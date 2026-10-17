@@ -45,7 +45,11 @@ test.describe('Course list', () => {
         [type[0].id]
       )
     ).rows[0].id;
-    courseId = (await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups) VALUES ($1, 'B1.1', 2) RETURNING id`, [startId])).rows[0].id;
+    // Two course numbers, as SchoolMan keeps a level's groups; six learners in the second's first week.
+    courseId = (
+      await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, filemaker_group_ids) VALUES ($1, 'B1.1', 2, '{99901,99902}') RETURNING id`, [startId])
+    ).rows[0].id;
+    await client.query(`INSERT INTO course_week_learners (course_id, group_index, monday, learners) VALUES ($1, 2, '2027-04-12', 6)`, [courseId]);
     // Group 1 by the first two colleagues, with a substitute day by the third; group 2 by the third.
     const days = ['2027-04-13', '2027-04-15', '2027-04-20', '2027-04-22'];
     for (const [i, day] of days.entries()) {
@@ -97,6 +101,23 @@ test.describe('Course list', () => {
     await expect(g1).not.toContainText(teachers[2].short);
     await expect(g1.locator('xpath=following-sibling::tr[1]')).toContainText(teachers[2].short);
     await expect(page.getByText('Gruppen', { exact: false })).toHaveCount(0);
+  });
+
+  test('each course number has its own page, the other of its level a link in its head', async ({ page }) => {
+    await page.goto('/admin/catalogue?view=evening');
+    await page.getByRole('link', { name: '99902', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}/2$`));
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/ B1\.1 · 99902$/);
+    // Its own main teacher and learners.
+    const stat = (label: string) => page.locator('dt', { hasText: new RegExp(`^${label}$`) }).locator('..');
+    await expect(stat('Lehrkräfte')).toContainText(teachers[2].short);
+    await expect(stat('Lehrkräfte')).not.toContainText(teachers[0].short);
+    await expect(stat('Teilnehmende')).toContainText('6 / 14');
+    // The level's other number, and back to the view it came from.
+    await page.getByRole('link', { name: /^99901/ }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}$`));
+    await expect(stat('Lehrkräfte')).toContainText(`${teachers[0].short} · ${teachers[1].short}`);
+    await expect(page.locator('header').getByRole('link', { name: 'Kurse' })).toHaveAttribute('href', '/admin/catalogue?view=evening');
   });
 
   test('a course’s actions: open or close it for booking, and edit it, the next one a click away', async ({ page }) => {

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { courseHref } from '../course-href';
 import { canAccess } from '@/lib/admin/access';
 import { applyPlan, changeDay, generateDays, saveWeekPlan, type DayPatch, type WeekPlanRow } from '@/lib/admin/course-days';
 import { requireModule } from '@/lib/admin/guard';
@@ -29,8 +30,7 @@ const optionalId = (formData: FormData, field: string): string | null => {
 };
 const text = (formData: FormData, field: string, max: number) => String(formData.get(field) ?? '').trim().slice(0, max) || null;
 
-const page = (courseId: string, tab?: string, group?: number) =>
-  `/admin/catalogue/courses/${courseId}${tab || group ? `?${[tab ? `tab=${tab}` : null, group && group > 1 ? `group=${group}` : null].filter(Boolean).join('&')}` : ''}`;
+const page = (courseId: string, tab?: string, group?: number) => `${courseHref(courseId, group)}${tab ? `?tab=${tab}` : ''}`;
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
@@ -44,9 +44,10 @@ function done(path: string): never {
 export async function generateDaysAction(formData: FormData): Promise<void> {
   const actor = await requireModule('rooms', 'edit');
   const courseId = id(formData, 'courseId');
+  const back = page(courseId, undefined, Math.min(Math.max(Number(formData.get('groupIndex')) || 1, 1), 9));
   const result = await generateDays(courseId, actor);
-  if (!result.ok) fail(page(courseId), pick((await getI18n()).lang, result.reason));
-  done(page(courseId));
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
 }
 
 /** One group's weekly plan: the weekdays ticked, each with its hours, lessons, teacher and room. */

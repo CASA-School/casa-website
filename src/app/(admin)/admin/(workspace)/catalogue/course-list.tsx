@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { CourseActions } from './course-actions';
+import { courseHref } from './course-href';
 import { groupRuns } from './list-parts';
 import { dayRange, ListEmpty } from '@/components/admin/list';
 import { Badge } from '@/components/admin/ui';
@@ -202,7 +203,7 @@ function GroupRow({
 }) {
   const span = row.groupRows.length;
   const waiting = row.waiting + row.offered;
-  const href = `/admin/catalogue/courses/${row.courseId}`;
+  const href = courseHref(row.courseId);
   return (
     <tr className={cn('align-middle', first ? 'border-t border-ws-line-soft' : 'border-t border-dashed border-ws-line-soft', shaded ? 'bg-[var(--ws-row-alt)]' : 'bg-white')}>
       {first ? (
@@ -224,7 +225,7 @@ function GroupRow({
       ) : null}
       <td className="px-3 py-2.5 text-[0.86rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] tabular-nums">
         {group.number ? (
-          <Link href={href} className="hover:underline">
+          <Link href={courseHref(row.courseId, group.index)} className="hover:underline">
             {group.number}
           </Link>
         ) : null}
@@ -279,7 +280,7 @@ const SHOWN_WEEKS = 12;
  * this week in ink, the weeks gone in grey-blue, those ahead pale. A long course (a term, a company's
  * year) shows twelve weeks: the four before this one and what follows.
  */
-function WeekBars({ weeks, week, places, today, t }: { weeks: { monday: string; n: number }[]; week: number | null; places: number; today: string; t: T }) {
+export function WeekBars({ weeks, week, places, today, t }: { weeks: { monday: string; n: number }[]; week: number | null; places: number; today: string; t: T }) {
   if (weeks.length < 2) return null;
   const from = weeks.length <= SHOWN_WEEKS ? 0 : Math.min(Math.max(0, (week ?? 1) - 5), weeks.length - SHOWN_WEEKS);
   const shown = weeks.slice(from, from + SHOWN_WEEKS);

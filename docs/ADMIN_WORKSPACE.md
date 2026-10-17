@@ -1186,12 +1186,12 @@ right. Under each start (type, shift, dates, days, hours, „Woche 4 von 8" whil
 before) its courses. A course is known by its **course number** (SchoolMan's, „Kurs-Nr."), and a
 level's parallel groups are one row each, by their numbers — they sit in their own rooms with their own
 teachers — with the **main teachers** (the week's own pair — this week while it runs, its first or last
-otherwise — substitutes left out, at most two), the room, and the learners now against the places with a
+otherwise — a covered day counting for the teacher it was covered for, at most two), the room, and the learners now against the places with a
 bar per week (this week in ink; amber when over — SchoolMan never enforced its cap). The course's level,
 its waiting list and „Buchen" span its rows; the number of groups is not written out (Rahman: not
 important). A level SchoolMan has not yet split into its groups (one record, 28 places) is one row;
-groups whose own learners are not known (bookings made here name no group) show „–". The course page
-shows the numbers in its head and on its group switch. Every view reads the same: a start of one named
+groups whose own learners are not known (bookings made here name no group) show „–". Each number links to its own page
+(§Lesson days, „The course page"). Every view reads the same: a start of one named
 course (a module, an exam preparation, a company's course) says the name in its head, at full width —
 the type left out when the name says it — and its row, like an intensive course's, shows the level
 badge (when it has a level; no made-up initials), the number (a link to the course), teachers, room,
@@ -1273,19 +1273,45 @@ day's two keys together: a course's day in a group's planning month
 Both run after the board makes groups and after days are generated. Removing
 an empty group deletes only days of no course.
 
-**The course page** (`/admin/catalogue/courses/[id]`, from „Kurstage" on each
-course card of a start) has three tabs. *Kurstage*: the days week by week —
-date, hours (bold when the day's own), lessons, teacher („für X" when someone
-replaced the plan's), room („statt Y"), called off; „Kurstage erzeugen" /
-„Fehlende Tage erzeugen" makes what is missing from the plan, leaving the
-school's closures out and a planned teacher off a day they are away; a day that
-exists is never touched. An intensive course's generation also makes its two
-board groups (`make_course_board_groups()`, 0047), so Kursplanung shows it. „Ändern" on a day opens its dialog:
-teacher and room choices name who is away, teaching elsewhere or holding the
-room then, free ones first. *Wochenplan*: the plan per group, defaulting to the
-start's days and hours; „Lehrkräfte übernehmen" / „Räume übernehmen" put the
-plan's on every day ahead (a day called off stays off). *Teilnehmende*: who is
-booked into the course.
+**The course page — one per course number** (2026-10-17, Rahman: „each course
+its own page, even of the same level"). SchoolMan keeps a level's parallel
+groups as courses of their own (4775, 5054, 5055), each with its room, teachers,
+lesson days and learners, so each has its own address: the first at
+`/admin/catalogue/courses/[id]`, the others at `/[id]/[n]` (`courseHref`; the
+old `?group=n` redirects). Where the list shows a course as one row (SchoolMan
+has not split it), it has one page. The page is `courses/course-page.tsx`; it
+reads the course as the list does (`courseListRow`), so both say the same.
+
+*The head* says what the team reads on SchoolMan's course list: the title with
+the course number, the dates (a link to the start) and „Woche 7 von 8", the
+shift, days and hours, and the level's other numbers as links with their
+learners („5054 10/14"). Its figures: learners now against the places, with the
+weeks as bars (SchoolMan's per number, plus bookings made here; where a number's
+own are not known, the course's); the main teachers (the week's pair; a covered
+day counts for the teacher it was covered for, in the list too); the room;
+lesson days and lessons; who waits (a link); „Buchung offen/geschlossen"; days
+ahead without a teacher. „Aktionen" is the list's menu without the two items the
+page already is — edit the course, Kursplanung (intensive), the waiting list,
+the open/closed switch — and „Buchen" stays the primary button. „Kurse" goes
+back to the view the course is listed in (intensive, evening, other; past).
+
+*Kurstage*: the days week by week — „KW 42 · Woche 7", this week marked —
+opening at this week, the weeks gone folded („Vergangene Wochen (6)"; a course
+that has ended shows all). Date, hours (bold when the day's own), lessons,
+teacher („für X" when someone replaced the plan's), room („statt Y"), called
+off; „Kurstage erzeugen" / „Fehlende Tage erzeugen" makes what is missing from
+the plan, leaving the school's closures out and a planned teacher off a day they
+are away; a day that exists is never touched. An intensive course's generation
+also makes its two board groups (`make_course_board_groups()`, 0047), so
+Kursplanung shows it. „Ändern" on a day opens its dialog: teacher and room
+choices name who is away, teaching elsewhere or holding the room then, free ones
+first. *Wochenplan*: the plan read as lines — the days that follow each other
+with the same hours, teacher and room together („Mo–Mi · 09:00–12:30 · Mikis
+Weber · Lübeck"), the lessons a week under them — „Bearbeiten" opens the grid;
+it defaults to the start's days and hours; „Lehrkräfte übernehmen" / „Räume
+übernehmen" put the plan's on every day ahead (a day called off stays off).
+*Teilnehmende*: the learners week by week against the places (the dashed line),
+and who was booked here by name.
 
 **Rights.** The page is `catalogue`; a day's teacher and the plan's teachers
 are Kursplanung's (`kursplanung` at `edit`), rooms, hours, calling off and

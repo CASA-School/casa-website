@@ -3,14 +3,15 @@ import Link from 'next/link';
 import { CohortForm } from './cohort-form';
 import { CourseActionsProvider, type EditableCourse } from './course-actions';
 import { CourseList, courseSections, viewOf, type CourseView } from './course-list';
+import { toEditable } from './editable';
 import { sentenceCase } from './list-parts';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Tally } from '@/components/admin/inbox';
-import { dayRange, euros, ListBar, ListEmpty } from '@/components/admin/list';
+import { euros, ListBar, ListEmpty } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { BOOKED_INTO_OTHER_COURSES, listCourseTypes, SESSION_LABELS, type CourseTypeSummary } from '@/lib/admin/catalogue';
+import { BOOKED_INTO_OTHER_COURSES, listCourseTypes, type CourseTypeSummary } from '@/lib/admin/catalogue';
 import { listCourses } from '@/lib/admin/course-list';
 import { roomChoice } from '@/lib/admin/course-starts';
 import { coursesForEditByIds } from '@/lib/admin/courses';
@@ -65,34 +66,7 @@ export default async function CataloguePage({
   // The editor steps through the courses in the order the list shows them.
   const ordered = view === 'types' ? [] : courseSections(shown, view, past, lang).flatMap((section) => section.rows);
   const edits = new Map((plans ? await coursesForEditByIds(ordered.map((r) => r.courseId)) : []).map((c) => [c.id, c]));
-  const editable: EditableCourse[] = ordered.map((r) => {
-    const e = edits.get(r.courseId);
-    const numbers = r.groupRows.map((g) => g.number).filter(Boolean);
-    return {
-      id: r.courseId,
-      startId: r.courseInstanceId,
-      label: r.title ?? r.levelCode ?? r.typeName,
-      context: [
-        r.title && r.levelCode ? r.levelCode : null,
-        `${r.typeName}${r.session ? ` · ${pick(lang, SESSION_LABELS[r.session])}` : ''}`,
-        dayRange(r.startDate, r.endDate, lang),
-        numbers.length ? `${t('Kurs-Nr.', 'Course no.')} ${numbers.join(' · ')}` : null,
-      ]
-        .filter(Boolean)
-        .join(' · '),
-      waitingHref: `/admin/catalogue/${r.courseInstanceId}?level=${encodeURIComponent(r.levelCode ?? r.courseId)}`,
-      waiting: r.waiting + r.offered,
-      named: !r.levelCode,
-      title: e?.title ?? r.title,
-      roomId: e?.roomId ?? null,
-      groups: e?.groups ?? r.groups,
-      placesPerGroup: e?.placesPerGroup ?? r.placesPerGroup,
-      bookable: e?.bookable ?? r.bookable,
-      price: e?.price ?? null,
-      lessons: e?.lessons ?? null,
-      note: e?.note ?? null,
-    };
-  });
+  const editable: EditableCourse[] = ordered.map((r) => toEditable(r, edits.get(r.courseId), t, lang));
   const running = rows.filter((r) => r.phase === 'running');
   const learnersNow = running.reduce((sum, r) => sum + r.now, 0);
   const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);

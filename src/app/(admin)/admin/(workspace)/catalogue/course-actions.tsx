@@ -79,8 +79,11 @@ export function CourseActionsProvider({
   );
 }
 
-/** „Aktionen ▾" on a course's row. */
-export function CourseActions({ courseId }: { courseId: string }) {
+/**
+ * „Aktionen ▾" on a course's row, and in the head of its own page (`here`): there its lesson days are
+ * the page itself, „Buchen" its own button, and Kursplanung one item more for an intensive course.
+ */
+export function CourseActions({ courseId, here = false, kursplanung = false }: { courseId: string; here?: boolean; kursplanung?: boolean }) {
   const ctx = useContext(CourseActionsContext);
   const { t } = useWsLang();
   const router = useRouter();
@@ -103,14 +106,19 @@ export function CourseActions({ courseId }: { courseId: string }) {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
-        className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-[0.8rem] font-semibold text-[var(--casa-muted)] transition-colors outline-none hover:bg-ws-sunk hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 data-[state=open]:bg-ws-sunk data-[state=open]:text-[var(--casa-ink)] [&_svg]:size-3.5"
+        className={cn(
+          'inline-flex items-center gap-1 font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5',
+          here
+            ? 'h-9 rounded-xl border border-ws-line bg-white px-3.5 text-[0.84rem] text-[var(--casa-ink)] hover:border-ws-line-firm data-[state=open]:border-ws-line-firm'
+            : 'h-8 rounded-lg px-2.5 text-[0.8rem] text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)] data-[state=open]:bg-ws-sunk data-[state=open]:text-[var(--casa-ink)]'
+        )}
         aria-label={t(`Aktionen für ${course.label}`, `Actions for ${course.label}`)}
       >
         {t('Aktionen', 'Actions')}
         {Icon.chevronDown}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={6} className={cn(menuPanel, 'min-w-[15rem]')}>
-        {ctx.canBook ? (
+        {ctx.canBook && !here ? (
           <DropdownMenuItem asChild className={menuItem}>
             <Link href={`/admin/catalogue/courses/${courseId}?book=1`}>
               {Icon.bookings}
@@ -124,12 +132,22 @@ export function CourseActions({ courseId }: { courseId: string }) {
             {t('Kurs bearbeiten …', 'Edit the course …')}
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuItem asChild className={menuItem}>
-          <Link href={`/admin/catalogue/courses/${courseId}`}>
-            {Icon.calendar}
-            {t('Kurstage & Lehrkräfte', 'Lesson days & teachers')}
-          </Link>
-        </DropdownMenuItem>
+        {here ? null : (
+          <DropdownMenuItem asChild className={menuItem}>
+            <Link href={`/admin/catalogue/courses/${courseId}`}>
+              {Icon.calendar}
+              {t('Kurstage & Lehrkräfte', 'Lesson days & teachers')}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {kursplanung ? (
+          <DropdownMenuItem asChild className={menuItem}>
+            <Link href="/admin/kursplanung">
+              {Icon.kursplanung}
+              {t('Kursplanung', 'Kursplanung')}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild className={menuItem}>
           <Link href={course.waitingHref}>
             {Icon.clock}
@@ -311,19 +329,24 @@ function CourseEditor({
               </p>
             ) : null}
             <div className="sticky bottom-0 z-10 -mx-6 mt-6 flex flex-wrap items-center gap-2 rounded-b-3xl border-t border-ws-line bg-white/95 px-6 py-3.5 backdrop-blur-sm">
-              <span className="mr-auto flex items-center gap-1">
-                <Button type="button" variant="secondary" size="md" onClick={() => go(index! - 1)} disabled={index === 0 || saving} aria-label={t('Vorheriger Kurs', 'Previous course')}>
-                  <span aria-hidden="true">‹</span>
-                  <span className="hidden sm:inline">{t('Vorheriger', 'Previous')}</span>
-                </Button>
-                <span className="min-w-[3.75rem] text-center text-xs font-semibold text-[var(--casa-muted)] tabular-nums">
-                  {index! + 1} / {courses.length}
+              {/* Alone (a course's own page), the editor has no neighbours to step to. */}
+              {courses.length > 1 ? (
+                <span className="mr-auto flex items-center gap-1">
+                  <Button type="button" variant="secondary" size="md" onClick={() => go(index! - 1)} disabled={index === 0 || saving} aria-label={t('Vorheriger Kurs', 'Previous course')}>
+                    <span aria-hidden="true">‹</span>
+                    <span className="hidden sm:inline">{t('Vorheriger', 'Previous')}</span>
+                  </Button>
+                  <span className="min-w-[3.75rem] text-center text-xs font-semibold text-[var(--casa-muted)] tabular-nums">
+                    {index! + 1} / {courses.length}
+                  </span>
+                  <Button type="button" variant="secondary" size="md" onClick={() => go(index! + 1)} disabled={index === courses.length - 1 || saving} aria-label={t('Nächster Kurs', 'Next course')}>
+                    <span className="hidden sm:inline">{t('Nächster', 'Next')}</span>
+                    <span aria-hidden="true">›</span>
+                  </Button>
                 </span>
-                <Button type="button" variant="secondary" size="md" onClick={() => go(index! + 1)} disabled={index === courses.length - 1 || saving} aria-label={t('Nächster Kurs', 'Next course')}>
-                  <span className="hidden sm:inline">{t('Nächster', 'Next')}</span>
-                  <span aria-hidden="true">›</span>
-                </Button>
-              </span>
+              ) : (
+                <span className="mr-auto" />
+              )}
               {saved && !dirty ? <span className="text-xs font-semibold text-[#17693a]">{t('Gespeichert', 'Saved')}</span> : null}
               <DialogClose asChild>
                 <Button type="button" variant="ghost" size="md">

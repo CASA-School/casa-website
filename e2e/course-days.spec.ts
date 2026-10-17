@@ -107,13 +107,21 @@ test.describe('Lesson days', () => {
 
   test('a weekly plan makes the days, and a day takes another teacher, another room, or is called off', async ({ page }) => {
     const [a, b] = teachers;
-    await page.goto(`/admin/catalogue/courses/${courseId}?tab=plan`);
+    // The plan reads as sentences; it is changed in its dialog.
+    await page.goto(`/admin/catalogue/courses/${courseId}?tab=plan`, { waitUntil: 'networkidle' });
+    const plan = page.getByRole('dialog');
+    await expect(async () => {
+      await page.getByRole('button', { name: /^(Bearbeiten|Wochenplan anlegen)$/ }).click();
+      await expect(plan).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
     for (let d = 1; d <= 5; d++) {
-      await page.locator(`select[name="teacher-${d}"]`).selectOption(a.id);
-      await page.locator(`select[name="room-${d}"]`).selectOption(rooms[0].id);
+      await plan.locator(`input[name="on-${d}"]`).check();
+      await plan.locator(`select[name="teacher-${d}"]`).selectOption(a.id);
+      await plan.locator(`select[name="room-${d}"]`).selectOption(rooms[0].id);
     }
-    await page.getByRole('button', { name: 'Wochenplan speichern' }).click();
-    await expect(page.locator('select[name="teacher-5"]')).toHaveValue(a.id);
+    await plan.getByRole('button', { name: 'Wochenplan speichern' }).click();
+    await expect(page.getByRole('listitem').filter({ hasText: 'Mo–Fr' })).toContainText(a.name);
+    await expect(page.getByRole('listitem').filter({ hasText: 'Mo–Fr' })).toContainText(rooms[0].name);
 
     await page.goto(`/admin/catalogue/courses/${courseId}`);
     await page.getByRole('button', { name: 'Kurstage erzeugen' }).click();

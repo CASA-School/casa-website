@@ -396,7 +396,8 @@ export function RecordHeader({
         {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}
         <div className="flex flex-wrap items-start gap-4 px-6 pt-6 pb-5">
           {avatar ? <Avatar name={avatar} size="lg" /> : null}
-          <div className="min-w-0 flex-1">
+          {/* Room for the name before the actions: on a phone they wrap under it, never over it. */}
+          <div className="min-w-[min(100%,12rem)] flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">{title}</h1>
               {status}

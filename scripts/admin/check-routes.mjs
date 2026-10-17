@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -66,6 +66,8 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT s.id FROM staff_members s LEFT JOIN course_days a ON a.teacher_id = s.id GROUP BY s.id ORDER BY count(a.*) DESC LIMIT 1`),
     // A course, the one with the most lesson days: its page reads days, plan and choices (0045).
     firstId(`SELECT c.id FROM courses c LEFT JOIN course_days d ON d.course_id = c.id GROUP BY c.id ORDER BY count(d.*) DESC LIMIT 1`),
+    // A course of several SchoolMan numbers: each has its own page (`/<n>`).
+    firstId(`SELECT id FROM courses WHERE coalesce(array_length(filemaker_group_ids, 1), 0) > 1 ORDER BY updated_at DESC LIMIT 1`),
   ]);
 
 const routes = [
@@ -109,6 +111,8 @@ const routes = [
   course && `/admin/catalogue/courses/${course}`,
   course && `/admin/catalogue/courses/${course}?tab=plan`,
   course && `/admin/catalogue/courses/${course}?book=1`,
+  numbered && `/admin/catalogue/courses/${numbered}/2`,
+  numbered && `/admin/catalogue/courses/${numbered}/2?tab=learners`,
   '/admin/catalogue/waitlist',
   '/admin/catalogue/waitlist?view=closed',
   '/admin/staff',

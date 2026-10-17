@@ -122,7 +122,17 @@ export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
 
 // ------------------------------------------------------------ weekly plan
 
-export type WeekPlanRow = { weekday: number; startsAt: string; endsAt: string; lessons: number; teacherId: string | null; roomId: string | null };
+export type WeekPlanRow = {
+  weekday: number;
+  startsAt: string;
+  endsAt: string;
+  lessons: number;
+  teacherId: string | null;
+  roomId: string | null;
+  /** For reading the plan; not saved. */
+  teacherName?: string | null;
+  roomName?: string | null;
+};
 export type WeekPlan = { groupIndex: number; stored: boolean; rows: WeekPlanRow[] };
 
 /**
@@ -176,6 +186,22 @@ export async function weekPlans(course: CourseInfo): Promise<WeekPlan[]> {
             }))
           : [],
     });
+  }
+  // The plan read as names: who and where, day by day.
+  const rows = out.flatMap((p) => p.rows);
+  const teacherIds = [...new Set(rows.map((r) => r.teacherId).filter((v): v is string => Boolean(v)))];
+  const roomIds = [...new Set(rows.map((r) => r.roomId).filter((v): v is string => Boolean(v)))];
+  const [teacherNames, roomNames] = await Promise.all([
+    teacherIds.length
+      ? query<{ id: string; name: string }>(`SELECT m.id, coalesce(${NAME('p')}, m.short_name) AS name FROM staff_members m LEFT JOIN people p ON p.id = m.person_id WHERE m.id = ANY($1::uuid[])`, [teacherIds])
+      : Promise.resolve([]),
+    roomIds.length ? query<{ id: string; name: string }>(`SELECT id, coalesce(nickname, name) AS name FROM rooms WHERE id = ANY($1::uuid[])`, [roomIds]) : Promise.resolve([]),
+  ]);
+  const teacher = new Map(teacherNames.map((r) => [r.id, r.name]));
+  const room = new Map(roomNames.map((r) => [r.id, r.name]));
+  for (const r of rows) {
+    r.teacherName = r.teacherId ? (teacher.get(r.teacherId) ?? null) : null;
+    r.roomName = r.roomId ? (room.get(r.roomId) ?? null) : null;
   }
   return out;
 }

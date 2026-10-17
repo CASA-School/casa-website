@@ -65,34 +65,53 @@ function mondayOf(day: string): string {
   return iso(d);
 }
 
-export async function listCourses(when: 'current' | 'past', today: string): Promise<CourseListRow[]> {
-  const starts = await query<{
-    id: string;
-    type_name: string;
-    slug: string;
-    format: string | null;
-    title: string | null;
-    start_date: string;
-    end_date: string;
-    session: string | null;
-    schedule: { days?: string[]; time?: string } | null;
-    on_website: boolean;
-  }>(
-    `SELECT i.id, coalesce(nullif(trim(t.name_de), ''), t.name) AS type_name, t.slug, t.format, i.title,
+type StartRow = {
+  id: string;
+  type_name: string;
+  slug: string;
+  format: string | null;
+  title: string | null;
+  start_date: string;
+  end_date: string;
+  session: string | null;
+  schedule: { days?: string[]; time?: string } | null;
+  on_website: boolean;
+};
+
+const START_COLUMNS = `i.id, coalesce(nullif(trim(t.name_de), ''), t.name) AS type_name, t.slug, t.format, i.title,
             to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
-            i.session, i.schedule, i.on_website
+            i.session, i.schedule, i.on_website`;
+
+export async function listCourses(when: 'current' | 'past', today: string): Promise<CourseListRow[]> {
+  const starts = await query<StartRow>(
+    `SELECT ${START_COLUMNS}
        FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
       WHERE i.status <> 'cancelled' AND NOT (t.slug = ANY($2::text[]))
         AND ${when === 'past' ? `i.end_date < $1::date AND i.end_date >= $1::date - 365` : `i.end_date >= $1::date AND i.start_date <= $1::date + 183`}
       ORDER BY i.start_date ${when === 'past' ? 'DESC' : 'ASC'}, t.position, i.id`,
     [today, [...BOOKED_INTO_OTHER_COURSES]]
   );
+  return rowsFor(starts, today);
+}
+
+/** One course as the list reads it — its groups, their main teachers, rooms and learners week by week — for its own page. */
+export async function courseListRow(courseId: string, today: string): Promise<CourseListRow | null> {
+  const starts = await query<StartRow>(
+    `SELECT ${START_COLUMNS}
+       FROM courses k JOIN course_instances i ON i.id = k.course_instance_id JOIN course_types t ON t.id = i.course_type_id
+      WHERE k.id = $1`,
+    [courseId]
+  );
+  return (await rowsFor(starts, today, courseId))[0] ?? null;
+}
+
+async function rowsFor(starts: StartRow[], today: string, only?: string): Promise<CourseListRow[]> {
   if (!starts.length) return [];
   const byStart = new Map(starts.map((s) => [s.id, s]));
   // In the starts' order (by date), each start's courses in their own order.
   const order = new Map(starts.map((s, i) => [s.id, i]));
   const groups = (await levelGroups(starts.map((s) => s.id)))
-    .filter((g) => !g.cancelled)
+    .filter((g) => (only ? g.courseId === only : !g.cancelled))
     .map((g, i) => ({ g, i }))
     .sort((a, b) => order.get(a.g.courseInstanceId)! - order.get(b.g.courseInstanceId)! || a.i - b.i)
     .map(({ g }) => g);
@@ -121,12 +140,16 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
       [ids]
     ),
     // Who taught, where, day by day: the main teachers and the room of each group come from these.
-    query<{ course_id: string; group_index: number; on_date: string; teacher: string | null; substitute: boolean; room: string | null }>(
+    // A day covered by someone else counts for the teacher it was covered for: still the course's own.
+    query<{ course_id: string; group_index: number; on_date: string; teacher: string | null; substitute: boolean; replaced: string | null; room: string | null }>(
       `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date,
               coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
-              d.is_substitute OR d.replaced_teacher_id IS NOT NULL AS substitute, coalesce(r.nickname, r.name) AS room
+              d.is_substitute OR d.replaced_teacher_id IS NOT NULL AS substitute,
+              coalesce(nullif(trim(rm.short_name), ''), nullif(concat_ws(' ', rp.first_name, left(rp.last_name, 1)), '')) AS replaced,
+              coalesce(r.nickname, r.name) AS room
          FROM course_days d
          LEFT JOIN staff_members m ON m.id = d.teacher_id LEFT JOIN people p ON p.id = m.person_id
+         LEFT JOIN staff_members rm ON rm.id = d.replaced_teacher_id LEFT JOIN people rp ON rp.id = rm.person_id
          LEFT JOIN rooms r ON r.id = d.room_id
         WHERE d.course_id = ANY($1::uuid[]) AND NOT d.cancelled
         ORDER BY d.on_date`,
@@ -185,14 +208,11 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
       const key = `${g.courseId}|${i + 1}`;
       const all = split || g.groups <= 1 ? (daysOf.get(key) ?? []) : allDays;
       const inWeek = all.filter((d) => d.on_date >= reference && d.on_date <= addDays(reference, 6));
-      const own = (list: typeof all) => list.filter((d) => !d.substitute);
+      // Each day's own teacher: who teaches it, or on a covered day whom it was covered for.
+      const own = (list: typeof all) => list.map((d) => (d.substitute ? d.replaced : d.teacher));
       // The main teachers: the week's own pair, else the course's most frequent, else the weekly plan's.
       const teachers = (
-        distinct(own(inWeek).map((d) => d.teacher)).length
-          ? distinct(own(inWeek).map((d) => d.teacher))
-          : mostOf(own(all).map((d) => d.teacher)).length
-            ? mostOf(own(all).map((d) => d.teacher))
-            : distinct((plansOf.get(key) ?? []).map((w) => w.teacher))
+        distinct(own(inWeek)).length ? distinct(own(inWeek)) : mostOf(own(all)).length ? mostOf(own(all)) : distinct((plansOf.get(key) ?? []).map((w) => w.teacher))
       ).slice(0, 2);
       const room = mostOf(inWeek.map((d) => d.room))[0] ?? mostOf(all.map((d) => d.room))[0] ?? distinct((plansOf.get(key) ?? []).map((w) => w.room))[0] ?? g.roomName;
       // One row for the course: its learners. A group of a split course: SchoolMan's for that group.

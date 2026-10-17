@@ -36,7 +36,7 @@ import { cn } from '@/lib/utils';
  * room picker): the window scrolls, not the panel.
  */
 
-const WIDTHS = { sm: 'max-w-[440px]', md: 'max-w-lg', lg: 'max-w-2xl' } as const;
+const WIDTHS = { sm: 'max-w-[440px]', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' } as const;
 export const dialogPanel = (width: keyof typeof WIDTHS) => cn('casa-ws-dialog overflow-visible rounded-3xl sm:rounded-3xl', WIDTHS[width]);
 export const DIALOG_OVERLAY = 'bg-[#0d1b33]/45';
 
@@ -81,8 +81,8 @@ export function FormDialog({
   children: ReactNode;
   triggerVariant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md';
-  /** `lg` for a multi-step form or two columns; the default suits a handful of fields. */
-  width?: 'sm' | 'md' | 'lg';
+  /** `lg` for a multi-step form or two columns, `xl` for a grid (a week's plan); the default suits a handful of fields. */
+  width?: 'sm' | 'md' | 'lg' | 'xl';
   /** Open on first render — for a screen that names the record in its URL. */
   defaultOpen?: boolean;
   /** For a module with its own type — the dialog is portalled out of the module's scope. */
