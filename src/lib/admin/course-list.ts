@@ -35,10 +35,25 @@ export type CourseListRow = LevelGroup & {
   week: number | null;
   /** Learners this week while it runs; before it starts, the most in any week (or the booked places). */
   now: number;
-  /** Who teaches it, most days first (short names). */
+  /** Its groups, each in its own room with its own teachers (Rahman: keep them apart). */
+  groupRows: CourseGroupRow[];
+};
+
+/**
+ * One group of a course: its SchoolMan number, room, main teachers and learners. `index` 0 is the
+ * course's groups together — before SchoolMan splits a level into its groups (one record, 28 places),
+ * or when nothing is known group by group yet. `now` is null when the group's own learners are not
+ * known (bookings made here do not name a group); the course's total says them.
+ */
+export type CourseGroupRow = {
+  index: number;
+  number: string | null;
+  room: string | null;
+  /** The main teachers — the week's pair, substitutes left out — at most two. */
   teachers: string[];
-  /** SchoolMan's course numbers of its groups. */
-  numbers: string[];
+  places: number;
+  weeks: { monday: string; n: number }[];
+  now: number | null;
 };
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -83,7 +98,8 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
     .map(({ g }) => g);
   const ids = groups.map((g) => g.courseId);
 
-  const [weekly, teachers, numbers] = await Promise.all([
+  const [weekly, groupWeekly, days, plans, numbers] = await Promise.all([
+    // A course's learners each week: booked here, and SchoolMan's of all its groups (0050, 0051).
     query<{ course_id: string; monday: string; n: number }>(
       `WITH c AS (
          SELECT k.id, i.start_date, i.end_date FROM courses k JOIN course_instances i ON i.id = k.course_instance_id WHERE k.id = ANY($1::uuid[])
@@ -91,23 +107,39 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
          SELECT c.id AS course_id, gs::date AS monday
            FROM c, generate_series(date_trunc('week', c.start_date)::date, c.end_date, interval '7 days') gs
        )
-       -- Bookings made here, and on top SchoolMan's learners that week (0050), while bookings are made there.
        SELECT w.course_id, to_char(w.monday, 'YYYY-MM-DD') AS monday,
-              (count(DISTINCT b.id) + coalesce(max(l.learners), 0))::int AS n
+              ((SELECT count(DISTINCT b.id) FROM booking_periods p JOIN bookings b ON b.id = p.booking_id
+                 WHERE p.course_id = w.course_id AND p.start_date <= w.monday + 6 AND p.end_date >= w.monday
+                   AND b.deleted_at IS NULL AND b.status <> 'cancelled')
+               + coalesce((SELECT sum(l.learners) FROM course_week_learners l WHERE l.course_id = w.course_id AND l.monday = w.monday), 0))::int AS n
          FROM w
-         LEFT JOIN booking_periods p ON p.course_id = w.course_id AND p.start_date <= w.monday + 6 AND p.end_date >= w.monday
-         LEFT JOIN bookings b ON b.id = p.booking_id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
-         LEFT JOIN course_week_learners l ON l.course_id = w.course_id AND l.monday = w.monday
-        GROUP BY w.course_id, w.monday
         ORDER BY w.course_id, w.monday`,
       [ids]
     ),
-    query<{ course_id: string; name: string; n: number }>(
-      `SELECT d.course_id, coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS name, count(*)::int AS n
-         FROM course_days d JOIN staff_members m ON m.id = d.teacher_id LEFT JOIN people p ON p.id = m.person_id
+    query<{ course_id: string; group_index: number; monday: string; n: number }>(
+      `SELECT course_id, group_index, to_char(monday, 'YYYY-MM-DD') AS monday, learners AS n FROM course_week_learners WHERE course_id = ANY($1::uuid[])`,
+      [ids]
+    ),
+    // Who taught, where, day by day: the main teachers and the room of each group come from these.
+    query<{ course_id: string; group_index: number; on_date: string; teacher: string | null; substitute: boolean; room: string | null }>(
+      `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date,
+              coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
+              d.is_substitute OR d.replaced_teacher_id IS NOT NULL AS substitute, coalesce(r.nickname, r.name) AS room
+         FROM course_days d
+         LEFT JOIN staff_members m ON m.id = d.teacher_id LEFT JOIN people p ON p.id = m.person_id
+         LEFT JOIN rooms r ON r.id = d.room_id
         WHERE d.course_id = ANY($1::uuid[]) AND NOT d.cancelled
-        GROUP BY d.course_id, 2
-        ORDER BY d.course_id, n DESC, 2`,
+        ORDER BY d.on_date`,
+      [ids]
+    ),
+    query<{ course_id: string; group_index: number; teacher: string | null; room: string | null }>(
+      `SELECT w.course_id, w.group_index, coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
+              coalesce(r.nickname, r.name) AS room
+         FROM course_week_plans w
+         LEFT JOIN staff_members m ON m.id = w.teacher_id LEFT JOIN people p ON p.id = m.person_id
+         LEFT JOIN rooms r ON r.id = w.room_id
+        WHERE w.course_id = ANY($1::uuid[])
+        ORDER BY w.weekday`,
       [ids]
     ),
     query<{ id: string; numbers: string[] | null; number: string | null }>(
@@ -116,18 +148,66 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
     ),
   ]);
 
+  const push = <K, V>(map: Map<K, V[]>, key: K, value: V) => map.set(key, [...(map.get(key) ?? []), value]);
   const weeksOf = new Map<string, { monday: string; n: number }[]>();
-  for (const w of weekly) weeksOf.set(w.course_id, [...(weeksOf.get(w.course_id) ?? []), { monday: w.monday, n: w.n }]);
-  const teachersOf = new Map<string, string[]>();
-  for (const r of teachers) teachersOf.set(r.course_id, [...(teachersOf.get(r.course_id) ?? []), r.name]);
+  for (const w of weekly) push(weeksOf, w.course_id, { monday: w.monday, n: w.n });
+  const groupWeeksOf = new Map<string, Map<string, number>>();
+  for (const w of groupWeekly) groupWeeksOf.set(`${w.course_id}|${w.group_index}`, (groupWeeksOf.get(`${w.course_id}|${w.group_index}`) ?? new Map()).set(w.monday, w.n));
+  const daysOf = new Map<string, typeof days>();
+  for (const d of days) push(daysOf, `${d.course_id}|${d.group_index}`, d);
+  const plansOf = new Map<string, typeof plans>();
+  for (const w of plans) push(plansOf, `${w.course_id}|${w.group_index}`, w);
   const numbersOf = new Map(numbers.map((r) => [r.id, r.numbers?.length ? r.numbers : r.number ? [r.number] : []]));
   const thisMonday = mondayOf(today);
+  const addDays = (day: string, n: number) => iso(new Date(Date.parse(`${day}T12:00:00Z`) + n * 86_400_000));
+  const distinct = (names: (string | null)[]) => [...new Set(names.filter((n): n is string => Boolean(n)))];
+  const mostOf = (names: (string | null)[]) => {
+    const n = new Map<string, number>();
+    for (const x of names) if (x) n.set(x, (n.get(x) ?? 0) + 1);
+    return [...n.entries()].sort((a, b) => b[1] - a[1]).map(([x]) => x);
+  };
 
   return groups.map((g) => {
     const s = byStart.get(g.courseInstanceId)!;
     const phase: CoursePhase = s.end_date < today ? 'past' : s.start_date <= today ? 'running' : 'upcoming';
     const weeks = weeksOf.get(g.courseId) ?? [];
     const index = weeks.findIndex((w) => w.monday === thisMonday);
+    // The week the teachers and rooms are read from: this one while it runs, else its first or last.
+    const reference = phase === 'running' ? thisMonday : phase === 'upcoming' ? mondayOf(s.start_date) : mondayOf(s.end_date);
+    const numbersHere = numbersOf.get(g.courseId) ?? [];
+    // Learners group by group only where SchoolMan keeps the groups apart (a number each); the groups
+    // as rows at all only where something is known about each — its learners or its own lesson days.
+    const perGroupLearners = g.groups > 1 && numbersHere.length >= g.groups;
+    const withDays = new Set((days.filter((d) => d.course_id === g.courseId).map((d) => d.group_index)));
+    const split = g.groups > 1 && (perGroupLearners || withDays.size > 1);
+    const allDays = days.filter((d) => d.course_id === g.courseId);
+    const groupRows: CourseGroupRow[] = Array.from({ length: split ? g.groups : 1 }, (_, i) => {
+      const key = `${g.courseId}|${i + 1}`;
+      const all = split || g.groups <= 1 ? (daysOf.get(key) ?? []) : allDays;
+      const inWeek = all.filter((d) => d.on_date >= reference && d.on_date <= addDays(reference, 6));
+      const own = (list: typeof all) => list.filter((d) => !d.substitute);
+      // The main teachers: the week's own pair, else the course's most frequent, else the weekly plan's.
+      const teachers = (
+        distinct(own(inWeek).map((d) => d.teacher)).length
+          ? distinct(own(inWeek).map((d) => d.teacher))
+          : mostOf(own(all).map((d) => d.teacher)).length
+            ? mostOf(own(all).map((d) => d.teacher))
+            : distinct((plansOf.get(key) ?? []).map((w) => w.teacher))
+      ).slice(0, 2);
+      const room = mostOf(inWeek.map((d) => d.room))[0] ?? mostOf(all.map((d) => d.room))[0] ?? distinct((plansOf.get(key) ?? []).map((w) => w.room))[0] ?? g.roomName;
+      // One row for the course: its learners. A group of a split course: SchoolMan's for that group.
+      const counts = groupWeeksOf.get(key);
+      const groupWeeks = !split ? weeks : perGroupLearners ? weeks.map((w) => ({ monday: w.monday, n: counts?.get(w.monday) ?? 0 })) : [];
+      return {
+        index: split ? i + 1 : g.groups > 1 ? 0 : 1,
+        number: split ? (numbersHere[i] ?? null) : numbersHere.length ? numbersHere.join(' · ') : null,
+        room,
+        teachers,
+        places: split ? g.placesPerGroup : g.places,
+        weeks: groupWeeks,
+        now: split && !perGroupLearners ? null : phase === 'running' && index >= 0 ? (groupWeeks[index]?.n ?? 0) : Math.max(0, ...groupWeeks.map((w) => w.n)),
+      };
+    });
     // The start's shift, else read from its hours, as the course page does.
     const hour = Number(/^(\d{1,2})/.exec(s.schedule?.time ?? '')?.[1]);
     const session =
@@ -156,8 +236,7 @@ export async function listCourses(when: 'current' | 'past', today: string): Prom
       weeks,
       week: phase === 'running' && index >= 0 ? index + 1 : null,
       now: phase === 'running' && index >= 0 ? weeks[index].n : Math.max(g.booked, ...weeks.map((w) => w.n), 0),
-      teachers: teachersOf.get(g.courseId) ?? [],
-      numbers: numbersOf.get(g.courseId) ?? [],
+      groupRows,
     };
   });
 }

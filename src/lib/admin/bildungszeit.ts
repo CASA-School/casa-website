@@ -61,8 +61,9 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
     ),
     // SchoolMan's learners in those courses each week (0050), while bookings are made there.
     query<{ course_id: string; monday: string; learners: number }>(
-      `SELECT course_id, to_char(monday, 'YYYY-MM-DD') AS monday, learners FROM course_week_learners
-        WHERE course_id IN (SELECT id FROM courses WHERE course_instance_id = ANY($1::uuid[]))`,
+      `SELECT course_id, to_char(monday, 'YYYY-MM-DD') AS monday, sum(learners)::int AS learners FROM course_week_learners
+        WHERE course_id IN (SELECT id FROM courses WHERE course_instance_id = ANY($1::uuid[]))
+        GROUP BY course_id, monday`,
       [ids]
     ),
   ]);

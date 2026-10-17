@@ -1176,22 +1176,28 @@ run: 158 courses, 125 courses here, 22 own starts; 18 courses of three intensive
 starts beyond our twelve months (Oct 2027 – Jan 2028) and one evening course of
 14 Sep 2026 wait for a start of ours.
 
-**The course list (2026-10-17, Rahman: „running first, then coming up, the past on a switch").**
-Kurse lists **courses, one row each**, under the start they belong to, as SchoolMan's `Course_List`
-does: „Laufend & kommend" (running ones first, then those ahead, six months), „Vergangen" (the last
-year), „Kursarten". A start's row says the type, the dates, the shift, days and hours, and „Woche 4 von
-8" while it runs. A course's row: its level, groups and room; SchoolMan's course numbers („Nr. 4780 ·
-5069") while both systems run; the teachers from its lesson days; the learners now against its places
-(amber when over — SchoolMan never enforced its cap) with a bar for each week (this week in ink); who
-waits; and „Buchen", which opens the course with „Wen buchen?" (`?book=1`): a learner found by name or
-address, or a new person, then the wizard at that course — from the next Monday when it already runs
-(`from=`). The picker (`components/admin/person-picker.tsx`) is the exam sitting's too. The waiting
-lists are their own item in the rail, no longer under Kurse.
+**The course list (2026-10-17).** Kurse is a view per kind of work (Rahman): **Intensiv ·
+Vormittag**, **Intensiv · Nachmittag**, **Abend** — level and special courses held in the evening,
+in sections **Montag + Mittwoch**, **Dienstag + Donnerstag** and weitere Abende (a one-evening course by
+its day) — **Weitere** (exam preparation, company and daytime special courses), and Kursarten; each
+**Aktuell** (running first, then six months ahead) or **Vergangen** (the last year), the switch on the
+right. Under each start (type, dates, shift, days, hours, „Woche 4 von 8" while it runs) its courses,
+and a course's **parallel groups one row each** — they sit in their own rooms with their own teachers:
+the group, SchoolMan's number, its **main teachers** (the week's own pair — this week while it runs,
+its first or last otherwise — substitutes left out, at most two), its room, and its learners now
+against its places with a bar per week (this week in ink; amber when over — SchoolMan never enforced
+its cap). The course's level, its total over the groups, its waiting list and „Buchen" span its group
+rows. A level SchoolMan has not yet split into its groups (one record, 28 places) is one row, „2
+Gruppen"; groups whose own learners are not known (bookings made here name no group) show „–". „Buchen"
+opens the course with „Wen buchen?" (`?book=1`): a learner found by name or address, or a new person,
+then the wizard at that course — from the next Monday when it already runs (`from=`); the picker
+(`components/admin/person-picker.tsx`) is the exam sitting's too. The waiting lists are their own item
+in the rail.
 
 **Learners from SchoolMan (0050).** While bookings are made in SchoolMan, its learners count:
 `python3 -I scripts/filemaker/read_course_learners.py | node scripts/filemaker/import-course-learners.mjs`
 reads its booking periods of the courses running or ahead (counts only — no name, no booking number)
-into `course_week_learners`, learners per course and week; a level's parallel groups add up. A week's
+into `course_week_learners`, learners per course, group (0051) and week. A week's
 learners are the bookings made here plus SchoolMan's, in the list, on the course page and in **booked
 places** everywhere (`BOOKED`, Bildungszeit's weeks), so free places, „voll" and the waiting list are
 right while both systems are used. Each read replaces the last; run it again to refresh. First read:

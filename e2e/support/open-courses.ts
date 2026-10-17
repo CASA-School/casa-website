@@ -10,15 +10,20 @@ export async function openCoursesAroundToday(client: pg.Client): Promise<{ resto
                    WHERE t.format = 'intensive' AND i.end_date >= current_date - 70 AND i.start_date <= current_date + 70`;
   const reopened = (await client.query<{ id: string }>(`UPDATE courses SET bookable = true WHERE id IN (${around}) AND NOT bookable RETURNING id`)).rows.map((r) => r.id);
   const counts = (
-    await client.query<{ course_id: string; monday: string; learners: number }>(
-      `DELETE FROM course_week_learners WHERE course_id IN (${around}) RETURNING course_id, to_char(monday, 'YYYY-MM-DD') AS monday, learners`
+    await client.query<{ course_id: string; group_index: number; monday: string; learners: number }>(
+      `DELETE FROM course_week_learners WHERE course_id IN (${around}) RETURNING course_id, group_index, to_char(monday, 'YYYY-MM-DD') AS monday, learners`
     )
   ).rows;
   return {
     restore: async () => {
       if (reopened.length) await client.query(`UPDATE courses SET bookable = false WHERE id = ANY($1::uuid[])`, [reopened]);
       for (const c of counts) {
-        await client.query(`INSERT INTO course_week_learners (course_id, monday, learners) VALUES ($1, $2::date, $3) ON CONFLICT DO NOTHING`, [c.course_id, c.monday, c.learners]);
+        await client.query(`INSERT INTO course_week_learners (course_id, group_index, monday, learners) VALUES ($1, $2, $3::date, $4) ON CONFLICT DO NOTHING`, [
+          c.course_id,
+          c.group_index,
+          c.monday,
+          c.learners,
+        ]);
       }
     },
   };

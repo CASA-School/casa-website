@@ -24,12 +24,15 @@ export function ListBar({
   active,
   summary,
   search,
+  end,
 }: {
   tabs?: readonly ListTab[];
   active?: string;
   /** For a list without views: what it holds, in a few words ("18 students"), where the tabs would be. */
   summary?: ReactNode;
   search?: ListSearchProps;
+  /** On the right, beside the search: a second, smaller choice (current or past). */
+  end?: ReactNode;
 }) {
   const { t } = useWsLang();
   return (
@@ -66,7 +69,12 @@ export function ListBar({
       ) : (
         <span />
       )}
-      {search ? <ListSearch {...search} /> : null}
+      {search || end ? (
+        <span className="flex items-center gap-3">
+          {end}
+          {search ? <ListSearch {...search} /> : null}
+        </span>
+      ) : null}
     </div>
   );
 }

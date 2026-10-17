@@ -34,7 +34,7 @@ test.describe('Joining a running course', () => {
   let future: { id: string; start_date: string; end_date: string } | null = null;
   let ownCourse = '';
   // Set aside for the run: SchoolMan's weekly learners on the start's courses, and the courses it closed.
-  let weekly: { course_id: string; monday: string; learners: number; read_at: string }[] = [];
+  let weekly: { course_id: string; group_index: number; monday: string; learners: number; read_at: string }[] = [];
   let reopened: string[] = [];
 
   const person = async (first: string) => {
@@ -83,7 +83,7 @@ test.describe('Joining a running course', () => {
     weekly = (
       await client.query(
         `DELETE FROM course_week_learners WHERE course_id IN (SELECT id FROM courses WHERE course_instance_id = $1)
-         RETURNING course_id, to_char(monday, 'YYYY-MM-DD') AS monday, learners, read_at`,
+         RETURNING course_id, group_index, to_char(monday, 'YYYY-MM-DD') AS monday, learners, read_at`,
         [start!.id]
       )
     ).rows;
@@ -99,8 +99,9 @@ test.describe('Joining a running course', () => {
     await client.query(`DELETE FROM bookings WHERE id = ANY($1::uuid[])`, [bookings]);
     await client.query(`DELETE FROM people WHERE id = ANY($1::uuid[])`, [people]);
     for (const w of weekly) {
-      await client.query(`INSERT INTO course_week_learners (course_id, monday, learners, read_at) VALUES ($1, $2::date, $3, $4) ON CONFLICT DO NOTHING`, [
+      await client.query(`INSERT INTO course_week_learners (course_id, group_index, monday, learners, read_at) VALUES ($1, $2, $3::date, $4, $5) ON CONFLICT DO NOTHING`, [
         w.course_id,
+        w.group_index,
         w.monday,
         w.learners,
         w.read_at,

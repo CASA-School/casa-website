@@ -1,7 +1,7 @@
 /**
- * Puts SchoolMan's learners per course and week into `course_week_learners` (2026-10-17,
+ * Puts SchoolMan's learners per course, group and week into `course_week_learners` (2026-10-17,
  * docs/ADMIN_WORKSPACE.md §Courses). Run the course import first: a count lands on the course whose
- * SchoolMan numbers include its course (a level's parallel groups add up).
+ * SchoolMan numbers include its course, on the group whose number it is (0051).
  *
  *   python3 -I scripts/filemaker/read_course_learners.py | DATABASE_URL=... node scripts/filemaker/import-course-learners.mjs [--dry-run]
  *
@@ -23,25 +23,25 @@ try {
   await client.query('BEGIN');
   const courses = new Map();
   for (const r of (await client.query(`SELECT id, filemaker_course_id, filemaker_group_ids FROM courses WHERE filemaker_course_id IS NOT NULL OR filemaker_group_ids IS NOT NULL`)).rows) {
-    for (const fm of r.filemaker_group_ids ?? []) courses.set(fm, r.id);
-    if (r.filemaker_course_id && !courses.has(r.filemaker_course_id)) courses.set(r.filemaker_course_id, r.id);
+    (r.filemaker_group_ids ?? []).forEach((fm, i) => courses.set(fm, { course: r.id, group: i + 1 }));
+    if (r.filemaker_course_id && !courses.has(r.filemaker_course_id)) courses.set(r.filemaker_course_id, { course: r.id, group: 1 });
   }
-  // A course's groups add up, week by week.
+  // Each group of a course on its own, week by week.
   const sums = new Map();
   for (const r of rows) {
-    const course = courses.get(r.course);
-    if (!course) {
+    const target = courses.get(r.course);
+    if (!target) {
       count.noCourse++;
       continue;
     }
-    const key = `${course}|${r.monday}`;
+    const key = `${target.course}|${target.group}|${r.monday}`;
     sums.set(key, (sums.get(key) ?? 0) + r.n);
   }
   const touched = [...new Set([...sums.keys()].map((k) => k.split('|')[0]))];
   await client.query(`DELETE FROM course_week_learners WHERE course_id = ANY($1::uuid[])`, [touched]);
   for (const [key, n] of sums) {
-    const [course, monday] = key.split('|');
-    await client.query(`INSERT INTO course_week_learners (course_id, monday, learners) VALUES ($1, $2::date, $3)`, [course, monday, n]);
+    const [course, group, monday] = key.split('|');
+    await client.query(`INSERT INTO course_week_learners (course_id, group_index, monday, learners) VALUES ($1, $2, $3::date, $4)`, [course, Number(group), monday, n]);
     count.weeks++;
   }
   count.courses = touched.length;

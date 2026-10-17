@@ -106,7 +106,7 @@ const BOOKED = `
        WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.course_id IS NOT NULL
        GROUP BY bp.course_id, w.week
       UNION ALL
-      SELECT course_id, monday, learners FROM course_week_learners
+      SELECT course_id, monday, sum(learners) FROM course_week_learners GROUP BY course_id, monday
     ) sources
     GROUP BY course_id, week
   ) weekly

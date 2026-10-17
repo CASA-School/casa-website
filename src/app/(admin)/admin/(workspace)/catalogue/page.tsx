@@ -1,5 +1,7 @@
+import Link from 'next/link';
+
 import { CohortForm } from './cohort-form';
-import { CourseList } from './course-list';
+import { CourseList, viewOf, type CourseView } from './course-list';
 import { sentenceCase } from './list-parts';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -15,6 +17,7 @@ import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listBookableRooms } from '@/lib/admin/rooms';
 import { todayInputValue } from '@/lib/dates';
+import { cn } from '@/lib/utils';
 
 /**
  * Courses (2026-10-17, Rahman: „running first, then coming up, the past on a switch"). One row per
@@ -25,9 +28,11 @@ import { todayInputValue } from '@/lib/dates';
  * prices and hours. The waiting lists are their own item in the rail.
  */
 
-const VIEWS: readonly { key: 'current' | 'past' | 'types'; label: Bilingual }[] = [
-  { key: 'current', label: { de: 'Laufend & kommend', en: 'Running & coming up' } },
-  { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
+const VIEWS: readonly { key: CourseView | 'types'; label: Bilingual }[] = [
+  { key: 'intensive-morning', label: { de: 'Intensiv · Vormittag', en: 'Intensive · morning' } },
+  { key: 'intensive-afternoon', label: { de: 'Intensiv · Nachmittag', en: 'Intensive · afternoon' } },
+  { key: 'evening', label: { de: 'Abend', en: 'Evening' } },
+  { key: 'other', label: { de: 'Weitere', en: 'Other' } },
   { key: 'types', label: { de: 'Kursarten', en: 'Course types' } },
 ];
 
@@ -36,27 +41,33 @@ const hide = 'hidden md:table-cell';
 export default async function CataloguePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string; view?: string; new?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; view?: string; time?: string; new?: string }>;
 }) {
   const user = await requireModule('catalogue');
   const { t, lang } = await getI18n();
   const plans = canAccess(user, 'rooms', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people');
   const today = todayInputValue();
-  const { error, view: rawView, new: fresh } = await searchParams;
-  const view = rawView === 'types' ? 'types' : rawView === 'past' ? 'past' : 'current';
+  const { error, view: rawView, time, new: fresh } = await searchParams;
+  const view = VIEWS.find((v) => v.key === rawView)?.key ?? 'intensive-morning';
+  const past = time === 'past';
   const [types, rows, rooms, levels] = await Promise.all([
     listCourseTypes(),
-    view === 'types' ? Promise.resolve([]) : listCourses(view === 'past' ? 'past' : 'current', today),
+    view === 'types' ? Promise.resolve([]) : listCourses(past ? 'past' : 'current', today),
     plans ? listBookableRooms() : Promise.resolve([]),
     plans
       ? query<{ code: string }>(`SELECT code FROM levels ORDER BY sort_order`).then((r) => r.map((x) => x.code))
       : Promise.resolve([]),
   ]);
+  const shown = view === 'types' ? [] : rows.filter((r) => viewOf(r) === view);
   const running = rows.filter((r) => r.phase === 'running');
   const learnersNow = running.reduce((sum, r) => sum + r.now, 0);
   const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);
   const next = rows.filter((r) => r.phase === 'upcoming').map((r) => r.startDate).sort()[0] ?? null;
+  const href = (key: string, at: 'current' | 'past' = past ? 'past' : 'current') => {
+    const params = new URLSearchParams({ ...(key !== 'intensive-morning' ? { view: key } : {}), ...(at === 'past' && key !== 'types' ? { time: 'past' } : {}) });
+    return `/admin/catalogue${params.size ? `?${params}` : ''}`;
+  };
 
   return (
     <>
@@ -86,7 +97,7 @@ export default async function CataloguePage({
       />
 
       {/* What runs now, who sits in it, who waits, and when the next start is. */}
-      {view === 'current' ? (
+      {!past && view !== 'types' ? (
         <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
           <Tally tone="working" n={running.length} label={running.length === 1 ? t('laufender Kurs', 'course running') : t('laufende Kurse', 'courses running')} lang={lang} />
           <Tally tone="done" n={learnersNow} label={t('Teilnehmende diese Woche', 'learners this week')} lang={lang} />
@@ -118,14 +129,34 @@ export default async function CataloguePage({
           tabs={VIEWS.map((v) => ({
             key: v.key,
             label: pick(lang, v.label),
-            href: `/admin/catalogue${v.key === 'current' ? '' : `?view=${v.key}`}`,
+            href: href(v.key),
+            count: v.key === 'types' || past ? undefined : rows.filter((r) => viewOf(r) === v.key).length || undefined,
           }))}
           active={view}
+          end={
+            view === 'types' ? null : (
+              <span className="inline-flex rounded-lg bg-ws-sunk p-0.5 text-[0.78rem] font-semibold" role="group" aria-label={t('Zeitraum', 'Period')}>
+                {(['current', 'past'] as const).map((at) => (
+                  <Link
+                    key={at}
+                    href={href(view, at)}
+                    aria-current={(at === 'past') === past ? 'page' : undefined}
+                    className={cn(
+                      'rounded-md px-2.5 py-1 transition-colors',
+                      (at === 'past') === past ? 'bg-white text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(15,23,42,0.08)]' : 'text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
+                    )}
+                  >
+                    {at === 'past' ? t('Vergangen', 'Past') : t('Aktuell', 'Current')}
+                  </Link>
+                ))}
+              </span>
+            )
+          }
         />
         {view === 'types' ? (
           <CourseTypes types={types} t={t} lang={lang} />
         ) : (
-          <CourseList rows={rows} view={view} canBook={canBook} today={today} t={t} lang={lang} />
+          <CourseList rows={shown} view={view} past={past} canBook={canBook} today={today} t={t} lang={lang} />
         )}
       </Card>
     </>
