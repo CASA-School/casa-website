@@ -1273,10 +1273,12 @@ export const BOOKING_LETTER_KEYS: Record<BookingLetterKind, string> = {
 };
 
 /** The booking letters in groups, as the letter page lists them. */
+/** The booking letters in the order a booking goes: registered, paid, a visa, the course begins — or is cancelled. */
 export const BOOKING_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kinds: BookingLetterKind[] }[] = [
-  { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['booking_confirmation', 'missing_items', 'visa_letter', 'enrolment_certificate'] },
+  { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['booking_confirmation', 'missing_items'] },
   { label: { de: 'Zahlung', en: 'Payment' }, kinds: ['payment_receipt', 'payment_reminder', 'payments_overview'] },
-  { label: { de: 'Vor dem Kurs', en: 'Before the course' }, kinds: ['showup_first_call', 'showup_last_call', 'course_start'] },
+  { label: { de: 'Visum', en: 'Visa' }, kinds: ['visa_letter', 'showup_first_call', 'showup_last_call'] },
+  { label: { de: 'Kursbeginn', en: 'The course' }, kinds: ['course_start', 'enrolment_certificate'] },
   { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
 ];
 
@@ -1284,7 +1286,8 @@ export const BOOKING_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kin
 export const EXAM_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kinds: BookingLetterKind[] }[] = [
   { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['exam_confirmation'] },
   { label: { de: 'Zahlung', en: 'Payment' }, kinds: ['payment_receipt', 'payment_reminder', 'payments_overview'] },
-  { label: { de: 'Prüfung', en: 'The exam' }, kinds: ['exam_invitation', 'exam_results', 'exam_participation'] },
+  { label: { de: 'Prüfungstag', en: 'The exam day' }, kinds: ['exam_invitation'] },
+  { label: { de: 'Nach der Prüfung', en: 'After the exam' }, kinds: ['exam_results', 'exam_participation'] },
   { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
 ];
 

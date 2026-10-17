@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { useWsLang } from '@/components/admin/lang';
+import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { Button } from '@/components/admin/ui';
@@ -36,8 +37,13 @@ export function SentLetter({
           <Link href={back.href} className="text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
             ← {back.label}
           </Link>
-          <h1 className="mt-1 text-[1.5rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{subject}</h1>
-          <p className="mt-0.5 text-[0.84rem] text-[var(--casa-muted)]">{sentLine}</p>
+          <div className="mt-2 flex items-center gap-3.5">
+            <LetterKindIcon kind={letter.kind} size="lg" />
+            <div className="min-w-0">
+              <h1 className="text-[1.5rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{subject}</h1>
+              <p className="mt-0.5 text-[0.84rem] text-[var(--casa-muted)]">{sentLine}</p>
+            </div>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {email ? (

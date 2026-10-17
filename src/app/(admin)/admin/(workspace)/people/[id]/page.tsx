@@ -45,6 +45,7 @@ import {
 import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
 import { personExamEntries } from '@/lib/admin/exams';
+import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -691,7 +692,7 @@ export default async function PersonPage({
                 {letters.map((l) => (
                   <li key={l.id}>
                     <Link href={`/admin/letters/${l.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
-                      <IconChip icon={Icon.mail} tint="blue" />
+                      <LetterKindIcon kind={l.kind} size="md" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{l.subject}</span>
                         <span className="mt-0.5 block text-[0.78rem] text-[var(--casa-muted)]">

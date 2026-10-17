@@ -42,8 +42,11 @@ import { listNotes } from '@/lib/admin/notes';
 import { levelCodes } from '@/lib/admin/waitlist';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { toDateInputValue } from '@/lib/dates';
-import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
+import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
+import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
+import { BOOKING_LETTER_KEYS, LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
+import { suggestBookingLetters } from '@/lib/admin/letters/suggest';
 import { pick, wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
@@ -135,6 +138,15 @@ export default async function BookingPage({
     canEdit && exam && open ? sittingsOf(exam.examTypeId) : Promise.resolve([]),
   ]);
   const carriesOver = targets.length > 0;
+  // The letter due now, from the booking and what was sent: the first thing the Briefe card offers.
+  const letterCtx = canEdit ? await bookingLetterContext(booking.id) : null;
+  const dueLetter = letterCtx
+    ? (suggestBookingLetters(
+        letterCtx,
+        toDateInputValue(new Date()),
+        letters.map((l) => ({ kind: l.kind, date: toDateInputValue(l.sentAt) }))
+      )[0] ?? null)
+    : null;
 
 
   // Teaching weeks: the school's closures (the Christmas break) are not weeks of the course.
@@ -700,27 +712,47 @@ export default async function BookingPage({
             tint="blue"
             actions={
               canEdit ? (
-                <Link href={`/admin/bookings/${booking.id}/letter${booking.status === 'cancelled' ? '?kind=cancellation' : ''}`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                <Link href={`/admin/bookings/${booking.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
                   {t('Brief schreiben', 'Write a letter')}
                 </Link>
               ) : undefined
             }
           >
+            {dueLetter ? (
+              // What is due now: one click to the letter, written from the booking.
+              <Link
+                href={`/admin/bookings/${booking.id}/letter?kind=${BOOKING_LETTER_KEYS[dueLetter]}`}
+                className={cn(
+                  'flex items-center gap-3 rounded-2xl bg-[#eef6fd] px-3 py-2.5 ring-1 ring-[#cfe5f7] transition-colors ring-inset hover:bg-[#e3f0fb]',
+                  letters.length ? 'mb-3' : ''
+                )}
+              >
+                <LetterKindIcon kind={dueLetter} size="md" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[0.72rem] font-semibold text-[#065f8c]">{t('Als Nächstes', 'Next')}</span>
+                  <span className="block truncate text-[0.88rem] font-bold text-[var(--casa-ink)]">{pick(lang, LETTER_KIND_LABELS[dueLetter])}</span>
+                </span>
+                <span className="text-[#065f8c]">{Icon.chevronRight}</span>
+              </Link>
+            ) : null}
             {letters.length ? (
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+              <ul className="-my-1 space-y-0.5">
                 {letters.map((l) => (
                   <li key={l.id}>
-                    <Link href={`/admin/letters/${l.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:underline">
-                      <span className="font-semibold">{pick(lang, LETTER_KIND_LABELS[l.kind])}{l.version > 1 ? ` · ${t(`Fassung ${l.version}`, `version ${l.version}`)}` : ''}</span>
+                    <Link href={`/admin/letters/${l.id}`} className="-mx-2 flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-ws-sunk">
+                      <LetterKindIcon kind={l.kind} />
+                      <span className="min-w-0 flex-1 truncate font-semibold">
+                        {pick(lang, LETTER_KIND_LABELS[l.kind])}
+                        {l.version > 1 ? <span className="font-medium text-[var(--casa-muted)]"> · {t(`Fassung ${l.version}`, `version ${l.version}`)}</span> : null}
+                      </span>
                       <span className="shrink-0 text-xs text-[var(--casa-muted)]">
                         <DateText value={l.sentAt} compact />
-                        {l.sentByName ? ` · ${l.sentByName}` : ''}
                       </span>
                     </Link>
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : dueLetter ? null : (
               <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
             )}
           </Card>

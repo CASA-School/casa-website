@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { issueSittingLettersAction } from '../../actions';
+import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { Badge, Button, Card, Field, RecordHeader, Select } from '@/components/admin/ui';
 import { getSitting } from '@/lib/admin/exams';
@@ -62,10 +63,11 @@ export default async function SittingLettersPage({
             href={`${back}/letters?kind=${KEYS[k]}`}
             aria-current={k === kind ? 'page' : undefined}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-[0.84rem] font-semibold',
+              'inline-flex items-center gap-2 rounded-lg py-1 pr-3 pl-1.5 text-[0.84rem] font-semibold',
               k === kind ? 'bg-[var(--fm-navy)] text-white' : 'text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
             )}
           >
+            <LetterKindIcon kind={k} />
             {pick(lang, LETTER_KIND_LABELS[k])}
           </Link>
         ))}

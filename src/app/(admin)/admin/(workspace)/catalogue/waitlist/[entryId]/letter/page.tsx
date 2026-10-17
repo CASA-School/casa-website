@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { saveLetterStandardAction } from '../../../../bookings/actions';
 import { issueWaitlistLetterAction } from '../../../actions';
 import { LetterComposer } from '@/components/admin/letters/letter-composer';
+import { sentDay } from '@/components/admin/letters/letter-kind';
 import { canAccess } from '@/lib/admin/access';
 import { query } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
@@ -11,6 +12,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { waitlistLetterContext } from '@/lib/admin/letters/booking-context';
 import { LETTER_KIND_LABELS, LETTER_STANDARD_DEFAULTS } from '@/lib/admin/letters/booking-letters';
 import { lettersForEntries, standardTexts } from '@/lib/admin/letters/repo';
+import { sentStates, suggestWaitlistLetter } from '@/lib/admin/letters/suggest';
 import type { WaitlistLetterKind } from '@/lib/admin/letters/types';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
@@ -47,6 +49,9 @@ export default async function WaitlistLetterPage({
     ),
   ]);
   const sent = letters.filter((l) => l.kind === kind);
+  const history = letters.map((l) => ({ kind: l.kind, date: toDateInputValue(l.sentAt) }));
+  const states = sentStates(Object.values(KINDS), history);
+  const due = suggestWaitlistLetter(ctx, history);
   const name = [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' ');
   const open = ctx.status === 'waiting' || ctx.status === 'offered';
   // Back to the queue it is in: a course start's level, or an exam sitting (0036).
@@ -69,18 +74,33 @@ export default async function WaitlistLetterPage({
       issueAction={issueWaitlistLetterAction}
       saveStandardAction={saveLetterStandardAction}
       hidden={{ entryId, kind }}
-      kinds={Object.entries(KINDS).map(([key, k]) => ({
-        label: pick(lang, LETTER_KIND_LABELS[k]),
-        href: `/admin/catalogue/waitlist/${entryId}/letter?kind=${key}`,
-        active: k === kind,
-      }))}
+      kindGroups={[
+        {
+          label: t('Warteliste', 'Waiting list'),
+          items: Object.entries(KINDS).map(([key, k]) => {
+            const state = states.get(k)!;
+            return {
+              kind: k,
+              label: pick(lang, LETTER_KIND_LABELS[k]),
+              href: `/admin/catalogue/waitlist/${entryId}/letter?kind=${key}`,
+              active: k === kind,
+              sentOn: state.lastSent ? sentDay(state.lastSent, lang) : null,
+              count: state.count,
+              // A closed entry writes only the confirmation, for the record.
+              blocked: !open && k !== 'waitlist_confirmation' ? t('Der Eintrag ist abgeschlossen.', 'The entry is closed.') : null,
+              suggested: k === due,
+            };
+          }),
+        },
+      ]}
       sent={sent.map((l) => ({
         id: l.id,
         label: l.version > 1 ? t(`Fassung ${l.version}`, `Version ${l.version}`) : pick(lang, LETTER_KIND_LABELS[kind]),
         detail: [toDateInputValue(l.sentAt).split('-').reverse().join('.'), l.sentByName].filter(Boolean).join(' · '),
       }))}
       back={{ href: back, label: t('Zur Warteliste', 'Back to the waiting list') }}
-      title={`${pick(lang, LETTER_KIND_LABELS[kind])} · ${name}`}
+      title={pick(lang, LETTER_KIND_LABELS[kind])}
+      subtitle={[name, ctx.course ? [ctx.course.name[lang], ctx.course.level].filter(Boolean).join(' ') : ctx.exam?.name].filter(Boolean).join(' · ')}
       error={error}
     />
   );

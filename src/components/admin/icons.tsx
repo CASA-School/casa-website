@@ -191,6 +191,27 @@ export const Icon = {
       <path d="M2.5 4.4a.9.9 0 0 1 .9-.9h9.2a.9.9 0 0 1 .9.9v5.2a.9.9 0 0 1-.9.9H6.75L3.5 13.25V10.5h-.1a.9.9 0 0 1-.9-.9V4.4Z" />
     </svg>
   ),
+  /** A sheet of lines with a total — a statement of costs and payments. */
+  statement: (
+    <svg {...box}>
+      <path d="M4.25 2.5h7.5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-7.5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" />
+      <path d="M5.75 5.5h4.5M5.75 8h4.5M5.75 10.75h1.75M9.5 10.75h.75" />
+    </svg>
+  ),
+  /** A rosette — a certificate, a confirmation to show someone. */
+  award: (
+    <svg {...box}>
+      <circle cx="8" cy="6.25" r="3.5" />
+      <path d="m5.9 9.1-.9 4.4 3-1.5 3 1.5-.9-4.4" />
+    </svg>
+  ),
+  /** A padlock — not possible yet; the reason is beside it. */
+  lock: (
+    <svg {...box}>
+      <rect x="3.5" y="7" width="9" height="6.5" rx="1.5" />
+      <path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7" />
+    </svg>
+  ),
   /** A chevron — this row opens something. */
   chevronRight: (
     <svg {...box}>

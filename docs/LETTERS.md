@@ -66,6 +66,37 @@ lacked a field the sheet had started to read, and opening one crashed the letter
   `globals.css` hides everything else on paper and sets `@page letter` (A4, the first page's margins
   inside the sheet). `printLetter(name)` names the PDF.
 
+## Choosing the letter (2026-10-17)
+
+Rahman: "there is a list of different types of letters so it should be more intuitive … the types
+and the whole framing" (the sheet itself stays as it is). A booking writes up to fourteen kinds, so
+the page around the sheet says which one is due, where each stands and what each is:
+
+- **A mark per kind** (`letter-kind.tsx`, `LETTER_KIND_LOOK`): an icon for what it does, a colour for
+  its stage — blue the registration, green money, sun before the course or the exam and the waiting
+  list, ink the confirmations after it, red a cancellation. The same mark wherever a letter is
+  listed: the switcher, a booking's „Briefe" card, a person's letters, a registration's, the sitting's
+  letters to all, the sent letter's head.
+- **Stages in the order a booking goes** (`BOOKING_LETTER_GROUPS`, `EXAM_LETTER_GROUPS`): Anmeldung ·
+  Zahlung · Visum · Kursbeginn · Stornierung; for an exam Anmeldung · Zahlung · Prüfungstag · Nach der
+  Prüfung · Stornierung.
+- **What is due** (`letters/suggest.ts`, pure and tested): from the booking and the letters sent —
+  the confirmation not yet sent; a payment after the last receipt; the letter for the embassy once a
+  visa learner has paid in full; the show-up letter 40 to 9 days before the start; the course start
+  in its last week; for an exam the invitation in the last fortnight and „Ergebnis ist da" once the
+  result is entered; a reminder when money is open a week after the confirmation and no reminder
+  went that week; missing details only when the essentials are missing (date of birth,
+  nationality, a way to reach them, a passport number for a visa) — not every field on the list, which
+  almost every record lacks; a cancelled booking only its cancellation. Most urgent first.
+- **The switcher** beside the sheet: per stage, each kind with its mark and where it stands — *Vorschlag*
+  when due, „✓ 12. Okt." when sent, a padlock with the reason on hover when it cannot go yet (it still
+  opens, to read and print) — and „Als Nächstes" on top, the most urgent one not open. On a phone or
+  a tablet the kinds are one row of chips above the sheet, scrolled to the one open.
+- **The head**: the kind's mark and name, whom and which booking it is for, and whether and when it
+  went („Gesendet am 12. Okt.", „3× gesendet, zuletzt am …", or „Noch nicht gesendet").
+- **„Brief schreiben" opens the letter due** (`/letter` without a kind), and a booking's „Briefe" card
+  offers it first — „Als Nächstes: Empfangsbestätigung" — above the letters sent.
+
 ## A booking's letters and the waiting list's (2026-10-16, migration 0032)
 
 Rahman: "start with the letters". SchoolMan's most written letters after offers, read from its DDR

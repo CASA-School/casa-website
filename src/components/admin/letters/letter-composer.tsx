@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import { InlinePanel, InlineText } from '@/components/admin/letters/inline-edit';
 import ed from '@/components/admin/letters/letter-edit.module.css';
 import { LetterSheet, type LetterSlots } from '@/components/admin/letters/letter-sheet';
+import { LETTER_KIND_LOOK, LetterKindIcon, LOCK } from '@/components/admin/letters/letter-kind';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
 import { Button } from '@/components/admin/ui';
 import {
@@ -27,6 +29,7 @@ import {
 import {
   subjectLine,
   type BookingLetterKind,
+  type LetterKind,
   type LetterLanguage,
   type LetterPart,
   type RegistrationLetterKind,
@@ -52,6 +55,22 @@ export type ComposerContext =
 
 type Standards = Record<LetterLanguage, Record<string, string>>;
 
+/** One kind of letter in the switcher, with where it stands for this record. */
+export type LetterKindItem = {
+  kind: LetterKind;
+  label: string;
+  href: string;
+  active: boolean;
+  /** The day it last went out ("12. Okt."), and how often it did. */
+  sentOn: string | null;
+  count: number;
+  /** Why it cannot go out now; it still opens, to read and print. */
+  blocked: string | null;
+  /** Due now, from what the record is and what was sent (`letters/suggest.ts`); `rank` 0 the most urgent. */
+  suggested: boolean;
+  rank?: number;
+};
+
 const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money', 'test', 'deposit', 'place', 'arrive', 'ready'];
 
 export function LetterComposer({
@@ -66,7 +85,6 @@ export function LetterComposer({
   issueAction,
   saveStandardAction,
   hidden,
-  kinds,
   kindGroups,
   sent,
   history,
@@ -76,6 +94,7 @@ export function LetterComposer({
   initialBookingIds,
   back,
   title,
+  subtitle,
   error,
 }: {
   source: ComposerContext;
@@ -90,9 +109,8 @@ export function LetterComposer({
   saveStandardAction: (input: { kind: string; language: LetterLanguage; part: string; body: string }) => Promise<{ ok: boolean }>;
   /** The record and kind, for the form. */
   hidden: Record<string, string>;
-  /** The other letters of this record, to switch to: a strip for a few, groups beside the page for many. */
-  kinds?: { label: string; href: string; active: boolean }[];
-  kindGroups?: { label: string; items: { label: string; href: string; active: boolean; sentCount: number }[] }[];
+  /** The record's kinds of letter, by stage, each with where it stands: the switcher beside the page. */
+  kindGroups?: { label: string; items: LetterKindItem[] }[];
   sent: { id: string; label: string; detail: string }[];
   /** The record's letters already sent, by kind and day: what the rules and some sentences read. */
   history?: { kind: string; date: string }[];
@@ -103,7 +121,9 @@ export function LetterComposer({
   /** The confirmation of several bookings: which are ticked when it opens. */
   initialBookingIds?: string[];
   back: { href: string; label: string };
+  /** The kind's name, and whom and what it is for ("Kenji Sato · B-2026-0003"). */
   title: string;
+  subtitle?: string;
   error?: string;
 }) {
   const { t } = useWsLang();
@@ -278,14 +298,40 @@ export function LetterComposer({
     { key: 'none' as const, label: t('Ohne Adresse', 'No address') },
   ];
 
+  // Where the letter shown stands: sent before, and when, or not yet.
+  const current = kindGroups?.flatMap((g) => g.items).find((k) => k.active) ?? null;
+  const all = kindGroups?.flatMap((g) => g.items) ?? [];
+  const next = all.filter((k) => k.suggested && !k.active).sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))[0] ?? null;
+  // The chip row on a phone opens with the letter shown in view, without moving the page.
+  const chips = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const row = chips.current;
+    const active = row?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (row && active) row.scrollLeft = active.offsetLeft - row.clientWidth / 2 + active.clientWidth / 2;
+  }, [source.kind]);
+
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <Link href={back.href} className="text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
-            ← {back.label}
-          </Link>
-          <h1 className="mt-1 text-[1.5rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{title}</h1>
+      <Link href={back.href} className="text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
+        ← {back.label}
+      </Link>
+      <div className="mt-2 mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <LetterKindIcon kind={source.kind} size="lg" />
+          <div className="min-w-0">
+            <h1 className="text-[1.5rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{title}</h1>
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[0.86rem] text-[var(--casa-muted)]">
+              {subtitle ? <span>{subtitle}</span> : null}
+              {subtitle ? <span aria-hidden="true">·</span> : null}
+              {current?.sentOn ? (
+                <span className="font-semibold text-[#17693a]">
+                  {current.count > 1 ? t(`${current.count}× gesendet, zuletzt am ${current.sentOn}`, `sent ${current.count}×, last on ${current.sentOn}`) : t(`Gesendet am ${current.sentOn}`, `Sent on ${current.sentOn}`)}
+                </span>
+              ) : (
+                <span>{t('Noch nicht gesendet', 'Not sent yet')}</span>
+              )}
+            </p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="secondary" onClick={print}>
@@ -325,26 +371,9 @@ export function LetterComposer({
         </div>
       </div>
 
-      {kinds && kinds.length > 1 ? (
-        <nav aria-label={t('Briefe', 'Letters')} className="mb-4 inline-flex flex-wrap gap-0.5 rounded-xl border border-ws-line bg-white p-1">
-          {kinds.map((k) => (
-            <Link
-              key={k.href}
-              href={k.href}
-              aria-current={k.active ? 'page' : undefined}
-              className={cn(
-                'inline-flex h-[30px] items-center rounded-lg px-3.5 text-[0.8rem] font-bold transition-colors',
-                k.active ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]'
-              )}
-            >
-              {k.label}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
-
       {blocked ? (
-        <p role="status" className="mb-4 rounded-2xl bg-[#fff8e6] px-4 py-3 text-[0.88rem] text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+        <p role="status" className="mb-4 flex items-center gap-2.5 rounded-2xl bg-[#fff8e6] px-4 py-3 text-[0.88rem] text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+          <span className="shrink-0 text-[#9a6b00]">{LOCK}</span>
           {blocked}
         </p>
       ) : null}
@@ -355,37 +384,62 @@ export function LetterComposer({
         </p>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
+      {/* A phone or a tablet: the kinds as chips above the letter; a wide screen: beside it, above the settings. */}
+      {kindGroups && all.length > 1 ? (
+        <nav ref={chips} aria-label={t('Briefe', 'Letters')} className="-mx-4 mb-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] xl:hidden [&::-webkit-scrollbar]:hidden">
+          <ul className="flex w-max gap-1.5">
+            {all.map((k) => (
+              <li key={k.href}>
+                <Link
+                  href={k.href}
+                  aria-current={k.active ? 'page' : undefined}
+                  title={k.blocked ?? undefined}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full border py-1 pr-3.5 pl-1 text-[0.82rem] font-semibold whitespace-nowrap transition-colors',
+                    k.active ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white' : 'border-ws-line bg-white text-[var(--casa-ink)]',
+                    k.blocked && !k.active && 'text-[var(--casa-muted)]'
+                  )}
+                >
+                  <LetterKindIcon kind={k.kind} className={cn('rounded-full', k.blocked && !k.active && 'opacity-55 grayscale')} />
+                  {k.label}
+                  {k.suggested ? <span className={cn('size-2 rounded-full', k.active ? 'bg-white' : 'bg-[#0b7fc0]')} aria-label={t('Vorschlag', 'Due')} /> : k.sentOn ? <span className={k.active ? 'text-white/75' : 'text-[#17693a]'}>✓</span> : null}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
         <div className="min-w-0">
           <LetterSheet letter={letter} slots={slots} />
         </div>
 
-        <aside className="space-y-4 xl:sticky xl:top-20" aria-label={t('Der Brief', 'The letter')}>
-          {kindGroups ? (
-            <nav aria-label={t('Briefe', 'Letters')} className="rounded-3xl border border-ws-line bg-white">
-              <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Brief', 'Letter')}</h2>
-              <div className="space-y-3 p-2">
+        <aside className="space-y-4" aria-label={t('Der Brief', 'The letter')}>
+          {kindGroups && all.length > 1 ? (
+            <nav aria-label={t('Briefe', 'Letters')} className="hidden rounded-3xl border border-ws-line bg-white xl:block">
+              <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Briefe', 'Letters')}</h2>
+              {next ? (
+                // What is due now, when it is not the letter open.
+                <Link
+                  href={next.href}
+                  className="mx-2 mt-2 flex items-center gap-3 rounded-2xl bg-[#eef6fd] px-3 py-2.5 ring-1 ring-[#cfe5f7] transition-colors ring-inset hover:bg-[#e3f0fb]"
+                >
+                  <LetterKindIcon kind={next.kind} size="md" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[0.72rem] font-semibold text-[#065f8c]">{t('Als Nächstes', 'Next')}</span>
+                    <span className="block truncate text-[0.88rem] font-bold text-[var(--casa-ink)]">{next.label}</span>
+                  </span>
+                  <span className="text-[#065f8c]">{Icon.chevronRight}</span>
+                </Link>
+              ) : null}
+              <div className="space-y-2.5 p-2">
                 {kindGroups.map((group) => (
                   <div key={group.label}>
                     <span className="block px-2 pt-1 pb-1 text-[0.72rem] font-semibold text-[var(--casa-muted)]">{group.label}</span>
-                    <ul>
+                    <ul className="space-y-0.5">
                       {group.items.map((k) => (
                         <li key={k.href}>
-                          <Link
-                            href={k.href}
-                            aria-current={k.active ? 'page' : undefined}
-                            className={cn(
-                              'flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 text-[0.84rem] font-semibold transition-colors',
-                              k.active ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-ink)] hover:bg-ws-sunk'
-                            )}
-                          >
-                            {k.label}
-                            {k.sentCount ? (
-                              <span className={cn('text-[0.72rem] font-semibold', k.active ? 'text-white/70' : 'text-[var(--casa-muted)]')}>
-                                {t(`${k.sentCount}× gesendet`, `sent ${k.sentCount}×`)}
-                              </span>
-                            ) : null}
-                          </Link>
+                          <KindRow item={k} />
                         </li>
                       ))}
                     </ul>
@@ -394,7 +448,6 @@ export function LetterComposer({
               </div>
             </nav>
           ) : null}
-
           <section className="rounded-3xl border border-ws-line bg-white">
             <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Einstellungen', 'Settings')}</h2>
             <Choice label={t('Sprache', 'Language')}>
@@ -499,7 +552,7 @@ export function LetterComposer({
 
           {sent.length ? (
             <section className="rounded-3xl border border-ws-line bg-white">
-              <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Schon gesendet', 'Already sent')}</h2>
+              <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Verlauf', 'History')}</h2>
               <ul className="p-1.5">
                 {sent.map((s) => (
                   <li key={s.id}>
@@ -546,5 +599,40 @@ function Seg<V extends string>({ value, options, onChange }: { value: V; options
         </button>
       ))}
     </span>
+  );
+}
+
+
+/** A kind of letter in the switcher: its mark and name, and where it stands — due now, sent, or not yet possible. */
+function KindRow({ item }: { item: LetterKindItem }) {
+  const { t } = useWsLang();
+  const look = LETTER_KIND_LOOK[item.kind];
+  return (
+    <Link
+      href={item.href}
+      aria-current={item.active ? 'page' : undefined}
+      title={item.blocked ?? undefined}
+      className={cn(
+        'group flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-[0.84rem] font-semibold transition-colors',
+        item.active ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-ink)] hover:bg-ws-sunk',
+        item.blocked && !item.active && 'text-[var(--casa-muted)]'
+      )}
+    >
+      <LetterKindIcon kind={item.kind} className={cn(item.blocked && !item.active && 'opacity-55 grayscale', item.active && look.tint === 'ink' && 'ring-1 ring-white/30')} />
+      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {item.suggested ? (
+        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[0.68rem] font-bold', item.active ? 'bg-white/15 text-white' : 'bg-[#e3f4fc] text-[#065f8c]')}>
+          {t('Vorschlag', 'Due')}
+        </span>
+      ) : item.sentOn ? (
+        <span className={cn('shrink-0 text-[0.72rem] font-semibold tabular-nums', item.active ? 'text-white/75' : 'text-[#17693a]')}>
+          ✓ {item.sentOn}
+        </span>
+      ) : item.blocked ? (
+        <span className={cn('shrink-0', item.active ? 'text-white/60' : 'text-[var(--casa-text-subtle)]')} aria-label={item.blocked}>
+          {LOCK}
+        </span>
+      ) : null}
+    </Link>
   );
 }

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { saveLetterStandardAction } from '../../../bookings/actions';
 import { issueLearnerLetterAction } from '../../actions';
 import { LetterComposer } from '@/components/admin/letters/letter-composer';
+import { sentDay } from '@/components/admin/letters/letter-kind';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
@@ -58,7 +59,26 @@ export default async function LearnerLetterPage({
         detail: [toDateInputValue(l.sentAt).split('-').reverse().join('.'), l.sentByName].filter(Boolean).join(' · '),
       }))}
       back={{ href: `/admin/people/${ctx.personId}?tab=letters`, label: t('Zur Person', 'Back to the person') }}
-      title={`${pick(lang, LETTER_KIND_LABELS.learner_confirmation)} · ${name}`}
+      title={pick(lang, LETTER_KIND_LABELS.learner_confirmation)}
+      subtitle={name}
+      // One kind here: no switcher, but the head says whether and when it went.
+      kindGroups={[
+        {
+          label: '',
+          items: [
+            {
+              kind: 'learner_confirmation',
+              label: pick(lang, LETTER_KIND_LABELS.learner_confirmation),
+              href: `/admin/people/${ctx.personId}/letter`,
+              active: true,
+              sentOn: sent[0] ? sentDay(toDateInputValue(sent.reduce((a, b) => (a.sentAt > b.sentAt ? a : b)).sentAt), lang) : null,
+              count: sent.length,
+              blocked: null,
+              suggested: false,
+            },
+          ],
+        },
+      ]}
       error={error}
     />
   );

@@ -23,6 +23,7 @@ import { getCourseRegistration } from '@/lib/admin/registrations';
 import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { levelGroups } from '@/lib/admin/waitlist';
+import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForRegistration } from '@/lib/admin/letters/repo';
 import { toDateInputValue } from '@/lib/dates';
@@ -283,11 +284,12 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
             }
           >
             {letters.length ? (
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+              <ul className="-my-1 space-y-0.5">
                 {letters.map((l) => (
                   <li key={l.id}>
-                    <Link href={`/admin/letters/${l.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:underline">
-                      <span className="font-semibold">{pick(lang, LETTER_KIND_LABELS[l.kind])}</span>
+                    <Link href={`/admin/letters/${l.id}`} className="-mx-2 flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-ws-sunk">
+                      <LetterKindIcon kind={l.kind} />
+                      <span className="min-w-0 flex-1 truncate font-semibold">{pick(lang, LETTER_KIND_LABELS[l.kind])}</span>
                       <span className="shrink-0 text-xs text-[var(--casa-muted)]">
                         <DateText value={l.sentAt} compact />
                         {l.sentByName ? ` · ${l.sentByName}` : ''}
