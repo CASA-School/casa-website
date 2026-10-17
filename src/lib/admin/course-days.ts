@@ -46,6 +46,8 @@ export type CourseInfo = {
   placesPerGroup: number;
   bookable: boolean;
   cancelled: boolean;
+  /** SchoolMan's course numbers, group by group. */
+  numbers: string[];
 };
 
 export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
@@ -68,11 +70,13 @@ export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
     places_per_group: number;
     bookable: boolean;
     status: string;
+    numbers: string[] | null;
+    number: string | null;
   }>(
     `SELECT c.id, c.course_instance_id, c.level_code, c.title, t.slug, coalesce(t.name_de, t.name) AS type_name, t.format,
             to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
             coalesce(c.session, i.session) AS session, i.schedule, c.groups, c.room_id, coalesce(r.nickname, r.name) AS room_name,
-            t.lessons_per_week, c.places_per_group, c.bookable, c.status
+            t.lessons_per_week, c.places_per_group, c.bookable, c.status, c.filemaker_group_ids AS numbers, c.filemaker_course_id AS number
        FROM courses c JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types t ON t.id = i.course_type_id
        LEFT JOIN rooms r ON r.id = c.room_id
       WHERE c.id = $1`,
@@ -112,6 +116,7 @@ export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
     placesPerGroup: r.places_per_group,
     bookable: r.bookable,
     cancelled: r.status === 'cancelled',
+    numbers: r.numbers?.length ? r.numbers : r.number ? [r.number] : [],
   };
 }
 

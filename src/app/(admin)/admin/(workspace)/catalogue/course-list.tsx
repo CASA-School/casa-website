@@ -11,21 +11,23 @@ import { cn } from '@/lib/utils';
 
 /**
  * The courses of one kind of work (2026-10-17; docs/ADMIN_WORKSPACE.md §Courses), Rahman: the
- * intensive morning and afternoon courses, the evening — level and special courses, by Monday +
- * Wednesday and Tuesday + Thursday — and the rest, each a view of its own. Under each start its
+ * intensive courses — morning and afternoon on one page, the running ones of both at the top — the evening — level and special courses, by
+ * Monday + Wednesday and Tuesday + Thursday — and the rest, each a view of its own. Under each start its
  * courses; a course's parallel groups one row each, since they sit in their own rooms with their own
- * teachers. A group's row: SchoolMan's number, its main teachers (the week's pair, at most two), its
- * room, its learners now against its places and week by week. A course's level, its waiting list and
- * „Buchen" span its groups.
+ * teachers, and each is known by its course number (SchoolMan's). A row: the number, its main teachers
+ * (the week's pair, at most two), its room, its learners now against its places and week by week. A
+ * course's level, its waiting list and „Buchen" span its rows.
  */
 
-export type CourseView = 'intensive-morning' | 'intensive-afternoon' | 'evening' | 'other';
+export type CourseView = 'intensive' | 'evening' | 'other';
 
-/** Which view a course belongs to: intensive by its shift, the evening by its hours, the rest. */
+/** Which view a course belongs to: the intensive courses, the evening by its hours, the rest. */
 export function viewOf(row: Pick<CourseListRow, 'format' | 'session'>): CourseView {
-  if (row.format === 'intensive') return row.session === 'afternoon' ? 'intensive-afternoon' : 'intensive-morning';
+  if (row.format === 'intensive') return 'intensive';
   return row.session === 'evening' ? 'evening' : 'other';
 }
+
+
 
 const PHASES: Record<CoursePhase, Bilingual> = {
   running: { de: 'Laufend', en: 'Running' },
@@ -91,19 +93,17 @@ export function CourseList({
   }
   const book = canBook && !past;
   const span = book ? 7 : 6;
-  // The evening by its pair of days, the rest by running and ahead.
+  // The evening by its pair of days, running first; the intensive courses and the rest by running and
+  // ahead — the running morning and afternoon courses together at the top, the shift in each start's head.
+  const byPhase = (list: CourseListRow[]) => [...list].sort((a, b) => PHASE_ORDER[a.phase] - PHASE_ORDER[b.phase] || (past ? b.startDate.localeCompare(a.startDate) : a.startDate.localeCompare(b.startDate)));
   const sections: { key: string; label: string; rows: CourseListRow[] }[] =
     view === 'evening'
-      ? (['mw', 'tt', 'other'] as Pair[]).map((pair) => ({
-          key: pair,
-          label: pick(lang, PAIRS[pair]),
-          rows: rows.filter((r) => pairOf(r.days) === pair).sort((a, b) => PHASE_ORDER[a.phase] - PHASE_ORDER[b.phase] || a.startDate.localeCompare(b.startDate)),
-        }))
+      ? (['mw', 'tt', 'other'] as Pair[]).map((pair) => ({ key: pair, label: pick(lang, PAIRS[pair]), rows: byPhase(rows.filter((r) => pairOf(r.days) === pair)) }))
       : (past ? (['past'] as CoursePhase[]) : (['running', 'upcoming'] as CoursePhase[])).map((phase) => ({
-          key: phase,
-          label: pick(lang, PHASES[phase]),
-          rows: rows.filter((r) => r.phase === phase),
-        }));
+            key: phase,
+            label: pick(lang, PHASES[phase]),
+            rows: rows.filter((r) => r.phase === phase),
+          }));
 
   let band = 0;
   return (
@@ -112,7 +112,7 @@ export function CourseList({
         <thead>
           <tr className="border-b border-[var(--ws-head-line)] bg-[var(--ws-head)] text-left text-xs font-semibold whitespace-nowrap text-[var(--ws-head-text)]">
             <th scope="col" className="py-3 pr-3 pl-5">{t('Kurs', 'Course')}</th>
-            <th scope="col" className="w-[8.5rem] px-3 py-3">{t('Gruppe', 'Group')}</th>
+            <th scope="col" className="w-[7.5rem] px-3 py-3">{t('Kurs-Nr.', 'Course no.')}</th>
             <th scope="col" className="w-[12rem] px-3 py-3">{t('Lehrkräfte', 'Teachers')}</th>
             <th scope="col" className="hidden w-[7.5rem] px-3 py-3 lg:table-cell">{t('Raum', 'Room')}</th>
             <th scope="col" className="w-[11.5rem] px-3 py-3">{t('Teilnehmende', 'Learners')}</th>
@@ -137,7 +137,7 @@ export function CourseList({
                 </th>
               </tr>
               {groupRuns(section.rows, (r) => r.courseInstanceId).flatMap((start) => [
-                <StartRow key={`s-${start.key}`} row={start.items[0]} span={span} showPhase={view === 'evening'} t={t} lang={lang} />,
+                <StartRow key={`s-${start.key}`} row={start.items[0]} span={span} showPhase={view !== 'other'} t={t} lang={lang} />,
                 ...start.items.flatMap((row) => {
                   band++;
                   return row.groupRows.map((group, i) => (
@@ -154,7 +154,7 @@ export function CourseList({
 
 /** The start a set of courses belongs to: what it is, when, and how far it has come. */
 function StartRow({ row, span, showPhase, t, lang }: { row: CourseListRow; span: number; showPhase: boolean; t: T; lang: WsLang }) {
-  const facts = [row.session ? pick(lang, SESSION_LABELS[row.session]) : null, dayList(row.days, lang), row.time ? row.time.replace('-', '–') : null].filter(Boolean);
+  const facts = [row.session && row.format !== 'intensive' ? pick(lang, SESSION_LABELS[row.session]) : null, dayList(row.days, lang), row.time ? row.time.replace('-', '–') : null].filter(Boolean);
   const where =
     row.phase === 'running' && row.week
       ? t(`Woche ${row.week} von ${row.weeks.length}`, `Week ${row.week} of ${row.weeks.length}`)
@@ -168,6 +168,7 @@ function StartRow({ row, span, showPhase, t, lang }: { row: CourseListRow; span:
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[0.82rem]">
             <Link href={`/admin/catalogue/${row.courseInstanceId}`} className="font-bold text-[var(--casa-ink)] hover:underline">
               {row.startTitle && row.startTitle !== row.typeName && !row.title ? `${row.typeName} · ${row.startTitle}` : row.typeName}
+              {row.format === 'intensive' && row.session ? ` · ${pick(lang, SESSION_LABELS[row.session])}` : null}
             </Link>
             <span className="text-[var(--casa-muted)] tabular-nums">{dayRange(row.startDate, row.endDate, lang)}</span>
             {facts.length ? <span className="text-[var(--casa-muted)]">{facts.join(' · ')}</span> : null}
@@ -205,7 +206,6 @@ function GroupRow({
   const span = row.groupRows.length;
   const waiting = row.waiting + row.offered;
   const href = `/admin/catalogue/courses/${row.courseId}`;
-  const several = span > 1;
   return (
     <tr className={cn('align-middle', first ? 'border-t border-ws-line-soft' : 'border-t border-dashed border-ws-line-soft', shaded ? 'bg-[var(--ws-row-alt)]' : 'bg-white')}>
       {first ? (
@@ -220,28 +220,16 @@ function GroupRow({
                   {row.title}
                 </span>
               ) : null}
-              <span className="flex flex-wrap items-center gap-1.5 text-[0.76rem] text-[var(--casa-muted)]">
-                {several ? (
-                  <span className="tabular-nums">
-                    {t(`${span} Gruppen`, `${span} groups`)} · {num(lang, row.now)} / {num(lang, row.places)}
-                  </span>
-                ) : null}
-                {!row.bookable ? <Badge tone="quiet">{t('Geschlossen', 'Closed')}</Badge> : null}
-              </span>
+              {!row.bookable ? (
+                <span className="mt-0.5 block">
+                  <Badge tone="quiet">{t('Geschlossen', 'Closed')}</Badge>
+                </span>
+              ) : null}
             </span>
           </Link>
         </td>
       ) : null}
-      <td className="px-3 py-2.5 text-[0.82rem] whitespace-nowrap">
-        {several ? (
-          <span className="font-semibold text-[var(--casa-ink)]">{t(`Gruppe ${group.index}`, `Group ${group.index}`)}</span>
-        ) : group.index === 0 ? (
-          <span className="font-semibold text-[var(--casa-ink)]">{t(`${row.groups} Gruppen`, `${row.groups} groups`)}</span>
-        ) : null}
-        {group.number ? (
-          <span className={cn('text-[var(--casa-muted)] tabular-nums', (several || group.index === 0) && 'block text-[0.74rem]')}>{`${t('Nr.', 'No.')} ${group.number}`}</span>
-        ) : null}
-      </td>
+      <td className="px-3 py-2.5 text-[0.86rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] tabular-nums">{group.number}</td>
       <td className="max-w-0 px-3 py-2.5 text-[0.82rem] text-[#2b3546]">
         {group.teachers.length ? <span className="block truncate">{group.teachers.join(' · ')}</span> : null}
       </td>

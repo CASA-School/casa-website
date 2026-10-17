@@ -4,8 +4,8 @@ import { expect, test } from '@playwright/test';
 import pg from 'pg';
 
 /**
- * The course list (2026-10-17): a view per kind of work — intensive morning, intensive afternoon, the
- * evening by Monday + Wednesday and Tuesday + Thursday, the rest — current or past; under each start
+ * The course list (2026-10-17): a view per kind of work — the intensive courses (morning and afternoon
+ * on one page), the evening by Monday + Wednesday and Tuesday + Thursday, the rest — current or past; under each start
  * its courses, a course's parallel groups one row each with their own teachers (at most two) and room.
  * Makes its own evening start in April 2027 with a course of two groups and their lesson days.
  *
@@ -78,7 +78,7 @@ test.describe('Course list', () => {
   test('a view per kind of work, current or past', async ({ page }) => {
     await page.goto('/admin/catalogue');
     const views = page.getByRole('navigation', { name: 'Ansichten' });
-    for (const name of [/^Intensiv · Vormittag/, /^Intensiv · Nachmittag/, /^Abend/, /^Weitere/, /^Kursarten/]) await expect(views.getByRole('link', { name })).toBeVisible();
+    for (const name of [/^Intensiv/, /^Abend/, /^Weitere/, /^Kursarten/]) await expect(views.getByRole('link', { name })).toBeVisible();
     await page.getByRole('link', { name: 'Vergangen' }).click();
     await expect(page).toHaveURL(/time=past/);
     await expect(page.getByRole('link', { name: 'Aktuell' })).toBeVisible();
@@ -90,11 +90,12 @@ test.describe('Course list', () => {
     await expect(tt).toBeVisible();
     const start = page.locator(`tr[data-start="${startId}"]`);
     await expect(start).toContainText('Di + Do');
-    const g1 = page.locator('tr', { hasText: 'Gruppe 1' }).filter({ has: page.locator(`a[href="/admin/catalogue/courses/${courseId}"]`) });
+    // The course's first row carries its level; each group is a row of its own with its main teachers.
+    const g1 = page.locator('tr').filter({ has: page.locator(`a[href="/admin/catalogue/courses/${courseId}"]`) });
     await expect(g1).toContainText(`${teachers[0].short} · ${teachers[1].short}`);
     // The substitute is not a main teacher of group 1; group 2 has its own.
     await expect(g1).not.toContainText(teachers[2].short);
-    const g2 = page.locator('tr', { hasText: 'Gruppe 2' }).filter({ hasText: teachers[2].short });
-    await expect(g2).toHaveCount(1);
+    await expect(g1.locator('xpath=following-sibling::tr[1]')).toContainText(teachers[2].short);
+    await expect(page.getByText('Gruppen', { exact: false })).toHaveCount(0);
   });
 });

@@ -97,7 +97,7 @@ export default async function CoursePage({
               g === groupIndex ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white' : 'border-ws-line bg-white hover:border-ws-line-firm'
             )}
           >
-            {t(`Gruppe ${g}`, `Group ${g}`)}
+            {course.numbers[g - 1] ?? t(`Gruppe ${g}`, `Group ${g}`)}
           </Link>
         ))}
       </div>
@@ -122,6 +122,7 @@ export default async function CoursePage({
               <MetaItem icon={Icon.clock}>{[course.session ? pick(lang, SESSION_LABELS[course.session]) : null, course.time].filter(Boolean).join(' · ')}</MetaItem>
             ) : null}
             {course.roomName ? <MetaItem icon={Icon.rooms}>{course.roomName}</MetaItem> : null}
+            {course.numbers.length ? <MetaItem icon={Icon.statement}>{`${t('Kurs-Nr.', 'Course no.')} ${course.numbers.join(' · ')}`}</MetaItem> : null}
           </MetaLine>
         }
         actions={

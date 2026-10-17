@@ -101,7 +101,7 @@ const routes = [
   offer && `/admin/offers/${offer}`,
   offer && `/admin/offers/${offer}/letter`,
   '/admin/catalogue',
-  '/admin/catalogue?view=intensive-afternoon',
+  '/admin/catalogue?time=past',
   '/admin/catalogue?view=evening',
   '/admin/catalogue?view=other&time=past',
   '/admin/catalogue?view=types',

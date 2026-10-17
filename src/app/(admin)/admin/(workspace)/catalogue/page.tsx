@@ -29,8 +29,7 @@ import { cn } from '@/lib/utils';
  */
 
 const VIEWS: readonly { key: CourseView | 'types'; label: Bilingual }[] = [
-  { key: 'intensive-morning', label: { de: 'Intensiv · Vormittag', en: 'Intensive · morning' } },
-  { key: 'intensive-afternoon', label: { de: 'Intensiv · Nachmittag', en: 'Intensive · afternoon' } },
+  { key: 'intensive', label: { de: 'Intensiv', en: 'Intensive' } },
   { key: 'evening', label: { de: 'Abend', en: 'Evening' } },
   { key: 'other', label: { de: 'Weitere', en: 'Other' } },
   { key: 'types', label: { de: 'Kursarten', en: 'Course types' } },
@@ -49,7 +48,7 @@ export default async function CataloguePage({
   const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people');
   const today = todayInputValue();
   const { error, view: rawView, time, new: fresh } = await searchParams;
-  const view = VIEWS.find((v) => v.key === rawView)?.key ?? 'intensive-morning';
+  const view = VIEWS.find((v) => v.key === rawView)?.key ?? 'intensive';
   const past = time === 'past';
   const [types, rows, rooms, levels] = await Promise.all([
     listCourseTypes(),
@@ -65,7 +64,7 @@ export default async function CataloguePage({
   const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);
   const next = rows.filter((r) => r.phase === 'upcoming').map((r) => r.startDate).sort()[0] ?? null;
   const href = (key: string, at: 'current' | 'past' = past ? 'past' : 'current') => {
-    const params = new URLSearchParams({ ...(key !== 'intensive-morning' ? { view: key } : {}), ...(at === 'past' && key !== 'types' ? { time: 'past' } : {}) });
+    const params = new URLSearchParams({ ...(key !== 'intensive' ? { view: key } : {}), ...(at === 'past' && key !== 'types' ? { time: 'past' } : {}) });
     return `/admin/catalogue${params.size ? `?${params}` : ''}`;
   };
 
