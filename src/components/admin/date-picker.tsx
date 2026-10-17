@@ -52,6 +52,7 @@ export function DateInput({
   placeholder,
   ariaLabel,
   onFocus,
+  onOpenCalendar,
   toggle,
 }: {
   id?: string;
@@ -63,6 +64,8 @@ export function DateInput({
   placeholder?: string;
   ariaLabel?: string;
   onFocus?: () => void;
+  /** Asks for the calendar: a click in the field, or ↓. */
+  onOpenCalendar?: () => void;
   toggle?: ReactNode;
 }) {
   const [text, setText] = useState('');
@@ -96,8 +99,11 @@ export function DateInput({
         aria-label={ariaLabel}
         aria-invalid={invalid || undefined}
         autoComplete="off"
-        placeholder={placeholder ?? t('Datum eingeben oder wählen', 'Type or pick a date')}
+        placeholder={placeholder ?? t('TT.MM.JJJJ', 'DD.MM.YYYY')}
         value={editing ? text : value ? formatDay(value, lang) : ''}
+        // A click or ↓ opens the calendar, not focus alone: a dialog focuses its first field when it
+        // opens, and a calendar over the rest of the form is in the way. Typing a date always works.
+        onPointerDown={() => onOpenCalendar?.()}
         onFocus={(e) => {
           setEditing(true);
           setText(value ? toGerman(value) : '');
@@ -110,7 +116,10 @@ export function DateInput({
         }}
         onBlur={commit}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            onOpenCalendar?.();
+          } else if (e.key === 'Enter') {
             e.preventDefault();
             (e.target as HTMLInputElement).blur();
           } else if (e.key === 'Escape') {
@@ -366,7 +375,7 @@ export function DateField({
         min={min}
         max={max}
         ariaLabel={ariaLabel}
-        onFocus={show}
+        onOpenCalendar={show}
         toggle={
           <button type="button" className={s.toggle} aria-label={t('Kalender öffnen', 'Open the calendar')} aria-expanded={open} onClick={() => (open ? setOpen(false) : show())}>
             {CALENDAR_ICON}

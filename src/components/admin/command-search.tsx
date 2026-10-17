@@ -10,6 +10,7 @@ import type { SearchHit, SearchKind } from '@/lib/admin/search';
 import { cn } from '@/lib/utils';
 
 import { Icon } from './icons';
+import { DIALOG_OVERLAY } from './dialogs';
 import { useWsLang } from './lang';
 
 const GROUPS: { kind: SearchKind; label: Bilingual }[] = [
@@ -116,7 +117,7 @@ export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-ico
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="casa-ws-dialog max-w-xl gap-0 overflow-hidden rounded-3xl p-0 sm:mt-[8vh] sm:self-start" showCloseButton={false}>
+        <DialogContent className="casa-ws-dialog max-w-xl gap-0 overflow-hidden rounded-3xl p-0 sm:mt-[8vh] sm:self-start" overlayClassName={DIALOG_OVERLAY} showCloseButton={false}>
           <DialogTitle className="sr-only">{t('Im Arbeitsbereich suchen', 'Search the workspace')}</DialogTitle>
           <DialogDescription className="sr-only">{t('Ein Name, eine E-Mail-Adresse oder eine Angebotsnummer', 'A name, an email address or an offer number')}</DialogDescription>
           <div className="flex items-center gap-3 border-b border-ws-line px-4">

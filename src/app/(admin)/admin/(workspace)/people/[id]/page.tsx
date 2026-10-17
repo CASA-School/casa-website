@@ -145,9 +145,9 @@ export default async function PersonPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; tab?: string }>;
+  searchParams: Promise<{ error?: string; tab?: string; book?: string }>;
 }) {
-  const [{ id }, { error, tab }, user] = await Promise.all([params, searchParams, requireModule('people')]);
+  const [{ id }, { error, tab, book }, user] = await Promise.all([params, searchParams, requireModule('people')]);
   const person = await getPerson(id);
 
   if (!person) {
@@ -404,7 +404,13 @@ export default async function PersonPage({
             {personDialog('secondary')}
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
-              <FormDialog trigger={t('Neue Buchung', 'New booking')} title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)} triggerVariant="primary" width="lg">
+              <FormDialog
+                trigger={t('Neue Buchung', 'New booking')}
+                title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)}
+                triggerVariant="primary"
+                width="lg"
+                defaultOpen={book === '1'}
+              >
                 <BookingWizard personId={person.id} personName={person.displayName} offer={offer} returnTo={`/admin/people/${person.id}`} action={createBookingFromWizardAction} waitlistAction={waitlistFromWizardAction} />
               </FormDialog>
             ) : null}

@@ -2,6 +2,7 @@ import { changeDayAction, saveWeekPlanAction } from './actions';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import type { CourseDay, DayChoices, WeekPlan } from '@/lib/admin/course-days';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * A lesson day and a weekly plan, in dialogs (0045). Each choice of teacher says who is away or teaching
@@ -101,9 +102,9 @@ export async function DayForm({
           </Field>
         </>
       ) : null}
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -192,9 +193,9 @@ export async function WeekPlanForm({
           </tbody>
         </table>
       </div>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Wochenplan speichern', 'Save weekly plan')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

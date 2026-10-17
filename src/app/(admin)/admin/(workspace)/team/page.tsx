@@ -16,7 +16,7 @@ import {
   TableRow,
   Textarea,
 } from '@/components/admin/ui';
-import { FormDialog } from '@/components/admin/dialogs';
+import { FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Avatar, ListGroup } from '@/components/admin/list';
 import { roleLabel } from '@/components/admin/shell';
 import { canDeleteStaff } from '@/lib/admin/auth';
@@ -100,9 +100,9 @@ export default async function TeamPage({
                     <WebsiteLevels t={t} />
                   </Select>
                 </Field>
-                <div className="pt-1">
+                <DialogFooter>
                   <Button type="submit">{t('Personen hinzufügen', 'Add colleagues')}</Button>
-                </div>
+                </DialogFooter>
               </form>
             </FormDialog>
 
@@ -164,8 +164,10 @@ export default async function TeamPage({
                     autoComplete="new-password"
                   />
                 </Field>
-                <div className="pt-1 sm:col-span-2">
-                  <Button type="submit">{t('Konto anlegen', 'Create account')}</Button>
+                <div className="sm:col-span-2">
+                  <DialogFooter>
+                    <Button type="submit">{t('Konto anlegen', 'Create account')}</Button>
+                  </DialogFooter>
                 </div>
               </form>
             </FormDialog>

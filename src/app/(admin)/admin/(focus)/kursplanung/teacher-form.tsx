@@ -1,3 +1,4 @@
+import { DialogFooter } from '@/components/admin/dialogs';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { levelStyle } from '@/lib/admin/kursplanung/colours';
@@ -112,9 +113,9 @@ export async function TeacherForm({
         </div>
       </div>
 
-      <div className={ui.foot}>
+      <DialogFooter>
         <button type="submit" className={ui.primary}>{t('Speichern', 'Save')}</button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

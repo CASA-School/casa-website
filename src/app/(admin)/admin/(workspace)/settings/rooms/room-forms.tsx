@@ -4,6 +4,7 @@ import { createRoomAction, updateRoomAction } from './actions';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * The two room forms, rendered inside dialogs.
@@ -63,9 +64,9 @@ export async function CreateRoomForm({ locations }: { locations: Location[] }) {
         </div>
       </OptionalSection>
 
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Raum hinzufügen', 'Add room')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -142,9 +143,9 @@ export async function EditRoomForm({ room }: { room: Room }) {
       <Field label={t('Notizen', 'Notes')} htmlFor="room-notes">
         <Input id="room-notes" name="notes" defaultValue={room.notes ?? ''} maxLength={500} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

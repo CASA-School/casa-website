@@ -12,7 +12,7 @@ import { ACCESS_GROUPS, moduleLabel } from './access-groups';
 import { PersonTabs } from './person-tabs';
 import { RowDialog } from './row-dialog';
 import { Button, DateText, Field, Input } from '@/components/admin/ui';
-import { ConfirmSubmit } from '@/components/admin/dialogs';
+import { ConfirmSubmit, DialogFooter } from '@/components/admin/dialogs';
 import { Popover, PopoverChoice } from '@/components/admin/popover';
 import { roleLabel } from '@/components/admin/shell';
 import {
@@ -85,9 +85,9 @@ export function PersonDialog({
           <Field label={t('Outlook-Adresse', 'Outlook address')} htmlFor={`edit-email-${account.id}`}>
             <Input id={`edit-email-${account.id}`} name="email" type="email" required defaultValue={account.email} />
           </Field>
-          <div className="pt-1">
+          <DialogFooter>
             <Button type="submit">{t('Speichern', 'Save')}</Button>
-          </div>
+          </DialogFooter>
         </form>
       ),
     },
@@ -112,9 +112,9 @@ export function PersonDialog({
                 autoComplete="new-password"
               />
             </Field>
-            <div className="pt-1">
+            <DialogFooter>
               <Button type="submit">{t('Passwort setzen', 'Set password')}</Button>
-            </div>
+            </DialogFooter>
           </form>
 
           {account.microsoftLinkedAt || microsoft ? (
@@ -375,9 +375,9 @@ function AccessForm({
           </Row>
         ))}
       </div>
-      <div className="pt-4">
+      <DialogFooter>
         <Button type="submit">{t('Zugriff speichern', 'Save access')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

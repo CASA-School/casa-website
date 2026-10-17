@@ -3,6 +3,7 @@ import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { CLOSE_REASON_LABELS, CLOSE_REASONS, freePlaces, type WaitlistEntry, type WizardPlaces } from '@/lib/admin/waitlist';
 import { addToWaitlistAction, closeEntryAction, moveEntryAction, moveToStartAction } from './actions';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * The waiting list's forms, rendered inside dialogs (docs/ADMIN_WORKSPACE.md §Waiting list). Each
@@ -66,9 +67,9 @@ export async function WaitlistForm({
       <Field label={t('Notiz', 'Note')} htmlFor="waitlist-note">
         <Textarea id="waitlist-note" name="note" rows={2} maxLength={300} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Auf die Warteliste', 'Add to waiting list')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -173,9 +174,9 @@ export async function CloseForm({ entry, returnTo }: { entry: Pick<WaitlistEntry
       <Field label={t('Notiz', 'Note')} htmlFor={`close-note-${entry.id}`}>
         <Textarea id={`close-note-${entry.id}`} name="note" rows={2} maxLength={300} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{entry.status === 'offered' ? t('Als abgesagt eintragen', 'Mark as declined') : t('Von der Liste nehmen', 'Take off the list')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

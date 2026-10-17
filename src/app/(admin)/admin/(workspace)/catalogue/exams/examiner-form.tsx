@@ -4,6 +4,7 @@ import { EXAM_PARTS, EXAMINER_PART_LABELS } from '@/lib/admin/exam-parts';
 import type { ExaminerChoice } from '@/lib/admin/examiners';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /** Puts a colleague on a sitting (0039): who, and what they do. The licensed for that day come first. */
 export async function ExaminerForm({ sittingId, choices }: { sittingId: string; choices: ExaminerChoice[] }) {
@@ -47,9 +48,9 @@ export async function ExaminerForm({ sittingId, choices }: { sittingId: string; 
           ))}
         </Select>
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Eintragen', 'Add')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

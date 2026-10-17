@@ -489,6 +489,23 @@ stays a list. And every destructive action goes through **`ConfirmSubmit`**: a
 button inside the form that opens a confirmation, and on confirm submits the
 form with a hidden `confirmed=1` that the server action checks — a request that
 skipped the dialog is refused, so the confirmation is not only visual.
+**Dialogs (2026-10-17).** One shape for every popup. A form dialog has a head
+(title, an optional line on what it is about, an optional subject icon on its
+tint), the form, and the form's **`DialogFooter`**: Cancel and the one primary
+action on the right, a quiet secondary action (`start`, e.g. „Zurück" in the
+booking wizard) on the left. The footer is pinned to the foot of the window
+while a long form scrolls, and while the form is being sent its submit button
+shows a spinner and takes no second click (`useFormStatus`). Outside a dialog
+the same footer is a plain right-aligned row. A confirmation names the
+consequence beside a red or ink icon; Cancel has the focus, and the final
+destructive button is solid red. Widths: `sm` 440 px (confirmations), `md` 512
+(a handful of fields), `lg` 672 (two columns, the wizard). The panel lets what
+opens inside it overflow — a date picker's calendar is never cut off — and the
+window scrolls, not the panel. A date field opens its calendar on a click or ↓,
+not on focus, so a dialog that focuses its first field does not cover the form;
+typing a date (`17.10.`) works as before. Triggers carry `data-dialog` (`form`
+or `confirm`), which the popup inventory script uses to open every popup.
+
 Deletes are soft where history matters (`people.deleted_at`,
 `bookings.deleted_at`; a room is removed outright because nothing refers to it
 once its cohorts are moved; a payment is voided, never deleted). Today: people

@@ -127,7 +127,8 @@ export async function createPersonAction(formData: FormData): Promise<void> {
   if (typeof input === 'string') redirect(`/admin/people?error=${encodeURIComponent(input)}`);
   const id = await createPersonByStaff(input, actor);
   revalidatePath('/admin/people', 'layout');
-  redirect(`/admin/people/${id}`);
+  // „Neu → Buchung" (a walk-in): straight on into the booking wizard.
+  redirect(formData.get('then') === 'book' ? `/admin/people/${id}?book=1` : `/admin/people/${id}`);
 }
 
 export async function updatePersonAction(formData: FormData): Promise<void> {

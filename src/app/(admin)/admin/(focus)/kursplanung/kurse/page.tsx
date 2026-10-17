@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
@@ -109,7 +109,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                         ))}
                       </select>
                     </div>
-                    <div className={ui.foot}><button type="submit" className={ui.primary}>{t('Anlegen', 'Add')}</button></div>
+                    <DialogFooter><button type="submit" className={ui.primary}>{t('Anlegen', 'Add')}</button></DialogFooter>
                   </form>
                 </FormDialog>
               ) : null}

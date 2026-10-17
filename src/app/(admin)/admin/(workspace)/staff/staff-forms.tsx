@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 import {
   addAbsenceAction,
   createStaffAction,
@@ -11,6 +9,7 @@ import {
   saveTeachingAction,
 } from './actions';
 import { DateFormField } from '@/components/admin/date-picker';
+import { DialogFooter } from '@/components/admin/dialogs';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import type { StaffLicence } from '@/lib/admin/examiners';
@@ -40,10 +39,6 @@ function Ticks({ name, options, checked, columns = 2 }: { name: string; options:
       ))}
     </div>
   );
-}
-
-function Foot({ children }: { children: ReactNode }) {
-  return <div className="flex justify-end pt-1">{children}</div>;
 }
 
 export async function NewStaffForm({ roles, preset = [], returnTo }: { roles: StaffRole[]; preset?: string[]; returnTo?: string }) {
@@ -92,9 +87,9 @@ export async function NewStaffForm({ roles, preset = [], returnTo }: { roles: St
           </div>
         </div>
       </OptionalSection>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Anlegen', 'Create')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -105,9 +100,9 @@ export async function RolesForm({ staffId, roles, checked }: { staffId: string; 
     <form action={saveStaffRolesAction} className="space-y-4">
       <input type="hidden" name="staffId" value={staffId} />
       <Ticks name="roles" options={roles.map((r) => ({ value: r.code, label: pick(lang, r.name) }))} checked={checked} columns={3} />
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -145,9 +140,9 @@ export async function TeachingForm({ member }: { member: StaffDetail }) {
       <Field label={t('Notiz', 'Note')} htmlFor="teach-note">
         <Textarea id="teach-note" name="note" rows={2} maxLength={200} defaultValue={member.teaching.note ?? ''} />
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -174,9 +169,9 @@ export async function AbsenceForm({ staffId }: { staffId: string }) {
           ))}
         </Select>
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Eintragen', 'Add')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -215,9 +210,9 @@ export async function ContractForm({ staffId, contract }: { staffId: string; con
       <Field label={t('Notiz', 'Note')} htmlFor="contract-note">
         <Textarea id="contract-note" name="note" rows={2} maxLength={300} defaultValue={contract?.note ?? ''} />
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{contract ? t('Speichern', 'Save') : t('Vertrag hinzufügen', 'Add contract')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -236,9 +231,9 @@ export async function HrNumbersForm({ staffId, numbers }: { staffId: string; num
       <Field label={t('Krankenversichertennummer', 'Health insurance number')} htmlFor="hr-health">
         <Input id="hr-health" name="healthNumber" maxLength={40} autoComplete="off" className="font-mono" defaultValue={numbers.healthNumber ?? ''} />
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -258,9 +253,9 @@ export async function AccountForm({ staffId, current, accounts }: { staffId: str
           ))}
         </Select>
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }
@@ -294,9 +289,9 @@ export async function LicenceForm({ staffId, exams, licence }: { staffId: string
       <Field label={t('Notiz', 'Note')} htmlFor="licence-note">
         <Textarea id="licence-note" name="note" rows={2} maxLength={300} defaultValue={licence?.note ?? ''} />
       </Field>
-      <Foot>
+      <DialogFooter>
         <Button type="submit">{licence ? t('Speichern', 'Save') : t('Lizenz eintragen', 'Add licence')}</Button>
-      </Foot>
+      </DialogFooter>
     </form>
   );
 }

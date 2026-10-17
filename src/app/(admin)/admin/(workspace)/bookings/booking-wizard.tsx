@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from 'react';
 
+import { DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Button, Field, Input, Select, Textarea, TINTS } from '@/components/admin/ui';
 import {
@@ -781,10 +782,13 @@ export function BookingWizard({
             </p>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
-            <Button type="button" variant="ghost" onClick={() => go(-1)}>
-              {t('Zurück', 'Back')}
-            </Button>
+          <DialogFooter
+            start={
+              <Button type="button" variant="ghost" onClick={() => go(-1)}>
+                {t('Zurück', 'Back')}
+              </Button>
+            }
+          >
             {bzFull.length ? (
               <Button type="submit" variant="secondary">
                 {t('Trotzdem buchen', 'Book anyway')}
@@ -813,17 +817,22 @@ export function BookingWizard({
             ) : (
               <Button type="submit">{t('Buchung anlegen', 'Create booking')}</Button>
             )}
-          </div>
+          </DialogFooter>
         </form>
       ) : (
-        <div className="flex items-center justify-between gap-3 border-t border-ws-line-soft pt-4">
-          <Button type="button" variant="ghost" onClick={() => go(-1)} disabled={index === 0}>
-            {t('Zurück', 'Back')}
-          </Button>
+        <DialogFooter
+          start={
+            index > 0 ? (
+              <Button type="button" variant="ghost" onClick={() => go(-1)}>
+                {t('Zurück', 'Back')}
+              </Button>
+            ) : null
+          }
+        >
           <Button type="button" onClick={() => go(1)} disabled={!canAdvance}>
             {t('Weiter', 'Continue')}
           </Button>
-        </div>
+        </DialogFooter>
       )}
     </div>
   );

@@ -65,10 +65,13 @@ function DialogContent({
   showCloseButton = true,
   closeLabel = 'Close',
   brandStripe = false,
+  overlayClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   closeLabel?: string;
+  /** The workspace's lighter veil; the site keeps its own. */
+  overlayClassName?: string;
   /**
    * The logo's red, blue and yellow along the top edge. For the public popups
    * in which CASA speaks to one visitor (and the new-website notice); cards keep
@@ -78,7 +81,7 @@ function DialogContent({
 }) {
   return (
     <DialogPrimitive.Portal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       {/*
         The positioner scrolls, not the panel, so a tall modal on a short screen
         can be scrolled past its own bottom edge on every browser. Centring with

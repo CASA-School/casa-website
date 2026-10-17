@@ -10,7 +10,7 @@ import { ExaminerForm } from '../examiner-form';
 import { SittingForm } from '../sitting-form';
 import { RecordFoot } from '../../../bookings/record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
-import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { Badge, Button, Card, Field, Input, RecordHeader } from '@/components/admin/ui';
@@ -481,9 +481,9 @@ function CandidateRow({
                   <Field label={t('Abgeholt von (mit Vollmacht)', 'Collected by (with authorisation)')} htmlFor={`collected-${c.bookingId}`}>
                     <Input id={`collected-${c.bookingId}`} name="note" maxLength={300} />
                   </Field>
-                  <div className="flex justify-end">
+                  <DialogFooter>
                     <Button type="submit">{t('Als abgeholt eintragen', 'Mark as collected')}</Button>
-                  </div>
+                  </DialogFooter>
                 </form>
               </FormDialog>
             ) : null}

@@ -95,11 +95,15 @@ export default async function PeoplePage({
           canEdit ? (
             <FormDialog
               trigger={t('Person hinzufügen', 'Add person')}
-              title={t('Neue Person', 'Add a person')}
+              title={params.then === 'book' ? t('Neue Buchung: wer?', 'New booking: who?') : t('Neue Person', 'Add a person')}
               triggerVariant="primary"
               defaultOpen={params.new === '1'}
             >
-              <PersonForm countries={countries} />
+              {params.then === 'book' ? (
+                <PersonForm countries={countries} hidden={{ then: 'book' }} submitLabel={t('Weiter zur Buchung', 'On to the booking')} />
+              ) : (
+                <PersonForm countries={countries} />
+              )}
             </FormDialog>
           ) : null
         }

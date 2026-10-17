@@ -2,6 +2,7 @@ import { createCourseAction, updateCourseAction } from './actions';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import type { CourseForEdit } from '@/lib/admin/courses';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * A course of a start (0041), in a dialog: its places, its room and whether it is offered; a module, an
@@ -66,9 +67,9 @@ export async function CourseForm({ course, rooms, returnTo }: { course: CourseFo
       <input type="hidden" name="courseId" value={course.id} />
       <input type="hidden" name="returnTo" value={returnTo} />
       <CourseFields course={course} rooms={rooms} named={!course.levelCode} />
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -105,9 +106,9 @@ export async function NewCourseForm({
         </Select>
       </Field>
       <CourseFields rooms={rooms} named={named} />
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Kurs anlegen', 'Add course')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

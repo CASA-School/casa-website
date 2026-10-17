@@ -2352,6 +2352,34 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 }
 
 /*
+ * A form's footer while it is being sent (`DialogFooter`, src/components/admin/dialogs.tsx): its
+ * submit button turns into a spinner beside its label and takes no second click.
+ */
+.ws-dialog-foot[data-pending] button[type='submit'] {
+  pointer-events: none;
+  opacity: 0.85;
+}
+.ws-dialog-foot[data-pending] button[type='submit']::before {
+  content: '';
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: ws-spin 700ms linear infinite;
+}
+@keyframes ws-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-dialog-foot[data-pending] button[type='submit']::before {
+    animation-duration: 2s;
+  }
+}
+
+/*
  * The module's own tokens — on the body, because the teacher dialog is
  * portalled there and must read the same as the board. Unused elsewhere.
  */

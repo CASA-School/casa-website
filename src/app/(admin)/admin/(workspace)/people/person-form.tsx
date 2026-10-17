@@ -5,6 +5,7 @@ import { addBankAccountAction, createPersonAction, saveAddressAction, updateBank
 import { toDateInputValue, todayInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * One form for creating and editing a person, rendered inside a dialog.
@@ -21,9 +22,12 @@ export async function PersonForm({
   countries,
   action,
   hidden,
+  submitLabel,
 }: {
   person?: PersonDetail;
   countries: Country[];
+  /** What the button says when the form leads on to something else („Weiter zur Buchung"). */
+  submitLabel?: string;
   /** Another module's action for the same fields — a colleague's person, on the staff page — and what it needs besides. */
   action?: (formData: FormData) => void | Promise<void>;
   hidden?: Record<string, string>;
@@ -165,9 +169,9 @@ export async function PersonForm({
         </fieldset>
       ) : null}
 
-      <div className="flex justify-end pt-1">
-        <Button type="submit">{editing ? t('Speichern', 'Save') : t('Person hinzufügen', 'Add person')}</Button>
-      </div>
+      <DialogFooter>
+        <Button type="submit">{submitLabel ?? (editing ? t('Speichern', 'Save') : t('Person hinzufügen', 'Add person'))}</Button>
+      </DialogFooter>
     </form>
   );
 }
@@ -214,9 +218,9 @@ export async function AddressForm({
           ))}
         </datalist>
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -266,9 +270,9 @@ export async function BankAccountForm({
       <Field label={t('Notiz', 'Note')} htmlFor="bank-note">
         <Textarea id="bank-note" name="note" rows={2} maxLength={200} defaultValue={account?.note ?? ''} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{account ? t('Speichern', 'Save') : t('Konto hinzufügen', 'Add account')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

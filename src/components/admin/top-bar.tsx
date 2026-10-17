@@ -37,6 +37,10 @@ export async function TopBar({
   const { t } = await getI18n();
 
   const creates: CreateItem[] = [
+    // A walk-in: the person, then straight on into the booking wizard.
+    ...(canAccess(user, 'people', 'edit') && canAccess(user, 'bookings', 'edit')
+      ? [{ href: '/admin/people?new=1&then=book', label: t('Buchung', 'Booking'), icon: Icon.bookings }]
+      : []),
     ...(canAccess(user, 'offers', 'edit') ? [{ href: '/admin/offers/new', label: t('Angebot', 'Offer'), icon: Icon.offers }] : []),
     ...(canAccess(user, 'people', 'edit') ? [{ href: '/admin/people?new=1', label: t('Person', 'Person'), icon: Icon.people }] : []),
     ...(canAccess(user, 'catalogue') && canAccess(user, 'rooms', 'edit')

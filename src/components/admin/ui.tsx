@@ -96,15 +96,16 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className={className}>
+    <div className={cn('flex flex-col', className)}>
       <label
         htmlFor={htmlFor}
-        className="mb-1.5 flex items-baseline justify-between gap-3 text-xs font-bold text-[var(--casa-muted)]"
+        className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-xs font-bold text-[var(--casa-muted)]"
       >
         <span>{label}</span>
         {hint ? <span className="font-normal text-[var(--casa-text-subtle)]">{hint}</span> : null}
       </label>
-      {children}
+      {/* At the foot: in a row of fields whose labels wrap differently, the controls still line up. */}
+      <div className="mt-auto">{children}</div>
     </div>
   );
 }
@@ -117,6 +118,8 @@ const buttonVariants = {
   ghost: 'text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
   danger:
     'border border-ws-line-firm bg-white text-[var(--casa-danger-text)] hover:border-[var(--casa-danger-text)]/50 hover:bg-[var(--casa-danger-text)]/6',
+  /** The last step of a destructive action, in its confirmation. */
+  destructive: 'bg-[#c4282f] text-white hover:bg-[#a51f26] shadow-[0_1px_2px_rgba(127,29,29,0.25)]',
 } as const;
 
 const buttonSizes = {

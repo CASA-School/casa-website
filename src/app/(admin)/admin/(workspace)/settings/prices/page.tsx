@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { DateFormField } from '@/components/admin/date-picker';
-import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Status } from '@/components/admin/list';
 import { Button, Card, Cell, EmptyState, Field, Input, PageHeader, Select, TableRow, type Tint } from '@/components/admin/ui';
@@ -88,9 +88,9 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
                 <Field label={t('Gültig ab', 'In force from')} htmlFor="prices-from">
                   <DateFormField id="prices-from" name="validFrom" defaultValue={nextStart} min={today} required />
                 </Field>
-                <div className="flex justify-end">
+                <DialogFooter>
                   <Button type="submit">{t('Liste vorbereiten', 'Prepare the list')}</Button>
-                </div>
+                </DialogFooter>
               </form>
             </FormDialog>
           ) : null
@@ -379,9 +379,9 @@ function PriceCard({
                   );
                 })}
               </div>
-              <div className="flex justify-end">
+              <DialogFooter>
                 <Button type="submit">{t('Speichern', 'Save')}</Button>
-              </div>
+              </DialogFooter>
             </form>
           </FormDialog>
         ) : null

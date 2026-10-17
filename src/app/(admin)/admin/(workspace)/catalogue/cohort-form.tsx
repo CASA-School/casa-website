@@ -7,6 +7,7 @@ import type { Room } from '@/lib/admin/rooms';
 import { createCohortAction } from '../settings/rooms/actions';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { DateFormField } from '@/components/admin/date-picker';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /** The value each day posts, as stored in the schedule, and its label in German. */
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
@@ -141,9 +142,9 @@ export async function CohortForm({
         </Field>
       </OptionalSection>
 
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Termin planen', 'Schedule cohort')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

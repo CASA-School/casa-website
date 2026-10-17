@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { DateField } from '@/components/admin/date-picker';
 import { useWsLang } from '@/components/admin/lang';
 import { Button, Field, Input, Select } from '@/components/admin/ui';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 type ExamDefaults = { id: string; name: string; startTime: string; endTime: string; capacity: number };
 
@@ -106,11 +107,11 @@ export function SittingForm({
         <input type="checkbox" name="published" defaultChecked={initial ? initial.published : true} className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]" />
         {t('Auf der Website zur Anmeldung anbieten', 'Offer it for registration on the website')}
       </label>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit" disabled={!day || !examTypeId}>
           {sittingId ? t('Speichern', 'Save') : t('Termin anlegen', 'Create sitting')}
         </Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

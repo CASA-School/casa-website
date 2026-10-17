@@ -2,8 +2,9 @@
 
 import { useState, type ReactNode } from 'react';
 
+import { DIALOG_OVERLAY, DialogHead, dialogPanel } from '@/components/admin/dialogs';
 import { useWsLang } from '@/components/admin/lang';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 /**
  * A person's dialog, opened by their whole row (docs/ADMIN_WORKSPACE.md
@@ -34,14 +35,9 @@ export function RowDialog({
       >
         <span className="sr-only">{label}</span>
       </button>
-      <DialogContent className="casa-ws-dialog max-w-2xl rounded-3xl p-6 sm:rounded-3xl" closeLabel={t('Schließen', 'Close')}>
-        <DialogTitle className="text-lg font-extrabold">{title}</DialogTitle>
-        {description ? (
-          <DialogDescription className="mt-1 text-sm">{description}</DialogDescription>
-        ) : (
-          <DialogDescription className="sr-only">{title}</DialogDescription>
-        )}
-        <div className="mt-5">{children}</div>
+      <DialogContent className={dialogPanel('lg')} overlayClassName={DIALOG_OVERLAY} closeLabel={t('Schließen', 'Close')}>
+        <DialogHead title={title} description={description} />
+        <div className="px-6 pt-5 pb-6">{children}</div>
       </DialogContent>
     </Dialog>
   );

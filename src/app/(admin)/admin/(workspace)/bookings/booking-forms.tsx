@@ -32,6 +32,7 @@ import {
   setPeriodLevelAction,
   updateBookingAction,
 } from './actions';
+import { DialogFooter } from '@/components/admin/dialogs';
 
 /**
  * The booking forms, rendered inside dialogs.
@@ -126,9 +127,9 @@ export async function EditBookingForm({
       <Field label={t('Notizen', 'Notes')} htmlFor="edit-notes">
         <Textarea id="edit-notes" name="notes" rows={3} defaultValue={booking.notes ?? ''} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -203,9 +204,9 @@ export async function ExtendBookingForm({
           </Field>
         </div>
       </More>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Verlängern', 'Extend')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -242,9 +243,9 @@ export async function ChargeForm({ bookingId }: { bookingId: string }) {
           className="text-right"
         />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Posten hinzufügen', 'Add line')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -301,9 +302,9 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
           </Field>
         </div>
       </More>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Zahlung erfassen', 'Record payment')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -350,9 +351,9 @@ export async function CarryOverForm({
       <Field label={t('Betrag', 'Amount')} htmlFor="carry-amount">
         <Input id="carry-amount" name="amount" inputMode="decimal" required className="text-right" defaultValue={credit.toFixed(2)} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Guthaben übertragen', 'Carry the credit over')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -380,9 +381,9 @@ export async function ObservationForm({ bookingId }: { bookingId: string }) {
       <Field label={t('Notiz', 'Note')} hint={t('Bei „Sonstiges" nötig', 'Needed for “Other”')} htmlFor="observation-note">
         <Textarea id="observation-note" name="note" rows={3} maxLength={300} />
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Unter Beobachtung stellen', 'Put under observation')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -404,9 +405,9 @@ export async function PeriodLevelForm({ bookingId, periodId, levelCode, levels }
           ))}
         </Select>
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
@@ -445,9 +446,9 @@ export async function ExamChangeForm({ booking, sittings }: { booking: BookingDe
           ))}
         </Select>
       </Field>
-      <div className="flex justify-end pt-1">
+      <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }
