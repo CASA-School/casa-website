@@ -254,7 +254,7 @@ export default async function PersonPage({
             detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
           />
         ),
-        // Nothing charged yet (a booking brought across from SchoolMan, whose money stays there) is not „paid".
+        // Nothing charged is not „paid".
         amount:
           b.status === 'cancelled' || (b.charged <= 0 && balance <= 0) ? null : balance > 0 ? (
             <span className="text-right">

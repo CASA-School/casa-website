@@ -23,6 +23,8 @@ export const group = (over: Partial<CourseGroup> & Pick<CourseGroup, 'id'>): Cou
   phase: '2',
   groupIndex: 1,
   registrations: 12,
+  live: false,
+  typedRegistrations: 12,
   teacherFirst: null,
   teacherSecond: null,
   roomId: null,

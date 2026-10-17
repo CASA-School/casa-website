@@ -100,6 +100,7 @@ type GroupRow = {
   phase: '1' | '2';
   group_index: number;
   registrations: number;
+  live: number | null;
   teacher_first: string | null;
   teacher_second: string | null;
   room_id: string | null;
@@ -110,13 +111,34 @@ type GroupRow = {
 
 export async function listGroups(month: string): Promise<CourseGroup[]> {
   const rows = await query<GroupRow>(
-    // Each group with its course's first and last day: the board plans no day outside them.
+    // Each group with its course's first and last day: the board plans no day outside them. Its
+    // learners, live (2026-10-17, Rahman): in the planning month's busiest week, SchoolMan's for this
+    // group (0051) or the bookings brought across into it (0052), whichever is more — the one holds the
+    // other — plus, for a course of one group, the bookings made here. A group of no course keeps the
+    // number typed for it.
     `SELECT g.id, to_char(g.month, 'YYYY-MM-DD') AS month, g.shift, g.level, g.phase, g.group_index,
-            g.registrations, g.teacher_first, g.teacher_second, g.room_id, g.filemaker_course_id,
+            g.registrations, live.n AS live, g.teacher_first, g.teacher_second, g.room_id, g.filemaker_course_id,
             to_char(i.start_date, 'YYYY-MM-DD') AS course_start, to_char(i.end_date, 'YYYY-MM-DD') AS course_end
        FROM course_groups g
        LEFT JOIN courses c ON c.id = g.course_id
        LEFT JOIN course_instances i ON i.id = c.course_instance_id
+       LEFT JOIN LATERAL (
+         SELECT max(
+                  greatest(
+                    coalesce((SELECT l.learners FROM course_week_learners l
+                               WHERE l.course_id = c.id AND l.group_index = g.group_index AND l.monday = w.monday), 0),
+                    (SELECT count(DISTINCT b.id) FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+                      WHERE bp.course_id = c.id AND b.filemaker_booking_id IS NOT NULL AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+                        AND coalesce(bp.group_index, 1) = g.group_index AND bp.start_date <= w.monday + 6 AND bp.end_date >= w.monday))
+                  + CASE WHEN c.groups > 1 THEN 0 ELSE
+                      (SELECT count(DISTINCT b.id) FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+                        WHERE bp.course_id = c.id AND b.filemaker_booking_id IS NULL AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+                          AND bp.start_date <= w.monday + 6 AND bp.end_date >= w.monday)
+                    END)::int AS n
+           FROM (SELECT gs::date AS monday
+                   FROM generate_series(planning_month_start(g.month), planning_month_start((g.month + interval '1 month')::date) - 1, interval '7 days') gs) w
+          WHERE c.id IS NOT NULL
+       ) live ON true
       WHERE g.month = $1::date
       ORDER BY g.shift, g.level, g.phase, g.group_index`,
     [`${month}-01`]
@@ -131,7 +153,9 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
             level: r.level,
             phase: r.phase,
             groupIndex: r.group_index,
-            registrations: r.registrations,
+            registrations: r.live ?? r.registrations,
+            live: r.live !== null,
+            typedRegistrations: r.registrations,
             teacherFirst: r.teacher_first,
             teacherSecond: r.teacher_second,
             roomId: r.room_id,

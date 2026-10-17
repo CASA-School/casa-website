@@ -117,11 +117,9 @@ export const BOOKING_LIGHT_LABELS: Record<BookingLight, Bilingual> = {
  * The colour's word, saying what the grey is (2026-10-17: „Unklar" said nothing): „Offen" while nothing
  * has come in, „Anzahlung erhalten" once part of it has, „Ohne Kosten" while nothing is charged.
  */
-export function bookingLightLabel(b: Parameters<typeof bookingLight>[0] & { imported?: boolean }): Bilingual {
+export function bookingLightLabel(b: Parameters<typeof bookingLight>[0]): Bilingual {
   const light = bookingLight(b);
   if (light !== 'unclear') return BOOKING_LIGHT_LABELS[light];
-  // A booking brought across from SchoolMan keeps its charges and payments there (0052).
-  if (b.charged <= 0.005 && b.imported) return { de: 'Kosten in SchoolMan', en: 'Charges in SchoolMan' };
   if (b.charged <= 0.005) return { de: 'Ohne Kosten', en: 'No charges' };
   if (b.paid > 0.005) return { de: 'Anzahlung erhalten', en: 'Part paid' };
   return BOOKING_LIGHT_LABELS.unclear;
@@ -179,8 +177,6 @@ export type BookingListItem = {
   /** An exam booking (0036): the sitting and the parts sat; its name and day are the sitting's. */
   examSessionId: string | null;
   examParts: ExamParts | null;
-  /** Brought across from SchoolMan (0052): its money is SchoolMan's while bookings are made there. */
-  imported: boolean;
   /** The stay booked (0013), as codes: a list names them from `stayVocabulary()`. */
   stay: { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: Date | null; to: Date | null } | null;
 };
@@ -271,7 +267,7 @@ export type BookingDetail = BookingListItem & {
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
          coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
-         b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts, b.filemaker_booking_id IS NOT NULL AS imported,
+         b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
          (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
@@ -301,7 +297,6 @@ type ListRow = {
   observation_note: string | null;
   exam_session_id: string | null;
   exam_parts: ExamParts | null;
-  imported: boolean;
   accommodation_type_code: string | null;
   accommodation_room_type_code: string | null;
   accommodation_catering_code: string | null;
@@ -326,7 +321,6 @@ const toItem = (r: ListRow): BookingListItem => ({
   observationNote: r.observation_note,
   examSessionId: r.exam_session_id,
   examParts: r.exam_parts,
-  imported: r.imported,
   stay: r.accommodation_type_code
     ? {
         typeCode: r.accommodation_type_code,

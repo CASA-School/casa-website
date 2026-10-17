@@ -1237,8 +1237,7 @@ four weeks, on a booking not „nein"/„storno" (whole courses, so a course's n
 all they have in SchoolMan: the person (names, salutation, birth date, nationality from `Flag`'s ISO
 prefix, birth place and country, mother tongue, occupation; not the passport number), e-mail addresses
 (not the agency's), phones (not fax), the newest address abroad as home and the newest in Germany as
-local, and every booking with its periods. Not the money (SchoolMan's while it books; such a booking
-reads „Kosten in SchoolMan", never „Alles bezahlt"), not attendance (the Klassenbuch's), not exam
+local, and every booking with its periods and its money. Not attendance (the Klassenbuch's), not exam
 bookings (their own module). One transaction, counts only, nothing personal in a file.
 
 - *Matching.* A person by their SchoolMan person, then student id (`filemaker_links`, now one row per
@@ -1254,7 +1253,24 @@ bookings (their own module). One transaction, counts only, nothing personal in a
 - *Counted once.* SchoolMan's weekly counts already hold every imported booking, so a course's learners
   each week are the bookings made here plus the greater of SchoolMan's count and the imported bookings —
   in `BOOKED`, the course list, Bildungszeit; Kursplanung's „Gebucht" counts only bookings made here.
-- *Re-runs* update status, type, visa and payer, and the periods; a period SchoolMan dropped goes.
+- *Money* (Rahman, 2026-10-17: bring the money too; 0054). Each charge (`CostDetail`; a reversing line
+  stays a line below zero) with its charge type through `charge_types.filemaker_id` (Storno, 21, by
+  hand), each payment received (`PaymentIn`, the method from its label: Überweisung, Karte, bar,
+  Übertrag, Verrechnung; what it paid as its subject) and each refund to the learner (`PaymentOut`
+  „Rückzahlung Student", a payment below zero) keeps SchoolMan's number. Rent paid to hosts and agency
+  commission are not the learner's account and stay out. Sums are never carried: SchoolMan's
+  `cal_CostGross`/`cal_PaymentIn` on a booking are auto-entered at the time of writing, not live (the
+  DDR: `fieldType="Normal"`), and are stale on about one booking in twenty; the lines are what counts.
+  First run: 8,554 charges, 6,779 payments, 95 refunds; per learner 251 even, 189 owing (242,051 €,
+  much of it for courses ahead), 88 in credit (8,972 €).
+- *Re-runs* update status, type, visa and payer, the periods and the money; a period or a money line
+  SchoolMan dropped goes.
+
+**Kursplanung's learners are live** (Rahman, 2026-10-17). A board group of a course shows its course's
+learners in the planning month's busiest week — SchoolMan's for that group, or the bookings brought
+across into it if more, plus the bookings made here for a course of one group — on the board and on the
+Kurse screen, where only a group of no course still has a number to type. Until then the typed
+„Anmeldungen" were kept, being the only figure there was.
 
 First run: 528 learners, 543 e-mails, 494 phones, 523 addresses; 2,146 bookings (95 exam bookings and
 9 without a period left out), 2,151 periods, 1,069 of them on courses from before our horizon; 5 likely

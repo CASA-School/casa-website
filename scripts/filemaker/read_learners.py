@@ -6,8 +6,10 @@
 Rahman, 2026-10-17: bring some learners across to see the workspace work with real data. The sample is
 everyone in a course this week or starting one in the next four weeks — a `DateBooking` period that
 runs then, of a booking that is not „nein" or „storno" — with all they have in SchoolMan: the person,
-their e-mail addresses, phones and address, and every booking with its periods. Whole courses, so a
-course's names match its count. Not the passport number, not the money (it stays SchoolMan's), not
+their e-mail addresses, phones and address, and every booking with its periods and its money — the
+charges (`CostDetail`), the payments received (`PaymentIn`) and the refunds paid back to the learner
+(`PaymentOut`, „Rückzahlung Student"; not rent to hosts or agency commission, which are not the
+learner's account). Whole courses, so a course's names match its count. Not the passport number, not
 the attendance (the Klassenbuch's).
 
 The JSON goes to stdout and straight into the importer: no personal data is written to a file.
@@ -59,6 +61,19 @@ bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking
                                                          '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', 'TimeStampOfCreation', 'DateOfCreation') if b['__ID_Booking'].strip()}
 periods = table('DateBooking', '__ID_DateBooking', '_ID_Booking', '_ID_Course', 'ZStartDate', 'ZEndDate')
 
+
+def amount(value):
+    """`1.234,56` or `72,00` or `168` → a number; None when there is none."""
+    text = (value or '').strip().replace(' ', '').replace('€', '')
+    if not text:
+        return None
+    if ',' in text:
+        text = text.replace('.', '').replace(',', '.')
+    try:
+        return round(float(text), 2)
+    except ValueError:
+        return None
+
 # The sample: whoever sits in a course from this Monday to four weeks ahead, on a booking taken.
 chosen = set()
 for p in periods:
@@ -108,6 +123,21 @@ for bid, b in bookings.items():
     pid = first(b['_ID_Person'])
     if pid in persons:
         bookings_of[pid].append(b)
+taken = {b['__ID_Booking'].strip() for bs in bookings_of.values() for b in bs}
+
+# The money of those bookings: charges, payments received, refunds to the learner.
+charges_of = collections.defaultdict(list)
+for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailReference', 'CostDetail_1', 'CostGross', 'Unit', 'CostGrossUnit', 'TimeStampOfCreation'):
+    if first(r['_ID_Booking']) in taken:
+        charges_of[first(r['_ID_Booking'])].append(r)
+payments_of = collections.defaultdict(list)
+for r in table('PaymentIn', '__ID_PaymentIn', '_ID_Booking', 'PaymentIn', '_ID_MethodPayment', 'MethodPayment_1', 'DateOfPayment', 'CostDetailReference_1', 'TimeStampOfCreation'):
+    if first(r['_ID_Booking']) in taken:
+        payments_of[first(r['_ID_Booking'])].append(r)
+refunds_of = collections.defaultdict(list)
+for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', 'MethodPayment_1', 'DatePaymentOut', 'ZSingleDatePayment', 'TimeStampOfCreation'):
+    if first(r['_ID_Booking']) in taken and first(r['_ID_PaymentOutReference']) == '3':  # 3 Rückzahlung Student
+        refunds_of[first(r['_ID_Booking'])].append(r)
 
 out = []
 for pid, p in persons.items():
@@ -142,6 +172,16 @@ for pid, p in persons.items():
             'type': first(b['_ID_CourseTypeReference']) or None,
             'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate'])}
                         for r in periods_of[b['__ID_Booking'].strip()]],
+            'charges': [{'id': r['__ID_CostDetail'].strip(), 'ref': first(r['_ID_CostDetailReference']) or None, 'label': r['CostDetail_1'].strip() or None,
+                         'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': stamp(r['TimeStampOfCreation'])}
+                        for r in charges_of[b['__ID_Booking'].strip()]],
+            'payments': [{'id': f"PaymentIn:{r['__ID_PaymentIn'].strip()}", 'amount': amount(r['PaymentIn']), 'method': first(r['_ID_MethodPayment']) or None,
+                          'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DateOfPayment']), 'for': r['CostDetailReference_1'].strip() or None,
+                          'created': stamp(r['TimeStampOfCreation'])} for r in payments_of[b['__ID_Booking'].strip()]]
+                        # A refund paid back to the learner is money out of their account: a payment below zero.
+                        + [{'id': f"PaymentOut:{r['__ID_PaymentOut'].strip()}", 'amount': -abs(amount(r['PaymentOut']) or 0), 'method': None,
+                            'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DatePaymentOut']) or iso(r['ZSingleDatePayment']), 'for': 'Rückzahlung',
+                            'created': stamp(r['TimeStampOfCreation'])} for r in refunds_of[b['__ID_Booking'].strip()]],
         } for b in bookings_of[pid]],
     })
 
@@ -152,6 +192,11 @@ if '--stats' in sys.argv:
     print('bookings', len(all_b), '· exam', sum(b['exam'] for b in all_b), '· without a period', sum(not b['periods'] for b in all_b),
           '· enrolment', collections.Counter(b['enrolment'] for b in all_b).most_common())
     print('periods', len(all_p), '· without dates', sum(not (r['start'] and r['end']) for r in all_p), '· inverted', sum(bool(r['start'] and r['end'] and r['end'] < r['start']) for r in all_p))
+    ch = [c for b in all_b for c in b['charges']]
+    pa = [p for b in all_b for p in b['payments']]
+    print('charges', len(ch), '· without an amount', sum(c['amount'] in (None, 0) for c in ch), '· sum', round(sum(c['amount'] or 0 for c in ch), 2),
+          '· payments', len(pa), '· refunds', sum(p['id'].startswith('PaymentOut:') for p in pa), '· sum', round(sum(p['amount'] or 0 for p in pa), 2),
+          '· without a date', sum(not p['date'] for p in pa))
     print('with e-mail', sum(bool(x['emails']) for x in out), '· phone', sum(bool(x['phones']) for x in out), '· address', sum(bool(x['addresses']) for x in out),
           '· birth date', sum(bool(x['birthDate']) for x in out), '· nationality', sum(bool(x['nationality']) for x in out), '· created', sum(bool(x['created']) for x in out))
     sys.exit(0)

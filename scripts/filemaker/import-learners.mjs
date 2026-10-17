@@ -20,6 +20,11 @@
  *   group's number, which names its group, 0053); a period of a course we do not have keeps its dates
  *   without one. Its step is the
  *   course's, the `.2` in an intensive course's second half (from its fifth week; closures ignored).
+ * - Its money (Rahman, 2026-10-17: bring the money too), each line keeping SchoolMan's number (0054):
+ *   the charges (`CostDetail`; a reversing line stays a line below zero) with their charge type, matched
+ *   on `charge_types.filemaker_id`; the payments received (`PaymentIn`) with their method and what they
+ *   paid; a refund to the learner (`PaymentOut`) as a payment below zero. A re-run updates them, and a
+ *   line SchoolMan no longer has goes. Sums are never carried — the balance is worked out from the lines.
  * - Exam bookings (an exam sitting is their own module) and bookings without a period are left out.
  */
 import { getCode } from 'country-list';
@@ -37,6 +42,12 @@ const EMAIL_KIND = { 1: 'personal', 2: 'work', 3: 'personal' };
 const EMAIL_SKIP = new Set(['4']); // Agentur: the agency's address, not the learner's
 const PHONE_KIND = { 1: 'home', 2: 'work', 3: 'mobile', 5: 'mobile' };
 const PHONE_SKIP = new Set(['7']); // Fax
+// A charge type's line kind; any other accommodation type is accommodation, the rest „other".
+const KIND = { tuition: 'tuition', enrolment_fee: 'enrolment_fee', books: 'books', exam_fee: 'exam_fee', deposit: 'deposit', discount: 'discount', cancellation: 'cancellation' };
+// SchoolMan's charge kinds our charge types carry no number for.
+const CHARGE_EXTRA = { 21: 'cancellation' };
+const METHOD_BY_LABEL = { überweisung: 'transfer', karte: 'card', bar: 'cash', übertrag: 'carryover', verrechnung: 'offset' };
+const METHOD_BY_ID = { 1: 'card', 2: 'cash', 5: 'transfer', 7: 'carryover' };
 
 const today = new Date().toISOString().slice(0, 10);
 const normalizeEmail = (v) => v.normalize('NFKC').trim().toLowerCase();
@@ -67,12 +78,18 @@ const count = {
   learners: learners.length, peopleNew: 0, peopleKnown: 0, emails: 0, phones: 0, addresses: 0,
   bookingsNew: 0, bookingsUpdated: 0, periodsNew: 0, periodsUpdated: 0, periodsRemoved: 0,
   skippedExam: 0, skippedNoPeriod: 0, periodsNoCourse: 0, nationalityUnmatched: 0, twins: 0,
+  charges: 0, chargesRemoved: 0, payments: 0, refunds: 0, paymentsRemoved: 0, zero: 0,
 };
 
 try {
   await client.query('BEGIN');
   const valid = new Set((await client.query(`SELECT code FROM countries`)).rows.map((r) => r.code.trim()));
   const types = new Map((await client.query(`SELECT id, filemaker_id::text AS fm FROM course_types WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.id]));
+  const chargeTypes = await client.query(`SELECT code, category_code, name_de, filemaker_id::int::text AS fm FROM charge_types`);
+  const chargeType = new Map(chargeTypes.rows.filter((r) => r.fm).map((r) => [r.fm, r]));
+  const chargeByCode = new Map(chargeTypes.rows.map((r) => [r.code, r]));
+  const typeOfCharge = (ref) => chargeType.get(ref ?? '') ?? chargeByCode.get(CHARGE_EXTRA[ref] ?? '') ?? null;
+  const method = (p) => METHOD_BY_LABEL[(p.methodLabel ?? '').trim().toLowerCase()] ?? METHOD_BY_ID[p.method] ?? 'transfer';
   // SchoolMan's course numbers → ours: a course's own number, or one of its groups' (0046).
   const courses = new Map();
   for (const r of (
@@ -276,6 +293,56 @@ try {
         [bookingId, seen]
       );
       count.periodsRemoved += gone.rowCount;
+
+      // Its money, line by line.
+      const charges = [];
+      for (const c of b.charges ?? []) {
+        if (!c.amount) {
+          count.zero++;
+          continue;
+        }
+        const type = typeOfCharge(c.ref);
+        const kind = (type && KIND[type.code]) ?? (type?.category_code === 'accommodation' || /miete|unterkunft/i.test(c.label ?? '') ? 'accommodation' : 'other');
+        charges.push(c.id);
+        await client.query(
+          `INSERT INTO booking_charges (booking_id, kind, description, amount, charge_type_code, quantity, unit_amount, filemaker_cost_detail_id, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+           ON CONFLICT (filemaker_cost_detail_id) WHERE filemaker_cost_detail_id IS NOT NULL DO UPDATE
+             SET booking_id = EXCLUDED.booking_id, kind = EXCLUDED.kind, description = EXCLUDED.description, amount = EXCLUDED.amount,
+                 charge_type_code = EXCLUDED.charge_type_code, quantity = EXCLUDED.quantity, unit_amount = EXCLUDED.unit_amount`,
+          [bookingId, kind, c.label ?? type?.name_de ?? 'SchoolMan', c.amount, type?.code ?? null, c.units && c.units > 0 ? c.units : 1, c.unitAmount, c.id, c.created]
+        );
+        count.charges++;
+      }
+      count.chargesRemoved += (
+        await client.query(
+          `DELETE FROM booking_charges WHERE booking_id = $1 AND filemaker_cost_detail_id IS NOT NULL AND NOT (filemaker_cost_detail_id = ANY($2::text[]))`,
+          [bookingId, charges]
+        )
+      ).rowCount;
+      const payments = [];
+      for (const p of b.payments ?? []) {
+        if (!p.amount) {
+          count.zero++;
+          continue;
+        }
+        payments.push(p.id);
+        await client.query(
+          `INSERT INTO payments (booking_id, amount, method, received_at, subject, filemaker_payment_id, created_at)
+           VALUES ($1, $2, $3, coalesce($4::date, ($6::timestamp)::date, current_date), $5, $7, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+           ON CONFLICT (filemaker_payment_id) WHERE filemaker_payment_id IS NOT NULL DO UPDATE
+             SET booking_id = EXCLUDED.booking_id, amount = EXCLUDED.amount, method = EXCLUDED.method, received_at = EXCLUDED.received_at, subject = EXCLUDED.subject`,
+          [bookingId, p.amount, method(p), p.date, p.for ?? 'Zahlung', p.created, p.id]
+        );
+        if (p.amount < 0 && p.id.startsWith('PaymentOut:')) count.refunds++;
+        else count.payments++;
+      }
+      count.paymentsRemoved += (
+        await client.query(
+          `DELETE FROM payments WHERE booking_id = $1 AND filemaker_payment_id IS NOT NULL AND NOT (filemaker_payment_id = ANY($2::text[]))`,
+          [bookingId, payments]
+        )
+      ).rowCount;
     }
   }
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
@@ -291,5 +358,7 @@ console.log(
   `${count.learners} learners read: ${count.peopleNew} new, ${count.peopleKnown} known · ${count.emails} e-mail, ${count.phones} phones, ${count.addresses} addresses\n` +
     `bookings ${count.bookingsNew} new, ${count.bookingsUpdated} updated · periods ${count.periodsNew} new, ${count.periodsUpdated} updated, ${count.periodsRemoved} removed\n` +
     `left out: ${count.skippedExam} exam bookings, ${count.skippedNoPeriod} without a period · ${count.periodsNoCourse} periods of a course not here · ` +
-    `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged`
+    `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged\n` +
+    `money: ${count.charges} charges, ${count.payments} payments, ${count.refunds} refunds · ${count.zero} lines of no amount left out · ` +
+    `${count.chargesRemoved} charges and ${count.paymentsRemoved} payments no longer in SchoolMan removed`
 );

@@ -146,7 +146,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                           <td colSpan={6}>
                             <span className={ui.lv} style={levelStyle(level)}>{level}.{phase}</span>
                             <span className={ui.meta}>
-                              <span>{t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
+                              <span>{lg.every((g) => g.live) ? t('Teilnehmende', 'Learners') : t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
                               {booked ? <span>{t('Gebucht', 'Booked')} <b>{booked}</b></span> : null}
                               <span>{t('Gruppen', 'Groups')} <b>{lg.length}</b></span>
                               {suggest !== lg.length ? <span>{t('Vorschlag', 'Suggested')} <b>{suggest}</b></span> : null}
@@ -182,7 +182,17 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                 <span className={ui.name}>{g.level}.{g.phase}{lg.length > 1 ? <small>{t('Gruppe', 'Group')} {g.groupIndex}</small> : null}</span>
                               </td>
                               <td className={ui.right}>
-                                {canWrite ? <input form={fid} name="registrations" type="number" min={0} max={999} defaultValue={g.registrations} className={`${ui.dashed} ${ui.dashedNum}`} aria-label={t('Anmeldungen', 'Registrations')} /> : <span className={ui.num}>{g.registrations}</span>}
+                                {/* A group of a course reads its learners live; only one of no course has a number typed. */}
+                                {g.live ? (
+                                  <>
+                                    {canWrite ? <input form={fid} type="hidden" name="registrations" value={g.typedRegistrations} /> : null}
+                                    <span className={ui.num}>{g.registrations}</span>
+                                  </>
+                                ) : canWrite ? (
+                                  <input form={fid} name="registrations" type="number" min={0} max={999} defaultValue={g.registrations} className={`${ui.dashed} ${ui.dashedNum}`} aria-label={t('Anmeldungen', 'Registrations')} />
+                                ) : (
+                                  <span className={ui.num}>{g.registrations}</span>
+                                )}
                               </td>
                               <td>{canWrite ? <select form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g)}</select> : name(g.teacherFirst)}</td>
                               <td>{canWrite ? <select form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g)}</select> : name(g.teacherSecond)}</td>

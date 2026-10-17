@@ -362,6 +362,7 @@ erDiagram
   BOOKING_CHARGES {
     uuid id PK
     uuid booking_id FK
+    text filemaker_cost_detail_id "SchoolMan's CostDetail (0054)"
     text kind
     text description
     numeric amount
@@ -370,6 +371,7 @@ erDiagram
   PAYMENTS {
     uuid id PK
     uuid booking_id FK
+    text filemaker_payment_id "SchoolMan's PaymentIn or PaymentOut (0054)"
     numeric amount
     text method
     date received_at

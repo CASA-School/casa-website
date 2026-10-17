@@ -100,7 +100,12 @@ export type CourseGroup = {
   /** '1' starts this month, '2' is the course's second month. */
   phase: '1' | '2';
   groupIndex: number;
+  /** Its learners: live from its course when it has one (`live`), else the number typed on the Kurse screen. */
   registrations: number;
+  /** Whether `registrations` is its course's learners, read (2026-10-17, Rahman: live counts on the board). */
+  live: boolean;
+  /** The number typed on the Kurse screen, kept for a group of no course. */
+  typedRegistrations: number;
   teacherFirst: string | null;
   teacherSecond: string | null;
   roomId: string | null;
