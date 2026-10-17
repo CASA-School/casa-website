@@ -40,8 +40,11 @@ system in the end, like the rest of SchoolMan — one module at a time.
 
 ## For the bridge
 
-Nothing yet: working time is one of the later modules, and the Klassenbuch already reads and writes
-the teachers' side of it. Teachers' names and absences for planning are already the workspace's own.
+The active staff come across by hand, read-only (2026-10-17): `scripts/filemaker/read_staff.py` piped
+into `import-staff.mjs` — person, contact, address, HR numbers, bank accounts, `Purview` roles,
+`DateTargetWorkTime` contract periods and `DateValidity` licences (docs/ADMIN_WORKSPACE.md §Staff).
+Working time is one of the later modules, and the Klassenbuch already reads and writes the teachers'
+side of it.
 
 ## Open questions
 

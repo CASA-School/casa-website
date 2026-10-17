@@ -83,7 +83,9 @@ edited here (Details) or on their page (Unterricht); their name, contact, contra
 on the register. „Lehrkraft anlegen" on Lehrkräfte creates the colleague with the role ticked and
 comes back with their Details open (needs `staff` at `edit` as well). A name on Lehrkräfte opens the
 colleague's page for those who hold `staff`. `scripts/kursplanung/import-bridge.mjs` writes a person,
-a staff row, the role and the contract for a teacher it does not know.
+a staff row, the role and the contract for a teacher it does not know. SchoolMan's staff import
+(2026-10-17) brought five teachers the board had not had; they start with the default rules (morning,
+five days, no levels) until the planners set theirs.
 
 ## Course starts (2026-10-17)
 

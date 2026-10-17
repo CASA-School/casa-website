@@ -1310,11 +1310,31 @@ given one on Zugänge (finance gets `staff_private`). Linking a workspace accoun
 also needs `team` at `edit`. Examiners on a sitting are the catalogue's
 (`catalogue` at `edit`).
 
+**From SchoolMan (2026-10-17).** Rahman: the colleagues SchoolMan marks as
+active staff, with everything, the HR part restricted.
+`python3 -I scripts/filemaker/read_staff.py | node scripts/filemaker/import-staff.mjs`
+reads them read-only through FileMaker Pro on the office Mac and writes them in
+one transaction; the JSON goes through the pipe, never to a file, and both print
+counts only (`--stats`, `--dry-run`). It matches on SchoolMan's staff number,
+then its person, so it can run again without twins. Person, salutation, birth
+date and place; e-mails, phones and home address (SchoolMan marks no main one:
+the work address and the mobile first); tax, pension and health-insurance
+numbers and bank accounts; roles from `Purview` that have not ended, Unterricht
+for an active teacher and Verwaltung for an office colleague with no task named;
+contract periods from `DateTargetWorkTime`, adjoining identical periods merged
+(252 rows became 127); licences for the two telc exams the catalogue has
+(TestDaF, B1, Medizin/Pflege and the BRF C1–C2 licences have no exam here). What
+the workspace already has wins: a field is only filled where empty, contracts
+only come in for a colleague without dated ones, and nobody marked as having
+left is made active again — SchoolMan's flag is not always kept up (Werner is
+still active there). Six colleagues have no person in SchoolMan; their names come
+from its search fields, which hold the name twice in two orders. First run,
+local database: 56 colleagues, 38 of them Kursplanung's teachers, 18 new.
+
 **Not now:** time sheets, holiday entitlement and pay — the teachers' side is
 the Klassenbuch's, the rest finance's (DATEV), and SchoolMan calculates no pay
 either; the contracts' weekly hours are the base for it later. Which course
-types a teacher may teach. A read-only import of SchoolMan's staff, roles,
-contracts and licences.
+types a teacher may teach.
 
 ## Copy on screens — labels, not explanations
 
