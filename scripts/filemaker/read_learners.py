@@ -14,7 +14,11 @@ students, including the comments about them): the notes — a booking's final no
 period's comment, the `Comment` table, the placement tests (`TestStudent`) and learning agreements
 (`Agreement`) with their texts —, the work log (`WorkFlow`), the letters with their text (`Letter`), the
 comments on payments and charges, and their bank accounts. Whole courses, so a course's names match its
-count. Not the passport number, not the attendance (the Klassenbuch's).
+count. Their exam bookings with the sitting (`Exam`: its exam, day and places), and their stays
+(`DateAccommodation`: dates, kind, room type, meals, called off, departure confirmed) — where only as
+a CASA flat's name and room; a host family stays „a host family" (hosts are people who are not
+learners: their own module and a privacy decision first). Not the passport number, not the attendance
+(the Klassenbuch's).
 
 The JSON goes to stdout and straight into the importer: no personal data is written to a file.
 Run the course import and the learner counts first (docs/ADMIN_WORKSPACE.md §Learners from SchoolMan).
@@ -226,6 +230,40 @@ for r, body in zip(lt, column_chunked('Letter', 'FreeField', 1000)):
                                 'sent': stamp(r['Date_LetterSent']) or stamp(r['DateOfEmission']) or stamp(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None,
                                 'text': body})
 
+# The sittings of their exam bookings: which exam, which day, how many places.
+def short_day(value):
+    """`B2 telc | 13.11.26` → `2026-11-13`: the day after the exam's name."""
+    m = re.search(r'(\d{1,2})\.(\d{1,2})\.(\d{2,4})', value or '')
+    if not m:
+        return None
+    year = int(m.group(3))
+    return f'{year + 2000 if year < 100 else year}-{int(m.group(2)):02d}-{int(m.group(1)):02d}'
+
+
+exams = {r['__ID_Exam'].strip(): r for r in table('Exam', '__ID_Exam', '_ID_ExamReference', 'Exam.ZSingleDate_OneLine', 'NumberPlace')}
+
+# Their stays; a place and a room by name only when it is one of CASA's own flats.
+places = {r['__ID_Accommodation'].strip(): r for r in table('Accommodation', '__ID_Accommodation', '_ID_SchoolFlatShare', 'SearchfieldAccommodation.Institution')}
+rooms = {r['__ID_Room'].strip(): r for r in table('Room', '__ID_Room', 'RoomName')}
+stays_of = collections.defaultdict(list)
+for r in table('DateAccommodation', '__ID_DateAccommodation', '_ID_Booking', 'ZStartDate', 'ZEndDate', '_ID_AccommodationType', '_ID_AccommodationRoom',
+               '_ID_AccommodationCatering', '_ID_Accommodation', '_ID_Room', '_ID_EnrolmentDone', '_ID_DepartureConfirmed'):
+    bid = first(r['_ID_Booking'])
+    if bid not in taken:
+        continue
+    place = places.get(first(r['_ID_Accommodation']), {})
+    flat = first(place.get('_ID_SchoolFlatShare')) == '1'
+    stays_of[bid].append({
+        'id': r['__ID_DateAccommodation'].strip(), 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate']),
+        'type': first(r['_ID_AccommodationType']) or None, 'room': first(r['_ID_AccommodationRoom']) or None, 'catering': first(r['_ID_AccommodationCatering']) or None,
+        'enrolment': first(r['_ID_EnrolmentDone']) or None, 'departure': first(r['_ID_DepartureConfirmed']) or None,
+        'place': first(r['_ID_Accommodation']) or None, 'flat': flat,
+        # „Die Biber – CASA WG" → „Die Biber": the stay's kind already says CASA WG.
+        'placeName': re.sub(r'\s*[–-]\s*CASA\s*WG$', '', re.sub(r'[\s|]+$', '', place.get('SearchfieldAccommodation.Institution', ''))).strip() or None if flat else None,
+        'roomId': first(r['_ID_Room']) or None,
+        'roomName': rooms.get(first(r['_ID_Room']), {}).get('RoomName', '').strip() or None if flat else None,
+    })
+
 banks_of = collections.defaultdict(list)
 for r in table('BankAccount', '__ID_BankAccount', '_ID_Person', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation'):
     pid = owner(r)
@@ -262,7 +300,10 @@ for pid, p in persons.items():
             'enrolment': first(b['_ID_EnrolmentDone']) or None,
             'visa': first(b['_ID_VisaRequired']) == '1',
             'payer': 'agency' if first(b['_ID_Agency']) else 'company' if first(b['_ID_Corporate']) else 'self',
-            'exam': bool(first(b['_ID_Exam'])),
+            'exam': {'id': first(b['_ID_Exam']), 'ref': first(exams.get(first(b['_ID_Exam']), {}).get('_ID_ExamReference')) or None,
+                     'day': short_day(exams.get(first(b['_ID_Exam']), {}).get('Exam.ZSingleDate_OneLine')),
+                     'places': exams.get(first(b['_ID_Exam']), {}).get('NumberPlace', '').strip() or None} if first(b['_ID_Exam']) else None,
+            'stays': stays_of[b['__ID_Booking'].strip()],
             'type': first(b['_ID_CourseTypeReference']) or None,
             'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate'])}
                         for r in periods_of[b['__ID_Booking'].strip()]],
@@ -290,7 +331,7 @@ if '--stats' in sys.argv:
     all_b = [b for x in out for b in x['bookings']]
     all_p = [r for b in all_b for r in b['periods']]
     print('learners', len(out), '· skipped: duplicated person keys', len(chosen & twice), '· chosen without a person row', len(chosen - set(persons) - twice))
-    print('bookings', len(all_b), '· exam', sum(b['exam'] for b in all_b), '· without a period', sum(not b['periods'] for b in all_b),
+    print('bookings', len(all_b), '· exam', sum(bool(b['exam']) for b in all_b), '· without a period', sum(not b['periods'] for b in all_b),
           '· enrolment', collections.Counter(b['enrolment'] for b in all_b).most_common())
     print('periods', len(all_p), '· without dates', sum(not (r['start'] and r['end']) for r in all_p), '· inverted', sum(bool(r['start'] and r['end'] and r['end'] < r['start']) for r in all_p))
     ch = [c for b in all_b for c in b['charges']]
@@ -298,6 +339,9 @@ if '--stats' in sys.argv:
     print('charges', len(ch), '· without an amount', sum(c['amount'] in (None, 0) for c in ch), '· sum', round(sum(c['amount'] or 0 for c in ch), 2),
           '· payments', len(pa), '· refunds', sum(p['id'].startswith('PaymentOut:') for p in pa), '· sum', round(sum(p['amount'] or 0 for p in pa), 2),
           '· without a date', sum(not p['date'] for p in pa))
+    st = [s for b in all_b for s in b['stays']]
+    print('exam bookings', sum(bool(b['exam']) for b in all_b), 'by exam kind', collections.Counter((b['exam'] or {}).get('ref') for b in all_b if b['exam']).most_common(),
+          '· stays', len(st), 'on', sum(bool(b['stays']) for b in all_b), 'bookings · in a CASA flat', sum(s['flat'] for s in st))
     print('notes', sum(len(x['notes']) for x in out), '· log lines', sum(len(x['log']) for x in out), '· letters', sum(len(x['letters']) for x in out),
           '(with text', sum(bool(l['text'].strip()) for x in out for l in x['letters']), ') · bank accounts', sum(len(x['banks']) for x in out))
     print('with e-mail', sum(bool(x['emails']) for x in out), '· phone', sum(bool(x['phones']) for x in out), '· address', sum(bool(x['addresses']) for x in out),

@@ -327,6 +327,7 @@ erDiagram
   COURSE_TYPES o|--o{ BOOKINGS : course_type_id
   COURSE_REGISTRATIONS o|--o| BOOKINGS : source_registration_id
   BOOKINGS ||--|{ BOOKING_PERIODS : dates
+  BOOKINGS ||--o{ BOOKING_STAYS : stays
   COURSE_INSTANCES o|--o{ BOOKING_PERIODS : course_instance_id
   BOOKINGS ||--o{ BOOKING_CHARGES : cost_lines
   BOOKINGS ||--o{ PAYMENTS : received
@@ -357,6 +358,21 @@ erDiagram
     text kind
     text filemaker_date_booking_id "SchoolMan's period (0052)"
     smallint group_index "the course's group (0053)"
+  }
+
+  BOOKING_STAYS {
+    uuid id PK
+    uuid booking_id FK
+    date starts_on
+    date ends_on
+    text accommodation_type_code FK
+    text room_type_code FK
+    text catering_code FK
+    text place "a CASA flat by name; never a host"
+    text room
+    bool cancelled
+    bool departure_confirmed
+    text filemaker_id "SchoolMan's DateAccommodation (0056)"
   }
 
   BOOKING_CHARGES {

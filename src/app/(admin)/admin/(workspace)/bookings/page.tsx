@@ -63,14 +63,15 @@ function when(b: BookingListItem, lang: WsLang): string {
   return from && to ? dayRange(from, to, lang) : '';
 }
 
-/** „Wohngemeinschaft · Einzelzimmer · mit Küchenbenutzung": the stay in words. */
+/** „CASA – WG · Die Biber · Einzelzimmer · ohne Verpflegung": the stay in words. */
 function stayWords(b: BookingListItem, vocabulary: StayVocabulary | null, lang: WsLang): string {
   if (!b.stay) return '';
   const name = (list: { code: string; name: Bilingual }[] | undefined, code: string | null) => {
     const found = code ? list?.find((v) => v.code === code) : null;
     return found ? pick(lang, found.name) : code;
   };
-  return [name(vocabulary?.types, b.stay.typeCode), name(vocabulary?.rooms, b.stay.roomTypeCode), name(vocabulary?.catering, b.stay.cateringCode)]
+  // Where it was arranged (a CASA flat's name), after its kind.
+  return [name(vocabulary?.types, b.stay.typeCode), b.stay.place, name(vocabulary?.rooms, b.stay.roomTypeCode), name(vocabulary?.catering, b.stay.cateringCode)]
     .filter(Boolean)
     .join(' · ');
 }

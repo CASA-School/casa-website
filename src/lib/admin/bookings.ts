@@ -178,7 +178,15 @@ export type BookingListItem = {
   examSessionId: string | null;
   examParts: ExamParts | null;
   /** The stay booked (0013), as codes: a list names them from `stayVocabulary()`. */
-  stay: { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: Date | null; to: Date | null } | null;
+  stay: {
+    typeCode: string;
+    roomTypeCode: string | null;
+    cateringCode: string | null;
+    from: Date | null;
+    to: Date | null;
+    /** Where it was arranged, now or next (0056): a CASA flat by its name; null for a host family. */
+    place: string | null;
+  } | null;
 };
 
 /** A vocabulary's name in both languages: the German where it has one. */
@@ -269,6 +277,8 @@ const LIST = `
          coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
+         (SELECT s.place FROM booking_stays s WHERE s.booking_id = b.id AND NOT s.cancelled AND s.place IS NOT NULL
+           ORDER BY (s.ends_on < current_date), s.starts_on LIMIT 1) AS stay_place,
          (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
@@ -302,6 +312,7 @@ type ListRow = {
   accommodation_catering_code: string | null;
   accommodation_from: Date | null;
   accommodation_to: Date | null;
+  stay_place: string | null;
 };
 
 const toItem = (r: ListRow): BookingListItem => ({
@@ -328,9 +339,60 @@ const toItem = (r: ListRow): BookingListItem => ({
         cateringCode: r.accommodation_catering_code,
         from: r.accommodation_from,
         to: r.accommodation_to,
+        place: r.stay_place,
       }
     : null,
 });
+
+/**
+ * A booking's stays as arranged (0056, from SchoolMan's `DateAccommodation`): when, what kind, which room
+ * type and meals, where — a CASA flat and its room by name, a host family not —, called off, and whether
+ * the departure is confirmed. The booking's own accommodation fields are the wish.
+ */
+export type BookingStay = {
+  id: string;
+  from: string;
+  to: string;
+  typeCode: string | null;
+  roomTypeCode: string | null;
+  cateringCode: string | null;
+  place: string | null;
+  room: string | null;
+  cancelled: boolean;
+  departureConfirmed: boolean | null;
+};
+
+export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
+  const rows = await query<{
+    id: string;
+    starts_on: string;
+    ends_on: string;
+    accommodation_type_code: string | null;
+    room_type_code: string | null;
+    catering_code: string | null;
+    place: string | null;
+    room: string | null;
+    cancelled: boolean;
+    departure_confirmed: boolean | null;
+  }>(
+    `SELECT id, to_char(starts_on, 'YYYY-MM-DD') AS starts_on, to_char(ends_on, 'YYYY-MM-DD') AS ends_on, accommodation_type_code, room_type_code, catering_code,
+            place, room, cancelled, departure_confirmed
+       FROM booking_stays WHERE booking_id = $1 ORDER BY starts_on`,
+    [bookingId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    from: r.starts_on,
+    to: r.ends_on,
+    typeCode: r.accommodation_type_code,
+    roomTypeCode: r.room_type_code,
+    cateringCode: r.catering_code,
+    place: r.place,
+    room: r.room,
+    cancelled: r.cancelled,
+    departureConfirmed: r.departure_confirmed,
+  }));
+}
 
 export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'accommodation' | 'reserved' | 'past' | 'cancelled' | 'all';
 

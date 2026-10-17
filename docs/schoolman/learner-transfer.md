@@ -22,18 +22,19 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `WorkFlow` (the work log — where most comments about a learner are) | 10,977 lines | the record's history, „in SchoolMan" |
 | `Letter` with its text | 9,500 (2,805 of a kind the workspace does not write) | `letters`, on the booking; the next letter is worked out from them |
 | `BankAccount` | 62 | `bank_accounts` |
+| Exam bookings (`Booking._ID_Exam`, `Exam`) | 94 (14 sittings linked, 9 earlier ones made) | `bookings` on their sitting (`exam_sessions.filemaker_exam_id`, 0056), all parts. One TestAS booking is left out: no TestAS here |
+| `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
 ## Cannot come across yet — the workspace has no place for it
 
 | SchoolMan | For the sample | What is missing |
 | --- | ---: | --- |
 | `SingleDateStudent` — attendance: present, absent, why, minutes late | 34,112 rows | No attendance at all. It is the Klassenbuch's; whether the workspace shows it (read-only) is a decision |
-| `DateAccommodation` + `Accommodation` — the stay, its status, the host | 362 stays | A booking holds one wished-for stay; no host, no placement, no stay status, no second stay (open item: placing learners) |
+| `Accommodation`, `Room` — the host family and its rooms | 56 places for the sample | A stay with a host family comes across without the family: hosts are people who are not learners — their own module and a privacy decision first (open item: placing learners) |
 | `PaymentOut` — rent paid to hosts, agency commission | 392 · 463 | No payouts and no commission (finance, with DATEV) |
 | `Commission` | 890 lines | No agency commission |
 | `Instalment` — payment plans | 412 lines | No instalment plans |
 | `Invoice` | 124 | No invoices (mostly companies and groups) |
-| Exam bookings (`Booking._ID_Exam`) | 95 | The exam module exists; SchoolMan's `Exam` dates are not matched to our sittings yet — the next step |
 | `PreBooking`, `Contact`, `WaitingRoom` — how they came in | 449 · 311 | Intake before the booking; the workspace's own intake is the website's. Whether the old ones come across is a decision |
 | `SingleDateControl` — follow-up dates set by letters | 1,687 | No follow-up list |
 | `WorkFlowLetter` — how a letter was sent (e-mail, print, SMTP) | 8,620 | Letters come with their date, not how they went |
@@ -53,3 +54,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
   learner-weeks).
 - `TestStudent` holds placement tests and exam certificates alike.
 - Five imported learners look like people already here; they are flagged for a colleague to link.
+- A stay's `StatusAccommodation` (and `_ID_StatusAccommodation` 1–4) is a copy of the learner's
+  Rookie/Runner/Unicorn/LastDance word, not the stay's state; the stay's own state is its
+  `_ID_EnrolmentDone` („nein" = called off) and `_ID_DepartureConfirmed`.
+- An exam's day is in `Exam.ZSingleDate_OneLine` after the exam's name („B2 telc | 13.11.26"); `ZSingleDate` is empty.

@@ -1276,9 +1276,18 @@ bookings (their own module). One transaction, counts only, nothing personal in a
 - *Re-runs* update status, type, visa and payer, the periods, the money, the notes and the letters, and
   read the work log afresh; a period or a money line SchoolMan dropped goes.
 
-What cannot come across yet — attendance, stays and hosts, instalments, invoices, commission, exam
-bookings, intake records, follow-ups — is listed with the sample's counts in
-`docs/schoolman/learner-transfer.md`.
+- *Exam bookings* (Rahman, 2026-10-18; 0056) go on their sitting: found by SchoolMan's exam
+  (`exam_sessions.filemaker_exam_id`), else by the exam and its day, else made from SchoolMan's at the
+  hours of its exam's other sittings — the sittings before August 2026 (never on the website, which
+  reads those ahead). All parts; TestAS and TestDaF, which the workspace does not hold, are left out.
+- *Stays* (`booking_stays`, 0056): each `DateAccommodation` with its dates, kind, room type, meals,
+  called off and departure confirmed, and where — a CASA flat and its room by name, a host family not
+  (its people come across only with a hosts module and a privacy decision). The booking page lists
+  them; they fill the booking's accommodation fields, so the bookings' „Unterkunft" view shows who is
+  staying now, arriving soon or later, with the flat's name.
+
+What cannot come across yet — attendance, host families, instalments, invoices, commission, intake
+records, follow-ups — is listed with the sample's counts in `docs/schoolman/learner-transfer.md`.
 
 **Kursplanung's learners are live** (Rahman, 2026-10-17). A board group of a course shows its course's
 learners in the planning month's busiest week — SchoolMan's for that group, or the bookings brought

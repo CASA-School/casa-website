@@ -16,6 +16,7 @@ import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
+import { dayRange } from '@/components/admin/list';
 import { Badge, Button, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
@@ -24,6 +25,7 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
+  bookingStays,
   carryOverTargets,
   CHARGE_KIND_LABELS,
   getBooking,
@@ -128,7 +130,7 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -138,7 +140,12 @@ export default async function BookingPage({
     lettersForBooking(booking.id),
     canEdit && exam && open ? sittingsOf(exam.examTypeId) : Promise.resolve([]),
     canEdit && !exam && open ? stayVocabulary() : Promise.resolve(null),
+    bookingStays(booking.id),
   ]);
+  // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
+  const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
+  const stayName = (list: { code: string; name: { de: string; en: string } }[] | undefined, code: string | null) =>
+    code ? (list?.find((v) => v.code === code)?.name[lang] ?? code) : null;
   const carriesOver = targets.length > 0;
   // The letter due now, from the booking and what was sent: the first thing the Briefe card offers.
   const letterCtx = canEdit ? await bookingLetterContext(booking.id) : null;
@@ -262,17 +269,37 @@ export default async function BookingPage({
           ),
         }
       : null,
-    stay && stay.from
+    arranged.length
       ? {
-          label: t('Unterkunft', 'Stay'),
+          label: arranged.length > 1 ? t('Unterkünfte', 'Stays') : t('Unterkunft', 'Stay'),
           wide: true,
           value: (
-            <>
-              <DateText value={stay.from} /> – <DateText value={stay.to} />
-            </>
+            <ul className="space-y-1">
+              {arranged.map((a) => (
+                <li key={a.id} className={cn('text-[0.86rem]', a.cancelled && 'text-[var(--casa-muted)] line-through')}>
+                  <span className="font-semibold tabular-nums">{dayRange(a.from, a.to, lang)}</span>
+                  {' · '}
+                  {[stayName(stayNames?.types, a.typeCode), a.place, a.room, stayName(stayNames?.rooms, a.roomTypeCode), stayName(stayNames?.catering, a.cateringCode)]
+                    .filter(Boolean)
+                    .join(' · ')}
+                  {a.departureConfirmed ? <span className="text-[var(--casa-muted)]"> · {t('Abreise bestätigt', 'Departure confirmed')}</span> : null}
+                  {a.cancelled ? <span className="no-underline"> · {t('abgesagt', 'called off')}</span> : null}
+                </li>
+              ))}
+            </ul>
           ),
         }
-      : null,
+      : stay && stay.from
+        ? {
+            label: t('Unterkunft', 'Stay'),
+            wide: true,
+            value: (
+              <>
+                <DateText value={stay.from} /> – <DateText value={stay.to} />
+              </>
+            ),
+          }
+        : null,
   ].filter((item) => item !== null);
   // The observation in the booking's own words: why, and what was noted.
   const observationEvents: TimelineEvent[] = activity

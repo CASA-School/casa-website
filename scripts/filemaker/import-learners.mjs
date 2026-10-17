@@ -32,8 +32,15 @@
  *   (`schoolman_log`, read afresh each run); the letters keep their text — a kind the workspace knows
  *   keeps it (so the booking's next letter is worked out from what was sent), the rest are „schoolman";
  *   a payment's comment is its reference, a charge's comment follows its name; bank accounts as theirs.
- * - Exam bookings (an exam sitting is their own module) and bookings without a period are left out;
- *   what is about one of them goes on the person.
+ * - An exam booking (2026-10-18) goes on its sitting: found by SchoolMan's exam (`filemaker_exam_id`,
+ *   0056), else by its exam and day, else made from SchoolMan's (a sitting from before the workspace's;
+ *   never on the website, which reads those ahead) at the hours of its exam's other sittings. All parts;
+ *   an exam we do not offer (TestAS, TestDaF) is left out.
+ * - A booking's stays (`DateAccommodation`, 0056): dates, kind, room type, meals, called off, departure
+ *   confirmed, and where — a CASA flat and its room by name, a host family not (hosts first need their
+ *   own module and a privacy decision). They also fill the booking's accommodation fields, so the
+ *   bookings' „Unterkunft" view and the booking page show them.
+ * - Bookings without a period (not exams) are left out; what is about one goes on the person.
  */
 import { getCode } from 'country-list';
 
@@ -72,6 +79,8 @@ const LETTER_KIND = [
   [/^(Cancel|Deactivate)/, 'cancellation_confirmation'],
   [/^Confirmation\.Exam/, 'exam_confirmation'],
 ];
+// SchoolMan's exam references → our exam types.
+const EXAM_TYPE = { 3: 'telc_b2', 4: 'telc_c1_hochschule' };
 const letterKind = (script) => LETTER_KIND.find(([re]) => re.test(script ?? ''))?.[1] ?? 'schoolman';
 const dayDe = (stamp) => (stamp ? new Date(`${stamp.slice(0, 10)}T12:00:00Z`).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
 /** A SchoolMan letter in the workspace's letter shape: its text as paragraphs, nothing composed. */
@@ -123,9 +132,10 @@ const client = await connect();
 const count = {
   learners: learners.length, peopleNew: 0, peopleKnown: 0, emails: 0, phones: 0, addresses: 0,
   bookingsNew: 0, bookingsUpdated: 0, periodsNew: 0, periodsUpdated: 0, periodsRemoved: 0,
-  skippedExam: 0, skippedNoPeriod: 0, periodsNoCourse: 0, nationalityUnmatched: 0, twins: 0,
+  skippedNoPeriod: 0, periodsNoCourse: 0, nationalityUnmatched: 0, twins: 0,
   charges: 0, chargesRemoved: 0, payments: 0, refunds: 0, paymentsRemoved: 0, zero: 0,
   notes: 0, log: 0, letters: 0, lettersOnPerson: 0, banks: 0,
+  examBookings: 0, examNoKind: 0, sittingsLinked: 0, sittingsMade: 0, stays: 0, staysRemoved: 0, staysNoDates: 0,
 };
 
 try {
@@ -137,6 +147,55 @@ try {
   const chargeByCode = new Map(chargeTypes.rows.map((r) => [r.code, r]));
   const typeOfCharge = (ref) => chargeType.get(ref ?? '') ?? chargeByCode.get(CHARGE_EXTRA[ref] ?? '') ?? null;
   const method = (p) => METHOD_BY_LABEL[(p.methodLabel ?? '').trim().toLowerCase()] ?? METHOD_BY_ID[p.method] ?? 'transfer';
+
+  // Exam types by SchoolMan's reference, with the hours their sittings are held at.
+  for (const [ref, code] of Object.entries(EXAM_TYPE)) await client.query(`UPDATE exam_types SET filemaker_id = $1 WHERE code = $2 AND filemaker_id IS NULL`, [Number(ref), code]);
+  const examTypes = new Map(
+    (
+      await client.query(
+        `SELECT t.id, t.code,
+                coalesce((SELECT to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') FROM exam_sessions s WHERE s.exam_type_id = t.id ORDER BY s.starts_at LIMIT 1), '09:00') AS starts,
+                coalesce((SELECT to_char(s.ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') FROM exam_sessions s WHERE s.exam_type_id = t.id ORDER BY s.starts_at LIMIT 1), '17:00') AS ends
+           FROM exam_types t`
+      )
+    ).rows.map((r) => [r.code, r])
+  );
+  /** The sitting an exam booking is on: SchoolMan's own, else the same exam that day here, else made. */
+  async function sittingFor(exam) {
+    const type = examTypes.get(EXAM_TYPE[exam.ref] ?? '');
+    if (!type || !exam.day) return null;
+    const known = (await client.query(`SELECT id FROM exam_sessions WHERE filemaker_exam_id = $1`, [exam.id])).rows[0];
+    if (known) return { id: known.id, day: exam.day };
+    const same = (
+      await client.query(
+        `UPDATE exam_sessions SET filemaker_exam_id = $1
+          WHERE id = (SELECT id FROM exam_sessions WHERE exam_type_id = $2 AND (starts_at AT TIME ZONE 'Europe/Berlin')::date = $3::date AND filemaker_exam_id IS NULL
+                       ORDER BY starts_at LIMIT 1)
+          RETURNING id`,
+        [exam.id, type.id, exam.day]
+      )
+    ).rows[0];
+    if (same) {
+      count.sittingsLinked++;
+      return { id: same.id, day: exam.day };
+    }
+    const made = (
+      await client.query(
+        `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, capacity, status, filemaker_exam_id)
+         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5, 'scheduled', $6)
+         RETURNING id`,
+        [type.id, exam.day, type.starts, type.ends, Number(exam.places) > 0 ? Number(exam.places) : 20, exam.id]
+      )
+    ).rows[0];
+    count.sittingsMade++;
+    return { id: made.id, day: exam.day };
+  }
+
+  // The stays' vocabularies by SchoolMan's ids.
+  const byFilemaker = async (table) => new Map((await client.query(`SELECT code, filemaker_id::int::text AS fm FROM ${table} WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.code]));
+  const stayTypes = await byFilemaker('accommodation_types');
+  const roomTypes = await byFilemaker('accommodation_room_types');
+  const caterings = await byFilemaker('catering_options');
   // SchoolMan's course numbers → ours: a course's own number, or one of its groups' (0046).
   const courses = new Map();
   for (const r of (
@@ -275,18 +334,21 @@ try {
     // SchoolMan's booking number → ours, for what is said about a booking.
     const bookingOf = new Map();
     for (const b of l.bookings) {
-      if (b.exam) {
-        count.skippedExam++;
+      // An exam booking is on its sitting and has no period of its own.
+      const sitting = b.exam ? await sittingFor(b.exam) : null;
+      if (b.exam && !sitting) {
+        count.examNoKind++;
         continue;
       }
-      const periods = b.periods.filter((p) => p.start && p.end && p.start <= p.end).sort((x, y) => x.start.localeCompare(y.start));
-      if (!periods.length) {
+      const periods = b.exam ? [] : b.periods.filter((p) => p.start && p.end && p.start <= p.end).sort((x, y) => x.start.localeCompare(y.start));
+      if (!b.exam && !periods.length) {
         count.skippedNoPeriod++;
         continue;
       }
       const ours = periods.map((p) => courses.get(p.course ?? '')).find(Boolean);
-      const typeId = ours?.course_type_id ?? types.get(b.type ?? '') ?? null;
-      const over = periods.every((p) => p.end < today);
+      const typeId = sitting ? null : (ours?.course_type_id ?? types.get(b.type ?? '') ?? null);
+      const over = sitting ? sitting.day < today : periods.every((p) => p.end < today);
+      if (sitting) count.examBookings++;
       const status = b.enrolment === '2' || b.enrolment === '3' ? 'cancelled' : over ? 'completed' : 'confirmed';
       const observed = b.enrolment === '4' && status === 'confirmed';
       const existing = (await client.query(`SELECT id FROM bookings WHERE filemaker_booking_id = $1`, [b.id])).rows[0];
@@ -294,11 +356,12 @@ try {
       if (existing) {
         bookingId = existing.id;
         await client.query(
-          `UPDATE bookings SET status = $2::booking_status, course_type_id = coalesce($3, course_type_id), visa_required = $4, payer = $5,
+          `UPDATE bookings SET status = $2::booking_status, course_type_id = CASE WHEN $7::uuid IS NULL THEN coalesce($3, course_type_id) END, visa_required = $4, payer = $5,
                   observation_reason = CASE WHEN observed_by IS NOT NULL THEN observation_reason WHEN $6 THEN 'other' ELSE NULL END,
-                  observed_at = CASE WHEN observed_by IS NOT NULL THEN observed_at WHEN $6 THEN coalesce(observed_at, now()) ELSE NULL END
+                  observed_at = CASE WHEN observed_by IS NOT NULL THEN observed_at WHEN $6 THEN coalesce(observed_at, now()) ELSE NULL END,
+                  exam_session_id = $7, exam_parts = CASE WHEN $7::uuid IS NULL THEN NULL ELSE coalesce(exam_parts, 'full') END
             WHERE id = $1`,
-          [bookingId, status, typeId, b.visa, b.payer, observed]
+          [bookingId, status, typeId, b.visa, b.payer, observed, sitting?.id ?? null]
         );
         count.bookingsUpdated++;
       } else {
@@ -309,11 +372,11 @@ try {
         bookingId = (
           await client.query(
             `INSERT INTO bookings (person_id, course_type_id, status, payer, visa_required, observation_reason, observed_at, filemaker_booking_id,
-                                   number_year, number_seq, created_at, cancelled_at)
+                                   number_year, number_seq, created_at, cancelled_at, exam_session_id, exam_parts)
              VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9, $10, coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()),
-                     CASE WHEN $3 = 'cancelled' THEN coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()) END)
+                     CASE WHEN $3 = 'cancelled' THEN coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()) END, $12, CASE WHEN $12::uuid IS NOT NULL THEN 'full' END)
              RETURNING id`,
-            [personId, typeId, status, b.payer, b.visa, observed ? 'other' : null, observed ? new Date() : null, b.id, year, seq, b.created]
+            [personId, typeId, status, b.payer, b.visa, observed ? 'other' : null, observed ? new Date() : null, b.id, year, seq, b.created, sitting?.id ?? null]
           )
         ).rows[0].id;
         count.bookingsNew++;
@@ -404,6 +467,62 @@ try {
           [bookingId, payments]
         )
       ).rowCount;
+
+      // Its stays, and from them the booking's own accommodation fields.
+      const stays = [];
+      const held = [];
+      for (const st of b.stays ?? []) {
+        if (!st.start || !st.end || st.end < st.start) {
+          count.staysNoDates++;
+          continue;
+        }
+        const stay = {
+          type: stayTypes.get(st.type ?? '') ?? null,
+          room: roomTypes.get(st.room ?? '') ?? null,
+          catering: caterings.get(st.catering ?? '') ?? null,
+          cancelled: st.enrolment === '2' || st.enrolment === '3',
+        };
+        stays.push(st.id);
+        if (!stay.cancelled) held.push({ ...st, ...stay });
+        await client.query(
+          `INSERT INTO booking_stays (booking_id, starts_on, ends_on, accommodation_type_code, room_type_code, catering_code, place, room, cancelled, departure_confirmed,
+                                      filemaker_id, filemaker_place_id, filemaker_room_id)
+           VALUES ($1, $2::date, $3::date, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+           ON CONFLICT (filemaker_id) WHERE filemaker_id IS NOT NULL DO UPDATE
+             SET booking_id = EXCLUDED.booking_id, starts_on = EXCLUDED.starts_on, ends_on = EXCLUDED.ends_on, accommodation_type_code = EXCLUDED.accommodation_type_code,
+                 room_type_code = EXCLUDED.room_type_code, catering_code = EXCLUDED.catering_code, place = EXCLUDED.place, room = EXCLUDED.room,
+                 cancelled = EXCLUDED.cancelled, departure_confirmed = EXCLUDED.departure_confirmed, filemaker_place_id = EXCLUDED.filemaker_place_id,
+                 filemaker_room_id = EXCLUDED.filemaker_room_id`,
+          [
+            bookingId,
+            st.start,
+            st.end,
+            stay.type,
+            stay.room,
+            stay.catering,
+            st.flat ? st.placeName : null,
+            st.flat ? st.roomName : null,
+            stay.cancelled,
+            st.departure === '1' ? true : st.departure === '2' ? false : null,
+            st.id,
+            st.place,
+            st.roomId,
+          ]
+        );
+        count.stays++;
+      }
+      count.staysRemoved += (
+        await client.query(`DELETE FROM booking_stays WHERE booking_id = $1 AND filemaker_id IS NOT NULL AND NOT (filemaker_id = ANY($2::text[]))`, [bookingId, stays])
+      ).rowCount;
+      if (held.length) {
+        held.sort((x, y) => x.start.localeCompare(y.start));
+        await client.query(
+          `UPDATE bookings SET accommodation_type_code = $2, accommodation_room_type_code = $3, accommodation_catering_code = $4,
+                  accommodation_from = $5::date, accommodation_to = $6::date
+            WHERE id = $1`,
+          [bookingId, held[0].type, held[0].room, held[0].catering, held[0].start, held.map((x) => x.end).sort().pop()]
+        );
+      }
     }
 
     // What SchoolMan says about them: notes, on the booking where we have it, else on the person.
@@ -495,9 +614,11 @@ try {
 console.log(
   `${count.learners} learners read: ${count.peopleNew} new, ${count.peopleKnown} known · ${count.emails} e-mail, ${count.phones} phones, ${count.addresses} addresses\n` +
     `bookings ${count.bookingsNew} new, ${count.bookingsUpdated} updated · periods ${count.periodsNew} new, ${count.periodsUpdated} updated, ${count.periodsRemoved} removed\n` +
-    `left out: ${count.skippedExam} exam bookings, ${count.skippedNoPeriod} without a period · ${count.periodsNoCourse} periods of a course not here · ` +
+    `left out: ${count.skippedNoPeriod} without a period · ${count.periodsNoCourse} periods of a course not here · ` +
     `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged\n` +
     `money: ${count.charges} charges, ${count.payments} payments, ${count.refunds} refunds · ${count.zero} lines of no amount left out · ` +
     `${count.chargesRemoved} charges and ${count.paymentsRemoved} payments no longer in SchoolMan removed\n` +
-    `about them: ${count.notes} notes, ${count.log} log lines, ${count.letters} letters (${count.lettersOnPerson} on the person only), ${count.banks} bank accounts`
+    `about them: ${count.notes} notes, ${count.log} log lines, ${count.letters} letters (${count.lettersOnPerson} on the person only), ${count.banks} bank accounts\n` +
+    `exams: ${count.examBookings} bookings · ${count.sittingsLinked} sittings linked, ${count.sittingsMade} made · ${count.examNoKind} of an exam we do not offer left out\n` +
+    `stays: ${count.stays} · ${count.staysRemoved} no longer in SchoolMan removed · ${count.staysNoDates} without dates left out`
 );
