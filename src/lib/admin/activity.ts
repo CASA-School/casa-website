@@ -334,6 +334,20 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
     }
     case 'exam_unfiled':
       return t('hat eine Meldung bei telc zurückgenommen', 'took back a report to telc');
+    case 'sitting_created':
+      return t(`hat ${acc} angelegt`, `created ${subject}`);
+    case 'sitting_updated':
+      return t(`hat ${acc} geändert`, `changed ${subject}`);
+    case 'sitting_cancelled':
+      return t(`hat ${acc} abgesagt`, `cancelled ${subject}`);
+    case 'sitting_deleted':
+      return t(`hat ${acc} gelöscht`, `deleted ${subject}`);
+    case 'exam_results_saved': {
+      const n = Number(entry.detail?.count ?? 0);
+      return t(n === 1 ? 'hat 1 Prüfungsergebnis eingetragen' : `hat ${n} Prüfungsergebnisse eingetragen`, n === 1 ? 'entered 1 exam result' : `entered ${n} exam results`);
+    }
+    case 'exam_result_collected':
+      return t('hat eingetragen, dass das Prüfungsergebnis abgeholt wurde', 'recorded that the exam result was collected');
     case 'exam_changed':
       return t('hat Prüfungstermin oder Teile einer Buchung geändert', "changed a booking's sitting or parts");
     case 'group_opened':

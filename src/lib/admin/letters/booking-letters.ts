@@ -22,7 +22,7 @@
  * built from figures — what to pay, a place in the queue, the next start — are changed per letter only.
  */
 
-import type { ExamParts } from '../exam-parts';
+import { partsSat, type ExamOutcome, type ExamParts } from '../exam-parts';
 import { teachingWeeks } from '../offers/course';
 
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation, type Salutation } from './format';
@@ -84,6 +84,8 @@ export type LetterExam = {
   endTime: string;
   deadline: string | null;
   parts: ExamParts;
+  /** telc's outcome per part, once entered (0038); null before. A queue's entry has none. */
+  result: { written: ExamOutcome | null; oral: ExamOutcome | null } | null;
 };
 
 export type BookingLetterContext = {
@@ -143,6 +145,7 @@ export const LETTER_KIND_LABELS: Record<LetterKind, Record<LetterLanguage, strin
   exam_confirmation: { de: 'Prüfungsbestätigung', en: 'Exam confirmation' },
   exam_invitation: { de: 'Einladung zur Prüfung', en: 'Exam invitation' },
   exam_results: { de: 'Ergebnis ist da', en: 'Results ready' },
+  exam_participation: { de: 'Teilnahmebestätigung', en: 'Confirmation of participation' },
   waitlist_confirmation: { de: 'Bestätigung Warteliste', en: 'Waiting-list confirmation' },
   waitlist_place_free: { de: 'Platz frei', en: 'Place free' },
   waitlist_no_place: { de: 'Kein Platz', en: 'No place' },
@@ -274,6 +277,7 @@ export const STANDARD_SLOTS: Record<ComposedKind, readonly string[]> = {
   exam_confirmation: ['intro', 'id', 'rules', 'closing'],
   exam_invitation: ['bring', 'oral', 'part', 'rules', 'closing'],
   exam_results: ['collect', 'proxy', 'closing'],
+  exam_participation: [],
   waitlist_confirmation: ['intro', 'closing'],
   waitlist_place_free: ['intro', 'closing'],
   waitlist_no_place: ['intro', 'closing'],
@@ -312,6 +316,7 @@ export const LETTER_STANDARD_DEFAULTS: Record<ComposedKind, Record<LetterLanguag
       closing: 'Please let us know briefly that you have received this invitation. We wish you every success!',
     },
   },
+  exam_participation: { de: {}, en: {} },
   exam_results: {
     de: {
       collect: 'Du kannst dein Ergebnis bei uns im Büro abholen. Bitte bring dazu deinen Ausweis oder Pass mit. Am Telefon und per E-Mail geben wir keine Ergebnisse weiter.',
@@ -928,7 +933,11 @@ export function bookingLetterBlock(kind: BookingLetterKind, ctx: BookingLetterCo
     case 'exam_invitation':
       return ctx.exam && ctx.exam.day < meta.today ? block('Die Prüfung ist schon vorbei.', 'The exam is already over.') : null;
     case 'exam_results':
-      return ctx.exam && ctx.exam.day >= meta.today ? block('Erst nach dem Prüfungstag.', 'Only after the exam day.') : null;
+      if (ctx.exam && ctx.exam.day >= meta.today) return block('Erst nach dem Prüfungstag.', 'Only after the exam day.');
+      return ctx.exam?.result ? null : block('Erst wenn das Ergebnis eingetragen ist.', 'Only once the result is entered.');
+    case 'exam_participation':
+      if (!ctx.exam?.result) return block('Erst wenn das Ergebnis eingetragen ist.', 'Only once the result is entered.');
+      return partsTaken(ctx.exam).length ? null : block('Die Person ist zur Prüfung nicht erschienen.', 'The candidate did not come to the exam.');
     default:
       return null;
   }
@@ -1111,6 +1120,10 @@ const EX = {
     paid: 'Die Prüfungsgebühr ist bezahlt. Dein Platz ist fest reserviert.',
     arrive: (day: string, name: string, at: string) => `am ${day} ist deine Prüfung ${name}. Bitte sei um ${at} Uhr bei uns in der Schule, Am Dobben 14–16 in Bremen.`,
     ready: (name: string, day: string) => `das Ergebnis deiner Prüfung ${name} vom ${day} ist da.`,
+    participation: 'Teilnahmebestätigung',
+    took: (who: string, day: string, exam: string, parts: string) =>
+      `Hiermit bestätigen wir, dass ${who} am ${day} bei CASA – Internationale Sprachschule Bremen an der Prüfung ${exam} teilgenommen hat${parts}.`,
+    partsTaken: { both: ' (schriftlicher und mündlicher Teil)', written: ' (schriftlicher Teil)', oral: ' (mündlicher Teil)' },
   },
   en: {
     confirmation: 'Confirmation of your exam registration',
@@ -1122,6 +1135,10 @@ const EX = {
     paid: 'The exam fee has been paid. Your place is reserved.',
     arrive: (day: string, name: string, at: string) => `Your exam ${name} is on ${day}. Please be at our school, Am Dobben 14–16 in Bremen, at ${at}.`,
     ready: (name: string, day: string) => `The result of your exam ${name} on ${day} has arrived.`,
+    participation: 'Confirmation of participation',
+    took: (who: string, day: string, exam: string, parts: string) =>
+      `This is to confirm that ${who} took part in the exam ${exam} at CASA – Internationale Sprachschule Bremen on ${day}${parts}.`,
+    partsTaken: { both: ' (written and oral part)', written: ' (written part)', oral: ' (oral part)' },
   },
 } as const;
 
@@ -1210,6 +1227,32 @@ export function examResultsLetter(ctx: BookingLetterContext, choices: LetterChoi
   return frame('exam_results', ctx.person, ctx.staff, choices, meta.today, { lead: e.results, title: exam?.name ?? '', tail: null }, body);
 }
 
+/** The parts a candidate came to: those sat whose outcome is not "did not come". */
+const partsTaken = (exam: LetterExam): ('written' | 'oral')[] => (exam.result ? partsSat(exam.parts).filter((p) => exam.result![p] && exam.result![p] !== 'absent') : []);
+
+/**
+ * SchoolMan's `Confirmation.ParticiptionExam_Booking`, which certified participation nothing
+ * recorded: here only once the result is entered, and only for the parts the candidate came to.
+ * Third person, no salutation, like the confirmation of enrolment.
+ */
+export function examParticipationLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  void standard;
+  const lang = choices.language;
+  const e = EX[lang];
+  const m = MORE[lang];
+  const p = ctx.person;
+  const exam = ctx.exam;
+  const who = `${m.title[p.salutation]}${fullName(p)}${p.birthDate ? `, ${m.born(formatLetterDate(p.birthDate, lang))},` : ''}`;
+  const body: LetterPart[] = [];
+  if (exam) {
+    const taken = partsTaken(exam);
+    const parts = taken.length === 2 ? e.partsTaken.both : taken.length === 1 ? e.partsTaken[taken[0]] : '';
+    body.push(text(choices, 'certify', e.took(who, formatLetterDate(exam.day, lang), exam.name, parts)));
+  }
+  body.push(text(choices, 'note', ''));
+  return frame('exam_participation', p, ctx.staff, choices, meta.today, { lead: e.participation, title: fullName(p), tail: null }, body, { salutation: '', signOff: '' });
+}
+
 /** A booking letter's short name in the address (`?kind=reminder`). */
 export const BOOKING_LETTER_KEYS: Record<BookingLetterKind, string> = {
   booking_confirmation: 'confirmation',
@@ -1226,6 +1269,7 @@ export const BOOKING_LETTER_KEYS: Record<BookingLetterKind, string> = {
   exam_confirmation: 'exam',
   exam_invitation: 'invitation',
   exam_results: 'results',
+  exam_participation: 'participation',
 };
 
 /** The booking letters in groups, as the letter page lists them. */
@@ -1240,7 +1284,7 @@ export const BOOKING_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kin
 export const EXAM_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kinds: BookingLetterKind[] }[] = [
   { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['exam_confirmation'] },
   { label: { de: 'Zahlung', en: 'Payment' }, kinds: ['payment_receipt', 'payment_reminder', 'payments_overview'] },
-  { label: { de: 'Prüfung', en: 'The exam' }, kinds: ['exam_invitation', 'exam_results'] },
+  { label: { de: 'Prüfung', en: 'The exam' }, kinds: ['exam_invitation', 'exam_results', 'exam_participation'] },
   { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
 ];
 
@@ -1277,6 +1321,8 @@ export function buildBookingLetter(kind: BookingLetterKind, ctx: BookingLetterCo
       return examInvitationLetter(ctx, choices, standard, meta);
     case 'exam_results':
       return examResultsLetter(ctx, choices, standard, meta);
+    case 'exam_participation':
+      return examParticipationLetter(ctx, choices, standard, meta);
   }
 }
 

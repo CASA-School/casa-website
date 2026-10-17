@@ -31,6 +31,7 @@ export const BOOKING_LETTER_KINDS = [
   'exam_confirmation',
   'exam_invitation',
   'exam_results',
+  'exam_participation',
 ] as const;
 
 /** A website registration's letters, before there is a booking (0035). */

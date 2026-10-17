@@ -35,7 +35,7 @@ import {
   storedWords,
 } from '@/lib/admin/bookings';
 import { listCourseTypes } from '@/lib/admin/catalogue';
-import { EXAM_PARTS_LABELS } from '@/lib/admin/exam-parts';
+import { EXAM_OUTCOME_LABELS, EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, overallOutcome } from '@/lib/admin/exam-parts';
 import { sittingsOf } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
@@ -170,6 +170,31 @@ export default async function BookingPage({
             <Link href={`/admin/catalogue/exams/${exam.sessionId}`} className="font-medium text-[#9a5b00] hover:underline">
               {t('Noch nicht', 'Not yet')}
             </Link>
+          ),
+        }
+      : null,
+    // telc's result, once entered on the sitting's page, and whether it was collected.
+    exam?.result
+      ? {
+          label: t('Ergebnis', 'Result'),
+          value: (
+            <span>
+              <span className="font-semibold">
+                {(() => {
+                  const overall = overallOutcome(exam.parts, exam.result);
+                  return overall ? pick(lang, EXAM_OVERALL_LABELS[overall]) : t('Unvollständig', 'Incomplete');
+                })()}
+              </span>
+              {exam.parts === 'full'
+                ? ` · ${t('schriftlich', 'written')} ${exam.result.written ? pick(lang, EXAM_OUTCOME_LABELS[exam.result.written]).toLowerCase() : '—'}, ${t('mündlich', 'oral')} ${exam.result.oral ? pick(lang, EXAM_OUTCOME_LABELS[exam.result.oral]).toLowerCase() : '—'}`
+                : ''}
+              {exam.result.collectedAt ? (
+                <span className="block text-xs text-[var(--casa-muted)]">
+                  {t('abgeholt', 'collected')} <DateText value={exam.result.collectedAt} />
+                  {exam.result.collectedNote ? ` · ${exam.result.collectedNote}` : ''}
+                </span>
+              ) : null}
+            </span>
           ),
         }
       : null,

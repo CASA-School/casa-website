@@ -1182,10 +1182,43 @@ booking; the queue's three letters with the sitting.
 The sitting's places: `catalogue` at `edit`. The telc list (personal data):
 `bookings`.
 
-**Not yet:** results per candidate (passed, points, certificate collected) and
-the participation confirmation SchoolMan prints, which wait for a record of the
-result; TestDaF and TestAS, which are not in the catalogue (only the two telc exams are); sittings
-are still created by the seeds and the FileMaker read, not on a screen.
+**The sittings themselves (2026-10-17, 0038).** „Neuer Termin" on the Prüfungen
+list (`catalogue` at `edit`): the exam, the day, the hours and the places start
+from that exam's last sitting; the deadline follows the day — the day before the
+same day a month earlier, as CASA's deadlines fall (13.11. → 12.10.) — until it
+is changed by hand. „Auf der Website zur Anmeldung anbieten" makes it
+`scheduled`, which the public registration form offers until the deadline;
+unticked it is a `draft`, prepared and not public. „Bearbeiten" on the sitting
+changes all of it; with bookings, the exam stays the same and the places never
+fall below the booked. „Termin absagen" (`full`, confirmed, before the day) takes
+it off the website and keeps it — not while anyone is booked or waits: they are
+moved, cancelled or told first. „Termin löschen" only for a sitting made in the
+workspace and never used: the seeds run again on every release and would put a
+seeded one back (`ON CONFLICT DO NOTHING` keeps edits, not deletions).
+
+**Results (0038).** telc sends them about six weeks after the sitting, and
+SchoolMan records none. „Ergebnisse eintragen" (after the exam day,
+`bookings` at `edit`): per candidate, per part sat, *Bestanden*, *Nicht
+bestanden* or *Nicht erschienen* — never free text (`exam_results`). The whole
+result is worked out, not stored (`overallOutcome`): every part passed is
+*Bestanden*, one passed and one not *Teilweise bestanden* (telc lets the other
+part be sat again), none came *Nicht erschienen*. The sitting's page shows it
+per candidate with „Abgeholt" — the result handed over at the office, with who
+collected it when it was someone with an authorisation — and the booking's page
+shows it too. Points stay on telc's certificate.
+
+**Letters to all (0038).** „Briefe an alle" on the sitting: the invitation, „Ergebnis
+ist da" (only once the result is entered) and the confirmation of participation
+(only for the parts the candidate came to). Ticked are those it can go to and who
+have not had it; each gets their own, in their own language, kept on their
+booking, with the same rules as one sent from the booking. Then all of them on
+one page: „Alle drucken / PDF", a letter a page (`@page letters`), and one email
+to all with the addresses in BCC — SchoolMan's circular put every address on
+the letter.
+
+**Not yet:** points per part; TestDaF and TestAS, which are not in the catalogue
+(only the two telc exams are); a full sitting still shows on the public form,
+where a registration becomes a waiting-list place.
 
 ## Copy on screens — labels, not explanations
 

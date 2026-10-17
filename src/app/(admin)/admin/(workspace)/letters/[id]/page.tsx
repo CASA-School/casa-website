@@ -24,11 +24,15 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
   if (found.offerId) back = { href: `/admin/offers/${found.offerId}/letter?version=${found.version}`, label: t('Zum Angebot', 'Back to the offer') };
   if (found.registrationId) back = { href: `/admin/registrations/course/${found.registrationId}`, label: t('Zur Anmeldung', 'Back to the registration') };
   if (found.waitlistEntryId) {
-    const entry = await queryFirst<{ course_instance_id: string; level_code: string }>(
-      `SELECT course_instance_id, level_code FROM waitlist_entries WHERE id = $1`,
+    const entry = await queryFirst<{ course_instance_id: string | null; level_code: string | null; exam_session_id: string | null }>(
+      `SELECT course_instance_id, level_code, exam_session_id FROM waitlist_entries WHERE id = $1`,
       [found.waitlistEntryId]
     );
-    if (entry) back = { href: `/admin/catalogue/${entry.course_instance_id}?level=${encodeURIComponent(entry.level_code)}`, label: t('Zur Warteliste', 'Back to the waiting list') };
+    // Back to the queue it is in: a course start's level, or an exam sitting (0036).
+    if (entry?.exam_session_id) back = { href: `/admin/catalogue/exams/${entry.exam_session_id}`, label: t('Zur Warteliste', 'Back to the waiting list') };
+    else if (entry?.course_instance_id) {
+      back = { href: `/admin/catalogue/${entry.course_instance_id}?level=${encodeURIComponent(entry.level_code ?? '')}`, label: t('Zur Warteliste', 'Back to the waiting list') };
+    }
   }
   const when = found.sentAt.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
 

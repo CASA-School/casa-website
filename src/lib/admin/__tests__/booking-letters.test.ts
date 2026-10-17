@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   amountInWords,
   examConfirmationLetter,
+  examParticipationLetter,
   examInvitationLetter,
   learnerConfirmationLetter,
   learnerLetterBlock,
@@ -282,7 +283,7 @@ describe('several bookings, and a registration (0035)', () => {
 });
 
 describe('an exam booking’s letters (0037)', () => {
-  const exam = { name: 'telc Deutsch B2', day: '2026-11-13', startTime: '09:00', endTime: '17:00', deadline: '2026-10-12', parts: 'written' as const };
+  const exam = { name: 'telc Deutsch B2', day: '2026-11-13', startTime: '09:00', endTime: '17:00', deadline: '2026-10-12', parts: 'written' as const, result: null };
   const ctx: BookingLetterContext = { ...base, course: null, exam, charges: [{ kind: 'exam_fee', description: 'telc Deutsch B2', amount: 160 }], charged: 160 };
   const meta = { today, version: 1 };
 
@@ -322,5 +323,30 @@ describe('an exam booking’s letters (0037)', () => {
       meta
     );
     expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'next', text: 'Der nächste Termin für telc Deutsch B2 ist am 22.01.2027. Wenn du möchtest, melden wir dich gern dafür an.' }));
+  });
+});
+
+describe('after the exam (0038)', () => {
+  const after = { today: '2026-11-20', version: 1 };
+  const exam = { name: 'telc Deutsch B2', day: '2026-11-13', startTime: '09:00', endTime: '17:00', deadline: '2026-10-12', parts: 'full' as const, result: null };
+  const ctx: BookingLetterContext = { ...base, course: null, exam, charges: [{ kind: 'exam_fee', description: 'telc Deutsch B2', amount: 190 }], charged: 190 };
+
+  it('says the result is here only once it is entered', () => {
+    expect(bookingLetterBlock('exam_results', ctx, after)?.de).toContain('Ergebnis eingetragen');
+    expect(bookingLetterBlock('exam_results', { ...ctx, exam: { ...exam, result: { written: 'passed', oral: 'failed' } } }, after)).toBeNull();
+  });
+
+  it('confirms participation only in the parts the candidate came to', () => {
+    expect(bookingLetterBlock('exam_participation', { ...ctx, exam: { ...exam, result: { written: 'absent', oral: 'absent' } } }, after)?.de).toContain('nicht erschienen');
+    const came = { ...ctx, exam: { ...exam, result: { written: 'passed' as const, oral: 'absent' as const } } };
+    expect(bookingLetterBlock('exam_participation', came, after)).toBeNull();
+    const letter = examParticipationLetter(came, de, {}, after);
+    expect(letter.salutation).toBe('');
+    expect(letter.body).toContainEqual(
+      expect.objectContaining({
+        slot: 'certify',
+        text: 'Hiermit bestätigen wir, dass Frau Lucía Fernández, geboren am 14.03.1998, am 13.11.2026 bei CASA – Internationale Sprachschule Bremen an der Prüfung telc Deutsch B2 teilgenommen hat (schriftlicher Teil).',
+      })
+    );
   });
 });

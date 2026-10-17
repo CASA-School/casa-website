@@ -5,7 +5,7 @@ import type { PoolClient } from 'pg';
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst } from './db';
-import type { ExamParts } from './exam-parts';
+import { isExamOutcome, partsSat, type ExamOutcome, type ExamParts } from './exam-parts';
 import type { Bilingual } from './i18n';
 import { setQueueStatus } from './queues';
 import type { WaitlistSource, WaitlistStatus } from './waitlist';
@@ -44,6 +44,8 @@ export type ExamSitting = {
   waiting: number;
   /** Website registrations for this sitting not yet booked, put on the list or closed. */
   openRegistrations: number;
+  /** Made in the workspace (0038), not by a seed: only such a sitting can be deleted. */
+  createdHere: boolean;
 };
 
 type SittingRow = {
@@ -62,11 +64,12 @@ type SittingRow = {
   offered: number;
   waiting: number;
   open_registrations: number;
+  created_here: boolean;
 };
 
 const SITTINGS = `
   SELECT s.id, s.exam_type_id, e.code AS exam_code, e.name AS exam_name, e.level, s.starts_at, s.ends_at,
-         s.registration_deadline, s.capacity, s.status,
+         s.registration_deadline, s.capacity, s.status, s.created_by IS NOT NULL AS created_here,
          (SELECT count(*) FROM bookings b WHERE b.exam_session_id = s.id AND b.deleted_at IS NULL AND b.status <> 'cancelled')::int AS booked,
          (SELECT count(*) FROM bookings b WHERE b.exam_session_id = s.id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
              AND b.exam_filed_at IS NOT NULL)::int AS filed,
@@ -94,6 +97,7 @@ const toSitting = (r: SittingRow): ExamSitting => ({
   offered: r.offered,
   waiting: r.waiting,
   openRegistrations: r.open_registrations,
+  createdHere: r.created_here,
 });
 
 /** The sittings from a fortnight ago on: the last ones stay for what follows them (results, certificates). */
@@ -176,6 +180,8 @@ export type SittingCandidate = {
   filedAt: Date | null;
   /** What telc still needs from the person's record. */
   missing: TelcField[];
+  /** telc's outcome per part sat, once recorded (0038), and when the result was collected. */
+  result: { written: ExamOutcome | null; oral: ExamOutcome | null; collectedAt: Date | null; collectedNote: string | null } | null;
 };
 
 export async function sittingCandidates(sittingId: string): Promise<SittingCandidate[]> {
@@ -195,8 +201,14 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
     has_birth_place: boolean;
     has_birth_country: boolean;
     has_mother_tongue: boolean;
+    written: ExamOutcome | null;
+    oral: ExamOutcome | null;
+    has_result: boolean;
+    collected_at: Date | null;
+    collected_note: string | null;
   }>(
     `SELECT b.id, b.number, canonical_person_id(b.person_id) AS person_id, p.first_name, p.last_name, b.exam_parts,
+            r.written, r.oral, r.booking_id IS NOT NULL AS has_result, r.collected_at, r.collected_note,
             b.status::text AS status, b.observation_reason, b.exam_filed_at,
             coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
             coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid,
@@ -205,6 +217,7 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
             p.birth_country_code IS NOT NULL AS has_birth_country,
             nullif(trim(p.mother_tongue), '') IS NOT NULL AS has_mother_tongue
        FROM bookings b JOIN people p ON p.id = canonical_person_id(b.person_id)
+       LEFT JOIN exam_results r ON r.booking_id = b.id
       WHERE b.exam_session_id = $1 AND b.deleted_at IS NULL
       ORDER BY (b.status = 'cancelled'), p.last_name, p.first_name`,
     [sittingId]
@@ -221,6 +234,7 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
     observationReason: r.observation_reason,
     filedAt: r.exam_filed_at,
     missing: TELC_FIELDS.filter((f) => !{ birth_date: r.has_birth_date, birth_place: r.has_birth_place, birth_country: r.has_birth_country, mother_tongue: r.has_mother_tongue }[f]),
+    result: r.has_result ? { written: r.written, oral: r.oral, collectedAt: r.collected_at, collectedNote: r.collected_note } : null,
   }));
 }
 
@@ -488,8 +502,166 @@ export async function setFiled(sittingId: string, bookingIds: readonly string[],
   return length;
 }
 
-/** A sitting's places: how many candidates the room and the examiners take. */
-export async function setCapacity(sittingId: string, capacity: number, actor: StaffUser): Promise<void> {
-  await query(`UPDATE exam_sessions SET capacity = $2 WHERE id = $1`, [sittingId, capacity]);
-  await logActivity({ actor, entity: 'exam_session', entityId: sittingId, action: 'places_set', detail: { capacity } });
+// ------------------------------------------------------------ the sittings themselves (0038)
+
+export type SittingStatus = 'draft' | 'scheduled' | 'cancelled';
+
+/** A sitting as the form writes it: the day and hours in Bremen's time, the deadline, the places. */
+export type SittingInput = {
+  examTypeId: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  deadline: string | null;
+  capacity: number;
+  /** On the website's registration form (scheduled), or prepared only (draft). */
+  published: boolean;
+};
+
+/** The exams a sitting can be of, each with its last sitting's hours and places to start a new one from. */
+export async function sittingDefaults(): Promise<{ id: string; name: string; startTime: string; endTime: string; capacity: number }[]> {
+  const rows = await query<{ id: string; name: string; start_time: string | null; end_time: string | null; capacity: number | null }>(
+    `SELECT e.id, e.name, last.start_time, last.end_time, last.capacity
+       FROM exam_types e
+       LEFT JOIN LATERAL (
+         SELECT to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS start_time,
+                to_char(s.ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS end_time, s.capacity
+           FROM exam_sessions s WHERE s.exam_type_id = e.id ORDER BY s.starts_at DESC LIMIT 1
+       ) last ON true
+      WHERE e.is_active ORDER BY e.name`
+  );
+  return rows.map((r) => ({ id: r.id, name: r.name, startTime: r.start_time ?? '09:00', endTime: r.end_time ?? '17:00', capacity: r.capacity ?? 20 }));
+}
+
+/** A sitting's own fields, for its form: Bremen's day and hours. */
+export async function sittingForEdit(id: string): Promise<(SittingInput & { status: SittingStatus }) | null> {
+  const row = await queryFirst<{ exam_type_id: string; day: string; start_time: string; end_time: string; deadline: string | null; capacity: number; status: SittingStatus }>(
+    `SELECT exam_type_id, to_char(starts_at AT TIME ZONE 'Europe/Berlin', 'YYYY-MM-DD') AS day,
+            to_char(starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS start_time,
+            to_char(ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS end_time,
+            to_char(registration_deadline, 'YYYY-MM-DD') AS deadline, capacity, status
+       FROM exam_sessions WHERE id = $1`,
+    [id]
+  );
+  return row
+    ? { examTypeId: row.exam_type_id, day: row.day, startTime: row.start_time, endTime: row.end_time, deadline: row.deadline, capacity: row.capacity, published: row.status === 'scheduled', status: row.status }
+    : null;
+}
+
+function checkInput(input: SittingInput): Result | null {
+  if (!(input.startTime < input.endTime)) return refuse('Das Ende liegt vor dem Beginn.', 'The end is before the start.');
+  if (input.deadline && input.deadline >= input.day) return refuse('Der Anmeldeschluss liegt nicht vor dem Prüfungstag.', 'The deadline is not before the exam day.');
+  return null;
+}
+
+/** A new sitting. A draft is prepared only; a published one is on the website's registration form until its deadline. */
+export async function createSitting(input: SittingInput, actor: StaffUser): Promise<Result> {
+  const wrong = checkInput(input);
+  if (wrong) return wrong;
+  const row = await queryFirst<{ id: string }>(
+    `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, registration_deadline, capacity, status, created_by)
+     SELECT e.id, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5::date, $6, $7, $8
+       FROM exam_types e WHERE e.id = $1 AND e.is_active
+     RETURNING id`,
+    [input.examTypeId, input.day, input.startTime, input.endTime, input.deadline, input.capacity, input.published ? 'scheduled' : 'draft', actor.id]
+  );
+  if (!row) return refuse('Diese Prüfung gibt es nicht.', 'That exam does not exist.');
+  await logActivity({ actor, entity: 'exam_session', entityId: row.id, action: 'sitting_created', detail: { day: input.day, published: input.published } });
+  return { ok: true, id: row.id };
+}
+
+/** The sitting changed: another day or hours, deadline, places, or on or off the website. */
+export async function updateSitting(id: string, input: SittingInput, actor: StaffUser): Promise<Result> {
+  const wrong = checkInput(input);
+  if (wrong) return wrong;
+  const current = await getSitting(id);
+  if (!current) return refuse('Diesen Termin gibt es nicht mehr.', 'That sitting no longer exists.');
+  if (input.capacity < current.booked) return refuse(`Es sind schon ${current.booked} gebucht.`, `${current.booked} are already booked.`);
+  if (input.examTypeId !== current.examTypeId && current.booked > 0) {
+    return refuse('Mit Buchungen bleibt die Prüfung dieselbe.', 'With bookings, the exam stays the same.');
+  }
+  await query(
+    `UPDATE exam_sessions
+        SET exam_type_id = $2, starts_at = ($3::date + $4::time) AT TIME ZONE 'Europe/Berlin', ends_at = ($3::date + $5::time) AT TIME ZONE 'Europe/Berlin',
+            registration_deadline = $6::date, capacity = $7, status = $8
+      WHERE id = $1`,
+    [id, input.examTypeId, input.day, input.startTime, input.endTime, input.deadline, input.capacity, input.published ? 'scheduled' : 'draft']
+  );
+  await logActivity({ actor, entity: 'exam_session', entityId: id, action: 'sitting_updated', detail: { day: input.day, published: input.published } });
+  return { ok: true, id };
+}
+
+/**
+ * Called off: off the website, kept on record. Not while a booking stands or anyone waits — they are
+ * moved to another sitting, cancelled or told first, so nobody is left on a sitting that will not happen.
+ */
+export async function cancelSitting(id: string, actor: StaffUser): Promise<Result> {
+  const current = await getSitting(id);
+  if (!current) return refuse('Diesen Termin gibt es nicht mehr.', 'That sitting no longer exists.');
+  if (current.booked === 1) return refuse('Erst die Buchung auf einen anderen Termin verschieben oder stornieren.', 'Move or cancel the booking first.');
+  if (current.booked > 1) return refuse(`Erst die ${current.booked} Buchungen auf einen anderen Termin verschieben oder stornieren.`, `Move or cancel the ${current.booked} bookings first.`);
+  if (current.waiting + current.offered > 0) return refuse('Erst die Warteliste auflösen.', 'Clear the waiting list first.');
+  await query(`UPDATE exam_sessions SET status = 'cancelled' WHERE id = $1`, [id]);
+  await logActivity({ actor, entity: 'exam_session', entityId: id, action: 'sitting_cancelled', detail: {} });
+  return { ok: true };
+}
+
+/**
+ * Gone, for a sitting made here by mistake: only one created in the workspace — the seeds put theirs
+ * back on every release — with no booking, entry or registration ever made on it. Else: cancel it.
+ */
+export async function deleteSitting(id: string, actor: StaffUser): Promise<Result> {
+  const row = await queryFirst<{ ours: boolean; used: boolean }>(
+    `SELECT s.created_by IS NOT NULL AS ours,
+            EXISTS (SELECT 1 FROM bookings b WHERE b.exam_session_id = s.id)
+              OR EXISTS (SELECT 1 FROM waitlist_entries w WHERE w.exam_session_id = s.id)
+              OR EXISTS (SELECT 1 FROM exam_registrations r WHERE r.exam_session_id = s.id) AS used
+       FROM exam_sessions s WHERE s.id = $1`,
+    [id]
+  );
+  if (!row) return refuse('Diesen Termin gibt es nicht mehr.', 'That sitting no longer exists.');
+  if (!row.ours || row.used) return refuse('Dieser Termin wird abgesagt, nicht gelöscht.', 'This sitting is cancelled, not deleted.');
+  await query(`DELETE FROM exam_sessions WHERE id = $1`, [id]);
+  await logActivity({ actor, entity: 'exam_session', entityId: id, action: 'sitting_deleted', detail: {} });
+  return { ok: true };
+}
+
+// ------------------------------------------------------------ results (0038)
+
+/**
+ * telc's results for the sitting's candidates, as entered: per booking, the outcome of each part it
+ * sat. A part not sat stays empty whatever was sent; a booking with nothing entered is left alone.
+ */
+export async function saveResults(sittingId: string, rows: readonly { bookingId: string; written: unknown; oral: unknown }[], actor: StaffUser): Promise<number> {
+  const bookings = await query<{ id: string; exam_parts: ExamParts }>(
+    `SELECT id, exam_parts FROM bookings WHERE exam_session_id = $1 AND deleted_at IS NULL AND status <> 'cancelled' AND id = ANY($2::uuid[])`,
+    [sittingId, rows.map((r) => r.bookingId)]
+  );
+  let saved = 0;
+  for (const b of bookings) {
+    const row = rows.find((r) => r.bookingId === b.id)!;
+    const sat = partsSat(b.exam_parts);
+    const written = sat.includes('written') && isExamOutcome(row.written) ? row.written : null;
+    const oral = sat.includes('oral') && isExamOutcome(row.oral) ? row.oral : null;
+    if (!written && !oral) continue;
+    await query(
+      `INSERT INTO exam_results (booking_id, written, oral, recorded_by) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (booking_id) DO UPDATE SET written = EXCLUDED.written, oral = EXCLUDED.oral, recorded_at = now(), recorded_by = EXCLUDED.recorded_by`,
+      [b.id, written, oral, actor.id]
+    );
+    saved += 1;
+  }
+  if (saved) await logActivity({ actor, entity: 'exam_session', entityId: sittingId, action: 'exam_results_saved', detail: { count: saved } });
+  return saved;
+}
+
+/** The result and the certificate were collected at the office — by the candidate, or with an authorisation (the note). */
+export async function markCollected(bookingId: string, note: string | null, actor: StaffUser): Promise<Result> {
+  const row = await queryFirst<{ booking_id: string }>(
+    `UPDATE exam_results SET collected_at = now(), collected_by = $2, collected_note = $3 WHERE booking_id = $1 AND collected_at IS NULL RETURNING booking_id`,
+    [bookingId, actor.id, note]
+  );
+  if (!row) return refuse('Für diese Buchung ist kein Ergebnis eingetragen.', 'No result is recorded for this booking.');
+  await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'exam_result_collected', detail: { note } });
+  return { ok: true };
 }

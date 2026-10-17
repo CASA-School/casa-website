@@ -136,3 +136,6 @@ export function LetterSheet({
 }
 
 export const printRootClass = s.printRoot;
+/** Several letters on paper at once: each on a page of its own. */
+export const printManyClass = `${s.printRoot} ${s.many}`;
+export const printNextClass = s.next;

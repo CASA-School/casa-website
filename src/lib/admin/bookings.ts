@@ -3,7 +3,7 @@ import type { PoolClient } from 'pg';
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
-import { ratedParts, type ExamParts } from './exam-parts';
+import { ratedParts, type ExamOutcome, type ExamParts } from './exam-parts';
 import { closeOnExamBooking, sittingHasPlace, sittingWords } from './exams';
 import { raiseFlag } from './flags';
 import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './waitlist';
@@ -208,6 +208,8 @@ export type BookingExam = {
   filedAt: Date | null;
   filedByName: string | null;
   sourceRegistrationId: string | null;
+  /** telc's outcome per part sat, once entered (0038), and its handover. */
+  result: { written: ExamOutcome | null; oral: ExamOutcome | null; collectedAt: Date | null; collectedNote: string | null } | null;
 };
 
 export type BookingDetail = BookingListItem & {
@@ -405,6 +407,11 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       exam_filed_at: Date | null;
       exam_filed_by_name: string | null;
       source_exam_registration_id: string | null;
+      result_written: ExamOutcome | null;
+      result_oral: ExamOutcome | null;
+      has_result: boolean;
+      collected_at: Date | null;
+      collected_note: string | null;
     }
   >(
     `${LIST.replace(
@@ -418,8 +425,10 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
          b.accommodation_from, b.accommodation_to,
          es.exam_type_id, es.starts_at AS exam_starts_at, es.ends_at AS exam_ends_at, es.registration_deadline AS exam_deadline,
          b.exam_filed_at, (SELECT name FROM staff_users WHERE id = b.exam_filed_by) AS exam_filed_by_name,
-         b.source_exam_registration_id
+         b.source_exam_registration_id,
+         er.written AS result_written, er.oral AS result_oral, er.booking_id IS NOT NULL AS has_result, er.collected_at, er.collected_note
     FROM bookings b
+    LEFT JOIN exam_results er ON er.booking_id = b.id
     LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
     LEFT JOIN accommodation_room_types art ON art.code = b.accommodation_room_type_code
     LEFT JOIN catering_options co ON co.code = b.accommodation_catering_code`
@@ -517,6 +526,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
             filedAt: row.exam_filed_at,
             filedByName: row.exam_filed_by_name,
             sourceRegistrationId: row.source_exam_registration_id,
+            result: row.has_result ? { written: row.result_written, oral: row.result_oral, collectedAt: row.collected_at, collectedNote: row.collected_note } : null,
           }
         : null,
     periods: periods.map((p) => ({

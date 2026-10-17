@@ -1,8 +1,14 @@
 import Link from 'next/link';
 
+import { createSittingAction } from './actions';
+import { SittingForm } from './sitting-form';
+import { FormDialog } from '@/components/admin/dialogs';
+import { canAccess } from '@/lib/admin/access';
+import { requireModule } from '@/lib/admin/guard';
+
 import { ListEmpty, ListGroup } from '@/components/admin/list';
 import { Badge, Card, PageHeader } from '@/components/admin/ui';
-import { listSittings } from '@/lib/admin/exams';
+import { listSittings, sittingDefaults } from '@/lib/admin/exams';
 import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenceCase, shortDate } from '../list-parts';
 import { pick, wsLocale, type Bilingual } from '@/lib/admin/i18n';
 import { Tally } from '@/components/admin/inbox';
@@ -28,8 +34,10 @@ const STATUS_LABELS: Record<string, Bilingual> = {
  * not simply scheduled, and a level only when the exam's name does not
  * already say it.
  */
-export default async function ExamCataloguePage() {
-  const [sessions, { t, lang }] = await Promise.all([listSittings(30), getI18n()]);
+export default async function ExamCataloguePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const [sessions, { t, lang }, user, { error }] = await Promise.all([listSittings(30), getI18n(), requireModule('catalogue'), searchParams]);
+  // A new sitting (0038): `catalogue` at `edit`, starting from its exam's last one.
+  const exams = canAccess(user, 'catalogue', 'edit') ? await sittingDefaults() : [];
   const months = groupRuns(sessions, (session) => monthKey(session.startsAt));
   const today = new Date().setHours(0, 0, 0, 0);
   const subtle = 'text-[var(--casa-muted)]';
@@ -42,7 +50,21 @@ export default async function ExamCataloguePage() {
 
   return (
     <>
-      <PageHeader title={t('Prüfungen', 'Exams')} />
+      <PageHeader
+        title={t('Prüfungen', 'Exams')}
+        actions={
+          exams.length ? (
+            <FormDialog trigger={t('Neuer Termin', 'New sitting')} title={t('Neuer Prüfungstermin', 'New exam sitting')} triggerVariant="primary">
+              <SittingForm action={createSittingAction} exams={exams} />
+            </FormDialog>
+          ) : null
+        }
+      />
+      {error ? (
+        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {error}
+        </p>
+      ) : null}
 
       {/* What is coming, how many have entered, and the next deadline: a telc entry cannot be filed after it. */}
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">

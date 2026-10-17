@@ -24,6 +24,9 @@ test.describe('exam bookings', () => {
   let anaId = '';
   let benId = '';
   let bookingId = '';
+  let pastId = '';
+  let pastBookingId = '';
+  let newSittingId = '';
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -52,11 +55,24 @@ test.describe('exam bookings', () => {
     ).rows[0].id;
     benId = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, salutation, created_by) VALUES ('Ben', 'Prüfungstest', 'mr', 'e2e') RETURNING id`)).rows[0].id;
     await client.query(`INSERT INTO emails (person_id, address, normalized, kind, is_primary) VALUES ($1, 'ana@example.com', 'ana@example.com', 'personal', true)`, [anaId]);
+    // A sitting ten days ago with Ana booked for both parts: its results are due.
+    pastId = (
+      await client.query<{ id: string }>(
+        `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, registration_deadline, capacity, status)
+         SELECT id, ((current_date - 10) + time '09:00') AT TIME ZONE 'Europe/Berlin', ((current_date - 10) + time '17:00') AT TIME ZONE 'Europe/Berlin', current_date - 40, 20, 'scheduled'
+           FROM exam_types WHERE code = 'telc_b2' RETURNING id`
+      )
+    ).rows[0].id;
+    pastBookingId = (
+      await client.query<{ id: string }>(`INSERT INTO bookings (person_id, status, exam_session_id, exam_parts) VALUES ($1, 'confirmed', $2, 'full') RETURNING id`, [anaId, pastId])
+    ).rows[0].id;
   });
 
   test.afterAll(async () => {
     if (!client) return;
     const people = [anaId, benId].filter(Boolean);
+    if (newSittingId) await client.query(`DELETE FROM staff_activity WHERE entity_id = $1`, [newSittingId]);
+    if (newSittingId) await client.query(`DELETE FROM exam_sessions WHERE id = $1`, [newSittingId]);
     await client.query(`DELETE FROM letters WHERE person_id = ANY($1::uuid[])`, [people]);
     await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[]) OR entity_id IN (SELECT id FROM bookings WHERE person_id = ANY($1::uuid[]))`, [
       [...people, sittingId].filter(Boolean),
@@ -65,6 +81,8 @@ test.describe('exam bookings', () => {
     await client.query(`DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE person_id = ANY($1::uuid[]))`, [people]);
     await client.query(`DELETE FROM bookings WHERE person_id = ANY($1::uuid[])`, [people]);
     if (sittingId) await client.query(`DELETE FROM exam_sessions WHERE id = $1`, [sittingId]);
+    if (pastId) await client.query(`DELETE FROM staff_activity WHERE entity_id = $1`, [pastId]);
+    if (pastId) await client.query(`DELETE FROM exam_sessions WHERE id = $1`, [pastId]);
     await client.query(`DELETE FROM people WHERE id = ANY($1::uuid[])`, [people]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
@@ -130,9 +148,9 @@ test.describe('exam bookings', () => {
     const filed = await client.query<{ filed: boolean }>(`SELECT exam_filed_at IS NOT NULL AS filed FROM bookings WHERE id = $1`, [bookingId]);
     expect(filed.rows[0].filed).toBe(true);
 
-    await page.getByRole('button', { name: 'Plätze ändern' }).click();
-    await page.getByRole('spinbutton', { name: 'Plätze' }).fill('2');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByRole('button', { name: 'Bearbeiten' }).click();
+    await page.getByRole('dialog').getByRole('spinbutton', { name: 'Plätze' }).fill('2');
+    await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
     const banner = page.getByRole('status');
     await expect(banner).toContainText('1 Platz frei');
     await expect(banner).toContainText('Ben Prüfungstest');
@@ -148,5 +166,70 @@ test.describe('exam bookings', () => {
     await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
     const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1`, [bookingId]);
     expect(rows).toEqual([{ kind: 'exam_confirmation' }]);
+  });
+
+  test('a sitting with a candidate is not called off', async ({ page }) => {
+    await page.goto(`/admin/catalogue/exams/${sittingId}`);
+    await page.getByRole('button', { name: 'Termin absagen' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Termin absagen' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Erst die Buchung' })).toContainText('auf einen anderen Termin verschieben');
+    const { rows } = await client.query<{ status: string }>(`SELECT status FROM exam_sessions WHERE id = $1`, [sittingId]);
+    expect(rows[0].status).toBe('scheduled');
+  });
+
+  test('a new sitting: created, taken off the website, deleted', async ({ page }) => {
+    await page.goto('/admin/catalogue/exams');
+    await page.getByRole('button', { name: 'Neuer Termin' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Prüfung', { exact: true }).selectOption({ label: 'telc Deutsch C1 Hochschule' });
+    await dialog.locator('#sitting-day').fill('+120');
+    await dialog.locator('#sitting-day').press('Tab');
+    await dialog.getByRole('spinbutton', { name: 'Plätze' }).fill('12');
+    await dialog.getByRole('button', { name: 'Termin anlegen' }).click();
+    await expect(page).toHaveURL(/\/admin\/catalogue\/exams\/[0-9a-f-]{36}$/);
+    newSittingId = page.url().split('/').pop()!;
+    const created = await client.query<{ status: string; capacity: number; gap: number }>(
+      `SELECT status, capacity, ((starts_at AT TIME ZONE 'Europe/Berlin')::date - registration_deadline) AS gap FROM exam_sessions WHERE id = $1`,
+      [newSittingId]
+    );
+    // On the website, and the deadline a month and a day before.
+    expect(created.rows[0].status).toBe('scheduled');
+    expect(created.rows[0].capacity).toBe(12);
+    expect(created.rows[0].gap).toBeGreaterThanOrEqual(29);
+
+    await page.getByRole('button', { name: 'Bearbeiten' }).click();
+    await page.getByRole('dialog').getByLabel('Auf der Website zur Anmeldung anbieten').uncheck();
+    await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+    await expect(page.getByText('Entwurf', { exact: true })).toBeVisible();
+    const draft = await client.query<{ status: string }>(`SELECT status FROM exam_sessions WHERE id = $1`, [newSittingId]);
+    expect(draft.rows[0].status).toBe('draft');
+
+    await page.getByRole('button', { name: 'Termin löschen' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Löschen', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/catalogue\/exams$/);
+    const gone = await client.query(`SELECT 1 FROM exam_sessions WHERE id = $1`, [newSittingId]);
+    expect(gone.rowCount).toBe(0);
+    newSittingId = '';
+  });
+
+  test('results entered, collected, and a confirmation of participation to all', async ({ page }) => {
+    await page.goto(`/admin/catalogue/exams/${pastId}/results`);
+    await page.getByLabel('Ana Prüfungstest: Schriftlich').selectOption({ label: 'Bestanden' });
+    await page.getByLabel('Ana Prüfungstest: Mündlich').selectOption({ label: 'Nicht bestanden' });
+    await page.getByRole('button', { name: 'Ergebnisse speichern' }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/exams/${pastId}$`));
+    await expect(page.locator('body')).toContainText('Teilweise bestanden');
+
+    await page.getByRole('button', { name: 'Abgeholt', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Als abgeholt eintragen' }).click();
+    await expect(page.locator('body')).toContainText(/abgeholt \d+\./);
+
+    await page.goto(`/admin/catalogue/exams/${pastId}/letters?kind=participation`);
+    await expect(page.locator('article').first()).toContainText('an der Prüfung telc Deutsch B2 teilgenommen hat (schriftlicher und mündlicher Teil)');
+    await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/exams/${pastId}/letters/print\\?ids=`));
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('1 Brief gespeichert');
+    const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1`, [pastBookingId]);
+    expect(rows).toEqual([{ kind: 'exam_participation' }]);
   });
 });

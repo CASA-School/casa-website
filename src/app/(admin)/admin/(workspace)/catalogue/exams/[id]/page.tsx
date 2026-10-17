@@ -5,9 +5,11 @@ import { createBookingFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
 import { offerPlaceAction, takeBackOfferAction } from '../../actions';
 import { CloseForm, MoveForm } from '../../waitlist-forms';
-import { fileCandidatesAction, setSittingPlacesAction, unfileCandidateAction } from '../actions';
+import { cancelSittingAction, deleteSittingAction, fileCandidatesAction, markCollectedAction, unfileCandidateAction, updateSittingAction } from '../actions';
+import { SittingForm } from '../sitting-form';
+import { RecordFoot } from '../../../bookings/record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
-import { FormDialog } from '@/components/admin/dialogs';
+import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { Badge, Button, Card, Field, Input, RecordHeader } from '@/components/admin/ui';
@@ -15,12 +17,14 @@ import { canAccess } from '@/lib/admin/access';
 import { bookingOffer } from '@/lib/admin/booking-offer';
 import type { BookingOffer } from '@/lib/admin/booking-offer-types';
 import { BOOKING_LIGHT_LABELS, bookingLight, type ObservationReason } from '@/lib/admin/bookings';
-import { EXAM_PARTS_LABELS } from '@/lib/admin/exam-parts';
+import { EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, overallOutcome, SITTING_STATUS_LABELS } from '@/lib/admin/exam-parts';
 import {
   freeSeats,
   getSitting,
   sittingCandidates,
+  sittingDefaults,
   sittingEntries,
+  sittingForEdit,
   sittingRegistrations,
   TELC_FIELD_LABELS,
   type ExamSitting,
@@ -55,10 +59,13 @@ export default async function ExamSittingPage({ params, searchParams }: { params
   const seesBookings = canAccess(user, 'bookings');
   const handles = canAccess(user, 'bookings', 'edit');
   const plans = canAccess(user, 'catalogue', 'edit');
-  const [candidates, entries, registrations] = await Promise.all([
+  const ends = canAccess(user, 'catalogue', 'full');
+  const [candidates, entries, registrations, exams, form] = await Promise.all([
     seesBookings ? sittingCandidates(id) : Promise.resolve([]),
     sittingEntries(id),
     canAccess(user, 'registrations') ? sittingRegistrations(id) : Promise.resolve([]),
+    plans ? sittingDefaults() : Promise.resolve([]),
+    plans ? sittingForEdit(id) : Promise.resolve(null),
   ]);
   const letters = await lettersForEntries(entries.map((e) => e.id));
   const open = entries.filter((e) => e.status === 'waiting' || e.status === 'offered');
@@ -73,6 +80,8 @@ export default async function ExamSittingPage({ params, searchParams }: { params
   const back = `/admin/catalogue/exams/${id}`;
   const today = new Date().setHours(0, 0, 0, 0);
   const past = new Date(sitting.startsAt).getTime() < today;
+  // After the exam day: telc's results are entered, and the result is handed over.
+  const sat = new Date(sitting.startsAt).setHours(0, 0, 0, 0) < today;
   const daysLeft = sitting.registrationDeadline ? Math.round((new Date(sitting.registrationDeadline).setHours(0, 0, 0, 0) - today) / 86_400_000) : null;
 
   return (
@@ -83,7 +92,8 @@ export default async function ExamSittingPage({ params, searchParams }: { params
         title={sitting.examName}
         status={
           <>
-            {sitting.status === 'cancelled' ? <Badge tone="danger">{t('Abgesagt', 'Cancelled')}</Badge> : null}
+            {sitting.status === 'cancelled' ? <Badge tone="danger">{pick(lang, SITTING_STATUS_LABELS.cancelled)}</Badge> : null}
+            {sitting.status === 'draft' ? <Badge tone="neutral">{pick(lang, SITTING_STATUS_LABELS.draft)}</Badge> : null}
             {past ? <Badge tone="quiet">{t('Vorbei', 'Past')}</Badge> : null}
           </>
         }
@@ -119,17 +129,9 @@ export default async function ExamSittingPage({ params, searchParams }: { params
                 {t('Liste für telc', 'List for telc')}
               </Link>
             ) : null}
-            {plans ? (
-              <FormDialog trigger={t('Plätze ändern', 'Change places')} title={t('Plätze in diesem Termin', 'Places in this sitting')} size="sm" triggerVariant="secondary">
-                <form action={setSittingPlacesAction} className="space-y-3">
-                  <input type="hidden" name="sittingId" value={id} />
-                  <Field label={t('Plätze', 'Places')} htmlFor="sitting-capacity">
-                    <Input id="sitting-capacity" name="capacity" type="number" min={Math.max(1, sitting.booked)} max={500} required defaultValue={sitting.capacity} />
-                  </Field>
-                  <div className="flex justify-end">
-                    <Button type="submit">{t('Speichern', 'Save')}</Button>
-                  </div>
-                </form>
+            {plans && form ? (
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t('Prüfungstermin bearbeiten', 'Edit the sitting')} triggerVariant="secondary">
+                <SittingForm action={updateSittingAction} exams={exams} sittingId={id} initial={form} examLocked={sitting.booked > 0} />
               </FormDialog>
             ) : null}
           </>
@@ -185,7 +187,26 @@ export default async function ExamSittingPage({ params, searchParams }: { params
         ) : null}
 
         {seesBookings ? (
-          <Card title={t('Teilnehmende', 'Candidates')} icon={Icon.people} tint="blue" bleed>
+          <Card
+            title={t('Teilnehmende', 'Candidates')}
+            icon={Icon.people}
+            tint="blue"
+            bleed
+            actions={
+              handles && standing.length ? (
+                <span className="flex items-center gap-4 text-[0.8rem] font-semibold">
+                  <Link href={`${back}/letters`} className="text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                    {t('Briefe an alle', 'Letters to all')}
+                  </Link>
+                  {sat ? (
+                    <Link href={`${back}/results`} className="text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                      {t('Ergebnisse eintragen', 'Enter results')}
+                    </Link>
+                  ) : null}
+                </span>
+              ) : undefined
+            }
+          >
             {standing.length === 0 ? (
               <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch niemand gebucht.', 'Nobody booked yet.')}</p>
             ) : (
@@ -193,10 +214,10 @@ export default async function ExamSittingPage({ params, searchParams }: { params
                 <input type="hidden" name="sittingId" value={id} />
                 <ul className="divide-y divide-ws-line-soft">
                   {standing.map((c) => (
-                    <CandidateRow key={c.bookingId} candidate={c} handles={handles} t={t} lang={lang} />
+                    <CandidateRow key={c.bookingId} candidate={c} handles={handles} files={handles && !sat} sittingId={id} t={t} lang={lang} />
                   ))}
                 </ul>
-                {handles && standing.some((c) => !c.filedAt) ? (
+                {handles && !sat && standing.some((c) => !c.filedAt) ? (
                   <div className="flex justify-end border-t border-ws-line-soft px-5 py-3">
                     <Button type="submit" size="sm" variant="secondary">
                       {t('Ausgewählte als gemeldet markieren', 'Mark the ticked as reported')}
@@ -226,7 +247,11 @@ export default async function ExamSittingPage({ params, searchParams }: { params
                     <li key={c.bookingId}>
                       <Link href={`/admin/bookings/${c.bookingId}`} className="flex items-center justify-between gap-3 px-5 py-2 text-[0.86rem] hover:bg-[var(--ws-row-hover)]">
                         <span className="truncate text-[var(--casa-muted)]">{c.personName}</span>
-                        <span className="text-xs text-[var(--casa-muted)] tabular-nums">{c.number}</span>
+                        <span className="text-xs text-[var(--casa-muted)] tabular-nums">
+                          {/* Reported, then cancelled: telc still has them. */}
+                          {c.filedAt ? <span className="mr-2 font-semibold text-[#9a5b00]">{t('war bei telc gemeldet', 'was reported to telc')}</span> : null}
+                          {c.number}
+                        </span>
                       </Link>
                     </li>
                   ))}
@@ -309,6 +334,31 @@ export default async function ExamSittingPage({ params, searchParams }: { params
           </Card>
         ) : null}
       </div>
+
+      {ends && ((sitting.status !== 'cancelled' && !past) || (sitting.createdHere && candidates.length === 0 && entries.length === 0)) ? (
+        <RecordFoot>
+          {sitting.status !== 'cancelled' && !past ? (
+            <form action={cancelSittingAction}>
+              <input type="hidden" name="sittingId" value={id} />
+              <ConfirmSubmit
+                title={t('Diesen Prüfungstermin absagen?', 'Cancel this sitting?')}
+                description={t('Er verschwindet von der Website und bleibt hier als abgesagt stehen.', 'It leaves the website and stays here as cancelled.')}
+                confirmLabel={t('Termin absagen', 'Cancel sitting')}
+              >
+                {t('Termin absagen', 'Cancel sitting')}
+              </ConfirmSubmit>
+            </form>
+          ) : null}
+          {sitting.createdHere && candidates.length === 0 && entries.length === 0 ? (
+            <form action={deleteSittingAction}>
+              <input type="hidden" name="sittingId" value={id} />
+              <ConfirmSubmit title={t('Diesen Prüfungstermin löschen?', 'Delete this sitting?')} description={t('Er verschwindet ganz.', 'It is gone for good.')}>
+                {t('Termin löschen', 'Delete sitting')}
+              </ConfirmSubmit>
+            </form>
+          ) : null}
+        </RecordFoot>
+      ) : null}
     </>
   );
 }
@@ -322,11 +372,27 @@ function sittingWhen(sitting: ExamSitting, lang: WsLang): string {
 }
 
 /** One candidate: the tick for the report, the name to the booking, the parts, the money, and telc. */
-function CandidateRow({ candidate: c, handles, t, lang }: { candidate: SittingCandidate; handles: boolean; t: T; lang: WsLang }) {
+function CandidateRow({
+  candidate: c,
+  handles,
+  files,
+  sittingId,
+  t,
+  lang,
+}: {
+  candidate: SittingCandidate;
+  handles: boolean;
+  /** Before the exam day: the tick that marks the candidate as reported to telc. */
+  files: boolean;
+  sittingId: string;
+  t: T;
+  lang: WsLang;
+}) {
+  const overall = c.result ? overallOutcome(c.parts, c.result) : null;
   const light = bookingLight({ status: c.status, observationReason: c.observationReason as ObservationReason | null, charged: c.charged, paid: c.paid });
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-3">
-      {handles ? (
+      {files ? (
         <input
           type="checkbox"
           name="bookingIds"
@@ -347,7 +413,32 @@ function CandidateRow({ candidate: c, handles, t, lang }: { candidate: SittingCa
       </div>
       <BookingLightPill light={light} label={pick(lang, BOOKING_LIGHT_LABELS[light])} />
       <span className="w-full text-[0.8rem] sm:w-56 sm:text-right">
-        {c.filedAt ? (
+        {c.result ? (
+          // The result telc sent, then whether it was collected.
+          <span className="inline-flex flex-wrap items-center gap-x-2 sm:justify-end">
+            <span className={cn('font-semibold', overall === 'passed' ? 'text-[#17693a]' : overall === 'partial' ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
+              {overall ? pick(lang, EXAM_OVERALL_LABELS[overall]) : t('Ergebnis unvollständig', 'Result incomplete')}
+            </span>
+            {c.result.collectedAt ? (
+              <span className="text-[var(--casa-muted)]" title={c.result.collectedNote ?? undefined}>
+                · {t('abgeholt', 'collected')} {new Date(c.result.collectedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
+              </span>
+            ) : handles && overall !== 'absent' ? (
+              <FormDialog trigger={t('Abgeholt', 'Collected')} title={t(`Ergebnis von ${c.personName} abgeholt`, `${c.personName}'s result collected`)} size="sm" triggerVariant="ghost">
+                <form action={markCollectedAction} className="space-y-3">
+                  <input type="hidden" name="sittingId" value={sittingId} />
+                  <input type="hidden" name="bookingId" value={c.bookingId} />
+                  <Field label={t('Abgeholt von (mit Vollmacht)', 'Collected by (with authorisation)')} htmlFor={`collected-${c.bookingId}`}>
+                    <Input id={`collected-${c.bookingId}`} name="note" maxLength={300} />
+                  </Field>
+                  <div className="flex justify-end">
+                    <Button type="submit">{t('Als abgeholt eintragen', 'Mark as collected')}</Button>
+                  </div>
+                </form>
+              </FormDialog>
+            ) : null}
+          </span>
+        ) : c.filedAt ? (
           <span className="inline-flex items-center gap-2 text-[#17693a]">
             {t('Gemeldet', 'Reported')} {new Date(c.filedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
             {handles ? (

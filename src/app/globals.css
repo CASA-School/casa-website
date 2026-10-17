@@ -2396,6 +2396,10 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 @page letter:first {
   margin: 0 0 16mm;
 }
+@page letters {
+  size: A4;
+  margin: 0 0 16mm;
+}
 
 /* The ground's grain (--casa-grain): only on the page's own `main`, under every
    band, card and photograph. Print stays plain. */

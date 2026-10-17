@@ -184,4 +184,12 @@
   .printRoot .footer {
     break-inside: avoid;
   }
+  /* Several letters at once (a sitting's, 0038): each starts a page of its own, its letterhead at
+     the top like a first page — `@page letters` in globals.css. */
+  .printRoot.many {
+    page: letters;
+  }
+  .printRoot.many .next {
+    break-before: page;
+  }
 }

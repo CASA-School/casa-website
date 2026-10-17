@@ -139,8 +139,6 @@ on the letters, the booking page, the course start page and the learner's „Woc
 - *Instalment agreement* (370) — waits for instalment plans.
 - *Agency confirmation with commission* (262), *free letters to organisations* — wait for agency pages.
 - *Invoices* (214 + cancellations) — wait for invoices (and the DATEV link).
-- *Exam participation* (`Confirmation.ParticiptionExam_Booking`) — waits for a record of each
-  candidate's result.
 - *Attendance* — "Dein Kurs vermisst dich" (331 + 74), certificates of participation (139 letters,
   ~2,000 PDFs), learning agreements (258): wait for the Klassenbuch bridge.
 - *Rooms* — room change (461), course start to a whole course (194), course restart (109): wait for
@@ -184,7 +182,12 @@ like any booking's, and not the course's (`lettersFor`, checked again on the ser
 | --- | --- | --- |
 | `exam_confirmation` (exam, the default) | `Confirmation.Exam_Booking` (401 in 2026) | the exam and the parts, the day and hours, the school; the costs; pay within a week, but before telc's deadline and the day before the exam, to reserve the place for good; the reference. Then what SchoolMan's never said: the name must be as in the ID (telc prints the certificate with it), bring the ID; the registration is binding and a no-show is not refunded (AGB 6.2) |
 | `exam_invitation` (invitation) | `InvitationExam.Student_Booking_telcB2`/`_telcC1` — circulars with every candidate's address on one letter | be at the school a quarter of an hour before the start (SchoolMan's 08:15 for 08:30) for the check of everyone's details; the ID; for the oral part only, its time (12:45, a standard text); for one part, bring the earlier telc result; water bottle and watches. Not after the exam day |
-| `exam_results` (results) | `ErgebnisseDa_Exam` | the result can be collected at the office with an ID, never given by phone or email; someone else needs a written authorisation. Only after the exam day |
+| `exam_results` (results) | `ErgebnisseDa_Exam` | the result can be collected at the office with an ID, never given by phone or email; someone else needs a written authorisation. Only once the result is entered (0038) |
+| `exam_participation` (participation, 0038) | `Confirmation.ParticiptionExam_Booking` | third person, no salutation: took part in the exam on the day, in the parts the candidate came to. SchoolMan certified participation nothing recorded; here only once the result is entered, never for a candidate who did not come |
+
+The invitation, the result and the participation also go to every candidate of a sitting at once
+(„Briefe an alle", `letters/exam-bulk.ts`): one letter each, in their language, kept on their booking,
+printed together a page each.
 
 The receipt, the reminder, the overview and the cancellation are the booking letters there are; they
 show the exam where a course's would be, and the reminder's deadline is the exam's. An exam's queue

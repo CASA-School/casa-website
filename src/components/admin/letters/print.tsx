@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 
 import type { Letter } from '@/lib/admin/letters/types';
 
-import { LetterSheet, printRootClass } from './letter-sheet';
+import { LetterSheet, printManyClass, printNextClass, printRootClass } from './letter-sheet';
 
 const subscribeNothing = () => () => {};
 
@@ -30,4 +30,20 @@ export function printLetter(name: string) {
   document.title = name;
   window.addEventListener('afterprint', () => (document.title = title), { once: true });
   window.print();
+}
+
+/** Several letters as one paper copy, each starting its own page: a sitting's letters to all (0038). */
+export function PrintCopies({ letters }: { letters: readonly Letter[] }) {
+  const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
+  if (!mounted) return null;
+  return createPortal(
+    <div data-letter-print className={printManyClass}>
+      {letters.map((letter, i) => (
+        <div key={i} className={i > 0 ? printNextClass : undefined}>
+          <LetterSheet letter={letter} variant="print" />
+        </div>
+      ))}
+    </div>,
+    document.body
+  );
 }
