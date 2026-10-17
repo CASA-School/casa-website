@@ -136,11 +136,11 @@ on the letters, the booking page, the course start page and the learner's „Woc
 
 **The rest of the 128, and what each waits for** (2026 counts):
 
-- *Exams* — confirmation (395), receipt (105), reminder (83), invitation (52), waiting list (375):
-  wait for exam bookings with a sitting.
 - *Instalment agreement* (370) — waits for instalment plans.
 - *Agency confirmation with commission* (262), *free letters to organisations* — wait for agency pages.
 - *Invoices* (214 + cancellations) — wait for invoices (and the DATEV link).
+- *Exam participation* (`Confirmation.ParticiptionExam_Booking`) — waits for a record of each
+  candidate's result.
 - *Attendance* — "Dein Kurs vermisst dich" (331 + 74), certificates of participation (139 letters,
   ~2,000 PDFs), learning agreements (258): wait for the Klassenbuch bridge.
 - *Rooms* — room change (461), course start to a whole course (194), course restart (109): wait for
@@ -174,6 +174,22 @@ Two letters are about something other than one booking, so `letters` gains a sub
   language. **Sending one sets a new or in-progress registration to „Wartet auf Antwort"**: what it asks for
   is now the learner's to answer. SchoolMan wrote these and its list never knew. Both texts are
   standard texts, editable with `registrations` at `full`.
+
+## An exam booking's letters (2026-10-17, migration 0037)
+
+An exam booking (`docs/ADMIN_WORKSPACE.md` §Exams) writes its own letters, from its letter page
+like any booking's, and not the course's (`lettersFor`, checked again on the server):
+
+| Kind (`?kind=`) | SchoolMan's | What it says, and its rule |
+| --- | --- | --- |
+| `exam_confirmation` (exam, the default) | `Confirmation.Exam_Booking` (401 in 2026) | the exam and the parts, the day and hours, the school; the costs; pay within a week, but before telc's deadline and the day before the exam, to reserve the place for good; the reference. Then what SchoolMan's never said: the name must be as in the ID (telc prints the certificate with it), bring the ID; the registration is binding and a no-show is not refunded (AGB 6.2) |
+| `exam_invitation` (invitation) | `InvitationExam.Student_Booking_telcB2`/`_telcC1` — circulars with every candidate's address on one letter | be at the school a quarter of an hour before the start (SchoolMan's 08:15 for 08:30) for the check of everyone's details; the ID; for the oral part only, its time (12:45, a standard text); for one part, bring the earlier telc result; water bottle and watches. Not after the exam day |
+| `exam_results` (results) | `ErgebnisseDa_Exam` | the result can be collected at the office with an ID, never given by phone or email; someone else needs a written authorisation. Only after the exam day |
+
+The receipt, the reminder, the overview and the cancellation are the booking letters there are; they
+show the exam where a course's would be, and the reminder's deadline is the exam's. An exam's queue
+writes the three waiting-list letters with the sitting; „no place this time" names the next sitting
+of the same exam. The confirmation of several bookings lists an exam booking with its day.
 
 ## Adding a kind of letter
 

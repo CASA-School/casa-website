@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   amountInWords,
+  examConfirmationLetter,
+  examInvitationLetter,
   learnerConfirmationLetter,
   learnerLetterBlock,
   registrationLetter,
@@ -58,6 +60,7 @@ const base: BookingLetterContext = {
   language: 'de',
   person,
   course,
+  exam: null,
   accommodation: null,
   charges: [{ kind: 'tuition', description: 'Kurspreis 8 Wochen', amount: 940 }],
   payments: [],
@@ -142,7 +145,7 @@ describe('amountInWords', () => {
 });
 
 describe('waitlistLetter', () => {
-  const ctx: WaitlistLetterContext = { entryId: 'w', language: 'de', status: 'waiting', person, course, position: 3, nextStart: '2027-02-01', staff: base.staff };
+  const ctx: WaitlistLetterContext = { entryId: 'w', language: 'de', status: 'waiting', person, course, exam: null, position: 3, nextStart: '2027-02-01', staff: base.staff };
 
   it('tells the learner their place in the queue', () => {
     const letter = waitlistLetter('waitlist_confirmation', ctx, de, LETTER_STANDARD_DEFAULTS.waitlist_confirmation.de, { today, version: 1 });
@@ -227,9 +230,9 @@ describe('several bookings, and a registration (0035)', () => {
     person,
     staff: base.staff,
     bookings: [
-      { id: 'a', number: 'B-2026-0042', status: 'confirmed', course, accommodation: null, charges: [{ description: 'Kurspreis 8 Wochen', amount: 940 }], charged: 940, paid: 200, visaRequired: false },
-      { id: 'b', number: 'B-2026-0043', status: 'confirmed', course: { ...course, name: { de: 'Prüfung', en: 'Exam' }, level: null }, accommodation: null, charges: [{ description: 'telc Deutsch B2', amount: 230 }], charged: 230, paid: 0, visaRequired: false },
-      { id: 'c', number: 'B-2026-0001', status: 'cancelled', course, accommodation: null, charges: [], charged: 0, paid: 0, visaRequired: false },
+      { id: 'a', number: 'B-2026-0042', status: 'confirmed', course, exam: null, accommodation: null, charges: [{ description: 'Kurspreis 8 Wochen', amount: 940 }], charged: 940, paid: 200, visaRequired: false },
+      { id: 'b', number: 'B-2026-0043', status: 'confirmed', course: { ...course, name: { de: 'Prüfung', en: 'Exam' }, level: null }, exam: null, accommodation: null, charges: [{ description: 'telc Deutsch B2', amount: 230 }], charged: 230, paid: 0, visaRequired: false },
+      { id: 'c', number: 'B-2026-0001', status: 'cancelled', course, exam: null, accommodation: null, charges: [], charged: 0, paid: 0, visaRequired: false },
     ],
   };
 
@@ -275,5 +278,49 @@ describe('several bookings, and a registration (0035)', () => {
     expect(letter.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(true);
     const noVisa = registrationLetter('registration_deposit_request', { ...registration, visaRequired: false }, de, LETTER_STANDARD_DEFAULTS.registration_deposit_request.de, meta);
     expect(noVisa.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(false);
+  });
+});
+
+describe('an exam booking’s letters (0037)', () => {
+  const exam = { name: 'telc Deutsch B2', day: '2026-11-13', startTime: '09:00', endTime: '17:00', deadline: '2026-10-12', parts: 'written' as const };
+  const ctx: BookingLetterContext = { ...base, course: null, exam, charges: [{ kind: 'exam_fee', description: 'telc Deutsch B2', amount: 160 }], charged: 160 };
+  const meta = { today, version: 1 };
+
+  it('confirms the exam and its part, and asks for the fee within a week, before the exam', () => {
+    const letter = examConfirmationLetter(ctx, de, LETTER_STANDARD_DEFAULTS.exam_confirmation.de, meta);
+    expect(letter.body).toContainEqual(expect.objectContaining({ type: 'heading', text: 'telc Deutsch B2 · nur schriftlicher Teil', detail: expect.stringContaining('09:00–17:00 Uhr') }));
+    expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'payment', text: expect.stringMatching(/überweise bitte 160,00\u00a0€ bis zum 23\.10\.2026/) }));
+    expect(letter.body).toContainEqual(expect.objectContaining({ text: expect.stringContaining('Verwendungszweck: B-2026-0042') }));
+    // A deadline still ahead comes first.
+    const sooner = examConfirmationLetter({ ...ctx, exam: { ...exam, deadline: '2026-10-20' } }, de, LETTER_STANDARD_DEFAULTS.exam_confirmation.de, meta);
+    expect(sooner.body).toContainEqual(expect.objectContaining({ slot: 'payment', text: expect.stringContaining('bis zum 20.10.2026') }));
+  });
+
+  it('writes an exam’s letters for an exam booking, a course’s for a course', () => {
+    expect(bookingLetterBlock('booking_confirmation', ctx, meta)?.de).toContain('Prüfungsbuchung nicht');
+    expect(bookingLetterBlock('exam_confirmation', base, meta)?.de).toContain('nur für eine Prüfungsbuchung');
+    expect(bookingLetterBlock('exam_confirmation', ctx, meta)).toBeNull();
+    expect(bookingLetterBlock('exam_results', ctx, meta)?.de).toContain('Erst nach dem Prüfungstag');
+    expect(bookingLetterBlock('exam_invitation', ctx, { ...meta, today: '2026-11-14' })?.de).toContain('vorbei');
+  });
+
+  it('invites a quarter of an hour early, the oral time and the earlier result only where they apply', () => {
+    const written = examInvitationLetter(ctx, de, LETTER_STANDARD_DEFAULTS.exam_invitation.de, meta);
+    expect(written.body).toContainEqual(expect.objectContaining({ slot: 'arrive', text: expect.stringContaining('um 08:45 Uhr') }));
+    expect(written.body.some((p) => p.type === 'text' && p.slot === 'part')).toBe(true);
+    expect(written.body.some((p) => p.type === 'text' && p.slot === 'oral')).toBe(false);
+    const full = examInvitationLetter({ ...ctx, exam: { ...exam, parts: 'full' } }, de, LETTER_STANDARD_DEFAULTS.exam_invitation.de, meta);
+    expect(full.body.some((p) => p.type === 'text' && (p.slot === 'part' || p.slot === 'oral'))).toBe(false);
+  });
+
+  it('points a full sitting’s queue to the next sitting', () => {
+    const letter = waitlistLetter(
+      'waitlist_no_place',
+      { entryId: 'w', language: 'de', status: 'waiting', person, course: null, exam: { ...exam, parts: 'full' }, position: 1, nextStart: '2027-01-22', staff: base.staff },
+      de,
+      LETTER_STANDARD_DEFAULTS.waitlist_no_place.de,
+      meta
+    );
+    expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'next', text: 'Der nächste Termin für telc Deutsch B2 ist am 22.01.2027. Wenn du möchtest, melden wir dich gern dafür an.' }));
   });
 });

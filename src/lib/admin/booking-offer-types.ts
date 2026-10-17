@@ -77,6 +77,16 @@ export type ExamOffer = {
   /** Fee for both parts, and for a single part, when a rate exists. */
   feeBothParts: number | null;
   feeOnePart: number | null;
+  /** Its sittings still ahead (0036), each with its places — the same shape as a course level's. */
+  sittings: SittingOffer[];
+};
+
+export type SittingOffer = {
+  id: string;
+  startsAt: Date;
+  /** The last day it can be reported to telc; after it, a booking is a late entry. */
+  deadline: Date | null;
+  places: LevelPlaces;
 };
 
 export type BookingOffer = {

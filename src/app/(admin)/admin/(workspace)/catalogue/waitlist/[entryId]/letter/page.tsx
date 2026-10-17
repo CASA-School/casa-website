@@ -41,12 +41,20 @@ export default async function WaitlistLetterPage({
   const [standards, letters, where] = await Promise.all([
     standardTexts(kind, LETTER_STANDARD_DEFAULTS[kind]),
     lettersForEntries([entryId]),
-    query<{ course_instance_id: string; level_code: string }>(`SELECT course_instance_id, level_code FROM waitlist_entries WHERE id = $1`, [entryId]),
+    query<{ course_instance_id: string | null; level_code: string | null; exam_session_id: string | null }>(
+      `SELECT course_instance_id, level_code, exam_session_id FROM waitlist_entries WHERE id = $1`,
+      [entryId]
+    ),
   ]);
   const sent = letters.filter((l) => l.kind === kind);
   const name = [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' ');
   const open = ctx.status === 'waiting' || ctx.status === 'offered';
-  const back = where[0] ? `/admin/catalogue/${where[0].course_instance_id}?level=${encodeURIComponent(where[0].level_code)}` : '/admin/catalogue/waitlist';
+  // Back to the queue it is in: a course start's level, or an exam sitting (0036).
+  const back = where[0]?.exam_session_id
+    ? `/admin/catalogue/exams/${where[0].exam_session_id}`
+    : where[0]?.course_instance_id
+      ? `/admin/catalogue/${where[0].course_instance_id}?level=${encodeURIComponent(where[0].level_code ?? '')}`
+      : '/admin/catalogue/waitlist';
 
   return (
     <LetterComposer

@@ -1,4 +1,9 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../../bookings/actions';
+import { BookingWizard } from '../../../bookings/booking-wizard';
+import { FormDialog } from '@/components/admin/dialogs';
 
 import { Icon } from '@/components/admin/icons';
 import { PersonPanel } from '@/components/admin/person-panel';
@@ -6,6 +11,9 @@ import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, 
 import { Badge, BirthDate, Card, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
+import { bookingOffer } from '@/lib/admin/booking-offer';
+import { queryFirst } from '@/lib/admin/db';
+import { isExamParts } from '@/lib/admin/exam-parts';
 import { listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type Bilingual } from '@/lib/admin/i18n';
@@ -46,6 +54,10 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
   }
 
   const canEdit = canAccess(user, 'registrations', 'edit');
+  // Booked from this registration already (0036): the booking, not a second one.
+  const booked = await queryFirst<{ id: string }>(`SELECT id FROM bookings WHERE source_exam_registration_id = $1 AND deleted_at IS NULL`, [registration.id]);
+  const canBook = canAccess(user, 'bookings', 'edit') && Boolean(registration.personId) && !booked;
+  const offer = canBook ? await bookingOffer() : null;
   const [notes, activity, staff, flags, person] = await Promise.all([
     listNotes('exam_registration', registration.id),
     activityFor('exam_registration', registration.id),
@@ -82,6 +94,37 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
         title={fullName}
         avatar={fullName}
         status={<Badge tone="neutral">{t('Prüfung', 'Exam')}</Badge>}
+        actions={
+          booked ? (
+            <Link
+              href={`/admin/bookings/${booked.id}`}
+              className="inline-flex h-9 items-center rounded-xl border border-ws-line bg-white px-3.5 text-[0.84rem] font-semibold text-[var(--casa-ink)] hover:border-ws-line-firm"
+            >
+              {t('Zur Buchung', 'Open the booking')}
+            </Link>
+          ) : canBook && offer && registration.personId ? (
+            <FormDialog trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+              <BookingWizard
+                personId={registration.personId}
+                personName={fullName}
+                offer={offer}
+                preselectedExam={
+                  registration.examTypeId
+                    ? {
+                        examTypeId: registration.examTypeId,
+                        sittingId: registration.examSessionId,
+                        parts: isExamParts(registration.registrationType) ? registration.registrationType : 'full',
+                      }
+                    : null
+                }
+                sourceExamRegistrationId={registration.id}
+                returnTo={`/admin/registrations/exam/${registration.id}`}
+                action={createBookingFromWizardAction}
+                waitlistAction={waitlistFromWizardAction}
+              />
+            </FormDialog>
+          ) : null
+        }
         subtitle={
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{exam}</span>
@@ -116,7 +159,7 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
             at={registration.submittedAt}
             via={t('über das Anmeldeformular', 'from the registration form')}
             title={exam}
-            reply={{ href: reply, locale: registration.locale }}
+            reply={{ href: reply, locale: registration.locale, primary: !canBook }}
           >
             <FactGrid
               facts={[

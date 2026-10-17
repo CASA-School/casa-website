@@ -44,6 +44,7 @@ import {
 } from '@/lib/admin/people';
 import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
+import { personExamEntries } from '@/lib/admin/exams';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -162,7 +163,7 @@ export default async function PersonPage({
   const seesBank = canAccess(user, 'private_data');
   const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters, examWaits] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -178,6 +179,7 @@ export default async function PersonPage({
     seesBank ? listBankAccounts(person.id) : Promise.resolve(null),
     seesBookings ? personEntries(person.id) : Promise.resolve([]),
     seesBookings || seesOffers ? lettersForPerson(person.id) : Promise.resolve([]),
+    seesBookings ? personExamEntries(person.id) : Promise.resolve([]),
   ]);
   // The letters this colleague may open: an offer's with `offers`, a registration's with
   // `registrations`, the others with `bookings`.
@@ -274,6 +276,24 @@ export default async function PersonPage({
           ),
       })
     ),
+    // Their places in an exam sitting's queue (0036).
+    ...examWaits.map(
+      (w): Case => ({
+        key: `waitlist-${w.id}`,
+        kind: 'waitlist',
+        title: w.examName,
+        detail: new Date(w.startsAt).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
+        at: w.joinedAt,
+        href: `/admin/catalogue/exams/${w.examSessionId}`,
+        open: w.status === 'waiting' || w.status === 'offered',
+        state:
+          w.status === 'waiting' ? (
+            <Badge tone="accent">{t(`Platz ${w.position}`, `Place ${w.position}`)}</Badge>
+          ) : (
+            <Badge tone={w.status === 'offered' || w.status === 'booked' ? 'positive' : 'quiet'}>{pick(lang, WAITLIST_STATUS_LABELS[w.status])}</Badge>
+          ),
+      })
+    ),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const openCases = cases.filter((c) => c.open);
   const pastCases = cases.filter((c) => !c.open);
@@ -284,7 +304,8 @@ export default async function PersonPage({
   // The course they are in, or the next one: the first thing anyone asks about a learner.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const dated = bookings.filter((b) => b.status !== 'cancelled' && b.startDate && b.endDate);
+  // A course: an exam booking is a day, and shows among the open cases instead.
+  const dated = bookings.filter((b) => !b.examSessionId && b.status !== 'cancelled' && b.startDate && b.endDate);
   const current = dated.find((b) => b.startDate! <= today && b.endDate! >= today) ?? null;
   const next = current ? null : (dated.filter((b) => b.startDate! > today).sort((a, b) => a.startDate!.getTime() - b.startDate!.getTime())[0] ?? null);
   const spotlight = current ?? next;

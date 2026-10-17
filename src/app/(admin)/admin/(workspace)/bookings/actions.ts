@@ -6,8 +6,10 @@ import { redirect } from 'next/navigation';
 import {
   addCharge,
   BOOKING_STATUSES,
+  BookingRefused,
   cancelBooking,
   carryOverCredit,
+  changeExam,
   createBooking,
   deleteBooking,
   endObservation,
@@ -29,6 +31,10 @@ import {
 } from '@/lib/admin/bookings';
 import { priceSelection, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
+import type { StaffUser } from '@/lib/admin/auth';
+import { isExamParts, ratedParts } from '@/lib/admin/exam-parts';
+import { addToExamWaitlist, getSitting } from '@/lib/admin/exams';
+import { toDateInputValue } from '@/lib/dates';
 import { issueBookingLetter } from '@/lib/admin/letters/booking-issue';
 import { BOOKING_LETTER_KEYS, STANDARD_SLOTS, type ComposedKind } from '@/lib/admin/letters/booking-letters';
 import { readChoices } from '@/lib/admin/letters/choices';
@@ -308,6 +314,7 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
 
   const kind = String(formData.get('kind') ?? 'course') === 'exam' ? 'exam' : 'course';
+  if (kind === 'exam') return createExamBooking(formData, actor, personId, safeBack);
   const { t } = await getI18n();
   const dates = readDates(formData, safeBack, t);
   const status = String(formData.get('status') ?? 'reserved');
@@ -325,8 +332,8 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
     kind,
     courseInstanceId: optionalId(formData, 'courseInstanceId'),
     courseTypeId: optionalId(formData, 'courseTypeId'),
-    examTypeId: kind === 'exam' ? optionalId(formData, 'examTypeId') : null,
-    examParts: String(formData.get('examParts') ?? '2') === '1' ? 1 : 2,
+    examTypeId: null,
+    examParts: null,
     ...dates,
     levelCode: levelRaw,
     // No money comes from the wizard: the cohort's price is resolved on the
@@ -348,7 +355,7 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
       personId,
       courseTypeId: selection.courseTypeId,
       courseInstanceId: selection.courseInstanceId,
-      levelCode: kind === 'course' && levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null,
+      levelCode: levelRaw && (await isLevelCode(levelRaw)) ? levelRaw : null,
       ...dates,
       status: status as BookingStatus,
       payer: payer as Payer,
@@ -376,6 +383,92 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   redirect(`/admin/bookings/${bookingId}`);
 }
 
+/** An exam booking's sitting or parts (0036): another sitting of the same exam with a place, or other parts. */
+export async function changeExamAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const parts = String(formData.get('examParts') ?? '');
+  if (!isExamParts(parts)) throw new Error('Invalid examParts');
+  try {
+    await changeExam(bookingId, { sessionId: id(formData, 'examSessionId'), parts }, actor);
+  } catch (error) {
+    if (error instanceof BookingRefused) fail(back, pick((await getI18n()).lang, error.reason));
+    throw error;
+  }
+  revalidatePath('/admin', 'layout');
+  redirect(back);
+}
+
+/**
+ * An exam booking from the wizard (0036): the sitting and the parts, priced on the server from the
+ * exam's rate on its day. Refused when the sitting has no place left for this person — the wizard
+ * offers the waiting list instead.
+ */
+async function createExamBooking(formData: FormData, actor: StaffUser, personId: string, back: string): Promise<void> {
+  const { t, lang } = await getI18n();
+  const sessionId = optionalId(formData, 'examSessionId');
+  const parts = String(formData.get('examParts') ?? 'full');
+  if (!isExamParts(parts)) throw new Error('Invalid examParts');
+  if (!sessionId) fail(back, t('Bitte wähle einen Prüfungstermin.', 'Choose a sitting.'));
+  const sitting = await getSitting(sessionId);
+  if (!sitting) fail(back, t('Diesen Prüfungstermin gibt es nicht mehr.', 'That sitting no longer exists.'));
+  const status = String(formData.get('status') ?? 'reserved');
+  if (!(BOOKING_STATUSES as readonly string[]).includes(status)) throw new Error('Invalid status');
+  const payer = String(formData.get('payer') ?? 'self');
+  if (!PAYERS.has(payer)) throw new Error('Invalid payer');
+  const day = toDateInputValue(sitting.startsAt);
+  const lines = await priceSelection({
+    kind: 'exam',
+    courseInstanceId: null,
+    courseTypeId: null,
+    examTypeId: sitting.examTypeId,
+    examParts: ratedParts(parts),
+    startDate: day,
+    endDate: day,
+    levelCode: null,
+    tuitionOverride: null,
+    includeEnrolmentFee: false,
+    materialIds: [],
+    accommodationTypeCode: null,
+    roomTypeCode: null,
+    cateringCode: null,
+    accommodationFrom: null,
+    accommodationTo: null,
+  });
+  let bookingId: string;
+  try {
+    bookingId = await createBooking(
+      {
+        personId,
+        courseTypeId: null,
+        courseInstanceId: null,
+        startDate: day,
+        endDate: day,
+        status: status as BookingStatus,
+        payer: payer as Payer,
+        payerName: text(formData, 'payerName', 120),
+        visaRequired: false,
+        notes: text(formData, 'notes', 2000),
+        charges: lines.map((line) => ({
+          kind: line.kind as ChargeKind,
+          description: line.description,
+          amount: line.amount,
+          chargeTypeCode: line.chargeTypeCode,
+          rateId: line.rateId,
+        })),
+        exam: { sessionId, parts, sourceRegistrationId: optionalId(formData, 'sourceExamRegistrationId') },
+      },
+      actor
+    );
+  } catch (error) {
+    if (error instanceof BookingRefused) fail(back, pick(lang, error.reason));
+    throw error;
+  }
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/bookings/${bookingId}`);
+}
+
 /**
  * The wizard's other ending: the level is full, so the learner goes into its queue instead of a
  * booking. Nothing is priced and nothing is booked; the registration it came from is answered.
@@ -386,6 +479,20 @@ export async function waitlistFromWizardAction(formData: FormData): Promise<void
   const raw = String(formData.get('returnTo') ?? '');
   const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
   const { t, lang } = await getI18n();
+  // A full sitting: the candidate queues for it, with the parts they want (0036).
+  if (String(formData.get('kind') ?? '') === 'exam') {
+    const sessionId = optionalId(formData, 'examSessionId');
+    const parts = String(formData.get('examParts') ?? 'full');
+    if (!sessionId || !isExamParts(parts)) fail(safeBack, t('Für die Warteliste braucht es einen Prüfungstermin.', 'The waiting list needs a sitting.'));
+    const registrationId = optionalId(formData, 'sourceExamRegistrationId');
+    const queued = await addToExamWaitlist(
+      { personId, examSessionId: sessionId, parts, source: registrationId ? 'registration' : 'office', registrationId, note: text(formData, 'notes', 300) },
+      actor
+    );
+    if (!queued.ok) fail(safeBack, pick(lang, queued.reason));
+    revalidatePath('/admin', 'layout');
+    redirect(`/admin/catalogue/exams/${sessionId}`);
+  }
   const courseInstanceId = optionalId(formData, 'courseInstanceId');
   const levelCode = text(formData, 'levelCode', 8);
   if (!courseInstanceId || !levelCode || !(await isLevelCode(levelCode))) {

@@ -10,7 +10,7 @@ import {
   removePeriodAction,
   voidPaymentAction,
 } from '../actions';
-import { CarryOverForm, ChargeForm, EditBookingForm, ExtendBookingForm, ObservationForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
+import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, ObservationForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
@@ -35,6 +35,8 @@ import {
   storedWords,
 } from '@/lib/admin/bookings';
 import { listCourseTypes } from '@/lib/admin/catalogue';
+import { EXAM_PARTS_LABELS } from '@/lib/admin/exam-parts';
+import { sittingsOf } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
 import { levelCodes } from '@/lib/admin/waitlist';
@@ -42,7 +44,7 @@ import { teachingWeeks } from '@/lib/admin/offers/course';
 import { toDateInputValue } from '@/lib/dates';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
-import { pick } from '@/lib/admin/i18n';
+import { pick, wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
@@ -121,14 +123,16 @@ export default async function BookingPage({
   // booking of the same learner (docs/schoolman/money.md).
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters] = await Promise.all([
+  const exam = booking.exam;
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
-    canEdit ? listCohortOptions() : Promise.resolve([]),
-    canEdit ? listCourseTypes() : Promise.resolve([]),
+    canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
+    canEdit && !exam ? listCourseTypes() : Promise.resolve([]),
     canEdit && credit > 0 ? carryOverTargets(booking.id) : Promise.resolve([]),
-    canEdit ? levelCodes() : Promise.resolve([]),
+    canEdit && !exam ? levelCodes() : Promise.resolve([]),
     lettersForBooking(booking.id),
+    canEdit && exam && open ? sittingsOf(exam.examTypeId) : Promise.resolve([]),
   ]);
   const carriesOver = targets.length > 0;
 
@@ -153,6 +157,32 @@ export default async function BookingPage({
   );
   const recordFields = [
     single && single.courseInstanceId ? { label: t('Niveau', 'Level'), value: levelValue(single) } : null,
+    // An exam candidate is reported to telc before the deadline; the sitting's page marks it.
+    exam && open
+      ? {
+          label: t('Bei telc gemeldet', 'Reported to telc'),
+          value: exam.filedAt ? (
+            <span>
+              <DateText value={exam.filedAt} />
+              {exam.filedByName ? ` · ${exam.filedByName}` : ''}
+            </span>
+          ) : (
+            <Link href={`/admin/catalogue/exams/${exam.sessionId}`} className="font-medium text-[#9a5b00] hover:underline">
+              {t('Noch nicht', 'Not yet')}
+            </Link>
+          ),
+        }
+      : null,
+    exam?.sourceRegistrationId
+      ? {
+          label: t('Aus der Anmeldung', 'From registration'),
+          value: (
+            <Link href={`/admin/registrations/exam/${exam.sourceRegistrationId}`} className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+              {t('Öffnen', 'Open')}
+            </Link>
+          ),
+        }
+      : null,
     booking.observationReason
       ? {
           label: t('Unter Beobachtung', 'Under observation'),
@@ -264,27 +294,41 @@ export default async function BookingPage({
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
               {booking.courseTypeName ?? t('Buchung', 'Booking')}
+              {exam && exam.parts !== 'full' ? <span className="font-medium text-[var(--casa-muted)]"> · {pick(lang, EXAM_PARTS_LABELS[exam.parts])}</span> : null}
               {single?.levelCode ? <span className="font-medium text-[var(--casa-muted)]"> · {single.levelCode}</span> : null}
               {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
               {/* The number a learner writes on a transfer and finance matches payments by. */}
               <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)] tabular-nums">{booking.number}</span>
             </span>
             <MetaLine>
-              <MetaItem icon={Icon.calendar}>
-                {booking.startDate ? (
-                  <>
-                    <DateText value={booking.startDate} compact /> – <DateText value={booking.endDate} compact />
-                    {weeks ? ` · ${weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}` : ''}
-                    {booking.periods.length > 1 ? ` · ${t(`${booking.periods.length} Zeiträume`, `${booking.periods.length} periods`)}` : ''}
-                  </>
-                ) : (
-                  t('Noch keine Daten', 'No dates yet')
-                )}
-                {single && !single.courseInstanceId ? <Badge tone="warning" className="ml-2">{t('Noch kein Termin', 'No cohort yet')}</Badge> : null}
-              </MetaItem>
-              <MetaItem icon={Icon.rooms}>
-                {stay ? [stay.typeName, stay.roomTypeName, stay.cateringName].filter(Boolean).join(' · ') : t('Keine Unterkunft', 'No accommodation')}
-              </MetaItem>
+              {exam ? (
+                // An exam's day is its sitting's, with the time it begins; the sitting has its own page.
+                <MetaItem icon={Icon.calendar}>
+                  <Link href={`/admin/catalogue/exams/${exam.sessionId}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                    {new Date(exam.startsAt).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    {' · '}
+                    {new Date(exam.startsAt).toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' })}
+                  </Link>
+                </MetaItem>
+              ) : (
+                <MetaItem icon={Icon.calendar}>
+                  {booking.startDate ? (
+                    <>
+                      <DateText value={booking.startDate} compact /> – <DateText value={booking.endDate} compact />
+                      {weeks ? ` · ${weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}` : ''}
+                      {booking.periods.length > 1 ? ` · ${t(`${booking.periods.length} Zeiträume`, `${booking.periods.length} periods`)}` : ''}
+                    </>
+                  ) : (
+                    t('Noch keine Daten', 'No dates yet')
+                  )}
+                  {single && !single.courseInstanceId ? <Badge tone="warning" className="ml-2">{t('Noch kein Termin', 'No cohort yet')}</Badge> : null}
+                </MetaItem>
+              )}
+              {exam && !stay ? null : (
+                <MetaItem icon={Icon.rooms}>
+                  {stay ? [stay.typeName, stay.roomTypeName, stay.cateringName].filter(Boolean).join(' · ') : t('Keine Unterkunft', 'No accommodation')}
+                </MetaItem>
+              )}
               <MetaItem icon={Icon.person}>
                 {pick(lang, PAYER_LABELS[booking.payer])}
                 {booking.payerName ? ` · ${booking.payerName}` : ''}
@@ -313,7 +357,11 @@ export default async function BookingPage({
                 </FormDialog>
               )
             ) : null}
-            {canEdit && open ? (
+            {canEdit && open && exam ? (
+              <FormDialog trigger={t('Termin ändern', 'Change sitting')} title={t('Termin und Teile', 'Sitting and parts')} size="sm">
+                <ExamChangeForm booking={booking} sittings={sittings} />
+              </FormDialog>
+            ) : canEdit && open ? (
               <FormDialog trigger={t('Verlängern', 'Extend')} title={t('Buchung verlängern', 'Extend the booking')}>
                 <ExtendBookingForm booking={booking} cohorts={cohorts} levels={levels} />
               </FormDialog>

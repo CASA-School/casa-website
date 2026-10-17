@@ -22,6 +22,7 @@
  * built from figures — what to pay, a place in the queue, the next start — are changed per letter only.
  */
 
+import type { ExamParts } from '../exam-parts';
 import { teachingWeeks } from '../offers/course';
 
 import { formatDateRange, formatLetterDate, formatMoney, letterhead, recipientLines, salutation, type Salutation } from './format';
@@ -73,6 +74,18 @@ export type LetterCourse = {
   room: { name: string; floor: number | null } | null;
 };
 
+/** An exam booking's sitting (0036): the exam, its day and hours, the parts sat, telc's deadline. */
+export type LetterExam = {
+  /** "telc Deutsch B2": the same in both languages. */
+  name: string;
+  /** The day, Berlin time ("2026-11-13"), and the hours ("09:00", "17:00"). */
+  day: string;
+  startTime: string;
+  endTime: string;
+  deadline: string | null;
+  parts: ExamParts;
+};
+
 export type BookingLetterContext = {
   bookingId: string;
   /** "B-2026-0042": on the letter, and the reference for a transfer. */
@@ -81,6 +94,8 @@ export type BookingLetterContext = {
   language: LetterLanguage;
   person: LetterPerson;
   course: LetterCourse | null;
+  /** An exam booking: the sitting instead of a course. */
+  exam: LetterExam | null;
   accommodation: { name: Record<LetterLanguage, string>; from: string; to: string | null } | null;
   charges: { kind: string; description: string; amount: number }[];
   payments: { id: string; date: string; method: string; amount: number; subject: string }[];
@@ -101,10 +116,12 @@ export type WaitlistLetterContext = {
   language: LetterLanguage;
   status: string;
   person: LetterPerson;
-  course: LetterCourse;
+  /** A course start's level — or, for an exam's queue (0036), its sitting. */
+  course: LetterCourse | null;
+  exam: LetterExam | null;
   /** Place in the queue; null once the entry is closed. */
   position: number | null;
-  /** The next start of the same course, for "no place this time". */
+  /** The next start of the same course, or the next sitting of the same exam, for "no place this time". */
   nextStart: string | null;
   staff: { id: string; name: string }[];
 };
@@ -123,6 +140,9 @@ export const LETTER_KIND_LABELS: Record<LetterKind, Record<LetterLanguage, strin
   course_start: { de: 'Kursbeginn', en: 'Course start' },
   enrolment_certificate: { de: 'Einschreibebestätigung', en: 'Confirmation of enrolment' },
   cancellation_confirmation: { de: 'Stornierung', en: 'Cancellation' },
+  exam_confirmation: { de: 'Prüfungsbestätigung', en: 'Exam confirmation' },
+  exam_invitation: { de: 'Einladung zur Prüfung', en: 'Exam invitation' },
+  exam_results: { de: 'Ergebnis ist da', en: 'Results ready' },
   waitlist_confirmation: { de: 'Bestätigung Warteliste', en: 'Waiting-list confirmation' },
   waitlist_place_free: { de: 'Platz frei', en: 'Place free' },
   waitlist_no_place: { de: 'Kein Platz', en: 'No place' },
@@ -137,6 +157,7 @@ export type LearnerBooking = {
   number: string;
   status: BookingLetterContext['status'];
   course: LetterCourse | null;
+  exam: LetterExam | null;
   accommodation: BookingLetterContext['accommodation'];
   charges: { description: string; amount: number }[];
   charged: number;
@@ -250,12 +271,59 @@ export const STANDARD_SLOTS: Record<ComposedKind, readonly string[]> = {
   course_start: ['practical', 'closing'],
   enrolment_certificate: [],
   cancellation_confirmation: ['intro', 'closing'],
+  exam_confirmation: ['intro', 'id', 'rules', 'closing'],
+  exam_invitation: ['bring', 'oral', 'part', 'rules', 'closing'],
+  exam_results: ['collect', 'proxy', 'closing'],
   waitlist_confirmation: ['intro', 'closing'],
   waitlist_place_free: ['intro', 'closing'],
   waitlist_no_place: ['intro', 'closing'],
 };
 
 export const LETTER_STANDARD_DEFAULTS: Record<ComposedKind, Record<LetterLanguage, Record<string, string>>> = {
+  // An exam's (0037): what SchoolMan's letters said, and what they left out — the ID, the name on the
+  // certificate, a no-show (AGB 6.2).
+  exam_confirmation: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung. Hiermit bestätigen wir dir deinen Platz in folgender Prüfung:',
+      id: 'Bitte prüf, ob dein Name genau so geschrieben ist wie in deinem Ausweis oder Pass: telc druckt dein Zertifikat mit diesem Namen. Wenn etwas nicht stimmt, sag uns bitte sofort Bescheid. Zur Prüfung bringst du deinen gültigen Ausweis oder Pass mit.',
+      rules: 'Bitte beachte: Deine Anmeldung zur Prüfung ist verbindlich. Wenn du zur Prüfung nicht kommst, erstatten wir die Prüfungsgebühr nicht (AGB, Punkt 6.2).',
+      closing: 'Ein paar Tage vor der Prüfung schicken wir dir eine Einladung mit dem Ablauf. Dein Ergebnis und dein Zertifikat sind etwa 6 Wochen nach der Prüfung da. Wenn du Fragen hast, schreib uns einfach.',
+    },
+    en: {
+      intro: 'Thank you for registering. We are pleased to confirm your place in the following exam:',
+      id: 'Please check that your name is spelt exactly as in your ID card or passport: telc prints your certificate with this name. If anything is wrong, please let us know straight away. Bring your valid ID card or passport to the exam.',
+      rules: 'Please note: your registration for the exam is binding. If you do not come to the exam, we do not refund the exam fee (terms and conditions, point 6.2).',
+      closing: 'A few days before the exam we will send you an invitation with the schedule. Your result and your certificate arrive about 6 weeks after the exam. If you have any questions, just write to us.',
+    },
+  },
+  exam_invitation: {
+    de: {
+      bring: 'Bitte bring deinen gültigen Ausweis oder Pass mit: Vor Beginn prüfen wir die Angaben aller Teilnehmenden.',
+      oral: 'Du legst nur den mündlichen Teil ab: Bitte komm um 12:45 Uhr.',
+      part: 'Weil du nur einen Teil ablegst, bring bitte auch dein bisheriges telc-Ergebnis mit.',
+      rules: 'In den Prüfungsraum darfst du nur eine durchsichtige Wasserflasche ohne Etikett mitnehmen. Uhren und Smartwatches sind nicht erlaubt.',
+      closing: 'Bitte bestätige uns kurz, dass du diese Einladung bekommen hast. Wir wünschen dir viel Erfolg!',
+    },
+    en: {
+      bring: 'Please bring your valid ID card or passport: before the exam begins, we check every candidate’s details.',
+      oral: 'You are taking the oral part only: please come at 12:45.',
+      part: 'As you are taking one part only, please also bring your previous telc result.',
+      rules: 'You may only take a clear water bottle without a label into the exam room. Watches and smartwatches are not allowed.',
+      closing: 'Please let us know briefly that you have received this invitation. We wish you every success!',
+    },
+  },
+  exam_results: {
+    de: {
+      collect: 'Du kannst dein Ergebnis bei uns im Büro abholen. Bitte bring dazu deinen Ausweis oder Pass mit. Am Telefon und per E-Mail geben wir keine Ergebnisse weiter.',
+      proxy: 'Wenn jemand anderes dein Ergebnis für dich abholt, braucht diese Person eine schriftliche Vollmacht von dir.',
+      closing: 'Wenn du Fragen hast, schreib uns einfach.',
+    },
+    en: {
+      collect: 'You can collect your result at our office. Please bring your ID card or passport. We do not give results over the phone or by email.',
+      proxy: 'If someone else collects your result for you, they need a written authorisation from you.',
+      closing: 'If you have any questions, just write to us.',
+    },
+  },
   learner_confirmation: {
     de: {
       intro: 'vielen Dank für deine Anmeldung bei CASA. Hiermit bestätigen wir dir folgende Buchungen:',
@@ -457,6 +525,8 @@ const W = {
     position: (n: number) => `Du stehst auf Platz ${n} der Warteliste.`,
     next: (course: string, date: string) => `Der nächste ${course} beginnt am ${date}. Wenn du möchtest, melden wir dich gern dafür an.`,
     noNext: 'Kommt vielleicht ein späterer Kurs für dich infrage? Dann melden wir dich gern dafür an.',
+    nextSitting: (exam: string, date: string) => `Der nächste Termin für ${exam} ist am ${date}. Wenn du möchtest, melden wir dich gern dafür an.`,
+    noNextSitting: 'Sobald ein neuer Prüfungstermin feststeht, kannst du dich über das Formular auf casa-bremen.de anmelden.',
     method: { card: 'Karte', cash: 'bar', transfer: 'Überweisung', carryover: 'Übertrag', agency: 'über die Agentur', offset: 'Verrechnung' } as Record<string, string>,
     days: { Mon: 'Mo', Tue: 'Di', Wed: 'Mi', Thu: 'Do', Fri: 'Fr', Sat: 'Sa', Sun: 'So' } as Record<string, string>,
   },
@@ -491,6 +561,8 @@ const W = {
     position: (n: number) => `You are number ${n} on the waiting list.`,
     next: (course: string, date: string) => `The next ${course} starts on ${date}. If you like, we will gladly register you for it.`,
     noNext: 'Would a later course suit you? We will gladly register you for it.',
+    nextSitting: (exam: string, date: string) => `The next sitting of ${exam} is on ${date}. If you like, we will gladly register you for it.`,
+    noNextSitting: 'As soon as a new exam date is set, you can register with the form on casa-bremen.de.',
     method: { card: 'card', cash: 'cash', transfer: 'bank transfer', carryover: 'carried over', agency: 'through the agency', offset: 'offset' } as Record<string, string>,
     days: { Mon: 'Mon', Tue: 'Tue', Wed: 'Wed', Thu: 'Thu', Fri: 'Fri', Sat: 'Sat', Sun: 'Sun' } as Record<string, string>,
   },
@@ -660,6 +732,7 @@ export function paymentReceiptLetter(
   const balance = ctx.charged - ctx.paid;
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) });
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   body.push({
     type: 'table',
     heading: null,
@@ -797,6 +870,7 @@ const reference = (ctx: BookingLetterContext, lang: LetterLanguage): LetterPart 
 
 /** A week from today, or the course start when it comes sooner. */
 const deadline = (ctx: BookingLetterContext, today: string) => {
+  if (ctx.exam) return examPayBy(ctx.exam, today);
   const week = addDays(today, 7);
   const start = ctx.course?.startDate;
   return start && start > today && start < week ? start : week;
@@ -814,6 +888,10 @@ export function bookingLetterBlock(kind: BookingLetterKind, ctx: BookingLetterCo
   const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
   const cancelled = ctx.status === 'cancelled';
   const start = ctx.course?.startDate ?? null;
+  // An exam booking writes an exam's letters, a course booking a course's (0037).
+  if (!lettersFor(ctx).includes(kind)) {
+    return ctx.exam ? block('Diesen Brief gibt es für eine Prüfungsbuchung nicht.', 'There is no such letter for an exam booking.') : block('Diesen Brief gibt es nur für eine Prüfungsbuchung.', 'This letter is for exam bookings only.');
+  }
   if (kind === 'cancellation_confirmation') return cancelled ? null : block('Die Buchung ist nicht storniert.', 'The booking is not cancelled.');
   if (cancelled && kind !== 'payment_receipt' && kind !== 'payments_overview') return block('Die Buchung ist storniert.', 'The booking is cancelled.');
   switch (kind) {
@@ -847,6 +925,10 @@ export function bookingLetterBlock(kind: BookingLetterKind, ctx: BookingLetterCo
       return start < meta.today ? block('Der Kurs hat schon begonnen.', 'The course has already begun.') : null;
     case 'enrolment_certificate':
       return ctx.course ? null : block('Die Buchung hat keinen Kurs.', 'The booking has no course.');
+    case 'exam_invitation':
+      return ctx.exam && ctx.exam.day < meta.today ? block('Die Prüfung ist schon vorbei.', 'The exam is already over.') : null;
+    case 'exam_results':
+      return ctx.exam && ctx.exam.day >= meta.today ? block('Erst nach dem Prüfungstag.', 'Only after the exam day.') : null;
     default:
       return null;
   }
@@ -858,6 +940,7 @@ export function paymentReminderLetter(ctx: BookingLetterContext, choices: Letter
   const balance = ctx.charged - ctx.paid;
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) });
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   body.push(text(choices, 'open', m.open(formatMoney(Math.max(balance, 0), lang), formatLetterDate(deadline(ctx, meta.today), lang)), true));
   body.push(text(choices, 'ways', standard.ways));
   body.push(reference(ctx, lang));
@@ -874,6 +957,7 @@ export function paymentsOverviewLetter(ctx: BookingLetterContext, choices: Lette
   const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: m.costsTotal, amount: money(ctx.charged) } });
   body.push({
     type: 'table',
@@ -997,6 +1081,7 @@ export function cancellationLetter(ctx: BookingLetterContext, choices: LetterCho
   const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
   const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
   if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) });
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   // What is owed or owed back, from the booking's lines — SchoolMan wrote a fixed 100 € fee into the text.
   const money_ = [
     fee > 0.005 && balance > 0.005 ? m.cancelFee(money(fee)) : null,
@@ -1010,7 +1095,119 @@ export function cancellationLetter(ctx: BookingLetterContext, choices: LetterCho
   if (balance > 0.005) body.push(reference(ctx, lang));
   body.push(text(choices, 'note', ''));
   body.push(text(choices, 'closing', standard.closing));
-  return frame('cancellation_confirmation', ctx.person, ctx.staff, choices, meta.today, { lead: m.cancellation, title: ctx.course ? courseTitle(ctx.course, lang) : '', tail: m.bookingNo(ctx.number) }, body);
+  return frame('cancellation_confirmation', ctx.person, ctx.staff, choices, meta.today, { lead: m.cancellation, title: ctx.course ? courseTitle(ctx.course, lang) : (ctx.exam?.name ?? ''), tail: m.bookingNo(ctx.number) }, body);
+}
+
+// ------------------------------------------------------------- an exam's letters (0037)
+
+const EX = {
+  de: {
+    confirmation: 'Bestätigung deiner Prüfungsanmeldung',
+    invitation: 'Einladung zur Prüfung',
+    results: 'Dein Prüfungsergebnis ist da',
+    when: (day: string, from: string, to: string) => `${day} · ${from}–${to} Uhr`,
+    place: 'Die Prüfung findet bei uns in der Schule statt: CASA, Am Dobben 14–16, 28203 Bremen.',
+    pay: (amount: string, by: string) => `Damit dein Prüfungsplatz fest reserviert ist, überweise bitte ${amount} bis zum ${by}.`,
+    paid: 'Die Prüfungsgebühr ist bezahlt. Dein Platz ist fest reserviert.',
+    arrive: (day: string, name: string, at: string) => `am ${day} ist deine Prüfung ${name}. Bitte sei um ${at} Uhr bei uns in der Schule, Am Dobben 14–16 in Bremen.`,
+    ready: (name: string, day: string) => `das Ergebnis deiner Prüfung ${name} vom ${day} ist da.`,
+  },
+  en: {
+    confirmation: 'Confirmation of your exam registration',
+    invitation: 'Invitation to the exam',
+    results: 'Your exam result has arrived',
+    when: (day: string, from: string, to: string) => `${day} · ${from}–${to}`,
+    place: 'The exam takes place at our school: CASA, Am Dobben 14–16, 28203 Bremen.',
+    pay: (amount: string, by: string) => `To reserve your exam place for good, please transfer ${amount} by ${by}.`,
+    paid: 'The exam fee has been paid. Your place is reserved.',
+    arrive: (day: string, name: string, at: string) => `Your exam ${name} is on ${day}. Please be at our school, Am Dobben 14–16 in Bremen, at ${at}.`,
+    ready: (name: string, day: string) => `The result of your exam ${name} on ${day} has arrived.`,
+  },
+} as const;
+
+const PART_WORDS: Record<LetterLanguage, Record<ExamParts, string>> = {
+  de: { full: '', written: 'nur schriftlicher Teil', oral: 'nur mündlicher Teil' },
+  en: { full: '', written: 'written part only', oral: 'oral part only' },
+};
+
+/** "telc Deutsch B2 · nur schriftlicher Teil": the exam, and the part when it is one. */
+const examTitle = (exam: LetterExam, lang: LetterLanguage) => [exam.name, PART_WORDS[lang][exam.parts]].filter(Boolean).join(' · ');
+
+/** The exam as a heading: its name and parts, the day and the hours. */
+const examHeading = (exam: LetterExam, lang: LetterLanguage): LetterPart => ({
+  type: 'heading',
+  text: examTitle(exam, lang),
+  detail: EX[lang].when(weekdayDate(exam.day, lang), exam.startTime, exam.endTime),
+});
+
+/** A quarter of an hour before the start: the check of everyone's details (SchoolMan: 08:15 for 08:30). */
+const arrival = (time: string) => {
+  const [h, m] = time.split(':').map(Number);
+  const minutes = h * 60 + m - 15;
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+};
+
+/** By when the fee is due: a week from today, but before telc's deadline and the day before the exam. */
+function examPayBy(exam: LetterExam, today: string): string {
+  const candidates = [addDays(today, 7), addDays(exam.day, -1)];
+  if (exam.deadline && exam.deadline >= today) candidates.push(exam.deadline);
+  return candidates.sort()[0] < today ? today : candidates.sort()[0];
+}
+
+export function examConfirmationLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const e = EX[lang];
+  const w = W[lang];
+  const money = (n: number) => formatMoney(n, lang);
+  const balance = Math.round((ctx.charged - ctx.paid) * 100) / 100;
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
+  body.push(text(choices, 'place', e.place));
+  body.push({ type: 'table', heading: w.costs, rows: ctx.charges.map((c) => ({ text: c.description, amount: money(c.amount), ref: null })), total: { label: w.total, amount: money(ctx.charged) } });
+  if (ctx.paid > 0.005) {
+    body.push({ type: 'sum', label: w.received, amount: money(ctx.paid) });
+    body.push({ type: 'sum', label: balance < -0.005 ? w.credit : w.open, amount: money(Math.abs(balance)) });
+  }
+  const payment = balance > 0.005 && ctx.exam ? e.pay(money(balance), formatLetterDate(examPayBy(ctx.exam, meta.today), lang)) : ctx.charged > 0.005 ? e.paid : '';
+  body.push(text(choices, 'payment', payment, true));
+  if (balance > 0.005) body.push(reference(ctx, lang));
+  body.push(text(choices, 'id', standard.id));
+  body.push(text(choices, 'rules', standard.rules));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('exam_confirmation', ctx.person, ctx.staff, choices, meta.today, { lead: e.confirmation, title: ctx.exam?.name ?? '', tail: meta.version > 1 ? w.version(meta.version) : MORE[lang].bookingNo(ctx.number) }, body);
+}
+
+export function examInvitationLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const e = EX[lang];
+  const exam = ctx.exam;
+  const body: LetterPart[] = [];
+  if (exam) {
+    body.push(text(choices, 'arrive', e.arrive(weekdayDate(exam.day, lang), exam.name, arrival(exam.startTime))));
+    body.push(examHeading(exam, lang));
+  }
+  body.push(text(choices, 'bring', standard.bring));
+  // Only the oral part: its own time. One part of the two: the earlier result goes with it.
+  if (exam?.parts === 'oral') body.push(text(choices, 'oral', standard.oral, true));
+  if (exam && exam.parts !== 'full') body.push(text(choices, 'part', standard.part));
+  body.push(text(choices, 'rules', standard.rules));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('exam_invitation', ctx.person, ctx.staff, choices, meta.today, { lead: e.invitation, title: exam?.name ?? '', tail: exam ? formatLetterDate(exam.day, lang) : null }, body);
+}
+
+export function examResultsLetter(ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
+  const lang = choices.language;
+  const e = EX[lang];
+  const exam = ctx.exam;
+  const body: LetterPart[] = [];
+  if (exam) body.push(text(choices, 'ready', e.ready(exam.name, formatLetterDate(exam.day, lang))));
+  body.push(text(choices, 'collect', standard.collect, true));
+  body.push(text(choices, 'proxy', standard.proxy));
+  body.push(text(choices, 'note', ''));
+  body.push(text(choices, 'closing', standard.closing));
+  return frame('exam_results', ctx.person, ctx.staff, choices, meta.today, { lead: e.results, title: exam?.name ?? '', tail: null }, body);
 }
 
 /** A booking letter's short name in the address (`?kind=reminder`). */
@@ -1026,6 +1223,9 @@ export const BOOKING_LETTER_KEYS: Record<BookingLetterKind, string> = {
   course_start: 'start',
   enrolment_certificate: 'certificate',
   cancellation_confirmation: 'cancellation',
+  exam_confirmation: 'exam',
+  exam_invitation: 'invitation',
+  exam_results: 'results',
 };
 
 /** The booking letters in groups, as the letter page lists them. */
@@ -1035,6 +1235,17 @@ export const BOOKING_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kin
   { label: { de: 'Vor dem Kurs', en: 'Before the course' }, kinds: ['showup_first_call', 'showup_last_call', 'course_start'] },
   { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
 ];
+
+/** An exam booking's letters (0037): its confirmation, the money, the day and the result, a cancellation. */
+export const EXAM_LETTER_GROUPS: { label: Record<LetterLanguage, string>; kinds: BookingLetterKind[] }[] = [
+  { label: { de: 'Anmeldung', en: 'Registration' }, kinds: ['exam_confirmation'] },
+  { label: { de: 'Zahlung', en: 'Payment' }, kinds: ['payment_receipt', 'payment_reminder', 'payments_overview'] },
+  { label: { de: 'Prüfung', en: 'The exam' }, kinds: ['exam_invitation', 'exam_results'] },
+  { label: { de: 'Stornierung', en: 'Cancellation' }, kinds: ['cancellation_confirmation'] },
+];
+
+/** The kinds a booking writes: an exam's, or a course's. */
+export const lettersFor = (ctx: Pick<BookingLetterContext, 'exam'>) => (ctx.exam ? EXAM_LETTER_GROUPS : BOOKING_LETTER_GROUPS).flatMap((g) => g.kinds);
 
 /** Every booking letter by its kind: what the composer previews and the server keeps. */
 export function buildBookingLetter(kind: BookingLetterKind, ctx: BookingLetterContext, choices: LetterChoices, standard: Record<string, string>, meta: LetterMeta): Letter {
@@ -1060,6 +1271,12 @@ export function buildBookingLetter(kind: BookingLetterKind, ctx: BookingLetterCo
       return enrolmentCertificateLetter(ctx, choices, standard, meta);
     case 'cancellation_confirmation':
       return cancellationLetter(ctx, choices, standard, meta);
+    case 'exam_confirmation':
+      return examConfirmationLetter(ctx, choices, standard, meta);
+    case 'exam_invitation':
+      return examInvitationLetter(ctx, choices, standard, meta);
+    case 'exam_results':
+      return examResultsLetter(ctx, choices, standard, meta);
   }
 }
 
@@ -1121,7 +1338,7 @@ export function learnerConfirmationLetter(ctx: LearnerLetterContext, choices: Le
   // In the order the learner will take them, whatever order the list was in.
   const chosen = ctx.bookings
     .filter((b) => choices.bookingIds?.includes(b.id))
-    .sort((a, b) => (a.course?.startDate ?? '').localeCompare(b.course?.startDate ?? ''));
+    .sort((a, b) => (a.course?.startDate ?? a.exam?.day ?? '').localeCompare(b.course?.startDate ?? b.exam?.day ?? ''));
   const charged = chosen.reduce((sum, b) => sum + b.charged, 0);
   const paid = chosen.reduce((sum, b) => sum + b.paid, 0);
   const balance = Math.round((charged - paid) * 100) / 100;
@@ -1129,8 +1346,8 @@ export function learnerConfirmationLetter(ctx: LearnerLetterContext, choices: Le
   for (const b of chosen) {
     body.push({
       type: 'heading',
-      text: `${b.course ? courseTitle(b.course, lang) : w.costs} · ${m.bookingNo(b.number)}`,
-      detail: b.course ? courseDetail(b.course, lang) : null,
+      text: `${b.course ? courseTitle(b.course, lang) : b.exam ? examTitle(b.exam, lang) : w.costs} · ${m.bookingNo(b.number)}`,
+      detail: b.course ? courseDetail(b.course, lang) : b.exam ? EX[lang].when(weekdayDate(b.exam.day, lang), b.exam.startTime, b.exam.endTime) : null,
     });
     if (b.accommodation) {
       body.push({
@@ -1147,7 +1364,8 @@ export function learnerConfirmationLetter(ctx: LearnerLetterContext, choices: Le
     body.push({ type: 'sum', label: balance < -0.005 ? w.credit : w.open, amount: money(Math.abs(balance)) });
   }
   // A week from today, or the first start when it comes sooner; the whole amount for a visa.
-  const starts = chosen.map((b) => b.course?.startDate).filter((d): d is string => Boolean(d) && d! > meta.today).sort();
+  // An exam's fee is due before its day, like a course's before its start.
+  const starts = chosen.map((b) => b.course?.startDate ?? (b.exam ? addDays(b.exam.day, -1) : undefined)).filter((d): d is string => Boolean(d) && d! > meta.today).sort();
   const week = addDays(meta.today, 7);
   const by = formatLetterDate(starts[0] && starts[0] < week ? starts[0] : week, lang);
   const payment = balance > 0.005 ? (chosen.some((b) => b.visaRequired) ? m.visa(money(balance), by) : m.pay(money(balance), by)) : charged > 0 ? w.allPaid : '';
@@ -1207,13 +1425,19 @@ export function waitlistLetter(
 ): Letter {
   const lang = choices.language;
   const w = W[lang];
-  const body: LetterPart[] = [
-    text(choices, 'intro', standard.intro),
-    { type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) },
-  ];
+  const body: LetterPart[] = [text(choices, 'intro', standard.intro)];
+  if (ctx.course) body.push({ type: 'heading', text: courseTitle(ctx.course, lang), detail: courseDetail(ctx.course, lang) });
+  if (ctx.exam) body.push(examHeading(ctx.exam, lang));
   if (kind === 'waitlist_confirmation' && ctx.position) body.push(text(choices, 'position', w.position(ctx.position)));
   if (kind === 'waitlist_no_place') {
-    body.push(text(choices, 'next', ctx.nextStart ? w.next(ctx.course.name[lang], formatLetterDate(ctx.nextStart, lang)) : w.noNext));
+    const next = ctx.nextStart
+      ? ctx.exam
+        ? w.nextSitting(ctx.exam.name, formatLetterDate(ctx.nextStart, lang))
+        : w.next(ctx.course?.name[lang] ?? '', formatLetterDate(ctx.nextStart, lang))
+      : ctx.exam
+        ? w.noNextSitting
+        : w.noNext;
+    body.push(text(choices, 'next', next));
   }
   body.push(text(choices, 'note', ''));
   body.push(text(choices, 'closing', standard.closing));
@@ -1225,8 +1449,8 @@ export function waitlistLetter(
     meta.today,
     {
       lead: kind === 'waitlist_place_free' ? w.placeFree : w.waitlist,
-      title: courseTitle(ctx.course, lang),
-      tail: meta.version > 1 ? w.version(meta.version) : formatDateRange(ctx.course.startDate, ctx.course.endDate, lang),
+      title: ctx.course ? courseTitle(ctx.course, lang) : (ctx.exam?.name ?? ''),
+      tail: meta.version > 1 ? w.version(meta.version) : ctx.course ? formatDateRange(ctx.course.startDate, ctx.course.endDate, lang) : ctx.exam ? formatLetterDate(ctx.exam.day, lang) : null,
     },
     body
   );

@@ -80,7 +80,8 @@ export async function MoveForm({
   levels,
   returnTo,
 }: {
-  entry: WaitlistEntry;
+  /** A course entry also moves to another start or level; an exam entry (0036) only within its queue. */
+  entry: Pick<WaitlistEntry, 'id' | 'position'> & { courseInstanceId: string | null; levelCode: string | null };
   queueLength: number;
   starts: readonly { id: string; label: string }[];
   levels: readonly string[];
@@ -109,43 +110,45 @@ export async function MoveForm({
           </div>
         </form>
       ) : null}
-      <form action={moveToStartAction} className="space-y-3 border-t border-ws-line-soft pt-5 first:border-t-0 first:pt-0">
-        <input type="hidden" name="entryId" value={entry.id} />
-        <input type="hidden" name="returnTo" value={returnTo} />
-        <h3 className="text-sm font-bold text-[var(--casa-ink)]">{t('Anderer Termin oder anderes Niveau', 'Another start or level')}</h3>
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
-          <Field label={t('Termin', 'Start')} htmlFor={`move-start-${entry.id}`}>
-            <Select id={`move-start-${entry.id}`} name="courseInstanceId" defaultValue={entry.courseInstanceId}>
-              {starts.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label={t('Niveau', 'Level')} htmlFor={`move-level-${entry.id}`}>
-            <Select id={`move-level-${entry.id}`} name="levelCode" defaultValue={entry.levelCode}>
-              {levels.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-        <p className="text-xs text-[var(--casa-muted)]">{t('Die Person behält den Tag, an dem sie auf die Liste kam.', 'They keep the day they joined the list.')}</p>
-        <div className="flex justify-end">
-          <Button type="submit" variant="secondary">
-            {t('Verschieben', 'Move')}
-          </Button>
-        </div>
-      </form>
+      {entry.courseInstanceId ? (
+        <form action={moveToStartAction} className="space-y-3 border-t border-ws-line-soft pt-5 first:border-t-0 first:pt-0">
+          <input type="hidden" name="entryId" value={entry.id} />
+          <input type="hidden" name="returnTo" value={returnTo} />
+          <h3 className="text-sm font-bold text-[var(--casa-ink)]">{t('Anderer Termin oder anderes Niveau', 'Another start or level')}</h3>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+            <Field label={t('Termin', 'Start')} htmlFor={`move-start-${entry.id}`}>
+              <Select id={`move-start-${entry.id}`} name="courseInstanceId" defaultValue={entry.courseInstanceId ?? undefined}>
+                {starts.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label={t('Niveau', 'Level')} htmlFor={`move-level-${entry.id}`}>
+              <Select id={`move-level-${entry.id}`} name="levelCode" defaultValue={entry.levelCode ?? undefined}>
+                {levels.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <p className="text-xs text-[var(--casa-muted)]">{t('Die Person behält den Tag, an dem sie auf die Liste kam.', 'They keep the day they joined the list.')}</p>
+          <div className="flex justify-end">
+            <Button type="submit" variant="secondary">
+              {t('Verschieben', 'Move')}
+            </Button>
+          </div>
+        </form>
+      ) : null}
     </div>
   );
 }
 
 /** Off the list: the reason, and a note when it is something else. An offered place declined, or no longer waiting. */
-export async function CloseForm({ entry, returnTo }: { entry: WaitlistEntry; returnTo: string }) {
+export async function CloseForm({ entry, returnTo }: { entry: Pick<WaitlistEntry, 'id' | 'status'>; returnTo: string }) {
   const { t, lang } = await getI18n();
   return (
     <form action={closeEntryAction} className="space-y-3">

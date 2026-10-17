@@ -18,11 +18,14 @@ import type { CourseTypeSummary } from '@/lib/admin/catalogue';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { toDateInputValue } from '@/lib/dates';
 import { DateFormField } from '@/components/admin/date-picker';
-import { pick, type T, type WsLang } from '@/lib/admin/i18n';
+import { pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { EXAM_PARTS, EXAM_PARTS_LABELS } from '@/lib/admin/exam-parts';
+import { freeSeats, type ExamSitting } from '@/lib/admin/exams';
 import {
   addChargeAction,
   carryOverAction,
+  changeExamAction,
   extendBookingAction,
   observeBookingAction,
   recordPaymentAction,
@@ -87,16 +90,19 @@ export async function EditBookingForm({
     <form action={updateBookingAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={booking.id} />
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t('Kursart', 'Course type')} htmlFor="edit-type">
-          <Select id="edit-type" name="courseTypeId" defaultValue={booking.courseTypeId ?? ''}>
-            <option value="">—</option>
-            {courseTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        {/* An exam booking has no course type: its exam and sitting change under "Termin ändern". */}
+        {booking.exam ? null : (
+          <Field label={t('Kursart', 'Course type')} htmlFor="edit-type">
+            <Select id="edit-type" name="courseTypeId" defaultValue={booking.courseTypeId ?? ''}>
+              <option value="">—</option>
+              {courseTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
         <Field label={t('Status', 'Status')} htmlFor="edit-status">
           <Select id="edit-status" name="status" defaultValue={booking.status}>
             {BOOKING_STATUSES.map((s) => (
@@ -394,6 +400,47 @@ export async function PeriodLevelForm({ bookingId, periodId, levelCode, levels }
           {levels.map((code) => (
             <option key={code} value={code}>
               {code}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <div className="flex justify-end pt-1">
+        <Button type="submit">{t('Speichern', 'Save')}</Button>
+      </div>
+    </form>
+  );
+}
+
+/** An exam booking's sitting — another of the same exam with a place — and its parts. */
+export async function ExamChangeForm({ booking, sittings }: { booking: BookingDetail; sittings: readonly ExamSitting[] }) {
+  const { t, lang } = await getI18n();
+  const exam = booking.exam;
+  if (!exam) return null;
+  const day = (d: Date) => new Date(d).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  return (
+    <form action={changeExamAction} className="space-y-3">
+      <input type="hidden" name="bookingId" value={booking.id} />
+      <Field label={t('Termin', 'Sitting')} htmlFor="exam-sitting">
+        <Select id="exam-sitting" name="examSessionId" defaultValue={exam.sessionId}>
+          {/* The booking's own sitting is always a choice, even when it has passed. */}
+          {sittings.some((s) => s.id === exam.sessionId) ? null : <option value={exam.sessionId}>{day(exam.startsAt)}</option>}
+          {sittings.map((s) => {
+            const own = s.id === exam.sessionId;
+            const free = freeSeats(s);
+            return (
+              <option key={s.id} value={s.id} disabled={!own && free === 0}>
+                {day(s.startsAt)}
+                {own ? ` · ${t('jetzt gebucht', 'booked now')}` : free === 0 ? ` · ${t('voll', 'full')}` : ` · ${free === 1 ? t('1 Platz frei', '1 place free') : t(`${free} Plätze frei`, `${free} places free`)}`}
+              </option>
+            );
+          })}
+        </Select>
+      </Field>
+      <Field label={t('Teile', 'Parts')} htmlFor="exam-parts">
+        <Select id="exam-parts" name="examParts" defaultValue={exam.parts}>
+          {EXAM_PARTS.map((p) => (
+            <option key={p} value={p}>
+              {pick(lang, EXAM_PARTS_LABELS[p])}
             </option>
           ))}
         </Select>

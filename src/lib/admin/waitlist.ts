@@ -6,6 +6,7 @@ import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst } from './db';
 import type { Bilingual } from './i18n';
+import { sittingWords } from './exams';
 import { setQueueStatus } from './queues';
 
 /**
@@ -538,17 +539,25 @@ export async function addToWaitlist(
   return { ok: true, id: row!.id };
 }
 
-type EntryCore = { id: string; person_id: string; course_instance_id: string; level_code: string; status: WaitlistStatus };
+/** An entry is a course start's level (`course_instance_id`, `level_code`) or an exam sitting (`exam_session_id`, 0036). */
+type EntryCore = {
+  id: string;
+  person_id: string;
+  course_instance_id: string | null;
+  level_code: string | null;
+  exam_session_id: string | null;
+  status: WaitlistStatus;
+};
 
 async function entryCore(id: string): Promise<EntryCore | undefined> {
   return queryFirst<EntryCore>(
-    `SELECT id, person_id, course_instance_id, level_code, status FROM waitlist_entries WHERE id = $1`,
+    `SELECT id, person_id, course_instance_id, level_code, exam_session_id, status FROM waitlist_entries WHERE id = $1`,
     [id]
   );
 }
 
 async function logEntry(actor: StaffUser, entry: EntryCore, action: string, extra: Record<string, unknown> = {}) {
-  const words = await startWords(entry.course_instance_id);
+  const words = entry.exam_session_id ? await sittingWords(entry.exam_session_id) : await startWords(entry.course_instance_id ?? '');
   await logActivity({ actor, entity: 'person', entityId: entry.person_id, action, detail: { entry: entry.id, level: entry.level_code, ...words, ...extra } });
 }
 
@@ -591,11 +600,14 @@ export async function closeEntry(id: string, status: 'declined' | 'withdrawn', r
 export async function moveEntry(id: string, toPosition: number, reason: string, actor: StaffUser): Promise<Result> {
   const entry = await entryCore(id);
   if (!entry || !OPEN_WAITLIST_STATUSES.includes(entry.status)) return refuse('Dieser Eintrag ist schon abgeschlossen.', 'This entry is already closed.');
+  // The entry's own queue: its start's level, or its sitting.
   const queue = await query<{ id: string; rank: number }>(
-    `SELECT id, rank FROM waitlist_entries
-      WHERE course_instance_id = $1 AND level_code = $2 AND status IN ('waiting', 'offered')
-      ORDER BY rank, joined_at`,
-    [entry.course_instance_id, entry.level_code]
+    entry.exam_session_id
+      ? `SELECT id, rank FROM waitlist_entries WHERE exam_session_id = $1 AND status IN ('waiting', 'offered') ORDER BY rank, joined_at`
+      : `SELECT id, rank FROM waitlist_entries
+          WHERE course_instance_id = $1 AND level_code = $2 AND status IN ('waiting', 'offered')
+          ORDER BY rank, joined_at`,
+    entry.exam_session_id ? [entry.exam_session_id] : [entry.course_instance_id, entry.level_code]
   );
   const from = queue.findIndex((q) => q.id === id) + 1;
   const others = queue.filter((q) => q.id !== id);
@@ -616,13 +628,14 @@ export async function moveEntry(id: string, toPosition: number, reason: string, 
 export async function moveToStart(id: string, courseInstanceId: string, levelCode: string, actor: StaffUser): Promise<Result> {
   const entry = await entryCore(id);
   if (!entry || !OPEN_WAITLIST_STATUSES.includes(entry.status)) return refuse('Dieser Eintrag ist schon abgeschlossen.', 'This entry is already closed.');
+  if (entry.exam_session_id) return refuse('Ein Prüfungseintrag wechselt den Termin auf der Seite des Termins.', 'An exam entry changes its sitting on the sitting’s page.');
   if (entry.course_instance_id === courseInstanceId && entry.level_code === levelCode) return { ok: true };
   const clash = await queryFirst<{ id: string }>(
     `SELECT id FROM waitlist_entries WHERE person_id = $1 AND course_instance_id = $2 AND level_code = $3 AND status IN ('waiting', 'offered')`,
     [entry.person_id, courseInstanceId, levelCode]
   );
   if (clash) return refuse('Für diesen Kurs steht die Person schon auf der Warteliste.', 'The person is already on that course’s waiting list.');
-  const from = await startWords(entry.course_instance_id);
+  const from = await startWords(entry.course_instance_id ?? '');
   await query(
     `UPDATE waitlist_entries SET course_instance_id = $2, level_code = $3, status = 'waiting', offered_at = NULL, offered_by = NULL WHERE id = $1`,
     [id, courseInstanceId, levelCode]
@@ -678,7 +691,7 @@ export async function closeOnBooking(
         SET status = 'booked', booking_id = $3, closed_at = now(), closed_by = $4, close_reason = NULL
       WHERE canonical_person_id(person_id) = canonical_person_id($1) AND course_instance_id = $2
         AND status IN ('waiting', 'offered')
-      RETURNING id, person_id, course_instance_id, level_code, status`,
+      RETURNING id, person_id, course_instance_id, level_code, exam_session_id, status`,
     [personId, courseInstanceId, bookingId, actor.id]
   );
   return rows;

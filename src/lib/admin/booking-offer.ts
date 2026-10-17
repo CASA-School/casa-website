@@ -1,5 +1,6 @@
 import type { BookingOffer, CohortOffer, CourseTypeOffer } from './booking-offer-types';
 import { query, queryFirst } from './db';
+import { upcomingSittings } from './exams';
 import { accommodationWeeks, teachingWeeks, termLessons } from './offers/course';
 import { coursePrice, rentPrice, type PriceList } from './prices/price-list';
 import { loadPriceLists } from './prices/repo';
@@ -41,7 +42,7 @@ export type {
 
 /** Everything the wizard needs, in one round trip. */
 export async function bookingOffer(): Promise<BookingOffer> {
-  const [cohortRows, examRows, levels, materials, accommodation, roomTypes, catering, fee, prices] =
+  const [cohortRows, examRows, levels, materials, accommodation, roomTypes, catering, fee, prices, sittings] =
     await Promise.all([
       query<{
         id: string;
@@ -127,6 +128,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
            NULL, 'enrolment_fee', NULL, NULL, NULL, NULL)`
       ),
       loadPriceLists(),
+      upcomingSittings(),
     ]);
 
   const byType = new Map<string, CourseTypeOffer>();
@@ -179,6 +181,14 @@ export async function bookingOffer(): Promise<BookingOffer> {
       name: e.name,
       feeBothParts: e.fee_both === null ? null : Number(e.fee_both),
       feeOnePart: e.fee_one === null ? null : Number(e.fee_one),
+      sittings: sittings
+        .filter((s) => s.examTypeId === e.id)
+        .map((s) => ({
+          id: s.id,
+          startsAt: s.startsAt,
+          deadline: s.registrationDeadline,
+          places: { places: s.capacity, booked: s.booked, offered: s.offered, queue: s.queue, offeredTo: s.offeredTo },
+        })),
     })),
     levels,
     materials: materials.map((m) => ({
@@ -342,7 +352,8 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
       lines.push({
         kind: 'exam_fee',
         chargeTypeCode: 'exam_fee',
-        description: `${exam.name}${selection.examParts === 1 ? ' · one part' : ''}`,
+        // The exam's name, the same in both languages; the parts are on the booking, and its letters say them in the reader's.
+        description: exam.name,
         amount: Number(exam.amount),
         quantity: null,
         unitAmount: null,

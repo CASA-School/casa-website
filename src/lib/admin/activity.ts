@@ -136,7 +136,13 @@ const article = (noun: string) => (/^[aeiou]/i.test(noun) ? 'an' : 'a');
 /** "an enquiry" / "a course registration". */
 const subjectOf = (entity: string) => {
   const queue = asQueue(entity);
-  const noun = queue ? queueLabel(queue, 'en').toLowerCase() : entity === 'course_instance' ? 'course start' : entity.replace(/_/g, ' ');
+  const noun = queue
+    ? queueLabel(queue, 'en').toLowerCase()
+    : entity === 'course_instance'
+      ? 'course start'
+      : entity === 'exam_session'
+        ? 'exam sitting'
+        : entity.replace(/_/g, ' ');
   return `${article(noun)} ${noun}`;
 };
 
@@ -152,6 +158,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   career_application: { noun: 'Bewerbung', gender: 'f' },
   placement_attempt: { noun: 'Einstufungstest', gender: 'm' },
   course_instance: { noun: 'Kurstermin', gender: 'm' },
+  exam_session: { noun: 'Prüfungstermin', gender: 'm' },
   booking: { noun: 'Buchung', gender: 'f' },
   person: { noun: 'Person', gender: 'f' },
   offer: { noun: 'Angebot', gender: 'n' },
@@ -278,10 +285,13 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
     case 'waitlist_moved':
     case 'waitlist_moved_course':
     case 'waitlist_booked': {
-      // "Intensive German B1.1 ab 26. Okt.": the queue, as the detail names it.
+      // "Intensive German B1.1 ab 26. Okt." — or an exam's queue, "telc Deutsch B2 am 13. Nov.": as the detail names it.
       const level = String(entry.detail?.level ?? '');
       const start = typeof entry.detail?.start === 'string' && entry.detail.start ? dayRange(entry.detail.start, entry.detail.start, lang) : '';
-      const what = [entry.detail?.course, level].filter(Boolean).join(' ') + (start ? ` ${t('ab', 'from')} ${start}` : '');
+      const sitting = typeof entry.detail?.sitting === 'string' && entry.detail.sitting ? dayRange(entry.detail.sitting, entry.detail.sitting, lang) : '';
+      const what = entry.detail?.exam
+        ? `${String(entry.detail.exam)}${sitting ? ` ${t('am', 'on')} ${sitting}` : ''}`
+        : [entry.detail?.course, level].filter(Boolean).join(' ') + (start ? ` ${t('ab', 'from')} ${start}` : '');
       switch (entry.action) {
         case 'waitlist_joined':
           return t(`hat ${acc} auf die Warteliste ${what} gesetzt`, `put ${subject} on the waiting list for ${what}`);
@@ -307,10 +317,25 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       }
     }
     case 'places_set':
+      // An exam sitting's places are one number (0036); a course level's are groups × places.
+      if (entry.detail?.capacity !== undefined) {
+        return t(`hat die Plätze ${dat} auf ${entry.detail.capacity} gesetzt`, `set ${subject} to ${entry.detail.capacity} places`);
+      }
       return t(
         `hat die Plätze für ${entry.detail?.level} auf ${entry.detail?.groups} × ${entry.detail?.placesPerGroup} gesetzt`,
         `set ${entry.detail?.level} to ${entry.detail?.groups} × ${entry.detail?.placesPerGroup} places`
       );
+    case 'exam_filed': {
+      const n = Number(entry.detail?.count ?? 0);
+      return t(
+        n === 1 ? 'hat 1 Person als bei telc gemeldet eingetragen' : `hat ${n} Personen als bei telc gemeldet eingetragen`,
+        n === 1 ? 'marked 1 candidate as reported to telc' : `marked ${n} candidates as reported to telc`
+      );
+    }
+    case 'exam_unfiled':
+      return t('hat eine Meldung bei telc zurückgenommen', 'took back a report to telc');
+    case 'exam_changed':
+      return t('hat Prüfungstermin oder Teile einer Buchung geändert', "changed a booking's sitting or parts");
     case 'group_opened':
       return t(`hat eine weitere Gruppe ${entry.detail?.level} eröffnet`, `opened another ${entry.detail?.level} group`);
     case 'cohort_created':

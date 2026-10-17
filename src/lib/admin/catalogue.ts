@@ -46,18 +46,6 @@ export type CourseInstanceSummary = {
   bookingCount: number;
 };
 
-export type ExamSessionSummary = {
-  id: string;
-  examCode: string;
-  examName: string;
-  level: string | null;
-  startsAt: Date;
-  registrationDeadline: Date | null;
-  capacity: number;
-  status: string;
-  registrationCount: number;
-};
-
 export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
   const rows = await query<{
     id: string;
@@ -246,46 +234,3 @@ export async function createCourseInstance(
   return row.id;
 }
 
-export async function listUpcomingExamSessions(limit = 25): Promise<ExamSessionSummary[]> {
-  const rows = await query<{
-    id: string;
-    exam_code: string;
-    exam_name: string;
-    level: string | null;
-    starts_at: Date;
-    registration_deadline: Date | null;
-    capacity: number;
-    status: string;
-    registration_count: string;
-  }>(
-    `SELECT s.id,
-            e.code AS exam_code,
-            e.name AS exam_name,
-            e.level,
-            s.starts_at,
-            s.registration_deadline,
-            s.capacity,
-            s.status,
-            (SELECT count(*) FROM exam_registrations r
-              WHERE r.exam_session_id = s.id AND r.status <> 'spam')
-              AS registration_count
-       FROM exam_sessions s
-       JOIN exam_types e ON e.id = s.exam_type_id
-      WHERE s.starts_at >= now() - interval '14 days'
-      ORDER BY s.starts_at ASC
-      LIMIT $1`,
-    [limit]
-  );
-
-  return rows.map((row) => ({
-    id: row.id,
-    examCode: row.exam_code,
-    examName: row.exam_name,
-    level: row.level,
-    startsAt: row.starts_at,
-    registrationDeadline: row.registration_deadline,
-    capacity: row.capacity,
-    status: row.status,
-    registrationCount: Number(row.registration_count),
-  }));
-}

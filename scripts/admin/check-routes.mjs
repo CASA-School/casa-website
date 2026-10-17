@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -56,6 +56,10 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
               WHERE i.end_date >= current_date GROUP BY i.id ORDER BY count(w.id) DESC, min(i.start_date) LIMIT 1`),
     firstId(`SELECT id FROM letters ORDER BY sent_at DESC LIMIT 1`),
     firstId(`SELECT id FROM waitlist_entries ORDER BY joined_at DESC LIMIT 1`),
+    // An exam sitting, the one with the most candidates; and an exam booking (0036).
+    firstId(`SELECT s.id FROM exam_sessions s LEFT JOIN bookings b ON b.exam_session_id = s.id
+              WHERE s.starts_at >= current_date GROUP BY s.id ORDER BY count(b.id) DESC, min(s.starts_at) LIMIT 1`),
+    firstId(`SELECT id FROM bookings WHERE exam_session_id IS NOT NULL AND deleted_at IS NULL LIMIT 1`),
   ]);
 
 const routes = [
@@ -95,6 +99,11 @@ const routes = [
   '/admin/catalogue/waitlist',
   '/admin/catalogue/waitlist?view=closed',
   '/admin/catalogue/exams',
+  sitting && `/admin/catalogue/exams/${sitting}`,
+  sitting && `/admin/catalogue/exams/${sitting}/telc`,
+  examBooking && `/admin/bookings/${examBooking}`,
+  examBooking && `/admin/bookings/${examBooking}/letter`,
+  examBooking && `/admin/bookings/${examBooking}/letter?kind=invitation`,
   '/admin/settings/rooms',
   room && `/admin/settings/rooms/${room}`,
   '/admin/applications',

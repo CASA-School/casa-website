@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { query, queryFirst } from '../db';
+import type { ExamParts } from '../exam-parts';
 import { sessionOf } from '../waitlist';
 
 import { getSiteUrl } from '@/lib/seo';
@@ -10,6 +11,7 @@ import type {
   LearnerLetterContext,
   LetterAddress,
   LetterCourse,
+  LetterExam,
   LetterPerson,
   RegistrationLetterContext,
   WaitlistLetterContext,
@@ -107,6 +109,29 @@ async function signers(): Promise<{ id: string; name: string }[]> {
   return query<{ id: string; name: string }>(`SELECT id, name FROM staff_users WHERE is_active ORDER BY name`);
 }
 
+/**
+ * The exam a booking or a queue entry is for (0036): its name, its day and hours in Bremen's time,
+ * telc's deadline and the parts. `where` picks the row: `b.id = $1` for a booking, `w.id = $1` for
+ * a waiting-list entry.
+ */
+async function letterExam(where: 'b.id = $1' | 'w.id = $1', id: string): Promise<LetterExam | null> {
+  const from =
+    where === 'b.id = $1'
+      ? `bookings b JOIN exam_sessions s ON s.id = b.exam_session_id`
+      : `waitlist_entries w JOIN exam_sessions s ON s.id = w.exam_session_id`;
+  const parts = where === 'b.id = $1' ? 'b.exam_parts' : 'w.exam_parts';
+  const row = await queryFirst<{ name: string; day: string; start_time: string; end_time: string; deadline: string | null; parts: ExamParts }>(
+    `SELECT e.name, to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'YYYY-MM-DD') AS day,
+            to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS start_time,
+            to_char(s.ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS end_time,
+            to_char(s.registration_deadline, 'YYYY-MM-DD') AS deadline, ${parts} AS parts
+       FROM ${from} JOIN exam_types e ON e.id = s.exam_type_id
+      WHERE ${where}`,
+    [id]
+  );
+  return row ? { name: row.name, day: row.day, startTime: row.start_time, endTime: row.end_time, deadline: row.deadline, parts: row.parts } : null;
+}
+
 export async function bookingLetterContext(bookingId: string): Promise<BookingLetterContext | null> {
   const booking = await queryFirst<{
     id: string;
@@ -125,7 +150,8 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     cancelled_at: string | null;
   }>(
     `SELECT b.id, b.number, b.person_id, b.status::text AS status, b.visa_required, b.payer, t.down_payment,
-            (SELECT r.locale FROM course_registrations r WHERE r.id = b.source_registration_id) AS locale,
+            coalesce((SELECT r.locale FROM course_registrations r WHERE r.id = b.source_registration_id),
+                     (SELECT r.locale FROM exam_registrations r WHERE r.id = b.source_exam_registration_id)) AS locale,
             to_char(b.cancelled_at, 'YYYY-MM-DD') AS cancelled_at,
             at.name_de AS acc_de, at.name_en AS acc_en,
             to_char(b.accommodation_from, 'YYYY-MM-DD') AS accommodation_from,
@@ -142,7 +168,7 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     [bookingId]
   );
   if (!booking) return null;
-  const [person, course, charges, payments, staff] = await Promise.all([
+  const [person, course, charges, payments, staff, exam] = await Promise.all([
     letterPerson(booking.person_id),
     queryFirst<CourseRow & { level_code: string | null }>(
       `SELECT t.name, t.name_de, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date,
@@ -165,6 +191,7 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
       [bookingId]
     ),
     signers(),
+    letterExam(`b.id = $1`, bookingId),
   ]);
   if (!person) return null;
   const charged = charges.reduce((sum, c) => sum + Number(c.amount), 0);
@@ -175,6 +202,7 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
     language: booking.locale === 'en' ? 'en' : 'de',
     person,
     course: course?.name ? toCourse(course, course.level_code) : null,
+    exam,
     accommodation:
       booking.acc_en && booking.accommodation_from
         ? { name: { de: booking.acc_de || booking.acc_en, en: booking.acc_en }, from: booking.accommodation_from, to: booking.accommodation_to }
@@ -193,6 +221,43 @@ export async function bookingLetterContext(bookingId: string): Promise<BookingLe
 }
 
 export async function waitlistLetterContext(entryId: string): Promise<WaitlistLetterContext | null> {
+  // An exam sitting's queue (0036): the sitting instead of a course start.
+  const examEntry = await queryFirst<{ id: string; person_id: string; status: string; exam_session_id: string; locale: string | null; position: number | null }>(
+    `SELECT w.id, w.person_id, w.status, w.exam_session_id,
+            (SELECT r.locale FROM exam_registrations r WHERE r.id = w.exam_registration_id) AS locale,
+            CASE WHEN w.status IN ('waiting', 'offered') THEN (
+              SELECT count(*)::int FROM waitlist_entries o
+               WHERE o.exam_session_id = w.exam_session_id AND o.status IN ('waiting', 'offered')
+                 AND (o.rank, o.joined_at) <= (w.rank, w.joined_at)) END AS position
+       FROM waitlist_entries w WHERE w.id = $1 AND w.exam_session_id IS NOT NULL`,
+    [entryId]
+  );
+  if (examEntry) {
+    const [person, exam, next, staff] = await Promise.all([
+      letterPerson(examEntry.person_id),
+      letterExam(`w.id = $1`, entryId),
+      // The next sitting of the same exam: what a "no place this time" letter points to.
+      queryFirst<{ day: string }>(
+        `SELECT to_char(n.starts_at AT TIME ZONE 'Europe/Berlin', 'YYYY-MM-DD') AS day
+           FROM exam_sessions s JOIN exam_sessions n ON n.exam_type_id = s.exam_type_id AND n.starts_at > s.starts_at AND n.status = 'scheduled'
+          WHERE s.id = $1 ORDER BY n.starts_at LIMIT 1`,
+        [examEntry.exam_session_id]
+      ),
+      signers(),
+    ]);
+    if (!person) return null;
+    return {
+      entryId: examEntry.id,
+      language: examEntry.locale === 'en' ? 'en' : 'de',
+      status: examEntry.status,
+      person,
+      course: null,
+      exam,
+      position: examEntry.position,
+      nextStart: next?.day ?? null,
+      staff,
+    };
+  }
   const entry = await queryFirst<
     CourseRow & {
       id: string;
@@ -240,6 +305,7 @@ export async function waitlistLetterContext(entryId: string): Promise<WaitlistLe
     status: entry.status,
     person,
     course: toCourse(entry, entry.level_code),
+    exam: null,
     position: entry.position,
     nextStart: next?.start_date ?? null,
     staff,
@@ -268,6 +334,7 @@ export async function learnerLetterContext(personId: string): Promise<LearnerLet
       number: b.number,
       status: b.status,
       course: b.course,
+      exam: b.exam,
       accommodation: b.accommodation,
       charges: b.charges.map((c) => ({ description: c.description, amount: c.amount })),
       charged: b.charged,

@@ -1116,8 +1116,76 @@ planners' (`rooms` at `edit`); seeing the lists needs `catalogue`.
 free (which holds the place), no place this time (which takes the learner off)
 — and says which letter went last (`docs/LETTERS.md`).
 
-**Not yet:** exam waiting lists (sittings have a capacity; SchoolMan has them).
-The link to Kursplanung's course groups, which are planned by hand per month.
+**Exam sittings have their own queue (2026-10-17):** the same table and rules,
+an entry about a sitting instead of a start's level — see Exams below.
+
+**Not yet:** the link to Kursplanung's course groups, which are planned by hand
+per month.
+
+## Exams (2026-10-17, migrations 0036–0037)
+
+Rahman: "yes build the exam bookings". SchoolMan books exams on their own
+business line (`NationalAirport`, ~400 bookings a year: telc B2 and telc C1
+Hochschule, about 20 sittings a year). Its study (`docs/schoolman/courses.md`)
+found what not to repeat: places shown and never enforced; a cancelled candidate
+still counted, still invited and still on the telc export; no deadline stored;
+the candidate's day a copied row; nothing noticing a freed place.
+
+**An exam booking is a booking** — the same number, cost lines, payments,
+observation, letters and history — whose `exam_session_id` names the sitting and
+`exam_parts` what is sat: the whole exam, or the written or the oral part only
+(telc sells them separately). It has no course and no period: its day is the
+sitting's (`booking_days`, a view over periods and sittings, gives every booking
+its days, so the bookings list and its filters show an exam on the day it is
+sat). `bookings_exam_check` keeps the two kinds apart.
+
+**Places are enforced.** A sitting's places are `exam_sessions.capacity`; booked
+are its bookings that are not cancelled, an offered place is held, the rest are
+free (`freeSeats`, `src/lib/admin/exams.ts`). `createBooking` locks the sitting
+row while it counts, so the last place cannot be booked twice, and refuses a
+full one — the wizard offers the waiting list instead, without „Trotzdem
+buchen": a sitting's places are the room's and the examiners'. More places are
+„Plätze ändern" on the sitting (`catalogue` at `edit`), never fewer than booked.
+
+**Booking.** The wizard's „Eine Prüfung": the exam (with how many sittings it
+has) and the parts, then the sitting (free places or „Voll · n auf der
+Warteliste", the deadline or „Anmeldeschluss vorbei"), then the review. After
+the deadline it says the entry to telc is a late one. The fee is the exam's
+rate for the parts on the sitting's day (`priceSelection`), the exam's name as
+the line. An exam registration from the website has „Buchung anlegen" with the
+exam, sitting and parts already chosen; the registration is then done, and its
+page links to the booking. On a booking, „Termin ändern" moves it to another
+sitting of the same exam with a place, or changes the parts — which re-prices
+the fee from its rate and, for another sitting, undoes the report to telc.
+
+**The sitting's page** (`/admin/catalogue/exams/[id]`, from the Prüfungen list):
+the exam, day and hours and the deadline with the days left; booked, reported
+to telc, waiting and free in the bar; the candidates — tick and „Ausgewählte als
+gemeldet markieren", and per candidate the money's colour and what telc still
+needs from the record („Fehlt: Geburtsort"); the queue with the course queue's
+actions; the website registrations for the sitting nobody has answered yet.
+**„Liste für telc"** is SchoolMan's export — surname, first name, gender, date
+and place of birth, country of birth, mother tongue, email, parts — of the
+bookings that stand, a gap marked „fehlt", copied as columns in one click.
+
+**Reported to telc** is `exam_filed_at`/`_by` on the booking: SchoolMan had no
+such field, and the Prüfungen list's deadline column is about exactly this.
+
+**The learner's page** lists exam bookings among „Anfragen & Buchungen" (the
+course spotlight stays a course) and their exam queues.
+
+**Letters** (`docs/LETTERS.md`): the exam's confirmation, invitation and
+„Ergebnis ist da"; receipt, reminder, overview and cancellation as for any
+booking; the queue's three letters with the sitting.
+
+**Rights.** Booking, changing, reporting and the queue: `bookings` at `edit`.
+The sitting's places: `catalogue` at `edit`. The telc list (personal data):
+`bookings`.
+
+**Not yet:** results per candidate (passed, points, certificate collected) and
+the participation confirmation SchoolMan prints, which wait for a record of the
+result; TestDaF and TestAS, which are not in the catalogue (only the two telc exams are); sittings
+are still created by the seeds and the FileMaker read, not on a screen.
 
 ## Copy on screens — labels, not explanations
 

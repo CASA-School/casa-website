@@ -1,6 +1,8 @@
+import Link from 'next/link';
+
 import { ListEmpty, ListGroup } from '@/components/admin/list';
 import { Badge, Card, PageHeader } from '@/components/admin/ui';
-import { listUpcomingExamSessions } from '@/lib/admin/catalogue';
+import { listSittings } from '@/lib/admin/exams';
 import { groupRuns, monthKey, monthLabel, openCell, OpenTable, SeatLine, sentenceCase, shortDate } from '../list-parts';
 import { pick, wsLocale, type Bilingual } from '@/lib/admin/i18n';
 import { Tally } from '@/components/admin/inbox';
@@ -13,7 +15,7 @@ const STATUS_LABELS: Record<string, Bilingual> = {
 };
 
 /**
- * Exam sittings, with entries against them.
+ * Exam sittings, with the candidates booked into them (0036) — each opens on its own page.
  *
  * The deadline column is the point of this screen. A telc entry cannot be filed
  * after the deadline, so a sitting with three days left and eleven of twenty
@@ -27,7 +29,7 @@ const STATUS_LABELS: Record<string, Bilingual> = {
  * already say it.
  */
 export default async function ExamCataloguePage() {
-  const [sessions, { t, lang }] = await Promise.all([listUpcomingExamSessions(30), getI18n()]);
+  const [sessions, { t, lang }] = await Promise.all([listSittings(30), getI18n()]);
   const months = groupRuns(sessions, (session) => monthKey(session.startsAt));
   const today = new Date().setHours(0, 0, 0, 0);
   const subtle = 'text-[var(--casa-muted)]';
@@ -45,7 +47,7 @@ export default async function ExamCataloguePage() {
       {/* What is coming, how many have entered, and the next deadline: a telc entry cannot be filed after it. */}
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
         <Tally tone="working" n={ahead.length} label={ahead.length === 1 ? t('kommender Termin', 'sitting ahead') : t('kommende Termine', 'sittings ahead')} lang={lang} />
-        <Tally tone="done" n={ahead.reduce((sum, s) => sum + s.registrationCount, 0)} label={t('Anmeldungen', 'entries')} lang={lang} />
+        <Tally tone="done" n={ahead.reduce((sum, s) => sum + s.booked, 0)} label={t('gebucht', 'booked')} lang={lang} />
         {nextDeadline && daysToDeadline !== null ? (
           <span className={daysToDeadline <= 7 ? 'font-semibold text-[#9a5b00]' : undefined}>
             {t('Nächster Anmeldeschluss', 'Next deadline')}{' '}
@@ -87,9 +89,12 @@ export default async function ExamCataloguePage() {
                   <tr key={session.id}>
                     <td className={`${openCell} py-3.5 md:max-w-0`}>
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className={`text-[0.9rem] font-semibold md:truncate ${past ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]'}`}>
+                        <Link
+                          href={`/admin/catalogue/exams/${session.id}`}
+                          className={`text-[0.9rem] font-semibold hover:underline md:truncate ${past ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]'}`}
+                        >
                           {session.examName}
-                        </span>
+                        </Link>
                         {past ? <Badge tone="quiet">{t('Vorbei', 'Past')}</Badge> : null}
                         {session.status !== 'scheduled' ? (
                           <Badge tone={session.status === 'cancelled' ? 'danger' : 'neutral'}>
@@ -130,13 +135,23 @@ export default async function ExamCataloguePage() {
                     </td>
                     <td className={`${openCell} py-3.5 ${hide}`}>
                       <SeatLine
-                        taken={session.registrationCount}
+                        taken={session.booked}
                         capacity={session.capacity}
-                        label={t(
-                          `${session.registrationCount} von ${session.capacity} Plätzen belegt`,
-                          `${session.registrationCount} of ${session.capacity} places taken`
-                        )}
+                        label={t(`${session.booked} von ${session.capacity} Plätzen gebucht`, `${session.booked} of ${session.capacity} places booked`)}
                         warn={closing}
+                        note={
+                          // Who still needs an answer: on the waiting list, or registered on the website and not booked.
+                          session.waiting + session.offered || session.openRegistrations ? (
+                            <span className="text-[var(--casa-muted)]">
+                              {[
+                                session.waiting + session.offered ? t(`${session.waiting + session.offered} warten`, `${session.waiting + session.offered} waiting`) : null,
+                                session.openRegistrations ? t(`${session.openRegistrations} neu`, `${session.openRegistrations} new`) : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          ) : undefined
+                        }
                       />
                     </td>
                   </tr>

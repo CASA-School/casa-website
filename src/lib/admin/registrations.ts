@@ -1,5 +1,6 @@
 import { query, queryFirst } from './db';
-import { pick, type Bilingual, type WsLang } from './i18n';
+import { EXAM_PARTS_LABELS, isExamParts } from './exam-parts';
+import { pick, type WsLang } from './i18n';
 import { inboxConditions, type InboxPeriod, type InboxState } from './inbox';
 import { normaliseStatus, type WorkStatus } from './queues';
 
@@ -104,16 +105,7 @@ export type ExamRegistrationDetail = {
   submittedAt: Date;
 };
 
-const REGISTRATION_TYPE_LABELS: Record<string, Bilingual> = {
-  full: { de: 'Ganze Prüfung', en: 'Full exam' },
-  written: { de: 'Nur schriftlicher Teil', en: 'Written part only' },
-  oral: { de: 'Nur mündlicher Teil', en: 'Oral part only' },
-};
-
-export const registrationTypeLabel = (value: string, lang: WsLang) => {
-  const label = REGISTRATION_TYPE_LABELS[value];
-  return label ? pick(lang, label) : value;
-};
+export const registrationTypeLabel = (value: string, lang: WsLang) => (isExamParts(value) ? pick(lang, EXAM_PARTS_LABELS[value]) : value);
 
 export async function listCourseRegistrations({
   period = 'week',

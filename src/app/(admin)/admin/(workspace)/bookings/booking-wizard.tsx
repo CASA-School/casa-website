@@ -12,13 +12,15 @@ import {
   waitingAhead,
   type BookingOffer,
   type CohortOffer,
+  type SittingOffer,
 } from '@/lib/admin/booking-offer-types';
+import { EXAM_PARTS, EXAM_PARTS_LABELS, type ExamParts } from '@/lib/admin/exam-parts';
 import { cn } from '@/lib/utils';
 import { toDateInputValue } from '@/lib/dates';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { DateField } from '@/components/admin/date-picker';
 import { useWsLang } from '@/components/admin/lang';
-import type { T } from '@/lib/admin/i18n';
+import { pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 
 /**
  * The booking wizard.
@@ -38,11 +40,16 @@ import type { T } from '@/lib/admin/i18n';
  * decides an amount.
  */
 
-type Step = 'what' | 'course' | 'level' | 'accommodation' | 'review';
+type Step = 'what' | 'course' | 'sitting' | 'level' | 'accommodation' | 'review';
+
+/** A course: what, which, level and books, accommodation. An exam: what (and its parts), the sitting. */
+const COURSE_STEPS: readonly Step[] = ['what', 'course', 'level', 'accommodation', 'review'];
+const EXAM_STEPS: readonly Step[] = ['what', 'sitting', 'review'];
 
 const steps = (t: T): readonly { key: Step; label: string }[] => [
   { key: 'what', label: t('Was', 'What') },
   { key: 'course', label: t('Auswahl', 'Which') },
+  { key: 'sitting', label: t('Termin', 'Sitting') },
   { key: 'level', label: t('Niveau & Bücher', 'Level & books') },
   { key: 'accommodation', label: t('Unterkunft', 'Accommodation') },
   { key: 'review', label: t('Prüfen', 'Review') },
@@ -67,6 +74,8 @@ export function BookingWizard({
   preselectedCohortId,
   preselectedLevelCode,
   sourceRegistrationId,
+  preselectedExam,
+  sourceExamRegistrationId,
   returnTo,
   action,
   waitlistAction,
@@ -78,12 +87,15 @@ export function BookingWizard({
   /** From a waiting list: the level the learner waited for. */
   preselectedLevelCode?: string | null;
   sourceRegistrationId?: string | null;
+  /** From an exam registration or an exam waiting list (0036): the exam, its sitting and the parts. */
+  preselectedExam?: { examTypeId: string; sittingId: string | null; parts: ExamParts } | null;
+  sourceExamRegistrationId?: string | null;
   returnTo: string;
   action: (formData: FormData) => void | Promise<void>;
   /** The other ending when the level is full: the learner goes into its queue (`waitlistFromWizardAction`). */
   waitlistAction?: (formData: FormData) => void | Promise<void>;
 }) {
-  const { t } = useWsLang();
+  const { t, lang } = useWsLang();
   const preselected = useMemo(
     () =>
       preselectedCohortId
@@ -93,14 +105,18 @@ export function BookingWizard({
     [offer.courseTypes, preselectedCohortId]
   );
 
-  const [step, setStep] = useState<Step>(preselected ? 'level' : 'what');
-  const [kind, setKind] = useState<'course' | 'exam'>('course');
+  const presetExam = preselectedExam ? (offer.exams.find((e) => e.id === preselectedExam.examTypeId) ?? null) : null;
+  const [step, setStep] = useState<Step>(preselected ? 'level' : presetExam ? 'sitting' : 'what');
+  const [kind, setKind] = useState<'course' | 'exam'>(presetExam ? 'exam' : 'course');
   const [courseTypeId, setCourseTypeId] = useState<string | null>(
     preselected?.courseTypeId ?? null
   );
   const [cohort, setCohort] = useState<CohortOffer | null>(preselected);
-  const [examTypeId, setExamTypeId] = useState<string | null>(null);
-  const [examParts, setExamParts] = useState<1 | 2>(2);
+  const [examTypeId, setExamTypeId] = useState<string | null>(presetExam?.id ?? null);
+  const [examParts, setExamParts] = useState<ExamParts>(preselectedExam?.parts ?? 'full');
+  const [sittingId, setSittingId] = useState<string | null>(
+    presetExam?.sittings.some((s) => s.id === preselectedExam?.sittingId) ? (preselectedExam?.sittingId ?? null) : null
+  );
 
   const [levelCode, setLevelCode] = useState<string | null>(preselectedLevelCode ?? preselected?.levelCode ?? null);
   const [levelScope, setLevelScope] = useState<'half' | 'whole'>('whole');
@@ -116,6 +132,7 @@ export function BookingWizard({
   const [includeFee, setIncludeFee] = useState(true);
 
   const exam = offer.exams.find((e) => e.id === examTypeId) ?? null;
+  const sitting = exam?.sittings.find((s) => s.id === sittingId) ?? null;
 
   /** The books for the chosen level: both halves, or just this one. */
   const books = useMemo(() => {
@@ -126,8 +143,8 @@ export function BookingWizard({
 
   const chosenBooks = books.filter((b) => !excludedBooks.has(b.id));
 
-  // The chosen level in the chosen start: its places and who already waits for them.
-  const group = kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : null;
+  // The chosen level in the chosen start — or the chosen sitting: its places and who already waits for them.
+  const group = kind === 'course' && cohort && levelCode ? levelPlaces(cohort, levelCode) : kind === 'exam' && sitting ? sitting.places : null;
   const free = group ? levelFree(group, personId) : null;
   const ahead = group ? waitingAhead(group, personId) : 0;
   const full = group !== null && free === 0;
@@ -137,11 +154,12 @@ export function BookingWizard({
     ? (offer.accommodation.find((a) => a.code === accType) ?? null)
     : null;
 
-  const visible = steps(t).filter((s) => (kind === 'exam' ? s.key !== 'level' : true));
+  const visible = steps(t).filter((s) => (kind === 'exam' ? EXAM_STEPS : COURSE_STEPS).includes(s.key));
   const index = visible.findIndex((s) => s.key === step);
   const canAdvance =
     (step === 'what' && (kind === 'course' || (kind === 'exam' && Boolean(examTypeId)))) ||
     (step === 'course' && Boolean(cohort)) ||
+    (step === 'sitting' && Boolean(sitting)) ||
     (step === 'level' && wantsBooks !== null) ||
     (step === 'accommodation' && wantsAccommodation !== null) ||
     step === 'review';
@@ -221,26 +239,24 @@ export function BookingWizard({
                   <Choice
                     key={e.id}
                     selected={examTypeId === e.id}
-                    onSelect={() => setExamTypeId(e.id)}
+                    onSelect={() => {
+                      setExamTypeId(e.id);
+                      if (e.id !== examTypeId) setSittingId(null);
+                    }}
                     title={e.name}
-                  />
+                  >
+                    {e.sittings.length === 0
+                      ? t('Kein Termin geplant', 'No sitting planned')
+                      : e.sittings.length === 1
+                        ? t('1 Termin', '1 sitting')
+                        : t(`${e.sittings.length} Termine`, `${e.sittings.length} sittings`)}
+                  </Choice>
                 ))}
               </div>
-              <div className="flex gap-2">
-                {([2, 1] as const).map((parts) => (
-                  <button
-                    key={parts}
-                    type="button"
-                    onClick={() => setExamParts(parts)}
-                    className={cn(
-                      'rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors',
-                      examParts === parts
-                        ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
-                        : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
-                    )}
-                  >
-                    {parts === 2 ? t('Beide Teile', 'Both parts') : t('Nur ein Teil', 'One part only')}
-                  </button>
+              <Question small>{t('Welche Teile?', 'Which parts?')}</Question>
+              <div className="flex flex-wrap gap-2">
+                {EXAM_PARTS.map((parts) => (
+                  <Toggle key={parts} selected={examParts === parts} onSelect={() => setExamParts(parts)} label={pick(lang, EXAM_PARTS_LABELS[parts])} />
                 ))}
               </div>
             </div>
@@ -309,6 +325,23 @@ export function BookingWizard({
               </div>
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {step === 'sitting' && exam ? (
+        <section className="space-y-3">
+          <Question>{t(`Welcher Termin für ${exam.name}?`, `Which sitting of ${exam.name}?`)}</Question>
+          {exam.sittings.length === 0 ? (
+            <p className="text-sm text-[var(--casa-muted)]">{t('Für diese Prüfung ist kein Termin geplant.', 'No sitting of this exam is planned.')}</p>
+          ) : (
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+              {exam.sittings.map((s) => (
+                <Choice key={s.id} selected={sittingId === s.id} onSelect={() => setSittingId(s.id)} title={sittingDay(s.startsAt, lang)}>
+                  {sittingFacts(s, personId, t, lang)}
+                </Choice>
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -529,7 +562,9 @@ export function BookingWizard({
             name="examTypeId"
             value={kind === 'exam' ? (examTypeId ?? '') : ''}
           />
-          <input type="hidden" name="examParts" value={String(examParts)} />
+          <input type="hidden" name="examSessionId" value={kind === 'exam' ? (sitting?.id ?? '') : ''} />
+          <input type="hidden" name="examParts" value={examParts} />
+          {sourceExamRegistrationId ? <input type="hidden" name="sourceExamRegistrationId" value={sourceExamRegistrationId} /> : null}
           <input
             type="hidden"
             name="startDate"
@@ -541,7 +576,7 @@ export function BookingWizard({
             value={cohort ? toDateInputValue(cohort.endDate) : accTo}
           />
           <input type="hidden" name="levelCode" value={levelCode ?? ''} />
-          <input type="hidden" name="includeEnrolmentFee" value={includeFee ? '1' : ''} />
+          <input type="hidden" name="includeEnrolmentFee" value={includeFee && kind === 'course' ? '1' : ''} />
           {wantsBooks
             ? chosenBooks.map((b) => (
                 <input key={b.id} type="hidden" name="materialIds" value={b.id} />
@@ -557,10 +592,11 @@ export function BookingWizard({
           <input type="hidden" name="accommodationFrom" value={wantsAccommodation ? accFrom : ''} />
           <input type="hidden" name="accommodationTo" value={wantsAccommodation ? accTo : ''} />
           <dl className="divide-y divide-ws-line-soft rounded-xl border border-ws-line">
-            {summaryRows(t, {
+            {summaryRows(t, lang, {
               kind,
               cohort,
               exam,
+              sitting,
               examParts,
               levelCode,
               levelScope,
@@ -602,29 +638,57 @@ export function BookingWizard({
             <Field label={t('Name der Zahlenden', 'Payer name')} htmlFor="review-payer-name">
               <Input id="review-payer-name" name="payerName" maxLength={120} />
             </Field>
-            <label className="flex items-center gap-2.5 text-sm">
-              <input
-                type="checkbox"
-                checked={includeFee}
-                onChange={(e) => setIncludeFee(e.target.checked)}
-                className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
-              />
-              {t('Anmeldegebühr berechnen', 'Charge the enrolment fee')}
-            </label>
-            <label className="flex items-center gap-2.5 text-sm">
-              <input
-                type="checkbox"
-                name="visaRequired"
-                className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
-              />
-              {t('Visum nötig', 'Visa required')}
-            </label>
+            {/* A course's: the enrolment fee and a visa. An exam is booked without either. */}
+            {kind === 'course' ? (
+              <>
+                <label className="flex items-center gap-2.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={includeFee}
+                    onChange={(e) => setIncludeFee(e.target.checked)}
+                    className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                  />
+                  {t('Anmeldegebühr berechnen', 'Charge the enrolment fee')}
+                </label>
+                <label className="flex items-center gap-2.5 text-sm">
+                  <input
+                    type="checkbox"
+                    name="visaRequired"
+                    className="size-4 rounded-lg border-ws-line-firm accent-[var(--casa-accent-surface)]"
+                  />
+                  {t('Visum nötig', 'Visa required')}
+                </label>
+              </>
+            ) : null}
             <Field label={t('Notizen', 'Notes')} htmlFor="review-notes">
               <Textarea id="review-notes" name="notes" rows={2} />
             </Field>
           </OptionalSection>
 
-          {queueFirst && group ? (
+          {kind === 'exam' && sitting && lateEntry(sitting) ? (
+            // After the deadline the entry reaches telc late, if at all: said before it is booked.
+            <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+              {t(
+                `Der Anmeldeschluss war am ${shortDay(sitting.deadline!, lang)}. Die Anmeldung bei telc ist eine Nachmeldung.`,
+                `Entries closed on ${shortDay(sitting.deadline!, lang)}. Reporting this candidate to telc is a late entry.`
+              )}
+            </p>
+          ) : null}
+
+          {queueFirst && group && kind === 'exam' ? (
+            // A full sitting, or candidates waiting in front: the queue is offered first.
+            <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
+              {full
+                ? t(
+                    `Dieser Termin ist voll (${group.booked} von ${group.places} Plätzen). Auf der Warteliste wäre ${personName} Nr. ${ahead + 1}.`,
+                    `This sitting is full (${group.booked} of ${group.places} places). On the waiting list ${personName} would be no. ${ahead + 1}.`
+                  )
+                : t(
+                    `${ahead === 1 ? '1 Person wartet' : `${ahead} Personen warten`} schon auf diesen Termin. Ein freier Platz geht zuerst an die Warteliste.`,
+                    `${ahead === 1 ? '1 person is' : `${ahead} people are`} already waiting for this sitting. A free place goes to the waiting list first.`
+                  )}
+            </p>
+          ) : queueFirst && group ? (
             // A full level, or learners waiting in front: the queue is offered first, and booking anyway stays possible.
             <p role="status" className="rounded-xl bg-[#fff8e6] px-3.5 py-3 text-[0.86rem] leading-relaxed text-[#5c3d00] ring-1 ring-[#efdca4] ring-inset">
               {full
@@ -643,7 +707,12 @@ export function BookingWizard({
             <Button type="button" variant="ghost" onClick={() => go(-1)}>
               {t('Zurück', 'Back')}
             </Button>
-            {queueFirst && full ? (
+            {queueFirst && full && kind === 'exam' ? (
+              // A sitting's places are the room's and the examiners': a full one is not booked over.
+              <Button type="submit" formAction={waitlistAction}>
+                {t('Auf die Warteliste', 'Add to waiting list')}
+              </Button>
+            ) : queueFirst && full ? (
               <span className="flex flex-wrap gap-2">
                 <Button type="submit" variant="secondary">
                   {t('Trotzdem buchen', 'Book anyway')}
@@ -758,10 +827,12 @@ function Toggle({
  */
 function summaryRows(
   t: T,
+  lang: WsLang,
   {
     kind,
     cohort,
     exam,
+    sitting,
     examParts,
     levelCode,
     levelScope,
@@ -773,7 +844,8 @@ function summaryRows(
     kind: 'course' | 'exam';
     cohort: CohortOffer | null;
     exam: { name: string } | null;
-    examParts: 1 | 2;
+    sitting: SittingOffer | null;
+    examParts: ExamParts;
     levelCode: string | null;
     levelScope: 'half' | 'whole';
     books: readonly { id: string; title: string }[];
@@ -793,10 +865,9 @@ function summaryRows(
   }
   if (kind === 'exam' && exam) {
     rows.push({ label: t('Prüfung', 'Exam'), value: exam.name });
-    rows.push({
-      label: t('Prüfungsteile', 'Sitting'),
-      value: examParts === 1 ? t('Ein Teil', 'One part') : t('Beide Teile', 'Both parts'),
-    });
+    if (sitting) rows.push({ label: t('Termin', 'Sitting'), value: sittingDay(sitting.startsAt, lang) });
+    rows.push({ label: t('Teile', 'Parts'), value: pick(lang, EXAM_PARTS_LABELS[examParts]) });
+    return rows;
   }
   if (levelCode) {
     rows.push({
@@ -821,6 +892,34 @@ function summaryRows(
   });
 
   return rows;
+}
+
+/** "Fr, 13. Nov. 2026 · 09:00": the day of a sitting and when it begins. */
+function sittingDay(startsAt: Date, lang: WsLang): string {
+  const d = new Date(startsAt);
+  return `${d.toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · ${d.toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+const shortDay = (day: Date, lang: WsLang) => new Date(day).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
+
+/** Its deadline has passed: a booking now is a late entry to telc. */
+const lateEntry = (s: SittingOffer) => s.deadline !== null && new Date(s.deadline).setHours(23, 59, 59, 999) < Date.now();
+
+/** Under a sitting: its free places — or that it is full and how many wait — and its deadline. */
+function sittingFacts(s: SittingOffer, personId: string, t: T, lang: WsLang): string {
+  const free = levelFree(s.places, personId);
+  return [
+    free > 0
+      ? free === 1
+        ? t('1 Platz frei', '1 place free')
+        : t(`${free} Plätze frei`, `${free} places free`)
+      : s.places.queue.length
+        ? t(`Voll · ${s.places.queue.length} auf der Warteliste`, `Full · ${s.places.queue.length} waiting`)
+        : t('Voll', 'Full'),
+    s.deadline ? (lateEntry(s) ? t('Anmeldeschluss vorbei', 'Entries closed') : t(`Anmeldeschluss ${shortDay(s.deadline, lang)}`, `Entries close ${shortDay(s.deadline, lang)}`)) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 const german = (iso: string) =>

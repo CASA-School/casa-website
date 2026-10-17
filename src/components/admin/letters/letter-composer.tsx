@@ -52,7 +52,7 @@ export type ComposerContext =
 
 type Standards = Record<LetterLanguage, Record<string, string>>;
 
-const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money', 'test', 'deposit'];
+const COMPUTED_SLOTS = ['payment', 'position', 'next', 'open', 'enrolled', 'lessons', 'request', 'start', 'certify', 'money', 'test', 'deposit', 'place', 'arrive', 'ready'];
 
 export function LetterComposer({
   source,
@@ -174,6 +174,16 @@ export function LetterComposer({
     deposit: t('Anzahlung', 'Down payment'),
     reference: t('Verwendungszweck', 'Payment reference'),
     visa: t('Visum', 'Visa'),
+    place: t('Ort', 'Place'),
+    id: t('Name und Ausweis', 'Name and ID'),
+    rules: t('Regeln', 'Rules'),
+    arrive: t('Ankunft', 'Arrival'),
+    bring: t('Mitbringen', 'What to bring'),
+    oral: t('Mündlicher Teil', 'Oral part'),
+    part: t('Ein Teil', 'One part'),
+    ready: t('Ergebnis', 'Result'),
+    collect: t('Abholen', 'Collecting'),
+    proxy: t('Vollmacht', 'Authorisation'),
   };
   // Every editable part has a name on its bar; one without its own is simply "Text".
   const slotLabel = new Proxy(labels, { get: (target, key: string) => target[key] ?? t('Text', 'Text') });
@@ -443,10 +453,12 @@ export function LetterComposer({
                         className="mt-0.5 size-4 accent-[var(--casa-ink-deep)]"
                       />
                       <span className="min-w-0">
-                        <span className="block font-semibold">{b.course ? [b.course.name[lang], b.course.level].filter(Boolean).join(' ') : b.number}</span>
+                        <span className="block font-semibold">{b.course ? [b.course.name[lang], b.course.level].filter(Boolean).join(' ') : (b.exam?.name ?? b.number)}</span>
                         <span className="block text-xs text-[var(--casa-muted)]">
                           {b.number}
-                          {b.course ? ` · ${new Date(`${b.course.startDate}T12:00:00`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}` : ''}
+                          {b.course || b.exam
+                            ? ` · ${new Date(`${b.course?.startDate ?? b.exam?.day}T12:00:00`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}`
+                            : ''}
                         </span>
                       </span>
                     </label>

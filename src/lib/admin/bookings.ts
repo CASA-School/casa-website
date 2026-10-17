@@ -3,6 +3,8 @@ import type { PoolClient } from 'pg';
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
+import { ratedParts, type ExamParts } from './exam-parts';
+import { closeOnExamBooking, sittingHasPlace, sittingWords } from './exams';
 import { raiseFlag } from './flags';
 import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './waitlist';
 import { pick, type Bilingual, type WsLang } from './i18n';
@@ -157,6 +159,9 @@ export type BookingListItem = {
   createdAt: Date;
   observationReason: ObservationReason | null;
   observationNote: string | null;
+  /** An exam booking (0036): the sitting and the parts sat; its name and day are the sitting's. */
+  examSessionId: string | null;
+  examParts: ExamParts | null;
 };
 
 export type BookingPeriod = {
@@ -192,6 +197,19 @@ export type Payment = {
   counterpart: { id: string; courseTypeName: string | null; startDate: Date | null } | null;
 };
 
+export type BookingExam = {
+  sessionId: string;
+  examTypeId: string;
+  name: string;
+  startsAt: Date;
+  endsAt: Date;
+  deadline: Date | null;
+  parts: ExamParts;
+  filedAt: Date | null;
+  filedByName: string | null;
+  sourceRegistrationId: string | null;
+};
+
 export type BookingDetail = BookingListItem & {
   courseTypeId: string | null;
   payer: Payer;
@@ -212,6 +230,8 @@ export type BookingDetail = BookingListItem & {
     to: Date | null;
   } | null;
   periods: BookingPeriod[];
+  /** What an exam booking is for (0036): the sitting, its day and deadline, the parts, the report to telc. */
+  exam: BookingExam | null;
   charges: BookingCharge[];
   payments: Payment[];
   balance: number;
@@ -219,15 +239,17 @@ export type BookingDetail = BookingListItem & {
 
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
-         t.name AS course_type_name, b.status::text AS status, b.currency, b.created_at,
-         b.observation_reason, b.observation_note,
-         (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = b.id) AS start_date,
-         (SELECT max(end_date) FROM booking_periods bp WHERE bp.booking_id = b.id) AS end_date,
+         coalesce(t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
+         b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
+         (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
+         (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
          coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid
     FROM bookings b
     JOIN people p ON p.id = b.person_id
     LEFT JOIN course_types t ON t.id = b.course_type_id
+    LEFT JOIN exam_sessions es ON es.id = b.exam_session_id
+    LEFT JOIN exam_types et ON et.id = es.exam_type_id
 `;
 
 type ListRow = {
@@ -245,6 +267,8 @@ type ListRow = {
   paid: string;
   observation_reason: ObservationReason | null;
   observation_note: string | null;
+  exam_session_id: string | null;
+  exam_parts: ExamParts | null;
 };
 
 const toItem = (r: ListRow): BookingListItem => ({
@@ -262,6 +286,8 @@ const toItem = (r: ListRow): BookingListItem => ({
   createdAt: r.created_at,
   observationReason: r.observation_reason,
   observationNote: r.observation_note,
+  examSessionId: r.exam_session_id,
+  examParts: r.exam_parts,
 });
 
 export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'reserved' | 'past' | 'cancelled' | 'all';
@@ -274,10 +300,10 @@ const FILTERS: Record<BookingFilter, string> = {
   // full (and not under observation, which shows yellow), or under observation.
   unclear: `b.status <> 'cancelled' AND b.observation_reason IS NULL AND NOT (${CHARGED} > 0.005 AND ${PAID} >= ${CHARGED} - 0.005)`,
   watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
-  current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.booking_id = b.id AND bp.start_date <= current_date AND bp.end_date >= current_date)`,
-  upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = b.id) > current_date`,
+  current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
+  upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) > current_date`,
   reserved: `b.status = 'reserved'`,
-  past: `b.status = 'completed' OR ((SELECT max(end_date) FROM booking_periods bp WHERE bp.booking_id = b.id) < current_date AND b.status <> 'cancelled')`,
+  past: `b.status = 'completed' OR ((SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) < current_date AND b.status <> 'cancelled')`,
   cancelled: `b.status = 'cancelled'`,
   all: 'true',
 };
@@ -297,10 +323,11 @@ export async function listBookings({
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})`;
   if (search) {
     params.push(`%${search}%`);
-    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR t.name ILIKE $1 OR b.number ILIKE $1)`;
+    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR t.name ILIKE $1 OR et.name ILIKE $1 OR b.number ILIKE $1)`;
   }
   const total = await queryFirst<{ n: string }>(
-    `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id ${where}`,
+    `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
+       LEFT JOIN exam_sessions es ON es.id = b.exam_session_id LEFT JOIN exam_types et ON et.id = es.exam_type_id ${where}`,
     params
   );
   const rows = await query<ListRow>(
@@ -371,6 +398,13 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       accommodation_catering_name: string | null;
       accommodation_from: Date | null;
       accommodation_to: Date | null;
+      exam_type_id: string | null;
+      exam_starts_at: Date | null;
+      exam_ends_at: Date | null;
+      exam_deadline: Date | null;
+      exam_filed_at: Date | null;
+      exam_filed_by_name: string | null;
+      source_exam_registration_id: string | null;
     }
   >(
     `${LIST.replace(
@@ -381,7 +415,10 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
          at.name_en AS accommodation_type_name,
          art.name_en AS accommodation_room_type_name,
          co.name_en AS accommodation_catering_name,
-         b.accommodation_from, b.accommodation_to
+         b.accommodation_from, b.accommodation_to,
+         es.exam_type_id, es.starts_at AS exam_starts_at, es.ends_at AS exam_ends_at, es.registration_deadline AS exam_deadline,
+         b.exam_filed_at, (SELECT name FROM staff_users WHERE id = b.exam_filed_by) AS exam_filed_by_name,
+         b.source_exam_registration_id
     FROM bookings b
     LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
     LEFT JOIN accommodation_room_types art ON art.code = b.accommodation_room_type_code
@@ -432,12 +469,14 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     }>(
       `SELECT pm.id, pm.amount, pm.method, pm.received_at, pm.subject, pm.reference,
               u.name AS recorded_by_name, pm.voided_at, pm.void_reason,
-              cb.id AS counterpart_id, ct.name AS counterpart_course,
-              (SELECT min(start_date) FROM booking_periods bp WHERE bp.booking_id = cb.id) AS counterpart_start
+              cb.id AS counterpart_id, coalesce(ct.name, cet.name) AS counterpart_course,
+              (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = cb.id) AS counterpart_start
          FROM payments pm
          LEFT JOIN staff_users u ON u.id = pm.recorded_by
          LEFT JOIN bookings cb ON cb.id = pm.counterpart_booking_id
          LEFT JOIN course_types ct ON ct.id = cb.course_type_id
+         LEFT JOIN exam_sessions ces ON ces.id = cb.exam_session_id
+         LEFT JOIN exam_types cet ON cet.id = ces.exam_type_id
         WHERE pm.booking_id = $1 ORDER BY pm.received_at, pm.created_at`,
       [id]
     ),
@@ -465,6 +504,21 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
           to: row.accommodation_to,
         }
       : null,
+    exam:
+      row.exam_session_id && row.exam_parts && row.exam_type_id && row.exam_starts_at && row.exam_ends_at
+        ? {
+            sessionId: row.exam_session_id,
+            examTypeId: row.exam_type_id,
+            name: row.course_type_name ?? '',
+            startsAt: row.exam_starts_at,
+            endsAt: row.exam_ends_at,
+            deadline: row.exam_deadline,
+            parts: row.exam_parts,
+            filedAt: row.exam_filed_at,
+            filedByName: row.exam_filed_by_name,
+            sourceRegistrationId: row.source_exam_registration_id,
+          }
+        : null,
     periods: periods.map((p) => ({
       id: p.id,
       courseInstanceId: p.course_instance_id,
@@ -533,7 +587,19 @@ export type NewBooking = {
     rateId?: string | null;
   }[];
   sourceRegistrationId?: string | null;
+  /**
+   * An exam booking (0036): the sitting and the parts, instead of a course and its dates. Booked
+   * only while a place is free for this person — checked with the sitting locked.
+   */
+  exam?: { sessionId: string; parts: ExamParts; sourceRegistrationId?: string | null } | null;
 };
+
+/** A booking the rules do not allow — a full sitting — with the reason in both languages. */
+export class BookingRefused extends Error {
+  constructor(readonly reason: Bilingual) {
+    super(reason.en);
+  }
+}
 
 async function addPeriodOn(
   client: PoolClient,
@@ -568,17 +634,38 @@ async function addPeriodOn(
 
 export async function createBooking(input: NewBooking, actor: StaffUser): Promise<string> {
   let closed: WaitlistEntryCore[] = [];
+  let closedExamEntries: string[] = [];
+  const exam = input.exam ?? null;
   const bookingId = await withTransaction(async (client) => {
+    if (exam) {
+      const { rows: sitting } = await client.query<{ open: boolean; twice: boolean }>(
+        `SELECT s.status = 'scheduled' AND s.starts_at >= current_date AS open,
+                EXISTS (SELECT 1 FROM bookings b WHERE b.exam_session_id = s.id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+                           AND canonical_person_id(b.person_id) = canonical_person_id($2)) AS twice
+           FROM exam_sessions s WHERE s.id = $1`,
+        [exam.sessionId, input.personId]
+      );
+      if (!sitting[0]?.open) throw new BookingRefused({ de: 'Dieser Prüfungstermin kann nicht mehr gebucht werden.', en: 'This sitting can no longer be booked.' });
+      if (sitting[0].twice) throw new BookingRefused({ de: 'Diese Person ist für diesen Termin schon gebucht.', en: 'This person is already booked for this sitting.' });
+    }
+    // The sitting is locked while its places are counted, so two colleagues cannot book its last place twice.
+    if (exam && !(await sittingHasPlace(client, exam.sessionId, input.personId))) {
+      throw new BookingRefused({
+        de: 'Für diesen Prüfungstermin ist kein Platz mehr frei. Die Person kann auf die Warteliste.',
+        en: 'No place is free in this sitting any more. The person can go on the waiting list.',
+      });
+    }
     const { rows } = await client.query<{ id: string }>(
       `INSERT INTO bookings
          (person_id, course_type_id, status, payer, payer_name, visa_required, notes,
           source_registration_id, accommodation_type_code, accommodation_room_type_code,
-          accommodation_catering_code, accommodation_from, accommodation_to, created_by)
-       VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9, $10, $11, $12::date, $13::date, $14)
+          accommodation_catering_code, accommodation_from, accommodation_to, created_by,
+          exam_session_id, exam_parts, source_exam_registration_id)
+       VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9, $10, $11, $12::date, $13::date, $14, $15, $16, $17)
        RETURNING id`,
       [
         input.personId,
-        input.courseTypeId,
+        exam ? null : input.courseTypeId,
         input.status,
         input.payer,
         input.payerName,
@@ -591,10 +678,15 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         input.accommodationFrom ?? null,
         input.accommodationTo ?? null,
         actor.id,
+        exam?.sessionId ?? null,
+        exam?.parts ?? null,
+        exam?.sourceRegistrationId ?? null,
       ]
     );
     const id = rows[0].id;
-    await addPeriodOn(
+    // An exam's day is its sitting's: no period of its own. A course's dates are its period.
+    if (exam) closedExamEntries = await closeOnExamBooking(client, input.personId, exam.sessionId, id, actor);
+    else await addPeriodOn(
       client,
       id,
       {
@@ -607,7 +699,7 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
       actor
     );
     // Booked into the course they were waiting for: their place in its queue closes with it.
-    if (input.courseInstanceId) closed = await closeOnBooking(client, input.personId, input.courseInstanceId, id, actor);
+    if (!exam && input.courseInstanceId) closed = await closeOnBooking(client, input.personId, input.courseInstanceId, id, actor);
     for (const c of input.charges) {
       await client.query(
         `INSERT INTO booking_charges
@@ -616,11 +708,14 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         [id, c.kind, c.description, c.amount, c.chargeTypeCode ?? null, c.rateId ?? null, actor.id]
       );
     }
-    if (input.sourceRegistrationId) {
+    if (input.sourceRegistrationId && !exam) {
       await client.query(
         `UPDATE course_registrations SET status = 'done' WHERE id = $1 AND status <> 'done'`,
         [input.sourceRegistrationId]
       );
+    }
+    if (exam?.sourceRegistrationId) {
+      await client.query(`UPDATE exam_registrations SET status = 'done' WHERE id = $1 AND status <> 'done'`, [exam.sourceRegistrationId]);
     }
     await client.query(
       `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)
@@ -629,12 +724,18 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         actor.id,
         actor.name,
         id,
-        JSON.stringify({ person: input.personId, from: input.sourceRegistrationId ?? null }),
+        JSON.stringify({ person: input.personId, from: input.sourceRegistrationId ?? exam?.sourceRegistrationId ?? null, exam: exam?.sessionId ?? null }),
       ]
     );
     return id;
   });
   await logClosedByBooking(closed, bookingId, actor);
+  if (exam && closedExamEntries.length) {
+    const words = await sittingWords(exam.sessionId);
+    for (const entry of closedExamEntries) {
+      await logActivity({ actor, entity: 'person', entityId: input.personId, action: 'waitlist_booked', detail: { entry, booking: bookingId, ...words } });
+    }
+  }
   return bookingId;
 }
 
@@ -916,6 +1017,65 @@ export async function cancelBooking(id: string, reason: string, actor: StaffUser
     entityId: id,
     action: 'booking_cancelled',
     detail: { reason },
+  });
+}
+
+/**
+ * An exam booking's sitting or parts changed (0036): another sitting of the same exam while it has a
+ * place for this person, or the whole exam instead of one part. A move to another sitting undoes the
+ * report to telc, which was for the old one; new parts re-price the exam fee from its rate.
+ */
+export async function changeExam(bookingId: string, input: { sessionId: string; parts: ExamParts }, actor: StaffUser): Promise<void> {
+  const change = await withTransaction(async (client) => {
+    const { rows } = await client.query<{ person_id: string; exam_session_id: string; exam_parts: ExamParts; status: string; exam_type_id: string }>(
+      `SELECT b.person_id, b.exam_session_id, b.exam_parts, b.status::text AS status, s.exam_type_id
+         FROM bookings b JOIN exam_sessions s ON s.id = b.exam_session_id
+        WHERE b.id = $1 AND b.deleted_at IS NULL FOR UPDATE OF b`,
+      [bookingId]
+    );
+    const booking = rows[0];
+    if (!booking) throw new BookingRefused({ de: 'Diese Buchung ist keine Prüfungsbuchung.', en: 'This is not an exam booking.' });
+    if (booking.status === 'cancelled') throw new BookingRefused({ de: 'Die Buchung ist storniert.', en: 'The booking is cancelled.' });
+    const moved = booking.exam_session_id !== input.sessionId;
+    if (moved) {
+      const { rows: target } = await client.query<{ exam_type_id: string; open: boolean }>(
+        `SELECT exam_type_id, status = 'scheduled' AND starts_at >= current_date AS open FROM exam_sessions WHERE id = $1`,
+        [input.sessionId]
+      );
+      if (!target[0]?.open) throw new BookingRefused({ de: 'Dieser Termin kann nicht gebucht werden.', en: 'That sitting cannot be booked.' });
+      if (target[0].exam_type_id !== booking.exam_type_id) throw new BookingRefused({ de: 'Nur ein anderer Termin derselben Prüfung.', en: 'Only another sitting of the same exam.' });
+      if (!(await sittingHasPlace(client, input.sessionId, booking.person_id, bookingId))) {
+        throw new BookingRefused({ de: 'In diesem Termin ist kein Platz frei.', en: 'No place is free in that sitting.' });
+      }
+    }
+    await client.query(
+      `UPDATE bookings SET exam_session_id = $2, exam_parts = $3,
+              exam_filed_at = CASE WHEN $4 THEN NULL ELSE exam_filed_at END,
+              exam_filed_by = CASE WHEN $4 THEN NULL ELSE exam_filed_by END
+        WHERE id = $1`,
+      [bookingId, input.sessionId, input.parts, moved]
+    );
+    if (moved) await closeOnExamBooking(client, booking.person_id, input.sessionId, bookingId, actor);
+    if (booking.exam_parts !== input.parts) {
+      // The fee follows the parts: an exam fee a rate set is set again from the rate for the new parts.
+      await client.query(
+        `UPDATE booking_charges c SET amount = r.amount, rate_id = r.id
+           FROM rates r
+          WHERE c.booking_id = $1 AND c.kind = 'exam_fee' AND c.rate_id IS NOT NULL
+            AND r.id = applicable_rate('exam_type'::rate_scope,
+                         (SELECT (starts_at AT TIME ZONE 'Europe/Berlin')::date FROM exam_sessions WHERE id = $2), NULL, $3,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $4::smallint)`,
+        [bookingId, input.sessionId, booking.exam_type_id, ratedParts(input.parts)]
+      );
+    }
+    return { moved, from: booking.exam_session_id, fromParts: booking.exam_parts };
+  });
+  await logActivity({
+    actor,
+    entity: 'booking',
+    entityId: bookingId,
+    action: 'exam_changed',
+    detail: { from: change.from, to: input.sessionId, fromParts: change.fromParts, parts: input.parts },
   });
 }
 

@@ -11,6 +11,8 @@ import {
   BOOKING_LETTER_GROUPS,
   BOOKING_LETTER_KEYS,
   bookingLetterBlock,
+  EXAM_LETTER_GROUPS,
+  lettersFor,
   LETTER_KIND_LABELS,
   LETTER_STANDARD_DEFAULTS,
   missingFromRecord,
@@ -35,9 +37,11 @@ export default async function BookingLetterPage({
 }) {
   const [{ id }, { kind: raw, error }, user] = await Promise.all([params, searchParams, requireModule('bookings')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const kind: BookingLetterKind = BOOKING_LETTER_KINDS.find((k) => BOOKING_LETTER_KEYS[k] === raw) ?? 'booking_confirmation';
   const ctx = await bookingLetterContext(id);
   if (!ctx) notFound();
+  // An exam booking writes an exam's letters (0037); its confirmation is the exam's.
+  const own = lettersFor(ctx);
+  const kind: BookingLetterKind = BOOKING_LETTER_KINDS.find((k) => BOOKING_LETTER_KEYS[k] === raw && own.includes(k)) ?? own[0];
   const { t, lang } = await getI18n();
   const [standards, letters] = await Promise.all([standardTexts(kind, LETTER_STANDARD_DEFAULTS[kind]), lettersForBooking(id)]);
   const today = todayInputValue();
@@ -45,7 +49,7 @@ export default async function BookingLetterPage({
   const sent = letters.filter((l) => l.kind === kind);
   const blocked = bookingLetterBlock(kind, ctx, { today, version: sent.length + 1, sent: history });
   const name = [ctx.person.firstName, ctx.person.lastName].filter(Boolean).join(' ');
-  const href = (k: BookingLetterKind) => `/admin/bookings/${id}/letter${k === 'booking_confirmation' ? '' : `?kind=${BOOKING_LETTER_KEYS[k]}`}`;
+  const href = (k: BookingLetterKind) => `/admin/bookings/${id}/letter${k === own[0] ? '' : `?kind=${BOOKING_LETTER_KEYS[k]}`}`;
 
   return (
     <LetterComposer
@@ -60,7 +64,7 @@ export default async function BookingLetterPage({
       issueAction={issueBookingLetterAction}
       saveStandardAction={saveLetterStandardAction}
       hidden={{ bookingId: id, kind }}
-      kindGroups={BOOKING_LETTER_GROUPS.map((group, i) => ({
+      kindGroups={(ctx.exam ? EXAM_LETTER_GROUPS : BOOKING_LETTER_GROUPS).map((group, i) => ({
         label: pick(lang, group.label),
         items: [
           ...group.kinds.map((k) => ({
