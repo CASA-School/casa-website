@@ -67,7 +67,7 @@ export default async function CataloguePage({
   const ordered = view === 'types' ? [] : courseSections(shown, view, past, lang).flatMap((section) => section.rows);
   const edits = new Map((plans ? await coursesForEditByIds(ordered.map((r) => r.courseId)) : []).map((c) => [c.id, c]));
   const editable: EditableCourse[] = ordered.map((r) => toEditable(r, edits.get(r.courseId), t, lang));
-  const running = rows.filter((r) => r.phase === 'running');
+  const running = rows.filter((r) => r.phase === 'running' && !r.notHeld);
   const learnersNow = running.reduce((sum, r) => sum + r.now, 0);
   const waiting = rows.reduce((sum, r) => sum + r.waiting + r.offered, 0);
   const next = rows.filter((r) => r.phase === 'upcoming').map((r) => r.startDate).sort()[0] ?? null;
@@ -137,7 +137,7 @@ export default async function CataloguePage({
             key: v.key,
             label: pick(lang, v.label),
             href: href(v.key),
-            count: v.key === 'types' || past ? undefined : rows.filter((r) => viewOf(r) === v.key).length || undefined,
+            count: v.key === 'types' || past ? undefined : rows.filter((r) => viewOf(r) === v.key && !r.notHeld).length || undefined,
           }))}
           active={view}
           end={

@@ -59,6 +59,13 @@
     // Removal condition: delete when bookings are made in the workspace alone.
     "scripts/filemaker/import-course-learners.mjs",
 
+    // Writes SchoolMan's staff absences (ill and holiday days) into
+    // `staff_absences`, from scripts/filemaker/read_absences.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Staff). Run by hand, never imported.
+    //
+    // Removal condition: delete when absences are entered in the workspace alone.
+    "scripts/filemaker/import-absences.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

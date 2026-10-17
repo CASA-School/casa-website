@@ -23,6 +23,7 @@ test.describe('Course list', () => {
   let startId = '';
   let courseId = '';
   let teachers: { id: string; short: string }[] = [];
+  let emptyStartId = '';
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -68,6 +69,7 @@ test.describe('Course list', () => {
   test.afterAll(async () => {
     if (!client) return;
     if (startId) await client.query(`DELETE FROM course_instances WHERE id = $1`, [startId]);
+    if (emptyStartId) await client.query(`DELETE FROM course_instances WHERE id = $1`, [emptyStartId]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });
@@ -118,6 +120,27 @@ test.describe('Course list', () => {
     await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}$`));
     await expect(stat('Lehrkräfte')).toContainText(`${teachers[0].short} · ${teachers[1].short}`);
     await expect(page.locator('header').getByRole('link', { name: 'Kurse' })).toHaveAttribute('href', '/admin/catalogue?view=evening');
+  });
+
+  test('a course begun with nobody in it and no lesson day sits apart, as not held', async ({ page }) => {
+    // Begun two weeks ago, a Tuesday + Thursday evening course with no learner and no lesson day (SchoolMan's 5043).
+    const { rows: type } = await client.query<{ id: string }>(`SELECT id FROM course_types WHERE format = 'evening' ORDER BY position LIMIT 1`);
+    emptyStartId = (
+      await client.query<{ id: string }>(
+        `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, status, session, on_website)
+         VALUES ($1, current_date - 14, current_date + 60, 14, '{"days":["Tue","Thu"],"time":"18:30-20:00"}', 'scheduled', 'evening', false) RETURNING id`,
+        [type[0].id]
+      )
+    ).rows[0].id;
+    await client.query(`INSERT INTO courses (course_instance_id, title, bookable) VALUES ($1, 'E2E nie gehalten', false)`, [emptyStartId]);
+    await page.goto('/admin/catalogue?view=evening');
+    const section = page.getByRole('columnheader', { name: /^Nicht zustande gekommen/ });
+    await expect(section).toBeVisible();
+    // After the section's head, and not among the running courses before it.
+    const start = page.locator(`tr[data-start="${emptyStartId}"]`);
+    await expect(start).toContainText('E2E nie gehalten');
+    expect(await start.evaluate((el, head) => Boolean(head && head.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING), await section.elementHandle())).toBe(true);
+    await expect(start).not.toContainText('Woche');
   });
 
   test('a course’s actions: open or close it for booking, and edit it, the next one a click away', async ({ page }) => {

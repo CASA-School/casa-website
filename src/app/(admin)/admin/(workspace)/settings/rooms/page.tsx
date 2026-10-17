@@ -111,7 +111,7 @@ export default async function RoomsPage({
               { label: t('Etage', 'Floor'), className: `w-[10rem] ${hide}` },
               { label: t('Art', 'Kind'), className: `w-[10rem] ${hide}` },
               { label: t('Plätze', 'Seats'), align: 'right', className: 'w-[6.5rem]' },
-              { label: t('Termine', 'Cohorts'), align: 'right', className: `w-[6.5rem] ${hide}` },
+              { label: t('Kurse', 'Courses'), align: 'right', className: `w-[6.5rem] ${hide}` },
             ]}
           >
             {groups.map((group) => [
@@ -149,7 +149,7 @@ function RoomRow({ room, hide, t, lang }: { room: Room; hide: string; t: T; lang
         ) : null}
       </Cell>
       <Cell align="right" className={`text-[0.84rem] font-semibold tabular-nums ${hide}`}>
-        {room.upcomingCohorts > 0 ? room.upcomingCohorts : null}
+        {room.coursesAhead > 0 ? room.coursesAhead : null}
       </Cell>
     </TableRow>
   );

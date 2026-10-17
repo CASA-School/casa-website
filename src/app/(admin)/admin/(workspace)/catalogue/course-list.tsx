@@ -73,8 +73,13 @@ function dayList(days: readonly string[], lang: WsLang): string | null {
 
 const PHASE_ORDER: Record<CoursePhase, number> = { running: 0, upcoming: 1, past: 2 };
 
+const NOT_HELD: Bilingual = { de: 'Nicht zustande gekommen', en: 'Did not take place' };
+
 /** The view's sections and their courses, in the order the list shows them (the editor steps through it). */
-export function courseSections(rows: CourseListRow[], view: CourseView, past: boolean, lang: WsLang): { key: string; label: string; rows: CourseListRow[] }[] {
+export function courseSections(all: CourseListRow[], view: CourseView, past: boolean, lang: WsLang): { key: string; label: string; rows: CourseListRow[] }[] {
+  // A course begun with nobody in it and no lesson day sits apart at the end, out of the running ones.
+  const rows = all.filter((r) => !r.notHeld);
+  const notHeld = all.filter((r) => r.notHeld);
   // The evening by its pair of days, running first; the intensive courses and the rest by running and
   // ahead — the running morning and afternoon courses together at the top, the shift in each start's head.
   const byPhase = (list: CourseListRow[]) => [...list].sort((a, b) => PHASE_ORDER[a.phase] - PHASE_ORDER[b.phase] || (past ? b.startDate.localeCompare(a.startDate) : a.startDate.localeCompare(b.startDate)));
@@ -86,7 +91,7 @@ export function courseSections(rows: CourseListRow[], view: CourseView, past: bo
             label: pick(lang, PHASES[phase]),
             rows: rows.filter((r) => r.phase === phase),
           }));
-  return sections.filter((section) => section.rows.length);
+  return [...sections, { key: 'not-held', label: pick(lang, NOT_HELD), rows: notHeld }].filter((section) => section.rows.length);
 }
 
 export function CourseList({ rows, view, past, today, t, lang }: { rows: CourseListRow[]; view: CourseView; past: boolean; today: string; t: T; lang: WsLang }) {
@@ -145,8 +150,9 @@ export function CourseList({ rows, view, past, today, t, lang }: { rows: CourseL
 /** The start a set of courses belongs to: what it is, when, and how far it has come. */
 function StartRow({ row, name, span, showPhase, t, lang }: { row: CourseListRow; name: string | null; span: number; showPhase: boolean; t: T; lang: WsLang }) {
   const facts = [row.session && row.format !== 'intensive' ? pick(lang, SESSION_LABELS[row.session]) : null, dayList(row.days, lang), row.time ? row.time.replace('-', '–') : null].filter(Boolean);
-  const where =
-    row.phase === 'running' && row.week
+  const where = row.notHeld
+    ? null
+    : row.phase === 'running' && row.week
       ? t(`Woche ${row.week} von ${row.weeks.length}`, `Week ${row.week} of ${row.weeks.length}`)
       : showPhase && row.phase === 'upcoming'
         ? t(`ab ${shortDay(row.startDate, lang)}`, `from ${shortDay(row.startDate, lang)}`)
@@ -203,7 +209,7 @@ function GroupRow({
 }) {
   const span = row.groupRows.length;
   const waiting = row.waiting + row.offered;
-  const href = courseHref(row.courseId);
+  const href = courseHref(row.courseId, row.groupRows[0]?.index ?? 1);
   return (
     <tr className={cn('align-middle', first ? 'border-t border-ws-line-soft' : 'border-t border-dashed border-ws-line-soft', shaded ? 'bg-[var(--ws-row-alt)]' : 'bg-white')}>
       {first ? (
@@ -232,6 +238,10 @@ function GroupRow({
       </td>
       <td className="max-w-0 px-3 py-2.5 text-[0.82rem] text-[#2b3546]">
         {group.teachers.length ? <span className="block truncate">{group.teachers.join(' · ')}</span> : null}
+        {/* No lesson day on a course still to be taught: nothing planned for its learners (SchoolMan's 5001, 5041, 5050). */}
+        {!group.days && !row.notHeld && row.phase !== 'past' ? (
+          <span className="block truncate text-[0.76rem] font-semibold text-[#9a5b00]">{t('Keine Kurstage', 'No lesson days')}</span>
+        ) : null}
       </td>
       <td className="hidden max-w-0 px-3 py-2.5 text-[0.82rem] text-[#2b3546] lg:table-cell">
         {group.room ? <span className="block truncate">{group.room}</span> : null}

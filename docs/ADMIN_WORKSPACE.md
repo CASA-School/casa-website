@@ -1191,7 +1191,15 @@ bar per week (this week in ink; amber when over — SchoolMan never enforced its
 its waiting list and „Buchen" span its rows; the number of groups is not written out (Rahman: not
 important). A level SchoolMan has not yet split into its groups (one record, 28 places) is one row;
 groups whose own learners are not known (bookings made here name no group) show „–". Each number links to its own page
-(§Lesson days, „The course page"). Every view reads the same: a start of one named
+(§Lesson days, „The course page"). **Not held** (Rahman, 2026-10-17: hide them or find out what is
+wrong): SchoolMan has no cancelled state, so a course planned and never held stays „running" there — on
+2026-10-17 a company course (5034) and a special course (5043), begun weeks before with nobody booked and
+no lesson day generated. A course begun with no learner and no lesson day sits apart at the end of its
+view, „Nicht zustande gekommen", out of the running ones and the counts above the list; its page says so.
+A parallel group begun the same way (4886, 4945: a level's second record never filled) is left out of
+its course. A course still to be taught with learners and no lesson day says „Keine Kurstage" under its
+teachers (5001, 5041, 5050: nothing planned for them in SchoolMan either). One SchoolMan course ends
+before it starts (5074) and was not imported. Every view reads the same: a start of one named
 course (a module, an exam preparation, a company's course) says the name in its head, at full width —
 the type left out when the name says it — and its row, like an intensive course's, shows the level
 badge (when it has a level; no made-up initials), the number (a link to the course), teachers, room,
@@ -1570,6 +1578,20 @@ teaching units a week); the one that runs today is the current one, and
 Kursplanung's employed/freelance is read from it. **Absences** are any
 colleague's (`staff_absences`).
 
+**Absences from SchoolMan (2026-10-17).**
+`python3 -I scripts/filemaker/read_absences.py | node scripts/filemaker/import-absences.mjs [--dry-run]`
+reads SchoolMan's day per colleague (`SingleDayStaff`, generated for the year)
+from ninety days back to a year ahead: a day marked ill is „Krank", one marked
+holiday — the approved `DateHoliday` requests, closures included — „Urlaub".
+Staff number, date and which of the two only. A day keeps its SchoolMan
+reference (`SingleDayStaff:<id>`), so a re-run brings it up to date and removes
+one SchoolMan no longer marks (a holiday taken back); a day entered here is
+never touched. First run: 689 days of 43 colleagues (62 ill, 627 holiday, 282
+ahead); three who have left are skipped. It showed 24 lesson days in November
+and December whose planned teacher is on holiday — SchoolMan does not mark
+that; the course pages and Kursplanung now do („abwesend · Urlaub", „Ohne
+Lehrkraft").
+
 A person on the register is not a learner: the learner list leaves them out,
 `/admin/people/[id]` sends them to their staff page (or 404s without `staff`),
 and the people module's actions refuse them.
@@ -1941,7 +1963,11 @@ cleaned on the way in).
 | `staff_module_access` | Per-person `(module, level)` exceptions; see *Roles, modules and levels* |
 
 Screens: **Rooms** (`/admin/planning`, by location, with an add form) and a room
-page with its cohorts and an edit form; the catalogue's cohort table gains a
+page with an edit form — since 2026-10-17 its week (lesson days by weekday and
+morning/afternoon/evening as each day's room is set, free slots and clashes
+visible, week by week) and the course numbers taught in it from today on,
+marked when they hold more learners than it seats; the list counts those
+course numbers; the catalogue's cohort table gains a
 Room column, with a picker for anyone who holds Planning and an *Over room
 capacity* badge when a cohort's seats exceed the room's.
 

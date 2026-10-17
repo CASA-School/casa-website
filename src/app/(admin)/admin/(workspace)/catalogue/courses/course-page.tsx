@@ -76,12 +76,13 @@ export async function CoursePage({
     mayPlan ? listBookableRooms() : Promise.resolve([]),
   ]);
   if (!row) notFound();
-  // The groups apart only where the list shows them apart; a number that is not one of them goes to the course.
-  const split = row.groupRows.length > 1;
-  const here = split ? row.groupRows.find((g) => g.index === group) : group === 1 ? row.groupRows[0] : undefined;
-  if (!here) redirect(courseHref(id));
-  const groupIndex = split ? group : 1;
-  const shown = split ? days.filter((d) => d.groupIndex === groupIndex) : days;
+  // The groups as the list shows them (an empty begun group left out); a number that is not one of
+  // them goes to the course's first. Index 0 is a course SchoolMan has not split: all its days.
+  const groups = row.groupRows;
+  const here = groups.find((g) => g.index === group) ?? (group === 1 && groups.length === 1 && groups[0].index <= 1 ? groups[0] : undefined);
+  if (!here) redirect(courseHref(id, groups[0]?.index || 1));
+  const groupIndex = here.index || 1;
+  const shown = here.index === 0 ? days : days.filter((d) => d.groupIndex === groupIndex);
   const plan = plans.find((p) => p.groupIndex === groupIndex);
   const held = shown.filter((d) => !d.cancelled);
   const lessons = held.reduce((n, d) => n + (d.lessons ?? 0), 0);
@@ -93,8 +94,8 @@ export async function CoursePage({
   const places = own ? here.places : row.places;
   const weeks = own && here.weeks.length ? here.weeks : row.weeks;
   const waiting = row.waiting + row.offered;
-  const number = here.number ?? (split ? `#${group}` : null);
-  const siblings = split ? row.groupRows.filter((g) => g.index !== group) : [];
+  const number = here.number ?? (groups.length > 1 ? `#${here.index}` : null);
+  const siblings = groups.filter((g) => g.index !== here.index);
 
   const startHref = `/admin/catalogue/${course.courseInstanceId}`;
   const view = viewOf(row);
@@ -113,8 +114,9 @@ export async function CoursePage({
   }).toString();
   const countries = canBook && canAccess(user, 'people', 'edit') ? await listCountries() : null;
   const title = `${course.typeName} ${course.label}${number ? ` · ${number}` : ''}`;
-  const where =
-    row.phase === 'running' && row.week
+  const where = row.notHeld
+    ? null
+    : row.phase === 'running' && row.week
       ? t(`Woche ${row.week} von ${row.weeks.length}`, `Week ${row.week} of ${row.weeks.length}`)
       : row.phase === 'past'
         ? t('Beendet', 'Ended')
@@ -132,7 +134,13 @@ export async function CoursePage({
         backHref={`/admin/catalogue${back.size ? `?${back}` : ''}`}
         backLabel={t('Kurse', 'Courses')}
         title={title}
-        status={course.cancelled ? <Badge tone="danger">{t('Abgesagt', 'Cancelled')}</Badge> : null}
+        status={
+          course.cancelled ? (
+            <Badge tone="danger">{t('Abgesagt', 'Cancelled')}</Badge>
+          ) : row.notHeld ? (
+            <Badge tone="warning">{t('Nicht zustande gekommen', 'Did not take place')}</Badge>
+          ) : null
+        }
         subtitle={
           <>
             <MetaLine>

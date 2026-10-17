@@ -37,6 +37,11 @@ export type CourseListRow = LevelGroup & {
   now: number;
   /** Its groups, each in its own room with its own teachers (Rahman: keep them apart). */
   groupRows: CourseGroupRow[];
+  /**
+   * Begun with nobody in it and no lesson day: planned in SchoolMan and never held (5034, 5043 in
+   * October 2026) — SchoolMan has no cancelled state, so such a course stays „running" there.
+   */
+  notHeld: boolean;
 };
 
 /**
@@ -54,6 +59,8 @@ export type CourseGroupRow = {
   places: number;
   weeks: { monday: string; n: number }[];
   now: number | null;
+  /** Its lesson days (not called off): none on a course with learners is a gap to fill. */
+  days: number;
 };
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -204,7 +211,8 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
     const withDays = new Set((days.filter((d) => d.course_id === g.courseId).map((d) => d.group_index)));
     const split = g.groups > 1 && (perGroupLearners || withDays.size > 1);
     const allDays = days.filter((d) => d.course_id === g.courseId);
-    const groupRows: CourseGroupRow[] = Array.from({ length: split ? g.groups : 1 }, (_, i) => {
+    const notHeld = phase !== 'upcoming' && allDays.length === 0 && g.booked === 0 && weeks.every((w) => w.n === 0);
+    const allGroupRows: CourseGroupRow[] = Array.from({ length: split ? g.groups : 1 }, (_, i) => {
       const key = `${g.courseId}|${i + 1}`;
       const all = split || g.groups <= 1 ? (daysOf.get(key) ?? []) : allDays;
       const inWeek = all.filter((d) => d.on_date >= reference && d.on_date <= addDays(reference, 6));
@@ -226,8 +234,13 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
         places: split ? g.placesPerGroup : g.places,
         weeks: groupWeeks,
         now: split && !perGroupLearners ? null : phase === 'running' && index >= 0 ? (groupWeeks[index]?.n ?? 0) : Math.max(0, ...groupWeeks.map((w) => w.n)),
+        days: all.length,
       };
     });
+    // A parallel group begun with nobody in it and no lesson day of its own was never held either
+    // (SchoolMan's 4886, 4945): left out, while the course has another.
+    const held = allGroupRows.filter((r) => phase === 'upcoming' || !perGroupLearners || r.days > 0 || r.weeks.some((w) => w.n > 0));
+    const groupRows = held.length && !notHeld ? held : allGroupRows;
     // The start's shift, else read from its hours, as the course page does.
     const hour = Number(/^(\d{1,2})/.exec(s.schedule?.time ?? '')?.[1]);
     const session =
@@ -257,6 +270,7 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
       week: phase === 'running' && index >= 0 ? index + 1 : null,
       now: phase === 'running' && index >= 0 ? weeks[index].n : Math.max(g.booked, ...weeks.map((w) => w.n), 0),
       groupRows,
+      notHeld,
     };
   });
 }
