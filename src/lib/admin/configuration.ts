@@ -55,7 +55,7 @@ export async function vocabularySummaries(lang: WsLang = 'de'): Promise<Vocabula
             (array_agg(title ORDER BY title))[1:3] FROM materials
      UNION ALL
      SELECT 'course_types', count(*)::text, count(*) FILTER (WHERE is_active)::text,
-            (array_agg(${named('name')} ORDER BY name))[1:4] FROM course_types
+            (array_agg(${named('name')} ORDER BY position, name))[1:4] FROM course_types
      UNION ALL
      SELECT 'exam_types', count(*)::text, count(*) FILTER (WHERE is_active)::text,
             (array_agg(name ORDER BY name))[1:4] FROM exam_types

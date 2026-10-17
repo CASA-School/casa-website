@@ -115,6 +115,25 @@ office shorthand the team writes, an `is_active` flag, a `position` for
 ordering, and its `filemaker_id`. Codes rather than integers, because
 `accommodation_rent` reads in a query and `3` does not.
 
+**Course types, and what is not one (2026-10-17, 0040).** CASA's courses are
+three: **intensive**, **evening** and **special courses**. They come first in
+every list (`course_types.position`), the rest after. Two rows are not courses
+of their own:
+
+- **Bildungszeit** (SchoolMan: *Superintensivkurs*) is two intensive courses at
+  once, one in the morning and one in the afternoon — 40 lessons a week, which
+  the Bildungszeit recognition asks for. SchoolMan has 1,331 courses and none of
+  them is a Superintensivkurs; 138 of its 164 Superintensiv bookings are a pair:
+  one person, one start date, a morning and an afternoon intensive course. The
+  row stays for the website's page and its price.
+- **German for groups** is an intensive course, 20 lessons a week, with the
+  group's own class.
+
+Both should be booked as intensive courses: Bildungszeit as a morning and an
+afternoon period of the same dates, a group on its own course start. Today the
+workspace still books Bildungszeit on its own starts, which Kursplanung does not
+count (docs/KURSPLANUNG.md §Course starts).
+
 ### Rates
 One table, `rates`, prices everything. A row says: **how much**, **per what**,
 **for which thing**, **under which conditions**, and **when it is true**.

@@ -81,7 +81,7 @@ export async function listCourseTypes(): Promise<CourseTypeSummary[]> {
               WHERE r.course_type_id = t.id AND r.status <> 'spam')
               AS registration_count
        FROM course_types t
-      ORDER BY t.is_active DESC, t.name ASC`
+      ORDER BY t.is_active DESC, t.position, t.name ASC`
   );
 
   return rows.map((row) => ({
@@ -147,7 +147,7 @@ export async function listUpcomingCourseInstances(limit = 25): Promise<CourseIns
        JOIN course_types t ON t.id = i.course_type_id
        LEFT JOIN rooms rm ON rm.id = i.room_id
       WHERE i.start_date >= current_date - interval '14 days'
-      ORDER BY i.start_date ASC
+      ORDER BY i.start_date ASC, t.position
       LIMIT $1`,
     [limit]
   );

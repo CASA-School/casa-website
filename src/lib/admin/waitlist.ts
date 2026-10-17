@@ -502,7 +502,7 @@ export async function upcomingStarts(): Promise<{ id: string; courseTypeName: st
     `SELECT i.id, t.name, i.start_date, i.session, i.schedule
        FROM course_instances i JOIN course_types t ON t.id = i.course_type_id
       WHERE i.end_date >= current_date AND i.status <> 'cancelled'
-      ORDER BY i.start_date, t.name`
+      ORDER BY i.start_date, t.position, t.name`
   );
   return rows.map((r) => ({ id: r.id, courseTypeName: r.name, startDate: r.start_date, session: sessionOf(r.session, r.schedule) }));
 }

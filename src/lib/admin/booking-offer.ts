@@ -61,8 +61,9 @@ export async function bookingOffer(): Promise<BookingOffer> {
         schedule: { days?: string[]; time?: string } | null;
         lessons: number | null;
         default_price: string;
+        type_position: number;
       }>(
-        `SELECT i.id, i.course_type_id, t.name AS course_type_name, t.slug, i.title,
+        `SELECT i.id, i.course_type_id, t.name AS course_type_name, t.slug, t.position AS type_position, i.title,
                 i.start_date, i.end_date, i.level_code, i.session,
                 coalesce(r.nickname, r.name) AS room_name, i.capacity,
                 (SELECT count(DISTINCT bp.booking_id) FROM booking_periods bp
@@ -74,7 +75,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
            JOIN course_types t ON t.id = i.course_type_id
            LEFT JOIN rooms r ON r.id = i.room_id
           WHERE i.end_date >= current_date AND i.status <> 'cancelled'
-          ORDER BY i.start_date, t.name`
+          ORDER BY i.start_date, t.position, t.name`
       ),
       query<{
         id: string;
@@ -132,6 +133,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
     ]);
 
   const byType = new Map<string, CourseTypeOffer>();
+  const typeOrder = new Map<string, number>();
 
   const places = await upcomingLevelPlaces();
 
@@ -163,6 +165,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
       tuitionUnit: price || published > 0 ? 'item' : null,
     };
 
+    typeOrder.set(row.course_type_id, row.type_position);
     const existing = byType.get(row.course_type_id);
     if (existing) existing.cohorts.push(cohort);
     else
@@ -175,7 +178,8 @@ export async function bookingOffer(): Promise<BookingOffer> {
   }
 
   return {
-    courseTypes: [...byType.values()].sort((a, b) => a.name.localeCompare(b.name)),
+    // Intensive, evening and special courses first, then the rest (course_types.position, 0040).
+    courseTypes: [...byType.values()].sort((a, b) => (typeOrder.get(a.id) ?? 100) - (typeOrder.get(b.id) ?? 100) || a.name.localeCompare(b.name)),
     exams: examRows.map((e) => ({
       id: e.id,
       name: e.name,

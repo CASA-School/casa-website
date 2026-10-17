@@ -14,8 +14,6 @@ import { levelsBetween, type CourseCatalogue, type CourseSlot, type LearnerHisto
  * offer keeps a copy of what was picked (docs/OFFERS.md §A learner's course).
  */
 
-const ORDER = ['intensive-german', 'evening-german', 'bildungszeit', 'special-courses', 'medical-german'];
-
 function slotFrom(schedule: unknown): CourseSlot | null {
   const s = schedule as { days?: unknown; time?: unknown } | null;
   if (!s || !Array.isArray(s.days) || typeof s.time !== 'string') return null;
@@ -24,9 +22,10 @@ function slotFrom(schedule: unknown): CourseSlot | null {
 
 export async function courseCatalogue(): Promise<CourseCatalogue> {
   const [types, terms, books, exams, prices] = await Promise.all([
+    // Intensive, evening and special courses first, then the rest (course_types.position, 0040).
     query<{ id: string; slug: string; name: string; name_de: string | null; lessons_per_week: number; level_min: string | null; level_max: string | null; default_price: string }>(
       `SELECT id, slug, name, name_de, lessons_per_week, level_min, level_max, default_price
-         FROM course_types WHERE is_active AND pricing_mode <> 'on_request'`
+         FROM course_types WHERE is_active AND pricing_mode <> 'on_request' ORDER BY position, name`
     ),
     query<{ id: string; course_type_id: string; start_date: Date; end_date: Date; schedule: unknown; lessons: number | null }>(
       `SELECT id, course_type_id, start_date, end_date, schedule, lessons FROM course_instances
@@ -67,8 +66,7 @@ export async function courseCatalogue(): Promise<CourseCatalogue> {
           lessons: term.lessons,
         })),
     }))
-    .filter((c) => c.terms.length > 0)
-    .sort((a, b) => (ORDER.indexOf(a.slug) + 1 || 99) - (ORDER.indexOf(b.slug) + 1 || 99) || a.name.en.localeCompare(b.name.en));
+    .filter((c) => c.terms.length > 0);
 
   return {
     courses,

@@ -64,7 +64,7 @@ export async function priceListSubjects() {
     query<{ slug: string; name: string }>(
       `SELECT slug, name FROM course_types
         WHERE is_active AND pricing_mode <> 'on_request' AND slug <> 'german-for-groups'
-        ORDER BY CASE slug WHEN 'intensive-german' THEN 0 WHEN 'evening-german' THEN 1 WHEN 'special-courses' THEN 2 ELSE 3 END, name`
+        ORDER BY position, name`
     ),
     query<{ id: string; title: string; level_code: string | null; part: number | null }>(
       `SELECT id, title, level_code, part FROM materials WHERE is_active ORDER BY level_code NULLS LAST, part NULLS LAST, title`
