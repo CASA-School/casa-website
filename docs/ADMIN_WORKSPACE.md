@@ -1191,7 +1191,11 @@ bar per week (this week in ink; amber when over — SchoolMan never enforced its
 its waiting list and „Buchen" span its rows; the number of groups is not written out (Rahman: not
 important). A level SchoolMan has not yet split into its groups (one record, 28 places) is one row;
 groups whose own learners are not known (bookings made here name no group) show „–". The course page
-shows the numbers in its head and on its group switch.
+shows the numbers in its head and on its group switch. Every view reads the same: a start of one named
+course (a module, an exam preparation, a company's course) says the name in its head, at full width —
+the type left out when the name says it — and its row, like an intensive course's, shows the level
+badge (when it has a level; no made-up initials), the number (a link to the course), teachers, room,
+learners and „Aktionen".
 
 **A course's actions** (Rahman, 2026-10-17: one action button instead of „Buchen", the „Geschlossen"
 badge gone): „Aktionen ▾" at the end of a course's row (`course-actions.tsx`) — **Teilnehmende buchen**

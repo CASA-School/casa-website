@@ -120,15 +120,20 @@ export function CourseList({ rows, view, past, today, t, lang }: { rows: CourseL
                   </span>
                 </th>
               </tr>
-              {groupRuns(section.rows, (r) => r.courseInstanceId).flatMap((start) => [
-                <StartRow key={`s-${start.key}`} row={start.items[0]} span={span} showPhase={view !== 'other'} t={t} lang={lang} />,
-                ...start.items.flatMap((row) => {
-                  band++;
-                  return row.groupRows.map((group, i) => (
-                    <GroupRow key={`${row.courseId}-${group.index}`} row={row} group={group} first={i === 0} shaded={band % 2 === 0} today={today} t={t} lang={lang} />
-                  ));
-                }),
-              ])}
+              {groupRuns(section.rows, (r) => r.courseInstanceId).flatMap((start) => {
+                // A start of one named course (a module, an exam preparation, a company's course) says
+                // its name in its head, at full width; its row then reads like an intensive course's.
+                const named = start.items.length === 1 ? start.items[0].title : null;
+                return [
+                  <StartRow key={`s-${start.key}`} row={start.items[0]} name={named} span={span} showPhase={view !== 'other'} t={t} lang={lang} />,
+                  ...start.items.flatMap((row) => {
+                    band++;
+                    return row.groupRows.map((group, i) => (
+                      <GroupRow key={`${row.courseId}-${group.index}`} row={row} group={group} first={i === 0} named={Boolean(named)} shaded={band % 2 === 0} today={today} t={t} lang={lang} />
+                    ));
+                  }),
+                ];
+              })}
             </tbody>
           ))}
       </table>
@@ -137,7 +142,7 @@ export function CourseList({ rows, view, past, today, t, lang }: { rows: CourseL
 }
 
 /** The start a set of courses belongs to: what it is, when, and how far it has come. */
-function StartRow({ row, span, showPhase, t, lang }: { row: CourseListRow; span: number; showPhase: boolean; t: T; lang: WsLang }) {
+function StartRow({ row, name, span, showPhase, t, lang }: { row: CourseListRow; name: string | null; span: number; showPhase: boolean; t: T; lang: WsLang }) {
   const facts = [row.session && row.format !== 'intensive' ? pick(lang, SESSION_LABELS[row.session]) : null, dayList(row.days, lang), row.time ? row.time.replace('-', '–') : null].filter(Boolean);
   const where =
     row.phase === 'running' && row.week
@@ -151,14 +156,21 @@ function StartRow({ row, span, showPhase, t, lang }: { row: CourseListRow; span:
         <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[0.82rem]">
             <Link href={`/admin/catalogue/${row.courseInstanceId}`} className="font-bold text-[var(--casa-ink)] hover:underline">
-              {row.startTitle && row.startTitle !== row.typeName && !row.title ? `${row.typeName} · ${row.startTitle}` : row.typeName}
+              {/* The type, and the name when it does not already say the type („… – Prüfungsvorbereitung"). */}
+              {name && name.toLowerCase().includes(row.typeName.toLowerCase())
+                ? name
+                : name
+                  ? `${row.typeName} · ${name}`
+                  : row.startTitle && row.startTitle !== row.typeName && !row.title
+                    ? `${row.typeName} · ${row.startTitle}`
+                    : row.typeName}
               {row.format === 'intensive' && row.session ? ` · ${pick(lang, SESSION_LABELS[row.session])}` : null}
             </Link>
             <span className="text-[var(--casa-muted)] tabular-nums">{dayRange(row.startDate, row.endDate, lang)}</span>
             {facts.length ? <span className="text-[var(--casa-muted)]">{facts.join(' · ')}</span> : null}
             {!row.onWebsite && row.phase !== 'past' ? <Badge tone="quiet">{t('Nicht auf der Website', 'Not on the website')}</Badge> : null}
           </span>
-          {where ? <span className="text-[0.78rem] font-semibold text-[var(--casa-ink)] tabular-nums">{where}</span> : null}
+          {where ? <span className="ml-auto text-[0.78rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] tabular-nums">{where}</span> : null}
         </span>
       </td>
     </tr>
@@ -172,6 +184,7 @@ function GroupRow({
   row,
   group,
   first,
+  named,
   shaded,
   today,
   t,
@@ -180,6 +193,8 @@ function GroupRow({
   row: CourseListRow;
   group: CourseGroupRow;
   first: boolean;
+  /** Its name is in the start's head already. */
+  named: boolean;
   shaded: boolean;
   today: string;
   t: T;
@@ -193,20 +208,27 @@ function GroupRow({
       {first ? (
         <td rowSpan={span} className="py-2.5 pr-3 pl-5 align-top md:max-w-0">
           <Link href={href} className="group flex min-w-0 items-start gap-3">
-            <span className="inline-flex h-7 min-w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--fm-navy)] px-2 text-[0.8rem] font-extrabold text-white tabular-nums">
-              {row.levelCode ?? (row.title ? row.title.slice(0, 2).toUpperCase() : '—')}
-            </span>
-            <span className="min-w-0 pt-1">
-              {row.title ? (
-                <span className="line-clamp-2 text-[0.84rem] leading-snug font-semibold text-[var(--casa-ink)] group-hover:underline" title={row.title}>
-                  {row.title}
-                </span>
-              ) : null}
-            </span>
+            {/* The level; a course without one has none to show (no made-up initials). */}
+            {row.levelCode ? (
+              <span className="inline-flex h-7 min-w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--fm-navy)] px-2 text-[0.8rem] font-extrabold text-white tabular-nums">
+                {row.levelCode}
+              </span>
+            ) : null}
+            {row.title && !named ? (
+              <span className="line-clamp-2 min-w-0 pt-1 text-[0.84rem] leading-snug font-semibold text-[var(--casa-ink)] group-hover:underline" title={row.title}>
+                {row.title}
+              </span>
+            ) : null}
           </Link>
         </td>
       ) : null}
-      <td className="px-3 py-2.5 text-[0.86rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] tabular-nums">{group.number}</td>
+      <td className="px-3 py-2.5 text-[0.86rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] tabular-nums">
+        {group.number ? (
+          <Link href={href} className="hover:underline">
+            {group.number}
+          </Link>
+        ) : null}
+      </td>
       <td className="max-w-0 px-3 py-2.5 text-[0.82rem] text-[#2b3546]">
         {group.teachers.length ? <span className="block truncate">{group.teachers.join(' · ')}</span> : null}
       </td>
