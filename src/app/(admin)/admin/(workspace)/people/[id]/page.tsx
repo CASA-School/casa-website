@@ -254,8 +254,9 @@ export default async function PersonPage({
             detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
           />
         ),
+        // Nothing charged yet (a booking brought across from SchoolMan, whose money stays there) is not „paid".
         amount:
-          b.status === 'cancelled' ? null : balance > 0 ? (
+          b.status === 'cancelled' || (b.charged <= 0 && balance <= 0) ? null : balance > 0 ? (
             <span className="text-right">
               <span className="block text-[0.86rem] font-bold text-[#9a5b00] tabular-nums">{euros(lang, balance, b.currency)}</span>
               <span className="block text-[0.72rem] text-[var(--casa-muted)]">{t('offen', 'open')}</span>
@@ -273,7 +274,7 @@ export default async function PersonPage({
       (w): Case => ({
         key: `waitlist-${w.id}`,
         kind: 'waitlist',
-        title: `${w.courseTypeName} · ${w.levelCode}`,
+        title: `${(lang === 'de' && w.courseTypeNameDe) || w.courseTypeName} · ${w.levelCode}`,
         detail: [
           w.session ? pick(lang, SESSION_LABELS[w.session]) : null,
           `${t('ab', 'from')} ${new Date(w.startDate).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })}`,
@@ -462,7 +463,7 @@ export default async function PersonPage({
                 )}
               </Stat>
             ) : null}
-            {seesBookings && bookings.length ? (
+            {seesBookings && bookings.some((b) => b.status !== 'cancelled' && b.charged > 0) ? (
               <Stat label={t('Zu zahlen', 'Owed')}>
                 {owed > 0 ? <span className="text-[#9a5b00]">{euros(lang, owed)}</span> : <span className="text-[#17693a]">{t('Alles bezahlt', 'All paid')}</span>}
               </Stat>

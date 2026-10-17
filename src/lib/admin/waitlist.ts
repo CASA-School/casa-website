@@ -98,15 +98,19 @@ export const placeForNext = (g: Places & { waiting: number }) => g.waiting > 0 &
 const BOOKED = `
   SELECT course_id, max(n)::int AS n FROM (
     -- A week's learners: booked here, and SchoolMan's that week (0050) while bookings are made there.
-    SELECT course_id, week, sum(n) AS n FROM (
-      SELECT bp.course_id, w.week::date AS week, count(DISTINCT bp.booking_id) AS n
+    -- A booking brought across from SchoolMan (0052) is already inside its count: the greater of the
+    -- two counts it once, and still counts it where SchoolMan's count is older or missing.
+    SELECT course_id, week, sum(here) + greatest(sum(schoolman), sum(imported)) AS n FROM (
+      SELECT bp.course_id, w.week::date AS week,
+             count(DISTINCT bp.booking_id) FILTER (WHERE b.filemaker_booking_id IS NULL) AS here, 0 AS schoolman,
+             count(DISTINCT bp.booking_id) FILTER (WHERE b.filemaker_booking_id IS NOT NULL) AS imported
         FROM booking_periods bp
         JOIN bookings b ON b.id = bp.booking_id
        CROSS JOIN LATERAL generate_series(date_trunc('week', bp.start_date), bp.end_date, interval '7 days') AS w(week)
        WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.course_id IS NOT NULL
        GROUP BY bp.course_id, w.week
       UNION ALL
-      SELECT course_id, monday, sum(learners) FROM course_week_learners GROUP BY course_id, monday
+      SELECT course_id, monday, 0, sum(learners), 0 FROM course_week_learners GROUP BY course_id, monday
     ) sources
     GROUP BY course_id, week
   ) weekly
@@ -640,7 +644,7 @@ export async function addToWaitlist(
   if (!course) return refuse('Diesen Termin gibt es nicht mehr.', 'That start no longer exists.');
   const already = await queryFirst<{ id: string }>(
     `SELECT id FROM waitlist_entries
-      WHERE canonical_person_id(person_id) = canonical_person_id($1) AND (course_id = $2 OR (course_instance_id = $3 AND level_code = $4))
+      WHERE person_id = ANY(person_family(canonical_person_id($1))) AND (course_id = $2 OR (course_instance_id = $3 AND level_code = $4))
         AND status IN ('waiting', 'offered')`,
     [input.personId, course.courseId, input.courseInstanceId, input.levelCode]
   );
@@ -797,7 +801,7 @@ export async function closeOnBooking(
   const { rows } = await client.query<EntryCore>(
     `UPDATE waitlist_entries
         SET status = 'booked', booking_id = $3, closed_at = now(), closed_by = $4, close_reason = NULL
-      WHERE canonical_person_id(person_id) = canonical_person_id($1)
+      WHERE person_id = ANY(person_family(canonical_person_id($1)))
         AND (course_instance_id = $2 OR course_id IN (SELECT id FROM courses WHERE course_instance_id = $2))
         AND status IN ('waiting', 'offered')
       RETURNING id, person_id, course_id, course_instance_id, level_code, exam_session_id, status`,

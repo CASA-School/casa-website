@@ -96,7 +96,8 @@ test.describe('booking colours', () => {
     await page.goto(`/admin/bookings?filter=all&q=${encodeURIComponent(number)}`);
     await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toBeVisible();
 
-    await page.goto('/admin/bookings?filter=watch');
+    // Among the bookings under observation (SchoolMan's „u.B." ones too, locally): found by name.
+    await page.goto(`/admin/bookings?filter=watch&q=${encodeURIComponent('Bea Buchungstest')}`);
     await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toContainText('Niveau');
 
     // Ended: the colour is the money's again.

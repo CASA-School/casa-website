@@ -270,14 +270,19 @@ export async function openCourseGroup(id: string, groups: number, actor: StaffUs
 /** The learners booked on a course: their period on it and their step, the bookings that stand. */
 export type CourseLearner = { bookingId: string; personId: string; name: string; levelCode: string | null; startDate: string; endDate: string; status: string };
 
-export async function courseLearners(courseId: string): Promise<CourseLearner[]> {
+/**
+ * Who is booked into a course; of one of its parallel groups (`group`), those whose period names it
+ * (SchoolMan's, 0053) and those booked here, which name no group yet.
+ */
+export async function courseLearners(courseId: string, group?: number): Promise<CourseLearner[]> {
   const rows = await query<{ booking_id: string; person_id: string; name: string; level_code: string | null; start_date: string; end_date: string; status: string }>(
     `SELECT b.id AS booking_id, b.person_id, concat_ws(' ', p.first_name, p.last_name) AS name, bp.level_code,
             to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, b.status::text AS status
        FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
       WHERE bp.course_id = $1 AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+        AND ($2::smallint IS NULL OR bp.group_index IS NULL OR bp.group_index = $2)
       ORDER BY p.last_name, p.first_name`,
-    [courseId]
+    [courseId, group ?? null]
   );
   return rows.map((r) => ({ bookingId: r.booking_id, personId: r.person_id, name: r.name, levelCode: r.level_code, startDate: r.start_date, endDate: r.end_date, status: r.status }));
 }

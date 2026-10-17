@@ -11,7 +11,9 @@ no name, no booking number.
 
 Read facts (2026-10-17): a period's booking carries `_ID_StatusStudent` (Rookie, Runner, Unicorn,
 LastDance — new, continuing, … last course), never a cancelled state; `_ID_StatusBooking` and
-`_ID_Active` are empty on current bookings. A cancelled booking has no period on the course.
+`_ID_Active` are empty on current bookings. A booking that did not work out is `_ID_EnrolmentDone`
+2 („nein") or 3 („storno") and keeps its periods: those are left out (they were counted until the
+learners came across and showed it).
 """
 import collections, json, os, re, sys
 from datetime import date, timedelta
@@ -37,10 +39,13 @@ for cid, start, end in zip(column('Course', '__ID_Course'), column('Course', 'ZS
     if s and e and e >= today:
         courses[cid] = (s, e)
 
+# A booking that did not work out („nein", „storno") keeps its periods in SchoolMan: it is not a learner.
+not_taken = {b.strip() for b, status in zip(column('Booking', '__ID_Booking'), column('Booking', '_ID_EnrolmentDone')) if first(status) in ('2', '3')}
+
 weeks = collections.defaultdict(set)  # (course, monday) → bookings
 for booking, course, start, end in zip(column('DateBooking', '_ID_Booking'), column('DateBooking', '_ID_Course'), column('DateBooking', 'ZStartDate'), column('DateBooking', 'ZEndDate')):
     course, booking = first(course), first(booking)
-    if course not in courses or not booking:
+    if course not in courses or not booking or booking in not_taken:
         continue
     s, e = day(start), day(end)
     if not s or not e or e < s:

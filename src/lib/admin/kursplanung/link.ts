@@ -129,6 +129,8 @@ export async function monthBookings(month: string): Promise<MonthBookings> {
          JOIN starts s ON s.id = c.course_instance_id AND s.month IN ($1, $2)
          JOIN booking_periods bp ON bp.course_id = c.id AND bp.start_date < $4::date AND bp.end_date >= $3::date
          JOIN bookings b ON b.id = bp.booking_id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+              -- Made here: one brought across from SchoolMan (0052) is in the typed Anmeldungen already.
+              AND b.filemaker_booking_id IS NULL
         WHERE c.level_code IS NOT NULL
         GROUP BY c.level_code, s.month = $2`,
       [month, previous, monthStart(month), monthStart(nextMonth(month))]

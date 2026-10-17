@@ -1225,7 +1225,48 @@ into `course_week_learners`, learners per course, group (0051) and week. A week'
 learners are the bookings made here plus SchoolMan's, in the list, on the course page and in **booked
 places** everywhere (`BOOKED`, Bildungszeit's weeks), so free places, „voll" and the waiting list are
 right while both systems are used. Each read replaces the last; run it again to refresh. First read:
-916 course weeks of 97 courses, 586 learners this week.
+916 course weeks of 97 courses, 586 learners this week. Since 2026-10-17 a booking that did not work
+out („nein", „storno", which keep their periods in SchoolMan) is not counted — the learners brought
+across showed it: 989 course weeks, 11,166 learner-weeks (was 12,959), 506 learners this week.
+
+**Learners from SchoolMan (2026-10-17, migrations 0052–0053).** Rahman: bring some learners across to
+see the workspace work with real data.
+`python3 -I scripts/filemaker/read_learners.py | node scripts/filemaker/import-learners.mjs [--dry-run]`
+— after the courses and the counts — takes everyone in a course this week or starting one in the next
+four weeks, on a booking not „nein"/„storno" (whole courses, so a course's names match its count), with
+all they have in SchoolMan: the person (names, salutation, birth date, nationality from `Flag`'s ISO
+prefix, birth place and country, mother tongue, occupation; not the passport number), e-mail addresses
+(not the agency's), phones (not fax), the newest address abroad as home and the newest in Germany as
+local, and every booking with its periods. Not the money (SchoolMan's while it books; such a booking
+reads „Kosten in SchoolMan", never „Alles bezahlt"), not attendance (the Klassenbuch's), not exam
+bookings (their own module). One transaction, counts only, nothing personal in a file.
+
+- *Matching.* A person by their SchoolMan person, then student id (`filemaker_links`, now one row per
+  SchoolMan record); never by name or address — a likely twin gets `duplicate_candidate`. Fields fill
+  only where empty. Made at SchoolMan's creation date (`created_by` `migration-schoolman`: „Importiert").
+- *Bookings* keep SchoolMan's number (`filemaker_booking_id`) and get a workspace number in the year
+  SchoolMan made them. „nein"/„storno" → cancelled; „u.B." → under observation („Sonstiges") while it
+  still runs, a colleague's own observation kept; „ja"/„???" → confirmed, completed once over.
+- *Periods* keep SchoolMan's number (`filemaker_date_booking_id`), its course mapped through the course
+  numbers, its group from the group's number (`booking_periods.group_index`, 0053: a number's page lists
+  its own learners and those booked here), its step the course's (`.2` from an intensive course's fifth
+  week, closures ignored). A period of a course from before our twelve months keeps its dates without one.
+- *Counted once.* SchoolMan's weekly counts already hold every imported booking, so a course's learners
+  each week are the bookings made here plus the greater of SchoolMan's count and the imported bookings —
+  in `BOOKED`, the course list, Bildungszeit; Kursplanung's „Gebucht" counts only bookings made here.
+- *Re-runs* update status, type, visa and payer, and the periods; a period SchoolMan dropped goes.
+
+First run: 528 learners, 543 e-mails, 494 phones, 523 addresses; 2,146 bookings (95 exam bookings and
+9 without a period left out), 2,151 periods, 1,069 of them on courses from before our horizon; 5 likely
+twins flagged. A second run changes nothing.
+
+**The learner list at that size.** Every count under a learner used `canonical_person_id(x.person_id) =
+p.id`: a recursive lookup for every row of the table, which would not have loaded with real data. It is
+now `x.person_id = ANY(family)` (`person_family()`, 0052, called only for a person someone was merged
+into) on the index; the view counts work the stage out once per person (`OFFSET 0` keeps Postgres from
+repeating it per count: 1.5 s → 0.14 s). Pages are ordered with a tiebreak (an import makes many rows in
+one instant); search finds a whole name either way round; the level is the confirmed one, else the
+course's; course types read in German.
 
 **Planning a start (2026-10-17, migration 0049).** „Termin planen" keeps what was
 typed and answers in the dialog when something is wrong. Hours are read however

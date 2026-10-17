@@ -117,9 +117,11 @@ export const BOOKING_LIGHT_LABELS: Record<BookingLight, Bilingual> = {
  * The colour's word, saying what the grey is (2026-10-17: „Unklar" said nothing): „Offen" while nothing
  * has come in, „Anzahlung erhalten" once part of it has, „Ohne Kosten" while nothing is charged.
  */
-export function bookingLightLabel(b: Parameters<typeof bookingLight>[0]): Bilingual {
+export function bookingLightLabel(b: Parameters<typeof bookingLight>[0] & { imported?: boolean }): Bilingual {
   const light = bookingLight(b);
   if (light !== 'unclear') return BOOKING_LIGHT_LABELS[light];
+  // A booking brought across from SchoolMan keeps its charges and payments there (0052).
+  if (b.charged <= 0.005 && b.imported) return { de: 'Kosten in SchoolMan', en: 'Charges in SchoolMan' };
   if (b.charged <= 0.005) return { de: 'Ohne Kosten', en: 'No charges' };
   if (b.paid > 0.005) return { de: 'Anzahlung erhalten', en: 'Part paid' };
   return BOOKING_LIGHT_LABELS.unclear;
@@ -177,6 +179,8 @@ export type BookingListItem = {
   /** An exam booking (0036): the sitting and the parts sat; its name and day are the sitting's. */
   examSessionId: string | null;
   examParts: ExamParts | null;
+  /** Brought across from SchoolMan (0052): its money is SchoolMan's while bookings are made there. */
+  imported: boolean;
   /** The stay booked (0013), as codes: a list names them from `stayVocabulary()`. */
   stay: { typeCode: string; roomTypeCode: string | null; cateringCode: string | null; from: Date | null; to: Date | null } | null;
 };
@@ -266,8 +270,8 @@ export type BookingDetail = BookingListItem & {
 
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
-         coalesce(t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
-         b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
+         coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
+         b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts, b.filemaker_booking_id IS NOT NULL AS imported,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
          (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
@@ -297,6 +301,7 @@ type ListRow = {
   observation_note: string | null;
   exam_session_id: string | null;
   exam_parts: ExamParts | null;
+  imported: boolean;
   accommodation_type_code: string | null;
   accommodation_room_type_code: string | null;
   accommodation_catering_code: string | null;
@@ -321,6 +326,7 @@ const toItem = (r: ListRow): BookingListItem => ({
   observationNote: r.observation_note,
   examSessionId: r.exam_session_id,
   examParts: r.exam_parts,
+  imported: r.imported,
   stay: r.accommodation_type_code
     ? {
         typeCode: r.accommodation_type_code,
@@ -367,7 +373,7 @@ export async function listBookings({
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})`;
   if (search) {
     params.push(`%${search}%`);
-    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR t.name ILIKE $1 OR et.name ILIKE $1 OR b.number ILIKE $1)`;
+    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE $1 OR concat_ws(' ', p.last_name, p.first_name) ILIKE $1 OR t.name ILIKE $1 OR t.name_de ILIKE $1 OR et.name ILIKE $1 OR b.number ILIKE $1)`;
   }
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -375,7 +381,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY ${filter === 'accommodation' ? 'b.accommodation_from ASC NULLS LAST, ' : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY ${filter === 'accommodation' ? 'b.accommodation_from ASC NULLS LAST, ' : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
@@ -407,7 +413,7 @@ export async function bookingsOwed(): Promise<{ amount: number; bookings: number
 
 export async function personBookings(canonicalPersonId: string): Promise<BookingListItem[]> {
   const rows = await query<ListRow>(
-    `${LIST} WHERE b.deleted_at IS NULL AND canonical_person_id(b.person_id) = $1 ORDER BY start_date DESC NULLS LAST`,
+    `${LIST} WHERE b.deleted_at IS NULL AND b.person_id = ANY(person_family($1)) ORDER BY start_date DESC NULLS LAST`,
     [canonicalPersonId]
   );
   return rows.map(toItem);
@@ -417,7 +423,7 @@ export async function personBookings(canonicalPersonId: string): Promise<Booking
 export async function carryOverTargets(bookingId: string): Promise<BookingListItem[]> {
   const rows = await query<ListRow>(
     `${LIST} WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.id <> $1
-        AND canonical_person_id(b.person_id) = (SELECT canonical_person_id(person_id) FROM bookings WHERE id = $1)
+        AND b.person_id = ANY(person_family((SELECT canonical_person_id(person_id) FROM bookings WHERE id = $1)))
       ORDER BY start_date DESC NULLS LAST`,
     [bookingId]
   );
@@ -720,7 +726,7 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
       const { rows: sitting } = await client.query<{ open: boolean; twice: boolean }>(
         `SELECT s.status = 'scheduled' AND s.starts_at >= current_date AS open,
                 EXISTS (SELECT 1 FROM bookings b WHERE b.exam_session_id = s.id AND b.deleted_at IS NULL AND b.status <> 'cancelled'
-                           AND canonical_person_id(b.person_id) = canonical_person_id($2)) AS twice
+                           AND b.person_id = ANY(person_family(canonical_person_id($2)))) AS twice
            FROM exam_sessions s WHERE s.id = $1`,
         [exam.sessionId, input.personId]
       );

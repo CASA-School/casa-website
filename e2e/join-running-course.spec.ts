@@ -36,6 +36,7 @@ test.describe('Joining a running course', () => {
   // Set aside for the run: SchoolMan's weekly learners on the start's courses, and the courses it closed.
   let weekly: { course_id: string; group_index: number; monday: string; learners: number; read_at: string }[] = [];
   let reopened: string[] = [];
+  let imported: string[] = [];
 
   const person = async (first: string) => {
     const id = (await client.query<{ id: string }>(`INSERT INTO people (first_name, last_name, created_by) VALUES ($1, 'Audittest', 'e2e') RETURNING id`, [first])).rows[0].id;
@@ -90,6 +91,14 @@ test.describe('Joining a running course', () => {
     reopened = (
       await client.query<{ id: string }>(`UPDATE courses SET bookable = true WHERE course_instance_id = $1 AND NOT bookable AND status <> 'cancelled' RETURNING id`, [start!.id])
     ).rows.map((r) => r.id);
+    // The learners brought across from SchoolMan (0052) fill these classes too: set aside, put back after.
+    imported = (
+      await client.query<{ id: string }>(
+        `UPDATE bookings SET deleted_at = now() WHERE filemaker_booking_id IS NOT NULL AND deleted_at IS NULL
+            AND id IN (SELECT bp.booking_id FROM booking_periods bp JOIN courses c ON c.id = bp.course_id WHERE c.course_instance_id = $1) RETURNING id`,
+        [start!.id]
+      )
+    ).rows.map((r) => r.id);
   });
 
   test.afterAll(async () => {
@@ -108,6 +117,7 @@ test.describe('Joining a running course', () => {
       ]);
     }
     if (reopened.length) await client.query(`UPDATE courses SET bookable = false WHERE id = ANY($1::uuid[])`, [reopened]);
+    if (imported.length) await client.query(`UPDATE bookings SET deleted_at = NULL WHERE id = ANY($1::uuid[])`, [imported]);
     if (tokenHash) await client.query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [tokenHash]);
     await client.end();
   });

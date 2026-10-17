@@ -38,7 +38,14 @@ try {
     sums.set(key, (sums.get(key) ?? 0) + r.n);
   }
   const touched = [...new Set([...sums.keys()].map((k) => k.split('|')[0]))];
-  await client.query(`DELETE FROM course_week_learners WHERE course_id = ANY($1::uuid[])`, [touched]);
+  // Every SchoolMan course the reader looked at (running or ahead) is read afresh — one that has
+  // nobody left keeps no old count.
+  await client.query(
+    `DELETE FROM course_week_learners WHERE course_id = ANY($1::uuid[])
+        OR course_id IN (SELECT k.id FROM courses k JOIN course_instances i ON i.id = k.course_instance_id
+                          WHERE i.end_date >= current_date AND (k.filemaker_course_id IS NOT NULL OR k.filemaker_group_ids IS NOT NULL))`,
+    [touched]
+  );
   for (const [key, n] of sums) {
     const [course, group, monday] = key.split('|');
     await client.query(`INSERT INTO course_week_learners (course_id, group_index, monday, learners) VALUES ($1, $2, $3::date, $4)`, [course, Number(group), monday, n]);

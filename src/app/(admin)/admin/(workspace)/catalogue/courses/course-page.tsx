@@ -66,11 +66,10 @@ export async function CoursePage({
 
   const mayTeach = canAccess(user, 'kursplanung', 'edit');
   const mayPlan = canAccess(user, 'rooms', 'edit');
-  const [days, plans, choices, learners, row, edit, rooms] = await Promise.all([
+  const [days, plans, choices, row, edit, rooms] = await Promise.all([
     listCourseDays(id),
     weekPlans(course),
     mayTeach || mayPlan ? courseDayChoices(id) : Promise.resolve({ teachers: [], rooms: [], taken: new Map(), away: new Map() }),
-    canAccess(user, 'bookings') ? courseLearners(id) : Promise.resolve([]),
     courseListRow(id, today),
     mayPlan ? courseForEdit(id) : Promise.resolve(null),
     mayPlan ? listBookableRooms() : Promise.resolve([]),
@@ -82,6 +81,8 @@ export async function CoursePage({
   const here = groups.find((g) => g.index === group) ?? (group === 1 && groups.length === 1 && groups[0].index <= 1 ? groups[0] : undefined);
   if (!here) redirect(courseHref(id, groups[0]?.index || 1));
   const groupIndex = here.index || 1;
+  // The names of this number's learners (a group of a split course: its own, and those booked here).
+  const learners = canAccess(user, 'bookings') ? await courseLearners(id, groups.length > 1 && here.index > 0 ? here.index : undefined) : [];
   const shown = here.index === 0 ? days : days.filter((d) => d.groupIndex === groupIndex);
   const plan = plans.find((p) => p.groupIndex === groupIndex);
   const held = shown.filter((d) => !d.cancelled);
@@ -359,12 +360,26 @@ export async function CoursePage({
                 <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch keine Teilnehmenden.', 'No learners yet.')}</p>
               )}
             </Card>
-            <Card title={t('Im Arbeitsbereich gebucht', 'Booked in the workspace')} icon={Icon.bookings} tint="red" bleed>
+            <Card
+              title={
+                <>
+                  {t('Buchungen', 'Bookings')}
+                  {learners.length ? <span className="ml-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{num(lang, learners.length)}</span> : null}
+                </>
+              }
+              icon={Icon.bookings}
+              tint="red"
+              bleed
+            >
               {learners.length ? (
                 <ul className="divide-y divide-ws-line-soft">
-                  {learners.map((l) => (
+                  {/* Those in the course now or still to come first; whose period has ended, after them and quiet. */}
+                  {[...learners].sort((a, b) => Number(a.endDate < today) - Number(b.endDate < today)).map((l) => (
                     <li key={`${l.bookingId}${l.startDate}`}>
-                      <Link href={`/admin/bookings/${l.bookingId}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[0.86rem] hover:bg-[var(--ws-row-hover)]">
+                      <Link
+                        href={`/admin/bookings/${l.bookingId}`}
+                        className={cn('flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[0.86rem] hover:bg-[var(--ws-row-hover)]', l.endDate < today && 'opacity-60')}
+                      >
                         <span className="font-semibold text-[var(--casa-ink)]">{l.name}</span>
                         <span className="text-[var(--casa-muted)] tabular-nums">{[l.levelCode, dayRange(l.startDate, l.endDate, lang)].filter(Boolean).join(' · ')}</span>
                       </Link>
@@ -372,7 +387,7 @@ export async function CoursePage({
                   ))}
                 </ul>
               ) : (
-                <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch niemand im Arbeitsbereich gebucht.', 'Nobody booked in the workspace yet.')}</p>
+                <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch keine Buchung.', 'No booking yet.')}</p>
               )}
             </Card>
           </div>

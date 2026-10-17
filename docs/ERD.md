@@ -345,6 +345,7 @@ erDiagram
     timestamptz cancelled_at
     text cancel_reason
     timestamptz deleted_at
+    text filemaker_booking_id "SchoolMan's booking (0052)"
   }
 
   BOOKING_PERIODS {
@@ -354,6 +355,8 @@ erDiagram
     date start_date
     date end_date
     text kind
+    text filemaker_date_booking_id "SchoolMan's period (0052)"
+    smallint group_index "the course's group (0053)"
   }
 
   BOOKING_CHARGES {

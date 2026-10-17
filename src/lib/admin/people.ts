@@ -173,19 +173,19 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
     query<{ address: string; is_primary: boolean }>(
       `SELECT DISTINCT ON (e.normalized) e.address, e.is_primary
          FROM emails e
-        WHERE canonical_person_id(e.person_id) = $1
+        WHERE e.person_id = ANY(person_family($1))
         ORDER BY e.normalized, e.is_primary DESC, e.created_at`,
       [row.id]
     ),
     query<{ number: string; is_primary: boolean }>(
       `SELECT DISTINCT ON (ph.normalized) ph.number, ph.is_primary
          FROM phones ph
-        WHERE canonical_person_id(ph.person_id) = $1
+        WHERE ph.person_id = ANY(person_family($1))
         ORDER BY ph.normalized, ph.is_primary DESC, ph.created_at`,
       [row.id]
     ),
     query<Row>(
-      `${SELECT} WHERE p.id <> $1 AND canonical_person_id(p.id) = $1 ORDER BY p.created_at`,
+      `${SELECT} WHERE p.id <> $1 AND p.id = ANY(person_family($1)) ORDER BY p.created_at`,
       [row.id]
     ),
   ]);
@@ -241,12 +241,20 @@ const NEW_FOR_DAYS = 28;
 /** The register's views: everyone, the learner stages, who has something open, who still owes money. */
 export type PeopleView = 'all' | 'in_course' | 'new' | 'last' | 'coming' | 'finished' | 'open' | 'owing';
 
+/**
+ * A person's family — themselves and every row merged into them (`person_family`, 0052): the fragments
+ * below match a booking, a case or a payment on `x.person_id = ANY(FAMILY)`, which uses the index on
+ * `person_id`. Nearly nobody has a row merged into them, so an index lookup answers first and the
+ * function runs only for those who do (a third of the time of calling it for everyone).
+ */
+const FAMILY = `(CASE WHEN EXISTS (SELECT 1 FROM people m WHERE m.merged_into = p.id) THEN person_family(p.id) ELSE ARRAY[p.id] END)`;
+
 /** Open cases under a person (theirs and the rows linked into them): enquiries, registrations, offers in play. */
 const OPEN_CASES = `(
-  (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND canonical_person_id(e.person_id) = p.id AND e.status IN ('new', 'in_progress', 'waiting'))
-  + (SELECT count(*) FROM course_registrations r WHERE r.person_id IS NOT NULL AND canonical_person_id(r.person_id) = p.id AND r.status IN ('new', 'in_progress', 'waiting'))
-  + (SELECT count(*) FROM exam_registrations r WHERE r.person_id IS NOT NULL AND canonical_person_id(r.person_id) = p.id AND r.status IN ('new', 'in_progress', 'waiting'))
-  + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND canonical_person_id(o.person_id) = p.id AND o.status IN ('draft', 'sent'))
+  (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND e.person_id = ANY(${FAMILY}) AND e.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM course_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM exam_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND o.person_id = ANY(${FAMILY}) AND o.status IN ('draft', 'sent'))
 )`;
 
 /** What a person still owes across their bookings that are not cancelled. */
@@ -255,33 +263,33 @@ const OWED = `(
            coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
          - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0))), 0)
     FROM bookings b
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
 )`;
 
 /** In a course today: a booking that is not cancelled with a period running now. */
 const IN_COURSE = `EXISTS (
   SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND canonical_person_id(b.person_id) = p.id
+   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND b.person_id = ANY(${FAMILY})
      AND bp.start_date <= current_date AND bp.end_date >= current_date
 )`;
 
 /** A period of an open booking that starts after today — something still to come. */
 const LATER = `EXISTS (
   SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND canonical_person_id(b.person_id) = p.id
+   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND b.person_id = ANY(${FAMILY})
      AND bp.start_date > current_date
 )`;
 
 /** The first day of their first course that was not cancelled. */
 const FIRST_START = `(
   SELECT min(bp.start_date) FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
 )`;
 
 /** A period that has ended, of a booking that was not cancelled. */
 const HAD_COURSE = `EXISTS (
   SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND canonical_person_id(b.person_id) = p.id
+   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
      AND bp.end_date < current_date
 )`;
 
@@ -325,7 +333,9 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
             count(*) FILTER (WHERE stage = 'finished') AS finished,
             count(*) FILTER (WHERE ${OPEN_CASES} > 0) AS open,
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
-       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF}) p`
+       -- OFFSET 0: the stage once per person — folded into the query, Postgres would repeat its six
+       -- sub-queries in each count below.
+       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF} OFFSET 0) p`
   );
   const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
@@ -369,9 +379,10 @@ export async function listPeople({
   const params: unknown[] = [];
   let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF}`;
   if (search) {
-    params.push(`%${search}%`);
-    where += ` AND (p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR EXISTS (
-      SELECT 1 FROM emails e WHERE e.person_id = p.id AND e.address ILIKE $1))`;
+    // A whole name either way round („Vorname Nachname"), or an address of theirs or of a record linked into them.
+    params.push(`%${search.trim().slice(0, 80).replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE $1 OR concat_ws(' ', p.last_name, p.first_name) ILIKE $1 OR EXISTS (
+      SELECT 1 FROM emails e WHERE e.person_id = ANY(${FAMILY}) AND e.address ILIKE $1))`;
   }
   const condition = VIEW_CONDITION[view];
   if (condition) where += ` AND ${condition}`;
@@ -397,28 +408,33 @@ export async function listPeople({
       'FROM people p',
       `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
          nb.course_name, nb.course_start, nb.course_end,
-         (SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
-           WHERE rv.person_id IS NOT NULL AND canonical_person_id(rv.person_id) = p.id ORDER BY rv.decided_at DESC LIMIT 1) AS level,
+         -- The level a teacher confirmed last, else the one of the course they sit in (or start next).
+         coalesce((SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
+                    WHERE rv.person_id IS NOT NULL AND rv.person_id = ANY(${FAMILY}) ORDER BY rv.decided_at DESC LIMIT 1),
+                  nb.course_level) AS level,
          ${OPEN_CASES} AS open_cases,
          ${OWED} AS owed,
          ${STAGE} AS stage
     FROM people p
     LEFT JOIN LATERAL (
-      SELECT t.name AS course_name, min(bp.start_date) AS course_start, max(bp.end_date) AS course_end
+      SELECT coalesce(nullif(trim(t.name_de), ''), t.name) AS course_name, min(bp.start_date) AS course_start, max(bp.end_date) AS course_end,
+             -- The step of the period running now, else of the first one ahead.
+             coalesce((array_agg(bp.level_code ORDER BY bp.start_date DESC) FILTER (WHERE bp.level_code IS NOT NULL AND bp.start_date <= current_date))[1],
+                      (array_agg(bp.level_code ORDER BY bp.start_date) FILTER (WHERE bp.level_code IS NOT NULL))[1]) AS course_level
         FROM bookings b
         JOIN booking_periods bp ON bp.booking_id = b.id
         LEFT JOIN course_types t ON t.id = b.course_type_id
-       WHERE canonical_person_id(b.person_id) = p.id
+       WHERE b.person_id = ANY(${FAMILY})
          AND b.deleted_at IS NULL
          AND b.status IN ('reserved', 'confirmed')
-       GROUP BY b.id, t.name
+       GROUP BY b.id, t.name, t.name_de
       HAVING max(bp.end_date) >= current_date
        ORDER BY min(bp.start_date)
        LIMIT 1
     ) nb ON true`
     )}
      ${where}
-     ORDER BY p.created_at DESC
+     ORDER BY p.created_at DESC, p.id
      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
@@ -467,19 +483,19 @@ export async function personTimeline(canonicalId: string, lang: WsLang): Promise
     `SELECT kind, id, title, detail, status, at FROM (
        SELECT 'enquiry'::text AS kind, e.id, e.topic AS title,
               left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at
-         FROM enquiries e WHERE canonical_person_id(e.person_id) = $1
+         FROM enquiries e WHERE e.person_id = ANY(person_family($1))
        UNION ALL
        SELECT 'course', r.id, r.course_type_label,
               r.course_instance_label, r.status::text, r.submitted_at
-         FROM course_registrations r WHERE canonical_person_id(r.person_id) = $1
+         FROM course_registrations r WHERE r.person_id = ANY(person_family($1))
        UNION ALL
        SELECT 'exam', r.id, r.exam_type_label,
               r.exam_session_label, r.status::text, r.submitted_at
-         FROM exam_registrations r WHERE canonical_person_id(r.person_id) = $1
+         FROM exam_registrations r WHERE r.person_id = ANY(person_family($1))
        UNION ALL
        SELECT 'review', rv.attempt_id, rv.confirmed_level,
               rv.note, NULL, rv.decided_at
-         FROM placement_reviews rv WHERE canonical_person_id(rv.person_id) = $1
+         FROM placement_reviews rv WHERE rv.person_id = ANY(person_family($1))
      ) t ORDER BY at DESC`,
     [canonicalId]
   );
@@ -522,7 +538,7 @@ export async function findDuplicateCandidates({
   if (email) {
     params.push(email.trim().toLowerCase());
     conditions.push(
-      `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $${params.length})`
+      `EXISTS (SELECT 1 FROM emails e WHERE e.person_id = ANY(person_family(p.id)) AND e.normalized = $${params.length})`
     );
   }
   if (lastName && birthDate) {
@@ -537,7 +553,7 @@ export async function findDuplicateCandidates({
   const rows = await query<Row & { by_email: boolean }>(
     `${SELECT.replace(
       'FROM people p',
-      `, ${email ? `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $1)` : 'false'} AS by_email FROM people p`
+      `, ${email ? `EXISTS (SELECT 1 FROM emails e WHERE e.person_id = ANY(person_family(p.id)) AND e.normalized = $1)` : 'false'} AS by_email FROM people p`
     )}
      WHERE p.merged_into IS NULL AND p.deleted_at IS NULL
        AND p.id <> canonical_person_id($${params.length}::uuid)
@@ -653,7 +669,7 @@ export async function latestConfirmedLevel(canonicalId: string): Promise<{
             u.name AS reviewer
        FROM placement_reviews rv
        LEFT JOIN staff_users u ON u.id = rv.reviewed_by
-      WHERE canonical_person_id(rv.person_id) = $1
+      WHERE rv.person_id = ANY(person_family($1))
       ORDER BY rv.decided_at DESC LIMIT 1`,
     [canonicalId]
   );
@@ -935,7 +951,7 @@ export async function listDeletedPeople({ search, limit = 40, offset = 0 }: { se
             (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email
        FROM people p LEFT JOIN staff_users u ON u.id = p.deleted_by
       ${where}
-      ORDER BY p.deleted_at DESC
+      ORDER BY p.deleted_at DESC, p.id
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );

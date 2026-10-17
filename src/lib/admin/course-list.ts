@@ -134,10 +134,16 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
            FROM c, generate_series(date_trunc('week', c.start_date)::date, c.end_date, interval '7 days') gs
        )
        SELECT w.course_id, to_char(w.monday, 'YYYY-MM-DD') AS monday,
+              -- Booked here, plus SchoolMan's — whose count holds the bookings brought across from it (0052):
+              -- the greater of the two counts those once.
               ((SELECT count(DISTINCT b.id) FROM booking_periods p JOIN bookings b ON b.id = p.booking_id
                  WHERE p.course_id = w.course_id AND p.start_date <= w.monday + 6 AND p.end_date >= w.monday
-                   AND b.deleted_at IS NULL AND b.status <> 'cancelled')
-               + coalesce((SELECT sum(l.learners) FROM course_week_learners l WHERE l.course_id = w.course_id AND l.monday = w.monday), 0))::int AS n
+                   AND b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.filemaker_booking_id IS NULL)
+               + greatest(
+                   coalesce((SELECT sum(l.learners) FROM course_week_learners l WHERE l.course_id = w.course_id AND l.monday = w.monday), 0),
+                   (SELECT count(DISTINCT b.id) FROM booking_periods p JOIN bookings b ON b.id = p.booking_id
+                     WHERE p.course_id = w.course_id AND p.start_date <= w.monday + 6 AND p.end_date >= w.monday
+                       AND b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.filemaker_booking_id IS NOT NULL)))::int AS n
          FROM w
         ORDER BY w.course_id, w.monday`,
       [ids]
@@ -292,15 +298,15 @@ export async function findLearnersForCourse(courseId: string, text: string): Pro
   const rows = await query<{ id: string; first_name: string; last_name: string | null; email: string | null; bookings: number; booked: boolean }>(
     `SELECT p.id, p.first_name, p.last_name,
             (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
-            (SELECT count(*) FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.deleted_at IS NULL)::int AS bookings,
+            (SELECT count(*) FROM bookings b WHERE b.person_id = ANY(person_family(p.id)) AND b.deleted_at IS NULL)::int AS bookings,
             EXISTS (SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-                     WHERE canonical_person_id(b.person_id) = p.id AND bp.course_id = $2
+                     WHERE b.person_id = ANY(person_family(p.id)) AND bp.course_id = $2
                        AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS booked
        FROM people p
       WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
         AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
         AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
-             OR EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND lower(e.address) LIKE $1))
+             OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = ANY(person_family(p.id)) AND lower(e.address) LIKE $1))
       ORDER BY p.updated_at DESC LIMIT 6`,
     [like, courseId]
   );

@@ -16,7 +16,7 @@ import { isSchoolClosed } from '@/config/school-closures';
 
 const DEFAULT_PLACES = 14;
 
-type PeriodRow = { course_id: string; start_date: string; end_date: string; booking_id: string };
+type PeriodRow = { course_id: string; start_date: string; end_date: string; booking_id: string; imported: boolean };
 
 async function intensiveStarts(): Promise<BzStart[]> {
   const rows = await query<{ id: string; start_date: string; end_date: string; session: string | null; schedule: { time?: string } | null }>(
@@ -53,7 +53,8 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
     query<{ code: string }>(`SELECT code FROM levels WHERE code ~ '\\.[12]$' ORDER BY sort_order`),
     levelGroups(ids),
     query<PeriodRow>(
-      `SELECT bp.course_id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.booking_id
+      `SELECT bp.course_id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.booking_id,
+              b.filemaker_booking_id IS NOT NULL AS imported
          FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
         WHERE bp.course_id IN (SELECT id FROM courses WHERE course_instance_id = ANY($1::uuid[]))
           AND b.deleted_at IS NULL AND b.status <> 'cancelled'`,
@@ -69,12 +70,14 @@ export async function bildungszeitOffer(horizonWeeks = 26): Promise<Bildungszeit
   ]);
   const elsewhere = new Map(schoolman.map((r) => [`${r.course_id}|${r.monday}`, r.learners]));
   const course = (instance: string, code: string) => groups.find((g) => g.courseInstanceId === instance && g.levelCode === code && !g.cancelled);
-  // The distinct bookings sitting in a course during the week.
-  const learners = (week: { monday: string; friday: string }, courseId: string | undefined) =>
-    courseId
-      ? new Set(periods.filter((p) => p.course_id === courseId && p.start_date <= week.friday && p.end_date >= week.monday).map((p) => p.booking_id)).size +
-        (elsewhere.get(`${courseId}|${week.monday}`) ?? 0)
-      : 0;
+  // The distinct bookings sitting in a course during the week: those made here, and SchoolMan's —
+  // whose count holds the bookings brought across from it (0052), so the greater counts those once.
+  const learners = (week: { monday: string; friday: string }, courseId: string | undefined) => {
+    if (!courseId) return 0;
+    const sitting = periods.filter((p) => p.course_id === courseId && p.start_date <= week.friday && p.end_date >= week.monday);
+    const distinct = (imported: boolean) => new Set(sitting.filter((p) => p.imported === imported).map((p) => p.booking_id)).size;
+    return distinct(false) + Math.max(elsewhere.get(`${courseId}|${week.monday}`) ?? 0, distinct(true));
+  };
 
   const weeks = frames.map((f): BzWeek => {
     const first: Record<string, BzClassPlaces> = {};
