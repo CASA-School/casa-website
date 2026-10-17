@@ -47,6 +47,8 @@ export const LETTER_KINDS = [
   /** Several bookings of one learner in one letter (0035). */
   'learner_confirmation',
   ...REGISTRATION_LETTER_KINDS,
+  /** A letter SchoolMan wrote that is none of the above (0055): kept as it was, never written here. */
+  'schoolman',
 ] as const;
 export type LetterKind = (typeof LETTER_KINDS)[number];
 

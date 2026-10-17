@@ -33,7 +33,8 @@ export async function listNotes(entity: NoteEntity, entityId: string): Promise<S
     author_name: string | null;
     created_at: Date;
   }>(
-    `SELECT n.id, n.body, u.name AS author_name, n.created_at
+    // A note brought across from SchoolMan (0055) keeps its SchoolMan author's name.
+    `SELECT n.id, n.body, coalesce(u.name, n.author_name) AS author_name, n.created_at
        FROM staff_notes n
        LEFT JOIN staff_users u ON u.id = n.staff_user_id
       WHERE n.entity = $1 AND n.entity_id = $2

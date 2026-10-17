@@ -1263,8 +1263,22 @@ bookings (their own module). One transaction, counts only, nothing personal in a
   DDR: `fieldType="Normal"`), and are stale on about one booking in twenty; the lines are what counts.
   First run: 8,554 charges, 6,779 payments, 95 refunds; per learner 251 even, 189 owing (242,051 €,
   much of it for courses ahead), 88 in credit (8,972 €).
-- *Re-runs* update status, type, visa and payer, the periods and the money; a period or a money line
-  SchoolMan dropped goes.
+- *What SchoolMan says about them* (Rahman, 2026-10-17: all the data related to students, including
+  the comments; 0055). Notes on the booking or the person under their SchoolMan author: a booking's
+  final note, a period's comment, the `Comment` table, tests (`TestStudent`: online placement tests and
+  certificates) and learning agreements with their full text. The work log (`WorkFlow`), where most
+  comments about a learner are, becomes the record's history („… in SchoolMan", `schoolman_log`, kept
+  out of the workspace's own activity feed). The letters with their text (`Letter.FreeField`, read in
+  ranges): a kind the workspace writes keeps it, so a booking's next letter is worked out from what
+  SchoolMan sent; the rest are „Brief aus SchoolMan". A payment's comment is its reference, a charge's
+  follows its name; bank accounts are theirs. A booking whose course is over asks for no letter but a
+  payment reminder.
+- *Re-runs* update status, type, visa and payer, the periods, the money, the notes and the letters, and
+  read the work log afresh; a period or a money line SchoolMan dropped goes.
+
+What cannot come across yet — attendance, stays and hosts, instalments, invoices, commission, exam
+bookings, intake records, follow-ups — is listed with the sample's counts in
+`docs/schoolman/learner-transfer.md`.
 
 **Kursplanung's learners are live** (Rahman, 2026-10-17). A board group of a course shows its course's
 learners in the planning month's busiest week — SchoolMan's for that group, or the bookings brought
@@ -1272,7 +1286,8 @@ across into it if more, plus the bookings made here for a course of one group �
 Kurse screen, where only a group of no course still has a number to type. Until then the typed
 „Anmeldungen" were kept, being the only figure there was.
 
-First run: 528 learners, 543 e-mails, 494 phones, 523 addresses; 2,146 bookings (95 exam bookings and
+First run (with the notes, log and letters on 2026-10-18): 1,125 notes, 10,977 log lines, 9,500 letters,
+62 bank accounts; and 528 learners, 543 e-mails, 494 phones, 523 addresses; 2,146 bookings (95 exam bookings and
 9 without a period left out), 2,151 periods, 1,069 of them on courses from before our horizon; 5 likely
 twins flagged. A second run changes nothing.
 

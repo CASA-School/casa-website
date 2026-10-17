@@ -36,3 +36,25 @@ return vals as text
 
 def count(table: str) -> int:
     return int(_run(f'tell application "FileMaker Pro" to tell document "{DOCUMENT}" to count of records of table "{table}"'))
+
+
+def column_chunked(table: str, field: str, size: int = 500) -> list[str]:
+    """`column` for a long text field (a letter's body), read in ranges of records: all at once is
+    more than AppleScript hands back (error -1741)."""
+    total, out = count(table), []
+    for start in range(1, total + 1, size):
+        end = min(start + size - 1, total)
+        chunk = _run(f'''
+with timeout of 900 seconds
+  tell application "FileMaker Pro"
+    tell document "{DOCUMENT}"
+      set vals to cell "{field}" of records {start} thru {end} of table "{table}"
+    end tell
+  end tell
+end timeout
+set AppleScript's text item delimiters to (ASCII character 30)
+return vals as text
+''')
+        values = ['' if v == 'missing value' else v for v in chunk.split(_RS)]
+        out.extend(values if end > start else [chunk if chunk != 'missing value' else ''])
+    return out

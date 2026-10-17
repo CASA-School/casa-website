@@ -204,3 +204,5 @@ Still open:
 
 Left as they are for now (Rahman, 2026-10-16): the passwords stored in SchoolMan — it is live, and
 nobody else has access to them.
+
+**Learners brought across (2026-10-17):** what of a learner comes into the workspace, and what has no place there yet — `learner-transfer.md`.

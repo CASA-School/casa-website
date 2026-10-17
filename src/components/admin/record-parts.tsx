@@ -452,6 +452,17 @@ export async function Timeline({
                 </li>
               );
             }
+            if (entry.action === 'schoolman_log') {
+              return (
+                <li key={key} className="relative flex gap-3">
+                  <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.note}</Mark>
+                  <div className="min-w-0 flex-1 pt-1">
+                    <Meta who={who} what={t('in SchoolMan', 'in SchoolMan')} at={when(item.at)} title={full(item.at)} />
+                    <p className="mt-1 text-[0.82rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{String(detail.text ?? '')}</p>
+                  </div>
+                </li>
+              );
+            }
             if (entry.action === 'assigned' || entry.action === 'unassigned') {
               const to = typeof detail.to === 'string' ? detail.to : null;
               const what =

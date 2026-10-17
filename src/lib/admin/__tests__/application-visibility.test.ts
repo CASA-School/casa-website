@@ -34,7 +34,7 @@ describe('job applications on the Activity screen', () => {
     await recentActivity(200, { includeApplications: true });
 
     const [[sql, hidden], [, shown]] = mocks.query.mock.calls;
-    expect(sql).toContain("WHERE $2::boolean OR entity <> 'career_application'");
+    expect(sql).toContain("WHERE ($2::boolean OR entity <> 'career_application')");
     expect(hidden).toEqual([200, false]);
     expect(shown).toEqual([200, true]);
   });

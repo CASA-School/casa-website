@@ -63,7 +63,9 @@ export async function recentActivity(
   }>(
     `SELECT id, staff_name, entity, entity_id, action, detail, created_at
        FROM staff_activity
-      WHERE $2::boolean OR entity <> 'career_application'
+      WHERE ($2::boolean OR entity <> 'career_application')
+        -- SchoolMan's work log lives on its records (0055), not in the workspace's own feed.
+        AND action <> 'schoolman_log'
       ORDER BY created_at DESC
       LIMIT $1`,
     [limit, includeApplications]
@@ -197,6 +199,9 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
   const from = fromDate(entry.detail?.list, lang);
 
   switch (entry.action) {
+    // A line of SchoolMan's work log (0055), as its colleague wrote it.
+    case 'schoolman_log':
+      return String(entry.detail?.text ?? '');
     case 'status_changed': {
       const was = statusLabel(entry.detail?.from, lang);
       const now = statusLabel(entry.detail?.to, lang);

@@ -25,7 +25,15 @@
  *   on `charge_types.filemaker_id`; the payments received (`PaymentIn`) with their method and what they
  *   paid; a refund to the learner (`PaymentOut`) as a payment below zero. A re-run updates them, and a
  *   line SchoolMan no longer has goes. Sums are never carried — the balance is worked out from the lines.
- * - Exam bookings (an exam sitting is their own module) and bookings without a period are left out.
+ * - What SchoolMan says about them (0055; Rahman: all the data related to students, including the
+ *   comments about them): a booking's final note, a period's comment, the `Comment` table, the
+ *   placement tests and the learning agreements become notes on the booking or the person, under the
+ *   SchoolMan user who wrote them; the work log (`WorkFlow`) becomes the record's history
+ *   (`schoolman_log`, read afresh each run); the letters keep their text — a kind the workspace knows
+ *   keeps it (so the booking's next letter is worked out from what was sent), the rest are „schoolman";
+ *   a payment's comment is its reference, a charge's comment follows its name; bank accounts as theirs.
+ * - Exam bookings (an exam sitting is their own module) and bookings without a period are left out;
+ *   what is about one of them goes on the person.
  */
 import { getCode } from 'country-list';
 
@@ -50,6 +58,44 @@ const METHOD_BY_LABEL = { überweisung: 'transfer', karte: 'card', bar: 'cash', 
 const METHOD_BY_ID = { 1: 'card', 2: 'cash', 5: 'transfer', 7: 'carryover' };
 
 const today = new Date().toISOString().slice(0, 10);
+// A SchoolMan letter's kind, by the script that wrote it; any other is kept as „schoolman".
+const LETTER_KIND = [
+  [/^Receipt/, 'payment_receipt'],
+  [/^(Confirmation\.First_Booking|ConfirmationStudentIndividual|ConfirmationAgency)/, 'booking_confirmation'],
+  [/^VisaLetter/, 'visa_letter'],
+  [/^MissingItem/, 'missing_items'],
+  [/^ShowUp\.FirstCall/, 'showup_first_call'],
+  [/^ShowUp\.LastCall/, 'showup_last_call'],
+  [/^Overview\./, 'payments_overview'],
+  [/Reminder/, 'payment_reminder'],
+  [/^CourseStartMail\.Individual/, 'course_start'],
+  [/^(Cancel|Deactivate)/, 'cancellation_confirmation'],
+  [/^Confirmation\.Exam/, 'exam_confirmation'],
+];
+const letterKind = (script) => LETTER_KIND.find(([re]) => re.test(script ?? ''))?.[1] ?? 'schoolman';
+const dayDe = (stamp) => (stamp ? new Date(`${stamp.slice(0, 10)}T12:00:00Z`).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
+/** A SchoolMan letter in the workspace's letter shape: its text as paragraphs, nothing composed. */
+function letterDocument(letter, kind) {
+  const cap = (v) => String(v ?? '').slice(0, 5000);
+  const paragraphs = String(letter.text ?? '').replace(/\r/g, '\n').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const parts = [];
+  for (const p of paragraphs) for (let i = 0; i < p.length; i += 5000) parts.push(p.slice(i, i + 5000));
+  const body = parts.length > 100 ? [...parts.slice(0, 99), parts.slice(99).join('\n\n').slice(0, 5000)] : parts;
+  return {
+    schema: 1,
+    kind,
+    language: letter.lang === 'en' ? 'en' : 'de',
+    returnAddress: '',
+    recipient: String(letter.header ?? '').split(/\r?\n|\r/).map((x) => x.trim()).filter(Boolean).slice(0, 20).map(cap),
+    placeDate: letter.sent ? `Bremen, ${dayDe(letter.sent)}` : '',
+    subject: { lead: '', title: cap(letter.subject ?? letter.script ?? ''), tail: null },
+    salutation: '',
+    body: body.map((text) => ({ type: 'text', slot: null, text, strong: false })),
+    signOff: '',
+    signature: [],
+    footer: [],
+  };
+}
 const normalizeEmail = (v) => v.normalize('NFKC').trim().toLowerCase();
 const normalizePhone = (v) => {
   const plus = v.normalize('NFKC').replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
@@ -79,6 +125,7 @@ const count = {
   bookingsNew: 0, bookingsUpdated: 0, periodsNew: 0, periodsUpdated: 0, periodsRemoved: 0,
   skippedExam: 0, skippedNoPeriod: 0, periodsNoCourse: 0, nationalityUnmatched: 0, twins: 0,
   charges: 0, chargesRemoved: 0, payments: 0, refunds: 0, paymentsRemoved: 0, zero: 0,
+  notes: 0, log: 0, letters: 0, lettersOnPerson: 0, banks: 0,
 };
 
 try {
@@ -225,6 +272,8 @@ try {
       count.addresses += r.rowCount;
     }
 
+    // SchoolMan's booking number → ours, for what is said about a booking.
+    const bookingOf = new Map();
     for (const b of l.bookings) {
       if (b.exam) {
         count.skippedExam++;
@@ -241,7 +290,7 @@ try {
       const status = b.enrolment === '2' || b.enrolment === '3' ? 'cancelled' : over ? 'completed' : 'confirmed';
       const observed = b.enrolment === '4' && status === 'confirmed';
       const existing = (await client.query(`SELECT id FROM bookings WHERE filemaker_booking_id = $1`, [b.id])).rows[0];
-      let bookingId;
+      let bookingId = existing?.id;
       if (existing) {
         bookingId = existing.id;
         await client.query(
@@ -269,6 +318,7 @@ try {
         ).rows[0].id;
         count.bookingsNew++;
       }
+      bookingOf.set(b.id, bookingId);
       const seen = [];
       for (const [i, p] of periods.entries()) {
         const course = courses.get(p.course ?? '');
@@ -310,7 +360,17 @@ try {
            ON CONFLICT (filemaker_cost_detail_id) WHERE filemaker_cost_detail_id IS NOT NULL DO UPDATE
              SET booking_id = EXCLUDED.booking_id, kind = EXCLUDED.kind, description = EXCLUDED.description, amount = EXCLUDED.amount,
                  charge_type_code = EXCLUDED.charge_type_code, quantity = EXCLUDED.quantity, unit_amount = EXCLUDED.unit_amount`,
-          [bookingId, kind, c.label ?? type?.name_de ?? 'SchoolMan', c.amount, type?.code ?? null, c.units && c.units > 0 ? c.units : 1, c.unitAmount, c.id, c.created]
+          [
+            bookingId,
+            kind,
+            [c.label ?? type?.name_de ?? 'SchoolMan', c.comment && c.comment !== c.label ? c.comment : null].filter(Boolean).join(' · '),
+            c.amount,
+            type?.code ?? null,
+            c.units && c.units > 0 ? c.units : 1,
+            c.unitAmount,
+            c.id,
+            c.created,
+          ]
         );
         count.charges++;
       }
@@ -328,11 +388,12 @@ try {
         }
         payments.push(p.id);
         await client.query(
-          `INSERT INTO payments (booking_id, amount, method, received_at, subject, filemaker_payment_id, created_at)
-           VALUES ($1, $2, $3, coalesce($4::date, ($6::timestamp)::date, current_date), $5, $7, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+          `INSERT INTO payments (booking_id, amount, method, received_at, subject, filemaker_payment_id, created_at, reference)
+           VALUES ($1, $2, $3, coalesce($4::date, ($6::timestamp)::date, current_date), $5, $7, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()), $8)
            ON CONFLICT (filemaker_payment_id) WHERE filemaker_payment_id IS NOT NULL DO UPDATE
-             SET booking_id = EXCLUDED.booking_id, amount = EXCLUDED.amount, method = EXCLUDED.method, received_at = EXCLUDED.received_at, subject = EXCLUDED.subject`,
-          [bookingId, p.amount, method(p), p.date, p.for ?? 'Zahlung', p.created, p.id]
+             SET booking_id = EXCLUDED.booking_id, amount = EXCLUDED.amount, method = EXCLUDED.method, received_at = EXCLUDED.received_at,
+                 subject = EXCLUDED.subject, reference = EXCLUDED.reference`,
+          [bookingId, p.amount, method(p), p.date, p.for ?? 'Zahlung', p.created, p.id, p.comment ?? null]
         );
         if (p.amount < 0 && p.id.startsWith('PaymentOut:')) count.refunds++;
         else count.payments++;
@@ -343,6 +404,83 @@ try {
           [bookingId, payments]
         )
       ).rowCount;
+    }
+
+    // What SchoolMan says about them: notes, on the booking where we have it, else on the person.
+    const on = (booking) => (booking && bookingOf.get(booking) ? ['booking', bookingOf.get(booking)] : ['person', personId]);
+    for (const n of l.notes ?? []) {
+      const [entity, entityId] = on(n.booking);
+      await client.query(
+        `INSERT INTO staff_notes (entity, entity_id, body, author_name, filemaker_ref, created_at)
+         VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+         ON CONFLICT (filemaker_ref) WHERE filemaker_ref IS NOT NULL DO UPDATE
+           SET entity = EXCLUDED.entity, entity_id = EXCLUDED.entity_id, body = EXCLUDED.body, author_name = EXCLUDED.author_name, created_at = EXCLUDED.created_at`,
+        [entity, entityId, n.body.slice(0, 20000), n.author ?? 'SchoolMan', n.ref, n.at]
+      );
+      count.notes++;
+    }
+    // The work log: read afresh, as SchoolMan has it now.
+    await client.query(`DELETE FROM staff_activity WHERE action = 'schoolman_log' AND entity_id = ANY($1::uuid[])`, [[personId, ...bookingOf.values()]]);
+    for (const w of l.log ?? []) {
+      const [entity, entityId] = on(w.booking);
+      await client.query(
+        `INSERT INTO staff_activity (staff_name, entity, entity_id, action, detail, created_at)
+         VALUES ($1, $2, $3, 'schoolman_log', $4::jsonb, coalesce($5::timestamp AT TIME ZONE 'Europe/Berlin', now()))`,
+        [w.author ?? 'SchoolMan', entity, entityId, JSON.stringify({ text: w.text.slice(0, 4000), ref: w.ref }), w.at]
+      );
+      count.log++;
+    }
+    // The letters, oldest first, each kind's versions in the order they went.
+    for (const letter of [...(l.letters ?? [])].sort((a, b) => String(a.sent ?? '').localeCompare(String(b.sent ?? '')))) {
+      const bookingId = letter.booking ? (bookingOf.get(letter.booking) ?? null) : null;
+      const mapped = letterKind(letter.script);
+      const kind = mapped !== 'schoolman' && bookingId ? mapped : 'schoolman';
+      if (!bookingId) count.lettersOnPerson++;
+      const doc = letterDocument(letter, kind);
+      const known = (await client.query(`SELECT id FROM letters WHERE filemaker_letter_id = $1`, [letter.ref])).rows[0];
+      if (known) {
+        await client.query(`UPDATE letters SET document = $2::jsonb, subject = $3, email = $4, recipient_name = $5 WHERE id = $1`, [
+          known.id,
+          JSON.stringify(doc),
+          doc.subject.title || 'Brief',
+          letter.email,
+          doc.recipient[0] ?? [l.firstName, l.lastName].filter(Boolean).join(' '),
+        ]);
+      } else {
+        const version = bookingId
+          ? (await client.query(`SELECT coalesce(max(version), 0) + 1 AS v FROM letters WHERE booking_id = $1 AND kind = $2`, [bookingId, kind])).rows[0].v
+          : 1;
+        await client.query(
+          `INSERT INTO letters (kind, version, language, person_id, booking_id, recipient_name, email, subject, document, source, sent_at, filemaker_letter_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb, coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()), $12)`,
+          [
+            kind,
+            version,
+            doc.language,
+            personId,
+            bookingId,
+            doc.recipient[0] ?? [l.firstName, l.lastName].filter(Boolean).join(' '),
+            letter.email,
+            doc.subject.title || 'Brief',
+            JSON.stringify(doc),
+            JSON.stringify({ schoolman: { script: letter.script, author: letter.author } }),
+            letter.sent,
+            letter.ref,
+          ]
+        );
+      }
+      count.letters++;
+    }
+    for (const a of l.banks ?? []) {
+      const iban = a.iban.replace(/\s+/g, '').toUpperCase();
+      const twin = (await client.query(`SELECT 1 FROM bank_accounts WHERE person_id = $1 AND replace(upper(iban), ' ', '') = $2 AND filemaker_ref IS DISTINCT FROM $3`, [personId, iban, a.ref])).rows.length;
+      if (twin) continue;
+      await client.query(
+        `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, filemaker_ref) VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (filemaker_ref) WHERE filemaker_ref IS NOT NULL DO UPDATE SET holder = EXCLUDED.holder, iban = EXCLUDED.iban, bic = EXCLUDED.bic, bank_name = EXCLUDED.bank_name`,
+        [personId, a.holder, iban, a.bic, a.bank, a.ref]
+      );
+      count.banks++;
     }
   }
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
@@ -360,5 +498,6 @@ console.log(
     `left out: ${count.skippedExam} exam bookings, ${count.skippedNoPeriod} without a period · ${count.periodsNoCourse} periods of a course not here · ` +
     `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged\n` +
     `money: ${count.charges} charges, ${count.payments} payments, ${count.refunds} refunds · ${count.zero} lines of no amount left out · ` +
-    `${count.chargesRemoved} charges and ${count.paymentsRemoved} payments no longer in SchoolMan removed`
+    `${count.chargesRemoved} charges and ${count.paymentsRemoved} payments no longer in SchoolMan removed\n` +
+    `about them: ${count.notes} notes, ${count.log} log lines, ${count.letters} letters (${count.lettersOnPerson} on the person only), ${count.banks} bank accounts`
 );

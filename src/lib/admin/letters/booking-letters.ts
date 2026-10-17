@@ -39,7 +39,7 @@ import {
 } from './types';
 
 /** Every kind the composer writes: all but the offer, which has its own editor. */
-export type ComposedKind = Exclude<LetterKind, 'offer'>;
+export type ComposedKind = Exclude<LetterKind, 'offer' | 'schoolman'>;
 
 // ------------------------------------------------------------------ context
 
@@ -133,6 +133,7 @@ export type WaitlistLetterContext = {
 /** Each kind's name, for lists and buttons. */
 export const LETTER_KIND_LABELS: Record<LetterKind, Record<LetterLanguage, string>> = {
   offer: { de: 'Angebot', en: 'Offer' },
+  schoolman: { de: 'Brief aus SchoolMan', en: 'Letter from SchoolMan' },
   booking_confirmation: { de: 'Buchungsbestätigung', en: 'Booking confirmation' },
   payment_receipt: { de: 'Empfangsbestätigung', en: 'Receipt' },
   payment_reminder: { de: 'Zahlungserinnerung', en: 'Payment reminder' },

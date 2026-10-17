@@ -45,6 +45,14 @@ export function suggestBookingLetters(ctx: BookingLetterContext, today: string, 
   // Cancelled: only the cancellation, once.
   if (ctx.status === 'cancelled') return lastSent(sent, 'cancellation_confirmation') ? [] : ['cancellation_confirmation'];
 
+  // Over (a booking from before, SchoolMan's ones among them, 0052): a confirmation, a receipt or a
+  // course-start letter comes too late; only money still open is worth a letter.
+  const end = ctx.course?.endDate ?? null;
+  if (ctx.status === 'completed' || (end && end < today)) {
+    const reminded = lastSent(sent, 'payment_reminder');
+    return balance > 0.005 && (!reminded || reminded <= addDays(today, -7)) ? ['payment_reminder'] : [];
+  }
+
   if (!confirmed) out.push(confirmation);
 
   // A payment came in after the last receipt, or there is none yet.

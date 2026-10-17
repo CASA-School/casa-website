@@ -9,8 +9,12 @@ runs then, of a booking that is not „nein" or „storno" — with all they hav
 their e-mail addresses, phones and address, and every booking with its periods and its money — the
 charges (`CostDetail`), the payments received (`PaymentIn`) and the refunds paid back to the learner
 (`PaymentOut`, „Rückzahlung Student"; not rent to hosts or agency commission, which are not the
-learner's account). Whole courses, so a course's names match its count. Not the passport number, not
-the attendance (the Klassenbuch's).
+learner's account). And what SchoolMan says about them (Rahman, 2026-10-17: all the data related to
+students, including the comments about them): the notes — a booking's final note (`FinalNote`), a
+period's comment, the `Comment` table, the placement tests (`TestStudent`) and learning agreements
+(`Agreement`) with their texts —, the work log (`WorkFlow`), the letters with their text (`Letter`), the
+comments on payments and charges, and their bank accounts. Whole courses, so a course's names match its
+count. Not the passport number, not the attendance (the Klassenbuch's).
 
 The JSON goes to stdout and straight into the importer: no personal data is written to a file.
 Run the course import and the learner counts first (docs/ADMIN_WORKSPACE.md §Learners from SchoolMan).
@@ -19,7 +23,7 @@ import collections, json, os, re, sys
 from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from fm_read import column  # noqa: E402
+from fm_read import column, column_chunked  # noqa: E402
 
 
 def table(name, *fields):
@@ -127,17 +131,107 @@ taken = {b['__ID_Booking'].strip() for bs in bookings_of.values() for b in bs}
 
 # The money of those bookings: charges, payments received, refunds to the learner.
 charges_of = collections.defaultdict(list)
-for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailReference', 'CostDetail_1', 'CostGross', 'Unit', 'CostGrossUnit', 'TimeStampOfCreation'):
+for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailReference', 'CostDetail_1', 'CostGross', 'Unit', 'CostGrossUnit', 'TimeStampOfCreation',
+               'CostDetailComment_1'):
     if first(r['_ID_Booking']) in taken:
         charges_of[first(r['_ID_Booking'])].append(r)
 payments_of = collections.defaultdict(list)
-for r in table('PaymentIn', '__ID_PaymentIn', '_ID_Booking', 'PaymentIn', '_ID_MethodPayment', 'MethodPayment_1', 'DateOfPayment', 'CostDetailReference_1', 'TimeStampOfCreation'):
+for r in table('PaymentIn', '__ID_PaymentIn', '_ID_Booking', 'PaymentIn', '_ID_MethodPayment', 'MethodPayment_1', 'DateOfPayment', 'CostDetailReference_1', 'TimeStampOfCreation',
+               'CommentPaymentIn_1', 'CommentPaymentIn_2'):
     if first(r['_ID_Booking']) in taken:
         payments_of[first(r['_ID_Booking'])].append(r)
 refunds_of = collections.defaultdict(list)
-for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', 'MethodPayment_1', 'DatePaymentOut', 'ZSingleDatePayment', 'TimeStampOfCreation'):
+for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', 'MethodPayment_1', 'DatePaymentOut', 'ZSingleDatePayment', 'TimeStampOfCreation',
+               'PaymentOutComment_1'):
     if first(r['_ID_Booking']) in taken and first(r['_ID_PaymentOutReference']) == '3':  # 3 Rückzahlung Student
         refunds_of[first(r['_ID_Booking'])].append(r)
+
+
+def text(*parts):
+    return '\n'.join(p.strip() for p in parts if p and p.strip())
+
+
+def owner(r):
+    """Whose row it is: the chosen person it names, else the person of the booking it names."""
+    for pid in ids(r.get('_ID_Person')):
+        if pid in persons:
+            return pid
+    b = bookings.get(first(r.get('_ID_Booking')))
+    return first(b['_ID_Person']) if b and first(b['_ID_Person']) in persons else None
+
+
+notes_of = collections.defaultdict(list)
+# A booking's final note and a period's comment: on the booking, by nobody named.
+for r in table('Booking', '__ID_Booking', 'FinalNote', 'TimeStampOfChange'):
+    bid = r['__ID_Booking'].strip()
+    if bid in taken and r['FinalNote'].strip():
+        notes_of[first(bookings[bid]['_ID_Person'])].append({'ref': f'Booking.FinalNote:{bid}', 'booking': bid, 'author': None, 'at': stamp(r['TimeStampOfChange']), 'body': r['FinalNote'].strip()})
+for r in table('DateBooking', '__ID_DateBooking', '_ID_Booking', 'CommentBooking', 'DateOfCreation'):
+    bid = first(r['_ID_Booking'])
+    if bid in taken and r['CommentBooking'].strip():
+        notes_of[first(bookings[bid]['_ID_Person'])].append({'ref': f'DateBooking.CommentBooking:{r["__ID_DateBooking"].strip()}', 'booking': bid, 'author': None,
+                                                             'at': stamp(r['DateOfCreation']), 'body': r['CommentBooking'].strip()})
+for r in table('Comment', '__ID_Comment', '_ID_Person', '_ID_Booking', 'Subject', 'Comment_1', 'Comment_2', 'UserName', 'TimeStampOfCreation'):
+    pid = owner(r)
+    body = text(r['Subject'], r['Comment_1'], r['Comment_2'])
+    if pid and body:
+        notes_of[pid].append({'ref': f'Comment:{r["__ID_Comment"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
+                              'at': stamp(r['TimeStampOfCreation']), 'body': body})
+# A test (`TestStudent` holds placement tests and exam results alike): its name, day, result, level and
+# score, and the tester's comment.
+for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', 'TestReference', 'DateOfTest', 'Result', 'LevelShort', 'Percentage', 'CommentTest', 'User',
+               'DateOfCreation'):
+    pid = owner(r)
+    if not pid:
+        continue
+    facts = ' · '.join(x for x in (r['Result'].strip(), r['LevelShort'].strip(), f"{r['Percentage'].strip()} %" if r['Percentage'].strip() else '') if x)
+    head = ' '.join(x for x in (r['TestReference'].strip() or 'Einstufungstest', f"am {r['DateOfTest'].strip()}" if r['DateOfTest'].strip() else '') if x)
+    notes_of[pid].append({'ref': f'TestStudent:{r["__ID_TestStudent"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['User'].strip() or None,
+                          'at': stamp(r['DateOfTest']) or stamp(r['DateOfCreation']), 'body': text(f'{head}: {facts}' if facts else head, r['CommentTest'])})
+# A learning agreement: its kind, its texts, the recommendation, the level and how long.
+for r in table('Agreement', '__ID_Agreement', '_ID_Person', '_ID_Booking', 'TypeAgreement_1', 'Subject', 'Agreement_1', 'Agreement_2', 'Agreement_3', 'Agreement_4',
+               'Agreement_5', 'AgreementComment_1', 'Recommendation', 'Level', 'LengthDuration', 'UserName', 'DateOfCreation'):
+    pid = owner(r)
+    if not pid:
+        continue
+    tail = ' · '.join(x for x in (f"Empfehlung: {r['Recommendation'].strip()}" if r['Recommendation'].strip() else '', f"Niveau {r['Level'].strip()}" if r['Level'].strip() else '',
+                                  r['LengthDuration'].strip()) if x)
+    notes_of[pid].append({'ref': f'Agreement:{r["__ID_Agreement"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
+                          'at': stamp(r['DateOfCreation']),
+                          'body': text(r['TypeAgreement_1'] or r['Subject'], r['Agreement_1'], r['Agreement_2'], r['Agreement_3'], r['Agreement_4'], r['Agreement_5'],
+                                       r['AgreementComment_1'], tail)})
+
+# The work log, line by line (its text read in ranges: there are more than 100,000).
+log_of = collections.defaultdict(list)
+W = ['__ID_Workflow', '_ID_Person', '_ID_Booking', 'UserName', 'TimeStampOfCreation']
+wf = [dict(zip(W, r)) for r in zip(*[column('WorkFlow', f) for f in W])]
+wf_text, wf_comment = column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'CommentWorkflow', 5000)
+for r, line, comment in zip(wf, wf_text, wf_comment):
+    pid = owner(r)
+    if pid and text(line, comment):
+        log_of[pid].append({'ref': r['__ID_Workflow'].strip(), 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
+                            'at': stamp(r['TimeStampOfCreation']), 'text': text(line, comment)})
+
+# The letters, with what they said.
+letters_of = collections.defaultdict(list)
+L = ['__ID_Letter', '_ID_Person', '_ID_Booking', 'ScriptName', 'ScriptParameter', 'Subject', 'AddressHeader', 'Email', 'Date_LetterSent', 'DateOfEmission',
+     'TimeStampOfCreation', 'UserName']
+lt = [dict(zip(L, r)) for r in zip(*[column('Letter', f) for f in L])]
+for r, body in zip(lt, column_chunked('Letter', 'FreeField', 1000)):
+    pid = owner(r)
+    if pid:
+        letters_of[pid].append({'ref': r['__ID_Letter'].strip(), 'booking': first(r['_ID_Booking']) or None, 'script': r['ScriptName'].strip() or None,
+                                'lang': 'en' if r['ScriptParameter'].strip() in ('En', '2') else 'de', 'subject': r['Subject'].strip() or None,
+                                'header': r['AddressHeader'].strip() or None, 'email': r['Email'].strip() or None,
+                                'sent': stamp(r['Date_LetterSent']) or stamp(r['DateOfEmission']) or stamp(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None,
+                                'text': body})
+
+banks_of = collections.defaultdict(list)
+for r in table('BankAccount', '__ID_BankAccount', '_ID_Person', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation'):
+    pid = owner(r)
+    if pid and r['IBAN.Text'].strip():
+        banks_of[pid].append({'ref': r['__ID_BankAccount'].strip(), 'holder': r['AccountOwner'].strip() or None, 'iban': r['IBAN.Text'].strip(),
+                              'bic': (r['SWIFT.Text'] or r['BIC']).strip() or None, 'bank': r['BankName'].strip() or None})
 
 out = []
 for pid, p in persons.items():
@@ -173,16 +267,23 @@ for pid, p in persons.items():
             'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate'])}
                         for r in periods_of[b['__ID_Booking'].strip()]],
             'charges': [{'id': r['__ID_CostDetail'].strip(), 'ref': first(r['_ID_CostDetailReference']) or None, 'label': r['CostDetail_1'].strip() or None,
+                         'comment': r['CostDetailComment_1'].strip() or None,
                          'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': stamp(r['TimeStampOfCreation'])}
                         for r in charges_of[b['__ID_Booking'].strip()]],
             'payments': [{'id': f"PaymentIn:{r['__ID_PaymentIn'].strip()}", 'amount': amount(r['PaymentIn']), 'method': first(r['_ID_MethodPayment']) or None,
                           'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DateOfPayment']), 'for': r['CostDetailReference_1'].strip() or None,
+                          'comment': text(r['CommentPaymentIn_1'], r['CommentPaymentIn_2']) or None,
                           'created': stamp(r['TimeStampOfCreation'])} for r in payments_of[b['__ID_Booking'].strip()]]
                         # A refund paid back to the learner is money out of their account: a payment below zero.
                         + [{'id': f"PaymentOut:{r['__ID_PaymentOut'].strip()}", 'amount': -abs(amount(r['PaymentOut']) or 0), 'method': None,
                             'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DatePaymentOut']) or iso(r['ZSingleDatePayment']), 'for': 'Rückzahlung',
+                            'comment': r['PaymentOutComment_1'].strip() or None,
                             'created': stamp(r['TimeStampOfCreation'])} for r in refunds_of[b['__ID_Booking'].strip()]],
         } for b in bookings_of[pid]],
+        'notes': notes_of[pid],
+        'log': log_of[pid],
+        'letters': letters_of[pid],
+        'banks': banks_of[pid],
     })
 
 if '--stats' in sys.argv:
@@ -197,6 +298,8 @@ if '--stats' in sys.argv:
     print('charges', len(ch), '· without an amount', sum(c['amount'] in (None, 0) for c in ch), '· sum', round(sum(c['amount'] or 0 for c in ch), 2),
           '· payments', len(pa), '· refunds', sum(p['id'].startswith('PaymentOut:') for p in pa), '· sum', round(sum(p['amount'] or 0 for p in pa), 2),
           '· without a date', sum(not p['date'] for p in pa))
+    print('notes', sum(len(x['notes']) for x in out), '· log lines', sum(len(x['log']) for x in out), '· letters', sum(len(x['letters']) for x in out),
+          '(with text', sum(bool(l['text'].strip()) for x in out for l in x['letters']), ') · bank accounts', sum(len(x['banks']) for x in out))
     print('with e-mail', sum(bool(x['emails']) for x in out), '· phone', sum(bool(x['phones']) for x in out), '· address', sum(bool(x['addresses']) for x in out),
           '· birth date', sum(bool(x['birthDate']) for x in out), '· nationality', sum(bool(x['nationality']) for x in out), '· created', sum(bool(x['created']) for x in out))
     sys.exit(0)
