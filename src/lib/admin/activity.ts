@@ -451,6 +451,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Provision einer Agentur geändert', "changed an agency's commission");
     case 'organisation_commission_removed':
       return t('hat die Provision einer Agentur entfernt', "removed an agency's commission");
+    case 'follow_up_added':
+      return t('hat eine Wiedervorlage gesetzt', 'set a follow-up');
+    case 'follow_up_done':
+      return t('hat eine Wiedervorlage erledigt', 'completed a follow-up');
     case 'accommodation_created':
       return t('hat eine Unterkunft angelegt', 'added a place to stay');
     case 'accommodation_updated':

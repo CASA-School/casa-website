@@ -105,6 +105,13 @@
     // Removal condition: delete when the FileMaker bridge brings accommodation across.
     "scripts/filemaker/import-accommodation.mjs",
 
+    // Writes SchoolMan's follow-up dates onto the bookings that came across,
+    // from scripts/filemaker/read_follow_ups.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Follow-ups). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings follow-ups across.
+    "scripts/filemaker/import-follow-ups.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.

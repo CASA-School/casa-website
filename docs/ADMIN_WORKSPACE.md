@@ -1228,6 +1228,21 @@ window, so none is linked yet. A group's offers came across with the offers (005
 tab, docs/OFFERS.md §From SchoolMan) and its bed reservations with the accommodation (0060; its page's
 Unterkünfte tab). Not across: its letters and invoices — docs/schoolman/groups.md.
 
+## Follow-ups (2026-10-18, migration 0062)
+
+A booking's „Wiedervorlage": a day to look at it again, and why (`booking_follow_ups`). On the booking's
+page, a card lists the open ones by day (amber once due) with who set it, „Erledigt" marks one done, and
+„Setzen" adds one (day and reason); the done ones are counted under it. The bookings list has a view
+„Wiedervorlage": bookings with an open follow-up due today or before. Setting and completing one are
+lines in the booking's history; `edit` on Bookings does both.
+
+**From SchoolMan.** SchoolMan's letter scripts set a follow-up when a letter goes out
+(`SingleDateControl`, 7,539: after a booking confirmation, a payment reminder, a cancellation …). It holds
+no text and no done mark, so the reason is said from the script („Nach der 2. Zahlungserinnerung") and one
+more than two weeks past comes in done. `read_follow_ups.py | import-follow-ups.mjs`, after the learners:
+1,683 on the sample's bookings, 128 open. The workspace's letters already work out what is due next
+(„Als Nächstes"); a follow-up is for what no rule knows.
+
 ## Accommodation (2026-10-18, migration 0060)
 
 Where learners stay, in „Unterkünfte" and „Aufenthalte" under Schule (module `accommodation`; Rahman:

@@ -405,7 +405,7 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
   }));
 }
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'accommodation' | 'reserved' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'accommodation' | 'reserved' | 'past' | 'cancelled' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
@@ -415,6 +415,8 @@ const FILTERS: Record<BookingFilter, string> = {
   // full (and not under observation, which shows yellow), or under observation.
   unclear: `b.status <> 'cancelled' AND b.observation_reason IS NULL AND NOT (${CHARGED} > 0.005 AND ${PAID} >= ${CHARGED} - 0.005)`,
   watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
+  // A follow-up due today or before that nobody has looked at yet (0062).
+  followup: `EXISTS (SELECT 1 FROM booking_follow_ups f WHERE f.booking_id = b.id AND f.done_at IS NULL AND f.due_on <= current_date)`,
   // Who needs a room, by arrival: every stay not cancelled that has not ended yet.
   accommodation: `b.status <> 'cancelled' AND b.accommodation_type_code IS NOT NULL AND coalesce(b.accommodation_to, b.accommodation_from, current_date) >= current_date`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
@@ -1400,4 +1402,46 @@ export async function listCohortOptions(): Promise<CohortOption[]> {
     defaultPrice: Number(r.default_price),
     currency: r.currency,
   }));
+}
+
+// ------------------------------------------------------------- follow-ups (0062)
+
+export type FollowUp = { id: string; dueOn: string; reason: string; doneAt: Date | null; createdByName: string | null };
+
+/** A booking's follow-ups: the open ones by day, then the latest few done. */
+export async function bookingFollowUps(bookingId: string): Promise<{ open: FollowUp[]; done: FollowUp[]; doneTotal: number }> {
+  const rows = await query<{ id: string; due_on: string; reason: string; done_at: Date | null; created_by_name: string | null; done_rank: string | null }>(
+    `SELECT f.id, to_char(f.due_on, 'YYYY-MM-DD') AS due_on, f.reason, f.done_at, coalesce(u.name, f.created_by_name) AS created_by_name,
+            CASE WHEN f.done_at IS NOT NULL THEN row_number() OVER (PARTITION BY f.done_at IS NULL ORDER BY f.due_on DESC, f.id) END AS done_rank
+       FROM booking_follow_ups f LEFT JOIN staff_users u ON u.id = f.created_by
+      WHERE f.booking_id = $1
+      ORDER BY f.due_on, f.id`,
+    [bookingId]
+  );
+  const toFollowUp = (r: (typeof rows)[number]): FollowUp => ({ id: r.id, dueOn: r.due_on, reason: r.reason, doneAt: r.done_at, createdByName: r.created_by_name });
+  const done = rows.filter((r) => r.done_at);
+  return {
+    open: rows.filter((r) => !r.done_at).map(toFollowUp),
+    done: done.filter((r) => Number(r.done_rank) <= 3).sort((a, b) => b.due_on.localeCompare(a.due_on)).map(toFollowUp),
+    doneTotal: done.length,
+  };
+}
+
+export async function addFollowUp(bookingId: string, dueOn: string, reason: string, actor: StaffUser): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `INSERT INTO booking_follow_ups (booking_id, due_on, reason, created_by)
+     SELECT id, $2, $3, $4 FROM bookings WHERE id = $1 AND deleted_at IS NULL RETURNING id`,
+    [bookingId, dueOn, reason, actor.id]
+  );
+  if (rows.length) await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'follow_up_added', detail: { due: dueOn } });
+  return rows.length > 0;
+}
+
+/** Looked at: the follow-up is done. */
+export async function completeFollowUp(bookingId: string, followUpId: string, actor: StaffUser): Promise<void> {
+  const rows = await query<{ id: string }>(
+    `UPDATE booking_follow_ups SET done_at = timezone('utc', now()), done_by = $3 WHERE id = $2 AND booking_id = $1 AND done_at IS NULL RETURNING id`,
+    [bookingId, followUpId, actor.id]
+  );
+  if (rows.length) await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'follow_up_done' });
 }

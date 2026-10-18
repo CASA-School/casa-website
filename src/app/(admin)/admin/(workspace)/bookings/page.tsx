@@ -43,6 +43,7 @@ const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
   { key: 'upcoming', label: { de: 'Kommend', en: 'Upcoming' } },
   { key: 'unclear', label: { de: 'Offen', en: 'Unpaid' } },
   { key: 'watch', label: { de: 'Unter Beobachtung', en: 'Under observation' } },
+  { key: 'followup', label: { de: 'Wiedervorlage', en: 'Follow-up' } },
   { key: 'accommodation', label: { de: 'Unterkunft', en: 'Accommodation' } },
   { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },

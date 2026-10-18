@@ -28,6 +28,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `Offer` with its lines and letters | 15 to the sample's learners (195 in all with groups and organisations) | `offers` (0059), their letters as sent versions — `read_offers.py` (offers.md) |
 | `Accommodation`, `Room`, the family, `DateRent` | all 142 places · 424 of the sample's stays placed | `accommodations` and their family, rooms and group reservations (0060) — `read_accommodation.py` (accommodation.md) |
+| `SingleDateControl` — follow-up dates set by letters | 1,683 (128 open) | `booking_follow_ups` (0062): on the booking's page, the bookings view „Wiedervorlage" — `read_follow_ups.py` |
 | `Person._ID_Client` — the customer number | 214 | `people.customer_number` (0061), on the learner's page; whether it is DATEV's debtor number is finance's to say |
 | `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
@@ -41,7 +42,6 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Instalment` — payment plans | 412 lines | No instalment plans |
 | `Invoice` | 124 | No invoices (mostly companies and groups) |
 | `PreBooking`, `Contact`, `WaitingRoom` — how they came in | 449 · 311 | Intake before the booking; the workspace's own intake is the website's. Whether the old ones come across is a decision |
-| `SingleDateControl` — follow-up dates set by letters | 1,687 | No follow-up list |
 | `WorkFlowLetter` — how a letter was sent (e-mail, print, SMTP) | 8,620 | Letters come with their date, not how they went |
 | Test results as a level | 537 | They arrive as notes; „Niveau" stays „nicht bestätigt" — a confirmed level needs our own placement review. A level history from SchoolMan's tests would need its own record |
 | Learning agreements as records | 154 | Notes only; no agreement module |

@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import {
+  addFollowUpAction,
   cancelBookingAction,
+  completeFollowUpAction,
   deleteBookingAction,
   endObservationAction,
   removeChargeAction,
@@ -13,11 +15,12 @@ import {
 import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, ObservationForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
 import { BookingLightPill } from '@/components/admin/booking-light';
-import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
+import { DateFormField } from '@/components/admin/date-picker';
+import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { dayRange } from '@/components/admin/list';
-import { Badge, Button, Card, DateText, DetailList, RecordHeader } from '@/components/admin/ui';
+import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import {
@@ -25,6 +28,7 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
+  bookingFollowUps,
   bookingStays,
   carryOverTargets,
   CHARGE_KIND_LABELS,
@@ -44,13 +48,13 @@ import { requireModule } from '@/lib/admin/guard';
 import { listNotes } from '@/lib/admin/notes';
 import { levelCodes } from '@/lib/admin/waitlist';
 import { teachingWeeks } from '@/lib/admin/offers/course';
-import { toDateInputValue } from '@/lib/dates';
+import { toDateInputValue, todayInputValue } from '@/lib/dates';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
 import { BOOKING_LETTER_KEYS, LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
 import { suggestBookingLetters } from '@/lib/admin/letters/suggest';
-import { pick, wsLocale } from '@/lib/admin/i18n';
+import { num, pick, wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
@@ -130,7 +134,7 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -141,6 +145,7 @@ export default async function BookingPage({
     canEdit && exam && open ? sittingsOf(exam.examTypeId) : Promise.resolve([]),
     canEdit && !exam && open ? stayVocabulary() : Promise.resolve(null),
     bookingStays(booking.id),
+    bookingFollowUps(booking.id),
   ]);
   // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
   const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
@@ -779,6 +784,68 @@ export default async function BookingPage({
                 >
                   {booking.notes}
                 </blockquote>
+              ) : null}
+            </Card>
+          ) : null}
+
+          {/* When to look at it again, and why (0062; SchoolMan's Wiedervorlage). */}
+          {followUps.open.length || followUps.doneTotal || canEdit ? (
+            <Card
+              title={t('Wiedervorlage', 'Follow-up')}
+              icon={Icon.clock}
+              tint="sun"
+              actions={
+                canEdit ? (
+                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Setzen', 'Set')} title={t('Wiedervorlage', 'Follow-up')} triggerVariant="ghost" size="sm">
+                    <form action={addFollowUpAction} className="space-y-3">
+                      <input type="hidden" name="bookingId" value={booking.id} />
+                      <Field label={t('Am', 'On')} htmlFor="follow-up-day">
+                        <DateFormField id="follow-up-day" name="dueOn" required />
+                      </Field>
+                      <Field label={t('Worum es geht', 'What it is about')} htmlFor="follow-up-reason">
+                        <Input id="follow-up-reason" name="reason" required maxLength={300} />
+                      </Field>
+                      <DialogFooter>
+                        <Button type="submit">{t('Setzen', 'Set')}</Button>
+                      </DialogFooter>
+                    </form>
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {followUps.open.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {followUps.open.map((f) => {
+                    const due = f.dueOn <= todayInputValue();
+                    return (
+                      <li key={f.id} className="flex items-center justify-between gap-3 py-2">
+                        <span className="min-w-0 text-[0.86rem]">
+                          <span className={cn('font-semibold tabular-nums', due ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
+                            <DateText value={f.dueOn} />
+                          </span>
+                          <span className="block text-[var(--casa-muted)]">{[f.reason, f.createdByName].filter(Boolean).join(' · ')}</span>
+                        </span>
+                        {canEdit ? (
+                          <form action={completeFollowUpAction}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <input type="hidden" name="followUpId" value={f.id} />
+                            <Button type="submit" variant="ghost" size="sm">
+                              {t('Erledigt', 'Done')}
+                            </Button>
+                          </form>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Nichts offen.', 'Nothing open.')}</p>
+              )}
+              {followUps.doneTotal ? (
+                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
+                  {t(`${num(lang, followUps.doneTotal)} erledigt`, `${num(lang, followUps.doneTotal)} done`)}
+                  {followUps.done[0] ? t(`, zuletzt ${followUps.done[0].reason}`, `, last: ${followUps.done[0].reason}`) : ''}
+                </p>
               ) : null}
             </Card>
           ) : null}

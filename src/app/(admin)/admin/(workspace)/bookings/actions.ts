@@ -5,12 +5,14 @@ import { redirect } from 'next/navigation';
 
 import {
   addCharge,
+  addFollowUp,
   BOOKING_STATUSES,
   BookingRefused,
   cancelBooking,
   carryOverCredit,
   changeExam,
   changeStay,
+  completeFollowUp,
   createBooking,
   deleteBooking,
   endObservation,
@@ -304,6 +306,31 @@ export async function endObservationAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');
   await endObservation(bookingId, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  redirect(`/admin/bookings/${bookingId}`);
+}
+
+/** A follow-up set: a day to look at the booking again, and why (0062). */
+export async function addFollowUpAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const { t } = await getI18n();
+  const due = String(formData.get('dueOn') ?? '').trim();
+  const reason = text(formData, 'reason', 300);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) fail(back, t('Bitte wähle den Tag.', 'Choose the day.'));
+  if (!reason) fail(back, t('Sag kurz, worum es geht.', 'Say briefly what it is about.'));
+  await addFollowUp(bookingId, due, reason!, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  redirect(back);
+}
+
+/** Looked at: the follow-up is done. */
+export async function completeFollowUpAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const followUpId = id(formData, 'followUpId');
+  await completeFollowUp(bookingId, followUpId, actor);
   revalidatePath('/admin/bookings', 'layout');
   redirect(`/admin/bookings/${bookingId}`);
 }

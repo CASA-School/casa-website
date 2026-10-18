@@ -95,6 +95,7 @@ const routes = [
   person && `/admin/people/${person}`,
   '/admin/bookings',
   '/admin/bookings?filter=all',
+  '/admin/bookings?filter=followup',
   booking && `/admin/bookings/${booking}`,
   booking && `/admin/bookings/${booking}/letter`,
   booking && `/admin/bookings/${booking}/letter?kind=receipt`,
