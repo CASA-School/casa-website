@@ -84,7 +84,7 @@ def amount(value):
 chosen = sample_persons(bookings, periods, today)
 
 person_rows = table('Person', '__ID_Person', '_ID_Student', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'Gender_1', 'DateOfBirth',
-                    '_ID_Homeland', 'BirthPlace', 'CountryBirth_1', 'Occupation', 'MotherTongue_1', 'TimestampCreation', 'DateOfCreation')
+                    '_ID_Homeland', 'BirthPlace', 'CountryBirth_1', 'Occupation', 'MotherTongue_1', 'TimestampCreation', 'DateOfCreation', '_ID_Client')
 seen = collections.Counter(r['__ID_Person'].strip() for r in person_rows)
 twice = {k for k, n in seen.items() if n > 1}
 persons = {r['__ID_Person'].strip(): r for r in person_rows if r['__ID_Person'].strip() in chosen and r['__ID_Person'].strip() not in twice}
@@ -270,6 +270,8 @@ for pid, p in persons.items():
     out.append({
         'personId': pid,
         'studentId': first(p['_ID_Student']) or None,
+        # SchoolMan's customer number (0061), copied onto their bookings there.
+        'customerNumber': first(p['_ID_Client']) or None,
         'firstName': p['ZFirstName'].strip(),
         'lastName': p['ZSurName'].strip() or None,
         'secondLastName': p['ZSurName2'].strip() or None,

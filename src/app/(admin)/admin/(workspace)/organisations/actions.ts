@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { CONTACT_SALUTATIONS, ORGANISATION_KINDS } from '@/lib/admin/organisation-labels';
+import { CONTACT_SALUTATIONS, ORGANISATION_KINDS, ORGANISATION_RELATIONS } from '@/lib/admin/organisation-labels';
 import {
   createOrganisation,
   deleteOrganisation,
@@ -46,6 +46,11 @@ const email = z
 const OrganisationSchema = z.object({
   name: z.string().trim().min(1, 'name').max(200, 'long'),
   kind: z.enum(ORGANISATION_KINDS),
+  relation: z
+    .string()
+    .trim()
+    .refine((v) => !v || (ORGANISATION_RELATIONS as readonly string[]).includes(v), 'relation')
+    .transform((v) => (v || null) as (typeof ORGANISATION_RELATIONS)[number] | null),
   address: text(500),
   countryCode: z
     .string()
@@ -127,7 +132,7 @@ function organisationId(formData: FormData): string {
   return parsed.data;
 }
 
-const ORGANISATION_FIELDS = ['name', 'kind', 'address', 'countryCode', 'language', 'email', 'phone', 'agreement', 'note'] as const;
+const ORGANISATION_FIELDS = ['name', 'kind', 'relation', 'address', 'countryCode', 'language', 'email', 'phone', 'agreement', 'note'] as const;
 
 export async function createOrganisationAction(formData: FormData): Promise<void> {
   const actor = await requireModule('organisations', 'edit');

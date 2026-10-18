@@ -7,7 +7,7 @@ import { query, queryFirst, withTransaction } from './db';
 import type { Bilingual } from './i18n';
 import type { LetterKind } from './letters/types';
 import { formatOfferNumber, type OfferStatus } from './offers/types';
-import type { ContactSalutation, OrganisationKind, OrganisationView } from './organisation-labels';
+import type { ContactSalutation, OrganisationKind, OrganisationRelation, OrganisationView } from './organisation-labels';
 
 /**
  * Organisations (2026-10-18, migration 0057; docs/ADMIN_WORKSPACE.md §Organisations): the agencies,
@@ -51,6 +51,7 @@ export type OrganisationListItem = {
   id: string;
   name: string;
   kind: OrganisationKind;
+  relation: OrganisationRelation | null;
   isActive: boolean;
   country: Bilingual | null;
   contacts: number;
@@ -64,6 +65,7 @@ type ListRow = {
   id: string;
   name: string;
   kind: OrganisationKind;
+  relation: OrganisationRelation | null;
   is_active: boolean;
   country_de: string | null;
   country_en: string | null;
@@ -95,7 +97,7 @@ export async function listOrganisations({
   }
   const total = await queryFirst<{ n: string }>(`SELECT count(*) AS n FROM organisations o ${where}`, params);
   const rows = await query<ListRow>(
-    `SELECT o.id, o.name, o.kind, o.is_active, c.name_de AS country_de, c.name_en AS country_en,
+    `SELECT o.id, o.name, o.kind, o.relation, o.is_active, c.name_de AS country_de, c.name_en AS country_en,
             (SELECT count(*) FROM organisation_contacts oc WHERE oc.organisation_id = o.id) AS contacts,
             (SELECT count(*) FROM bookings b WHERE b.payer_organisation_id = o.id AND ${PAYS_NOW('b')}) AS bookings,
             (SELECT coalesce(nullif(btrim(concat_ws(' ', oc.first_name, oc.last_name)), ''), oc.email)
@@ -114,6 +116,7 @@ export async function listOrganisations({
       id: r.id,
       name: r.name,
       kind: r.kind,
+      relation: r.relation,
       isActive: r.is_active,
       country: both(r.country_de, r.country_en),
       contacts: Number(r.contacts),
@@ -139,6 +142,7 @@ export type OrganisationDetail = {
   id: string;
   name: string;
   kind: OrganisationKind;
+  relation: OrganisationRelation | null;
   isActive: boolean;
   /** Street, then postcode and town, as the letter prints it. */
   address: string | null;
@@ -158,6 +162,7 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail | 
     id: string;
     name: string;
     kind: OrganisationKind;
+    relation: OrganisationRelation | null;
     is_active: boolean;
     address: string | null;
     country_code: string | null;
@@ -170,7 +175,7 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail | 
     note: string | null;
     created_at: Date;
   }>(
-    `SELECT o.id, o.name, o.kind, o.is_active, o.address, o.country_code, c.name_de AS country_de, c.name_en AS country_en,
+    `SELECT o.id, o.name, o.kind, o.relation, o.is_active, o.address, o.country_code, c.name_de AS country_de, c.name_en AS country_en,
             o.language, o.email, o.phone, o.agreement, o.note, o.created_at
        FROM organisations o LEFT JOIN countries c ON c.code = o.country_code
       WHERE o.id = $1`,
@@ -181,6 +186,7 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail | 
     id: row.id,
     name: row.name,
     kind: row.kind,
+    relation: row.relation,
     isActive: row.is_active,
     address: row.address,
     countryCode: row.country_code?.trim() ?? null,
@@ -468,6 +474,7 @@ export async function commissionChargeTypes(): Promise<{ code: string; name: Bil
 export type OrganisationInput = {
   name: string;
   kind: OrganisationKind;
+  relation: OrganisationRelation | null;
   address: string | null;
   countryCode: string | null;
   language: 'de' | 'en';
@@ -479,10 +486,10 @@ export type OrganisationInput = {
 
 export async function createOrganisation(input: OrganisationInput, actor: StaffUser): Promise<string> {
   const row = await queryFirst<{ id: string }>(
-    `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, agreement, note, created_by)
-     VALUES ($1, $2, $3, (SELECT code FROM countries WHERE code = $4), $5, $6, $7, $8, $9, $10)
+    `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, agreement, note, created_by, relation)
+     VALUES ($1, $2, $3, (SELECT code FROM countries WHERE code = $4), $5, $6, $7, $8, $9, $10, $11)
      RETURNING id`,
-    [input.name, input.kind, input.address, input.countryCode, input.language, input.email, input.phone, input.agreement, input.note, actor.id]
+    [input.name, input.kind, input.address, input.countryCode, input.language, input.email, input.phone, input.agreement, input.note, actor.id, input.relation]
   );
   const id = row!.id;
   await logActivity({ actor, entity: 'organisation', entityId: id, action: 'organisation_created', detail: { kind: input.kind } });
@@ -493,9 +500,9 @@ export async function updateOrganisation(id: string, input: OrganisationInput, a
   const rows = await query<{ id: string }>(
     `UPDATE organisations
         SET name = $2, kind = $3, address = $4, country_code = (SELECT code FROM countries WHERE code = $5), language = $6,
-            email = $7, phone = $8, agreement = $9, note = $10
+            email = $7, phone = $8, agreement = $9, note = $10, relation = $11
       WHERE id = $1 RETURNING id`,
-    [id, input.name, input.kind, input.address, input.countryCode, input.language, input.email, input.phone, input.agreement, input.note]
+    [id, input.name, input.kind, input.address, input.countryCode, input.language, input.email, input.phone, input.agreement, input.note, input.relation]
   );
   if (!rows.length) return GONE;
   await logActivity({ actor, entity: 'organisation', entityId: id, action: 'organisation_updated' });

@@ -28,6 +28,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `Offer` with its lines and letters | 15 to the sample's learners (195 in all with groups and organisations) | `offers` (0059), their letters as sent versions — `read_offers.py` (offers.md) |
 | `Accommodation`, `Room`, the family, `DateRent` | all 142 places · 424 of the sample's stays placed | `accommodations` and their family, rooms and group reservations (0060) — `read_accommodation.py` (accommodation.md) |
+| `Person._ID_Client` — the customer number | 214 | `people.customer_number` (0061), on the learner's page; whether it is DATEV's debtor number is finance's to say |
 | `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
 ## Cannot come across yet — the workspace has no place for it
@@ -46,7 +47,6 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | Learning agreements as records | 154 | Notes only; no agreement module |
 | `Booking.CertificateText` — the certificate's wording | 2,160 | No certificate of participation yet |
 | `Complaint` | 2 | No complaints |
-| `Person._ID_Client` — a customer number per learner, copied onto their bookings | 213 learners | No customer number on a learner (accounting; ask finance whether it is DATEV's debtor number) |
 | Letters before 2025 | — | They live in `Letter.fmp12`, a separate file not in reach |
 | Periods on courses before our twelve months | 1,069 | They keep their dates without a course (open item: past courses) |
 

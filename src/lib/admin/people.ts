@@ -47,6 +47,8 @@ export type PersonFacts = {
   motherTongue: string | null;
   occupation: string | null;
   passportNumber: string | null;
+  /** SchoolMan's customer number (0061), read only. */
+  customerNumber: string | null;
 };
 
 /** Where a person lives: at home, and in Bremen while here. */
@@ -158,9 +160,10 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
       mother_tongue: string | null;
       occupation: string | null;
       passport_number: string | null;
+      customer_number: string | null;
     }>(
       `SELECT p.second_last_name, p.nickname, p.birth_year, p.birth_place, p.birth_country_code,
-              coalesce(c.name_de, c.name_en) AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number
+              coalesce(c.name_de, c.name_en) AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number, p.customer_number
          FROM people p LEFT JOIN countries c ON c.code = p.birth_country_code WHERE p.id = $1`,
       [row.id]
     ),
@@ -202,6 +205,7 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
       motherTongue: facts?.mother_tongue ?? null,
       occupation: facts?.occupation ?? null,
       passportNumber: facts?.passport_number ?? null,
+      customerNumber: facts?.customer_number ?? null,
     },
     addresses: addresses.map((a) => ({
       kind: a.kind,

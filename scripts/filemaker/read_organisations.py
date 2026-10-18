@@ -103,11 +103,34 @@ for cid in sorted(corporate_ids):
     parties.append({'kind': 'company', 'id': cid, 'management': first(c['_ID_Management']) or None, 'institution': inst['__ID_Institution'].strip() if inst else None,
                     'name': (inst['Institution'].strip() if inst else '') or (header[0] if header else ''), 'active': first(c['_ID_Active']) != '2', 'agreement': None})
 
+# The other parties (2026-10-18, 0061): a `Management` record that is an organisation with a relation to
+# CASA (`_ID_StatusManagementReference`) — it takes interns, sends learners our way, runs an activity,
+# supplies something, insures, partners in a tandem, rebuilds, or is the Förderverein — and has an
+# organisation's name (`Institution`). People (colleagues, teachers, friends, tenants) stay out; so does a
+# party that is already an agency, a company or a host.
+RELATION = {'1': 'tandem_school', '7': 'internship', '10': 'multiplier', '15': 'activity', '19': 'supplier', '20': 'health_insurer', '22': 'association',
+            '23': 'contractor'}
+KIND_OF = {'tandem_school': 'school', 'health_insurer': 'public_body'}
+taken = {p['management'] for p in parties if p['management']}
+for name in ('Agency', 'Corporate', 'Accommodation'):
+    taken |= {first(x) for x in column(name, '_ID_Management') if first(x)}
+inst_of_management = {}
+for r in institutions:
+    if first(r['_ID_Management']) and r['Institution'].strip():
+        inst_of_management.setdefault(first(r['_ID_Management']), r)
+for mid, status in zip(column('Management', '__ID_Management'), column('Management', '_ID_StatusManagementReference')):
+    mid = mid.strip()
+    relation = next((RELATION[x] for x in ids((status or '').replace('\r', '\n')) if x in RELATION), None)
+    inst = inst_of_management.get(mid)
+    if relation and mid not in taken and inst:
+        parties.append({'kind': KIND_OF.get(relation, 'other'), 'relation': relation, 'id': mid, 'management': mid, 'institution': inst['__ID_Institution'].strip(),
+                        'name': inst['Institution'].strip(), 'active': True, 'agreement': None})
+
 
 def link_keys(p):
-    """The ids that point at this party from a channel or a person."""
-    return {('_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate', p['id'])} | ({('_ID_Institution', p['institution'])} if p['institution'] else set()) | (
-        {('_ID_Management', p['management'])} if p['management'] else set())
+    """The ids that point at this party from a channel or a person (another party has no agency or company id)."""
+    own = set() if p.get('relation') else {('_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate', p['id'])}
+    return own | ({('_ID_Institution', p['institution'])} if p['institution'] else set()) | ({('_ID_Management', p['management'])} if p['management'] else set())
 
 
 owner = {}
@@ -152,8 +175,13 @@ for r in table('Address', '_ID_Person', *LINKS, 'Street', 'HouseNumber', 'ZPostC
 
 # The people who work there: `Person` rows linked to the party, with their job title.
 contacts = collections.defaultdict(list)
-for r in table('Person', '__ID_Person', '_ID_Agency', '_ID_Corporate', '_ID_Institution', 'ZFirstName', 'ZSurName', '_ID_GenderReference', 'Function'):
+for r in table('Person', '__ID_Person', '_ID_Agency', '_ID_Corporate', '_ID_Institution', '_ID_Management', 'ZFirstName', 'ZSurName', '_ID_GenderReference',
+               'Function'):
     p = party_of(r, ('_ID_Agency', '_ID_Corporate', '_ID_Institution'))
+    if not p:
+        # Someone at another party, by its `Management` (an agency's or a company's people come by their ids).
+        q = party_of(r, ('_ID_Management',))
+        p = q if q and q.get('relation') else None
     if p and (r['ZFirstName'].strip() or r['ZSurName'].strip()):
         pid = r['__ID_Person'].strip()
         ch = person_channels.get(pid, {'emails': [], 'phones': []})
@@ -195,12 +223,13 @@ for p in parties:
                 'address': max(o['addresses'], key=lambda x: x[0])[1] if o['addresses'] else None,
                 'contacts': contacts[id(p)],
                 'commissions': commissions[id(p)],
-                # The sample's bookings it is named on, and its company courses.
-                'bookings': sorted(b['__ID_Booking'].strip() for b in theirs if first(b['_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate']) == p['id']),
-                'courses': sorted(c for c, corp in course_corporates.items() if p['kind'] == 'company' and corp == p['id']),
+                # The sample's bookings it is named on, and its company courses (another party has neither).
+                'bookings': [] if p.get('relation') else sorted(b['__ID_Booking'].strip() for b in theirs if first(b['_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate']) == p['id']),
+                'courses': sorted(c for c, corp in course_corporates.items() if p['kind'] == 'company' and not p.get('relation') and corp == p['id']),
                 'letters': letters_of[id(p)]})
 
 if '--stats' in sys.argv:
+    print('other parties', dict(collections.Counter(p['relation'] for p in out if p.get('relation'))))
     print('sample learners', len(chosen), '· agencies', sum(p['kind'] == 'agency' for p in out), '· companies', sum(p['kind'] == 'company' for p in out),
           f'(of which {len(set(course_corporates.values()))} by a company course)')
     print('without a name', sum(not p['name'] for p in out), '· inactive', sum(not p['active'] for p in out), '· with e-mail', sum(bool(p['email']) for p in out),

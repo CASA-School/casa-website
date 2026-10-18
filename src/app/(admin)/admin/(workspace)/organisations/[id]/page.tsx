@@ -24,7 +24,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import type { LetterKind } from '@/lib/admin/letters/types';
 import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
-import { CONTACT_SALUTATION_LABELS, ORGANISATION_KIND_LABELS } from '@/lib/admin/organisation-labels';
+import { CONTACT_SALUTATION_LABELS, ORGANISATION_KIND_LABELS, ORGANISATION_RELATION_LABELS } from '@/lib/admin/organisation-labels';
 import {
   commissionChargeTypes,
   commissionTerms,
@@ -131,7 +131,10 @@ export default async function OrganisationPage({
         status={!organisation.isActive ? <Badge tone="quiet">{t('Inaktiv', 'Inactive')}</Badge> : null}
         subtitle={
           <>
-            <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{pick(lang, ORGANISATION_KIND_LABELS[organisation.kind])}</span>
+            <span className="block text-[0.98rem] font-semibold text-[#2b3546]">
+              {pick(lang, ORGANISATION_KIND_LABELS[organisation.kind])}
+              {organisation.relation ? <span className="font-normal text-[var(--casa-muted)]"> · {pick(lang, ORGANISATION_RELATION_LABELS[organisation.relation])}</span> : null}
+            </span>
             <MetaLine>
               <MetaItem icon={Icon.globe}>
                 {[organisation.country ? pick(lang, organisation.country) : null, organisation.language === 'de' ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')]

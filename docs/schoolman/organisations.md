@@ -60,10 +60,18 @@ onto their bookings, not a party.
 groups (17 agencies, 60 companies, 102 contacts in all); `read_groups.py` brings the groups
 (groups.md).
 
-Not yet: `Management` parties that are people (host
-families, tandem partners — their own modules), the other parties (multipliers, health insurers, the
-Förderverein; `_ID_StatusManagementReference`), commission per booking (`Commission`, the money
-module), a booking's contact at the agency (`Booking._ID_Contact`, 22).
+**The other parties (2026-10-18, 0061):** a `Management` record with a relation to CASA
+(`_ID_StatusManagementReference`: 1 TandemSchule, 7 Praktikum, 10 Multiplikator, 15 Activity, 19 Provider,
+20 Krankenkasse, 22 Förderverein, 23 Umbau) and an organisation's name (`Institution`) comes across as an
+organisation with that relation (`organisations.relation`): 20 suppliers, 19 tandem schools, 13 internship
+hosts, 12 activity providers, 4 contractors, 2 multipliers, 1 health insurer — 71 in all, with their
+contacts. A party already an agency, a company or a host is not taken twice. People stay out: colleagues and
+teachers (the staff register), friends and tenants (private), the Förderverein's members (it has no
+organisation record). The status list has six values without an id (3, 4, 8, 12, 16, 17 on 131 parties) —
+reference rows SchoolMan lost (FILEMAKER_LESSONS).
+
+Not yet: commission per booking (`Commission`, the money module), a booking's contact at the agency
+(`Booking._ID_Contact`, 22).
 
 ## For the bridge
 

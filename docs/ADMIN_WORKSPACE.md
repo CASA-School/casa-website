@@ -1172,7 +1172,11 @@ terms (`CommissionDetail`), who pays which sample booking (an agency over a comp
 course's company and the letters that name it. Never `Management`'s comments (they hold credentials). A
 match on SchoolMan's ids, else the same name and kind made here; fields fill only where empty. First
 run: 12 agencies, 40 companies, 66 contacts, 12 commission terms, 1,164 bookings, 2,311 letters
-(docs/schoolman/organisations.md has what is not yet across: the other parties). Since the group visits
+(docs/schoolman/organisations.md). Since 0061 an organisation can also say what it is to CASA beyond a
+client (`relation`: Praktikumsbetrieb, Multiplikator, Ausflüge und Aktivitäten, Lieferant oder
+Dienstleister, Krankenkasse, Tandem-Schule, Handwerk und Umbau, Förderverein) — on its page under the kind,
+in the list in place of it, „Für CASA" in the edit dialog; the reader brings SchoolMan's 71 such parties.
+Since the group visits
 (below) it also reads the schools, companies and agencies of all 52 of SchoolMan's groups: 17 agencies,
 60 companies, 102 contacts in all. A second person at an organisation with an address another contact
 there already has (a shared office mailbox) comes without it.

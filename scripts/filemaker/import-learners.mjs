@@ -274,6 +274,8 @@ try {
         );
       }
     }
+    // SchoolMan's customer number (0061): what the workspace has wins.
+    if (l.customerNumber) await client.query(`UPDATE people SET customer_number = coalesce(customer_number, $2) WHERE id = $1`, [personId, l.customerNumber]);
     await link('person', personId, 'Person', l.personId);
     if (l.studentId) await link('person', personId, 'ID_Student', l.studentId);
 

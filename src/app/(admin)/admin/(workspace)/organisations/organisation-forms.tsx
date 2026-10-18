@@ -4,7 +4,14 @@ import { OptionalSection } from '@/components/admin/optional-section';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
 import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { CONTACT_SALUTATION_LABELS, CONTACT_SALUTATIONS, ORGANISATION_KIND_CHOICES, ORGANISATION_KIND_LABELS } from '@/lib/admin/organisation-labels';
+import {
+  CONTACT_SALUTATION_LABELS,
+  CONTACT_SALUTATIONS,
+  ORGANISATION_KIND_CHOICES,
+  ORGANISATION_KIND_LABELS,
+  ORGANISATION_RELATION_LABELS,
+  ORGANISATION_RELATIONS,
+} from '@/lib/admin/organisation-labels';
 import type { CommissionTerm, OrganisationContact, OrganisationDetail } from '@/lib/admin/organisations';
 
 /**
@@ -83,6 +90,23 @@ async function KindSelect({ id, value, required = false }: { id: string; value?:
   );
 }
 
+/** What it is to CASA beyond a client, when it is more: optional. */
+async function RelationSelect({ id, value }: { id: string; value?: string | null }) {
+  const { t, lang } = await getI18n();
+  return (
+    <Field label={t('Für CASA', 'For CASA')} htmlFor={id}>
+      <Select id={id} name="relation" defaultValue={value ?? ''}>
+        <option value="">—</option>
+        {ORGANISATION_RELATIONS.map((r) => (
+          <option key={r} value={r}>
+            {pick(lang, ORGANISATION_RELATION_LABELS[r])}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+}
+
 export async function NewOrganisationForm({ countries }: { countries: readonly Country[] }) {
   const { t } = await getI18n();
   return (
@@ -118,6 +142,7 @@ export async function EditOrganisationForm({ organisation, countries }: { organi
           <KindSelect id="org-edit-kind" value={organisation.kind} />
         </Field>
       </div>
+      <RelationSelect id="org-edit-relation" value={organisation.relation} />
       <ReachFields organisation={organisation} countries={countries} prefix="org-edit" />
       <Field label={t('Vereinbarung', 'Agreement')} htmlFor="org-edit-agreement">
         <Textarea id="org-edit-agreement" name="agreement" rows={3} maxLength={2000} defaultValue={organisation.agreement ?? ''} />

@@ -69,10 +69,12 @@ try {
     const code = country(p.address?.country);
     const countryCode = code && valid.has(code) ? code : null;
     const address = p.address ? [p.address.street, [p.address.postcode, p.address.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || null : null;
+    // An agency or a company by its own record; another party (0061) by its `Management`.
+    const layout = p.relation ? 'Management' : LAYOUT[p.kind];
     let orgId = (
       await client.query(
         `SELECT entity_id FROM filemaker_links WHERE entity = 'organisation' AND source_database = 'SchoolMan' AND source_layout = $1 AND source_record_id = $2`,
-        [LAYOUT[p.kind], p.id]
+        [layout, p.id]
       )
     ).rows[0]?.entity_id;
     if (!orgId) {
@@ -83,21 +85,21 @@ try {
       count.known++;
       await client.query(
         `UPDATE organisations SET address = coalesce(address, $2), country_code = coalesce(country_code, $3), email = coalesce(email, $4), phone = coalesce(phone, $5),
-                agreement = coalesce(agreement, $6), is_active = $7
+                agreement = coalesce(agreement, $6), is_active = $7, relation = coalesce(relation, $8)
           WHERE id = $1`,
-        [orgId, address, countryCode, p.email, p.phone, p.agreement, p.active]
+        [orgId, address, countryCode, p.email, p.phone, p.agreement, p.active, p.relation ?? null]
       );
     } else {
       orgId = (
         await client.query(
-          `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, is_active, agreement)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-          [p.name, p.kind, address, countryCode, !countryCode || GERMAN.has(countryCode) ? 'de' : 'en', p.email, p.phone, p.active, p.agreement]
+          `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, is_active, agreement, relation)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+          [p.name, p.kind, address, countryCode, !countryCode || GERMAN.has(countryCode) ? 'de' : 'en', p.email, p.phone, p.active, p.agreement, p.relation ?? null]
         )
       ).rows[0].id;
       count.made++;
     }
-    await link(orgId, LAYOUT[p.kind], p.id);
+    await link(orgId, layout, p.id);
     await link(orgId, 'Management', p.management);
     await link(orgId, 'Institution', p.institution);
 

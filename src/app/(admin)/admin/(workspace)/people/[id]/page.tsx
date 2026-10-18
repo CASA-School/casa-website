@@ -586,6 +586,7 @@ export default async function PersonPage({
                   { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
                   { label: t('Beruf', 'Occupation'), value: person.facts.occupation },
                   { label: t('Passnummer', 'Passport number'), value: person.facts.passportNumber },
+                  ...(person.facts.customerNumber ? [{ label: t('Kundennummer (SchoolMan)', 'Customer number (SchoolMan)'), value: person.facts.customerNumber }] : []),
                 ]}
               />
             </Card>

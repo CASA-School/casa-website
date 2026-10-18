@@ -32,6 +32,24 @@ export const ORGANISATION_VIEW_LABELS: Record<OrganisationView, Bilingual> = {
 };
 export const isOrganisationView = (value: unknown): value is OrganisationView => (ORGANISATION_VIEWS as readonly unknown[]).includes(value);
 
+/**
+ * What an organisation is to CASA beyond a client (0061, SchoolMan's `_ID_StatusManagementReference`): it
+ * takes interns, sends learners our way, runs an activity, supplies something, insures, partners in a
+ * tandem, rebuilds, or is the Förderverein.
+ */
+export const ORGANISATION_RELATIONS = ['internship', 'multiplier', 'activity', 'supplier', 'health_insurer', 'tandem_school', 'contractor', 'association'] as const;
+export type OrganisationRelation = (typeof ORGANISATION_RELATIONS)[number];
+export const ORGANISATION_RELATION_LABELS: Record<OrganisationRelation, Bilingual> = {
+  internship: { de: 'Praktikumsbetrieb', en: 'Internship host' },
+  multiplier: { de: 'Multiplikator', en: 'Multiplier' },
+  activity: { de: 'Ausflüge und Aktivitäten', en: 'Outings and activities' },
+  supplier: { de: 'Lieferant oder Dienstleister', en: 'Supplier' },
+  health_insurer: { de: 'Krankenkasse', en: 'Health insurer' },
+  tandem_school: { de: 'Tandem-Schule', en: 'Tandem school' },
+  contractor: { de: 'Handwerk und Umbau', en: 'Contractor' },
+  association: { de: 'Förderverein', en: 'Support association' },
+};
+
 export const CONTACT_SALUTATIONS = ['ms', 'mr', 'none'] as const;
 export type ContactSalutation = (typeof CONTACT_SALUTATIONS)[number];
 export const CONTACT_SALUTATION_LABELS: Record<ContactSalutation, Bilingual> = {

@@ -8,7 +8,14 @@ import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { isOrganisationView, ORGANISATION_KIND_LABELS, ORGANISATION_VIEW_LABELS, ORGANISATION_VIEWS, type OrganisationView } from '@/lib/admin/organisation-labels';
+import {
+  isOrganisationView,
+  ORGANISATION_KIND_LABELS,
+  ORGANISATION_RELATION_LABELS,
+  ORGANISATION_VIEW_LABELS,
+  ORGANISATION_VIEWS,
+  type OrganisationView,
+} from '@/lib/admin/organisation-labels';
 import { listOrganisations, organisationCounts, organisationCountries } from '@/lib/admin/organisations';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { cn } from '@/lib/utils';
@@ -97,7 +104,14 @@ export default async function OrganisationsPage({ searchParams }: { searchParams
                     <RecordName
                       name={o.name}
                       flag={!o.isActive && view !== 'inactive' ? <Badge tone="quiet">{t('Inaktiv', 'Inactive')}</Badge> : undefined}
-                      about={[saysKind ? pick(lang, ORGANISATION_KIND_LABELS[o.kind]) : null, o.contactName].filter(Boolean).join(' · ') || undefined}
+                      about={
+                        [
+                          o.relation ? pick(lang, ORGANISATION_RELATION_LABELS[o.relation]) : saysKind ? pick(lang, ORGANISATION_KIND_LABELS[o.kind]) : null,
+                          o.contactName,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || undefined
+                      }
                     />
                   </span>
                 </Cell>
