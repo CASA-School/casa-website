@@ -33,8 +33,6 @@ import {
   carryOverTargets,
   CHARGE_KIND_LABELS,
   getBooking,
-  OBSERVATION_REASON_LABELS,
-  type ObservationReason,
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -127,7 +125,6 @@ export default async function BookingPage({
   // The team's colour (docs/schoolman/bookings.md): red cancelled, yellow under observation, grey
   // until paid in full, green when all is well.
   const light = bookingLight(booking);
-  const reasonLabel = booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : null;
 
   // A credit — paid over, or what is left of a cancelled booking — can be carried over to another
   // booking of the same learner (docs/schoolman/money.md).
@@ -242,7 +239,7 @@ export default async function BookingPage({
           wide: true,
           value: (
             <span>
-              <span className="font-semibold">{reasonLabel}</span>
+              {/* A note written before the colours were simplified (2026-10-18) stays readable. */}
               {booking.observationNote ? <span className="block whitespace-pre-line">{booking.observationNote}</span> : null}
               <span className="block text-xs text-[var(--casa-muted)]">
                 {t('seit', 'since')} <DateText value={booking.observedAt} />
@@ -322,13 +319,10 @@ export default async function BookingPage({
           }
         : null,
   ].filter((item) => item !== null);
-  // The observation in the booking's own words: why, and what was noted.
+  // The observation in the booking's history: who set it and ended it, and a note an older one had.
   const observationEvents: TimelineEvent[] = activity
     .filter((entry) => entry.action === 'booking_observed' || entry.action === 'booking_observation_ended')
     .map((entry) => {
-      const reason = typeof entry.detail?.reason === 'string' && entry.detail.reason in OBSERVATION_REASON_LABELS
-        ? pick(lang, OBSERVATION_REASON_LABELS[entry.detail.reason as ObservationReason])
-        : null;
       const note = typeof entry.detail?.note === 'string' && entry.detail.note ? entry.detail.note : null;
       const observed = entry.action === 'booking_observed';
       return {
@@ -337,7 +331,7 @@ export default async function BookingPage({
         icon: observed ? Icon.attention : Icon.check,
         who: entry.staffName ?? t('Jemand', 'Someone'),
         what: observed ? t('hat die Buchung unter Beobachtung gestellt', 'put the booking under observation') : t('hat die Beobachtung beendet', 'ended the observation'),
-        body: observed ? [reason, note].filter(Boolean).join(' · ') || undefined : undefined,
+        body: observed ? (note ?? undefined) : undefined,
         tone: observed ? ('watch' as const) : undefined,
       };
     });
@@ -362,11 +356,10 @@ export default async function BookingPage({
               booking={booking}
               lang={lang}
               canEdit={canEdit}
+              canCancel={canAccess(user, 'bookings', 'full')}
               variant="pill"
               detail={
-                light === 'watch'
-                  ? (reasonLabel ?? undefined)
-                  : light === 'unclear' && booking.balance > 0.005
+                light === 'unclear' && booking.balance > 0.005
                     ? // „Offen · 2.052,98 €", „Anzahlung erhalten · 1.852,98 € offen".
                       booking.paid > 0.005
                       ? t(`${money(booking.balance, booking.currency)} offen`, `${money(booking.balance, booking.currency)} open`)

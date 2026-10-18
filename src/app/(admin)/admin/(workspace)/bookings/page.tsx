@@ -9,7 +9,6 @@ import {
   bookingLightLabel,
   bookingsOwed,
   listBookings,
-  OBSERVATION_REASON_LABELS,
   type BookingFilter,
   type BookingListItem,
 } from '@/lib/admin/bookings';
@@ -161,12 +160,7 @@ export default async function BookingsPage({
               group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={span} /> : null,
               ...group.rows.map((b) => {
                 const light = bookingLight(b);
-                const lightLabel = [
-                  pick(lang, bookingLightLabel(b)),
-                  light === 'watch' && b.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ');
+                const lightLabel = pick(lang, bookingLightLabel(b));
                 const about = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
                 return (
                 <TableRow key={b.id} interactive>

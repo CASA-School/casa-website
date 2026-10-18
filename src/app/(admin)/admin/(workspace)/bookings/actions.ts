@@ -19,7 +19,6 @@ import {
   extendBooking,
   isLevelCode,
   observeBooking,
-  OBSERVATION_REASONS,
   recordPayment,
   removeCharge,
   removePeriod,
@@ -28,7 +27,6 @@ import {
   voidPayment,
   type BookingStatus,
   type ChargeKind,
-  type ObservationReason,
   type PaymentMethod,
   type Payer,
 } from '@/lib/admin/bookings';
@@ -285,23 +283,22 @@ export async function carryOverAction(formData: FormData): Promise<void> {
 }
 
 /**
- * The colour chosen from a booking's dot (2026-10-18): `plain` ends an observation, so the booking shows
- * what its money says again; `watch:<reason>` puts it under observation — „Sonstiges" only with a note
- * saying what. Used on the booking's page and wherever its dot is, so it revalidates the workspace.
+ * The colour chosen from a booking's dot, as in SchoolMan (Rahman, 2026-10-18): `ok` — in order, so the
+ * booking shows what its money says (green, or grey until paid) —, `watch` — u.B., yellow —, or `no` —
+ * red, the booking cancelled, which takes the right to cancel and the confirmation. Used on the booking's
+ * page and wherever its dot is, so it revalidates the workspace.
  */
 export async function setBookingLightAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');
   const choice = String(formData.get('light') ?? '');
-  if (choice === 'plain') {
-    await endObservation(bookingId, actor);
-  } else {
-    const reason = choice.startsWith('watch:') ? choice.slice('watch:'.length) : '';
-    if (!(OBSERVATION_REASONS as readonly string[]).includes(reason)) throw new Error('Invalid colour');
-    const note = text(formData, 'note', 300);
-    if (reason === 'other' && !note) throw new Error('A note is needed for “Other”');
-    await observeBooking(bookingId, reason as ObservationReason, note, actor);
-  }
+  if (choice === 'ok') await endObservation(bookingId, actor);
+  else if (choice === 'watch') await observeBooking(bookingId, actor);
+  else if (choice === 'no') {
+    const canceller = await requireModule('bookings', 'full');
+    if (!confirmed(formData)) return;
+    await cancelBooking(bookingId, 'Cancelled', canceller);
+  } else throw new Error('Invalid colour');
   revalidatePath('/admin', 'layout');
 }
 

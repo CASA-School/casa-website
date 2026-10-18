@@ -6,8 +6,8 @@ import pg from 'pg';
 /**
  * A booking's colour (2026-10-16, docs/schoolman/bookings.md): grey („Offen", „Anzahlung erhalten") until paid in full,
  * yellow while a colleague has it under observation — chosen from the colour itself, on the booking's
- * page or the learner's (2026-10-18), with the reason in its head, on the list's dot and in its history
- * — and green once the money is in.
+ * page or the learner's, from SchoolMan's three: in order, under observation, cancelled (2026-10-18) —
+ * and green once the money is in. Cancelling from the colour asks once more.
  *
  * Runs only with a database and an owner account, in German (pinned). Everything it makes is
  * deleted afterwards.
@@ -73,7 +73,7 @@ test.describe('booking colours', () => {
     ]);
   });
 
-  test('grey until paid, yellow under observation with its reason, green when all is in', async ({ page }) => {
+  test('grey until paid, yellow under observation, green when all is in, red when cancelled', async ({ page }) => {
     const light = page.locator('[data-light]').first();
 
     await page.goto(`/admin/bookings/${bookingId}`);
@@ -81,11 +81,10 @@ test.describe('booking colours', () => {
     // The grey says what it is (2026-10-17): nothing has come in yet.
     await expect(light).toContainText('Offen');
 
-    // Yellow, chosen from the colour, with the reason in the head, on the list's dot and in the history.
+    // Yellow, chosen from the colour — one choice, as in SchoolMan — in the head, on the list's dot and in the history.
     await page.getByRole('button', { name: /^Farbe: Offen/ }).click();
-    await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Niveau' }).click();
+    await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Unter Beobachtung' }).click();
     await expect(light).toHaveAttribute('data-light', 'watch');
-    await expect(light).toContainText('Niveau');
     await expect(page.getByText('hat die Buchung unter Beobachtung gestellt')).toBeVisible();
 
     // Found by its number, which stands beside the course.
@@ -95,22 +94,15 @@ test.describe('booking colours', () => {
     await page.goto(`/admin/bookings?filter=all&q=${encodeURIComponent(number)}`);
     await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toBeVisible();
 
-    // In the list, the colour before the name, its word and reason on hover.
-    await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' }).getByRole('img', { name: 'Unter Beobachtung · Niveau' })).toBeVisible();
+    // In the list, the colour before the name, its word on hover.
+    await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' }).getByRole('img', { name: 'Unter Beobachtung' })).toBeVisible();
 
-    // On the learner's page the dot changes it too: „Sonstiges" asks what, then back to the money's colour.
+    // On the learner's page the dot changes it too: back to in order, which is grey while nothing is paid.
     await page.goto(`/admin/people/${personId}`);
-    const dot = page.getByRole('button', { name: /^Farbe: Unter Beobachtung · Niveau/ }).first();
-    await dot.click();
-    const colours = page.getByRole('dialog', { name: 'Farbe der Buchung' });
-    await colours.getByRole('button', { name: 'Sonstiges …' }).click();
-    await colours.getByRole('textbox', { name: 'Sonstiges' }).fill('Kommt eher aus A2.');
-    await colours.getByRole('button', { name: 'Speichern' }).click();
-    await expect(page.getByRole('button', { name: /^Farbe: Unter Beobachtung · Sonstiges/ }).first()).toBeVisible();
-    const note = await client.query<{ observation_reason: string; observation_note: string }>(`SELECT observation_reason, observation_note FROM bookings WHERE id = $1`, [bookingId]);
-    expect(note.rows[0]).toEqual({ observation_reason: 'other', observation_note: 'Kommt eher aus A2.' });
     await page.getByRole('button', { name: /^Farbe: Unter Beobachtung/ }).first().click();
-    await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Offen' }).click();
+    const colours = page.getByRole('dialog', { name: 'Farbe der Buchung' });
+    await expect(colours.getByRole('button')).toHaveText(['In Ordnung', 'Unter Beobachtung', 'Storniert']);
+    await colours.getByRole('button', { name: 'In Ordnung' }).click();
     await expect(page.getByRole('button', { name: /^Farbe: Offen/ }).first()).toBeVisible();
 
     // Ended: the colour is the money's again.
@@ -125,5 +117,15 @@ test.describe('booking colours', () => {
     await page.reload();
     await expect(light).toHaveAttribute('data-light', 'ok');
     await expect(light).toContainText('In Ordnung');
+
+    // Red from the colour cancels the booking, after asking once more; then the colour opens nothing.
+    await page.getByRole('button', { name: /^Farbe: In Ordnung/ }).click();
+    await colours.getByRole('button', { name: 'Storniert' }).click();
+    await expect(colours.getByText('Buchung stornieren?')).toBeVisible();
+    await colours.getByRole('button', { name: 'Stornieren' }).click();
+    await expect(light).toHaveAttribute('data-light', 'no');
+    await expect(page.getByRole('button', { name: /^Farbe:/ })).toHaveCount(0);
+    const cancelled = await client.query<{ status: string }>(`SELECT status FROM bookings WHERE id = $1`, [bookingId]);
+    expect(cancelled.rows[0].status).toBe('cancelled');
   });
 });

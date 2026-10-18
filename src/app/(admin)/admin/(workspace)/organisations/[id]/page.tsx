@@ -15,7 +15,7 @@ import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-par
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
-import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
+import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
 import { organisationGroups } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
@@ -601,12 +601,7 @@ function BookingRows({ bookings, lang, t, quiet = false }: { bookings: readonly 
             state={
               <BookingLightDot
                 light={bookingLight(b)}
-                label={[
-                  pick(lang, bookingLightLabel(b)),
-                  b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
+                label={pick(lang, bookingLightLabel(b))}
                 size="md"
               />
             }

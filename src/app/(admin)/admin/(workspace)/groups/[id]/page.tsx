@@ -16,7 +16,7 @@ import { Badge, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTo
 import { groupReservations } from '@/lib/admin/accommodation';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
-import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
+import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
 import { getGroup, groupCourses, groupDeletable, groupFigures, groupOffers, groupOptions, groupParticipants, groupProgramme, type GroupParticipant } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
@@ -469,12 +469,7 @@ function ParticipantRows({ participants, lang, t }: { participants: readonly Gro
             state={
               <BookingLightDot
                 light={bookingLight(p)}
-                label={[
-                  pick(lang, bookingLightLabel(p)),
-                  p.observationReason && p.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[p.observationReason]) : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
+                label={pick(lang, bookingLightLabel(p))}
                 size="md"
               />
             }

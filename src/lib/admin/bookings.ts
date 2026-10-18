@@ -86,18 +86,12 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, Bilingual> = {
 };
 
 /**
- * Why a booking is under observation — the team's yellow (u.B., *unter Beobachtung*). The other
- * three colours are not typed: red is the cancellation, grey and green follow from the money.
+ * The team's yellow (u.B., *unter Beobachtung*), stored as whether a booking is under observation. It is
+ * one colour, as in SchoolMan, with no reasons under it (Rahman, 2026-10-18: "keep it simple"): the
+ * workspace writes 'other', and the column's finer values (0028) are no longer offered. Green and grey
+ * follow from the money; red is the cancellation.
  */
 export type ObservationReason = 'level' | 'visa' | 'attendance' | 'documents' | 'other';
-export const OBSERVATION_REASONS: readonly ObservationReason[] = ['level', 'visa', 'attendance', 'documents', 'other'];
-export const OBSERVATION_REASON_LABELS: Record<ObservationReason, Bilingual> = {
-  level: { de: 'Niveau', en: 'Level' },
-  visa: { de: 'Visum', en: 'Visa' },
-  attendance: { de: 'Anwesenheit', en: 'Attendance' },
-  documents: { de: 'Unterlagen fehlen', en: 'Documents missing' },
-  other: { de: 'Sonstiges', en: 'Other' },
-};
 
 /**
  * The booking's colour, as the team reads it in SchoolMan (docs/schoolman/bookings.md):
@@ -1271,13 +1265,14 @@ export async function carryOverCredit(
 }
 
 /** Yellow: a colleague puts the booking under observation, with the reason; the change is a line in its history. */
-export async function observeBooking(id: string, reason: ObservationReason, note: string | null, actor: StaffUser): Promise<void> {
-  await query(
-    `UPDATE bookings SET observation_reason = $2, observation_note = $3, observed_at = now(), observed_by = $4
-      WHERE id = $1 AND deleted_at IS NULL AND status <> 'cancelled'`,
-    [id, reason, note, actor.id]
+/** Yellow: the booking is under observation, from now, by this colleague. */
+export async function observeBooking(id: string, actor: StaffUser): Promise<void> {
+  const rows = await query<{ id: string }>(
+    `UPDATE bookings SET observation_reason = 'other', observation_note = NULL, observed_at = now(), observed_by = $2
+      WHERE id = $1 AND deleted_at IS NULL AND status <> 'cancelled' AND observation_reason IS NULL RETURNING id`,
+    [id, actor.id]
   );
-  await logActivity({ actor, entity: 'booking', entityId: id, action: 'booking_observed', detail: { reason, note } });
+  if (rows.length) await logActivity({ actor, entity: 'booking', entityId: id, action: 'booking_observed' });
 }
 
 /** The observation ends: the booking's colour is the money's again. */

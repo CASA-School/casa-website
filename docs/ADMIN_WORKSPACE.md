@@ -1068,24 +1068,28 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     **The team's colours (2026-10-16, migration 0028).** Every booking shows the
     colour the team knows from SchoolMan (`docs/schoolman/bookings.md`), worked
     out by `bookingLight()` and never typed: red when cancelled, yellow while a
-    colleague has it *unter Beobachtung* (with a reason — Niveau, Visum,
-    Anwesenheit, Unterlagen fehlen, Sonstiges, which needs a note saying what),
-    grey *Offen* until the charges are paid in full, green when all is well. Only
-    yellow is stored (`observation_reason`, who and when); setting and ending it
-    are lines in the booking's history.
+    colleague has it *unter Beobachtung*, grey *Offen* until the charges are paid
+    in full, green when all is well. Only yellow is stored (`observation_reason`,
+    who and when); setting and ending it are lines in the booking's history.
+    Yellow is one colour, as SchoolMan's u.B. is (Rahman, 2026-10-18: "keep it
+    simple … don't add those sub levels"): the workspace writes 'other', and the
+    column's finer values from 0028 are no longer offered or shown; a note an
+    older observation had stays readable on the booking.
 
     **Colours, not words (Rahman, 2026-10-18: "play with colors and dropdown …
     instead of the whole word, the staff is used to the colors").** In the lists —
     Buchungen, a group's, an organisation's, a sitting's and a course's people —
-    the colour is a dot before the name, its word and reason on hover
-    (`BookingLightDot`); Buchungen has no „Stand" column and no yellow view. On
-    the learner's page (each booking, and the course they are in) the dot opens
-    the colours to choose from (`BookingColour` → `BookingLightMenu`, action
-    `setBookingLightAction`): the money's own colour, or yellow with a reason;
-    „Sonstiges" asks for its note in the panel. The booking's head keeps the pill
-    with its words and money, and the pill opens the same panel; the „Beobachten"
-    and „Beobachtung beenden" buttons are gone. Red is a cancellation and is not
-    chosen there. Laufend splits into „Enden bald" and „Laufen weiter", Kommend
+    the colour is a dot before the name, its word on hover (`BookingLightDot`);
+    Buchungen has no „Stand" column and no yellow view. On the learner's page
+    (each booking, and the course they are in) the dot opens SchoolMan's three
+    choices (`BookingColour` → `BookingLightMenu`, action `setBookingLightAction`):
+    In Ordnung (ja — then green once paid in full, grey until then), Unter
+    Beobachtung (u.B.), Storniert (nein). Storniert is offered to whoever may
+    cancel (`bookings` full), asks once more, and cancels the booking; a cancelled
+    booking's colour opens nothing, as there is no way back from a cancellation.
+    The booking's head keeps the pill with its words and money, and the pill
+    opens the same three; the „Beobachten" and „Beobachtung beenden" buttons are
+    gone. Laufend splits into „Enden bald" and „Laufen weiter", Kommend
     into „Starten bald" and „Später" (two weeks). A lifecycle badge only for
     Reserviert and Abgeschlossen. A cancelled booking's leftover is not shown as
     owed.

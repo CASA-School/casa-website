@@ -172,6 +172,7 @@ export default async function PersonPage({
 
   const canEdit = canAccess(user, 'people', 'edit');
   const canBook = canAccess(user, 'bookings', 'edit');
+  const canCancelBookings = canAccess(user, 'bookings', 'full');
   const seesBookings = canAccess(user, 'bookings');
   const seesOffers = canAccess(user, 'offers');
   const canOffer = canAccess(user, 'offers', 'edit');
@@ -250,8 +251,8 @@ export default async function PersonPage({
         href: `/admin/bookings/${b.id}`,
         open: b.status === 'reserved' || b.status === 'confirmed' || balance > 0,
         // The booking's colour, as the team reads it — red, yellow, grey until paid, green — its word on hover,
-        // and a click on it changes it (2026-10-18); what is open is the amount beside it.
-        state: <BookingColour booking={b} lang={lang} canEdit={canBook} />,
+        // and a click on it changes it, as in SchoolMan (2026-10-18); what is open is the amount beside it.
+        state: <BookingColour booking={b} lang={lang} canEdit={canBook} canCancel={canCancelBookings} />,
         // Nothing charged is not „paid".
         amount:
           b.status === 'cancelled' || (b.charged <= 0 && balance <= 0) ? null : balance > 0 ? (
@@ -485,7 +486,7 @@ export default async function PersonPage({
       <RecordTabPanel id="overview">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="space-y-4">
-            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} canEdit={canBook} /> : null}
+            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} canEdit={canBook} canCancel={canCancelBookings} /> : null}
             {/* The course above is already open; „nothing open" only when nothing at all is. */}
             {overviewOpen.length || !spotlight ? (
               <Card title={t('Offen', 'Open')} icon={Icon.registrations} tint="blue" bleed>
@@ -934,7 +935,21 @@ const DAY = 86_400_000;
  * The course a learner is in — which week of how many, as a line that fills — or the next one and
  * how soon it starts, with the booking's colour and what is still open on it.
  */
-function CourseNow({ booking, running, today, lang, canEdit }: { booking: BookingListItem; running: boolean; today: Date; lang: WsLang; canEdit: boolean }) {
+function CourseNow({
+  booking,
+  running,
+  today,
+  lang,
+  canEdit,
+  canCancel,
+}: {
+  booking: BookingListItem;
+  running: boolean;
+  today: Date;
+  lang: WsLang;
+  canEdit: boolean;
+  canCancel: boolean;
+}) {
   const t = translator(lang);
   const start = booking.startDate!;
   const end = booking.endDate!;
@@ -958,7 +973,7 @@ function CourseNow({ booking, running, today, lang, canEdit }: { booking: Bookin
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{booking.courseTypeName ?? t('Buchung', 'Booking')}</span>
-            <BookingColour booking={booking} lang={lang} canEdit={canEdit} />
+            <BookingColour booking={booking} lang={lang} canEdit={canEdit} canCancel={canCancel} />
           </div>
           <p className="mt-1 text-sm text-[var(--casa-muted)]">
             {dayRange(toDateInputValue(start), toDateInputValue(end), lang)} · {weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}
