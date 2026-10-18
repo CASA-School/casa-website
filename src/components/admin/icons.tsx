@@ -64,6 +64,17 @@ export const Icon = {
       <path d="M11.25 9.6a3.6 3.6 0 0 1 2.75 3.65" />
     </svg>
   ),
+  /** Three people side by side — a group that comes together. */
+  group: (
+    <svg {...box}>
+      <circle cx="8" cy="4.75" r="1.9" />
+      <path d="M4.75 12.75a3.25 3.25 0 0 1 6.5 0" />
+      <circle cx="3.4" cy="6.4" r="1.45" />
+      <path d="M1.25 12.25a2.35 2.35 0 0 1 2.9-2.6" />
+      <circle cx="12.6" cy="6.4" r="1.45" />
+      <path d="M14.75 12.25a2.35 2.35 0 0 0-2.9-2.6" />
+    </svg>
+  ),
   /** A ticket — a booked place. */
   bookings: (
     <svg {...box}>

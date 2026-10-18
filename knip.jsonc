@@ -82,6 +82,14 @@
     // Removal condition: delete when the FileMaker bridge brings organisations across.
     "scripts/filemaker/import-organisations.mjs",
 
+    // Writes SchoolMan's group visits into `group_visits` (their comments and
+    // work log; links the participants' bookings and the group's courses),
+    // from scripts/filemaker/read_groups.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Groups). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings group visits across.
+    "scripts/filemaker/import-groups.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

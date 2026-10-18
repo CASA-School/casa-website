@@ -246,6 +246,8 @@ export type BookingDetail = BookingListItem & {
   payerName: string | null;
   /** The agency or company that pays it (0057), when it is one CASA keeps. */
   payerOrganisation: { id: string; name: string } | null;
+  /** The group visit it belongs to (0058). */
+  groupVisit: { id: string; name: string } | null;
   visaRequired: boolean;
   notes: string | null;
   sourceRegistrationId: string | null;
@@ -496,6 +498,8 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       payer_name: string | null;
       payer_organisation_id: string | null;
       payer_organisation_name: string | null;
+      group_visit_id: string | null;
+      group_visit_name: string | null;
       visa_required: boolean;
       notes: string | null;
       source_registration_id: string | null;
@@ -526,6 +530,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     `${LIST.replace(
       'FROM bookings b',
       `, b.course_type_id, b.payer, b.payer_name, b.payer_organisation_id, po.name AS payer_organisation_name,
+         b.group_visit_id, gv.name AS group_visit_name,
          b.visa_required, b.notes, b.source_registration_id,
          b.cancelled_at, b.cancel_reason, b.observed_at,
          (SELECT name FROM staff_users WHERE id = b.observed_by) AS observed_by_name,
@@ -539,6 +544,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     FROM bookings b
     LEFT JOIN exam_results er ON er.booking_id = b.id
     LEFT JOIN organisations po ON po.id = b.payer_organisation_id
+    LEFT JOIN group_visits gv ON gv.id = b.group_visit_id
     LEFT JOIN accommodation_types at ON at.code = b.accommodation_type_code
     LEFT JOIN accommodation_room_types art ON art.code = b.accommodation_room_type_code
     LEFT JOIN catering_options co ON co.code = b.accommodation_catering_code`
@@ -613,6 +619,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
     payerName: row.payer_name,
     payerOrganisation:
       row.payer_organisation_id && row.payer_organisation_name ? { id: row.payer_organisation_id, name: row.payer_organisation_name } : null,
+    groupVisit: row.group_visit_id && row.group_visit_name ? { id: row.group_visit_id, name: row.group_visit_name } : null,
     visaRequired: row.visa_required,
     notes: row.notes,
     sourceRegistrationId: row.source_registration_id,

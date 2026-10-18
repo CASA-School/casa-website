@@ -423,6 +423,17 @@ export default async function BookingPage({
                   ''
                 )}
               </MetaItem>
+              {booking.groupVisit ? (
+                <MetaItem icon={Icon.group}>
+                  {canAccess(user, 'groups') ? (
+                    <Link href={`/admin/groups/${booking.groupVisit.id}`} className="font-semibold text-[var(--fm-navy)] hover:underline">
+                      {booking.groupVisit.name}
+                    </Link>
+                  ) : (
+                    booking.groupVisit.name
+                  )}
+                </MetaItem>
+              ) : null}
               <MetaItem icon={Icon.people}>
                 <Link href={`/admin/people/${booking.personId}`} className="font-semibold text-[var(--fm-navy)] hover:underline">
                   {t('Zur Person', 'Student page')}

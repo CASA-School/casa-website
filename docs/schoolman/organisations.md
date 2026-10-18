@@ -56,7 +56,11 @@ letters to them. The learners themselves name no employer or school (`Person._ID
 `_ID_Institution` are empty on all 528); `Person._ID_Client` is a customer number per learner, copied
 onto their bookings, not a party.
 
-Not yet: `Group` (52 group visits; none in the sample), `Management` parties that are people (host
+**Group visits (2026-10-18):** the reader also takes in the schools, companies and agencies of all 52
+groups (17 agencies, 60 companies, 102 contacts in all); `read_groups.py` brings the groups
+(groups.md).
+
+Not yet: `Management` parties that are people (host
 families, tandem partners — their own modules), the other parties (multipliers, health insurers, the
 Förderverein; `_ID_StatusManagementReference`), commission per booking (`Commission`, the money
 module), a booking's contact at the agency (`Booking._ID_Contact`, 22).

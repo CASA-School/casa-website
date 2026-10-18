@@ -6,8 +6,9 @@
 Rahman, 2026-10-18: focus on corporate, management, agencies — there are dependencies there.
 SchoolMan's party is a `Management` record; its roles are `Agency` (a language-travel agency) and
 `Corporate` (a company as client), with the name in `Institution`. This reads the agencies and
-companies the sample's bookings name (`Booking._ID_Agency`, `_ID_Corporate`), and the companies of the
-company courses still running or ahead (`Course._ID_Corporate`): the party's name, whether it is
+companies the sample's bookings name (`Booking._ID_Agency`, `_ID_Corporate`), the companies of the
+company courses still running or ahead (`Course._ID_Corporate`), and those of the group visits
+(`Group._ID_Corporate`, `_ID_Agency`; `read_groups.py` links them): the party's name, whether it is
 active, an agency's agreement, its own e-mail, phone and address (the rows of no person), the people
 who work there with their job title and their e-mail and phone, an agency's commission terms
 (`CommissionDetail`), which sample booking each pays, and the letters that name it. Never `Management`'s comments — they hold
@@ -48,7 +49,7 @@ def stamp(value):
 
 
 today = date.today()
-bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_EnrolmentDone', '_ID_Agency', '_ID_Corporate') if b['__ID_Booking'].strip()}
+bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_EnrolmentDone', '_ID_Agency', '_ID_Corporate', '_ID_Group') if b['__ID_Booking'].strip()}
 periods = table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate')
 chosen = sample_persons(bookings, periods, today)
 theirs = [b for b in bookings.values() if first(b['_ID_Person']) in chosen]
@@ -61,6 +62,12 @@ for cid, corp, end in zip(column('Course', '__ID_Course'), column('Course', '_ID
     if first(corp) and iso(end) and iso(end) >= today.isoformat():
         course_corporates[cid.strip()] = first(corp)
 corporate_ids |= set(course_corporates.values())
+# The schools, companies and agencies of the group visits, all 52 of them.
+for corp, agency in zip(column('Group', '_ID_Corporate'), column('Group', '_ID_Agency')):
+    if first(corp):
+        corporate_ids.add(first(corp))
+    if first(agency):
+        agency_ids.add(first(agency))
 
 agencies = {r['__ID_Agency'].strip(): r for r in table('Agency', '__ID_Agency', '_ID_Management', '_ID_Institution', '_ID_Active', 'InstitutionAgency', 'Agreement')}
 corporates = {r['__ID_Corporate'].strip(): r for r in table('Corporate', '__ID_Corporate', '_ID_Management', '_ID_Active', 'HeaderCorporate.Text')}

@@ -4,6 +4,9 @@ Rahman: a sample first, to see what the workspace is missing. Everyone in a cour
 starting one in the next four weeks — a `DateBooking` period that runs then, of a booking that is not
 „nein" or „storno". `read_learners.py` brings these people across; `read_organisations.py` the
 agencies and companies they depend on. One rule, so the two never drift apart.
+
+Since 2026-10-18 also the participants of this year's group visits (`Booking._ID_Group`, a period in
+this calendar year), so a group's page has its people: `read_groups.py` brings the groups.
 """
 import re
 from datetime import date, timedelta
@@ -23,14 +26,17 @@ def _iso(value):
 
 def sample_persons(bookings, periods, today=None):
     """SchoolMan person ids of the sample, from `Booking` rows by id (with `_ID_Person`,
-    `_ID_EnrolmentDone`) and `DateBooking` rows (with `_ID_Booking`, `ZStartDate`, `ZEndDate`)."""
+    `_ID_EnrolmentDone`, `_ID_Group`) and `DateBooking` rows (with `_ID_Booking`, `ZStartDate`, `ZEndDate`)."""
     today = today or date.today()
     monday = (today - timedelta(days=today.weekday())).isoformat()
     until = (today + timedelta(days=28)).isoformat()
+    new_year = date(today.year, 1, 1).isoformat()
     chosen = set()
     for p in periods:
         b = bookings.get(_first(p['_ID_Booking']))
         s, e = _iso(p['ZStartDate']), _iso(p['ZEndDate'])
-        if b and s and e and s <= until and e >= monday and _first(b['_ID_EnrolmentDone']) not in NOT_TAKEN and _first(b['_ID_Person']):
+        if not (b and s and e and _first(b['_ID_EnrolmentDone']) not in NOT_TAKEN and _first(b['_ID_Person'])):
+            continue
+        if (s <= until and e >= monday) or (_first(b.get('_ID_Group')) and e >= new_year):
             chosen.add(_first(b['_ID_Person']))
     return chosen

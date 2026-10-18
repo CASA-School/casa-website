@@ -319,6 +319,7 @@ describe('workspace auth gate', () => {
       ['kursplanung', '(focus)/kursplanung'],
       ['offers', '(workspace)/offers'],
       ['organisations', '(workspace)/organisations'],
+      ['groups', '(workspace)/groups'],
       ['website', '(editor)/website'],
     ];
 

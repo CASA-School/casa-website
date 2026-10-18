@@ -553,6 +553,42 @@ per (course, group, date) and per (board group, date). The view
 `course_day_times` gives its hours as they are. `courses.filemaker_group_ids`
 holds SchoolMan's course numbers of a level's parallel groups.
 
+## Group visits (0058)
+
+```mermaid
+erDiagram
+  ORGANISATIONS o|--o{ GROUP_VISITS : "organisation_id (school or company)"
+  ORGANISATIONS o|--o{ GROUP_VISITS : "agency_id"
+  COURSE_TYPES o|--o{ GROUP_VISITS : course_type_id
+  GROUP_VISITS o|--o{ BOOKINGS : "group_visit_id (the participants)"
+  GROUP_VISITS o|--o{ COURSES : "group_visit_id (its own class)"
+
+  GROUP_VISITS {
+    uuid id PK
+    text name
+    text status
+    uuid organisation_id FK
+    uuid agency_id FK
+    uuid course_type_id FK
+    text level
+    text country_code FK
+    int participants
+    int escorts
+    smallint age_from
+    smallint age_to
+    date arrival
+    date departure
+    date course_from
+    date course_to
+    text travel_note
+    text note
+    text filemaker_group_id
+  }
+```
+
+A visit's notes are `staff_notes` with entity `group_visit`. Whether a confirmed
+visit is over is read from its dates (docs/ADMIN_WORKSPACE.md §Groups).
+
 ## Notes
 - `course_instances.schedule` should remain structured JSON.
 - Public reads should only expose active or publishable records.

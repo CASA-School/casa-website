@@ -398,7 +398,7 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, private_data, bookings, offers, organisations, rooms, prices, catalogue,
+applications, people, private_data, bookings, offers, organisations, groups, rooms, prices, catalogue,
 kursplanung, website, staff, staff_private, activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
@@ -412,7 +412,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Groups, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -1172,7 +1172,55 @@ terms (`CommissionDetail`), who pays which sample booking (an agency over a comp
 course's company and the letters that name it. Never `Management`'s comments (they hold credentials). A
 match on SchoolMan's ids, else the same name and kind made here; fields fill only where empty. First
 run: 12 agencies, 40 companies, 66 contacts, 12 commission terms, 1,164 bookings, 2,311 letters
-(docs/schoolman/organisations.md has what is not yet across: group visits, the other parties).
+(docs/schoolman/organisations.md has what is not yet across: the other parties). Since the group visits
+(below) it also reads the schools, companies and agencies of all 52 of SchoolMan's groups: 17 agencies,
+60 companies, 102 contacts in all. A second person at an organisation with an address another contact
+there already has (a shared office mailbox) comes without it.
+
+## Groups (2026-10-18, migration 0058)
+
+Group visits — a school class, a company's team, an agency's group that comes together — in „Gruppen"
+under Schule (module `groups`), between Angebote and Organisationen. A visit (`group_visits`) has its
+name, its state (Angefragt, Bestätigt, Abgesagt), the school or company that sends it and the agency
+that books it (both `organisations`), how many learners and escorts, their ages, the course type and band
+(A1 … C2, B1+), the country, the stay (Anreise, Abreise) and the lessons in it, how it travels, and a
+note. Its participants are learners with their own bookings (`bookings.group_visit_id`); a group with its
+own class has its own courses (`courses.group_visit_id`). Whether a confirmed visit is over is read from
+its dates, never stored.
+
+**List.** Views Kommend (confirmed, not over — the default), Angefragt, Vergangen, Abgesagt and Alle,
+with counts; a search by name, school, company or agency. A row: the name, the school or company and
+„über" the agency; the country; the dates (the stay, else the lessons); how many come („20 + 2") and how
+many of them are booked. Over and called-off ones are muted. „Neue Gruppe" asks for the name; who, when
+and how many open once it is in.
+
+**A visit's page.** The head: name, state („Vorbei" once a confirmed visit is over), the school or
+company and the agency (linked for whoever holds Organisationen), country, ages, course type and band;
+the figures Personen, Gebucht, Zeitraum and what the participants' bookings still owe. Tabs:
+**Übersicht** (the details, Notizen und Verlauf with SchoolMan's comments and work log, and An- und
+Abreise and Notiz when written), **Teilnehmende** (each booking: the learner, the booking's colour,
+number, dates, where they stay, what is open), **Kurse** (the group's own). A booking's page names its
+group and links to it; an organisation's page has a Gruppen tab with the visits it sends or books.
+
+**Rights and rules.** `view` reads; `edit` creates and changes a visit and confirms, cancels or reopens
+it, each after a confirmation; `full` deletes. Staff hold `edit` by default. Calling a visit off changes
+nothing else — its participants' bookings keep their own state. „Löschen" is for a visit entered by
+mistake: offered only while no booking or course names it and it did not come from SchoolMan; its notes
+go with it. An organisation a visit names is no longer deletable (set it inactive). Every change is a
+line in Aktivität („hat eine Gruppe bestätigt").
+
+**From SchoolMan (2026-10-18).**
+`python3 -I scripts/filemaker/read_groups.py | node scripts/filemaker/import-groups.mjs [--dry-run]`,
+after the learners and the organisations. All 52 `Group` records (2022–2027): `_ID_StatusGroup`
+1 ja → Bestätigt, 2 nein → Abgesagt, 4 u.B. → Angefragt; `_ID_Level` is SchoolMan's band number (1 A1,
+2 A2, 3 B1, 3,5 B1+, 4 B2, 5 C1); a number of people typed as a range („4-6") is planned at its top, the
+range kept in the note; the lessons are SchoolMan's tuition dates, else the span of the participants'
+booked periods. The comments on the group become notes, its work log its history. While no colleague has
+changed a visit here a re-run takes SchoolMan's values; after that, SchoolMan only fills what is empty.
+The learner sample takes in the participants of this year's groups (`sample.py`), so their bookings are
+linked: 82 bookings on four visits. SchoolMan's group courses all ended before the course import's
+window, so none is linked yet. Not across: the group's offers, letters, invoices and bed reservations
+(`DateRent`) — docs/schoolman/groups.md.
 
 ## Courses (2026-10-17, migration 0041)
 

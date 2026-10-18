@@ -511,25 +511,28 @@ export async function setOrganisationActive(id: string, active: boolean, actor: 
 }
 
 /** What names an organisation, and so keeps it from being deleted. */
-type Holds = { bookings: number; offers: number; courses: number; letters: number; fromSchoolMan: boolean };
+type Holds = { bookings: number; offers: number; groups: number; courses: number; letters: number; fromSchoolMan: boolean };
 
 const HOLDS = `
   SELECT (SELECT count(*) FROM bookings b WHERE b.payer_organisation_id = o.id AND b.deleted_at IS NULL) AS bookings,
          (SELECT count(*) FROM offers f WHERE f.organisation_id = o.id AND f.deleted_at IS NULL) AS offers,
+         (SELECT count(*) FROM group_visits v WHERE v.organisation_id = o.id OR v.agency_id = o.id) AS groups,
          (SELECT count(*) FROM courses c WHERE c.organisation_id = o.id) AS courses,
          (SELECT count(*) FROM letters l WHERE l.organisation_id = o.id) AS letters,
          EXISTS (SELECT 1 FROM filemaker_links fl WHERE fl.entity = 'organisation' AND fl.entity_id = o.id) AS from_schoolman
     FROM organisations o WHERE o.id = $1`;
 
-type HoldsRow = { bookings: string; offers: string; courses: string; letters: string; from_schoolman: boolean };
+type HoldsRow = { bookings: string; offers: string; groups: string; courses: string; letters: string; from_schoolman: boolean };
 const toHolds = (r: HoldsRow): Holds => ({
   bookings: Number(r.bookings),
   offers: Number(r.offers),
+  groups: Number(r.groups),
   courses: Number(r.courses),
   letters: Number(r.letters),
   fromSchoolMan: r.from_schoolman,
 });
-const held = (h: Holds) => h.bookings + h.offers + h.courses + h.letters > 0 || h.fromSchoolMan;
+const named = (h: Holds) => h.bookings + h.offers + h.groups + h.courses + h.letters;
+const held = (h: Holds) => named(h) > 0 || h.fromSchoolMan;
 
 /** Whether „Löschen" can be offered: nothing names it, and it did not come from SchoolMan. */
 export async function organisationDeletable(id: string): Promise<boolean> {
@@ -545,6 +548,7 @@ function holdsWords(h: Holds): Bilingual {
   };
   add(h.bookings, ['Buchung', 'Buchungen'], ['booking', 'bookings']);
   add(h.offers, ['Angebot', 'Angebote'], ['offer', 'offers']);
+  add(h.groups, ['Gruppe', 'Gruppen'], ['group', 'groups']);
   add(h.courses, ['Kurs', 'Kurse'], ['course', 'courses']);
   add(h.letters, ['Brief', 'Briefe'], ['letter', 'letters']);
   const join = (words: string[], and: string) => (words.length > 1 ? `${words.slice(0, -1).join(', ')} ${and} ${words[words.length - 1]}` : (words[0] ?? ''));
@@ -552,7 +556,7 @@ function holdsWords(h: Holds): Bilingual {
 }
 
 /**
- * Gone, for an organisation entered by mistake: only while no booking, offer, course or letter names it
+ * Gone, for an organisation entered by mistake: only while no booking, offer, group, course or letter names it
  * and it did not come from SchoolMan. One CASA worked with is set inactive instead. Its contacts and
  * commission terms go with it.
  */
@@ -562,9 +566,9 @@ export async function deleteOrganisation(id: string, actor: StaffUser): Promise<
     const locked = await client.query<{ name: string }>(`SELECT name FROM organisations WHERE id = $1 FOR UPDATE`, [id]);
     if (!locked.rows[0]) return GONE;
     const holds = toHolds((await client.query<HoldsRow>(HOLDS, [id])).rows[0]);
-    if (holds.bookings + holds.offers + holds.courses + holds.letters > 0) {
+    if (named(holds) > 0) {
       const what = holdsWords(holds);
-      const many = holds.bookings + holds.offers + holds.courses + holds.letters > 1;
+      const many = named(holds) > 1;
       return refuse(
         `${what.de} ${many ? 'nennen' : 'nennt'} diese Organisation — setz sie auf inaktiv, statt sie zu löschen.`,
         `${what.en} ${many ? 'name' : 'names'} this organisation — set it inactive instead of deleting it.`

@@ -16,6 +16,8 @@ import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/com
 import { Badge, Card, DateText, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
+import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
+import { organisationGroups } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -41,6 +43,8 @@ import {
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
+const GROUP_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
+
 const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
   draft: 'neutral',
   sent: 'accent',
@@ -63,8 +67,8 @@ const range = (from: Date | null, to: Date | null, lang: WsLang) => (from && to 
  * pages' tabs. The head: the name, what it is, whether CASA still works with it, how to reach it, and the
  * figures — the bookings it pays now or ahead and their learners, its contacts, an agency's commission.
  * Übersicht holds the contacts, an agency's commission, its agreement and the note; then the bookings it
- * pays, a company's own courses, the offers made to it and the letters sent to it — each shown to whoever
- * holds that module, and only when there is something in it.
+ * pays, the group visits it sends or books (0058), a company's own courses, the offers made to it and the
+ * letters sent to it — each shown to whoever holds that module, and only when there is something in it.
  */
 export default async function OrganisationPage({
   params,
@@ -84,13 +88,15 @@ export default async function OrganisationPage({
   const seesBookings = canAccess(user, 'bookings');
   const seesCourses = canAccess(user, 'catalogue');
   const seesOffers = canAccess(user, 'offers');
+  const seesGroups = canAccess(user, 'groups');
   const isAgency = organisation.kind === 'agency';
 
-  const [contacts, terms, figures, bookings, courses, offers, letters, countries, chargeTypes, deletable] = await Promise.all([
+  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable] = await Promise.all([
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
     seesBookings ? organisationBookings(id, { allEarlier: earlier === 'all' }) : Promise.resolve(null),
+    seesGroups ? organisationGroups(id) : Promise.resolve([]),
     seesCourses ? organisationCourses(id) : Promise.resolve([]),
     seesOffers ? organisationOffers(id) : Promise.resolve([]),
     organisationLetters(id),
@@ -106,6 +112,7 @@ export default async function OrganisationPage({
   const tabs: RecordTab[] = [
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     ...(bookingCount ? [{ id: 'bookings', label: t('Buchungen', 'Bookings'), icon: Icon.bookings, count: bookingCount }] : []),
+    ...(groups.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: groups.length }] : []),
     ...(courses.length ? [{ id: 'courses', label: t('Kurse', 'Courses'), icon: Icon.catalogue, count: courses.length }] : []),
     ...(offers.length ? [{ id: 'offers', label: t('Angebote', 'Offers'), icon: Icon.offers, count: offers.length }] : []),
     ...(seenLetters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letterCount }] : []),
@@ -341,6 +348,28 @@ export default async function OrganisationPage({
                 ) : null}
               </Group>
             ) : null}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {groups.length ? (
+        <RecordTabPanel id="groups">
+          <Card bleed>
+            <Rows>
+              {groups.map((g) => (
+                <Row
+                  key={g.id}
+                  href={`/admin/groups/${g.id}`}
+                  quiet={g.status === 'cancelled' || g.isOver}
+                  icon={<IconChip icon={Icon.group} tint="green" />}
+                  title={g.name}
+                  state={
+                    <Badge tone={GROUP_TONES[g.status]}>{g.status === 'confirmed' && g.isOver ? t('Vorbei', 'Over') : pick(lang, GROUP_STATUS_LABELS[g.status])}</Badge>
+                  }
+                  detail={[range(g.startDate, g.endDate ?? g.startDate, lang), g.viaAgency ? t('als Agentur', 'as the agency') : null].filter(Boolean).join(' · ') || null}
+                />
+              ))}
+            </Rows>
           </Card>
         </RecordTabPanel>
       ) : null}

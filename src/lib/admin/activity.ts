@@ -449,6 +449,22 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Provision einer Agentur geändert', "changed an agency's commission");
     case 'organisation_commission_removed':
       return t('hat die Provision einer Agentur entfernt', "removed an agency's commission");
+    case 'group_created':
+      return t('hat eine Gruppe angelegt', 'added a group');
+    case 'group_updated':
+      return t('hat eine Gruppe bearbeitet', 'edited a group');
+    case 'group_status_changed': {
+      const to = entry.detail?.to;
+      return to === 'confirmed'
+        ? t('hat eine Gruppe bestätigt', 'confirmed a group')
+        : to === 'cancelled'
+          ? t('hat eine Gruppe abgesagt', 'cancelled a group')
+          : t('hat eine Gruppe wieder geöffnet', 'reopened a group');
+    }
+    case 'group_deleted': {
+      const name = typeof entry.detail?.name === 'string' ? entry.detail.name : '';
+      return name ? t(`hat die Gruppe „${name}“ gelöscht`, `deleted the group “${name}”`) : t('hat eine Gruppe gelöscht', 'deleted a group');
+    }
     case 'letter_standard_text_changed': {
       const closing = entry.detail?.part === 'closing';
       const german = entry.detail?.language === 'de';
@@ -557,6 +573,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'organisation' && entry.entityId && entry.action !== 'organisation_deleted') {
     return `/admin/organisations/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'group_visit' && entry.entityId && entry.action !== 'group_deleted') {
+    return `/admin/groups/${entry.entityId}`;
   }
 
   if (entry.entity === 'website_release') {

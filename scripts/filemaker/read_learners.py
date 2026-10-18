@@ -64,7 +64,7 @@ def stamp(value):
 today = date.today()
 
 bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_Student', '_ID_EnrolmentDone', '_ID_VisaRequired', '_ID_Agency',
-                                                         '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', 'TimeStampOfCreation', 'DateOfCreation') if b['__ID_Booking'].strip()}
+                                                         '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', '_ID_Group', 'TimeStampOfCreation', 'DateOfCreation') if b['__ID_Booking'].strip()}
 periods = table('DateBooking', '__ID_DateBooking', '_ID_Booking', '_ID_Course', 'ZStartDate', 'ZEndDate')
 
 

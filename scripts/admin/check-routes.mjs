@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -70,6 +70,8 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT id FROM courses WHERE coalesce(array_length(filemaker_group_ids, 1), 0) > 1 ORDER BY updated_at DESC LIMIT 1`),
     // An organisation, the one paying the most bookings: every tab of its page reads (0057).
     firstId(`SELECT o.id FROM organisations o LEFT JOIN bookings b ON b.payer_organisation_id = o.id GROUP BY o.id ORDER BY count(b.id) DESC, o.id LIMIT 1`),
+    // A group visit, the one with the most participants: its participants tab reads their bookings (0058).
+    firstId(`SELECT v.id FROM group_visits v LEFT JOIN bookings b ON b.group_visit_id = v.id GROUP BY v.id ORDER BY count(b.id) DESC, v.id LIMIT 1`),
   ]);
 
 const routes = [
@@ -103,6 +105,10 @@ const routes = [
   '/admin/organisations?view=agency',
   organisation && `/admin/organisations/${organisation}`,
   organisation && `/admin/organisations/${organisation}?tab=bookings&earlier=all`,
+  '/admin/groups',
+  '/admin/groups?view=all',
+  '/admin/groups?view=past&q=a',
+  group && `/admin/groups/${group}`,
   '/admin/offers',
   '/admin/offers?filter=all',
   '/admin/offers/new',

@@ -45,7 +45,7 @@ const country = (name) => {
 
 const parties = await readStdin();
 const client = await connect();
-const count = { read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0 };
+const count = { read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, sharedEmail: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0 };
 
 try {
   await client.query('BEGIN');
@@ -103,6 +103,17 @@ try {
 
     for (const c of p.contacts) {
       if (!(c.firstName || c.lastName || c.email)) continue;
+      // One address belongs to one contact of an organisation: a second person at it with the same
+      // address (a shared office mailbox) comes without it.
+      const shared =
+        c.email &&
+        (
+          await client.query(
+            `SELECT 1 FROM organisation_contacts WHERE organisation_id = $1 AND lower(email) = lower($2) AND filemaker_person_id IS DISTINCT FROM $3`,
+            [orgId, c.email, c.id]
+          )
+        ).rowCount > 0;
+      if (shared) count.sharedEmail++;
       await client.query(
         `INSERT INTO organisation_contacts (organisation_id, salutation, first_name, last_name, email, phone, role, filemaker_person_id)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -110,7 +121,7 @@ try {
            SET first_name = coalesce(organisation_contacts.first_name, EXCLUDED.first_name), last_name = coalesce(organisation_contacts.last_name, EXCLUDED.last_name),
                email = coalesce(organisation_contacts.email, EXCLUDED.email), phone = coalesce(organisation_contacts.phone, EXCLUDED.phone),
                role = coalesce(organisation_contacts.role, EXCLUDED.role)`,
-        [orgId, SALUTATION[c.gender] ?? 'none', c.firstName, c.lastName, c.email, c.phone, c.role, c.id]
+        [orgId, SALUTATION[c.gender] ?? 'none', c.firstName, c.lastName, shared ? null : c.email, c.phone, c.role, c.id]
       );
       count.contacts++;
     }
@@ -161,6 +172,6 @@ try {
 
 console.log(
   `${count.read} organisations read: ${count.made} new, ${count.known} known (${count.byName} by their name here) · ${count.noName} without a name left out\n` +
-    `${count.contacts} contacts · ${count.commissions} commission terms (${count.commissionsRemoved} no longer in SchoolMan removed) · ` +
+    `${count.contacts} contacts (${count.sharedEmail} without an address another contact there has) · ${count.commissions} commission terms (${count.commissionsRemoved} no longer in SchoolMan removed) · ` +
     `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked`
 );

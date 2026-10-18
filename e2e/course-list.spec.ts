@@ -102,7 +102,7 @@ test.describe('Course list', () => {
     // The substitute is not a main teacher of group 1; group 2 has its own.
     await expect(g1).not.toContainText(teachers[2].short);
     await expect(g1.locator('xpath=following-sibling::tr[1]')).toContainText(teachers[2].short);
-    await expect(page.getByText('Gruppen', { exact: false })).toHaveCount(0);
+    await expect(page.locator('main').getByText('Gruppen', { exact: false })).toHaveCount(0);
   });
 
   test('each course number has its own page, the other of its level a link in its head', async ({ page }) => {

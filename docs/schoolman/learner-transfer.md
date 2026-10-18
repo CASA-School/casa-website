@@ -4,7 +4,8 @@ Rahman, 2026-10-17: transfer all the data related to students, including the com
 first a sample, to see what the workspace is missing. Live and read-only; counts only.
 
 **The sample:** 528 learners — everyone in a course this week or starting one in the next four weeks,
-on a booking that is not „nein"/„storno". SchoolMan has 15,514 people (about 22,500 bookings), so this
+on a booking that is not „nein"/„storno" — and since 2026-10-18 the 83 participants of this year's group
+visits (611 in all). SchoolMan has 15,514 people (about 22,500 bookings), so this
 is about 3% of them. Nothing beyond the sample is imported. The run is
 `python3 -I scripts/filemaker/read_learners.py | node scripts/filemaker/import-learners.mjs`
 (docs/ADMIN_WORKSPACE.md §Learners from SchoolMan); a second run changes nothing.
@@ -24,6 +25,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `BankAccount` | 62 | `bank_accounts` |
 | Exam bookings (`Booking._ID_Exam`, `Exam`) | 94 (14 sittings linked, 9 earlier ones made) | `bookings` on their sitting (`exam_sessions.filemaker_exam_id`, 0056), all parts. One TestAS booking is left out: no TestAS here |
 | `Agency`, `Corporate` (+ `Management`, `Institution`), their contacts, `CommissionDetail` | 12 agencies · 40 companies · 66 contacts · 12 commission terms | `organisations`, `organisation_contacts`, `agency_commissions` (0057); 1,164 bookings know who pays them, 2,311 letters whom they went to — `read_organisations.py`, after the learners (organisations.md) |
+| `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
 ## Cannot come across yet — the workspace has no place for it
