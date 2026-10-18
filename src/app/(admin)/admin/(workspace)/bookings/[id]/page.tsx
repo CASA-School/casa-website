@@ -279,9 +279,23 @@ export default async function BookingPage({
                 <li key={a.id} className={cn('text-[0.86rem]', a.cancelled && 'text-[var(--casa-muted)] line-through')}>
                   <span className="font-semibold tabular-nums">{dayRange(a.from, a.to, lang)}</span>
                   {' · '}
-                  {[stayName(stayNames?.types, a.typeCode), a.place, a.room, stayName(stayNames?.rooms, a.roomTypeCode), stayName(stayNames?.catering, a.cateringCode)]
+                  {[stayName(stayNames?.types, a.typeCode)].filter(Boolean).join('')}
+                  {a.place ? (
+                    <>
+                      {stayName(stayNames?.types, a.typeCode) ? ' · ' : ''}
+                      {a.placeId && canAccess(user, 'accommodation') ? (
+                        <Link href={`/admin/accommodation/${a.placeId}`} className="font-semibold text-[var(--fm-navy)] hover:underline">
+                          {a.place}
+                        </Link>
+                      ) : (
+                        a.place
+                      )}
+                    </>
+                  ) : null}
+                  {[a.room, stayName(stayNames?.rooms, a.roomTypeCode), stayName(stayNames?.catering, a.cateringCode)]
                     .filter(Boolean)
-                    .join(' · ')}
+                    .map((part) => ` · ${part}`)
+                    .join('')}
                   {a.departureConfirmed ? <span className="text-[var(--casa-muted)]"> · {t('Abreise bestätigt', 'Departure confirmed')}</span> : null}
                   {a.cancelled ? <span className="no-underline"> · {t('abgesagt', 'called off')}</span> : null}
                 </li>

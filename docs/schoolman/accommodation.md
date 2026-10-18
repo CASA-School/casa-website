@@ -40,14 +40,21 @@ accommodation moves, it is built with her.
 
 ## In the workspace today
 
-Only the vocabularies: `accommodation_types`, `accommodation_room_types`, `catering_options`. The
-website's host-family pages are content, not data. There are no host families, rooms or stays.
+Since 2026-10-18 (migration 0060, Rahman: "we are fine with host family privacy"): `accommodations`,
+`accommodation_members`, `accommodation_rooms`, `accommodation_reservations`, and the learners' stays
+(`booking_stays`, 0056) placed at them — „Unterkünfte" and „Aufenthalte" (docs/ADMIN_WORKSPACE.md
+§Accommodation). `read_accommodation.py | import-accommodation.mjs` brings all 142 places: 131 host
+families, 8 CASA flats (three flagged, five WGs found by their stays), 3 others; 108 family members, 169
+rooms, 542 group reservations, 99 comments. Members carry name and role only.
+
+Not yet: rent paid to hosts (`PaymentOut`, finance), the letters to hosts (`StatementLandlord`), keys and
+the flats' cleaning plan (`Key`, `CleaningDetail`, `SingleWeekCleaning`).
 
 ## For the bridge
 
 - The current stays — who lives where until when — are what a colleague needs beside a booking.
-- Host families hold personal data of people who are not learners; they come over only with their
-  own module and a privacy decision.
+- Host families hold personal data of people who are not learners: they come over with their own module
+  (decided 2026-10-18), name and role only for the family.
 
 ## Decided from the data
 

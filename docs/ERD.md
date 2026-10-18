@@ -590,6 +590,44 @@ erDiagram
 A visit's notes are `staff_notes` with entity `group_visit`. Whether a confirmed
 visit is over is read from its dates (docs/ADMIN_WORKSPACE.md §Groups).
 
+## Accommodation (0060)
+
+```mermaid
+erDiagram
+  ACCOMMODATIONS ||--o{ ACCOMMODATION_MEMBERS : "the family"
+  ACCOMMODATIONS ||--o{ ACCOMMODATION_ROOMS : rooms
+  ACCOMMODATIONS ||--o{ ACCOMMODATION_RESERVATIONS : "beds held"
+  GROUP_VISITS o|--o{ ACCOMMODATION_RESERVATIONS : group_visit_id
+  ACCOMMODATIONS o|--o{ BOOKING_STAYS : accommodation_id
+  ACCOMMODATION_ROOMS o|--o{ BOOKING_STAYS : room_id
+
+  ACCOMMODATIONS {
+    uuid id PK
+    text name
+    text kind
+    text contact_name
+    text email
+    text phone
+    text address
+    bool smoker
+    text pets
+    bool washing_machine
+    smallint rating
+    bool is_active
+    text filemaker_id
+  }
+  ACCOMMODATION_ROOMS {
+    uuid id PK
+    uuid accommodation_id FK
+    text name
+    text room_type_code FK
+    smallint beds
+    bool is_active
+  }
+```
+
+A family member is a name and a role (`accommodation_members.role`), nothing more.
+
 ## Notes
 - `course_instances.schedule` should remain structured JSON.
 - Public reads should only expose active or publishable records.

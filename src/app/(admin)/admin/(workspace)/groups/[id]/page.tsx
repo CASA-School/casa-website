@@ -13,6 +13,7 @@ import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
+import { groupReservations } from '@/lib/admin/accommodation';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
@@ -59,12 +60,14 @@ export default async function GroupPage({
   const seesCourses = canAccess(user, 'catalogue');
   const seesOrganisations = canAccess(user, 'organisations');
   const seesOffers = canAccess(user, 'offers');
+  const seesAccommodation = canAccess(user, 'accommodation');
 
-  const [figures, participants, courses, offers, notes, activity, options, deletable] = await Promise.all([
+  const [figures, participants, courses, offers, reservations, notes, activity, options, deletable] = await Promise.all([
     seesBookings ? groupFigures(id) : Promise.resolve(null),
     seesBookings ? groupParticipants(id) : Promise.resolve([]),
     seesCourses ? groupCourses(id) : Promise.resolve([]),
     seesOffers ? groupOffers(id) : Promise.resolve([]),
+    seesAccommodation ? groupReservations(id) : Promise.resolve([]),
     listNotes('group_visit', id),
     activityFor('group_visit', id, 100),
     canEdit ? groupOptions([group.organisationId, group.agencyId, group.courseTypeId]) : Promise.resolve(null),
@@ -76,6 +79,7 @@ export default async function GroupPage({
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     ...(participants.length ? [{ id: 'participants', label: t('Teilnehmende', 'Students'), icon: Icon.people, count: participants.length }] : []),
     ...(offers.length ? [{ id: 'offers', label: t('Angebote', 'Offers'), icon: Icon.offers, count: offers.length }] : []),
+    ...(reservations.length ? [{ id: 'stays', label: t('Unterkünfte', 'Accommodation'), icon: Icon.home, count: reservations.length }] : []),
     ...(courses.length ? [{ id: 'courses', label: t('Kurse', 'Courses'), icon: Icon.catalogue, count: courses.length }] : []),
   ];
   const hidden = <input type="hidden" name="groupId" value={id} />;
@@ -230,6 +234,31 @@ export default async function GroupPage({
                   state={<Badge tone={OFFER_TONES[o.status]}>{pick(lang, OFFER_STATUS_LABELS[o.status])}</Badge>}
                   detail={o.perPerson != null ? t(`${euros(o.perPerson)} pro Person`, `${euros(o.perPerson)} per person`) : null}
                   end={<DateText value={o.createdAt} compact />}
+                />
+              ))}
+            </Rows>
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {reservations.length ? (
+        <RecordTabPanel id="stays">
+          <Card bleed>
+            <Rows>
+              {reservations.map((r) => (
+                <Row
+                  key={r.id}
+                  href={`/admin/accommodation/${r.placeId}`}
+                  icon={<IconChip icon={Icon.home} tint="blue" />}
+                  title={r.placeName}
+                  detail={[
+                    dayRange(r.from, r.to, lang),
+                    r.minPeople || r.maxPeople ? t(`${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} Personen`, `${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} people`) : null,
+                    r.roomName,
+                    r.note,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 />
               ))}
             </Rows>

@@ -97,6 +97,14 @@
     // Removal condition: delete when the FileMaker bridge brings offers across.
     "scripts/filemaker/import-offers.mjs",
 
+    // Writes SchoolMan's places to stay into `accommodations` (family, rooms,
+    // group reservations) and places the learners' stays, from
+    // scripts/filemaker/read_accommodation.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Accommodation). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings accommodation across.
+    "scripts/filemaker/import-accommodation.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.

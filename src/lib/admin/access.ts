@@ -32,6 +32,7 @@ export const MODULES = [
   'offers',
   'organisations',
   'groups',
+  'accommodation',
   'rooms',
   'prices',
   'catalogue',
@@ -72,6 +73,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   offers: { de: 'Angebote', en: 'Offers' },
   organisations: { de: 'Organisationen', en: 'Organisations' },
   groups: { de: 'Gruppen', en: 'Groups' },
+  accommodation: { de: 'Unterkünfte', en: 'Accommodation' },
   rooms: { de: 'Räume', en: 'Rooms' },
   prices: { de: 'Preise', en: 'Prices' },
   catalogue: { de: 'Kurse & Prüfungen', en: 'Courses & exams' },
@@ -128,6 +130,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * `groups` — the group visits, a school class or a company's team coming together — is the team's too
  * (2026-10-18): its participants are learners the team books and houses. `edit` adds, changes and
  * confirms or calls one off; `full` also deletes a visit entered by mistake.
+ * `accommodation` — host families, CASA's flats, their rooms and the stays at them — is the team's
+ * (2026-10-18; the placement is Natalia's daily work, and every colleague answers where a learner lives):
+ * `edit` adds and changes a place, its family and rooms, and places a stay; `full` also deletes.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
@@ -138,6 +143,7 @@ const STAFF_MODULES: readonly WorkspaceModule[] = [
   'bookings',
   'organisations',
   'groups',
+  'accommodation',
   'catalogue',
   'activity',
 ];

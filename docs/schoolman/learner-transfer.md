@@ -27,6 +27,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Agency`, `Corporate` (+ `Management`, `Institution`), their contacts, `CommissionDetail` | 12 agencies · 40 companies · 66 contacts · 12 commission terms | `organisations`, `organisation_contacts`, `agency_commissions` (0057); 1,164 bookings know who pays them, 2,311 letters whom they went to — `read_organisations.py`, after the learners (organisations.md) |
 | `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `Offer` with its lines and letters | 15 to the sample's learners (195 in all with groups and organisations) | `offers` (0059), their letters as sent versions — `read_offers.py` (offers.md) |
+| `Accommodation`, `Room`, the family, `DateRent` | all 142 places · 424 of the sample's stays placed | `accommodations` and their family, rooms and group reservations (0060) — `read_accommodation.py` (accommodation.md) |
 | `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
 ## Cannot come across yet — the workspace has no place for it
@@ -34,7 +35,6 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | SchoolMan | For the sample | What is missing |
 | --- | ---: | --- |
 | `SingleDateStudent` — attendance: present, absent, why, minutes late | 34,112 rows | No attendance at all. It is the Klassenbuch's; whether the workspace shows it (read-only) is a decision |
-| `Accommodation`, `Room` — the host family and its rooms | 56 places for the sample | A stay with a host family comes across without the family: hosts are people who are not learners — their own module and a privacy decision first (open item: placing learners) |
 | `PaymentOut` — rent paid to hosts, agency commission | 392 · 463 | No payouts and no commission (finance, with DATEV) |
 | `Commission` | 890 lines | An agency's general terms come across; the commission on each booking does not (money module) |
 | `Instalment` — payment plans | 412 lines | No instalment plans |

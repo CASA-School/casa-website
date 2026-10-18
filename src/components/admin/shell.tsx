@@ -149,12 +149,13 @@ export async function WorkspaceShell({
             canAccess(user, 'bookings') ||
             canAccess(user, 'offers') ||
             canAccess(user, 'groups') ||
+            canAccess(user, 'accommodation') ||
             canAccess(user, 'organisations') ||
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
                 label={t('Schule', 'School')}
-                hrefs={['/admin/people', '/admin/bookings', '/admin/offers', '/admin/groups', '/admin/organisations', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/bookings', '/admin/offers', '/admin/groups', '/admin/accommodation', '/admin/organisations', '/admin/catalogue']}
               >
                 {canAccess(user, 'people') ? (
                   <NavLink href="/admin/people" title={t('Teilnehmende', 'Students')} icon={Icon.people}>
@@ -178,6 +179,18 @@ export async function WorkspaceShell({
                   <NavLink href="/admin/groups" icon={Icon.group} title={t('Gruppen', 'Groups')}>
                     {t('Gruppen', 'Groups')}
                   </NavLink>
+                ) : null}
+                {/* Where learners stay: the places (host families, CASA's flats), and the stays as the
+                    accommodation colleague works them. */}
+                {canAccess(user, 'accommodation') ? (
+                  <>
+                    <NavLink href="/admin/accommodation" icon={Icon.home} title={t('Unterkünfte', 'Accommodation')} exclude={['/admin/accommodation/stays']}>
+                      {t('Unterkünfte', 'Accommodation')}
+                    </NavLink>
+                    <NavLink href="/admin/accommodation/stays" icon={Icon.calendar} title={t('Aufenthalte', 'Stays')}>
+                      {t('Aufenthalte', 'Stays')}
+                    </NavLink>
+                  </>
                 ) : null}
                 {/* The agencies, companies, schools and offices CASA works with: who pays a booking,
                     whom an offer is for, an agency's commission. */}

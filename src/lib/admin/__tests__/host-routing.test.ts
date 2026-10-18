@@ -320,6 +320,7 @@ describe('workspace auth gate', () => {
       ['offers', '(workspace)/offers'],
       ['organisations', '(workspace)/organisations'],
       ['groups', '(workspace)/groups'],
+      ['accommodation', '(workspace)/accommodation'],
       ['website', '(editor)/website'],
     ];
 

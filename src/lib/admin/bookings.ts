@@ -361,6 +361,8 @@ export type BookingStay = {
   roomTypeCode: string | null;
   cateringCode: string | null;
   place: string | null;
+  /** The place in the accommodation module (0060), when the stay is placed. */
+  placeId: string | null;
   room: string | null;
   cancelled: boolean;
   departureConfirmed: boolean | null;
@@ -375,13 +377,17 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
     room_type_code: string | null;
     catering_code: string | null;
     place: string | null;
+    place_id: string | null;
     room: string | null;
     cancelled: boolean;
     departure_confirmed: boolean | null;
   }>(
-    `SELECT id, to_char(starts_on, 'YYYY-MM-DD') AS starts_on, to_char(ends_on, 'YYYY-MM-DD') AS ends_on, accommodation_type_code, room_type_code, catering_code,
-            place, room, cancelled, departure_confirmed
-       FROM booking_stays WHERE booking_id = $1 ORDER BY starts_on`,
+    `SELECT s.id, to_char(s.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(s.ends_on, 'YYYY-MM-DD') AS ends_on, s.accommodation_type_code, s.room_type_code,
+            s.catering_code, coalesce(a.name, s.place) AS place, a.id AS place_id, coalesce(r.name, s.room) AS room, s.cancelled, s.departure_confirmed
+       FROM booking_stays s
+       LEFT JOIN accommodations a ON a.id = s.accommodation_id
+       LEFT JOIN accommodation_rooms r ON r.id = s.room_id
+      WHERE s.booking_id = $1 ORDER BY s.starts_on`,
     [bookingId]
   );
   return rows.map((r) => ({
@@ -392,6 +398,7 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
     roomTypeCode: r.room_type_code,
     cateringCode: r.catering_code,
     place: r.place,
+    placeId: r.place_id,
     room: r.room,
     cancelled: r.cancelled,
     departureConfirmed: r.departure_confirmed,

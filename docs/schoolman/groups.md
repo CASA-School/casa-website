@@ -40,13 +40,13 @@ company and agency (the organisations reader takes in every group's parties), co
 country, people and ages, stay, lessons (else the span of the booked periods), travel, the comments and
 the work log. The learner sample takes in the participants of this year's four groups (82 bookings,
 `sample.py`), so their pages have their people. Since 0059 a group's offers come across too (47, on its
-page's Angebote tab; offers.md).
+page's Angebote tab; offers.md), and since 0060 the beds held for it (`DateRent`, 338 linked; its page's
+Unterkünfte tab; accommodation.md).
 
 ## Not yet across
 
 | SchoolMan | Why not |
 | --- | --- |
-| `DateRent` — bed reservations with hosts and hostels | Hosts are people: their own module and a privacy decision first |
 | `Letter` with `_ID_Group` (18) | Letters come with the learners; a letter to a group has no place yet |
 | `Invoice` (5), `PaymentIn` on a group | Invoices are finance's (with DATEV) |
 | The participants of earlier years' groups | Beyond the sample |

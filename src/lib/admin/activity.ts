@@ -451,6 +451,34 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Provision einer Agentur geändert', "changed an agency's commission");
     case 'organisation_commission_removed':
       return t('hat die Provision einer Agentur entfernt', "removed an agency's commission");
+    case 'accommodation_created':
+      return t('hat eine Unterkunft angelegt', 'added a place to stay');
+    case 'accommodation_updated':
+      return t('hat eine Unterkunft bearbeitet', 'edited a place to stay');
+    case 'accommodation_deactivated':
+      return t('hat eine Unterkunft auf inaktiv gesetzt', 'set a place to stay inactive');
+    case 'accommodation_reactivated':
+      return t('hat eine Unterkunft wieder aktiv gesetzt', 'set a place to stay active again');
+    case 'accommodation_deleted': {
+      const name = typeof entry.detail?.name === 'string' ? entry.detail.name : '';
+      return name ? t(`hat die Unterkunft „${name}“ gelöscht`, `deleted the place “${name}”`) : t('hat eine Unterkunft gelöscht', 'deleted a place to stay');
+    }
+    case 'accommodation_room_added':
+      return t('hat ein Zimmer hinzugefügt', 'added a room');
+    case 'accommodation_room_updated':
+      return t('hat ein Zimmer geändert', 'changed a room');
+    case 'accommodation_room_removed':
+      return t('hat ein Zimmer entfernt', 'removed a room');
+    case 'accommodation_member_added':
+      return t('hat jemanden zur Gastfamilie hinzugefügt', 'added someone to a host family');
+    case 'accommodation_member_updated':
+      return t('hat einen Eintrag der Gastfamilie geändert', "changed a host family's entry");
+    case 'accommodation_member_removed':
+      return t('hat jemanden aus der Gastfamilie entfernt', 'removed someone from a host family');
+    case 'stay_placed':
+      return t('hat einen Aufenthalt einer Unterkunft zugewiesen', 'placed a stay');
+    case 'stay_unplaced':
+      return t('hat einen Aufenthalt aus seiner Unterkunft genommen', 'took a stay out of its place');
     case 'group_created':
       return t('hat eine Gruppe angelegt', 'added a group');
     case 'group_updated':
@@ -575,6 +603,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'organisation' && entry.entityId && entry.action !== 'organisation_deleted') {
     return `/admin/organisations/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'accommodation' && entry.entityId && entry.action !== 'accommodation_deleted') {
+    return `/admin/accommodation/${entry.entityId}`;
   }
 
   if (entry.entity === 'group_visit' && entry.entityId && entry.action !== 'group_deleted') {

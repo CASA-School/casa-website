@@ -75,6 +75,14 @@ export const Icon = {
       <path d="M14.75 12.25a2.35 2.35 0 0 0-2.9-2.6" />
     </svg>
   ),
+  /** A house — where a learner stays. */
+  home: (
+    <svg {...box}>
+      <path d="M2.5 7.25 8 2.75l5.5 4.5" />
+      <path d="M3.75 6.25v7h8.5v-7" />
+      <path d="M6.75 13.25v-3.5h2.5v3.5" />
+    </svg>
+  ),
   /** A ticket — a booked place. */
   bookings: (
     <svg {...box}>

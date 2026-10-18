@@ -398,7 +398,7 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, private_data, bookings, offers, organisations, groups, rooms, prices, catalogue,
+applications, people, private_data, bookings, offers, organisations, groups, accommodation, rooms, prices, catalogue,
 kursplanung, website, staff, staff_private, activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
@@ -412,7 +412,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Groups, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Groups, Accommodation, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -1221,8 +1221,54 @@ changed a visit here a re-run takes SchoolMan's values; after that, SchoolMan on
 The learner sample takes in the participants of this year's groups (`sample.py`), so their bookings are
 linked: 82 bookings on four visits. SchoolMan's group courses all ended before the course import's
 window, so none is linked yet. A group's offers came across with the offers (0059; its page's Angebote
-tab, docs/OFFERS.md §From SchoolMan). Not across: its letters, invoices and bed reservations
-(`DateRent`) — docs/schoolman/groups.md.
+tab, docs/OFFERS.md §From SchoolMan) and its bed reservations with the accommodation (0060; its page's
+Unterkünfte tab). Not across: its letters and invoices — docs/schoolman/groups.md.
+
+## Accommodation (2026-10-18, migration 0060)
+
+Where learners stay, in „Unterkünfte" and „Aufenthalte" under Schule (module `accommodation`; Rahman:
+"we are fine with host family privacy"). A place (`accommodations`) is a host family, a CASA flat or
+another place (a hotel), with its contact, e-mail, phone and address, its descriptions in German and
+English, smoker, pets, washing machine, SchoolMan's grade, whether it is still used, and a note; the
+family who lives there (`accommodation_members`: name and role only — no birth date, no papers); its
+rooms (`accommodation_rooms`: name, room type, beds, in use or not); the beds held there for a group
+visit (`accommodation_reservations`). A learner's stay (`booking_stays`) points at its place and room.
+
+**Unterkünfte.** Views Alle, Gastfamilien, CASA-WGs, Weitere, Inaktiv; a search by name, host, address or
+someone of the family. A row: the name, the host and the town; the rooms; who stays there today; the next
+arrival. „Neue Unterkunft" asks for the name and kind; how to reach it opens once both are in.
+
+**A place's page.** The head: name, kind, the host, phone, e-mail, address; Zimmer, Wohnen jetzt,
+Nächste Anreise. Tabs: **Übersicht** (the house; the family, added, changed and removed in a dialog; notes
+and history with SchoolMan's comments), **Zimmer** (each with who is in it today, or „frei"), **Belegung**
+(the stays now and coming, then the latest 30 earlier, each to its booking), **Gruppen** (beds held for
+group visits, each to its group). A booking's page links its stay to the place; a group's page has an
+Unterkünfte tab with the beds held for it.
+
+**Aufenthalte.** The accommodation colleague's work list (docs/schoolman/accommodation.md §The work
+lists): Kommen bald (the next two weeks), Wohnen jetzt (the default), Reisen bald ab, Bleiben nach dem Kurs
+(more than a weekend beyond the course's last day), Noch ohne Unterkunft; all, CASA flats or host families;
+a search by name, booking number or place. In Kommen bald and Noch ohne Unterkunft each row places the
+stay — or moves it — at a place and a room of it („stay_placed" in the booking's history).
+
+**Rights and rules.** `view` reads; `edit` adds and changes a place, its family and rooms, sets a place
+inactive, and places a stay; `full` deletes a place (only while no stay or reservation names it and it did
+not come from SchoolMan), a room (only one nobody stayed in; else it is set „nicht mehr vergeben") or a
+family member. Staff hold `edit` by default.
+
+**From SchoolMan (2026-10-18).**
+`python3 -I scripts/filemaker/read_accommodation.py | node scripts/filemaker/import-accommodation.mjs [--dry-run]`,
+after the learners and the groups. All 142 `Accommodation` records: the name from SchoolMan's search field
+(„Name | Person" — a host family's name is the host's own, another place's an institution's), a CASA flat
+when flagged (`_ID_SchoolFlatShare`, three), offered as „CASA – WG", or when most of its stays were booked
+so (five more WGs CASA rents); the place's own channels, else its host's; pets from `AnimalAtHome`; the
+family from the `Person` rows with a role (`_ID_Status_Family`); the rooms (`_ID_TypeRoom` 1 single,
+2 double, 3 triple); the group reservations (`DateRent`, linked to their visit); the comments. First run:
+131 host families, 8 CASA flats, 3 others; 108 family members, 169 rooms, 542 reservations (338 linked to
+their group), 99 comments; 424 of the 448 imported stays placed. While no colleague has changed a place
+here a re-run takes SchoolMan's values; after that SchoolMan only fills what is empty. Not across: rent
+paid to hosts (`PaymentOut`) and the letters to them (`StatementLandlord`) — finance and letters;
+the keys and the flats' cleaning plan.
 
 ## Courses (2026-10-17, migration 0041)
 
