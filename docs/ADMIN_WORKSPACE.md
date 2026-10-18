@@ -1187,9 +1187,10 @@ and sets it inactive or active again; `full` deletes an organisation, removes a 
 term, each after a confirmation. Staff hold `edit` by default; owners and administrators `full`.
 
 **Rules.** An organisation CASA no longer works with is set inactive, never deleted: it keeps everything
-and moves to „Inaktiv". „Löschen" is for one entered by mistake and is offered only while no booking,
-offer, course or letter names it and it did not come from SchoolMan (the import would bring it back); the
-action refuses otherwise and says what names it. Its contacts and commission terms go with it. Every
+and moves to „Inaktiv". „Löschen" is for one entered by mistake and is offered only while nothing names it — a booking, an
+offer, a group, a course, a letter, an invoice, a commission, a payout, an internship place or a book
+order (2026-10-18: a delete would unlink each one silently) — and it did not come from SchoolMan (the
+import would bring it back); the action refuses otherwise and says what names it. Its contacts and commission terms go with it. Every
 change is a line in Aktivität („hat eine Organisation angelegt", „hat die Provision einer Agentur
 eingetragen", …); the trail says that a contact changed, never who.
 

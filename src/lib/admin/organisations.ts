@@ -517,8 +517,20 @@ export async function setOrganisationActive(id: string, active: boolean, actor: 
   return { ok: true };
 }
 
-/** What names an organisation, and so keeps it from being deleted. */
-type Holds = { bookings: number; offers: number; groups: number; courses: number; letters: number; fromSchoolMan: boolean };
+/** What names an organisation, and so keeps it from being deleted: a delete would unlink it from each, silently. */
+type Holds = {
+  bookings: number;
+  offers: number;
+  groups: number;
+  courses: number;
+  letters: number;
+  commissions: number;
+  payouts: number;
+  invoices: number;
+  internships: number;
+  orders: number;
+  fromSchoolMan: boolean;
+};
 
 const HOLDS = `
   SELECT (SELECT count(*) FROM bookings b WHERE b.payer_organisation_id = o.id AND b.deleted_at IS NULL) AS bookings,
@@ -526,19 +538,41 @@ const HOLDS = `
          (SELECT count(*) FROM group_visits v WHERE v.organisation_id = o.id OR v.agency_id = o.id) AS groups,
          (SELECT count(*) FROM courses c WHERE c.organisation_id = o.id) AS courses,
          (SELECT count(*) FROM letters l WHERE l.organisation_id = o.id) AS letters,
+         (SELECT count(*) FROM booking_commissions m WHERE m.organisation_id = o.id) AS commissions,
+         (SELECT count(*) FROM payouts p WHERE p.organisation_id = o.id) AS payouts,
+         (SELECT count(*) FROM invoices i WHERE i.organisation_id = o.id) AS invoices,
+         (SELECT count(*) FROM group_internships gi WHERE gi.organisation_id = o.id) AS internships,
+         (SELECT count(*) FROM book_orders bo WHERE bo.organisation_id = o.id) AS orders,
          EXISTS (SELECT 1 FROM filemaker_links fl WHERE fl.entity = 'organisation' AND fl.entity_id = o.id) AS from_schoolman
     FROM organisations o WHERE o.id = $1`;
 
-type HoldsRow = { bookings: string; offers: string; groups: string; courses: string; letters: string; from_schoolman: boolean };
+type HoldsRow = {
+  bookings: string;
+  offers: string;
+  groups: string;
+  courses: string;
+  letters: string;
+  commissions: string;
+  payouts: string;
+  invoices: string;
+  internships: string;
+  orders: string;
+  from_schoolman: boolean;
+};
 const toHolds = (r: HoldsRow): Holds => ({
   bookings: Number(r.bookings),
   offers: Number(r.offers),
   groups: Number(r.groups),
   courses: Number(r.courses),
   letters: Number(r.letters),
+  commissions: Number(r.commissions),
+  payouts: Number(r.payouts),
+  invoices: Number(r.invoices),
+  internships: Number(r.internships),
+  orders: Number(r.orders),
   fromSchoolMan: r.from_schoolman,
 });
-const named = (h: Holds) => h.bookings + h.offers + h.groups + h.courses + h.letters;
+const named = (h: Holds) => h.bookings + h.offers + h.groups + h.courses + h.letters + h.commissions + h.payouts + h.invoices + h.internships + h.orders;
 const held = (h: Holds) => named(h) > 0 || h.fromSchoolMan;
 
 /** Whether „Löschen" can be offered: nothing names it, and it did not come from SchoolMan. */
@@ -558,13 +592,18 @@ function holdsWords(h: Holds): Bilingual {
   add(h.groups, ['Gruppe', 'Gruppen'], ['group', 'groups']);
   add(h.courses, ['Kurs', 'Kurse'], ['course', 'courses']);
   add(h.letters, ['Brief', 'Briefe'], ['letter', 'letters']);
+  add(h.invoices, ['Rechnung', 'Rechnungen'], ['invoice', 'invoices']);
+  add(h.commissions, ['Provision', 'Provisionen'], ['commission', 'commissions']);
+  add(h.payouts, ['Auszahlung', 'Auszahlungen'], ['payout', 'payouts']);
+  add(h.internships, ['Praktikumsplatz', 'Praktikumsplätze'], ['internship place', 'internship places']);
+  add(h.orders, ['Buchbestellung', 'Buchbestellungen'], ['book order', 'book orders']);
   const join = (words: string[], and: string) => (words.length > 1 ? `${words.slice(0, -1).join(', ')} ${and} ${words[words.length - 1]}` : (words[0] ?? ''));
   return { de: join(parts.map((p) => p.de), 'und'), en: join(parts.map((p) => p.en), 'and') };
 }
 
 /**
- * Gone, for an organisation entered by mistake: only while no booking, offer, group, course or letter names it
- * and it did not come from SchoolMan. One CASA worked with is set inactive instead. Its contacts and
+ * Gone, for an organisation entered by mistake: only while nothing names it (a booking, offer, group, course,
+ * letter, invoice, commission, payout, internship place or book order) and it did not come from SchoolMan. One CASA worked with is set inactive instead. Its contacts and
  * commission terms go with it.
  */
 export async function deleteOrganisation(id: string, actor: StaffUser): Promise<Result> {
