@@ -20,6 +20,7 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
   const { t, lang } = await getI18n();
 
   let back = { href: found.personId ? `/admin/people/${found.personId}?tab=letters` : '/admin', label: t('Zur Person', 'Back to the person') };
+  if (!found.personId && found.accommodationId) back = { href: `/admin/accommodation/${found.accommodationId}?tab=letters`, label: t('Zur Unterkunft', 'Back to the place') };
   if (found.bookingId) back = { href: `/admin/bookings/${found.bookingId}`, label: t('Zur Buchung', 'Back to the booking') };
   if (found.offerId) back = { href: `/admin/offers/${found.offerId}/letter?version=${found.version}`, label: t('Zum Angebot', 'Back to the offer') };
   if (found.registrationId) back = { href: `/admin/registrations/course/${found.registrationId}`, label: t('Zur Anmeldung', 'Back to the registration') };
@@ -41,7 +42,10 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
       letter={found.letter}
       email={found.email}
       recipientName={found.recipientName}
-      sentLine={t(`Gesendet am ${when}${found.sentByName ? ` von ${found.sentByName}` : ''}`, `Sent on ${when}${found.sentByName ? ` by ${found.sentByName}` : ''}`)}
+      sentLine={
+        t(`Gesendet am ${when}${found.sentByName ? ` von ${found.sentByName}` : ''}`, `Sent on ${when}${found.sentByName ? ` by ${found.sentByName}` : ''}`) +
+        (found.sentVia === 'email' ? t(' · per E-Mail', ' · by email') : found.sentVia === 'print' ? t(' · gedruckt', ' · printed') : '')
+      }
       back={back}
       justSent={sent === '1'}
     />

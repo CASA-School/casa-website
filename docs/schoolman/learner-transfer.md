@@ -28,6 +28,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `Offer` with its lines and letters | 15 to the sample's learners (195 in all with groups and organisations) | `offers` (0059), their letters as sent versions — `read_offers.py` (offers.md) |
 | `Accommodation`, `Room`, the family, `DateRent` | all 142 places · 424 of the sample's stays placed | `accommodations` and their family, rooms and group reservations (0060) — `read_accommodation.py` (accommodation.md) |
+| `WorkFlowLetter`, `StatementLandlord`, `Complaint` | 7,012 letters · 130 letters to hosts · 2 | how a letter went (`letters.sent_via`), letters to hosts on the place (0067), complaints as notes — `read_letters_extra.py` |
 | `PreBooking`, `WaitingRoom` — how they came in | 449 · 2 with a course | notes „Anmeldung in SchoolMan: …" on the booking or person; waiting-list entries (0065) — `read_intake.py` (intake.md) |
 | `SingleDateStudent` — attendance (the Klassenbuch's) | 34,568 | `booking_attendance` (0064), read only: „Anwesenheit" on the booking — `read_attendance.py` |
 | `Instalment`, `Commission`, `PaymentOut`, `Invoice` | 412 · 890 · 920 · 124 (642 with organisations') | `booking_instalments`, `booking_commissions`, `payouts`, `invoices` (0063), read only — `read_money.py` (money.md) |
@@ -39,11 +40,9 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 
 | SchoolMan | For the sample | What is missing |
 | --- | ---: | --- |
-| `WorkFlowLetter` — how a letter was sent (e-mail, print, SMTP) | 8,620 | Letters come with their date, not how they went |
 | Test results as the confirmed level | 539 | They are the learner's test history now; „Niveau" stays „nicht bestätigt" — a confirmed level is a teacher's (the placement review, the Klassenbuch) |
 | Learning agreements as records | 154 | Notes only; no agreement module |
 | `Booking.CertificateText` — the certificate's wording | 2,160 | No certificate of participation yet |
-| `Complaint` | 2 | No complaints |
 | Letters before 2025 | — | They live in `Letter.fmp12`, a separate file not in reach |
 | Periods on courses before our twelve months | 1,069 | They keep their dates without a course (open item: past courses) |
 

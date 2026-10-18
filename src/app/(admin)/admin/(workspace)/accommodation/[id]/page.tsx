@@ -28,6 +28,7 @@ import { ACCOMMODATION_KIND_LABELS, MEMBER_ROLE_LABELS } from '@/lib/admin/accom
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { lettersForPlace } from '@/lib/admin/letters/repo';
 import { listNotes } from '@/lib/admin/notes';
 import { cn } from '@/lib/utils';
 
@@ -52,12 +53,13 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const seesBookings = canAccess(user, 'bookings');
   const seesGroups = canAccess(user, 'groups');
 
-  const [members, rooms, stays, reservations, payouts, notes, activity, types, deletable] = await Promise.all([
+  const [members, rooms, stays, reservations, payouts, letters, notes, activity, types, deletable] = await Promise.all([
     placeMembers(id),
     placeRooms(id),
     placeStays(id),
     placeReservations(id),
     seesBookings ? placePayouts(id) : Promise.resolve([]),
+    seesBookings ? lettersForPlace(id) : Promise.resolve([]),
     listNotes('accommodation', id),
     activityFor('accommodation', id, 50),
     canEdit ? roomTypes() : Promise.resolve([]),
@@ -76,6 +78,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     ...(stays.current.length + stays.earlierTotal ? [{ id: 'stays', label: t('Belegung', 'Stays'), icon: Icon.people, count: stays.current.length + stays.earlierTotal }] : []),
     ...(reservations.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: reservations.length }] : []),
     ...(payouts.length ? [{ id: 'rent', label: t('Miete', 'Rent'), icon: Icon.money, count: payouts.length }] : []),
+    ...(letters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
   ];
   const thisYear = String(new Date().getFullYear());
   const rentThisYear = payouts.filter((p) => p.paidOn?.startsWith(thisYear)).reduce((s, p) => s + p.amount, 0);
@@ -355,6 +358,26 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
             actions={<span className="text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{t(`${thisYear}: ${euros(rentThisYear)}`, `${thisYear}: ${euros(rentThisYear)}`)}</span>}
           >
             <MoneyRows rows={payouts} lang={lang} linked={seesBookings} />
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {letters.length ? (
+        <RecordTabPanel id="letters">
+          <Card bleed>
+            <ul className="py-1.5">
+              {letters.map((l) => (
+                <li key={l.id}>
+                  <Link href={`/admin/letters/${l.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
+                    <IconChip icon={Icon.mail} tint="blue" />
+                    <span className="min-w-0 flex-1 truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{l.subject}</span>
+                    <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
+                      <DateText value={l.sentAt} compact />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Card>
         </RecordTabPanel>
       ) : null}

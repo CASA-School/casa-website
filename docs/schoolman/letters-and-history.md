@@ -96,3 +96,15 @@ nobody else has access to them.
 
 1. Receipts, confirmations (first, individual, exam, agency) and the missing-information letter are
    about half of all letters (16,220 of 33,218) — the ones to build first?
+
+## Letters to hosts, how letters went, complaints (2026-10-18, migration 0067)
+
+`read_letters_extra.py | import-letters-extra.mjs`, after the learners and the accommodation:
+
+- **Letters to hosts** (`StatementLandlord`, 752; 130 on the sample's bookings) come across as SchoolMan
+  letters of the place (`letters.accommodation_id`) and of the booking they are about, with no learner as
+  addressee — the place's „Briefe" tab, the booking's letters.
+- **How a letter went** (`WorkFlowLetter.FormCommunication`: `Email_Client`, `EmailSMPT` → e-mail; `Print`
+  → printed; the latest says): `letters.sent_via` on 7,012 letters, shown on the letter's page beside its day.
+- **Complaints** (`Complaint`, 2 for the sample) are notes on the booking, else the learner.
+

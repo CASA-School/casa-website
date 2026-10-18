@@ -88,10 +88,14 @@ export type SentLetter = {
   offerId: string | null;
   registrationId: string | null;
   personId: string | null;
+  /** A letter to a place — SchoolMan's letters to hosts (0067). */
+  accommodationId: string | null;
+  /** How it went out, where SchoolMan logged it (0067). */
+  sentVia: 'email' | 'print' | null;
 };
 
 const SENT = `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
-                     l.registration_id, l.person_id
+                     l.registration_id, l.person_id, l.accommodation_id, l.sent_via
                 FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by`;
 
 type SentRow = {
@@ -106,6 +110,8 @@ type SentRow = {
   offer_id: string | null;
   registration_id: string | null;
   person_id: string | null;
+  accommodation_id: string | null;
+  sent_via: 'email' | 'print' | null;
 };
 
 const toSent = (r: SentRow): SentLetter => ({
@@ -120,7 +126,14 @@ const toSent = (r: SentRow): SentLetter => ({
   offerId: r.offer_id,
   registrationId: r.registration_id,
   personId: r.person_id,
+  accommodationId: r.accommodation_id,
+  sentVia: r.sent_via,
 });
+
+/** The letters to a place — to a host, about a learner's stay — the latest first. */
+export async function lettersForPlace(placeId: string): Promise<SentLetter[]> {
+  return (await query<SentRow>(`${SENT} WHERE l.accommodation_id = $1 ORDER BY l.sent_at DESC`, [placeId])).map(toSent);
+}
 
 /** A website registration's letters, the latest first. */
 export async function lettersForRegistration(registrationId: string): Promise<SentLetter[]> {
@@ -149,7 +162,7 @@ export async function lettersForPerson(canonicalPersonId: string): Promise<SentL
 export async function getSentLetter(id: string): Promise<(SentLetter & { letter: Letter; email: string | null; recipientName: string }) | null> {
   const row = await queryFirst<SentRow & { document: unknown; email: string | null; recipient_name: string }>(
     `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
-            l.registration_id, l.person_id, l.document, l.email, l.recipient_name
+            l.registration_id, l.person_id, l.accommodation_id, l.sent_via, l.document, l.email, l.recipient_name
        FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by WHERE l.id = $1`,
     [id]
   );

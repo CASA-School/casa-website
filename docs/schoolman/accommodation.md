@@ -47,8 +47,9 @@ Since 2026-10-18 (migration 0060, Rahman: "we are fine with host family privacy"
 families, 8 CASA flats (three flagged, five WGs found by their stays), 3 others; 108 family members, 169
 rooms, 542 group reservations, 99 comments. Members carry name and role only.
 
-Not yet: rent paid to hosts (`PaymentOut`, finance), the letters to hosts (`StatementLandlord`), keys and
-the flats' cleaning plan (`Key`, `CleaningDetail`, `SingleWeekCleaning`).
+Since then also the rent paid to hosts (`payouts`, 0063 — the place's „Miete" tab) and the letters to
+hosts (`StatementLandlord`, 0067 — the place's „Briefe" tab). Not yet: keys and the flats' cleaning plan
+(`Key`, `CleaningDetail`, `SingleWeekCleaning`).
 
 ## For the bridge
 

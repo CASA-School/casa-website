@@ -135,6 +135,13 @@
     // Removal condition: delete when the FileMaker bridge brings intake across.
     "scripts/filemaker/import-intake.mjs",
 
+    // Writes SchoolMan's letters to hosts, how each letter went out, and the
+    // complaints, from scripts/filemaker/read_letters_extra.py through a pipe
+    // (docs/schoolman/letters-and-history.md). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings letters across.
+    "scripts/filemaker/import-letters-extra.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.
