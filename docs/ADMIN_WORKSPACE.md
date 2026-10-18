@@ -895,7 +895,7 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     act on now, or „Alle" on a register —, the views a record moves through follow in that order, the
     archive (Inaktiv, Ehemalige, Storniert, Gelöscht) comes last, and „Alle" closes a work list. A stage
     view says where a record stands, so a record is in one; a question view (Zahlung offen, Ohne
-    Folgekurs, Unter Beobachtung) may cut across them, and then it is ordered by its question (most owed
+    Folgekurs, Wiedervorlage) may cut across them, and then it is ordered by its question (most owed
     first, ending first). A view never repeats another screen's job:
     who needs a room is „Aufenthalte", not a bookings view; what is open under a person is worked in the
     inboxes, not a register view. One thing has one word everywhere („Zahlung offen" in Buchungen and
@@ -915,7 +915,7 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     | Anfragen, Anmeldungen, Bewerbungen | Letzte 7 Tage · Verlauf | the inbox design (§Lists 16); search finds everything |
     | Einstufungstests | Wartet auf Lehrkraft · Test läuft noch · Bestätigt · Alle | |
     | Teilnehmende | Alle · Kommend · Im Kurs · Ohne Folgekurs · Zahlung offen · Abgeschlossen · Gelöscht | „Neu" is a word on the row |
-    | Buchungen | Laufend · Kommend · Zahlung offen · Unter Beobachtung · Wiedervorlage · Vergangen · Storniert · Alle | the sum owed above; search by name, booking number or course |
+    | Buchungen | Laufend · Kommend · Zahlung offen · Wiedervorlage · Vergangen · Storniert · Alle | the team's colour as a dot before each name; the sum owed above; search by name, booking number or course |
     | Angebote | Offen · Angenommen · Nicht angenommen · Alle | |
     | Gruppen | Aktuell · Angefragt · Vergangen · Abgesagt · Alle | Aktuell: here now or still to come, as on Kurse |
     | Unterkünfte | Alle · Gastfamilien · CASA-WGs · Weitere · Inaktiv | |
@@ -1054,8 +1054,8 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     aligned columns — and above it the sum still owed across all bookings
     (`bookingsOwed`), the one figure its tabs do not carry (2026-10-18). „Zahlung
     offen" is every booking that still owes something, most owed first — under
-    observation or not, and not one with nothing charged; „Unter Beobachtung" is
-    the bookings SchoolMan's yellow marks that are not over yet. A booking's page: the course, the dates and weeks, the
+    observation or not, and not one with nothing charged. Yellow is no view of its own
+    (2026-10-18): it is a colour on the row, like the other three. A booking's page: the course, the dates and weeks, the
     stay and who pays as `MetaLine` under the name; the header's bar is the
     money (`StatBar`: total, paid, open) with a line that fills as it is paid;
     the periods, costs and payments stay ledgers; beside them what else
@@ -1069,15 +1069,26 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     colour the team knows from SchoolMan (`docs/schoolman/bookings.md`), worked
     out by `bookingLight()` and never typed: red when cancelled, yellow while a
     colleague has it *unter Beobachtung* (with a reason — Niveau, Visum,
-    Anwesenheit, Unterlagen fehlen, Sonstiges — and a note), grey *Unklar* until
-    the charges are paid in full, green when all is well. Only yellow is stored
-    (`observation_reason`, who and when); setting and ending it are lines in the
-    booking's history. The list has a „Stand" column (a dot beside the name on a
-    phone) and the team's work lists: Laufend splits into „Enden bald" and
-    „Laufen weiter", Kommend into „Starten bald" and „Später" (two weeks), plus
-    the views *Unklar* and *Unter Beobachtung*. The booking's head shows the
-    colour as a pill; a lifecycle badge only for Reserviert and Abgeschlossen.
-    A cancelled booking's leftover is not shown as owed.
+    Anwesenheit, Unterlagen fehlen, Sonstiges, which needs a note saying what),
+    grey *Offen* until the charges are paid in full, green when all is well. Only
+    yellow is stored (`observation_reason`, who and when); setting and ending it
+    are lines in the booking's history.
+
+    **Colours, not words (Rahman, 2026-10-18: "play with colors and dropdown …
+    instead of the whole word, the staff is used to the colors").** In the lists —
+    Buchungen, a group's, an organisation's, a sitting's and a course's people —
+    the colour is a dot before the name, its word and reason on hover
+    (`BookingLightDot`); Buchungen has no „Stand" column and no yellow view. On
+    the learner's page (each booking, and the course they are in) the dot opens
+    the colours to choose from (`BookingColour` → `BookingLightMenu`, action
+    `setBookingLightAction`): the money's own colour, or yellow with a reason;
+    „Sonstiges" asks for its note in the panel. The booking's head keeps the pill
+    with its words and money, and the pill opens the same panel; the „Beobachten"
+    and „Beobachtung beenden" buttons are gone. Red is a cancellation and is not
+    chosen there. Laufend splits into „Enden bald" and „Laufen weiter", Kommend
+    into „Starten bald" and „Später" (two weeks). A lifecycle badge only for
+    Reserviert and Abgeschlossen. A cancelled booking's leftover is not shown as
+    owed.
 
     **Booking numbers (2026-10-16, migration 0033).** Rahman: "give bookings
     their own numbers". „B-2026-0042": the year a booking was made and a running

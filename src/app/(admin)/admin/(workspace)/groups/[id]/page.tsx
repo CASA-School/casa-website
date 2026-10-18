@@ -6,7 +6,7 @@ import { RecordFoot } from '../../bookings/record-foot';
 import { courseHref } from '../../catalogue/course-href';
 import { deleteGroupAction, setGroupStatusAction } from '../actions';
 import { EditGroupForm } from '../group-forms';
-import { BookingLightPill } from '@/components/admin/booking-light';
+import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { dayRange, euros } from '@/components/admin/list';
@@ -467,10 +467,15 @@ function ParticipantRows({ participants, lang, t }: { participants: readonly Gro
             icon={<IconChip icon={Icon.bookings} tint="sun" />}
             title={p.personName}
             state={
-              <BookingLightPill
+              <BookingLightDot
                 light={bookingLight(p)}
-                label={pick(lang, bookingLightLabel(p))}
-                detail={p.observationReason && p.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[p.observationReason]) : undefined}
+                label={[
+                  pick(lang, bookingLightLabel(p)),
+                  p.observationReason && p.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[p.observationReason]) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+                size="md"
               />
             }
             detail={[p.number, range(p.startDate, p.endDate, lang) ?? t('Keine Daten', 'No dates'), p.stay].filter(Boolean).join(' · ')}

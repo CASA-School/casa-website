@@ -5,8 +5,9 @@ import pg from 'pg';
 
 /**
  * A booking's colour (2026-10-16, docs/schoolman/bookings.md): grey („Offen", „Anzahlung erhalten") until paid in full,
- * yellow while a colleague has it under observation — with the reason in its head, in the list's
- * „Unter Beobachtung" view and in its history — and green once the money is in.
+ * yellow while a colleague has it under observation — chosen from the colour itself, on the booking's
+ * page or the learner's (2026-10-18), with the reason in its head, on the list's dot and in its history
+ * — and green once the money is in.
  *
  * Runs only with a database and an owner account, in German (pinned). Everything it makes is
  * deleted afterwards.
@@ -80,11 +81,9 @@ test.describe('booking colours', () => {
     // The grey says what it is (2026-10-17): nothing has come in yet.
     await expect(light).toContainText('Offen');
 
-    // Yellow, with the reason, in the head, the list and the history.
-    await page.getByRole('button', { name: 'Beobachten' }).click();
-    await page.getByRole('radio', { name: 'Niveau' }).check();
-    await page.getByRole('textbox', { name: 'Notiz' }).fill('Kommt eher aus A2.');
-    await page.getByRole('button', { name: 'Unter Beobachtung stellen' }).click();
+    // Yellow, chosen from the colour, with the reason in the head, on the list's dot and in the history.
+    await page.getByRole('button', { name: /^Farbe: Offen/ }).click();
+    await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Niveau' }).click();
     await expect(light).toHaveAttribute('data-light', 'watch');
     await expect(light).toContainText('Niveau');
     await expect(page.getByText('hat die Buchung unter Beobachtung gestellt')).toBeVisible();
@@ -96,13 +95,26 @@ test.describe('booking colours', () => {
     await page.goto(`/admin/bookings?filter=all&q=${encodeURIComponent(number)}`);
     await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toBeVisible();
 
-    // Among the bookings under observation (SchoolMan's „u.B." ones too, locally): found by name.
-    await page.goto(`/admin/bookings?filter=watch&q=${encodeURIComponent('Bea Buchungstest')}`);
-    await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' })).toContainText('Niveau');
+    // In the list, the colour before the name, its word and reason on hover.
+    await expect(page.getByRole('row').filter({ hasText: 'Bea Buchungstest' }).getByRole('img', { name: 'Unter Beobachtung · Niveau' })).toBeVisible();
+
+    // On the learner's page the dot changes it too: „Sonstiges" asks what, then back to the money's colour.
+    await page.goto(`/admin/people/${personId}`);
+    const dot = page.getByRole('button', { name: /^Farbe: Unter Beobachtung · Niveau/ }).first();
+    await dot.click();
+    const colours = page.getByRole('dialog', { name: 'Farbe der Buchung' });
+    await colours.getByRole('button', { name: 'Sonstiges …' }).click();
+    await colours.getByRole('textbox', { name: 'Sonstiges' }).fill('Kommt eher aus A2.');
+    await colours.getByRole('button', { name: 'Speichern' }).click();
+    await expect(page.getByRole('button', { name: /^Farbe: Unter Beobachtung · Sonstiges/ }).first()).toBeVisible();
+    const note = await client.query<{ observation_reason: string; observation_note: string }>(`SELECT observation_reason, observation_note FROM bookings WHERE id = $1`, [bookingId]);
+    expect(note.rows[0]).toEqual({ observation_reason: 'other', observation_note: 'Kommt eher aus A2.' });
+    await page.getByRole('button', { name: /^Farbe: Unter Beobachtung/ }).first().click();
+    await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Offen' }).click();
+    await expect(page.getByRole('button', { name: /^Farbe: Offen/ }).first()).toBeVisible();
 
     // Ended: the colour is the money's again.
     await page.goto(`/admin/bookings/${bookingId}`);
-    await page.getByRole('button', { name: 'Beobachtung beenden' }).click();
     await expect(light).toHaveAttribute('data-light', 'unclear');
 
     // Paid in full: green, with nobody changing a status.

@@ -6,7 +6,7 @@ import { RecordFoot } from '../../bookings/record-foot';
 import { courseHref } from '../../catalogue/course-href';
 import { deleteOrganisationAction, removeCommissionAction, removeContactAction, setOrganisationActiveAction } from '../actions';
 import { CommissionForm, ContactForm, EditOrganisationForm } from '../organisation-forms';
-import { BookingLightPill } from '@/components/admin/booking-light';
+import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
@@ -599,10 +599,15 @@ function BookingRows({ bookings, lang, t, quiet = false }: { bookings: readonly 
             icon={<IconChip icon={Icon.bookings} tint="sun" />}
             title={b.personName}
             state={
-              <BookingLightPill
+              <BookingLightDot
                 light={bookingLight(b)}
-                label={pick(lang, bookingLightLabel(b))}
-                detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
+                label={[
+                  pick(lang, bookingLightLabel(b)),
+                  b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+                size="md"
               />
             }
             detail={[b.courseTypeName, b.number, range(b.startDate, b.endDate, lang) ?? t('Keine Daten', 'No dates')].filter(Boolean).join(' · ')}

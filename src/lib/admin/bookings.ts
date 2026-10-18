@@ -405,7 +405,7 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
   }));
 }
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'followup' | 'past' | 'cancelled' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
@@ -414,9 +414,6 @@ const FILTERS: Record<BookingFilter, string> = {
   // „Zahlung offen": something is still owed — the same rule as the learners' view and the figure above the
   // list (2026-10-18). A booking with nothing charged owes nothing; one under observation still owes.
   unclear: `b.status <> 'cancelled' AND ${CHARGED} - ${PAID} > 0.005`,
-  // Under observation and not over yet: a finished course needs no more watching.
-  watch: `b.status IN ('reserved','confirmed') AND b.observation_reason IS NOT NULL
-          AND coalesce((SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id), current_date) >= current_date`,
   // A follow-up due today or before that nobody has looked at yet (0062).
   followup: `EXISTS (SELECT 1 FROM booking_follow_ups f WHERE f.booking_id = b.id AND f.done_at IS NULL AND f.due_on <= current_date)`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,

@@ -8,7 +8,7 @@ import { StartEditForm } from '../cohort-form';
 import { RecordFoot } from '../../bookings/record-foot';
 import { CourseForm, NewCourseForm } from '../course-forms';
 import { CloseForm, MoveForm } from '../waitlist-forms';
-import { BookingLightPill } from '@/components/admin/booking-light';
+import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { dayRange } from '@/components/admin/list';
@@ -809,7 +809,7 @@ function BookedRows({ bookings, lang }: { bookings: StartBooking[]; lang: WsLang
           <li key={b.id}>
             <Link href={`/admin/bookings/${b.id}`} className="flex items-center justify-between gap-3 px-5 py-2 text-[0.86rem] transition-colors hover:bg-[var(--ws-row-hover)]">
               <span className="truncate font-medium text-[var(--casa-ink)]">{b.personName}</span>
-              <BookingLightPill light={light} label={pick(lang, bookingLightLabel(money))} />
+              <BookingLightDot light={light} label={pick(lang, bookingLightLabel(money))} size="md" />
             </Link>
           </li>
         );

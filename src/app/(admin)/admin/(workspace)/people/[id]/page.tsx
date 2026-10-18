@@ -7,6 +7,7 @@ import { deletePersonAction, removeBankAccountAction } from '../actions';
 import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
+import { BookingColour } from '../../bookings/booking-colour';
 import { RecordFoot } from '../../bookings/record-foot';
 import { courseNameResolver } from '../../registrations/course-names';
 import { optionLine } from '../../registrations/option-label';
@@ -19,8 +20,7 @@ import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordH
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
-import { bookingLight, bookingLightLabel, type BookingListItem, OBSERVATION_REASON_LABELS, personBookings } from '@/lib/admin/bookings';
-import { BookingLightPill } from '@/components/admin/booking-light';
+import { type BookingListItem, personBookings } from '@/lib/admin/bookings';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
@@ -249,14 +249,9 @@ export default async function PersonPage({
         at: b.createdAt,
         href: `/admin/bookings/${b.id}`,
         open: b.status === 'reserved' || b.status === 'confirmed' || balance > 0,
-        // The booking's colour, as on its own page: red, yellow with the reason, grey until paid, green.
-        state: (
-          <BookingLightPill
-            light={bookingLight(b)}
-            label={pick(lang, bookingLightLabel(b))}
-            detail={b.observationReason && b.status !== 'cancelled' ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
-          />
-        ),
+        // The booking's colour, as the team reads it — red, yellow, grey until paid, green — its word on hover,
+        // and a click on it changes it (2026-10-18); what is open is the amount beside it.
+        state: <BookingColour booking={b} lang={lang} canEdit={canBook} />,
         // Nothing charged is not „paid".
         amount:
           b.status === 'cancelled' || (b.charged <= 0 && balance <= 0) ? null : balance > 0 ? (
@@ -490,7 +485,7 @@ export default async function PersonPage({
       <RecordTabPanel id="overview">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="space-y-4">
-            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} /> : null}
+            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} canEdit={canBook} /> : null}
             {/* The course above is already open; „nothing open" only when nothing at all is. */}
             {overviewOpen.length || !spotlight ? (
               <Card title={t('Offen', 'Open')} icon={Icon.registrations} tint="blue" bleed>
@@ -902,18 +897,21 @@ function CaseRows({ cases, lang, quiet = false }: { cases: readonly Case[]; lang
   return (
     <ul className="py-1.5">
       {cases.map((c) => (
-        <li key={c.key}>
-          <Link
-            href={c.href}
-            className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]"
-          >
-            <span className={cn(quiet && 'opacity-70')}>
+        // The link covers the row, so a booking's colour can be a control of its own above it: a button
+        // may not sit inside a link.
+        <li
+          key={c.key}
+          className="relative flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)] has-[a:focus-visible]:bg-[var(--ws-row-hover)]"
+        >
+          <Link href={c.href} aria-label={[c.title, pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')} className="absolute inset-0 outline-none" />
+          <span className={cn(quiet && 'opacity-70')}>
               <IconChip icon={KINDS[c.kind].icon} tint={KINDS[c.kind].tint} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                 <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{c.title}</span>
-                {c.state}
+                {/* A booking's colour sits above the row's link: its word shows on hover, and it is a control of its own. */}
+                {c.kind === 'booking' ? <span className="relative z-10 inline-flex">{c.state}</span> : c.state}
               </span>
               <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">
                 {[pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')}
@@ -924,7 +922,6 @@ function CaseRows({ cases, lang, quiet = false }: { cases: readonly Case[]; lang
                 <DateText value={c.at} compact />
               </span>
             )}
-          </Link>
         </li>
       ))}
     </ul>
@@ -937,7 +934,7 @@ const DAY = 86_400_000;
  * The course a learner is in — which week of how many, as a line that fills — or the next one and
  * how soon it starts, with the booking's colour and what is still open on it.
  */
-function CourseNow({ booking, running, today, lang }: { booking: BookingListItem; running: boolean; today: Date; lang: WsLang }) {
+function CourseNow({ booking, running, today, lang, canEdit }: { booking: BookingListItem; running: boolean; today: Date; lang: WsLang; canEdit: boolean }) {
   const t = translator(lang);
   const start = booking.startDate!;
   const end = booking.endDate!;
@@ -945,7 +942,6 @@ function CourseNow({ booking, running, today, lang }: { booking: BookingListItem
   const weeks = teachingWeeks(toDateInputValue(start), toDateInputValue(end));
   const week = Math.min(weeks, teachingWeeks(toDateInputValue(start), toDateInputValue(today < start ? start : today)));
   const inDays = Math.round((start.getTime() - today.getTime()) / DAY);
-  const light = bookingLight(booking);
   const open = booking.charged - booking.paid;
   return (
     <Card
@@ -962,11 +958,7 @@ function CourseNow({ booking, running, today, lang }: { booking: BookingListItem
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{booking.courseTypeName ?? t('Buchung', 'Booking')}</span>
-            <BookingLightPill
-              light={light}
-              label={pick(lang, bookingLightLabel(booking))}
-              detail={booking.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[booking.observationReason]) : undefined}
-            />
+            <BookingColour booking={booking} lang={lang} canEdit={canEdit} />
           </div>
           <p className="mt-1 text-sm text-[var(--casa-muted)]">
             {dayRange(toDateInputValue(start), toDateInputValue(end), lang)} · {weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}

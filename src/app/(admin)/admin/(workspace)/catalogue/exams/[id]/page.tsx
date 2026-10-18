@@ -10,7 +10,7 @@ import { ExaminerForm } from '../examiner-form';
 import { SittingForm } from '../sitting-form';
 import { PersonForm } from '../../../people/person-form';
 import { RecordFoot } from '../../../bookings/record-foot';
-import { BookingLightPill } from '@/components/admin/booking-light';
+import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { PersonPicker } from '@/components/admin/person-picker';
@@ -488,7 +488,7 @@ function CandidateRow({
           {c.parts !== 'full' ? ` · ${pick(lang, EXAM_PARTS_LABELS[c.parts])}` : ''}
         </p>
       </div>
-      <BookingLightPill light={light} label={pick(lang, bookingLightLabel(money))} />
+      <BookingLightDot light={light} label={pick(lang, bookingLightLabel(money))} size="md" />
       <span className="w-full text-[0.8rem] sm:w-56 sm:text-right">
         {c.result ? (
           // The result telc sent, then whether it was collected.

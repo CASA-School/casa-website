@@ -7,14 +7,13 @@ import {
   cancelBookingAction,
   completeFollowUpAction,
   deleteBookingAction,
-  endObservationAction,
   removeChargeAction,
   removePeriodAction,
   voidPaymentAction,
 } from '../actions';
-import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, ObservationForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
+import { BookingColour } from '../booking-colour';
+import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
-import { BookingLightPill } from '@/components/admin/booking-light';
 import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -24,7 +23,6 @@ import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader }
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import {
-  bookingLightLabel,
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
@@ -359,12 +357,15 @@ export default async function BookingPage({
         avatar={booking.personName}
         status={
           <>
-            <BookingLightPill
-              light={light}
-              label={pick(lang, bookingLightLabel(booking))}
+            {/* The colour, and on a click the colours to choose from: the money's own, or yellow with its reason. */}
+            <BookingColour
+              booking={booking}
+              lang={lang}
+              canEdit={canEdit}
+              variant="pill"
               detail={
                 light === 'watch'
-                  ? reasonLabel
+                  ? (reasonLabel ?? undefined)
                   : light === 'unclear' && booking.balance > 0.005
                     ? // „Offen · 2.052,98 €", „Anzahlung erhalten · 1.852,98 € offen".
                       booking.paid > 0.005
@@ -467,20 +468,6 @@ export default async function BookingPage({
         }
         actions={
           <>
-            {canEdit && open ? (
-              booking.observationReason ? (
-                <form action={endObservationAction}>
-                  <input type="hidden" name="bookingId" value={booking.id} />
-                  <Button type="submit" variant="secondary">
-                    {t('Beobachtung beenden', 'End observation')}
-                  </Button>
-                </form>
-              ) : (
-                <FormDialog icon={Icon.attention} tint="sun" trigger={t('Beobachten', 'Observe')} title={t('Unter Beobachtung stellen', 'Put under observation')}>
-                  <ObservationForm bookingId={booking.id} />
-                </FormDialog>
-              )
-            ) : null}
             {canEdit && open && exam ? (
               <FormDialog icon={Icon.calendar} tint="red" trigger={t('Termin ändern', 'Change sitting')} title={t('Termin und Teile', 'Sitting and parts')} size="sm">
                 <ExamChangeForm booking={booking} sittings={sittings} />

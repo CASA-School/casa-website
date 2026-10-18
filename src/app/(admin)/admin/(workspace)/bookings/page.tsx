@@ -1,4 +1,4 @@
-import { BookingLightDot, BookingLightLabel } from '@/components/admin/booking-light';
+import { BookingLightDot } from '@/components/admin/booking-light';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
@@ -24,12 +24,14 @@ import { getI18n } from '@/lib/admin/i18n.server';
  *
  * A booking is created from a person or a registration, never from here — the
  * list is where you find one. Every row carries the team's colour from SchoolMan
- * (docs/schoolman/bookings.md): green all good, yellow under observation, grey
- * „Offen" (SchoolMan’s „unklar") until paid in full, red cancelled. The views are the team's work
- * lists: what is running (ending soon first), what is coming (starting soon
- * first), what is still owed (most first), what is under observation and not
- * over, then the past and the cancelled. The tabs carry the counts; the line
- * above says only the sum owed (2026-10-18).
+ * (docs/schoolman/bookings.md) as a dot before the name, its word on hover: green
+ * all good, yellow under observation, grey until paid in full, red cancelled —
+ * the team reads the colours, not the words (Rahman, 2026-10-18), and yellow is
+ * set from the dot on the learner's or the booking's page. The views are the
+ * team's work lists: what is running (ending soon first), what is coming
+ * (starting soon first), what is still owed (most first), the follow-ups due,
+ * then the past and the cancelled. The tabs carry the counts; the line above
+ * says only the sum owed.
  *
  * Money is two figures: the total charged, and the balance still open — the
  * one the team looks at first, in a calm amber while something is owed and a
@@ -41,7 +43,6 @@ const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
   { key: 'current', label: { de: 'Laufend', en: 'Current' } },
   { key: 'upcoming', label: { de: 'Kommend', en: 'Upcoming' } },
   { key: 'unclear', label: { de: 'Zahlung offen', en: 'Unpaid' } },
-  { key: 'watch', label: { de: 'Unter Beobachtung', en: 'Under observation' } },
   { key: 'followup', label: { de: 'Wiedervorlage', en: 'Follow-up' } },
   { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },
@@ -113,7 +114,7 @@ export default async function BookingsPage({
             { key: 'later', label: t('Später', 'Later'), rows: items.filter((b) => !startsSoon(b)) },
           ].filter((g) => g.rows.length)
         : [{ key: filter, label: '', rows: items }];
-  const span = 5;
+  const span = 4;
   const hide = 'hidden md:table-cell';
   const href = (key: BookingFilter) => `/admin/bookings${key === 'current' ? '' : `?filter=${key}`}`;
 
@@ -152,7 +153,6 @@ export default async function BookingsPage({
             head={[
               t('Buchung', 'Booking'),
               { label: t('Zeitraum', 'Dates'), className: `w-[13.5rem] ${hide}` },
-              { label: t('Stand', 'Standing'), className: `w-[12rem] ${hide}` },
               { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hide}` },
               { label: t('Offen', 'Balance'), align: 'right' as const, className: 'w-[8.5rem]' },
             ]}
@@ -161,26 +161,25 @@ export default async function BookingsPage({
               group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={span} /> : null,
               ...group.rows.map((b) => {
                 const light = bookingLight(b);
-                const lightLabel = pick(lang, bookingLightLabel(b));
+                const lightLabel = [
+                  pick(lang, bookingLightLabel(b)),
+                  light === 'watch' && b.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
                 const about = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
                 return (
                 <TableRow key={b.id} interactive>
                   <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
-                    <span className="flex items-center gap-2">
-                      <span className="md:hidden">
-                        <BookingLightDot light={light} label={lightLabel} />
+                    {/* The team's colour before the name, as SchoolMan colours the record; its word on hover. */}
+                    <span className="flex items-center gap-2.5">
+                      <span className="relative z-20 inline-flex">
+                        <BookingLightDot light={light} label={lightLabel} size="md" />
                       </span>
                       <RecordName name={b.personName} reference={b.number} about={about || undefined} />
                     </span>
                   </Cell>
                   <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>
-                  <Cell className={`max-w-0 ${hide}`}>
-                    <BookingLightLabel
-                      light={light}
-                      label={lightLabel}
-                      detail={light === 'watch' && b.observationReason ? pick(lang, OBSERVATION_REASON_LABELS[b.observationReason]) : undefined}
-                    />
-                  </Cell>
                   <Cell align="right" className={`whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>

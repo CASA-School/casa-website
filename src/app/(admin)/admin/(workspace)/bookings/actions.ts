@@ -284,30 +284,25 @@ export async function carryOverAction(formData: FormData): Promise<void> {
   redirect(back);
 }
 
-/** Yellow, with its reason. „Sonstiges" needs a note saying what; the others may have one. */
-export async function observeBookingAction(formData: FormData): Promise<void> {
+/**
+ * The colour chosen from a booking's dot (2026-10-18): `plain` ends an observation, so the booking shows
+ * what its money says again; `watch:<reason>` puts it under observation — „Sonstiges" only with a note
+ * saying what. Used on the booking's page and wherever its dot is, so it revalidates the workspace.
+ */
+export async function setBookingLightAction(formData: FormData): Promise<void> {
   const actor = await requireModule('bookings', 'edit');
   const bookingId = id(formData, 'bookingId');
-  const back = `/admin/bookings/${bookingId}`;
-  const reason = String(formData.get('reason') ?? '');
-  if (!(OBSERVATION_REASONS as readonly string[]).includes(reason)) {
-    fail(back, (await getI18n()).t('Bitte wähle einen Grund.', 'Choose a reason.'));
+  const choice = String(formData.get('light') ?? '');
+  if (choice === 'plain') {
+    await endObservation(bookingId, actor);
+  } else {
+    const reason = choice.startsWith('watch:') ? choice.slice('watch:'.length) : '';
+    if (!(OBSERVATION_REASONS as readonly string[]).includes(reason)) throw new Error('Invalid colour');
+    const note = text(formData, 'note', 300);
+    if (reason === 'other' && !note) throw new Error('A note is needed for “Other”');
+    await observeBooking(bookingId, reason as ObservationReason, note, actor);
   }
-  const note = text(formData, 'note', 300);
-  if (reason === 'other' && !note) {
-    fail(back, (await getI18n()).t('Bei „Sonstiges" sag kurz, worum es geht.', 'For “Other”, say briefly what it is.'));
-  }
-  await observeBooking(bookingId, reason as ObservationReason, note, actor);
-  revalidatePath('/admin/bookings', 'layout');
-  redirect(back);
-}
-
-export async function endObservationAction(formData: FormData): Promise<void> {
-  const actor = await requireModule('bookings', 'edit');
-  const bookingId = id(formData, 'bookingId');
-  await endObservation(bookingId, actor);
-  revalidatePath('/admin/bookings', 'layout');
-  redirect(`/admin/bookings/${bookingId}`);
+  revalidatePath('/admin', 'layout');
 }
 
 /** A follow-up set: a day to look at the booking again, and why (0062). */
