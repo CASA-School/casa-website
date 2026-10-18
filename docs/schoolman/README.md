@@ -132,19 +132,24 @@ copied into these pages; all of it should be changed and kept in the password ma
 
 ✓ the workspace does it · ◐ partly · ✗ not yet
 
-| Area | SchoolMan *(live rows)* | Workspace today | |
+| Area | SchoolMan *(live rows)* | Workspace today *(2026-10-18, branch `admin`, a sample of learners)* | |
 | --- | --- | --- | --- |
-| People | `Person` 15,509 · `Email` 13,983 · `Phone` 14,609 · `Address` 12,944 | `people`, `emails`, `phones` — no addresses | ◐ |
-| Organisations | `Management` 3,771 · `Institution` 1,914 · `Corporate` 788 · `Agency` 120 | `organisations`, `organisation_contacts` (for offers) | ◐ |
-| Intake | `Contact` 5,072 · `PreBooking` 6,081 · `WaitingRoom` 1,958 · `TestStudent` 5,940 | the inboxes, placement, with status and owner | ✓ new intake · ✗ history, waiting list |
-| Offers | `Offer` 397 · `DateOffer` 5,026 | `offers`, `offer_lines`, `letters` | ✓ |
-| Bookings | `Booking` 22,488 · `DateBooking` 20,206 | `bookings`, `booking_periods` | ◐ |
-| Courses and exams | `Course` 1,331 · `Exam` 134 · `SingleDateCourse` 34,016 | the catalogue, Kursplanung, rooms; terms and exams read into seeds | ◐ |
-| Attendance | `SingleDateStudent` 70,732 | — | ✗ |
-| Money | `CostDetail` 79,482 · `PaymentIn` 51,523 · `PaymentOut` 6,348 | `booking_charges`, `payments`, the price lists | ◐ |
-| Accommodation | `Accommodation` 142 · `DateAccommodation` 2,465 | vocabularies only | ✗ |
-| Letters and history | `Letter` 33,213 · `WorkFlow` 109,870 | offer letters; notes and history on every record | ◐ |
-| Staff and working time | `StaffMember` 82 · `SingleDayStaff` 86,664 | workspace accounts, teachers, absences | ◐ |
+| People | `Person` 15,509 · `Email` 13,983 · `Phone` 14,609 · `Address` 12,944 | `people` with e-mails, phones, addresses, customer number — the 611 learners of the sample | ◐ sample |
+| Organisations | `Management` 3,771 · `Institution` 1,914 · `Corporate` 788 · `Agency` 120 | `organisations` with contacts, commission terms, relation — every party the sample, the groups and the offers name, and 71 others | ◐ |
+| Group visits | `Group` 52 | `group_visits` with participants, courses, offers, beds held | ✓ |
+| Intake | `Contact` 5,072 · `PreBooking` 6,081 · `WaitingRoom` 1,958 · `TestStudent` 5,940 | new intake with status and owner; the sample's pre-bookings as notes, its tests as records, the waiting list | ✓ new · ◐ history |
+| Offers | `Offer` 397 · `DateOffer` 5,026 | `offers`, `offer_lines`, `letters` — 195 imported | ✓ |
+| Bookings | `Booking` 22,488 · `DateBooking` 20,206 | `bookings`, `booking_periods`, stays, follow-ups — the sample's | ◐ sample |
+| Courses and exams | `Course` 1,331 · `Exam` 134 · `SingleDateCourse` 34,016 | the catalogue, Kursplanung, rooms, lesson days — twelve months; earlier courses not | ◐ |
+| Attendance | `SingleDateStudent` 70,732 | `booking_attendance`, read only — the sample's | ◐ sample |
+| Money | `CostDetail` 79,482 · `PaymentIn` 51,523 · `PaymentOut` 6,348 · `Instalment` · `Commission` · `Invoice` | charges, payments, payment plans, commission, payouts, invoices — read as SchoolMan has them, for the sample; DATEV untouched | ◐ sample |
+| Accommodation | `Accommodation` 142 · `Room` 416 · `DateAccommodation` 2,465 · `DateRent` 543 | every place with family, rooms, group reservations, rent, letters, the flats' cleaning plan; the sample's stays placed | ✓ |
+| Letters and history | `Letter` 33,213 · `WorkFlow` 109,870 · `StatementLandlord` 752 | letters with their text and how they went, notes and history — the sample's; before 2025 not in reach | ◐ sample |
+| Staff and working time | `StaffMember` 82 · `SingleDayStaff` 86,664 | the staff register, accounts, absences; time sheets stay the Klassenbuch's | ◐ |
+| Group programme | `SingleDateActivity` 31 · `ServiceDetail` 156 · `DatePlacement` 10 | a visit's programme, services and internship places (0068) — the group's „Programm" tab | ✓ |
+| Book orders | `Order` 506 · `OrderDetail` 2,139 · `Editorial` 8 | `book_orders` with their books (0068); each publisher an organisation („Verlag") with a „Bestellungen" tab | ✓ |
+| Keys | `Key` 118 | `staff_keys` (0068): number, door, holder — the colleague's „Schlüssel" tab; four keys are twice under one number in SchoolMan | ✓ |
+| Cleaning | `CleaningDetail` 125 · `SingleWeekCleaning` 781 | the CASA flats' task lists and weekly plan (0068/0069) — the flat's „Putzplan" tab; SchoolMan ties a week's job number to no task list, so both are shown as they are | ✓ |
 
 ## The parallel system and the bridge — principles
 

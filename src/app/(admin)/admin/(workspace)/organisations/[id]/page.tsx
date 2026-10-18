@@ -38,6 +38,7 @@ import {
   organisationLetters,
   organisationInvoices,
   organisationOffers,
+  organisationOrders,
   organisationPayouts,
   type CommissionTerm,
   type OrganisationBooking,
@@ -94,7 +95,7 @@ export default async function OrganisationPage({
   const seesGroups = canAccess(user, 'groups');
   const isAgency = organisation.kind === 'agency';
 
-  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts] = await Promise.all([
+  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts, orders] = await Promise.all([
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
@@ -108,6 +109,7 @@ export default async function OrganisationPage({
     canDelete ? organisationDeletable(id) : Promise.resolve(false),
     seesBookings ? organisationInvoices(id) : Promise.resolve([]),
     seesBookings ? organisationPayouts(id) : Promise.resolve([]),
+    organisation.relation === 'publisher' ? organisationOrders(id) : Promise.resolve([]),
   ]);
   const seenLetters = letters.items.filter((l) => canAccess(user, letterModule(l.kind)));
   const letterCount = seenLetters.length === letters.items.length ? letters.total : seenLetters.length;
@@ -123,6 +125,7 @@ export default async function OrganisationPage({
     ...(seenLetters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letterCount }] : []),
     ...(invoices.length ? [{ id: 'invoices', label: t('Rechnungen', 'Invoices'), icon: Icon.statement, count: invoices.length }] : []),
     ...(payouts.length ? [{ id: 'payouts', label: t('Auszahlungen', 'Paid out'), icon: Icon.money, count: payouts.length }] : []),
+    ...(orders.length ? [{ id: 'orders', label: t('Bestellungen', 'Orders'), icon: Icon.book, count: orders.length }] : []),
   ];
   const hidden = <input type="hidden" name="organisationId" value={id} />;
   const muted = (text: string) => <span className="font-semibold text-[var(--casa-muted)]">{text}</span>;
@@ -462,6 +465,30 @@ export default async function OrganisationPage({
                 />
               ))}
             </Rows>
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {orders.length ? (
+        <RecordTabPanel id="orders">
+          <Card bleed>
+            <ul className="divide-y divide-ws-line-soft">
+              {orders.map((o) => (
+                <li key={o.id} className="px-4 py-3">
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-[0.88rem] font-semibold text-[var(--casa-ink)]">
+                      {o.orderedOn ? dayRange(o.orderedOn, o.orderedOn, lang) : t('Bestellung', 'Order')}
+                      {o.done === false ? <span className="ml-2"><Badge tone="accent">{t('Offen', 'Open')}</Badge></span> : null}
+                    </span>
+                    <span className="text-[0.86rem] font-semibold tabular-nums">{euros(o.net)}</span>
+                  </span>
+                  <span className="mt-0.5 block text-[0.8rem] text-[var(--casa-muted)]">
+                    {o.lines.map((l) => `${l.quantity != null ? `${num(lang, l.quantity)} × ` : ''}${l.title ?? '—'}`).join(' · ')}
+                    {o.orderedBy ? ` · ${o.orderedBy}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </Card>
         </RecordTabPanel>
       ) : null}

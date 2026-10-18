@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -77,6 +77,11 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     // A booking with SchoolMan's plan, commission and payouts on it (0063).
     firstId(`SELECT b.id FROM bookings b WHERE EXISTS (SELECT 1 FROM booking_commissions c WHERE c.booking_id = b.id)
               AND EXISTS (SELECT 1 FROM payouts p WHERE p.booking_id = b.id) ORDER BY b.number LIMIT 1`),
+    // A publisher with its book orders, a CASA flat with its cleaning plan, a colleague holding keys, a group with a programme (0068).
+    firstId(`SELECT o.id FROM organisations o WHERE EXISTS (SELECT 1 FROM book_orders b WHERE b.organisation_id = o.id) ORDER BY o.name LIMIT 1`),
+    firstId(`SELECT a.id FROM accommodations a WHERE EXISTS (SELECT 1 FROM cleaning_weeks w WHERE w.accommodation_id = a.id) ORDER BY a.name LIMIT 1`),
+    firstId(`SELECT s.id FROM staff_members s WHERE EXISTS (SELECT 1 FROM staff_keys k WHERE k.holder_id = s.id) LIMIT 1`),
+    firstId(`SELECT g.id FROM group_visits g WHERE EXISTS (SELECT 1 FROM group_programme p WHERE p.group_visit_id = g.id) LIMIT 1`),
   ]);
 
 const routes = [
@@ -119,6 +124,10 @@ const routes = [
   '/admin/accommodation?view=casa_flat&q=e',
   place && `/admin/accommodation/${place}`,
   ledger && `/admin/bookings/${ledger}`,
+  publisher && `/admin/organisations/${publisher}`,
+  flat && `/admin/accommodation/${flat}`,
+  keyHolder && `/admin/staff/${keyHolder}`,
+  programmeGroup && `/admin/groups/${programmeGroup}`,
   '/admin/accommodation/stays',
   '/admin/accommodation/stays?view=arriving',
   '/admin/accommodation/stays?view=leaving&kind=casa_flat',

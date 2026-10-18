@@ -524,3 +524,41 @@ export async function deleteGroup(id: string, actor: StaffUser): Promise<Result>
   await logActivity({ actor, entity: 'group_visit', entityId: id, action: 'group_deleted', detail: { name: outcome.name } });
   return { ok: true };
 }
+
+export type GroupProgramme = {
+  programme: { id: string; day: string | null; startsAt: string | null; activity: string; meetingPoint: string | null }[];
+  services: { id: string; service: string; detail: string | null }[];
+  internships: { id: string; place: string | null; organisationId: string | null; organisationName: string | null; from: string | null; to: string | null; minPeople: number | null; maxPeople: number | null }[];
+};
+
+/** What a visit does and has booked (0068): its programme by day, its services, the internship places held for it. */
+export async function groupProgramme(id: string): Promise<GroupProgramme> {
+  const [programme, services, internships] = await Promise.all([
+    query<{ id: string; day: string | null; starts_at: string | null; activity: string; meeting_point: string | null }>(
+      `SELECT id, to_char(day, 'YYYY-MM-DD') AS day, starts_at, activity, meeting_point FROM group_programme WHERE group_visit_id = $1 ORDER BY day NULLS LAST, starts_at, id`,
+      [id]
+    ),
+    query<{ id: string; service: string; detail: string | null }>(`SELECT id, service, detail FROM group_services WHERE group_visit_id = $1 ORDER BY created_at, id`, [id]),
+    query<{ id: string; place: string | null; organisation_id: string | null; organisation_name: string | null; starts_on: string | null; ends_on: string | null; min_people: number | null; max_people: number | null }>(
+      `SELECT i.id, i.place, i.organisation_id, o.name AS organisation_name, to_char(i.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(i.ends_on, 'YYYY-MM-DD') AS ends_on,
+              i.min_people, i.max_people
+         FROM group_internships i LEFT JOIN organisations o ON o.id = i.organisation_id
+        WHERE i.group_visit_id = $1 ORDER BY i.starts_on, i.id`,
+      [id]
+    ),
+  ]);
+  return {
+    programme: programme.map((r) => ({ id: r.id, day: r.day, startsAt: r.starts_at, activity: r.activity, meetingPoint: r.meeting_point })),
+    services: services.map((r) => ({ id: r.id, service: r.service, detail: r.detail })),
+    internships: internships.map((r) => ({
+      id: r.id,
+      place: r.place,
+      organisationId: r.organisation_id,
+      organisationName: r.organisation_name,
+      from: r.starts_on,
+      to: r.ends_on,
+      minPeople: r.min_people,
+      maxPeople: r.max_people,
+    })),
+  };
+}

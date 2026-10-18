@@ -144,8 +144,8 @@ test.describe('a booking from a registration', () => {
     );
     expect(rent[0].n).toBe(1);
 
-    // Who needs a room, by arrival.
-    await page.goto('/admin/bookings?filter=accommodation');
+    // Who needs a room, by arrival — found by name: the list runs over more than one page.
+    await page.goto('/admin/bookings?filter=accommodation&q=Registrierungstest');
     await expect(page.getByRole('row').filter({ hasText: 'Rita Registrierungstest' })).toContainText('CASA – WG');
   });
 });

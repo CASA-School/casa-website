@@ -17,6 +17,7 @@ import {
   getPlace,
   placeDeletable,
   placeMembers,
+  placeCleaning,
   placePayouts,
   placeReservations,
   placeRooms,
@@ -53,13 +54,14 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const seesBookings = canAccess(user, 'bookings');
   const seesGroups = canAccess(user, 'groups');
 
-  const [members, rooms, stays, reservations, payouts, letters, notes, activity, types, deletable] = await Promise.all([
+  const [members, rooms, stays, reservations, payouts, letters, cleaning, notes, activity, types, deletable] = await Promise.all([
     placeMembers(id),
     placeRooms(id),
     placeStays(id),
     placeReservations(id),
     seesBookings ? placePayouts(id) : Promise.resolve([]),
     seesBookings ? lettersForPlace(id) : Promise.resolve([]),
+    place.kind === 'casa_flat' ? placeCleaning(id) : Promise.resolve(null),
     listNotes('accommodation', id),
     activityFor('accommodation', id, 50),
     canEdit ? roomTypes() : Promise.resolve([]),
@@ -79,6 +81,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     ...(reservations.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: reservations.length }] : []),
     ...(payouts.length ? [{ id: 'rent', label: t('Miete', 'Rent'), icon: Icon.money, count: payouts.length }] : []),
     ...(letters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
+    ...(cleaning ? [{ id: 'cleaning', label: t('Putzplan', 'Cleaning'), icon: Icon.calendar }] : []),
   ];
   const thisYear = String(new Date().getFullYear());
   const rentThisYear = payouts.filter((p) => p.paidOn?.startsWith(thisYear)).reduce((s, p) => s + p.amount, 0);
@@ -359,6 +362,41 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
           >
             <MoneyRows rows={payouts} lang={lang} linked={seesBookings} />
           </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {cleaning ? (
+        <RecordTabPanel id="cleaning">
+          <div className="space-y-4">
+            <Card title={t('Diese und die nächsten Wochen', 'This week and the next')} icon={Icon.calendar} tint="blue">
+              {cleaning.weeks.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {cleaning.weeks.map((w) => (
+                    <li key={w.from} className="py-2 text-[0.86rem]">
+                      <span className="block font-semibold tabular-nums text-[var(--casa-ink)]">{dayRange(w.from, w.to ?? w.from, lang)}</span>
+                      <span className="text-[var(--casa-muted)]">
+                        {w.rooms.map((r) => t(`${r.room}: Aufgabe ${r.job ?? '?'}`, `${r.room}: job ${r.job ?? '?'}`)).join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Für die nächsten Wochen ist nichts geplant.', 'Nothing planned for the next weeks.')}</p>
+              )}
+            </Card>
+            {cleaning.tasks.length ? (
+              <Card title={t('Aufgaben', 'Jobs')} icon={Icon.check} tint="green">
+                <ol className="-my-1 space-y-3">
+                  {cleaning.tasks.map((g, i) => (
+                    <li key={g.group} className="text-[0.86rem]">
+                      <span className="font-semibold text-[var(--casa-ink)]">{t(`Liste ${i + 1}`, `List ${i + 1}`)}</span>
+                      <span className="block text-[var(--casa-muted)]">{g.items.join(' · ')}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            ) : null}
+          </div>
         </RecordTabPanel>
       ) : null}
 

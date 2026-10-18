@@ -25,6 +25,7 @@ import { canAccess } from '@/lib/admin/access';
 import { EXAMINER_PART_LABELS, needsLicence } from '@/lib/admin/exam-parts';
 import { licenceExams, staffLicences, staffSittings } from '@/lib/admin/examiners';
 import { requireModule } from '@/lib/admin/guard';
+import { cn } from '@/lib/utils';
 import { counted, num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ABSENCE_LABELS, WEEKDAY_LABELS } from '@/lib/admin/kursplanung/types';
@@ -33,6 +34,7 @@ import { CONTRACT_KIND_LABELS } from '@/lib/admin/staff-labels';
 import {
   getStaffMember,
   staffContracts,
+  staffKeys,
   staffHrNumbers,
   staffRoles,
   unlinkedAccounts,
@@ -77,7 +79,7 @@ export default async function StaffMemberPage({
   const teaches = member.roles.includes('teaching');
   const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
 
-  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts] = await Promise.all([
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
     upcomingTeaching(id, weeks * 7),
@@ -90,6 +92,7 @@ export default async function StaffMemberPage({
     seesPrivate ? listBankAccounts(member.personId) : Promise.resolve([]),
     canEdit ? listCountries() : Promise.resolve([]),
     canEdit && managesAccounts ? unlinkedAccounts() : Promise.resolve([]),
+    staffKeys(id),
   ]);
   if (!person) notFound();
   const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
@@ -110,6 +113,7 @@ export default async function StaffMemberPage({
     ...(teaches || teaching.length ? [{ id: 'teaching', label: t('Unterricht', 'Teaching'), icon: Icon.kursplanung }] : []),
     ...(examines || licences.length || sittings.length ? [{ id: 'exams', label: t('Prüfungen', 'Exams'), icon: Icon.award }] : []),
     { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
+    ...(keys.length ? [{ id: 'keys', label: t('Schlüssel', 'Keys'), icon: Icon.lock, count: keys.filter((k) => k.isActive).length }] : []),
     ...(seesPrivate ? [{ id: 'contracts', label: t('Vertrag', 'Contract'), icon: Icon.registrations, count: contracts.length }] : []),
     ...(seesPrivate ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
@@ -417,6 +421,25 @@ export default async function StaffMemberPage({
               )}
             </Card>
           </div>
+        </RecordTabPanel>
+      ) : null}
+
+      {keys.length ? (
+        <RecordTabPanel id="keys">
+          <Card bleed>
+            <ul className="divide-y divide-ws-line-soft">
+              {keys.map((k) => (
+                <li key={k.id} className={cn('flex items-center justify-between gap-3 px-4 py-2.5 text-[0.86rem]', !k.isActive && 'opacity-60')}>
+                  <span className="min-w-0">
+                    <span className="font-semibold text-[var(--casa-ink)]">{k.kind ?? t('Schlüssel', 'Key')}</span>
+                    {k.note ? <span className="text-[var(--casa-muted)]"> · {k.note}</span> : null}
+                    {!k.isActive ? <span className="text-[var(--casa-muted)]"> · {t('zurückgegeben', 'returned')}</span> : null}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-[var(--casa-muted)]">{k.number ? t(`Nr. ${k.number}`, `No. ${k.number}`) : null}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
         </RecordTabPanel>
       ) : null}
 

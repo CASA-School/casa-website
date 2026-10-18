@@ -708,3 +708,21 @@ export async function organisationPayouts(organisationId: string): Promise<Organ
   );
   return rows.map((r) => ({ id: r.id, paidOn: r.paid_on, amount: Number(r.amount), bookingId: r.booking_id, bookingNumber: r.number, personName: r.person_name }));
 }
+
+export type BookOrder = { id: string; orderedOn: string | null; done: boolean | null; orderedBy: string | null; lines: { title: string | null; quantity: number | null; net: number | null }[]; net: number };
+
+/** The book orders to a publisher (0068), the latest first, each with its books. */
+export async function organisationOrders(organisationId: string): Promise<BookOrder[]> {
+  const rows = await query<{ id: string; ordered_on: string | null; done: boolean | null; ordered_by_name: string | null; lines: { title: string | null; quantity: string | null; net: string | null }[] | null }>(
+    `SELECT o.id, to_char(o.ordered_on, 'YYYY-MM-DD') AS ordered_on, o.done, o.ordered_by_name,
+            (SELECT json_agg(json_build_object('title', coalesce(m.title, l.title), 'quantity', l.quantity, 'net', l.net) ORDER BY coalesce(m.title, l.title))
+               FROM book_order_lines l LEFT JOIN materials m ON m.id = l.material_id WHERE l.order_id = o.id) AS lines
+       FROM book_orders o WHERE o.organisation_id = $1
+      ORDER BY o.ordered_on DESC NULLS LAST, o.id`,
+    [organisationId]
+  );
+  return rows.map((r) => {
+    const lines = (r.lines ?? []).map((l) => ({ title: l.title, quantity: l.quantity == null ? null : Number(l.quantity), net: l.net == null ? null : Number(l.net) }));
+    return { id: r.id, orderedOn: r.ordered_on, done: r.done, orderedBy: r.ordered_by_name, lines, net: lines.reduce((s, l) => s + (l.net ?? 0), 0) };
+  });
+}

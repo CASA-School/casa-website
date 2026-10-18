@@ -496,3 +496,14 @@ export async function deleteStaffMember(id: string, actor: StaffUser): Promise<R
   await logActivity({ actor, entity: 'staff_member', entityId: id, action: 'staff_deleted' });
   return { ok: true };
 }
+
+export type StaffKey = { id: string; number: string | null; kind: string | null; isActive: boolean; note: string | null };
+
+/** The keys a colleague holds (0068, SchoolMan's `Key`). */
+export async function staffKeys(staffId: string): Promise<StaffKey[]> {
+  const rows = await query<{ id: string; number: string | null; kind: string | null; is_active: boolean; note: string | null }>(
+    `SELECT id, number, kind, is_active, note FROM staff_keys WHERE holder_id = $1 ORDER BY is_active DESC, kind, number, id`,
+    [staffId]
+  );
+  return rows.map((r) => ({ id: r.id, number: r.number, kind: r.kind, isActive: r.is_active, note: r.note }));
+}

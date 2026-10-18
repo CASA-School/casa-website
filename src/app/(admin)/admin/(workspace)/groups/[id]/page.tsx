@@ -18,7 +18,7 @@ import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
-import { getGroup, groupCourses, groupDeletable, groupFigures, groupOffers, groupOptions, groupParticipants, type GroupParticipant } from '@/lib/admin/groups';
+import { getGroup, groupCourses, groupDeletable, groupFigures, groupOffers, groupOptions, groupParticipants, groupProgramme, type GroupParticipant } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -62,12 +62,13 @@ export default async function GroupPage({
   const seesOffers = canAccess(user, 'offers');
   const seesAccommodation = canAccess(user, 'accommodation');
 
-  const [figures, participants, courses, offers, reservations, notes, activity, options, deletable] = await Promise.all([
+  const [figures, participants, courses, offers, reservations, programme, notes, activity, options, deletable] = await Promise.all([
     seesBookings ? groupFigures(id) : Promise.resolve(null),
     seesBookings ? groupParticipants(id) : Promise.resolve([]),
     seesCourses ? groupCourses(id) : Promise.resolve([]),
     seesOffers ? groupOffers(id) : Promise.resolve([]),
     seesAccommodation ? groupReservations(id) : Promise.resolve([]),
+    groupProgramme(id),
     listNotes('group_visit', id),
     activityFor('group_visit', id, 100),
     canEdit ? groupOptions([group.organisationId, group.agencyId, group.courseTypeId]) : Promise.resolve(null),
@@ -80,6 +81,9 @@ export default async function GroupPage({
     ...(participants.length ? [{ id: 'participants', label: t('Teilnehmende', 'Students'), icon: Icon.people, count: participants.length }] : []),
     ...(offers.length ? [{ id: 'offers', label: t('Angebote', 'Offers'), icon: Icon.offers, count: offers.length }] : []),
     ...(reservations.length ? [{ id: 'stays', label: t('Unterkünfte', 'Accommodation'), icon: Icon.home, count: reservations.length }] : []),
+    ...(programme.programme.length + programme.services.length + programme.internships.length
+      ? [{ id: 'programme', label: t('Programm', 'Programme'), icon: Icon.calendar, count: programme.programme.length + programme.services.length + programme.internships.length }]
+      : []),
     ...(courses.length ? [{ id: 'courses', label: t('Kurse', 'Courses'), icon: Icon.catalogue, count: courses.length }] : []),
   ];
   const hidden = <input type="hidden" name="groupId" value={id} />;
@@ -263,6 +267,68 @@ export default async function GroupPage({
               ))}
             </Rows>
           </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {programme.programme.length + programme.services.length + programme.internships.length ? (
+        <RecordTabPanel id="programme">
+          <div className="space-y-4">
+            {programme.programme.length ? (
+              <Card title={t('Programm', 'Programme')} icon={Icon.calendar} tint="sun">
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {programme.programme.map((p) => (
+                    <li key={p.id} className="flex gap-3 py-2 text-[0.86rem]">
+                      <span className="w-32 shrink-0 text-[var(--casa-muted)] tabular-nums">
+                        {p.day ? <DateText value={p.day} compact /> : '—'}
+                        {p.startsAt ? ` · ${p.startsAt}` : ''}
+                      </span>
+                      <span className="min-w-0 text-[var(--casa-ink)]">
+                        <span className="font-semibold">{p.activity}</span>
+                        {p.meetingPoint ? <span className="text-[var(--casa-muted)]"> · {p.meetingPoint}</span> : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
+            {programme.services.length ? (
+              <Card title={t('Leistungen', 'Services')} icon={Icon.check} tint="green">
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {programme.services.map((s) => (
+                    <li key={s.id} className="py-2 text-[0.86rem]">
+                      <span className="font-semibold text-[var(--casa-ink)]">{s.service}</span>
+                      {s.detail ? <span className="text-[var(--casa-muted)]"> · {s.detail}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
+            {programme.internships.length ? (
+              <Card title={t('Praktikumsplätze', 'Internship places')} icon={Icon.group} tint="blue">
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {programme.internships.map((i) => (
+                    <li key={i.id} className="py-2 text-[0.86rem]">
+                      <span className="font-semibold text-[var(--casa-ink)]">
+                        {i.organisationId && canAccess(user, 'organisations') ? (
+                          <Link href={`/admin/organisations/${i.organisationId}`} className="hover:underline">
+                            {i.organisationName ?? i.place}
+                          </Link>
+                        ) : (
+                          (i.organisationName ?? i.place ?? t('Praktikum', 'Internship'))
+                        )}
+                      </span>
+                      <span className="text-[var(--casa-muted)]">
+                        {[
+                          i.from ? ` · ${dayRange(i.from, i.to ?? i.from, lang)}` : '',
+                          i.minPeople || i.maxPeople ? t(` · ${i.minPeople ?? '?'}–${i.maxPeople ?? '?'} Personen`, ` · ${i.minPeople ?? '?'}–${i.maxPeople ?? '?'} people`) : '',
+                        ].join('')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : null}
+          </div>
         </RecordTabPanel>
       ) : null}
 
