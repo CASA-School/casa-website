@@ -64,6 +64,16 @@ intake from the website, with a status and an owner — the part FileMaker never
 waiting list is its own (below, and `docs/ADMIN_WORKSPACE.md` §Waiting list); offers have their own
 module.
 
+## Brought across (2026-10-18, migration 0065)
+
+`read_intake.py | import-intake.mjs`, for the sample's learners: each `PreBooking` as a note saying what
+was asked for („Anmeldung in SchoolMan: Intensivkurs · B1 · vormittags · Visum nötig · Status ja") on the
+booking it became, else on the person — 449, 426 of them on their booking; its state only when it is ja or
+nein. A `WaitingRoom` row that names a course the workspace has becomes an entry on that course's waiting
+list (`source` „Aus SchoolMan", `filemaker_id`): booked when it became a booking, closed once the course has
+begun, else waiting. Only 2 of the sample's rows name a course, both before the workspace's twelve months.
+`Contact` is the pre-booking's twin and adds nothing; `Source` is unused since 2023.
+
 ## For the bridge
 
 - The intake history is mostly links and default statuses. Reading it across would bring little

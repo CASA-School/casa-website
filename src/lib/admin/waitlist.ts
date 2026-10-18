@@ -38,11 +38,12 @@ export const WAITLIST_STATUS_LABELS: Record<WaitlistStatus, Bilingual> = {
   withdrawn: { de: 'Von der Liste genommen', en: 'Taken off the list' },
 };
 
-export type WaitlistSource = 'office' | 'registration' | 'booking';
+export type WaitlistSource = 'office' | 'registration' | 'booking' | 'schoolman';
 export const WAITLIST_SOURCE_LABELS: Record<WaitlistSource, Bilingual> = {
   office: { de: 'Im Büro eingetragen', en: 'Added in the office' },
   registration: { de: 'Anmeldung über die Website', en: 'Website registration' },
   booking: { de: 'Weiter nach einem Kurs', en: 'Continuing after a course' },
+  schoolman: { de: 'Aus SchoolMan', en: 'From SchoolMan' },
 };
 
 /** Why an entry leaves the list without a booking. Stored in English, read in the reader's language. */

@@ -127,6 +127,14 @@
     // Removal condition: delete when the workspace reads attendance from the Klassenbuch.
     "scripts/filemaker/import-attendance.mjs",
 
+    // Writes how the sample's learners came in (pre-bookings as notes, the
+    // waiting-list rows that name a course here), from
+    // scripts/filemaker/read_intake.py through a pipe (docs/schoolman/intake.md).
+    // Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings intake across.
+    "scripts/filemaker/import-intake.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.
