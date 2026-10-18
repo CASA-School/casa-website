@@ -1,7 +1,6 @@
 import { NewStaffForm } from './staff-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { Tally } from '@/components/admin/inbox';
 import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
@@ -39,10 +38,6 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
           ) : null
         }
       />
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="working" n={counts.teaching} label={t('im Unterricht', 'teaching')} lang={lang} />
-        <Tally tone="done" n={counts.office} label={t('im Büro', 'in the office')} lang={lang} />
-      </p>
       {params.error ? (
         <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
           {params.error}

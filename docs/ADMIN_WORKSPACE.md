@@ -893,21 +893,31 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
 10a. **Views are few, clear, and each answers one question (Rahman, 2026-10-18: "don't add unnecessary
     filters but clear and useful filter in each section").** The default view comes first — what staff
     act on now, or „Alle" on a register —, the views a record moves through follow in that order, the
-    archive (Inaktiv, Ehemalige, Storniert, Gelöscht) comes last, and „Alle" closes a work list. A record
-    stands in one stage view, never in two that overlap. A view never repeats another screen's job:
+    archive (Inaktiv, Ehemalige, Storniert, Gelöscht) comes last, and „Alle" closes a work list. A stage
+    view says where a record stands, so a record is in one; a question view (Zahlung offen, Ohne
+    Folgekurs, Unter Beobachtung) may cut across them, and then it is ordered by its question (most owed
+    first, ending first). A view never repeats another screen's job:
     who needs a room is „Aufenthalte", not a bookings view; what is open under a person is worked in the
     inboxes, not a register view. One thing has one word everywhere („Zahlung offen" in Buchungen and
-    Teilnehmende). A second dimension is a row of chips above the card (the kind of place on
-    „Aufenthalte", the colleague on „Aktivität"), not more tabs. The lists as they stand:
+    Teilnehmende — something is still owed, by the same rule). A second dimension is a row of chips above
+    the card (the kind of place on „Aufenthalte", the colleague on „Aktivität"), not more tabs.
+
+    **The tabs carry the counts, so nothing repeats them (Rahman, 2026-10-18: "avoid redundancies").** A
+    counts line above a list says only what its tabs do not: the sum owed on Buchungen, the learners this
+    week on Kurse, the sittings and entries on Prüfungen (which have no tabs). Teilnehmende, Angebote,
+    Wartelisten, Einstufungstests and Mitarbeitende have none; Teilnehmende keeps its line of open flags,
+    each a link to its work list. Where the counts line said „469 im Kurs" over a tab „Im Kurs 186", the
+    two had to be read together to be understood — a count is said once, by the tab. The lists as they
+    stand:
 
     | List | Views (default first) | Also |
     | --- | --- | --- |
     | Anfragen, Anmeldungen, Bewerbungen | Letzte 7 Tage · Verlauf | the inbox design (§Lists 16); search finds everything |
     | Einstufungstests | Wartet auf Lehrkraft · Test läuft noch · Bestätigt · Alle | |
-    | Teilnehmende | Alle · Kommend · Neu · Im Kurs · Letzter Kurs · Abgeschlossen · Zahlung offen · Gelöscht | |
-    | Buchungen | Laufend · Kommend · Zahlung offen · Unter Beobachtung · Wiedervorlage · Vergangen · Storniert · Alle | search by name, booking number or course |
+    | Teilnehmende | Alle · Kommend · Im Kurs · Ohne Folgekurs · Zahlung offen · Abgeschlossen · Gelöscht | „Neu" is a word on the row |
+    | Buchungen | Laufend · Kommend · Zahlung offen · Unter Beobachtung · Wiedervorlage · Vergangen · Storniert · Alle | the sum owed above; search by name, booking number or course |
     | Angebote | Offen · Angenommen · Nicht angenommen · Alle | |
-    | Gruppen | Kommend · Angefragt · Vergangen · Abgesagt · Alle | |
+    | Gruppen | Aktuell · Angefragt · Vergangen · Abgesagt · Alle | Aktuell: here now or still to come, as on Kurse |
     | Unterkünfte | Alle · Gastfamilien · CASA-WGs · Weitere · Inaktiv | |
     | Aufenthalte | Kommen bald · Wohnen jetzt · Reisen bald ab · Bleiben nach dem Kurs · Noch ohne Unterkunft | chips: Alle · CASA-WGs · Gastfamilien |
     | Organisationen | Alle · Agenturen · Firmen · Schulen & Behörden · Weitere · Inaktiv | |
@@ -1041,9 +1051,11 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     answers as a `FactGrid`, and the shared `Timeline` in place of its own
     notes and history. The pilot line under the title stays (rule 6).
 20. **Buchungen (2026-10-15).** The list keeps its table — money reads in
-    aligned columns — and gains the counts line every list has: what is
-    running, what is coming, and what is still owed across all bookings
-    (`bookingsOwed`). A booking's page: the course, the dates and weeks, the
+    aligned columns — and above it the sum still owed across all bookings
+    (`bookingsOwed`), the one figure its tabs do not carry (2026-10-18). „Zahlung
+    offen" is every booking that still owes something, most owed first — under
+    observation or not, and not one with nothing charged; „Unter Beobachtung" is
+    the bookings SchoolMan's yellow marks that are not over yet. A booking's page: the course, the dates and weeks, the
     stay and who pays as `MetaLine` under the name; the header's bar is the
     money (`StatBar`: total, paid, open) with a line that fills as it is paid;
     the periods, costs and payments stay ledgers; beside them what else
@@ -1091,11 +1103,12 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     A payment recorded by
     hand with the method „Übertragen" remains for a credit that sits in
     FileMaker.
-21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
-    bring to a register — Alle, then the learner stages in the order a learner goes
-    through them, each learner in one (Kommend, Neu, Im Kurs, Letzter Kurs,
-    Abgeschlossen; 2026-10-18), and Zahlung offen — with the counts line above them
-    („im Kurs" there counts all three stages in a course), and a row says,
+21. **Teilnehmende, the register (2026-10-15).** The views answer what the
+    office asks of a register (2026-10-18): Alle; Kommend, by start; Im Kurs,
+    everyone in a course today, new or not; Ohne Folgekurs, those in a course with
+    nothing booked after it, ending first — whom to ask whether they go on;
+    Zahlung offen, most owed first; Abgeschlossen. „Neu" (the first four weeks)
+    is a word under the name, not a tab. A row says,
     beside the name and the course or address, the level a teacher confirmed
     (a green chip), what is open under the person (enquiries, registrations,
     offers in play, counted across linked records) and what they still owe.
@@ -1106,11 +1119,12 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     **Learner stages (2026-10-16).** FileMaker's Rookie, Runner, LastDance and
     Unicorn, worked out from the booked periods by one SQL fragment (`STAGE`
     in `people.ts`) instead of typed: *Neu* (in a course whose first day was
-    in the last four weeks), *Letzter Kurs* (in a course, nothing booked after
-    it — the list to ask about extending), *Im Kurs*, *Kommend* (booked, not
-    started), *Abgeschlossen* (all over). They are views of the register, a
-    word in each row's line (left out where the view already says it) and a
-    badge in the head of the person's page; the person's bookings carry the
+    in the last four weeks), *Ohne Folgekurs* (in a course, nothing booked after
+    it — the list to ask about extending; „Letzter Kurs" until 2026-10-18, which
+    read like the course they had last), *Im Kurs*, *Kommend* (booked, not
+    started), *Abgeschlossen* (all over). They are a word in each row's line
+    (left out where the view already says it) and a badge in the head of the
+    person's page; the views are rule 10a's; the person's bookings carry the
     booking colours (§20).
 
     **What a list carries (Rahman, 2026-10-16).** A list shows what staff act on;

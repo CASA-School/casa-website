@@ -405,21 +405,22 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
   }));
 }
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'reserved' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'past' | 'cancelled' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
 
 const FILTERS: Record<BookingFilter, string> = {
-  // The grey and the yellow of `bookingLight`, as lists: not cancelled, and either not paid in
-  // full (and not under observation, which shows yellow), or under observation.
-  unclear: `b.status <> 'cancelled' AND b.observation_reason IS NULL AND NOT (${CHARGED} > 0.005 AND ${PAID} >= ${CHARGED} - 0.005)`,
-  watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
+  // „Zahlung offen": something is still owed — the same rule as the learners' view and the figure above the
+  // list (2026-10-18). A booking with nothing charged owes nothing; one under observation still owes.
+  unclear: `b.status <> 'cancelled' AND ${CHARGED} - ${PAID} > 0.005`,
+  // Under observation and not over yet: a finished course needs no more watching.
+  watch: `b.status IN ('reserved','confirmed') AND b.observation_reason IS NOT NULL
+          AND coalesce((SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id), current_date) >= current_date`,
   // A follow-up due today or before that nobody has looked at yet (0062).
   followup: `EXISTS (SELECT 1 FROM booking_follow_ups f WHERE f.booking_id = b.id AND f.done_at IS NULL AND f.due_on <= current_date)`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
   upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) > current_date`,
-  reserved: `b.status = 'reserved'`,
   past: `b.status = 'completed' OR ((SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) < current_date AND b.status <> 'cancelled')`,
   cancelled: `b.status = 'cancelled'`,
   all: 'true',
@@ -448,7 +449,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY ${filter === 'unclear' ? `${CHARGED} - ${PAID} DESC, ` : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };

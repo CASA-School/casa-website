@@ -1,4 +1,3 @@
-import { Tally } from '@/components/admin/inbox';
 import { ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -55,13 +54,6 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHeader title={t('Wartelisten', 'Waiting lists')} />
-
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="working" n={counts.waiting} label={counts.waiting === 1 ? t('wartet', 'waiting') : t('warten', 'waiting')} lang={lang} />
-        <Tally tone="done" n={counts.free} label={counts.free === 1 ? t('Liste mit freiem Platz', 'list with a free place') : t('Listen mit freiem Platz', 'lists with a free place')} lang={lang} />
-        <Tally tone="new" n={counts.offered} label={counts.offered === 1 ? t('Platz angeboten', 'place offered') : t('Plätze angeboten', 'places offered')} lang={lang} />
-        {counts.started ? <Tally tone="waiting" n={counts.started} label={t('Kurs hat begonnen', 'course has begun')} lang={lang} /> : null}
-      </p>
 
       <Card bleed>
         <ListBar

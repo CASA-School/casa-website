@@ -21,7 +21,8 @@ export const isGroupStatus = (value: unknown): value is GroupStatus => (GROUP_ST
 export const GROUP_VIEWS = ['upcoming', 'open', 'past', 'cancelled', 'all'] as const;
 export type GroupView = (typeof GROUP_VIEWS)[number];
 export const GROUP_VIEW_LABELS: Record<GroupView, Bilingual> = {
-  upcoming: { de: 'Kommend', en: 'Upcoming' },
+  // Here now or still to come: Kurse says the same word for not over yet.
+  upcoming: { de: 'Aktuell', en: 'Current' },
   open: { de: 'Angefragt', en: 'Requested' },
   past: { de: 'Vergangen', en: 'Past' },
   cancelled: { de: 'Abgesagt', en: 'Cancelled' },

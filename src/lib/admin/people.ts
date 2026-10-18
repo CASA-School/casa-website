@@ -235,7 +235,7 @@ export type LearnerStage = 'new' | 'in_course' | 'last' | 'coming' | 'finished';
 export const LEARNER_STAGE_LABELS: Record<LearnerStage, Bilingual> = {
   new: { de: 'Neu', en: 'New' },
   in_course: { de: 'Im Kurs', en: 'In a course' },
-  last: { de: 'Letzter Kurs', en: 'Last course' },
+  last: { de: 'Ohne Folgekurs', en: 'No next course' },
   coming: { de: 'Kommend', en: 'Coming' },
   finished: { de: 'Abgeschlossen', en: 'Finished' },
 };
@@ -243,11 +243,12 @@ export const LEARNER_STAGE_LABELS: Record<LearnerStage, Bilingual> = {
 const NEW_FOR_DAYS = 28;
 
 /**
- * The register's views (2026-10-18): everyone, the learner stages one after another — each learner in exactly
- * one —, and who still owes money. What is open under a person is a column, not a view: the inboxes are
- * where it is worked.
+ * The register's views (2026-10-18), each one question the office asks: who is coming, who is here (everyone in
+ * a course today, new or not), who is here with nothing booked after — to ask whether they go on —, who still
+ * owes money, who has finished. „Neu" is a word on the row, not a view. What is open under a person is a
+ * column: the inboxes are where it is worked.
  */
-export type PeopleView = 'all' | 'coming' | 'new' | 'in_course' | 'last' | 'finished' | 'owing';
+export type PeopleView = 'all' | 'coming' | 'in_course' | 'last' | 'owing' | 'finished';
 
 /**
  * A person's family — themselves and every row merged into them (`person_family`, 0052): the fragments
@@ -320,34 +321,41 @@ const NOT_STAFF = `NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id
 
 const VIEW_CONDITION: Record<PeopleView, string | null> = {
   all: null,
-  // „Im Kurs" is the middle of a course: not new any more, and more to come after it.
-  in_course: `${STAGE} = 'in_course'`,
-  new: `${STAGE} = 'new'`,
-  last: `${STAGE} = 'last'`,
+  // Everyone in a course today, new or not; and of them, who has nothing booked after it.
+  in_course: IN_COURSE,
+  last: `${IN_COURSE} AND NOT ${LATER}`,
   coming: `${STAGE} = 'coming'`,
   finished: `${STAGE} = 'finished'`,
   owing: `${OWED} > 0.005`,
+};
+
+/** Each view in the order its question asks: who arrives first, who leaves first, who owes most; else the newest. */
+const VIEW_ORDER: Record<PeopleView, string> = {
+  all: 'p.created_at DESC, p.id',
+  coming: 'course_start NULLS LAST, p.id',
+  in_course: 'p.created_at DESC, p.id',
+  last: 'course_end NULLS LAST, p.id',
+  owing: 'owed DESC, p.id',
+  finished: 'p.created_at DESC, p.id',
 };
 
 /** How many people each view holds, for the counts beside its tabs. */
 export async function peopleCounts(): Promise<Record<PeopleView, number>> {
   const row = await queryFirst<Record<PeopleView, string>>(
     `SELECT count(*) AS all,
-            count(*) FILTER (WHERE stage = 'in_course') AS in_course,
-            count(*) FILTER (WHERE stage = 'new') AS new,
-            count(*) FILTER (WHERE stage = 'last') AS last,
+            count(*) FILTER (WHERE stage IN ('new', 'in_course', 'last')) AS in_course,
+            count(*) FILTER (WHERE stage IN ('new', 'in_course', 'last') AND NOT later) AS last,
             count(*) FILTER (WHERE stage = 'coming') AS coming,
             count(*) FILTER (WHERE stage = 'finished') AS finished,
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
        -- OFFSET 0: the stage once per person — folded into the query, Postgres would repeat its six
        -- sub-queries in each count below.
-       FROM (SELECT p.*, ${STAGE} AS stage FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF} OFFSET 0) p`
+       FROM (SELECT p.*, ${STAGE} AS stage, ${LATER} AS later FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF} OFFSET 0) p`
   );
   const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
     all: n('all'),
     in_course: n('in_course'),
-    new: n('new'),
     last: n('last'),
     coming: n('coming'),
     finished: n('finished'),
@@ -439,7 +447,7 @@ export async function listPeople({
     ) nb ON true`
     )}
      ${where}
-     ORDER BY p.created_at DESC, p.id
+     ORDER BY ${VIEW_ORDER[view]}
      LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );

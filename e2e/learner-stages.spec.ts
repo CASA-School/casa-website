@@ -5,9 +5,9 @@ import pg from 'pg';
 
 /**
  * Where a learner stands (2026-10-16): FileMaker's Rookie, Runner, LastDance and Unicorn, worked out
- * from the booked periods. A learner in a course with nothing after it is in their last course —
- * in the register's „Letzter Kurs" view and in the head of their page — and the moment a further
- * period is booked, they are simply in a course.
+ * from the booked periods. A learner in a course with nothing after it stands „Ohne Folgekurs" — in that
+ * view of the register and in the head of their page — and the moment a further period is booked, they
+ * are simply in a course. „Im Kurs" holds them either way (2026-10-18: everyone in a course today).
  *
  * Runs only with a database and an owner account, in German (pinned). Everything is deleted after.
  */
@@ -59,12 +59,14 @@ test.describe('learner stages', () => {
     ]);
   });
 
-  test('last course until something is booked after it, then in a course', async ({ page }) => {
+  test('no next course until something is booked after it, then in a course', async ({ page }) => {
     await page.goto(`/admin/people?view=last&q=${encodeURIComponent('Stufentest')}`);
     await expect(page.getByRole('row').filter({ hasText: 'Lea Stufentest' })).toBeVisible();
+    await page.goto(`/admin/people?view=in_course&q=${encodeURIComponent('Stufentest')}`);
+    await expect(page.getByRole('row').filter({ hasText: 'Lea Stufentest' })).toContainText('Ohne Folgekurs');
 
     await page.goto(`/admin/people/${personId}`);
-    await expect(page.locator('h1').locator('xpath=..')).toContainText('Letzter Kurs');
+    await expect(page.locator('h1').locator('xpath=..')).toContainText('Ohne Folgekurs');
 
     // A further period starting after this one ends: no longer the last course.
     await book(11, 66);
@@ -72,5 +74,7 @@ test.describe('learner stages', () => {
     await expect(page.locator('h1').locator('xpath=..')).toContainText('Im Kurs');
     await page.goto(`/admin/people?view=last&q=${encodeURIComponent('Stufentest')}`);
     await expect(page.getByRole('row').filter({ hasText: 'Lea Stufentest' })).toHaveCount(0);
+    await page.goto(`/admin/people?view=in_course&q=${encodeURIComponent('Stufentest')}`);
+    await expect(page.getByRole('row').filter({ hasText: 'Lea Stufentest' })).toBeVisible();
   });
 });

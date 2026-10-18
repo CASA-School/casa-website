@@ -1,4 +1,4 @@
-import { Assignee, CardRow, DaySections, Language, Tally } from '@/components/admin/inbox';
+import { Assignee, CardRow, DaySections, Language } from '@/components/admin/inbox';
 import { ListBar } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Badge, PageHeader } from '@/components/admin/ui';
@@ -64,12 +64,7 @@ export default async function PlacementPage({
     <>
       <PageHeader title={t('Einstufungstests', 'Placement')} />
 
-      <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="new" n={counts.needs_review} label={t('warten auf eine Lehrkraft', 'awaiting a teacher')} lang={lang} />
-        <Tally tone="working" n={counts.in_progress} label={t('Tests laufen noch', 'still testing')} lang={lang} />
-        <Tally tone="done" n={counts.confirmed} label={t('bestätigt', 'confirmed')} lang={lang} />
-      </p>
-      <p className="mb-6 flex items-start gap-2.5 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
+      <p className="-mt-3 mb-6 flex items-start gap-2.5 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">
         <span aria-hidden="true" className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-[#d97706]" />
         {lang === 'de' ? (
           <span>

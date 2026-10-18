@@ -16,8 +16,7 @@ import {
 import { addDays } from '@/lib/admin/offers/stay';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
-import { counted, pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
-import { Tally } from '@/components/admin/inbox';
+import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
@@ -28,8 +27,9 @@ import { getI18n } from '@/lib/admin/i18n.server';
  * (docs/schoolman/bookings.md): green all good, yellow under observation, grey
  * „Offen" (SchoolMan’s „unklar") until paid in full, red cancelled. The views are the team's work
  * lists: what is running (ending soon first), what is coming (starting soon
- * first), what is unclear, what is under observation, then the past and the
- * cancelled.
+ * first), what is still owed (most first), what is under observation and not
+ * over, then the past and the cancelled. The tabs carry the counts; the line
+ * above says only the sum owed (2026-10-18).
  *
  * Money is two figures: the total charged, and the balance still open — the
  * one the team looks at first, in a calm amber while something is owed and a
@@ -121,19 +121,13 @@ export default async function BookingsPage({
     <>
       <PageHeader title={t('Buchungen', 'Bookings')} />
 
-      {/* What is running, what is coming, and what is still owed across all of it. */}
+      {/* What is still owed across all bookings: the one figure the tabs do not carry. */}
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="working" n={counts.current} label={t('laufend', 'current')} lang={lang} />
-        <Tally tone="new" n={counts.upcoming} label={t('kommend', 'upcoming')} lang={lang} />
-        <Tally tone="waiting" n={counts.watch} label={t('unter Beobachtung', 'under observation')} lang={lang} />
         {owed.amount > 0.005 ? (
           <span className="inline-flex items-center gap-2">
             <span aria-hidden="true" className="size-2 rounded-full bg-[#e0a100]" />
             <b className="font-semibold text-[#9a5b00] tabular-nums">{euros(owed.amount)}</b>
-            {t(
-              `offen in ${counted(lang, owed.bookings, 'Buchung', 'Buchungen')}`,
-              `owed on ${counted(lang, owed.bookings, 'booking', 'bookings')}`
-            )}
+            {t('offen', 'owed')}
           </span>
         ) : null}
       </p>

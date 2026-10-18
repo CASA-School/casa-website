@@ -78,7 +78,7 @@ The rest of the list (*storno*, *Undefined*) is not used. Whoever has the learne
 changes the status (Rahman, 2026-10-15): nobody owns it, and nothing records who changed it or why.
 `_ID_StatusBooking` is never filled. The learner's `_ID_StatusStudent` is on 100% and not important (Rahman): *Rookie* has just started,
 *Runner* is in a course now, *LastDance* is in their last course, *Unicorn* probably finished. The
-workspace works it out from the booked periods (built 2026-10-16: Neu, Im Kurs, Letzter Kurs,
+workspace works it out from the booked periods (built 2026-10-16: Neu, Im Kurs, Ohne Folgekurs,
 Kommend, Abgeschlossen — views of the register, `docs/ADMIN_WORKSPACE.md` §Lists 21).
 
 **The bookings at *???*, read against the money** *(live, 2026-10-16)* — 3,139, each compared with its

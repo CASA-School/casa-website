@@ -2,7 +2,6 @@ import Link from 'next/link';
 
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { Tally } from '@/components/admin/inbox';
 import { dayRange, euros, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Badge, Button, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
@@ -32,10 +31,11 @@ import { PersonForm } from './person-form';
  * offers in play), the dates of that course, and when they were added
  * (2026-10-15). A list carries what staff act on — nationality and birth date
  * are on the person's page (Rahman, 2026-10-16). The views answer the
- * questions staff bring to a register — who is coming, who is new, who is in
- * the middle of a course, who is in their last, who has finished, who owes
- * money — one stage per learner, in that order (2026-10-18); what is open under
- * a person is the column, worked in the inboxes. The learner stages are
+ * questions the office brings to a register, and nothing twice (Rahman,
+ * 2026-10-18: "avoid redundancies"): who is coming, who is here, who is here
+ * with nothing booked after, who owes money, who has finished. The tabs carry
+ * the counts, so no line above repeats them; „Neu" is a word on the row. What
+ * is open under a person is the column, worked in the inboxes. The learner stages are
  * FileMaker's Rookie, Runner, LastDance and Unicorn, worked out from the
  * booked periods instead of typed (2026-10-16, docs/schoolman/bookings.md). Open flags are one quiet
  * line above the list, each a link to that work list; they are cleared on the
@@ -45,15 +45,14 @@ import { PersonForm } from './person-form';
 /** The register's views, and „Gelöscht" for whoever may delete (and so restore) a person. */
 type RegisterView = PeopleView | 'deleted';
 
-// The stages in the order a learner goes through them, each learner in one; then who owes money.
+// In the order a learner goes through them; who owes money before the archive.
 const VIEWS: readonly { key: RegisterView; label: Bilingual }[] = [
   { key: 'all', label: { de: 'Alle', en: 'All' } },
   { key: 'coming', label: LEARNER_STAGE_LABELS.coming },
-  { key: 'new', label: LEARNER_STAGE_LABELS.new },
   { key: 'in_course', label: LEARNER_STAGE_LABELS.in_course },
   { key: 'last', label: LEARNER_STAGE_LABELS.last },
-  { key: 'finished', label: LEARNER_STAGE_LABELS.finished },
   { key: 'owing', label: { de: 'Zahlung offen', en: 'Unpaid' } },
+  { key: 'finished', label: LEARNER_STAGE_LABELS.finished },
 ];
 
 const shortDay = (value: Date, lang: WsLang) => value.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
@@ -119,16 +118,8 @@ export default async function PeoplePage({
         </p>
       ) : null}
 
-      {/* Who is here — in a course today, new, middle or last —, who comes, who still owes: the register at a glance. */}
-      <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="done" n={counts.new + counts.in_course + counts.last} label={t('im Kurs', 'in a course')} lang={lang} />
-        <Tally tone="new" n={counts.coming} label={t('kommen', 'coming')} lang={lang} />
-        <Tally tone="working" n={counts.last} label={t('im letzten Kurs', 'in their last course')} lang={lang} />
-        <Tally tone="waiting" n={counts.owing} label={t('mit offenen Beträgen', 'owing money')} lang={lang} />
-      </p>
-
       {flagEntries.length > 0 ? (
-        <p className="mb-6 flex flex-wrap gap-x-5 gap-y-1">
+        <p className="-mt-3 mb-6 flex flex-wrap gap-x-5 gap-y-1">
           {flagEntries.map(([code, n]) => (
             <Link
               key={code}

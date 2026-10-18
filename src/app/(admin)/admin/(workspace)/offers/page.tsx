@@ -1,4 +1,3 @@
-import { Tally } from '@/components/admin/inbox';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, Owner, RecordName } from '@/components/admin/list';
 import { ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
@@ -101,17 +100,6 @@ export default async function OffersPage({
           ) : null
         }
       />
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="new" n={counts.follow} label={t('zum Nachfassen', 'to follow up')} lang={lang} />
-        <Tally
-          tone="waiting"
-          n={counts.waiting}
-          label={counts.waiting === 1 ? t('wartet auf Antwort', 'awaiting an answer') : t('warten auf Antwort', 'awaiting an answer')}
-          lang={lang}
-        />
-        <Tally tone="working" n={counts.draft} label={counts.draft === 1 ? t('Entwurf', 'draft') : t('Entwürfe', 'drafts')} lang={lang} />
-        <Tally tone="done" n={counts.accepted} label={t('angenommen', 'accepted')} lang={lang} />
-      </p>
       {params.ok === 'deleted' ? (
         <p role="status" className="mb-4 rounded-2xl bg-[#e9f6ee] px-4 py-3 text-[0.88rem] text-[#14532d] ring-1 ring-[#b7dfc6] ring-inset">
           {t('Das Angebot wurde gelöscht.', 'The offer was deleted.')}
