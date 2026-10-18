@@ -28,6 +28,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Group` — the group visits | all 52 · 82 participant bookings of this year's four | `group_visits` (0058) with their comments and work log; `bookings.group_visit_id` — `read_groups.py` (groups.md) |
 | `Offer` with its lines and letters | 15 to the sample's learners (195 in all with groups and organisations) | `offers` (0059), their letters as sent versions — `read_offers.py` (offers.md) |
 | `Accommodation`, `Room`, the family, `DateRent` | all 142 places · 424 of the sample's stays placed | `accommodations` and their family, rooms and group reservations (0060) — `read_accommodation.py` (accommodation.md) |
+| `SingleDateStudent` — attendance (the Klassenbuch's) | 34,568 | `booking_attendance` (0064), read only: „Anwesenheit" on the booking — `read_attendance.py` |
 | `Instalment`, `Commission`, `PaymentOut`, `Invoice` | 412 · 890 · 920 · 124 (642 with organisations') | `booking_instalments`, `booking_commissions`, `payouts`, `invoices` (0063), read only — `read_money.py` (money.md) |
 | `SingleDateControl` — follow-up dates set by letters | 1,683 (128 open) | `booking_follow_ups` (0062): on the booking's page, the bookings view „Wiedervorlage" — `read_follow_ups.py` |
 | `Person._ID_Client` — the customer number | 214 | `people.customer_number` (0061), on the learner's page; whether it is DATEV's debtor number is finance's to say |
@@ -37,7 +38,6 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 
 | SchoolMan | For the sample | What is missing |
 | --- | ---: | --- |
-| `SingleDateStudent` — attendance: present, absent, why, minutes late | 34,112 rows | No attendance at all. It is the Klassenbuch's; whether the workspace shows it (read-only) is a decision |
 | `PreBooking`, `Contact`, `WaitingRoom` — how they came in | 449 · 311 | Intake before the booking; the workspace's own intake is the website's. Whether the old ones come across is a decision |
 | `WorkFlowLetter` — how a letter was sent (e-mail, print, SMTP) | 8,620 | Letters come with their date, not how they went |
 | Test results as a level | 537 | They arrive as notes; „Niveau" stays „nicht bestätigt" — a confirmed level needs our own placement review. A level history from SchoolMan's tests would need its own record |

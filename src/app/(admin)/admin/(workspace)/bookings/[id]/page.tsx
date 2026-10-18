@@ -28,6 +28,7 @@ import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
   bookingLight,
+  bookingAttendance,
   bookingFollowUps,
   bookingLedgerExtras,
   bookingStays,
@@ -135,7 +136,7 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps, extras] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps, extras, attendance] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -148,6 +149,7 @@ export default async function BookingPage({
     bookingStays(booking.id),
     bookingFollowUps(booking.id),
     bookingLedgerExtras(booking.id),
+    bookingAttendance(booking.id),
   ]);
   // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
   const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
@@ -889,6 +891,52 @@ export default async function BookingPage({
                 >
                   {booking.notes}
                 </blockquote>
+              ) : null}
+            </Card>
+          ) : null}
+
+          {/* Attendance as the Klassenbuch recorded it (0064): read here, never written. */}
+          {attendance ? (
+            <Card title={t('Anwesenheit', 'Attendance')} icon={Icon.check} tint="green">
+              <p className="text-sm text-[var(--casa-ink)]">
+                <span className="text-[1.15rem] font-extrabold tabular-nums">{num(lang, Math.round((attendance.present / attendance.days) * 100))} %</span>
+                <span className="ml-2 text-[var(--casa-muted)]">
+                  {t(`${num(lang, attendance.present)} von ${num(lang, attendance.days)} Tagen da`, `there ${num(lang, attendance.present)} of ${num(lang, attendance.days)} days`)}
+                  {attendance.lateCount
+                    ? t(` · ${num(lang, attendance.lateCount)}× zu spät (${num(lang, attendance.lateMinutes)} Min.)`, ` · late ${num(lang, attendance.lateCount)}× (${num(lang, attendance.lateMinutes)} min)`)
+                    : ''}
+                </span>
+              </p>
+              {attendance.absences.length ? (
+                <ul className="mt-3 space-y-1 text-[0.84rem]">
+                  {attendance.absences.map((a) => (
+                    <li key={a.day} className="flex gap-2">
+                      <span className="w-24 shrink-0 tabular-nums text-[var(--casa-muted)]">
+                        <DateText value={a.day} compact />
+                      </span>
+                      <span className="min-w-0 text-[var(--casa-ink)]">
+                        {[
+                          a.absence === 'ill'
+                            ? t('krank', 'ill')
+                            : a.absence === 'excused'
+                              ? t('entschuldigt', 'excused')
+                              : a.absence === 'unexcused'
+                                ? t('unentschuldigt', 'unexcused')
+                                : t('ohne Grund', 'no reason'),
+                          a.sickNote === 'certificate' ? t('Attest', "doctor's note") : a.sickNote === 'self' ? t('eigene Krankmeldung', 'own sick note') : null,
+                          a.comment,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {attendance.absentTotal > attendance.absences.length ? (
+                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
+                  {t(`Die letzten ${num(lang, attendance.absences.length)} von ${num(lang, attendance.absentTotal)} Fehltagen`, `The latest ${num(lang, attendance.absences.length)} of ${num(lang, attendance.absentTotal)} days missed`)}
+                </p>
               ) : null}
             </Card>
           ) : null}

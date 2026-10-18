@@ -1505,3 +1505,42 @@ export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtr
     invoices: invoices.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, subject: r.subject, amount: n(r.amount) })),
   };
 }
+
+// ------------------------------------------------------- attendance (0064, read only)
+
+export type AttendanceSummary = {
+  /** Days with a mark, and how many of them the learner was there. */
+  days: number;
+  present: number;
+  lateCount: number;
+  lateMinutes: number;
+  /** The latest absences, with why. */
+  absences: { day: string; absence: 'ill' | 'excused' | 'unexcused' | null; sickNote: 'certificate' | 'self' | null; comment: string | null }[];
+  absentTotal: number;
+};
+
+/** A booking's attendance as the Klassenbuch recorded it: the rate, lateness, and the latest absences. */
+export async function bookingAttendance(bookingId: string): Promise<AttendanceSummary | null> {
+  const [totals, absences] = await Promise.all([
+    queryFirst<{ days: string; present: string; late_count: string; late_minutes: string | null; absent: string }>(
+      `SELECT count(*) FILTER (WHERE present IS NOT NULL) AS days, count(*) FILTER (WHERE present) AS present,
+              count(*) FILTER (WHERE minutes_late > 0) AS late_count, sum(minutes_late) AS late_minutes, count(*) FILTER (WHERE present = false) AS absent
+         FROM booking_attendance WHERE booking_id = $1`,
+      [bookingId]
+    ),
+    query<{ day: string; absence: AttendanceSummary['absences'][number]['absence']; sick_note: AttendanceSummary['absences'][number]['sickNote']; comment: string | null }>(
+      `SELECT to_char(day, 'YYYY-MM-DD') AS day, absence, sick_note, comment FROM booking_attendance
+        WHERE booking_id = $1 AND present = false ORDER BY day DESC LIMIT 8`,
+      [bookingId]
+    ),
+  ]);
+  if (!totals || Number(totals.days) === 0) return null;
+  return {
+    days: Number(totals.days),
+    present: Number(totals.present),
+    lateCount: Number(totals.late_count),
+    lateMinutes: Number(totals.late_minutes ?? 0),
+    absences: absences.map((a) => ({ day: a.day, absence: a.absence, sickNote: a.sick_note, comment: a.comment })),
+    absentTotal: Number(totals.absent),
+  };
+}

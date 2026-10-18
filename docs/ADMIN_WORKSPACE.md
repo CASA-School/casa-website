@@ -1228,6 +1228,19 @@ window, so none is linked yet. A group's offers came across with the offers (005
 tab, docs/OFFERS.md §From SchoolMan) and its bed reservations with the accommodation (0060; its page's
 Unterkünfte tab). Not across: its letters and invoices — docs/schoolman/groups.md.
 
+## Attendance (2026-10-18, migration 0064)
+
+Attendance is the Klassenbuch's: teachers record it there and it writes into SchoolMan
+(docs/schoolman/klassenbuch.md). The workspace reads it beside a booking (`booking_attendance`): per lesson
+day there or not, why not (ill, excused, unexcused), a sick note (doctor's certificate or their own),
+minutes late, the lessons, a comment. The booking's page shows „Anwesenheit": the rate („91 % · 29 von 32
+Tagen da"), lateness, and the latest eight absences with their reason. Nothing writes it.
+
+`read_attendance.py | import-attendance.mjs`, after the learners and the lesson days: the sample's
+bookings' lesson days up to today — 34,568 rows, 4,722 absences (385 ill, 462 excused, 53 unexcused, the
+rest with no reason), 1,526 late; 9,627 on a lesson day the workspace has (the rest on courses before its
+window). When the workspace reads the Klassenbuch directly (planned), this import goes.
+
 ## Money from SchoolMan (2026-10-18, migration 0063)
 
 The rest of SchoolMan's learner ledger, read as it is beside the charges and payments (0054). SchoolMan's

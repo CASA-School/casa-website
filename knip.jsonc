@@ -120,6 +120,13 @@
     // Removal condition: delete when the FileMaker bridge brings money across.
     "scripts/filemaker/import-money.mjs",
 
+    // Writes the Klassenbuch's attendance, as SchoolMan holds it, beside the
+    // sample's bookings, from scripts/filemaker/read_attendance.py through a
+    // pipe (docs/ADMIN_WORKSPACE.md §Attendance). Run by hand, never imported.
+    //
+    // Removal condition: delete when the workspace reads attendance from the Klassenbuch.
+    "scripts/filemaker/import-attendance.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.
