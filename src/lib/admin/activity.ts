@@ -165,6 +165,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   person: { noun: 'Person', gender: 'f' },
   offer: { noun: 'Angebot', gender: 'n' },
   room: { noun: 'Raum', gender: 'm' },
+  organisation: { noun: 'Organisation', gender: 'f' },
 };
 
 const ARTICLES_DE = {
@@ -424,6 +425,30 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat ein Angebot zur Überarbeitung wieder geöffnet', 'reopened an offer to revise it');
     case 'offer_deleted':
       return t('hat ein Angebot gelöscht', 'deleted an offer');
+    case 'organisation_created':
+      return t('hat eine Organisation angelegt', 'added an organisation');
+    case 'organisation_updated':
+      return t('hat eine Organisation bearbeitet', 'edited an organisation');
+    case 'organisation_deactivated':
+      return t('hat eine Organisation auf inaktiv gesetzt', 'set an organisation inactive');
+    case 'organisation_reactivated':
+      return t('hat eine Organisation wieder aktiv gesetzt', 'set an organisation active again');
+    case 'organisation_deleted': {
+      const name = typeof entry.detail?.name === 'string' ? entry.detail.name : '';
+      return name ? t(`hat die Organisation „${name}“ gelöscht`, `deleted the organisation “${name}”`) : t('hat eine Organisation gelöscht', 'deleted an organisation');
+    }
+    case 'organisation_contact_added':
+      return t('hat einen Kontakt bei einer Organisation hinzugefügt', 'added a contact to an organisation');
+    case 'organisation_contact_updated':
+      return t('hat einen Kontakt bei einer Organisation geändert', "changed an organisation's contact");
+    case 'organisation_contact_removed':
+      return t('hat einen Kontakt bei einer Organisation entfernt', "removed an organisation's contact");
+    case 'organisation_commission_added':
+      return t('hat die Provision einer Agentur eingetragen', "added an agency's commission");
+    case 'organisation_commission_updated':
+      return t('hat die Provision einer Agentur geändert', "changed an agency's commission");
+    case 'organisation_commission_removed':
+      return t('hat die Provision einer Agentur entfernt', "removed an agency's commission");
     case 'letter_standard_text_changed': {
       const closing = entry.detail?.part === 'closing';
       const german = entry.detail?.language === 'de';
@@ -528,6 +553,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'offer' && entry.entityId && entry.action !== 'offer_deleted') {
     return `/admin/offers/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'organisation' && entry.entityId && entry.action !== 'organisation_deleted') {
+    return `/admin/organisations/${entry.entityId}`;
   }
 
   if (entry.entity === 'website_release') {

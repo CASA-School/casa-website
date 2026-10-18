@@ -272,6 +272,7 @@ const ENTITY_ICON: Record<string, ReactNode> = {
   person: Icon.person,
   booking: Icon.bookings,
   offer: Icon.offers,
+  organisation: Icon.globe,
   letter_text: Icon.offers,
   kursplanung: Icon.kursplanung,
   course_instance: Icon.catalogue,

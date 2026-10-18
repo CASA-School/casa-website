@@ -23,6 +23,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Letter` with its text | 9,500 (2,805 of a kind the workspace does not write) | `letters`, on the booking; the next letter is worked out from them |
 | `BankAccount` | 62 | `bank_accounts` |
 | Exam bookings (`Booking._ID_Exam`, `Exam`) | 94 (14 sittings linked, 9 earlier ones made) | `bookings` on their sitting (`exam_sessions.filemaker_exam_id`, 0056), all parts. One TestAS booking is left out: no TestAS here |
+| `Agency`, `Corporate` (+ `Management`, `Institution`), their contacts, `CommissionDetail` | 12 agencies · 40 companies · 66 contacts · 12 commission terms | `organisations`, `organisation_contacts`, `agency_commissions` (0057); 1,164 bookings know who pays them, 2,311 letters whom they went to — `read_organisations.py`, after the learners (organisations.md) |
 | `DateAccommodation` — the stays | 361 on 341 bookings | `booking_stays` (0056): dates, kind, room type, meals, called off, departure confirmed, and the place — a CASA flat (Die Biber, Die Hamster, Die Igel) and its room by name; they also fill the booking's accommodation, so the bookings' „Unterkunft" view shows them |
 
 ## Cannot come across yet — the workspace has no place for it
@@ -32,7 +33,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `SingleDateStudent` — attendance: present, absent, why, minutes late | 34,112 rows | No attendance at all. It is the Klassenbuch's; whether the workspace shows it (read-only) is a decision |
 | `Accommodation`, `Room` — the host family and its rooms | 56 places for the sample | A stay with a host family comes across without the family: hosts are people who are not learners — their own module and a privacy decision first (open item: placing learners) |
 | `PaymentOut` — rent paid to hosts, agency commission | 392 · 463 | No payouts and no commission (finance, with DATEV) |
-| `Commission` | 890 lines | No agency commission |
+| `Commission` | 890 lines | An agency's general terms come across; the commission on each booking does not (money module) |
 | `Instalment` — payment plans | 412 lines | No instalment plans |
 | `Invoice` | 124 | No invoices (mostly companies and groups) |
 | `PreBooking`, `Contact`, `WaitingRoom` — how they came in | 449 · 311 | Intake before the booking; the workspace's own intake is the website's. Whether the old ones come across is a decision |
@@ -42,6 +43,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | Learning agreements as records | 154 | Notes only; no agreement module |
 | `Booking.CertificateText` — the certificate's wording | 2,160 | No certificate of participation yet |
 | `Complaint` | 2 | No complaints |
+| `Person._ID_Client` — a customer number per learner, copied onto their bookings | 213 learners | No customer number on a learner (accounting; ask finance whether it is DATEV's debtor number) |
 | `Offer` | 19 | The offers module exists; SchoolMan's offers are not mapped |
 | Letters before 2025 | — | They live in `Letter.fmp12`, a separate file not in reach |
 | Periods on courses before our twelve months | 1,069 | They keep their dates without a course (open item: past courses) |

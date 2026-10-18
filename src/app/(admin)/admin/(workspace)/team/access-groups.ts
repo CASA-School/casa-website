@@ -21,7 +21,7 @@ import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
  */
 const SIDEBAR: readonly { label: Bilingual; modules: readonly WorkspaceModule[] }[] = [
   { label: { de: 'Posteingang', en: 'Inbox' }, modules: ['enquiries', 'registrations'] },
-  { label: { de: 'Schule', en: 'School' }, modules: ['people', 'private_data', 'placement', 'bookings', 'offers', 'catalogue'] },
+  { label: { de: 'Schule', en: 'School' }, modules: ['people', 'private_data', 'placement', 'bookings', 'offers', 'organisations', 'catalogue'] },
   { label: { de: 'Verwaltung', en: 'Management' }, modules: ['applications', 'staff', 'staff_private', 'kursplanung', 'website', 'activity'] },
   { label: { de: 'Einstellungen', en: 'Settings' }, modules: ['prices', 'rooms'] },
 ];

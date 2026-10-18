@@ -40,9 +40,26 @@ link's name. Read it as nothing.
 
 ## In the workspace today
 
-`organisations` and `organisation_contacts`, made for offers: a name, a kind (school, agency,
-company, authority), a country, a language, contacts. No commission terms, no client status, no link
-from a learner to their school or employer.
+`organisations` and `organisation_contacts`, made for offers, and since 2026-10-18 (migration 0057)
+an organisation's own e-mail, phone, active state and an agency's agreement; a contact's phone and job
+title; `agency_commissions` (a share of a kind of charge); `bookings.payer_organisation_id` (who pays).
+One workspace organisation per SchoolMan party, linked in `filemaker_links` to its `Agency` or
+`Corporate`, its `Management` and its `Institution`. „Organisationen" in the rail lists and opens
+them (docs/ADMIN_WORKSPACE.md §Organisations).
+
+**Brought across for the learner sample (2026-10-18):** `read_organisations.py | import-organisations.mjs`
+reads the agencies and companies the sample's bookings name, and the companies of company courses
+ahead: 12 agencies, 40 companies (one more has no name in SchoolMan and is left out), 66 contacts,
+12 commission terms (all on the course price: 20 % for nine agencies, 7 % for two, 10 % for one),
+1,164 bookings linked to who pays (591 through an agency, 573 a company), one company course, 2,311
+letters to them. The learners themselves name no employer or school (`Person._ID_Corporate` and
+`_ID_Institution` are empty on all 528); `Person._ID_Client` is a customer number per learner, copied
+onto their bookings, not a party.
+
+Not yet: `Group` (52 group visits; none in the sample), `Management` parties that are people (host
+families, tandem partners — their own modules), the other parties (multipliers, health insurers, the
+Förderverein; `_ID_StatusManagementReference`), commission per booking (`Commission`, the money
+module), a booking's contact at the agency (`Booking._ID_Contact`, 22).
 
 ## For the bridge
 

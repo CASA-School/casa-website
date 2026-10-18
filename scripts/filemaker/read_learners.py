@@ -28,6 +28,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fm_read import column, column_chunked  # noqa: E402
+from sample import sample_persons  # noqa: E402
 
 
 def table(name, *fields):
@@ -61,9 +62,6 @@ def stamp(value):
 
 
 today = date.today()
-monday = today - timedelta(days=today.weekday())
-until = today + timedelta(days=28)
-NOT_TAKEN = {'2', '3'}  # _ID_EnrolmentDone: 2 nein, 3 storno
 
 bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_Student', '_ID_EnrolmentDone', '_ID_VisaRequired', '_ID_Agency',
                                                          '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', 'TimeStampOfCreation', 'DateOfCreation') if b['__ID_Booking'].strip()}
@@ -82,13 +80,8 @@ def amount(value):
     except ValueError:
         return None
 
-# The sample: whoever sits in a course from this Monday to four weeks ahead, on a booking taken.
-chosen = set()
-for p in periods:
-    b = bookings.get(first(p['_ID_Booking']))
-    s, e = iso(p['ZStartDate']), iso(p['ZEndDate'])
-    if b and s and e and s <= until.isoformat() and e >= monday.isoformat() and first(b['_ID_EnrolmentDone']) not in NOT_TAKEN and first(b['_ID_Person']):
-        chosen.add(first(b['_ID_Person']))
+# The sample: whoever sits in a course from this Monday to four weeks ahead, on a booking taken (sample.py).
+chosen = sample_persons(bookings, periods, today)
 
 person_rows = table('Person', '__ID_Person', '_ID_Student', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'Gender_1', 'DateOfBirth',
                     '_ID_Homeland', 'BirthPlace', 'CountryBirth_1', 'Occupation', 'MotherTongue_1', 'TimestampCreation', 'DateOfCreation')

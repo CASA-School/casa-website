@@ -406,7 +406,22 @@ export default async function BookingPage({
               )}
               <MetaItem icon={Icon.person}>
                 {pick(lang, PAYER_LABELS[booking.payer])}
-                {booking.payerName ? ` · ${booking.payerName}` : ''}
+                {booking.payerOrganisation ? (
+                  <>
+                    {' · '}
+                    {canAccess(user, 'organisations') ? (
+                      <Link href={`/admin/organisations/${booking.payerOrganisation.id}`} className="font-semibold text-[var(--fm-navy)] hover:underline">
+                        {booking.payerOrganisation.name}
+                      </Link>
+                    ) : (
+                      booking.payerOrganisation.name
+                    )}
+                  </>
+                ) : booking.payerName ? (
+                  ` · ${booking.payerName}`
+                ) : (
+                  ''
+                )}
               </MetaItem>
               <MetaItem icon={Icon.people}>
                 <Link href={`/admin/people/${booking.personId}`} className="font-semibold text-[var(--fm-navy)] hover:underline">

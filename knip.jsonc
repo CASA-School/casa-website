@@ -74,6 +74,14 @@
     // Removal condition: delete when the FileMaker bridge brings learners across.
     "scripts/filemaker/import-learners.mjs",
 
+    // Writes the agencies and companies the learner sample depends on into
+    // `organisations` (contacts, commission terms, who pays a booking), from
+    // scripts/filemaker/read_organisations.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Organisations). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings organisations across.
+    "scripts/filemaker/import-organisations.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

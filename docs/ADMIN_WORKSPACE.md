@@ -398,8 +398,8 @@ password — or uses **Sign in with Microsoft**.
 
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
-applications, people, bookings, offers, rooms, catalogue, kursplanung, website,
-staff, staff_private, activity, team, settings. For each
+applications, people, private_data, bookings, offers, organisations, rooms, prices, catalogue,
+kursplanung, website, staff, staff_private, activity, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -412,7 +412,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -1121,6 +1121,58 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     Konto carries the language as a setting of the account (Deutsch | English,
     the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
     Räume were already in the shared design and kept as they are.
+
+## Organisations (2026-10-18, migration 0057)
+
+The agencies, companies, schools and offices CASA works with, in „Organisationen" under Schule (module
+`organisations`). An organisation has its name and kind (Agentur, Firma, Schule, Behörde, Sonstige),
+address, country, the language CASA writes to it in, e-mail, phone, whether CASA still works with it, an
+agency's agreement and a note; its contacts (`organisation_contacts`: salutation, name, job title,
+e-mail, phone; one e-mail address per contact of an organisation); an agency's commission
+(`agency_commissions`: a percentage of a kind of charge, „20 % auf Kurspreis"). A booking knows who
+pays it (`bookings.payer_organisation_id`); a company's own course its company
+(`courses.organisation_id`); a letter whom it went to. Imported ones are linked to SchoolMan in
+`filemaker_links`; no screen shows that.
+
+**List.** Views Alle, Agenturen, Firmen, Schulen & Behörden, Weitere and Inaktiv, with counts; a search
+by name, e-mail or a contact's name or e-mail. A row: the name, its kind where the view does not say it
+and the contact written to last; the country; how many contacts; how many bookings it pays that run
+today or are still to come (`payer_organisation_id`, not cancelled or deleted, a day ending today or
+later). Inactive ones are muted and listed last. „Neue Organisation" asks for the name and kind;
+country, language, e-mail, phone and address open once both are in.
+
+**An organisation's page.** The head: name, kind, „Inaktiv", country and language, e-mail, phone,
+address; the figures Laufende Buchungen, Teilnehmende (distinct learners of those bookings), Kontakte
+and, for an agency, Provision. Tabs: **Übersicht** (contacts and commission, each added, changed and
+removed in a dialog; Vereinbarung and Notiz when written), **Buchungen** (those it pays: running and
+coming, then the latest 25 earlier ones with „Alle anzeigen"; each with the booking's colour and what is
+open), **Kurse** (a company's own courses), **Angebote**, **Briefe**. A tab shows only when it has
+something in it, and only to whoever holds that module (bookings, catalogue, offers, and for a letter the
+module its page asks for). A booking's page names the organisation that pays and links to it.
+
+**Rights.** `view` reads; `edit` creates and changes an organisation, a contact or a commission term,
+and sets it inactive or active again; `full` deletes an organisation, removes a contact or a commission
+term, each after a confirmation. Staff hold `edit` by default; owners and administrators `full`.
+
+**Rules.** An organisation CASA no longer works with is set inactive, never deleted: it keeps everything
+and moves to „Inaktiv". „Löschen" is for one entered by mistake and is offered only while no booking,
+offer, course or letter names it and it did not come from SchoolMan (the import would bring it back); the
+action refuses otherwise and says what names it. Its contacts and commission terms go with it. Every
+change is a line in Aktivität („hat eine Organisation angelegt", „hat die Provision einer Agentur
+eingetragen", …); the trail says that a contact changed, never who.
+
+**From SchoolMan (2026-10-18).**
+`python3 -I scripts/filemaker/read_organisations.py | node scripts/filemaker/import-organisations.mjs [--dry-run]`,
+after the learners: the agencies and companies the learner sample's bookings name, and the companies of
+company courses ahead (the sample rule is `scripts/filemaker/sample.py`, shared with the learners'
+reader). SchoolMan's party is a `Management` record with roles — `Agency`, `Corporate`, the name in
+`Institution`; one organisation here per party, linked to all of them. Its own e-mail, phone and address
+(the rows of no person), the people who work there with their job title, an agency's general commission
+terms (`CommissionDetail`), who pays which sample booking (an agency over a company), the company
+course's company and the letters that name it. Never `Management`'s comments (they hold credentials). A
+match on SchoolMan's ids, else the same name and kind made here; fields fill only where empty. First
+run: 12 agencies, 40 companies, 66 contacts, 12 commission terms, 1,164 bookings, 2,311 letters
+(docs/schoolman/organisations.md has what is not yet across: group visits, the other parties).
 
 ## Courses (2026-10-17, migration 0041)
 

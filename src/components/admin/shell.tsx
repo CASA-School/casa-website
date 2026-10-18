@@ -148,11 +148,12 @@ export async function WorkspaceShell({
             {canAccess(user, 'people') ||
             canAccess(user, 'bookings') ||
             canAccess(user, 'offers') ||
+            canAccess(user, 'organisations') ||
             canAccess(user, 'catalogue') ? (
               <NavGroup
                 id="school"
                 label={t('Schule', 'School')}
-                hrefs={['/admin/people', '/admin/bookings', '/admin/offers', '/admin/catalogue']}
+                hrefs={['/admin/people', '/admin/bookings', '/admin/offers', '/admin/organisations', '/admin/catalogue']}
               >
                 {canAccess(user, 'people') ? (
                   <NavLink href="/admin/people" title={t('Teilnehmende', 'Students')} icon={Icon.people}>
@@ -169,6 +170,13 @@ export async function WorkspaceShell({
                 {canAccess(user, 'offers') ? (
                   <NavLink href="/admin/offers" icon={Icon.offers} title={t('Angebote', 'Offers')}>
                     {t('Angebote', 'Offers')}
+                  </NavLink>
+                ) : null}
+                {/* The agencies, companies, schools and offices CASA works with: who pays a booking,
+                    whom an offer is for, an agency's commission. */}
+                {canAccess(user, 'organisations') ? (
+                  <NavLink href="/admin/organisations" icon={Icon.globe} title={t('Organisationen', 'Organisations')}>
+                    {t('Organisationen', 'Organisations')}
                   </NavLink>
                 ) : null}
                 {/* Courses and exams are two areas of work, not one screen with

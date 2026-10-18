@@ -30,6 +30,7 @@ export const MODULES = [
   'private_data',
   'bookings',
   'offers',
+  'organisations',
   'rooms',
   'prices',
   'catalogue',
@@ -68,6 +69,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   private_data: { de: 'Bankverbindungen', en: 'Bank details' },
   bookings: { de: 'Buchungen', en: 'Bookings' },
   offers: { de: 'Angebote', en: 'Offers' },
+  organisations: { de: 'Organisationen', en: 'Organisations' },
   rooms: { de: 'Räume', en: 'Rooms' },
   prices: { de: 'Preise', en: 'Prices' },
   catalogue: { de: 'Kurse & Prüfungen', en: 'Courses & exams' },
@@ -118,6 +120,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * their contracts, tax and insurance numbers and bank details — are management's
  * (Rahman, 2026-10-17): owners and administrators hold both, and `staff_private`
  * is given to a colleague in finance on the Team screen.
+ * `organisations` — the agencies, companies, schools and offices CASA works with, their
+ * contacts and an agency's commission — is the team's daily work (2026-10-18): `edit` adds and
+ * changes, `full` also deletes an organisation entered by mistake, a contact or a commission term.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'enquiries',
@@ -126,6 +131,7 @@ const STAFF_MODULES: readonly WorkspaceModule[] = [
   'people',
   'private_data',
   'bookings',
+  'organisations',
   'catalogue',
   'activity',
 ];
