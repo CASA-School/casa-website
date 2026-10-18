@@ -167,6 +167,32 @@ test.describe('offers', () => {
     expect(rows[0].subject).toContain('German and culture in Bremen');
   });
 
+  test('a sent offer nobody answered is closed as „No answer“ and leaves the open list', async ({ page }) => {
+    await newGroupOffer(page);
+    const id = page.url().split('/').pop()!;
+    // Sent a month ago (the send itself is the test above).
+    await client.query(`UPDATE offers SET status = 'sent', version = 1, sent_at = now() - interval '30 days' WHERE id = $1`, [id]);
+
+    await page.goto(`/admin/offers/${id}`);
+    await page.getByRole('button', { name: 'More' }).click();
+    await page.getByRole('menuitem', { name: 'Not accepted …' }).click();
+    await page.getByText('No answer came', { exact: true }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText(/· No answer$/)).toBeVisible();
+
+    const { rows } = await client.query<{ status: string; decided: boolean; number: string }>(
+      `SELECT status, decided_at IS NOT NULL AS decided, year || '-' || lpad(seq::text, 3, '0') AS number FROM offers WHERE id = $1`,
+      [id]
+    );
+    expect(rows[0]).toMatchObject({ status: 'lapsed', decided: true });
+
+    await page.goto(`/admin/offers?q=${rows[0].number}`);
+    await expect(page.locator('main')).toContainText('Nothing found');
+    await page.goto(`/admin/offers?filter=declined&q=${rows[0].number}`);
+    await expect(page.locator('main')).toContainText(rows[0].number);
+    await expect(page.locator('main')).toContainText('No answer');
+  });
+
   test('a package takes what the group wants on top: an afternoon, a transfer, a reduction', async ({ page }) => {
     await newGroupOffer(page);
     const main = page.locator('main');

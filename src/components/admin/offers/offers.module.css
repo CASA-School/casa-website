@@ -161,7 +161,7 @@
 .pill_draft { background: #fff; color: var(--o-ink2); box-shadow: inset 0 0 0 1px var(--o-line-firm); }
 .pill_sent { background: var(--o-blue-tint); color: var(--o-blue-ink); }
 .pill_accepted { background: var(--o-green-soft); color: var(--o-green); }
-.pill_declined, .pill_withdrawn { background: var(--o-sunk); color: var(--o-mute); }
+.pill_declined, .pill_withdrawn, .pill_lapsed { background: var(--o-sunk); color: var(--o-mute); }
 
 /* the packages */
 .pkgs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }

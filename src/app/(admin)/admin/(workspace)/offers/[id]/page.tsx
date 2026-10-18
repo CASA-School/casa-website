@@ -103,13 +103,14 @@ function offerEvents(record: OfferRecord, activity: readonly ActivityEntry[], t:
     ),
   }));
 
-  const decisions = activity.filter((entry) => entry.action === 'offer_accepted' || entry.action === 'offer_declined');
+  const decisions = activity.filter((entry) => entry.action === 'offer_accepted' || entry.action === 'offer_declined' || entry.action === 'offer_lapsed');
   // The decision's note is stored on the offer and holds for its latest answer only.
   const latest = meta.decidedAt ? decisions[0] : undefined;
   const WORDED: Record<string, { what: string; icon: TimelineEvent['icon']; tone?: 'good' }> = {
     offer_accepted: { what: t('hat es als angenommen erfasst', 'recorded it as accepted'), icon: Icon.check, tone: 'good' },
     offer_declined: { what: t('hat es als abgelehnt erfasst', 'recorded it as declined'), icon: Icon.close },
     offer_withdrawn: { what: t('hat es zurückgezogen', 'withdrew it'), icon: Icon.close },
+    offer_lapsed: { what: t('hat es als unbeantwortet geschlossen', 'closed it as unanswered'), icon: Icon.close },
     offer_revised: { what: t('hat es zur Überarbeitung wieder geöffnet', 'reopened it to revise'), icon: Icon.offers },
   };
   for (const entry of activity) {

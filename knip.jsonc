@@ -90,6 +90,20 @@
     // Removal condition: delete when the FileMaker bridge brings group visits across.
     "scripts/filemaker/import-groups.mjs",
 
+    // Writes SchoolMan's offers into `offers` (lines, letters, comments, work
+    // log), from scripts/filemaker/read_offers.py through a pipe
+    // (docs/OFFERS.md §From SchoolMan). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings offers across.
+    "scripts/filemaker/import-offers.mjs",
+
+    // A SchoolMan letter in the workspace's letter shape, shared by the two
+    // imports above that bring letters (learners, offers); imported only by
+    // them, which knip does not follow.
+    //
+    // Removal condition: delete with the last of those imports.
+    "scripts/filemaker/letter-document.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

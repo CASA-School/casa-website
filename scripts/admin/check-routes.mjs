@@ -111,6 +111,8 @@ const routes = [
   group && `/admin/groups/${group}`,
   '/admin/offers',
   '/admin/offers?filter=all',
+  '/admin/offers?filter=declined',
+  '/admin/offers?filter=all&q=376',
   '/admin/offers/new',
   offer && `/admin/offers/${offer}`,
   offer && `/admin/offers/${offer}/letter`,

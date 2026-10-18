@@ -81,6 +81,7 @@ const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
   accepted: 'positive',
   declined: 'quiet',
   withdrawn: 'quiet',
+  lapsed: 'quiet',
 };
 
 /** Where a learner stands, as a badge in the head: the new and the last course stand out. */

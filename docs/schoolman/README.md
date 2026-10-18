@@ -22,6 +22,7 @@ rule for each) and `docs/FILEMAKER_BRIDGE.md` (the bridge design).
 | People, their e-mail addresses, phones and addresses | [people.md](people.md) |
 | Organisations — schools, companies, agencies, and the `Management` party record | [organisations.md](organisations.md) |
 | Group visits — `Group`, its participants, courses, offers and bed reservations | [groups.md](groups.md) |
+| Offers — `Offer`, its lines and letters, and what became of them | [offers.md](offers.md) |
 | Intake — enquiries, pre-bookings, the waiting list, tests, offers | [intake.md](intake.md) |
 | Bookings, the business lines, booked periods | [bookings.md](bookings.md) |
 | Courses, exams, lessons and attendance | [courses.md](courses.md) |

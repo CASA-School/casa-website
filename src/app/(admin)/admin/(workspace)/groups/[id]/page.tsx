@@ -12,20 +12,23 @@ import { Icon } from '@/components/admin/icons';
 import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
-import { Badge, Card, DetailList, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
+import { Badge, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel, OBSERVATION_REASON_LABELS } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
-import { getGroup, groupCourses, groupDeletable, groupFigures, groupOptions, groupParticipants, type GroupParticipant } from '@/lib/admin/groups';
+import { getGroup, groupCourses, groupDeletable, groupFigures, groupOffers, groupOptions, groupParticipants, type GroupParticipant } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
+import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
 const STATUS_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
+
+const OFFER_TONES: Record<OfferStatus, BadgeTone> = { draft: 'neutral', sent: 'accent', accepted: 'positive', declined: 'quiet', withdrawn: 'quiet', lapsed: 'quiet' };
 
 const range = (from: Date | null, to: Date | null, lang: WsLang) => (from ? dayRange(toDateInputValue(from), toDateInputValue(to ?? from), lang) : null);
 
@@ -34,7 +37,7 @@ const range = (from: Date | null, to: Date | null, lang: WsLang) => (from ? dayR
  * tabs. The head: the name, whether it is on, who sends it and through whom, where from, and the figures
  * — how many come, how many are booked, the stay, what their bookings still owe. Übersicht holds the
  * visit's details, how it travels, the note, and what has been said and done (SchoolMan's comments and
- * work log among it); then the participants and the group's own courses, each shown to whoever holds that
+ * work log among it); then the participants, the offers made for it and the group's own courses, each shown to whoever holds that
  * module, and only when there is something in it.
  */
 export default async function GroupPage({
@@ -55,11 +58,13 @@ export default async function GroupPage({
   const seesBookings = canAccess(user, 'bookings');
   const seesCourses = canAccess(user, 'catalogue');
   const seesOrganisations = canAccess(user, 'organisations');
+  const seesOffers = canAccess(user, 'offers');
 
-  const [figures, participants, courses, notes, activity, options, deletable] = await Promise.all([
+  const [figures, participants, courses, offers, notes, activity, options, deletable] = await Promise.all([
     seesBookings ? groupFigures(id) : Promise.resolve(null),
     seesBookings ? groupParticipants(id) : Promise.resolve([]),
     seesCourses ? groupCourses(id) : Promise.resolve([]),
+    seesOffers ? groupOffers(id) : Promise.resolve([]),
     listNotes('group_visit', id),
     activityFor('group_visit', id, 100),
     canEdit ? groupOptions([group.organisationId, group.agencyId, group.courseTypeId]) : Promise.resolve(null),
@@ -70,6 +75,7 @@ export default async function GroupPage({
   const tabs: RecordTab[] = [
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     ...(participants.length ? [{ id: 'participants', label: t('Teilnehmende', 'Students'), icon: Icon.people, count: participants.length }] : []),
+    ...(offers.length ? [{ id: 'offers', label: t('Angebote', 'Offers'), icon: Icon.offers, count: offers.length }] : []),
     ...(courses.length ? [{ id: 'courses', label: t('Kurse', 'Courses'), icon: Icon.catalogue, count: courses.length }] : []),
   ];
   const hidden = <input type="hidden" name="groupId" value={id} />;
@@ -206,6 +212,27 @@ export default async function GroupPage({
         <RecordTabPanel id="participants">
           <Card bleed>
             <ParticipantRows participants={participants} lang={lang} t={t} />
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {offers.length ? (
+        <RecordTabPanel id="offers">
+          <Card bleed>
+            <Rows>
+              {offers.map((o) => (
+                <Row
+                  key={o.id}
+                  href={`/admin/offers/${o.id}`}
+                  quiet={!['draft', 'sent', 'accepted'].includes(o.status)}
+                  icon={<IconChip icon={Icon.offers} tint="blue" />}
+                  title={`${o.title || t('Angebot', 'Offer')} · ${o.number}`}
+                  state={<Badge tone={OFFER_TONES[o.status]}>{pick(lang, OFFER_STATUS_LABELS[o.status])}</Badge>}
+                  detail={o.perPerson != null ? t(`${euros(o.perPerson)} pro Person`, `${euros(o.perPerson)} per person`) : null}
+                  end={<DateText value={o.createdAt} compact />}
+                />
+              ))}
+            </Rows>
           </Card>
         </RecordTabPanel>
       ) : null}

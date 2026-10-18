@@ -6,6 +6,7 @@ import type { BookingStatus, ObservationReason } from './bookings';
 import { query, queryFirst, withTransaction } from './db';
 import type { GroupLevel, GroupStatus, GroupView } from './group-labels';
 import type { Bilingual } from './i18n';
+import { formatOfferNumber, type OfferStatus } from './offers/types';
 import type { OrganisationKind } from './organisation-labels';
 
 /**
@@ -338,6 +339,27 @@ export async function groupCourses(id: string): Promise<GroupCourse[]> {
     startDate: r.start_date,
     endDate: r.end_date,
     cancelled: r.status === 'cancelled',
+  }));
+}
+
+export type GroupOffer = { id: string; number: string; status: OfferStatus; title: string; perPerson: number | null; createdAt: Date };
+
+/** The offers made for the visit (0059), the latest first, with what each asks per person. */
+export async function groupOffers(id: string): Promise<GroupOffer[]> {
+  const rows = await query<{ id: string; year: number; seq: number; status: OfferStatus; title: string; per_person: string | null; created_at: Date }>(
+    `SELECT f.id, f.year, f.seq, f.status, f.title, f.created_at,
+            (SELECT sum(amount) FROM offer_lines l WHERE l.offer_id = f.id AND l.audience = 'participant') AS per_person
+       FROM offers f WHERE f.group_visit_id = $1 AND f.deleted_at IS NULL
+      ORDER BY f.created_at DESC, f.id`,
+    [id]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    number: formatOfferNumber(r.year, r.seq),
+    status: r.status,
+    title: r.title,
+    perPerson: r.per_person == null ? null : Number(r.per_person),
+    createdAt: r.created_at,
   }));
 }
 

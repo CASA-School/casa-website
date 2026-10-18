@@ -39,13 +39,13 @@ bookings (174).
 company and agency (the organisations reader takes in every group's parties), course type, band,
 country, people and ages, stay, lessons (else the span of the booked periods), travel, the comments and
 the work log. The learner sample takes in the participants of this year's four groups (82 bookings,
-`sample.py`), so their pages have their people.
+`sample.py`), so their pages have their people. Since 0059 a group's offers come across too (47, on its
+page's Angebote tab; offers.md).
 
 ## Not yet across
 
 | SchoolMan | Why not |
 | --- | --- |
-| `Offer`, `DateOffer`, `CostDetailSample` | The offers module has its own builder; mapping SchoolMan's offers is its own piece of work (learner-transfer.md lists them too) |
 | `DateRent` — bed reservations with hosts and hostels | Hosts are people: their own module and a privacy decision first |
 | `Letter` with `_ID_Group` (18) | Letters come with the learners; a letter to a group has no place yet |
 | `Invoice` (5), `PaymentIn` on a group | Invoices are finance's (with DATEV) |

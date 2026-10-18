@@ -136,7 +136,7 @@ shared with pre-bookings and groups.
 | Wrong signature | Ina's group offers are signed "– Buchhaltung –" (`$$_Account_Function` set without its parameter) | Signed by the offer's owner, with the school's name |
 | Wrong level | Group and company offers print "Niveau: " and nothing (read via the pre-booking's course) | No level field on the letter; the title says what it is |
 | Empty offers go out | 37622 was sent three times with no lines | A check stops sending: no lines, a line without a price, no participants, no title, validity passed |
-| No status, no follow-up | Whether an offer was accepted is recorded nowhere; 10 of 396 led to an invoice | Draft → Sent → Accepted / Declined / Withdrawn; "Follow up" after 10 days, "Expired" past validity |
+| No status, no follow-up | Whether an offer was accepted is recorded nowhere; 10 of 396 led to an invoice | Draft → Sent → Accepted / Declined / Withdrawn / No answer; "Follow up" after 10 days, "Expired" past validity |
 | Deleting lines can delete offers | `EraseCostDetailSample_Offer` runs *Delete All Records* after an unchecked GTRR (not reproduced live) | Lines are rows of their offer, replaced in one transaction |
 | VAT | Offers never mention VAT; the footer cites "§ 5 Abs. 1 Nr. 9 KStG und § 3 Nr. 6" as VAT exemption — corporate and trade tax provisions | No tax wording until CASA's tax adviser gives it (open question 1) |
 
@@ -312,10 +312,42 @@ the catalogue's "from" price stands until it is typed over).
   totals). The workspace sends no email of its own, so the dialog is the three steps: save the PDF,
   write the email (a `mailto:` with subject and greeting), mark as sent — which keeps the letter in
   `letters`, updates the organisation's address and adds or refreshes the contact it went to.
-- **Answers.** *Accepted* (primary once sent) and *Not accepted …* (⋯: declined by them, or withdrawn
-  by us) with a note. *Revise* (⋯) reopens any offer as a draft; the versions already sent stay.
+- **Answers.** *Accepted* (primary once sent) and *Not accepted …* (⋯: declined by them, no answer
+  came, or withdrawn by us) with a note. „Ohne Antwort" (`lapsed`, 0059) closes an offer nobody
+  answered — the commonest end in SchoolMan, which never recorded one. *Revise* (⋯) reopens any offer
+  as a draft; the versions already sent stay.
 - **The list.** Open (drafts and sent) first; per person and group totals; *Follow up* on an offer
-  sent ten days ago without an answer, *Expired* past its validity.
+  sent ten days ago without an answer, *Expired* past its validity. Nicht angenommen groups by how it
+  ended: Abgelehnt (declined or withdrawn), Ohne Antwort. The search finds a title, a name, our number
+  or SchoolMan's („37602").
+
+## From SchoolMan (2026-10-18, migration 0059)
+
+`python3 -I scripts/filemaker/read_offers.py | node scripts/filemaker/import-offers.mjs [--dry-run]`,
+after the learners, the organisations and the groups. Every `Offer` that is not a template and whose
+recipient the workspace has: a group visit's offers (`offers.group_visit_id`, and the group's page lists
+them), those to an agency or a company (the organisations reader takes those parties in), and those to
+a learner of the sample. First run: 195 of 397 (115 to companies, 21 to agencies, 47 to groups, 15 to
+learners). Left out: 174 to learners outside the sample, 19 that name nobody the workspace has (no
+recipient, or a party that is not an agency or a company), 6 templates, 3 to a company without a name.
+
+- **Number.** Ours in the year SchoolMan made it (2025-031); SchoolMan's (`filemaker_offer_id`), which
+  its letters printed as „Offer Nº", is searchable.
+- **Shape.** A group's offer is a group offer on no package (*Own offer*) with the visit's people and
+  dates; the rest are individual offers to their organisation or learner. Every `CostDetailSample`
+  line is a typed line: its type (`charge_types.filemaker_id`, else Zusatzkosten), label and detail in
+  the letter's language, quantity and typed price — SchoolMan has no price list behind them. A group's
+  own offer takes its weeks from its dates, else from its course line („Kurspreis 2 × 145").
+- **Letters.** Each `Letter` that went out is a version (kind `offer`), its frozen text as the letter
+  („Wie gesendet"); one the learners' import brought becomes the offer's and stays so.
+- **Answer.** SchoolMan records none, so it is worked out: invoiced → accepted; the group called off
+  (*nein*) → declined; the group confirmed (*ja*) → its newest offer accepted and the earlier ones
+  withdrawn (replaced); the group still asked for (*u.B.*), or made in the last eight weeks → open (sent
+  once a letter went out, else a draft); the rest → „Ohne Antwort". First run: 140 no answer, 21
+  declined, 17 accepted, 12 sent, 4 withdrawn, 1 draft.
+- **Re-runs.** An offer a colleague has worked on here is left alone; otherwise SchoolMan's values are
+  taken, and an offer is only written when they changed (every write stamps `updated_at`, which the
+  list shows).
 
 ## Code map
 

@@ -562,6 +562,7 @@ erDiagram
   COURSE_TYPES o|--o{ GROUP_VISITS : course_type_id
   GROUP_VISITS o|--o{ BOOKINGS : "group_visit_id (the participants)"
   GROUP_VISITS o|--o{ COURSES : "group_visit_id (its own class)"
+  GROUP_VISITS o|--o{ OFFERS : "group_visit_id (0059)"
 
   GROUP_VISITS {
     uuid id PK

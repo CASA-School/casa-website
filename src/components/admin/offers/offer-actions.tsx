@@ -196,7 +196,7 @@ export function SendButton({
 
 function DecideDialog({ id, decision, onClose }: { id: string; decision: 'accepted' | 'declined'; onClose: () => void }) {
   const { t } = useWsLang();
-  const [reason, setReason] = useState<'declined' | 'withdrawn'>('declined');
+  const [reason, setReason] = useState<'declined' | 'lapsed' | 'withdrawn'>('declined');
   const accepted = decision === 'accepted';
   return (
     <Dialog open onOpenChange={(o) => (o ? null : onClose())}>
@@ -213,6 +213,7 @@ function DecideDialog({ id, decision, onClose }: { id: string; decision: 'accept
               {(
                 [
                   ['declined', t('Von ihnen abgelehnt', 'Declined by them')],
+                  ['lapsed', t('Keine Antwort bekommen', 'No answer came')],
                   ['withdrawn', t('Von uns zurückgezogen', 'Withdrawn by us')],
                 ] as const
               ).map(([v, label]) => (

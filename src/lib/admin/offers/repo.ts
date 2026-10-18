@@ -162,7 +162,7 @@ export type OfferListItem = {
 const FILTER_SQL: Record<OfferListFilter, string> = {
   open: `o.status IN ('draft', 'sent')`,
   accepted: `o.status = 'accepted'`,
-  declined: `o.status IN ('declined', 'withdrawn')`,
+  declined: `o.status IN ('declined', 'withdrawn', 'lapsed')`,
   all: 'true',
 };
 
@@ -176,7 +176,9 @@ export async function listOffers({ filter, q, lang }: { filter: OfferListFilter;
     params.push(`%${q.trim().toLowerCase()}%`);
     search = `AND (lower(o.title) LIKE $1 OR lower(coalesce(o.group_name, '')) LIKE $1
                    OR lower(o.recipient_name) LIKE $1 OR (o.year || '-' || lpad(o.seq::text, 3, '0')) LIKE $1
-                   OR lower(coalesce(o.contact_last_name, '')) LIKE $1)`;
+                   OR lower(coalesce(o.contact_last_name, '')) LIKE $1
+                   -- SchoolMan's number, which its letters printed as „Offer Nº" (0059).
+                   OR coalesce(o.filemaker_offer_id, '') LIKE $1)`;
   }
   const rows = await query<
     OfferRow & { p_sum: string | null; e_sum: string | null }
@@ -187,7 +189,7 @@ export async function listOffers({ filter, q, lang }: { filter: OfferListFilter;
      WHERE o.deleted_at IS NULL AND ${FILTER_SQL[filter]} ${search}
      ORDER BY CASE o.status WHEN 'sent' THEN 0 WHEN 'draft' THEN 1 ELSE 2 END,
               o.updated_at DESC
-     LIMIT 200`,
+     LIMIT 500`,
     params
   );
   const now = today();
@@ -718,7 +720,7 @@ export async function markSent(id: string, actor: StaffUser): Promise<SendResult
   });
 }
 
-export type Decision = 'accepted' | 'declined' | 'withdrawn';
+export type Decision = 'accepted' | 'declined' | 'withdrawn' | 'lapsed';
 
 export async function decideOffer(id: string, decision: Decision, note: string | null, actor: StaffUser): Promise<boolean> {
   const rows = await query<{ id: string }>(

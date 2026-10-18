@@ -8,7 +8,8 @@ SchoolMan's party is a `Management` record; its roles are `Agency` (a language-t
 `Corporate` (a company as client), with the name in `Institution`. This reads the agencies and
 companies the sample's bookings name (`Booking._ID_Agency`, `_ID_Corporate`), the companies of the
 company courses still running or ahead (`Course._ID_Corporate`), and those of the group visits
-(`Group._ID_Corporate`, `_ID_Agency`; `read_groups.py` links them): the party's name, whether it is
+(`Group._ID_Corporate`, `_ID_Agency`; `read_groups.py` links them) and of the offers (`Offer._ID_Agency`,
+`_ID_Corporate`; `read_offers.py`): the party's name, whether it is
 active, an agency's agreement, its own e-mail, phone and address (the rows of no person), the people
 who work there with their job title and their e-mail and phone, an agency's commission terms
 (`CommissionDetail`), which sample booking each pays, and the letters that name it. Never `Management`'s comments — they hold
@@ -64,6 +65,14 @@ for cid, corp, end in zip(column('Course', '__ID_Course'), column('Course', '_ID
 corporate_ids |= set(course_corporates.values())
 # The schools, companies and agencies of the group visits, all 52 of them.
 for corp, agency in zip(column('Group', '_ID_Corporate'), column('Group', '_ID_Agency')):
+    if first(corp):
+        corporate_ids.add(first(corp))
+    if first(agency):
+        agency_ids.add(first(agency))
+# The agencies and companies the offers were made to (templates aside).
+for corp, agency, template in zip(column('Offer', '_ID_Corporate'), column('Offer', '_ID_Agency'), column('Offer', '_ID_ActiveTemplate')):
+    if first(template) == '1':
+        continue
     if first(corp):
         corporate_ids.add(first(corp))
     if first(agency):

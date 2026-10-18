@@ -1199,7 +1199,8 @@ company and the agency (linked for whoever holds Organisationen), country, ages,
 the figures Personen, Gebucht, Zeitraum and what the participants' bookings still owe. Tabs:
 **Übersicht** (the details, Notizen und Verlauf with SchoolMan's comments and work log, and An- und
 Abreise and Notiz when written), **Teilnehmende** (each booking: the learner, the booking's colour,
-number, dates, where they stay, what is open), **Kurse** (the group's own). A booking's page names its
+number, dates, where they stay, what is open), **Angebote** (those made for it, with what each asks per
+person), **Kurse** (the group's own). A booking's page names its
 group and links to it; an organisation's page has a Gruppen tab with the visits it sends or books.
 
 **Rights and rules.** `view` reads; `edit` creates and changes a visit and confirms, cancels or reopens
@@ -1219,7 +1220,8 @@ booked periods. The comments on the group become notes, its work log its history
 changed a visit here a re-run takes SchoolMan's values; after that, SchoolMan only fills what is empty.
 The learner sample takes in the participants of this year's groups (`sample.py`), so their bookings are
 linked: 82 bookings on four visits. SchoolMan's group courses all ended before the course import's
-window, so none is linked yet. Not across: the group's offers, letters, invoices and bed reservations
+window, so none is linked yet. A group's offers came across with the offers (0059; its page's Angebote
+tab, docs/OFFERS.md §From SchoolMan). Not across: its letters, invoices and bed reservations
 (`DateRent`) — docs/schoolman/groups.md.
 
 ## Courses (2026-10-17, migration 0041)

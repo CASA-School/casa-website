@@ -51,6 +51,7 @@ const OFFER_TONES: Record<OfferStatus, BadgeTone> = {
   accepted: 'positive',
   declined: 'quiet',
   withdrawn: 'quiet',
+  lapsed: 'quiet',
 };
 
 /** The module a letter is opened with (`/admin/letters/[id]` asks for it): an offer's, a registration's, a booking's. */

@@ -9,7 +9,8 @@ import type { CourseChoice } from './course';
  * component) and the server share one definition of an offer.
  */
 
-export const OFFER_STATUSES = ['draft', 'sent', 'accepted', 'declined', 'withdrawn'] as const;
+/** `lapsed`: sent and never answered (0059) — SchoolMan's old offers mostly, and one a colleague closes so. */
+export const OFFER_STATUSES = ['draft', 'sent', 'accepted', 'declined', 'withdrawn', 'lapsed'] as const;
 export type OfferStatus = (typeof OFFER_STATUSES)[number];
 
 /** The workspace's words for a status, read with `pick(lang, …)`; never printed on the letter. */
@@ -19,6 +20,7 @@ export const OFFER_STATUS_LABELS: Record<OfferStatus, Bilingual> = {
   accepted: { de: 'Angenommen', en: 'Accepted' },
   declined: { de: 'Abgelehnt', en: 'Declined' },
   withdrawn: { de: 'Zurückgezogen', en: 'Withdrawn' },
+  lapsed: { de: 'Ohne Antwort', en: 'No answer' },
 };
 
 export type OfferKind = 'group' | 'individual';

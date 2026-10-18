@@ -84,7 +84,7 @@ export async function sendOfferAction(formData: FormData) {
 }
 
 const DecisionSchema = z.object({
-  decision: z.enum(['accepted', 'declined', 'withdrawn']),
+  decision: z.enum(['accepted', 'declined', 'withdrawn', 'lapsed']),
   note: z
     .string()
     .max(1000)

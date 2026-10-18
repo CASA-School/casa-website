@@ -419,6 +419,8 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat ein Angebot als angenommen erfasst', 'recorded an offer as accepted');
     case 'offer_declined':
       return t('hat ein Angebot als abgelehnt erfasst', 'recorded an offer as declined');
+    case 'offer_lapsed':
+      return t('hat ein Angebot als unbeantwortet geschlossen', 'closed an offer as unanswered');
     case 'offer_withdrawn':
       return t('hat ein Angebot zurückgezogen', 'withdrew an offer');
     case 'offer_revised':

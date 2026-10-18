@@ -17,7 +17,7 @@ import { listOffers, offerCounts, OFFER_FILTERS, type OfferListFilter, type Offe
 const filterLabels = (t: T): Record<OfferListFilter, string> => ({
   open: t('Offen', 'Open'),
   accepted: t('Angenommen', 'Accepted'),
-  declined: t('Abgelehnt', 'Declined'),
+  declined: t('Nicht angenommen', 'Not accepted'),
   all: t('Alle', 'All'),
 });
 
@@ -28,6 +28,7 @@ const stages = (t: T) =>
     { key: 'draft', label: t('Entwürfe', 'Drafts'), has: (o: OfferListItem) => o.status === 'draft' },
     { key: 'accepted', label: t('Angenommen', 'Accepted'), has: (o: OfferListItem) => o.status === 'accepted' },
     { key: 'declined', label: t('Abgelehnt', 'Declined'), has: (o: OfferListItem) => o.status === 'declined' || o.status === 'withdrawn' },
+    { key: 'lapsed', label: t('Ohne Antwort', 'No answer'), has: (o: OfferListItem) => o.status === 'lapsed' },
   ] as const;
 
 /** Who it is for, under the name: the school behind a group's name and its size, or a learner's course. */
@@ -80,9 +81,10 @@ export default async function OffersPage({
   const canWrite = canAccess(user, 'offers', 'edit');
   const href = (f: OfferListFilter) => `/admin/offers${f === 'open' ? '' : `?filter=${f}`}`;
 
-  // Open and All read in groups by what to do; Accepted and Declined are one group already, named by their tab.
+  // Open and All read in groups by what to do, Not accepted by how it ended (refused or withdrawn, or never
+  // answered); Accepted is one group already, named by its tab.
   const groups =
-    filter === 'open' || filter === 'all'
+    filter === 'open' || filter === 'all' || filter === 'declined'
       ? stages(t).map((stage) => ({ ...stage, rows: offers.filter(stage.has) })).filter((g) => g.rows.length)
       : [{ key: filter, label: '', rows: offers }];
 
