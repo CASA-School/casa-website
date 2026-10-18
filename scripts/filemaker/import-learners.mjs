@@ -519,6 +519,31 @@ try {
       );
       count.notes++;
     }
+    // Their tests (0066): a record each, no longer a note.
+    for (const test of l.tests ?? []) {
+      await client.query(
+        `INSERT INTO person_tests (person_id, booking_id, taken_on, test, level, score, result, comment, author_name, filemaker_id, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+         ON CONFLICT (filemaker_id) WHERE filemaker_id IS NOT NULL DO UPDATE
+           SET person_id = EXCLUDED.person_id, booking_id = EXCLUDED.booking_id, taken_on = EXCLUDED.taken_on, test = EXCLUDED.test, level = EXCLUDED.level,
+               score = EXCLUDED.score, result = EXCLUDED.result, comment = EXCLUDED.comment, author_name = EXCLUDED.author_name`,
+        [
+          personId,
+          test.booking ? (bookingOf.get(test.booking) ?? null) : null,
+          test.day,
+          test.test,
+          ['A1', 'A2', 'B1', 'B1+', 'B2', 'C1', 'C2'].includes(test.level ?? '') ? test.level : null,
+          test.score,
+          test.result ?? (test.level && !['A1', 'A2', 'B1', 'B1+', 'B2', 'C1', 'C2'].includes(test.level) ? test.level : null),
+          test.comment,
+          test.author ?? 'SchoolMan',
+          test.ref,
+          test.created,
+        ]
+      );
+      count.tests = (count.tests ?? 0) + 1;
+    }
+    await client.query(`DELETE FROM staff_notes WHERE filemaker_ref = ANY($1::text[])`, [(l.tests ?? []).map((test) => `TestStudent:${test.ref}`)]);
     // The work log: read afresh, as SchoolMan has it now.
     await client.query(`DELETE FROM staff_activity WHERE action = 'schoolman_log' AND entity_id = ANY($1::uuid[])`, [[personId, ...bookingOf.values()]]);
     for (const w of l.log ?? []) {
@@ -600,7 +625,7 @@ console.log(
     `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged\n` +
     `money: ${count.charges} charges, ${count.payments} payments, ${count.refunds} refunds · ${count.zero} lines of no amount left out · ` +
     `${count.chargesRemoved} charges and ${count.paymentsRemoved} payments no longer in SchoolMan removed\n` +
-    `about them: ${count.notes} notes, ${count.log} log lines, ${count.letters} letters (${count.lettersOnPerson} on the person only), ${count.banks} bank accounts\n` +
+    `about them: ${count.notes} notes, ${count.tests ?? 0} tests, ${count.log} log lines, ${count.letters} letters (${count.lettersOnPerson} on the person only), ${count.banks} bank accounts\n` +
     `exams: ${count.examBookings} bookings · ${count.sittingsLinked} sittings linked, ${count.sittingsMade} made · ${count.examNoKind} of an exam we do not offer left out\n` +
     `stays: ${count.stays} · ${count.staysRemoved} no longer in SchoolMan removed · ${count.staysNoDates} without dates left out`
 );

@@ -36,6 +36,7 @@ import {
   learnerStage,
   listBankAccounts,
   listCountries,
+  personTests,
   personTimeline,
   type Address,
   type AddressKind,
@@ -179,7 +180,7 @@ export default async function PersonPage({
   const seesBank = canAccess(user, 'private_data');
   const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters, examWaits] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters, examWaits, tests] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -196,6 +197,7 @@ export default async function PersonPage({
     seesBookings ? personEntries(person.id) : Promise.resolve([]),
     seesBookings || seesOffers ? lettersForPerson(person.id) : Promise.resolve([]),
     seesBookings ? personExamEntries(person.id) : Promise.resolve([]),
+    personTests(person.id),
   ]);
   // The letters this colleague may open: an offer's with `offers`, a registration's with
   // `registrations`, the others with `bookings`.
@@ -344,6 +346,7 @@ export default async function PersonPage({
     { id: 'cases', label: t('Anfragen & Buchungen', 'Enquiries & bookings'), icon: Icon.registrations, count: cases.length },
     { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
     ...(seesBookings || seesOffers ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
+    ...(tests.length ? [{ id: 'tests', label: t('Tests', 'Tests'), icon: Icon.placement, count: tests.length }] : []),
     ...(bankAccounts ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
   // What is open, in the team's words: „1 Anmeldung · 1 Buchung".
@@ -749,6 +752,30 @@ export default async function PersonPage({
             ) : (
               <p className="px-4 py-4 text-sm text-[var(--casa-muted)]">{t('Noch kein Brief an diese Person.', 'No letter to this person yet.')}</p>
             )}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {/* Their tests (0066): placement and progress tests, the level reached and the score — the level history. */}
+      {tests.length ? (
+        <RecordTabPanel id="tests">
+          <Card bleed>
+            <ul className="divide-y divide-ws-line-soft">
+              {tests.map((test) => (
+                <li key={test.id} className="flex items-start gap-3 px-4 py-3">
+                  <span className="w-24 shrink-0 pt-0.5 text-[0.82rem] text-[var(--casa-muted)] tabular-nums">{test.takenOn ? <DateText value={test.takenOn} compact /> : '—'}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[0.88rem] font-semibold text-[var(--casa-ink)]">{test.test ?? t('Test', 'Test')}</span>
+                    {test.comment ? <span className="mt-0.5 block text-[0.8rem] whitespace-pre-line text-[var(--casa-muted)]">{test.comment}</span> : null}
+                    {test.authorName ? <span className="mt-0.5 block text-[0.74rem] text-[var(--casa-muted)]">{test.authorName}</span> : null}
+                  </span>
+                  <span className="shrink-0 text-right">
+                    {test.level ? <Badge tone="accent">{test.level}</Badge> : null}
+                    <span className="mt-1 block text-[0.84rem] font-semibold tabular-nums text-[var(--casa-ink)]">{test.score != null ? `${num(lang, test.score)} %` : (test.result ?? '')}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </Card>
         </RecordTabPanel>
       ) : null}

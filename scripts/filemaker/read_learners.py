@@ -174,17 +174,20 @@ for r in table('Comment', '__ID_Comment', '_ID_Person', '_ID_Booking', 'Subject'
     if pid and body:
         notes_of[pid].append({'ref': f'Comment:{r["__ID_Comment"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
                               'at': stamp(r['TimeStampOfCreation']), 'body': body})
-# A test (`TestStudent` holds placement tests and exam results alike): its name, day, result, level and
-# score, and the tester's comment.
-for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', 'TestReference', 'DateOfTest', 'Result', 'LevelShort', 'Percentage', 'CommentTest', 'User',
+# A test (`TestStudent` holds placement and progress tests alike, 0066): which, when, the level reached
+# (`LevelShort`: A1 … C1, B1+), the result (a percentage, mostly), the tester's comment.
+tests_of = collections.defaultdict(list)
+for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', 'TestReference', 'DateOfTest', 'Result', 'LevelShort', 'CommentTest', 'User',
                'DateOfCreation'):
     pid = owner(r)
     if not pid:
         continue
-    facts = ' · '.join(x for x in (r['Result'].strip(), r['LevelShort'].strip(), f"{r['Percentage'].strip()} %" if r['Percentage'].strip() else '') if x)
-    head = ' '.join(x for x in (r['TestReference'].strip() or 'Einstufungstest', f"am {r['DateOfTest'].strip()}" if r['DateOfTest'].strip() else '') if x)
-    notes_of[pid].append({'ref': f'TestStudent:{r["__ID_TestStudent"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['User'].strip() or None,
-                          'at': stamp(r['DateOfTest']) or stamp(r['DateOfCreation']), 'body': text(f'{head}: {facts}' if facts else head, r['CommentTest'])})
+    result = r['Result'].strip()
+    pct = re.match(r'^\s*(\d{1,3})(?:[.,]\d+)?\s*%?\s*$', result)
+    tests_of[pid].append({'ref': r['__ID_TestStudent'].strip(), 'booking': first(r['_ID_Booking']) or None, 'test': r['TestReference'].strip() or None,
+                          'day': iso(r['DateOfTest']), 'level': r['LevelShort'].strip() or None,
+                          'score': int(pct.group(1)) if pct and int(pct.group(1)) <= 100 else None, 'result': None if pct else (result or None),
+                          'comment': r['CommentTest'].strip() or None, 'author': r['User'].strip() or None, 'created': stamp(r['DateOfCreation'])})
 # A learning agreement: its kind, its texts, the recommendation, the level and how long.
 for r in table('Agreement', '__ID_Agreement', '_ID_Person', '_ID_Booking', 'TypeAgreement_1', 'Subject', 'Agreement_1', 'Agreement_2', 'Agreement_3', 'Agreement_4',
                'Agreement_5', 'AgreementComment_1', 'Recommendation', 'Level', 'LengthDuration', 'UserName', 'DateOfCreation'):
@@ -317,6 +320,7 @@ for pid, p in persons.items():
                             'created': stamp(r['TimeStampOfCreation'])} for r in refunds_of[b['__ID_Booking'].strip()]],
         } for b in bookings_of[pid]],
         'notes': notes_of[pid],
+        'tests': tests_of[pid],
         'log': log_of[pid],
         'letters': letters_of[pid],
         'banks': banks_of[pid],

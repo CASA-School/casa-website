@@ -970,3 +970,16 @@ export async function listDeletedPeople({ search, limit = 40, offset = 0 }: { se
     total: Number(total?.n ?? 0),
   };
 }
+
+export type PersonTest = { id: string; takenOn: string | null; test: string | null; level: string | null; score: number | null; result: string | null; comment: string | null; authorName: string | null };
+
+/** A learner's tests (0066), the latest first: which, when, the level reached, the score. */
+export async function personTests(personId: string): Promise<PersonTest[]> {
+  const rows = await query<{ id: string; taken_on: string | null; test: string | null; level: string | null; score: number | null; result: string | null; comment: string | null; author_name: string | null }>(
+    `SELECT id, to_char(taken_on, 'YYYY-MM-DD') AS taken_on, test, level, score, result, comment, author_name
+       FROM person_tests WHERE person_id = ANY(person_family($1))
+      ORDER BY taken_on DESC NULLS LAST, created_at DESC, id`,
+    [personId]
+  );
+  return rows.map((r) => ({ id: r.id, takenOn: r.taken_on, test: r.test, level: r.level, score: r.score, result: r.result, comment: r.comment, authorName: r.author_name }));
+}

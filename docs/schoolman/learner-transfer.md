@@ -18,7 +18,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | `Booking` + `DateBooking` | 2,146 bookings · 2,151 periods | `bookings`, `booking_periods` (course, group, step, status, under observation) |
 | `CostDetail`, `PaymentIn`, `PaymentOut` (refunds to the learner) | 8,554 charges · 6,779 payments · 95 refunds | `booking_charges`, `payments`, with their comments |
 | `Booking.FinalNote`, `DateBooking.CommentBooking`, `Comment` | 302 · 130 · 2 | notes on the booking or the person, under their SchoolMan author |
-| `TestStudent` (online placement tests, certificates) | 537 | notes: test, day, result, level, score, comment |
+| `TestStudent` (placement and progress tests, certificates) | 539 | `person_tests` (0066): day, test, level reached, score or result, comment — the learner's „Tests" tab |
 | `Agreement` (learning agreements, teacher's recommendation) | 154 | notes with the full text |
 | `WorkFlow` (the work log — where most comments about a learner are) | 10,977 lines | the record's history, „in SchoolMan" |
 | `Letter` with its text | 9,500 (2,805 of a kind the workspace does not write) | `letters`, on the booking; the next letter is worked out from them |
@@ -40,7 +40,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 | SchoolMan | For the sample | What is missing |
 | --- | ---: | --- |
 | `WorkFlowLetter` — how a letter was sent (e-mail, print, SMTP) | 8,620 | Letters come with their date, not how they went |
-| Test results as a level | 537 | They arrive as notes; „Niveau" stays „nicht bestätigt" — a confirmed level needs our own placement review. A level history from SchoolMan's tests would need its own record |
+| Test results as the confirmed level | 539 | They are the learner's test history now; „Niveau" stays „nicht bestätigt" — a confirmed level is a teacher's (the placement review, the Klassenbuch) |
 | Learning agreements as records | 154 | Notes only; no agreement module |
 | `Booking.CertificateText` — the certificate's wording | 2,160 | No certificate of participation yet |
 | `Complaint` | 2 | No complaints |

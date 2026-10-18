@@ -51,6 +51,10 @@ maintains it — LESSONS §4.6.
 
 ## Tests
 
+**In the workspace (2026-10-18, migration 0066):** each test is a record of the learner (`person_tests`: day,
+test, the band reached, the score when the result is a percentage, else the result as typed, the comment,
+who) — the „Tests" tab on the learner's page; they came as notes before. The learners' import brings them.
+
 `TestStudent` holds every test, not only placement. `_ID_LevelSchool` (the level reached) is on 95%;
 `Result` on 92%, mostly as free text with the percentage in the comment (LESSONS §5). The kind of
 test (`_ID_TestReference`) is on only 21%: of those, 1,065 are the *Netzwerk neu* online test; the
