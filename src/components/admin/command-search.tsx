@@ -22,6 +22,9 @@ const GROUPS: { kind: SearchKind; label: Bilingual }[] = [
   { kind: 'offer', label: { de: 'Angebote', en: 'Offers' } },
   { kind: 'booking', label: { de: 'Buchungen', en: 'Bookings' } },
   { kind: 'application', label: { de: 'Bewerbungen', en: 'Job applications' } },
+  { kind: 'group', label: { de: 'Gruppen', en: 'Groups' } },
+  { kind: 'organisation', label: { de: 'Organisationen', en: 'Organisations' } },
+  { kind: 'place', label: { de: 'Unterkünfte', en: 'Accommodation' } },
 ];
 
 /**
@@ -141,7 +144,7 @@ export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-ico
                   go(ordered[active]);
                 }
               }}
-              placeholder={t('Name, E-Mail-Adresse oder Angebotsnummer', 'A name, an email address or an offer number')}
+              placeholder={t('Name, E-Mail oder Nummer', 'A name, an email or a number')}
               aria-label={t('Im Arbeitsbereich suchen', 'Search the workspace')}
               className="h-14 flex-1 bg-transparent text-[0.95rem] text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-text-subtle)]"
             />

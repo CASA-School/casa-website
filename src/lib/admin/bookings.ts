@@ -405,7 +405,7 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
   }));
 }
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'accommodation' | 'reserved' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'watch' | 'followup' | 'reserved' | 'past' | 'cancelled' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
@@ -417,8 +417,6 @@ const FILTERS: Record<BookingFilter, string> = {
   watch: `b.status <> 'cancelled' AND b.observation_reason IS NOT NULL`,
   // A follow-up due today or before that nobody has looked at yet (0062).
   followup: `EXISTS (SELECT 1 FROM booking_follow_ups f WHERE f.booking_id = b.id AND f.done_at IS NULL AND f.due_on <= current_date)`,
-  // Who needs a room, by arrival: every stay not cancelled that has not ended yet.
-  accommodation: `b.status <> 'cancelled' AND b.accommodation_type_code IS NOT NULL AND coalesce(b.accommodation_to, b.accommodation_from, current_date) >= current_date`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
   upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) > current_date`,
   reserved: `b.status = 'reserved'`,
@@ -450,7 +448,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY ${filter === 'accommodation' ? 'b.accommodation_from ASC NULLS LAST, ' : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
@@ -849,6 +847,7 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
       ]
     );
     const id = rows[0].id;
+    await syncOwnStay(client, id);
     // An exam's day is its sitting's: no period of its own. A course's dates are its period.
     if (exam) closedExamEntries = await closeOnExamBooking(client, input.personId, exam.sessionId, id, actor);
     else if (input.periods?.length) {
@@ -956,6 +955,38 @@ export type StayInput = { typeCode: string; roomTypeCode: string | null; caterin
  * by the caller; a line a colleague added by hand stays. No stay: the stay and its rent are gone.
  * Returns whether anything changed. A cancelled booking keeps what it had.
  */
+/**
+ * A booking made here keeps one stay record in step with its stay (0070), so the stays list
+ * („Aufenthalte") shows it and it can be placed at a place and room. Its dates, kind, room type and meals
+ * follow the booking; where it is placed stays. A booking from SchoolMan has SchoolMan's stays instead.
+ */
+async function syncOwnStay(client: PoolClient, bookingId: string): Promise<void> {
+  const { rows } = await client.query<{ type: string | null; room: string | null; catering: string | null; from: string | null; to: string | null; imported: boolean }>(
+    `SELECT accommodation_type_code AS type, accommodation_room_type_code AS room, accommodation_catering_code AS catering,
+            to_char(accommodation_from, 'YYYY-MM-DD') AS "from", to_char(accommodation_to, 'YYYY-MM-DD') AS "to", filemaker_booking_id IS NOT NULL AS imported
+       FROM bookings WHERE id = $1`,
+    [bookingId]
+  );
+  const b = rows[0];
+  if (!b || b.imported) return;
+  const own = (await client.query<{ id: string }>(`SELECT id FROM booking_stays WHERE booking_id = $1 AND filemaker_id IS NULL ORDER BY created_at, id LIMIT 1`, [bookingId])).rows[0];
+  if (b.type && b.from && b.to && b.to >= b.from) {
+    if (own) {
+      await client.query(
+        `UPDATE booking_stays SET starts_on = $2::date, ends_on = $3::date, accommodation_type_code = $4, room_type_code = $5, catering_code = $6, cancelled = false WHERE id = $1`,
+        [own.id, b.from, b.to, b.type, b.room, b.catering]
+      );
+    } else {
+      await client.query(
+        `INSERT INTO booking_stays (booking_id, starts_on, ends_on, accommodation_type_code, room_type_code, catering_code) VALUES ($1, $2::date, $3::date, $4, $5, $6)`,
+        [bookingId, b.from, b.to, b.type, b.room, b.catering]
+      );
+    }
+  } else if (own) {
+    await client.query(`DELETE FROM booking_stays WHERE booking_id = $1 AND filemaker_id IS NULL`, [bookingId]);
+  }
+}
+
 export async function changeStay(
   id: string,
   stay: StayInput | null,
@@ -988,6 +1019,7 @@ export async function changeStay(
         WHERE id = $1`,
       [id, stay?.typeCode ?? null, stay?.roomTypeCode ?? null, stay?.cateringCode ?? null, stay?.from ?? null, stay?.to ?? null]
     );
+    await syncOwnStay(client, id);
     await client.query(`DELETE FROM booking_charges WHERE booking_id = $1 AND charge_type_code = 'accommodation_rent'`, [id]);
     if (stay && rent) {
       await client.query(

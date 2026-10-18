@@ -27,10 +27,11 @@ import { backgroundItems } from './[id]/background';
  * quiet line, read once.
  */
 const FILTERS: readonly { key: PlacementFilter; label: Bilingual }[] = [
+  // In the order a test goes: what a teacher must look at, then the ones still being taken, then the done.
   { key: 'needs_review', label: { de: 'Wartet auf Lehrkraft', en: 'Awaiting a teacher' } },
-  { key: 'confirmed', label: { de: 'Bestätigt', en: 'Confirmed' } },
   { key: 'in_progress', label: { de: 'Test läuft noch', en: 'Still testing' } },
-  { key: 'all', label: { de: 'Alle', en: 'Everything' } },
+  { key: 'confirmed', label: { de: 'Bestätigt', en: 'Confirmed' } },
+  { key: 'all', label: { de: 'Alle', en: 'All' } },
 ];
 
 const STAGE_LABELS: Record<string, Bilingual> = {

@@ -514,8 +514,9 @@ appears once a rate does cover it.
 The booking's edit dialog holds the stay too (type, room, meals, arrival,
 departure); saving replaces the rent line the workspace priced, and leaves lines
 typed by hand. Once a period sits on a course start, the booking's course type is
-locked. **Buchungen → Unterkunft** lists the bookings with a stay by arrival:
-Gerade da, Anreise bald, Später. A payment is recorded with an empty amount (a
+locked. A stay booked here keeps one stay record in step with the booking (0070,
+`syncOwnStay`), so it is on **Aufenthalte** with SchoolMan's and is placed there
+(§Accommodation); the bookings list has no stay view of its own any more. A payment is recorded with an empty amount (a
 chip fills what is open) and what it is for: Anzahlung, Restzahlung, Kurspreis,
 Unterkunft or Sonstiges. A booking's money says what it is: Offen, Anzahlung
 erhalten, Ohne Kosten, Bezahlt, Überfällig.
@@ -701,12 +702,13 @@ professional tool looks like (`shell.tsx`):
   and elegant for some of the functionalities"; `top-bar.tsx`).** 56px of glass
   over the canvas — the page's own ground, a fine line under it — aligned with
   the page's 1180px measure. On the left the search (`command-search.tsx`, ⌘K,
-  Ctrl K or "/"): a name, an email address or an offer number, and Enter opens
-  the record — students, enquiries, registrations, offers, bookings and job
-  applications, each only for a colleague who holds that module
-  (`src/lib/admin/search.ts`), five a kind. On the right „Neu" (an offer, a
-  person, a cohort — what this colleague may create; `?new=1` opens the form on
-  its page), DE | EN, and who is signed in: their initials and first name open
+  Ctrl K or "/"): a name, an email address or a number, and Enter opens
+  the record — students, enquiries, registrations, offers, bookings, job
+  applications, and since 2026-10-18 groups, organisations (also by a contact) and
+  places to stay (also by someone of the family), each only for a colleague who
+  holds that module (`src/lib/admin/search.ts`), five a kind. On the right „Neu" (a
+  booking, an offer, a person, a cohort, a group, an organisation, a place to stay —
+  what this colleague may create; `?new=1` opens the form on its page), DE | EN, and who is signed in: their initials and first name open
   a menu with Your account, the website and sign-out. Navigation stays in the
   sidebar, which is now navigation and nothing else. On a phone the navy band is
   the top bar: the logo, the language, search and the initials (the same account
@@ -888,6 +890,34 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     opens beside it and stays open while a search is in force, with a cross to
     clear it (2026-10-14); it submits on Enter — no Search button. A tab with nothing in it
     shows no count; a tab that only repeats a group of another view goes.
+10a. **Views are few, clear, and each answers one question (Rahman, 2026-10-18: "don't add unnecessary
+    filters but clear and useful filter in each section").** The default view comes first — what staff
+    act on now, or „Alle" on a register —, the views a record moves through follow in that order, the
+    archive (Inaktiv, Ehemalige, Storniert, Gelöscht) comes last, and „Alle" closes a work list. A record
+    stands in one stage view, never in two that overlap. A view never repeats another screen's job:
+    who needs a room is „Aufenthalte", not a bookings view; what is open under a person is worked in the
+    inboxes, not a register view. One thing has one word everywhere („Zahlung offen" in Buchungen and
+    Teilnehmende). A second dimension is a row of chips above the card (the kind of place on
+    „Aufenthalte", the colleague on „Aktivität"), not more tabs. The lists as they stand:
+
+    | List | Views (default first) | Also |
+    | --- | --- | --- |
+    | Anfragen, Anmeldungen, Bewerbungen | Letzte 7 Tage · Verlauf | the inbox design (§Lists 16); search finds everything |
+    | Einstufungstests | Wartet auf Lehrkraft · Test läuft noch · Bestätigt · Alle | |
+    | Teilnehmende | Alle · Kommend · Neu · Im Kurs · Letzter Kurs · Abgeschlossen · Zahlung offen · Gelöscht | |
+    | Buchungen | Laufend · Kommend · Zahlung offen · Unter Beobachtung · Wiedervorlage · Vergangen · Storniert · Alle | search by name, booking number or course |
+    | Angebote | Offen · Angenommen · Nicht angenommen · Alle | |
+    | Gruppen | Kommend · Angefragt · Vergangen · Abgesagt · Alle | |
+    | Unterkünfte | Alle · Gastfamilien · CASA-WGs · Weitere · Inaktiv | |
+    | Aufenthalte | Kommen bald · Wohnen jetzt · Reisen bald ab · Bleiben nach dem Kurs · Noch ohne Unterkunft | chips: Alle · CASA-WGs · Gastfamilien |
+    | Organisationen | Alle · Agenturen · Firmen · Schulen & Behörden · Weitere · Inaktiv | |
+    | Kurse | Intensiv · Abend · Weitere · Kursarten | Aktuell / Vergangen |
+    | Wartelisten | Platz frei · Wartend · Angeboten · Kurs begonnen · Abgeschlossen | |
+    | Prüfungen | — (coming sittings, then the past) | |
+    | Mitarbeitende | Aktiv · Unterricht · Büro · Ehemalige | |
+    | Aktivität | — (by day) | chips: Alle · each colleague in the feed |
+    | Räume | In Nutzung · Inaktiv | |
+
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about
     (`RecordName`) — then when, how much, who has it, how recent. Never a
@@ -1062,8 +1092,10 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     hand with the method „Übertragen" remains for a credit that sits in
     FileMaker.
 21. **Teilnehmende, the register (2026-10-15).** The views answer what staff
-    bring to a register — Alle, Im Kurs (a booking running today), Offene
-    Anfragen, Zu zahlen — with the counts line above them, and a row says,
+    bring to a register — Alle, then the learner stages in the order a learner goes
+    through them, each learner in one (Kommend, Neu, Im Kurs, Letzter Kurs,
+    Abgeschlossen; 2026-10-18), and Zahlung offen — with the counts line above them
+    („im Kurs" there counts all three stages in a course), and a row says,
     beside the name and the course or address, the level a teacher confirmed
     (a green chip), what is open under the person (enquiries, registrations,
     offers in play, counted across linked records) and what they still owe.
@@ -1485,8 +1517,8 @@ bookings (their own module). One transaction, counts only, nothing personal in a
 - *Stays* (`booking_stays`, 0056): each `DateAccommodation` with its dates, kind, room type, meals,
   called off and departure confirmed, and where — a CASA flat and its room by name, a host family not
   (its people come across only with a hosts module and a privacy decision). The booking page lists
-  them; they fill the booking's accommodation fields, so the bookings' „Unterkunft" view shows who is
-  staying now, arriving soon or later, with the flat's name.
+  them; they fill the booking's accommodation fields, and „Aufenthalte" (0060) shows who is staying now,
+  arriving soon or leaving, where.
 
 What cannot come across yet — attendance, host families, instalments, invoices, commission, intake
 records, follow-ups — is listed with the sample's counts in `docs/schoolman/learner-transfer.md`.

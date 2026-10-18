@@ -242,8 +242,12 @@ export const LEARNER_STAGE_LABELS: Record<LearnerStage, Bilingual> = {
 /** How long a learner counts as new after their first course starts. */
 const NEW_FOR_DAYS = 28;
 
-/** The register's views: everyone, the learner stages, who has something open, who still owes money. */
-export type PeopleView = 'all' | 'in_course' | 'new' | 'last' | 'coming' | 'finished' | 'open' | 'owing';
+/**
+ * The register's views (2026-10-18): everyone, the learner stages one after another — each learner in exactly
+ * one —, and who still owes money. What is open under a person is a column, not a view: the inboxes are
+ * where it is worked.
+ */
+export type PeopleView = 'all' | 'coming' | 'new' | 'in_course' | 'last' | 'finished' | 'owing';
 
 /**
  * A person's family — themselves and every row merged into them (`person_family`, 0052): the fragments
@@ -316,13 +320,12 @@ const NOT_STAFF = `NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id
 
 const VIEW_CONDITION: Record<PeopleView, string | null> = {
   all: null,
-  // „Im Kurs" is everyone in a course today — the new and the last-course ones too.
-  in_course: IN_COURSE,
+  // „Im Kurs" is the middle of a course: not new any more, and more to come after it.
+  in_course: `${STAGE} = 'in_course'`,
   new: `${STAGE} = 'new'`,
   last: `${STAGE} = 'last'`,
   coming: `${STAGE} = 'coming'`,
   finished: `${STAGE} = 'finished'`,
-  open: `${OPEN_CASES} > 0`,
   owing: `${OWED} > 0.005`,
 };
 
@@ -330,12 +333,11 @@ const VIEW_CONDITION: Record<PeopleView, string | null> = {
 export async function peopleCounts(): Promise<Record<PeopleView, number>> {
   const row = await queryFirst<Record<PeopleView, string>>(
     `SELECT count(*) AS all,
-            count(*) FILTER (WHERE ${IN_COURSE}) AS in_course,
+            count(*) FILTER (WHERE stage = 'in_course') AS in_course,
             count(*) FILTER (WHERE stage = 'new') AS new,
             count(*) FILTER (WHERE stage = 'last') AS last,
             count(*) FILTER (WHERE stage = 'coming') AS coming,
             count(*) FILTER (WHERE stage = 'finished') AS finished,
-            count(*) FILTER (WHERE ${OPEN_CASES} > 0) AS open,
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
        -- OFFSET 0: the stage once per person — folded into the query, Postgres would repeat its six
        -- sub-queries in each count below.
@@ -349,7 +351,6 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
     last: n('last'),
     coming: n('coming'),
     finished: n('finished'),
-    open: n('open'),
     owing: n('owing'),
   };
 }

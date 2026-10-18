@@ -46,6 +46,9 @@ export async function TopBar({
     ...(canAccess(user, 'catalogue') && canAccess(user, 'rooms', 'edit')
       ? [{ href: '/admin/catalogue?new=1', label: t('Kurstermin', 'Cohort'), icon: Icon.catalogue }]
       : []),
+    ...(canAccess(user, 'groups', 'edit') ? [{ href: '/admin/groups?new=1', label: t('Gruppe', 'Group'), icon: Icon.group }] : []),
+    ...(canAccess(user, 'organisations', 'edit') ? [{ href: '/admin/organisations?new=1', label: t('Organisation', 'Organisation'), icon: Icon.globe }] : []),
+    ...(canAccess(user, 'accommodation', 'edit') ? [{ href: '/admin/accommodation?new=1', label: t('Unterkunft', 'Place to stay'), icon: Icon.home }] : []),
   ];
 
   return (

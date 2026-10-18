@@ -50,7 +50,7 @@ export async function logActivity({
  */
 export async function recentActivity(
   limit = 12,
-  { includeApplications = false }: { includeApplications?: boolean } = {}
+  { includeApplications = false, staffUserId = null }: { includeApplications?: boolean; staffUserId?: string | null } = {}
 ): Promise<ActivityEntry[]> {
   const rows = await query<{
     id: string;
@@ -66,9 +66,11 @@ export async function recentActivity(
       WHERE ($2::boolean OR entity <> 'career_application')
         -- SchoolMan's work log lives on its records (0055), not in the workspace's own feed.
         AND action <> 'schoolman_log'
+        -- One colleague's changes, when the feed is filtered to them (2026-10-18).
+        AND ($3::uuid IS NULL OR staff_user_id = $3::uuid)
       ORDER BY created_at DESC
       LIMIT $1`,
-    [limit, includeApplications]
+    [limit, includeApplications, staffUserId]
   );
 
   return rows.map((row) => ({
@@ -643,3 +645,14 @@ const shiftWeekDe = (value: unknown) =>
 /** " am Vormittag" — a shift after a noun, in German; nothing for the course as a whole. */
 const shiftDe = (value: unknown) => (value === 'afternoon' ? ' am Nachmittag' : value === 'morning' ? ' am Vormittag' : '');
 
+/** The colleagues in the feed, the one active most recently first: the activity screen's filter (2026-10-18). */
+export async function activityColleagues(): Promise<{ id: string; name: string }[]> {
+  return query<{ id: string; name: string }>(
+    `SELECT a.staff_user_id AS id, coalesce(u.name, max(a.staff_name)) AS name
+       FROM staff_activity a LEFT JOIN staff_users u ON u.id = a.staff_user_id
+      WHERE a.staff_user_id IS NOT NULL AND a.action <> 'schoolman_log'
+      GROUP BY a.staff_user_id, u.name
+      ORDER BY max(a.created_at) DESC
+      LIMIT 12`
+  );
+}

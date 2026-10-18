@@ -30,7 +30,9 @@ test.describe('workspace search', () => {
     person = (
       await client.query(
         `SELECT id, first_name, last_name FROM people p WHERE deleted_at IS NULL AND merged_into IS NULL AND length(first_name) > 2
-            AND NOT EXISTS (SELECT 1 FROM staff_members s WHERE s.person_id = p.id) ORDER BY updated_at DESC LIMIT 1`
+            AND NOT EXISTS (SELECT 1 FROM staff_members s WHERE s.person_id = p.id)
+          -- One from SchoolMan where there is one: never a person another test makes or deletes meanwhile.
+          ORDER BY created_by <> 'migration-schoolman', updated_at DESC LIMIT 1`
       )
     ).rows[0];
     colleague = (
@@ -39,7 +41,12 @@ test.describe('workspace search', () => {
           WHERE s.is_active AND length(coalesce(p.last_name, '')) > 2 ORDER BY p.last_name LIMIT 1`
       )
     ).rows[0];
-    offer = (await client.query(`SELECT id, year || '-' || lpad(seq::text, 3, '0') AS number FROM offers WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 1`)).rows[0];
+    // One from SchoolMan where there is one: never an offer another test makes or deletes meanwhile.
+    offer = (
+      await client.query(
+        `SELECT id, year || '-' || lpad(seq::text, 3, '0') AS number FROM offers WHERE deleted_at IS NULL ORDER BY filemaker_offer_id IS NULL, updated_at DESC LIMIT 1`
+      )
+    ).rows[0];
     token = randomBytes(32).toString('base64url');
     tokenHash = createHash('sha256').update(token).digest('hex');
     await client.query(
@@ -77,6 +84,25 @@ test.describe('workspace search', () => {
       await expect(results.getByText('Offers', { exact: true })).toBeVisible();
       await box.press('Enter');
       await expect(page).toHaveURL(new RegExp(`/admin/offers/${offer.id}$`));
+    }
+  });
+
+  test('an organisation, a group visit and a place to stay are found by name (2026-10-18)', async ({ page }) => {
+    const pick = async (sql: string) => (await client.query<{ id: string; name: string }>(sql)).rows[0];
+    const found = [
+      { group: 'Organisations', href: '/admin/organisations/', row: await pick(`SELECT id, name FROM organisations WHERE length(name) > 4 ORDER BY name LIMIT 1`) },
+      { group: 'Groups', href: '/admin/groups/', row: await pick(`SELECT id, name FROM group_visits WHERE length(name) > 4 ORDER BY name LIMIT 1`) },
+      { group: 'Accommodation', href: '/admin/accommodation/', row: await pick(`SELECT id, name FROM accommodations WHERE length(name) > 4 ORDER BY name LIMIT 1`) },
+    ].filter((f) => f.row);
+    test.skip(found.length === 0, 'no organisation, group or place');
+    await page.goto('/admin', { waitUntil: 'networkidle' });
+    await page.keyboard.press('ControlOrMeta+k');
+    const box = page.getByRole('textbox', { name: 'Search the workspace' });
+    const results = page.getByRole('listbox', { name: 'Results' });
+    for (const f of found) {
+      await box.fill(f.row.name);
+      const section = results.locator('div').filter({ has: page.getByText(f.group, { exact: true }) });
+      await expect(section.getByRole('option').filter({ hasText: f.row.name }).first()).toBeVisible();
     }
   });
 

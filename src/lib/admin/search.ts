@@ -8,14 +8,14 @@ import type { T } from './i18n';
  * The workspace's search (⌘K in the top bar): a name, an address or an offer
  * number finds the record across the modules the colleague holds — a student,
  * a colleague, an enquiry, a registration, an offer, a booking, a job
- * application. Five of each at most, newest first; a module the colleague does
+ * application, an organisation, a group visit, a place to stay (2026-10-18). Five of each at most, newest first; a module the colleague does
  * not hold is not searched at all.
  *
  * A colleague is a person too (0039), but not a student: they are found under
  * „Mitarbeitende" and open on their staff page, never among the learners.
  */
 
-export type SearchKind = 'person' | 'staff' | 'enquiry' | 'course' | 'exam' | 'offer' | 'booking' | 'application';
+export type SearchKind = 'person' | 'staff' | 'enquiry' | 'course' | 'exam' | 'offer' | 'booking' | 'application' | 'organisation' | 'group' | 'place';
 
 export type SearchHit = { kind: SearchKind; id: string; title: string; detail: string; href: string };
 
@@ -202,6 +202,80 @@ export async function searchWorkspace(
           title: name(r.first_name, r.last_name),
           detail: r.position_title ?? t('Bewerbung', 'Job application'),
           href: `/admin/applications/${r.id}`,
+        }))
+      )
+    );
+  }
+
+  if (holds('organisations')) {
+    runs.push(
+      query<{ id: string; name: string; kind: string; contact: string | null; is_active: boolean }>(
+        `SELECT o.id, o.name, o.kind, o.is_active,
+                (SELECT nullif(btrim(concat_ws(' ', c.first_name, c.last_name)), '') FROM organisation_contacts c
+                  WHERE c.organisation_id = o.id AND (lower(concat_ws(' ', c.first_name, c.last_name)) LIKE $1 OR lower(coalesce(c.email, '')) LIKE $1) LIMIT 1) AS contact
+           FROM organisations o
+          WHERE lower(o.name) LIKE $1 OR lower(coalesce(o.email, '')) LIKE $1
+             OR EXISTS (SELECT 1 FROM organisation_contacts c WHERE c.organisation_id = o.id
+                         AND (lower(concat_ws(' ', c.first_name, c.last_name)) LIKE $1 OR lower(coalesce(c.email, '')) LIKE $1))
+          ORDER BY o.is_active DESC, lower(o.name) LIMIT ${LIMIT}`,
+        [like]
+      ).then((rows) =>
+        rows.map((r) => ({
+          kind: 'organisation' as const,
+          id: r.id,
+          title: r.name,
+          detail: [
+            { agency: t('Agentur', 'Agency'), company: t('Firma', 'Company'), school: t('Schule', 'School'), public_body: t('Behörde', 'Public body'), other: t('Sonstige', 'Other') }[
+              r.kind
+            ],
+            r.contact,
+            r.is_active ? null : t('inaktiv', 'inactive'),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          href: `/admin/organisations/${r.id}`,
+        }))
+      )
+    );
+  }
+
+  if (holds('groups')) {
+    runs.push(
+      query<{ id: string; name: string; organisation: string | null; start: Date | null }>(
+        `SELECT v.id, v.name, o.name AS organisation, coalesce(v.arrival, v.course_from) AS start
+           FROM group_visits v LEFT JOIN organisations o ON o.id = v.organisation_id LEFT JOIN organisations a ON a.id = v.agency_id
+          WHERE lower(v.name) LIKE $1 OR lower(coalesce(o.name, '')) LIKE $1 OR lower(coalesce(a.name, '')) LIKE $1
+          ORDER BY coalesce(v.arrival, v.course_from) DESC NULLS LAST LIMIT ${LIMIT}`,
+        [like]
+      ).then((rows) =>
+        rows.map((r) => ({
+          kind: 'group' as const,
+          id: r.id,
+          title: r.name,
+          detail: [r.organisation, day(r.start)].filter(Boolean).join(' · '),
+          href: `/admin/groups/${r.id}`,
+        }))
+      )
+    );
+  }
+
+  if (holds('accommodation')) {
+    runs.push(
+      query<{ id: string; name: string; kind: string; contact_name: string | null }>(
+        `SELECT a.id, a.name, a.kind, a.contact_name FROM accommodations a
+          WHERE lower(a.name) LIKE $1 OR lower(coalesce(a.contact_name, '')) LIKE $1 OR lower(coalesce(a.address, '')) LIKE $1
+             OR EXISTS (SELECT 1 FROM accommodation_members m WHERE m.accommodation_id = a.id AND lower(concat_ws(' ', m.first_name, m.last_name)) LIKE $1)
+          ORDER BY a.is_active DESC, lower(a.name) LIMIT ${LIMIT}`,
+        [like]
+      ).then((rows) =>
+        rows.map((r) => ({
+          kind: 'place' as const,
+          id: r.id,
+          title: r.name,
+          detail: [{ host_family: t('Gastfamilie', 'Host family'), casa_flat: t('CASA-WG', 'CASA flat'), other: t('Sonstige', 'Other') }[r.kind], r.contact_name !== r.name ? r.contact_name : null]
+            .filter(Boolean)
+            .join(' · '),
+          href: `/admin/accommodation/${r.id}`,
         }))
       )
     );

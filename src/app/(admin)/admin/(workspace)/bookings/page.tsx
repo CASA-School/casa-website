@@ -2,7 +2,6 @@ import { BookingLightDot, BookingLightLabel } from '@/components/admin/booking-l
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
-import { stayVocabulary, type StayVocabulary } from '@/lib/admin/booking-offer';
 import {
   BOOKING_STATUS_LABELS,
   bookingCounts,
@@ -41,10 +40,9 @@ import { getI18n } from '@/lib/admin/i18n.server';
 const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
   { key: 'current', label: { de: 'Laufend', en: 'Current' } },
   { key: 'upcoming', label: { de: 'Kommend', en: 'Upcoming' } },
-  { key: 'unclear', label: { de: 'Offen', en: 'Unpaid' } },
+  { key: 'unclear', label: { de: 'Zahlung offen', en: 'Unpaid' } },
   { key: 'watch', label: { de: 'Unter Beobachtung', en: 'Under observation' } },
   { key: 'followup', label: { de: 'Wiedervorlage', en: 'Follow-up' } },
-  { key: 'accommodation', label: { de: 'Unterkunft', en: 'Accommodation' } },
   { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },
   { key: 'all', label: { de: 'Alle', en: 'All' } },
@@ -62,19 +60,6 @@ function when(b: BookingListItem, lang: WsLang): string {
   const from = toDateInputValue(b.startDate);
   const to = toDateInputValue(b.endDate);
   return from && to ? dayRange(from, to, lang) : '';
-}
-
-/** „CASA – WG · Die Biber · Einzelzimmer · ohne Verpflegung": the stay in words. */
-function stayWords(b: BookingListItem, vocabulary: StayVocabulary | null, lang: WsLang): string {
-  if (!b.stay) return '';
-  const name = (list: { code: string; name: Bilingual }[] | undefined, code: string | null) => {
-    const found = code ? list?.find((v) => v.code === code) : null;
-    return found ? pick(lang, found.name) : code;
-  };
-  // Where it was arranged (a CASA flat's name), after its kind.
-  return [name(vocabulary?.types, b.stay.typeCode), b.stay.place, name(vocabulary?.rooms, b.stay.roomTypeCode), name(vocabulary?.catering, b.stay.cateringCode)]
-    .filter(Boolean)
-    .join(' · ');
 }
 
 function Balance({ b, t }: { b: BookingListItem; t: T }) {
@@ -103,13 +88,11 @@ export default async function BookingsPage({
   const search = firstParam(params.q);
   const page = clampPage(params.page);
 
-  const stays = filter === 'accommodation';
-  const [{ items, total }, counts, owed, { t, lang }, vocabulary] = await Promise.all([
+  const [{ items, total }, counts, owed, { t, lang }] = await Promise.all([
     listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page) }),
     bookingCounts(),
     bookingsOwed(),
     getI18n(),
-    stays ? stayVocabulary() : Promise.resolve(null),
   ]);
 
   // Running ones split by whether they end within two weeks, coming ones by whether they start
@@ -117,18 +100,9 @@ export default async function BookingsPage({
   const soon = addDays(todayInputValue(), SOON_DAYS);
   const endsSoon = (b: BookingListItem) => (toDateInputValue(b.endDate) || '9999') <= soon;
   const startsSoon = (b: BookingListItem) => (toDateInputValue(b.startDate) || '9999') <= soon;
-  // Who needs a room, read by arrival: here now, arriving within two weeks, later.
-  const today = todayInputValue();
-  const arrived = (b: BookingListItem) => (toDateInputValue(b.stay?.from ?? null) || '9999') <= today;
-  const arrivesSoon = (b: BookingListItem) => !arrived(b) && (toDateInputValue(b.stay?.from ?? null) || '9999') <= soon;
+  // Who needs a room is „Aufenthalte" (/admin/accommodation/stays), where a stay is also placed.
   const groups =
-    stays
-      ? [
-          { key: 'here', label: t('Gerade da', 'Staying now'), rows: items.filter(arrived) },
-          { key: 'arriving', label: t('Anreise bald', 'Arriving soon'), rows: items.filter(arrivesSoon) },
-          { key: 'later', label: t('Später', 'Later'), rows: items.filter((b) => !arrived(b) && !arrivesSoon(b)) },
-        ].filter((g) => g.rows.length)
-      : filter === 'current'
+    filter === 'current'
       ? [
           { key: 'ending', label: t('Enden bald', 'Ending soon'), rows: items.filter(endsSoon) },
           { key: 'running', label: t('Laufen weiter', 'Running on'), rows: items.filter((b) => !endsSoon(b)) },
@@ -171,7 +145,7 @@ export default async function BookingsPage({
           search={{
             action: '/admin/bookings',
             value: search,
-            placeholder: t('Name oder Kurs', 'Name or course'),
+            placeholder: t('Name, Buchungsnummer oder Kurs', 'Name, booking number or course'),
             keep: { filter: filter === 'current' ? undefined : filter },
           }}
         />
@@ -179,31 +153,6 @@ export default async function BookingsPage({
           <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Hier gibt es keine Buchungen', 'No bookings here')}>
             {search ? t(`Keine Buchung passt zu „${search}“.`, `No booking matches “${search}”.`) : null}
           </ListEmpty>
-        ) : stays ? (
-          <Table
-            head={[
-              t('Buchung', 'Booking'),
-              { label: t('Anreise – Abreise', 'Arrival – departure'), className: 'w-[13.5rem]' },
-              { label: t('Unterkunft', 'Accommodation'), className: hide },
-            ]}
-          >
-            {groups.map((group) => [
-              <ListGroup key={group.key} label={group.label} count={group.rows.length} span={3} />,
-              ...group.rows.map((b) => {
-                const from = toDateInputValue(b.stay?.from ?? null);
-                const to = toDateInputValue(b.stay?.to ?? null);
-                return (
-                  <TableRow key={b.id} interactive>
-                    <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
-                      <RecordName name={b.personName} reference={b.number} about={[b.courseTypeName, when(b, lang)].filter(Boolean).join(' · ') || undefined} />
-                    </Cell>
-                    <Cell className="text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums">{from && to ? dayRange(from, to, lang) : from}</Cell>
-                    <Cell className={`max-w-0 truncate text-[0.84rem] text-[#2b3546] ${hide}`}>{stayWords(b, vocabulary, lang)}</Cell>
-                  </TableRow>
-                );
-              }),
-            ])}
-          </Table>
         ) : (
           <Table
             head={[

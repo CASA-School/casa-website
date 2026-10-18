@@ -32,9 +32,10 @@ import { PersonForm } from './person-form';
  * offers in play), the dates of that course, and when they were added
  * (2026-10-15). A list carries what staff act on — nationality and birth date
  * are on the person's page (Rahman, 2026-10-16). The views answer the
- * questions staff bring to a register — who is here now, who is new, who is in
- * their last course, who is coming, who has finished, who has something open,
- * who owes money — and the counts line says how many. The learner stages are
+ * questions staff bring to a register — who is coming, who is new, who is in
+ * the middle of a course, who is in their last, who has finished, who owes
+ * money — one stage per learner, in that order (2026-10-18); what is open under
+ * a person is the column, worked in the inboxes. The learner stages are
  * FileMaker's Rookie, Runner, LastDance and Unicorn, worked out from the
  * booked periods instead of typed (2026-10-16, docs/schoolman/bookings.md). Open flags are one quiet
  * line above the list, each a link to that work list; they are cleared on the
@@ -44,15 +45,15 @@ import { PersonForm } from './person-form';
 /** The register's views, and „Gelöscht" for whoever may delete (and so restore) a person. */
 type RegisterView = PeopleView | 'deleted';
 
+// The stages in the order a learner goes through them, each learner in one; then who owes money.
 const VIEWS: readonly { key: RegisterView; label: Bilingual }[] = [
   { key: 'all', label: { de: 'Alle', en: 'All' } },
-  { key: 'in_course', label: { de: 'Im Kurs', en: 'In a course' } },
-  { key: 'new', label: LEARNER_STAGE_LABELS.new },
-  { key: 'last', label: LEARNER_STAGE_LABELS.last },
   { key: 'coming', label: LEARNER_STAGE_LABELS.coming },
+  { key: 'new', label: LEARNER_STAGE_LABELS.new },
+  { key: 'in_course', label: LEARNER_STAGE_LABELS.in_course },
+  { key: 'last', label: LEARNER_STAGE_LABELS.last },
   { key: 'finished', label: LEARNER_STAGE_LABELS.finished },
-  { key: 'open', label: { de: 'Offene Anfragen', en: 'Open enquiries' } },
-  { key: 'owing', label: { de: 'Zu zahlen', en: 'Owing' } },
+  { key: 'owing', label: { de: 'Zahlung offen', en: 'Unpaid' } },
 ];
 
 const shortDay = (value: Date, lang: WsLang) => value.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' });
@@ -118,11 +119,11 @@ export default async function PeoplePage({
         </p>
       ) : null}
 
-      {/* Who is here, who has something open, who still owes: the register at a glance. */}
+      {/* Who is here — in a course today, new, middle or last —, who comes, who still owes: the register at a glance. */}
       <p className="-mt-3 mb-2 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="done" n={counts.in_course} label={t('im Kurs', 'in a course')} lang={lang} />
+        <Tally tone="done" n={counts.new + counts.in_course + counts.last} label={t('im Kurs', 'in a course')} lang={lang} />
+        <Tally tone="new" n={counts.coming} label={t('kommen', 'coming')} lang={lang} />
         <Tally tone="working" n={counts.last} label={t('im letzten Kurs', 'in their last course')} lang={lang} />
-        <Tally tone="new" n={counts.open} label={t('mit offenen Anfragen', 'with open enquiries')} lang={lang} />
         <Tally tone="waiting" n={counts.owing} label={t('mit offenen Beträgen', 'owing money')} lang={lang} />
       </p>
 

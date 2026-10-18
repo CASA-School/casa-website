@@ -35,7 +35,8 @@ describe('job applications on the Activity screen', () => {
 
     const [[sql, hidden], [, shown]] = mocks.query.mock.calls;
     expect(sql).toContain("WHERE ($2::boolean OR entity <> 'career_application')");
-    expect(hidden).toEqual([200, false]);
-    expect(shown).toEqual([200, true]);
+    // The third parameter is the colleague filter (2026-10-18), none here.
+    expect(hidden).toEqual([200, false, null]);
+    expect(shown).toEqual([200, true, null]);
   });
 });

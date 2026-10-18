@@ -81,8 +81,8 @@ test.describe('person page', () => {
     await expect(open).toContainText('Abendkurs im Januar');
     await expect(closed).toContainText('Unterkunft im Sommer');
 
-    // In the register, under „Offene Anfragen", with what is open beside the name.
-    await page.goto(`/admin/people?view=open&q=${encodeURIComponent('Prüfperson')}`);
+    // In the register, with what is open beside the name.
+    await page.goto(`/admin/people?q=${encodeURIComponent('Prüfperson')}`);
     await expect(page.getByRole('row').filter({ hasText: 'Pia Prüfperson' })).toContainText('1 offene Anfrage');
 
     await page.goto(`/admin/people/${personId}`);

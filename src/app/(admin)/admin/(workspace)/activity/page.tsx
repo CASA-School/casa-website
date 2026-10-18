@@ -5,13 +5,14 @@ import { InboundChart } from '@/components/admin/inbound-chart';
 import { ListEmpty, RecordName, Status } from '@/components/admin/list';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { activityHref, describeActivity, recentActivity, type ActivityEntry } from '@/lib/admin/activity';
+import { activityColleagues, activityHref, describeActivity, recentActivity, type ActivityEntry } from '@/lib/admin/activity';
 import { requireModule } from '@/lib/admin/guard';
 import { capitalise, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { getInboundByDay, getOverviewCounts, getRecentInbound } from '@/lib/admin/overview';
 import { normaliseStatus, queueLabel, STATUS_LABELS, STATUS_TONES, type QueueEntity } from '@/lib/admin/queues';
 import { activityIcon, Mark, StatePill } from '@/components/admin/record-parts';
+import { cn } from '@/lib/utils';
 
 /**
  * The full activity trail, as one feed.
@@ -38,16 +39,19 @@ import { activityIcon, Mark, StatePill } from '@/components/admin/record-parts';
  * holds the Applications module. The volume chart and counts stay whole: a
  * number is not a person.
  */
-export default async function ActivityPage() {
-  const user = await requireModule('activity');
+export default async function ActivityPage({ searchParams }: { searchParams: Promise<{ by?: string }> }) {
+  const [user, { by }] = await Promise.all([requireModule('activity'), searchParams]);
   const { t, lang } = await getI18n();
   const includeApplications = canAccess(user, 'applications');
+  // One colleague's changes, or everyone's: „who did what" is the question this screen answers.
+  const colleague = by && /^[0-9a-f-]{36}$/i.test(by) ? by : null;
 
-  const [entries, recent, inbound, counts] = await Promise.all([
-    recentActivity(200, { includeApplications }),
+  const [entries, recent, inbound, counts, colleagues] = await Promise.all([
+    recentActivity(200, { includeApplications, staffUserId: colleague }),
     getRecentInbound(8, { includeApplications }),
     getInboundByDay(14),
     getOverviewCounts(),
+    activityColleagues(),
   ]);
 
   const weekDelta = counts.inboundThisWeek - counts.inboundPreviousWeek;
@@ -124,6 +128,24 @@ export default async function ActivityPage() {
           <InboundChart days={inbound} lang={lang} />
         </Card>
       </div>
+
+      {colleagues.length > 1 ? (
+        <nav aria-label={t('Von wem', 'By whom')} className="mb-5 flex flex-wrap gap-1.5">
+          {[{ id: null, name: t('Alle', 'Everyone') }, ...colleagues].map((c) => (
+            <Link
+              key={c.id ?? 'all'}
+              href={c.id ? `/admin/activity?by=${c.id}` : '/admin/activity'}
+              aria-current={colleague === c.id ? 'page' : undefined}
+              className={cn(
+                'rounded-full px-3 py-1 text-[0.8rem] font-semibold ring-1 ring-inset',
+                colleague === c.id ? 'bg-[var(--fm-navy)] text-white ring-[var(--fm-navy)]' : 'bg-white text-[#2b3546] ring-ws-line hover:bg-[var(--ws-row-hover)]'
+              )}
+            >
+              {c.name}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
 
       {entries.length === 0 ? (
         <div className="rounded-3xl border border-ws-line bg-white">
