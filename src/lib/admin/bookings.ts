@@ -1445,3 +1445,63 @@ export async function completeFollowUp(bookingId: string, followUpId: string, ac
   );
   if (rows.length) await logActivity({ actor, entity: 'booking', entityId: bookingId, action: 'follow_up_done' });
 }
+
+// ------------------------------------------------- the rest of SchoolMan's ledger (0063)
+
+export type LedgerExtras = {
+  instalments: { id: string; label: string | null; dueOn: string | null; amount: number; paid: boolean | null }[];
+  commissions: { id: string; agency: string | null; description: string | null; baseAmount: number | null; percentage: number | null; amount: number; paid: boolean | null }[];
+  payouts: { id: string; kind: 'host_rent' | 'agency_commission' | 'agency_direct' | 'other'; to: string | null; toHref: string | null; amount: number; paidOn: string | null; note: string | null }[];
+  invoices: { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null }[];
+};
+
+/** A booking's payment plan, its agency's commission, the money paid out for it and its invoices, read as SchoolMan has them. */
+export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtras> {
+  const [instalments, commissions, payouts, invoices] = await Promise.all([
+    query<{ id: string; label: string | null; due_on: string | null; amount: string; paid: boolean | null }>(
+      `SELECT id, label, to_char(due_on, 'YYYY-MM-DD') AS due_on, amount, paid FROM booking_instalments WHERE booking_id = $1 ORDER BY position, due_on NULLS LAST, id`,
+      [bookingId]
+    ),
+    query<{ id: string; agency: string | null; description: string | null; base_amount: string | null; percentage: string | null; amount: string; paid: boolean | null }>(
+      `SELECT c.id, o.name AS agency, c.description, c.base_amount, c.percentage, c.amount, c.paid
+         FROM booking_commissions c LEFT JOIN organisations o ON o.id = c.organisation_id
+        WHERE c.booking_id = $1 ORDER BY c.created_at, c.id`,
+      [bookingId]
+    ),
+    query<{ id: string; kind: LedgerExtras['payouts'][number]['kind']; place_id: string | null; place: string | null; org_id: string | null; org: string | null; amount: string; paid_on: string | null; note: string | null }>(
+      `SELECT p.id, p.kind, a.id AS place_id, a.name AS place, o.id AS org_id, o.name AS org, p.amount, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on, p.note
+         FROM payouts p LEFT JOIN accommodations a ON a.id = p.accommodation_id LEFT JOIN organisations o ON o.id = p.organisation_id
+        WHERE p.booking_id = $1 ORDER BY p.paid_on NULLS LAST, p.id`,
+      [bookingId]
+    ),
+    query<{ id: string; number: string; issued_on: string | null; subject: string | null; amount: string | null }>(
+      `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject,
+              coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount
+         FROM invoices i WHERE i.booking_id = $1 ORDER BY i.issued_on, i.number`,
+      [bookingId]
+    ),
+  ]);
+  const n = (v: string | null) => (v == null ? null : Number(v));
+  return {
+    instalments: instalments.map((r) => ({ id: r.id, label: r.label, dueOn: r.due_on, amount: Number(r.amount), paid: r.paid })),
+    commissions: commissions.map((r) => ({
+      id: r.id,
+      agency: r.agency,
+      description: r.description,
+      baseAmount: n(r.base_amount),
+      percentage: n(r.percentage),
+      amount: Number(r.amount),
+      paid: r.paid,
+    })),
+    payouts: payouts.map((r) => ({
+      id: r.id,
+      kind: r.kind,
+      to: r.place ?? r.org,
+      toHref: r.place_id ? `/admin/accommodation/${r.place_id}` : r.org_id ? `/admin/organisations/${r.org_id}` : null,
+      amount: Number(r.amount),
+      paidOn: r.paid_on,
+      note: r.note,
+    })),
+    invoices: invoices.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, subject: r.subject, amount: n(r.amount) })),
+  };
+}

@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -74,6 +74,9 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT v.id FROM group_visits v LEFT JOIN bookings b ON b.group_visit_id = v.id GROUP BY v.id ORDER BY count(b.id) DESC, v.id LIMIT 1`),
     // A place to stay, the one with the most stays: its rooms, stays and reservations read (0060).
     firstId(`SELECT a.id FROM accommodations a LEFT JOIN booking_stays s ON s.accommodation_id = a.id GROUP BY a.id ORDER BY count(s.id) DESC, a.id LIMIT 1`),
+    // A booking with SchoolMan's plan, commission and payouts on it (0063).
+    firstId(`SELECT b.id FROM bookings b WHERE EXISTS (SELECT 1 FROM booking_commissions c WHERE c.booking_id = b.id)
+              AND EXISTS (SELECT 1 FROM payouts p WHERE p.booking_id = b.id) ORDER BY b.number LIMIT 1`),
   ]);
 
 const routes = [
@@ -115,6 +118,7 @@ const routes = [
   '/admin/accommodation',
   '/admin/accommodation?view=casa_flat&q=e',
   place && `/admin/accommodation/${place}`,
+  ledger && `/admin/bookings/${ledger}`,
   '/admin/accommodation/stays',
   '/admin/accommodation/stays?view=arriving',
   '/admin/accommodation/stays?view=leaving&kind=casa_flat',

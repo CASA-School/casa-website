@@ -112,6 +112,14 @@
     // Removal condition: delete when the FileMaker bridge brings follow-ups across.
     "scripts/filemaker/import-follow-ups.mjs",
 
+    // Writes the rest of SchoolMan's learner ledger (payment plans, commission
+    // per charge, payouts, invoice numbers, invoices), from
+    // scripts/filemaker/read_money.py through a pipe (docs/ADMIN_WORKSPACE.md
+    // §Money from SchoolMan). Run by hand, never imported.
+    //
+    // Removal condition: delete when the FileMaker bridge brings money across.
+    "scripts/filemaker/import-money.mjs",
+
     // A SchoolMan letter in the workspace's letter shape, shared by the two
     // imports above that bring letters (learners, offers); imported only by
     // them, which knip does not follow.

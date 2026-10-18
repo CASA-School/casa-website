@@ -648,3 +648,18 @@ export async function roomTypes(): Promise<{ code: string; name: Bilingual }[]> 
   const rows = await query<{ code: string; name_de: string; name_en: string }>(`SELECT code, name_de, name_en FROM accommodation_room_types ORDER BY filemaker_id NULLS LAST, code`);
   return rows.map((r) => ({ code: r.code, name: { de: r.name_de, en: r.name_en } }));
 }
+
+export type PlacePayout = { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null; note: string | null };
+
+/** The rent paid to a place (0063, SchoolMan's `PaymentOut`), the latest first. */
+export async function placePayouts(id: string): Promise<PlacePayout[]> {
+  const rows = await query<{ id: string; paid_on: string | null; amount: string; booking_id: string | null; number: string | null; person_name: string | null; note: string | null }>(
+    `SELECT p.id, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on, p.amount, b.id AS booking_id, b.number,
+            btrim(pe.first_name || ' ' || coalesce(pe.last_name, '')) AS person_name, p.note
+       FROM payouts p LEFT JOIN bookings b ON b.id = p.booking_id LEFT JOIN people pe ON pe.id = b.person_id
+      WHERE p.accommodation_id = $1
+      ORDER BY p.paid_on DESC NULLS LAST, p.id`,
+    [id]
+  );
+  return rows.map((r) => ({ id: r.id, paidOn: r.paid_on, amount: Number(r.amount), bookingId: r.booking_id, bookingNumber: r.number, personName: r.person_name, note: r.note }));
+}

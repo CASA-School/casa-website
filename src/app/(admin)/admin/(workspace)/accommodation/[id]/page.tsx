@@ -7,7 +7,7 @@ import { EditPlaceForm, MemberForm, RoomForm } from '../accommodation-forms';
 import { deletePlaceAction, removeMemberAction, removeRoomAction, setPlaceActiveAction } from '../actions';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { dayRange } from '@/components/admin/list';
+import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader } from '@/components/admin/ui';
@@ -17,6 +17,7 @@ import {
   getPlace,
   placeDeletable,
   placeMembers,
+  placePayouts,
   placeReservations,
   placeRooms,
   placeStays,
@@ -51,11 +52,12 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const seesBookings = canAccess(user, 'bookings');
   const seesGroups = canAccess(user, 'groups');
 
-  const [members, rooms, stays, reservations, notes, activity, types, deletable] = await Promise.all([
+  const [members, rooms, stays, reservations, payouts, notes, activity, types, deletable] = await Promise.all([
     placeMembers(id),
     placeRooms(id),
     placeStays(id),
     placeReservations(id),
+    seesBookings ? placePayouts(id) : Promise.resolve([]),
     listNotes('accommodation', id),
     activityFor('accommodation', id, 50),
     canEdit ? roomTypes() : Promise.resolve([]),
@@ -73,7 +75,10 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     { id: 'rooms', label: t('Zimmer', 'Rooms'), icon: Icon.home, count: rooms.length },
     ...(stays.current.length + stays.earlierTotal ? [{ id: 'stays', label: t('Belegung', 'Stays'), icon: Icon.people, count: stays.current.length + stays.earlierTotal }] : []),
     ...(reservations.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: reservations.length }] : []),
+    ...(payouts.length ? [{ id: 'rent', label: t('Miete', 'Rent'), icon: Icon.money, count: payouts.length }] : []),
   ];
+  const thisYear = String(new Date().getFullYear());
+  const rentThisYear = payouts.filter((p) => p.paidOn?.startsWith(thisYear)).reduce((s, p) => s + p.amount, 0);
   const hidden = <input type="hidden" name="placeId" value={id} />;
   const muted = (text: string) => <span className="font-semibold text-[var(--casa-muted)]">{text}</span>;
 
@@ -340,6 +345,20 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
         </RecordTabPanel>
       ) : null}
 
+      {payouts.length ? (
+        <RecordTabPanel id="rent">
+          <Card
+            bleed
+            title={t('Miete an die Unterkunft', 'Rent paid to the place')}
+            icon={Icon.money}
+            tint="sun"
+            actions={<span className="text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{t(`${thisYear}: ${euros(rentThisYear)}`, `${thisYear}: ${euros(rentThisYear)}`)}</span>}
+          >
+            <MoneyRows rows={payouts} lang={lang} linked={seesBookings} />
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
       {canEdit ? (
         <RecordFoot>
           <form action={setPlaceActiveAction}>
@@ -368,6 +387,37 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
         </RecordFoot>
       ) : null}
     </RecordTabs>
+  );
+}
+
+function MoneyRows({ rows, lang, linked }: { rows: readonly { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null; note?: string | null }[]; lang: WsLang; linked: boolean }) {
+  const day = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : '—');
+  return (
+    <ul className="divide-y divide-ws-line-soft">
+      {rows.map((r) => {
+        const body = (
+          <>
+            <span className="w-24 shrink-0 text-[0.82rem] text-[var(--casa-muted)] tabular-nums">{day(r.paidOn)}</span>
+            <span className="min-w-0 flex-1 truncate text-[0.86rem]">
+              <span className="font-semibold text-[var(--casa-ink)]">{r.personName ?? '—'}</span>
+              <span className="text-[var(--casa-muted)]">{[r.bookingNumber, r.note?.split('\n')[0]].filter(Boolean).map((x) => ` · ${x}`).join('')}</span>
+            </span>
+            <span className="shrink-0 text-[0.86rem] font-semibold tabular-nums">{euros(r.amount)}</span>
+          </>
+        );
+        return (
+          <li key={r.id}>
+            {linked && r.bookingId ? (
+              <Link href={`/admin/bookings/${r.bookingId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
+                {body}
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3 px-4 py-2.5">{body}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

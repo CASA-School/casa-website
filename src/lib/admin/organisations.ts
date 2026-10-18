@@ -678,3 +678,33 @@ export async function removeCommission(organisationId: string, termId: string, a
   const rows = await query<{ id: string }>(`DELETE FROM agency_commissions WHERE id = $1 AND organisation_id = $2 RETURNING id`, [termId, organisationId]);
   if (rows.length) await logActivity({ actor, entity: 'organisation', entityId: organisationId, action: 'organisation_commission_removed' });
 }
+
+// ------------------------------------------------- from SchoolMan's ledger (0063)
+
+export type OrganisationInvoice = { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null; bookingId: string | null };
+
+/** The invoices to an organisation, the latest first; its total is SchoolMan's figure, else its charges'. */
+export async function organisationInvoices(organisationId: string): Promise<OrganisationInvoice[]> {
+  const rows = await query<{ id: string; number: string; issued_on: string | null; subject: string | null; amount: string | null; booking_id: string | null }>(
+    `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject, i.booking_id,
+            coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount
+       FROM invoices i WHERE i.organisation_id = $1
+      ORDER BY i.issued_on DESC NULLS LAST, i.number DESC`,
+    [organisationId]
+  );
+  return rows.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, subject: r.subject, amount: r.amount == null ? null : Number(r.amount), bookingId: r.booking_id }));
+}
+
+export type OrganisationPayout = { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null };
+
+/** What was paid out to it — an agency's commission — the latest first. */
+export async function organisationPayouts(organisationId: string): Promise<OrganisationPayout[]> {
+  const rows = await query<{ id: string; paid_on: string | null; amount: string; booking_id: string | null; number: string | null; person_name: string | null }>(
+    `SELECT p.id, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on, p.amount, b.id AS booking_id, b.number, btrim(pe.first_name || ' ' || coalesce(pe.last_name, '')) AS person_name
+       FROM payouts p LEFT JOIN bookings b ON b.id = p.booking_id LEFT JOIN people pe ON pe.id = b.person_id
+      WHERE p.organisation_id = $1
+      ORDER BY p.paid_on DESC NULLS LAST, p.id`,
+    [organisationId]
+  );
+  return rows.map((r) => ({ id: r.id, paidOn: r.paid_on, amount: Number(r.amount), bookingId: r.booking_id, bookingNumber: r.number, personName: r.person_name }));
+}

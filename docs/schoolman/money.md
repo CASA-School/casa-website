@@ -63,8 +63,13 @@ money tables are a learner ledger, not the accounts.
 ## In the workspace today
 
 `booking_charges`, `payments`, `rates` (the price lists, Settings → Prices) and `charge_types`. Prices
-are rows with a validity, not script text. There are no invoices, instalment plans, commissions or
-payouts.
+are rows with a validity, not script text. Since 2026-10-18 (migration 0063) also, read as SchoolMan has
+them and written by nothing: payment plans (`booking_instalments`), an agency's commission per charge
+(`booking_commissions`), money paid out (`payouts`: rent to hosts — found through the stay on the newer
+ones —, commission to agencies), invoices (`invoices`, with their number stamped on the charges) —
+docs/ADMIN_WORKSPACE.md §Money from SchoolMan. `PaymentOutReference`: 1 Mietzahlung an Gastgeber,
+2 Auszahlung Kommission Agentur, 3 Rückzahlung Student, 4 Direktzahlung an Agentur; 1,799 payouts name no
+kind. `_ID_Payment_Done` on payouts is „nein" on 6,338 of 6,348 — read as nothing.
 
 ## For the bridge
 

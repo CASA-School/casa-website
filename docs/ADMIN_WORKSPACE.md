@@ -1228,6 +1228,28 @@ window, so none is linked yet. A group's offers came across with the offers (005
 tab, docs/OFFERS.md §From SchoolMan) and its bed reservations with the accommodation (0060; its page's
 Unterkünfte tab). Not across: its letters and invoices — docs/schoolman/groups.md.
 
+## Money from SchoolMan (2026-10-18, migration 0063)
+
+The rest of SchoolMan's learner ledger, read as it is beside the charges and payments (0054). SchoolMan's
+money tables are a ledger of what learners are charged and pay; finance keeps the accounts in DATEV
+(docs/schoolman/money.md), so these are shown, not worked into a balance, and nothing here writes them.
+
+- **Payment plans** (`booking_instalments`, `Instalment`): each part with its day, amount and whether
+  SchoolMan marks it paid — the booking page's „Ratenplan".
+- **An agency's commission per charge** (`booking_commissions`, `Commission`): the share, the charge's
+  amount, the commission, paid out or not — „Provision der Agentur", with its total.
+- **Money paid out** (`payouts`, `PaymentOut`): rent to a host, commission to an agency, a payment straight
+  to an agency — „Auszahlungen" on the booking, „Miete" on the host's page (with this year's total),
+  „Auszahlungen" on the agency's page. A refund to the learner is a payment below zero (0054), not here.
+- **Invoices** (`invoices`, `Invoice`): number, day, recipient, subject; the charges an invoice covers carry
+  its number (`booking_charges.invoice_number`) and its total is theirs unless SchoolMan stored one —
+  „Rechnungen" on the booking and on the organisation's page.
+
+`read_money.py | import-money.mjs`, after the learners, the organisations and the accommodation: for the
+sample's bookings 412 instalments, 890 commission lines, 920 payouts (447 rent — 435 with their host, found
+through the stay on the newer ones —, 463 agency commission, 10 without a kind), 267 charges stamped with
+their invoice; 642 invoices (124 on the sample's bookings, the rest to the agencies and companies here).
+
 ## Follow-ups (2026-10-18, migration 0062)
 
 A booking's „Wiedervorlage": a day to look at it again, and why (`booking_follow_ups`). On the booking's

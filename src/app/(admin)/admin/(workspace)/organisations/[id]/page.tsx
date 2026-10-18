@@ -36,7 +36,9 @@ import {
   organisationDeletable,
   organisationFigures,
   organisationLetters,
+  organisationInvoices,
   organisationOffers,
+  organisationPayouts,
   type CommissionTerm,
   type OrganisationBooking,
 } from '@/lib/admin/organisations';
@@ -92,7 +94,7 @@ export default async function OrganisationPage({
   const seesGroups = canAccess(user, 'groups');
   const isAgency = organisation.kind === 'agency';
 
-  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable] = await Promise.all([
+  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts] = await Promise.all([
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
@@ -104,6 +106,8 @@ export default async function OrganisationPage({
     canEdit ? organisationCountries() : Promise.resolve([]),
     canEdit ? commissionChargeTypes() : Promise.resolve([]),
     canDelete ? organisationDeletable(id) : Promise.resolve(false),
+    seesBookings ? organisationInvoices(id) : Promise.resolve([]),
+    seesBookings ? organisationPayouts(id) : Promise.resolve([]),
   ]);
   const seenLetters = letters.items.filter((l) => canAccess(user, letterModule(l.kind)));
   const letterCount = seenLetters.length === letters.items.length ? letters.total : seenLetters.length;
@@ -117,6 +121,8 @@ export default async function OrganisationPage({
     ...(courses.length ? [{ id: 'courses', label: t('Kurse', 'Courses'), icon: Icon.catalogue, count: courses.length }] : []),
     ...(offers.length ? [{ id: 'offers', label: t('Angebote', 'Offers'), icon: Icon.offers, count: offers.length }] : []),
     ...(seenLetters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letterCount }] : []),
+    ...(invoices.length ? [{ id: 'invoices', label: t('Rechnungen', 'Invoices'), icon: Icon.statement, count: invoices.length }] : []),
+    ...(payouts.length ? [{ id: 'payouts', label: t('Auszahlungen', 'Paid out'), icon: Icon.money, count: payouts.length }] : []),
   ];
   const hidden = <input type="hidden" name="organisationId" value={id} />;
   const muted = (text: string) => <span className="font-semibold text-[var(--casa-muted)]">{text}</span>;
@@ -437,6 +443,44 @@ export default async function OrganisationPage({
                 {t(`Die letzten ${num(lang, letters.items.length)} von ${num(lang, letters.total)}`, `The latest ${num(lang, letters.items.length)} of ${num(lang, letters.total)}`)}
               </p>
             ) : null}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {invoices.length ? (
+        <RecordTabPanel id="invoices">
+          <Card bleed>
+            <Rows>
+              {invoices.map((i) => (
+                <Row
+                  key={i.id}
+                  href={i.bookingId ? `/admin/bookings/${i.bookingId}` : `/admin/organisations/${id}?tab=invoices`}
+                  icon={<IconChip icon={Icon.statement} tint="blue" />}
+                  title={t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}
+                  detail={[i.issuedOn ? dayRange(i.issuedOn, i.issuedOn, lang) : null, i.subject].filter(Boolean).join(' · ') || null}
+                  end={i.amount != null ? euros(i.amount) : null}
+                />
+              ))}
+            </Rows>
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {payouts.length ? (
+        <RecordTabPanel id="payouts">
+          <Card bleed>
+            <Rows>
+              {payouts.map((p) => (
+                <Row
+                  key={p.id}
+                  href={p.bookingId ? `/admin/bookings/${p.bookingId}` : `/admin/organisations/${id}?tab=payouts`}
+                  icon={<IconChip icon={Icon.money} tint="sun" />}
+                  title={[p.personName, p.bookingNumber].filter(Boolean).join(' · ') || t('Auszahlung', 'Payout')}
+                  detail={p.paidOn ? dayRange(p.paidOn, p.paidOn, lang) : null}
+                  end={euros(p.amount)}
+                />
+              ))}
+            </Rows>
           </Card>
         </RecordTabPanel>
       ) : null}

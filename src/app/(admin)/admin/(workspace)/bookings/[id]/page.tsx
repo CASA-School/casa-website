@@ -29,6 +29,7 @@ import {
   BOOKING_STATUS_TONES,
   bookingLight,
   bookingFollowUps,
+  bookingLedgerExtras,
   bookingStays,
   carryOverTargets,
   CHARGE_KIND_LABELS,
@@ -134,7 +135,7 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps] = await Promise.all([
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps, extras] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -146,6 +147,7 @@ export default async function BookingPage({
     canEdit && !exam && open ? stayVocabulary() : Promise.resolve(null),
     bookingStays(booking.id),
     bookingFollowUps(booking.id),
+    bookingLedgerExtras(booking.id),
   ]);
   // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
   const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
@@ -768,6 +770,109 @@ export default async function BookingPage({
               </ul>
             )}
           </Card>
+          {/* The rest of SchoolMan's ledger for this booking, read as it is (0063): its payment plan, its agency's
+              commission, what was paid out for it, its invoices. Finance keeps the accounts in DATEV. */}
+          {extras.instalments.length ? (
+            <Card title={t('Ratenplan', 'Payment plan')} icon={Icon.calendar} tint="green">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {extras.instalments.map((i) => (
+                  <li key={i.id}>
+                    <LedgerLine className="py-2.5" withAction={false} amount={money(i.amount, booking.currency)}>
+                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">{i.label ?? t('Rate', 'Instalment')}</span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                        {[i.dueOn ? t(`fällig ${new Date(`${i.dueOn}T12:00:00Z`).toLocaleDateString('de-DE')}`, `due ${new Date(`${i.dueOn}T12:00:00Z`).toLocaleDateString('en-GB')}`) : null,
+                          i.paid === true ? t('bezahlt', 'paid') : i.paid === false ? t('offen', 'open') : null]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </LedgerLine>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+          {extras.commissions.length ? (
+            <Card
+              title={t('Provision der Agentur', "The agency's commission")}
+              icon={Icon.money}
+              tint="green"
+              footer={
+                <LedgerLine withAction={false} amount={<span className="font-extrabold">{money(extras.commissions.reduce((s, c) => s + c.amount, 0), booking.currency)}</span>}>
+                  <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Gesamt', 'Total')}</span>
+                </LedgerLine>
+              }
+            >
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {extras.commissions.map((c) => (
+                  <li key={c.id}>
+                    <LedgerLine className="py-2.5" withAction={false} amount={money(c.amount, booking.currency)}>
+                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">
+                        {[c.percentage != null ? `${num(lang, c.percentage)} %` : null, c.description].filter(Boolean).join(t(' auf ', ' on '))}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                        {[c.agency, c.baseAmount != null ? t(`von ${money(c.baseAmount, booking.currency)}`, `of ${money(c.baseAmount, booking.currency)}`) : null,
+                          c.paid === true ? t('ausgezahlt', 'paid out') : c.paid === false ? t('noch nicht ausgezahlt', 'not paid out yet') : null]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </LedgerLine>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+          {extras.payouts.length ? (
+            <Card title={t('Auszahlungen', 'Paid out')} icon={Icon.money} tint="sun">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {extras.payouts.map((p) => (
+                  <li key={p.id}>
+                    <LedgerLine className="py-2.5" withAction={false} amount={money(p.amount, booking.currency)}>
+                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">
+                        {p.kind === 'host_rent'
+                          ? t('Miete an Gastgeber', 'Rent to the host')
+                          : p.kind === 'agency_commission'
+                            ? t('Provision an Agentur', 'Commission to the agency')
+                            : p.kind === 'agency_direct'
+                              ? t('Direkt an Agentur', 'Straight to the agency')
+                              : t('Auszahlung', 'Payout')}
+                        {p.to ? (
+                          <>
+                            {' · '}
+                            {p.toHref ? (
+                              <Link href={p.toHref} className="text-[var(--fm-navy)] hover:underline">
+                                {p.to}
+                              </Link>
+                            ) : (
+                              p.to
+                            )}
+                          </>
+                        ) : null}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                        {[p.paidOn ? new Date(`${p.paidOn}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : null, p.note?.split('\n')[0]].filter(Boolean).join(' · ')}
+                      </span>
+                    </LedgerLine>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+          {extras.invoices.length ? (
+            <Card title={t('Rechnungen', 'Invoices')} icon={Icon.statement} tint="blue">
+              <ul className="-my-1.5 divide-y divide-ws-line-soft">
+                {extras.invoices.map((i) => (
+                  <li key={i.id}>
+                    <LedgerLine className="py-2.5" withAction={false} amount={i.amount != null ? money(i.amount, booking.currency) : '—'}>
+                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">{t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}</span>
+                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                        {[i.issuedOn ? new Date(`${i.issuedOn}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : null, i.subject].filter(Boolean).join(' · ')}
+                      </span>
+                    </LedgerLine>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
         </div>
 
         <div className="space-y-4">
