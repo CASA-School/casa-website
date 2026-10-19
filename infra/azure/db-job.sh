@@ -91,9 +91,14 @@ fi
 
 echo "==> job $JOB: $TASK"
 for old in $(az containerapp job list -g "$RG" --query "[?starts_with(name, '$JOB_PREFIX')].name" -o tsv 2>/dev/null); do
-  az containerapp job delete -n "$old" -g "$RG" --yes -o none 2>/dev/null || true
+  running=$(az containerapp job execution list -n "$old" -g "$RG" --query "length([?properties.status=='Running'])" -o tsv 2>/dev/null || echo 0)
+  [ "${running:-0}" = 0 ] && az containerapp job delete -n "$old" -g "$RG" --yes -o none 2>/dev/null || true
 done
-trap 'rm -rf "${CTX:-}"; az containerapp job delete -n "$JOB" -g "$RG" --yes -o none 2>/dev/null || true' EXIT
+# Removed at exit only once its run has ended: a lost connection here must never stop a job in Azure
+# (2026-10-20, the first bridge run was cut off in its learners' step that way).
+STARTED=false
+FINISHED=false
+trap 'rm -rf "${CTX:-}"; if ! $STARTED || $FINISHED; then az containerapp job delete -n "$JOB" -g "$RG" --yes -o none 2>/dev/null || true; else echo "==> $JOB left running in Azure; the next run removes it" >&2; fi' EXIT
 az containerapp job create -n "$JOB" -g "$RG" --environment "$ENV_ID" \
   --trigger-type Manual --replica-timeout "$TIMEOUT" --replica-retry-limit 0 \
   --parallelism 1 --replica-completion-count 1 \
@@ -103,11 +108,12 @@ az containerapp job create -n "$JOB" -g "$RG" --environment "$ENV_ID" \
   --command sh --args task.sh "$TASK" --only-show-errors -o none
 
 EXECUTION=$(az containerapp job start -n "$JOB" -g "$RG" --query name -o tsv)
+STARTED=true
 echo "==> execution $EXECUTION"
 status=Running
 for _ in $(seq 1 $((TIMEOUT / 10))); do
-  status=$(az containerapp job execution show -n "$JOB" -g "$RG" --job-execution-name "$EXECUTION" --query properties.status -o tsv)
-  case "$status" in Succeeded|Failed|Stopped|Degraded) break ;; esac
+  status=$(az containerapp job execution show -n "$JOB" -g "$RG" --job-execution-name "$EXECUTION" --query properties.status -o tsv 2>/dev/null || echo Unknown)
+  case "$status" in Succeeded|Failed|Stopped|Degraded) FINISHED=true; break ;; esac
   sleep 10
 done
 echo "==> $status"
