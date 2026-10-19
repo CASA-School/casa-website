@@ -530,7 +530,7 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 Each importer is idempotent, so a run changes only what differs. The window moves with the date.
 Nothing is ever written to SchoolMan.
 
-**How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`) on the office Mac, with SchoolMan
+**How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`, or `--local-first` to import into the Mac's own database first and send the same bundle only if that worked) on the office Mac, with SchoolMan
 open in FileMaker Pro and `az` signed in:
 1. `bridge-pack.mjs` runs the readers. Their output stays in memory and is sealed with AES-256-GCM under
    a key made for that run (`bridge-bundle.mjs`), then uploaded to the private container `bridge` in

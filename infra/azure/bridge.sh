@@ -5,6 +5,8 @@
 #
 #   ./infra/azure/bridge.sh                      every step
 #   ./infra/azure/bridge.sh --only staff,day     some steps (they keep their order)
+#   ./infra/azure/bridge.sh --local-first        import into this Mac's database (.env.local) first, and
+#                                                send the same sealed bundle to Azure only if that worked
 #
 # Run on the office Mac, with SchoolMan open in FileMaker Pro and `az` signed in to CASA's tenant.
 #   1. The readers read SchoolMan (read-only) and the result is sealed under a key made for this run.
@@ -22,7 +24,14 @@ ACCOUNT=stcasawebsitef8d745
 CONTAINER=bridge
 
 ONLY=()
-if [ "${1:-}" = "--only" ]; then ONLY=(--only "${2:?--only needs step names}"); fi
+LOCAL_FIRST=false
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --only) ONLY=(--only "${2:?--only needs step names}"); shift 2 ;;
+    --local-first) LOCAL_FIRST=true; shift ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
+  esac
+done
 
 osascript -e 'tell application "FileMaker Pro" to get name of every document' 2>/dev/null | grep -q SchoolMan \
   || { echo "Open SchoolMan in FileMaker Pro first." >&2; exit 1; }
@@ -33,18 +42,29 @@ store() { az storage "$@" --account-name "$ACCOUNT" --account-key "$STORAGE_KEY"
 store container create -n "$CONTAINER" --public-access off -o none
 
 BLOB="schoolman-$(date -u +%Y%m%dT%H%M%SZ).bin"
-EXPIRY=$(date -u -v+2H +%Y-%m-%dT%H:%MZ)
-sas() { store blob generate-sas -c "$CONTAINER" -n "$BLOB" --permissions "$1" --expiry "$EXPIRY" --https-only -o tsv; }
+# Two hours from when each link is made: reading SchoolMan and a local import can take a while.
+sas() { store blob generate-sas -c "$CONTAINER" -n "$BLOB" --permissions "$1" --expiry "$(date -u -v+2H +%Y-%m-%dT%H:%MZ)" --https-only -o tsv; }
 BASE="https://$ACCOUNT.blob.core.windows.net/$CONTAINER/$BLOB"
 KEY=$(openssl rand -hex 32)
 
+TMP=$(mktemp -d)
 cleanup() {
+  rm -rf "$TMP"
   store blob delete -c "$CONTAINER" -n "$BLOB" -o none 2>/dev/null || true
 }
 trap cleanup EXIT
 
 echo "==> reading SchoolMan"
-BRIDGE_KEY="$KEY" BRIDGE_UPLOAD_URL="$BASE?$(sas cw)" node scripts/filemaker/bridge-pack.mjs ${ONLY[@]+"${ONLY[@]}"}
+if $LOCAL_FIRST; then
+  # Sealed on disk only for this run, in a folder removed at exit.
+  BRIDGE_KEY="$KEY" node scripts/filemaker/bridge-pack.mjs --file "$TMP/bundle.bin" ${ONLY[@]+"${ONLY[@]}"}
+  echo "==> importing into this Mac's database first"
+  ( set -a; . ./.env.local; set +a; BRIDGE_KEY="$KEY" node scripts/filemaker/bridge-unpack.mjs --file "$TMP/bundle.bin" ) \
+    || { echo "The local import failed; nothing was sent to Azure." >&2; exit 1; }
+  store blob upload -c "$CONTAINER" -n "$BLOB" -f "$TMP/bundle.bin" -o none
+else
+  BRIDGE_KEY="$KEY" BRIDGE_UPLOAD_URL="$BASE?$(sas cw)" node scripts/filemaker/bridge-pack.mjs ${ONLY[@]+"${ONLY[@]}"}
+fi
 
 echo "==> importing in Azure"
 BRIDGE_KEY="$KEY" BRIDGE_URL="$BASE?$(sas rd)" ./infra/azure/db-job.sh import
