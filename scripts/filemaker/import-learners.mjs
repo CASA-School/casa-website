@@ -139,7 +139,10 @@ try {
       )
     ).rows.map((r) => [r.code, r])
   );
-  /** The sitting an exam booking is on: SchoolMan's own, else the same exam that day here, else made. */
+  /**
+   * The sitting an exam booking is on: SchoolMan's own, else the same exam that day here, else made — as
+   * a draft, so a date only SchoolMan knows never appears on the website until someone publishes it.
+   */
   async function sittingFor(exam) {
     const type = examTypes.get(EXAM_TYPE[exam.ref] ?? '');
     if (!type || !exam.day) return null;
@@ -161,7 +164,7 @@ try {
     const made = (
       await client.query(
         `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, capacity, status, filemaker_exam_id)
-         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5, 'scheduled', $6)
+         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5, 'draft', $6)
          RETURNING id`,
         [type.id, exam.day, type.starts, type.ends, Number(exam.places) > 0 ? Number(exam.places) : 20, exam.id]
       )

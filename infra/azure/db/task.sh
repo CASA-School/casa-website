@@ -11,5 +11,6 @@ case "$1" in
   bootstrap) node bootstrap.mjs ;;
   owner) node scripts/admin/seed-staff.mjs ;;
   password) node scripts/admin/seed-staff.mjs --reset ;;
+  import) node scripts/filemaker/bridge-unpack.mjs ;;
   *) echo "unknown task: $1" >&2; exit 2 ;;
 esac

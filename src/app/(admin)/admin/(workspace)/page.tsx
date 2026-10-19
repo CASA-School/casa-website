@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
+import { bridgeStatus, bridgeTime } from '@/lib/admin/bridge';
 import { requireModule } from '@/lib/admin/guard';
 import { num, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -224,7 +225,7 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
 
 export default async function OverviewPage() {
   const user = await requireModule('overview');
-  const [facts, { t, lang }] = await Promise.all([getOverviewFacts(), getI18n()]);
+  const [facts, bridge, { t, lang }] = await Promise.all([getOverviewFacts(), bridgeStatus(), getI18n()]);
 
   const now = new Date();
   const hour = now.getHours();
@@ -237,14 +238,24 @@ export default async function OverviewPage() {
 
   return (
     <div className="mx-auto max-w-[1120px] pb-6">
-      <header className="mb-10 pt-1">
-        <p className="text-[0.82rem] font-medium text-[var(--casa-text-subtle)]">
-          {now.toLocaleDateString(wsLocale(lang), { weekday: 'long', day: 'numeric', month: 'long' })}
-        </p>
-        <h1 className="mt-1.5 text-[2.15rem] leading-[1.1] font-extrabold tracking-[-0.03em] text-[var(--casa-ink)]">
-          {greeting}
-          {firstName ? `, ${firstName}` : ''}
-        </h1>
+      <header className="mb-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 pt-1">
+        <div>
+          <p className="text-[0.82rem] font-medium text-[var(--casa-text-subtle)]">
+            {now.toLocaleDateString(wsLocale(lang), { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
+          <h1 className="mt-1.5 text-[2.15rem] leading-[1.1] font-extrabold tracking-[-0.03em] text-[var(--casa-ink)]">
+            {greeting}
+            {firstName ? `, ${firstName}` : ''}
+          </h1>
+        </div>
+        {/* What the workspace shows from SchoolMan is a copy as of a time: say which (docs/FILEMAKER_BRIDGE.md §8). */}
+        {bridge ? (
+          <p className="flex items-center gap-2 pb-1 text-[0.8rem] font-medium text-[var(--casa-text-subtle)]">
+            <span aria-hidden="true" className={cn('size-2 rounded-full', bridge.lastFailed ? 'bg-[#d92d20]' : 'bg-[#17b26a]')} />
+            {bridge.readAt ? t(`SchoolMan · Stand ${bridgeTime(bridge.readAt, t, lang)}`, `SchoolMan · as of ${bridgeTime(bridge.readAt, t, lang)}`) : 'SchoolMan'}
+            {bridge.lastFailed ? <span className="text-[#b42318]">{t('· letzte Übernahme fehlgeschlagen', '· last transfer failed')}</span> : null}
+          </p>
+        ) : null}
       </header>
 
       <div className="space-y-10">

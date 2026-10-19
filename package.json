@@ -23,6 +23,7 @@
     "db:baseline": "node scripts/db/migrate.mjs --baseline=0001",
     "db:seed": "node scripts/db/apply-sql-directory.mjs db/seeds",
     "db:azure": "./infra/azure/db-job.sh",
+    "bridge:azure": "./infra/azure/bridge.sh",
     "db:bootstrap": "node infra/azure/db/bootstrap.mjs",
     "db:countries": "node scripts/db/generate-countries-sql.mjs",
     "placement:port": "node scripts/placement/port-item-bank.mjs",

@@ -36,6 +36,15 @@
     // Removal condition: delete when the FileMaker bridge brings staff across
     // (docs/FILEMAKER_BRIDGE.md) and this script is retired.
     "scripts/filemaker/import-staff.mjs",
+    // The SchoolMan bridge into the live database (docs/FILEMAKER_BRIDGE.md §8): run by
+    // infra/azure/bridge.sh on the office Mac and in the database job, never imported by the app.
+    //
+    // Removal condition: delete when the workspace reads SchoolMan through its own bridge
+    // service and these scripts are retired.
+    "scripts/filemaker/bridge-bundle.mjs",
+    "scripts/filemaker/bridge-pack.mjs",
+    "scripts/filemaker/bridge-unpack.mjs",
+    "scripts/filemaker/bridge-steps.mjs",
     // The Tagesplan's tasks, desks and shifts, from scripts/filemaker/read_day.py through a pipe
     // (docs/ADMIN_WORKSPACE.md §Tagesplan).
     "scripts/filemaker/import-day.mjs",

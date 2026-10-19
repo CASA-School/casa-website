@@ -512,7 +512,60 @@ sitting in FileMaker Pro. Item 1 is a conversation, and it comes first.
 
 ---
 
-## 8. Files consulted
+## 8. The copy in the live workspace (2026-10-19)
+
+Rahman, after the first release of the workspace: „the new project and changes are live but I don't
+see the data". The importers had only ever run against the database on the office Mac. He asked for a
+bridge that brings SchoolMan's latest data once a day. For now a person starts each run („at the first
+phase I will tell you to run it"). It goes nightly once the email tests are done.
+
+**What a run brings.** It brings what the local copy has, by the importers' own rules
+(`scripts/filemaker/bridge-steps.mjs` lists them in order):
+- staff, courses with their weekly counts, lesson days and absences;
+- the learner sample (a course this week or in the next four, plus this year's group participants),
+  with history, money, attendance and letters;
+- organisations, groups, offers, accommodation, follow-ups, intake and the rest;
+- the Tagesplan's tasks.
+
+Each importer is idempotent, so a run changes only what differs. The window moves with the date.
+Nothing is ever written to SchoolMan.
+
+**How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`) on the office Mac, with SchoolMan
+open in FileMaker Pro and `az` signed in:
+1. `bridge-pack.mjs` runs the readers. Their output stays in memory and is sealed with AES-256-GCM under
+   a key made for that run (`bridge-bundle.mjs`), then uploaded to the private container `bridge` in
+   `stcasawebsitef8d745`. The upload link can only create and write, and lasts two hours.
+2. `db-job.sh import` starts the database job (1 vCPU, 2 GiB, up to an hour) with the key and a link that
+   can only read and delete. The job runs inside Azure, the only place that reaches the database.
+3. `bridge-unpack.mjs` in the job downloads the bundle, deletes it, and opens it. It feeds each step to
+   its importer, taking the importer from the image's own list and never from the bundle, and stops at
+   the first failure. It logs the importers' summary lines and the row counts before and after, then
+   records the run in `bridge_runs` (0073).
+4. Back on the Mac, `bridge.sh` deletes the bundle again in any case and removes the job, which held the
+   key.
+
+**What the workspace says.**
+- The Overview's head reads „SchoolMan · Stand heute, 07:12" from the last run that went through. A
+  red dot and „letzte Übernahme fehlgeschlagen" appear when the latest run did not.
+- Settings has the same in its SchoolMan card.
+- Bookings are still made in SchoolMan, so the workspace shows a copy as of a time and says which.
+
+**Safety.**
+- The workspace sends no email: every „E-Mail" button is a `mailto:` opened in the colleague's own
+  mail program. Importing real learners cannot write to anyone.
+- The importers touch only two tables the public site reads.
+  - `course_instances`: new starts are made with `on_website = false`.
+  - `exam_sessions`: a sitting only SchoolMan knows is now made as a `draft`, so it does not appear
+    on the website until someone publishes it.
+- Upload, download, deletion and refusal were checked against the real storage on 2026-10-19:
+  - the upload link cannot read;
+  - the read link can read and delete;
+  - no access without a link.
+
+**Local test.** `BRIDGE_KEY=<64 hex> node scripts/filemaker/bridge-pack.mjs --file <sealed.bin>`, then
+`DATABASE_URL=… BRIDGE_KEY=… node scripts/filemaker/bridge-unpack.mjs --file <sealed.bin>`.
+
+## 9. Files consulted
 
 - `casa-google-business-audit/FILEMAKER_ARCHITECTURE.md`,
   `bridge/README.md`, `bridge/SYNC_HANDOFF.md`, `bridge/live_api_sync.py`,

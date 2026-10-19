@@ -7,6 +7,7 @@ import { Status } from '@/components/admin/list';
 import { Card, DetailList, PageHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { getStaffUser } from '@/lib/admin/auth';
+import { bridgeStatus, bridgeTime } from '@/lib/admin/bridge';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { formDeliveryConfig } from '@/lib/notifications/forms.server';
 import { LISTENING_AUDIO_AVAILABLE, POLICY_VERSION, RELEASE_MODE } from '@/config/placement/policy';
@@ -33,7 +34,7 @@ export default async function SettingsPage() {
     redirect('/admin/sign-in');
   }
 
-  const { t, lang } = await getI18n();
+  const [{ t, lang }, bridge] = await Promise.all([getI18n(), bridgeStatus()]);
 
   const integrations = [
     {
@@ -104,6 +105,27 @@ export default async function SettingsPage() {
                   value: microsoftMail
                     ? t('Eingerichtet', 'Configured')
                     : t('Absenderverbindung nicht eingerichtet', 'Sender connection not configured'),
+                },
+              ]}
+            />
+          </Card>
+
+          <Card title="SchoolMan" icon={Icon.clock} tint="ink">
+            <DetailList
+              items={[
+                {
+                  label: t('Zuletzt übernommen', 'Last transfer'),
+                  value: bridge?.readAt ? bridgeTime(bridge.readAt, t, lang) : t('Noch nicht', 'Not yet'),
+                },
+                {
+                  label: t('Letzte Übernahme', 'Latest transfer'),
+                  value: !bridge ? (
+                    '—'
+                  ) : bridge.lastFailed ? (
+                    <Status tone="danger">{t('Fehlgeschlagen', 'Failed')}</Status>
+                  ) : (
+                    <Status tone="positive">{t('Vollständig', 'Complete')}</Status>
+                  ),
                 },
               ]}
             />

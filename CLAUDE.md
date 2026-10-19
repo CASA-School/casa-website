@@ -69,6 +69,7 @@ npm run admin:seed   # creates the first staff workspace account (an owner, the 
 npm run admin:password  # new password for ADMIN_EMAIL when no owner can sign in
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
+npm run bridge:azure # SchoolMan's current data into the live workspace, run on request (docs/FILEMAKER_BRIDGE.md §8)
 npm run cms:extract  # refreshes the website editor's catalog of the site's copy
 npm run cms:translations  # the six prepared languages: status, `-- todo`, `-- merge` (docs/TRANSLATIONS.md)
 npm run placement:port  # re-ports the placement item bank from its source markdown
