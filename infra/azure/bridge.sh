@@ -11,7 +11,7 @@
 #   2. The sealed bundle goes to a private blob container, written through a link valid for two hours.
 #   3. An import job inside Azure (db-job.sh import), the only place that reaches the database, fetches
 #      it with a read-and-delete link, writes it in, records the run and deletes the bundle.
-#   4. Here the bundle is deleted again in any case, and the job, which held the key, is removed.
+#   4. Here the bundle is deleted again in any case; db-job.sh removes the job, which held the key.
 # The key and the links live in this shell and in the job only; the storage key is never printed.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -20,7 +20,6 @@ SUBSCRIPTION=f8d745fc-c2dc-4ad9-a3a8-e9da556b69ab
 RG=rg-casa-website-prod
 ACCOUNT=stcasawebsitef8d745
 CONTAINER=bridge
-JOB=caj-casa-website-db
 
 ONLY=()
 if [ "${1:-}" = "--only" ]; then ONLY=(--only "${2:?--only needs step names}"); fi
@@ -41,7 +40,6 @@ KEY=$(openssl rand -hex 32)
 
 cleanup() {
   store blob delete -c "$CONTAINER" -n "$BLOB" -o none 2>/dev/null || true
-  az containerapp job delete -n "$JOB" -g "$RG" --yes -o none 2>/dev/null || true
 }
 trap cleanup EXIT
 

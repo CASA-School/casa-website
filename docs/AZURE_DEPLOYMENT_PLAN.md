@@ -215,8 +215,10 @@ applicants' CVs is a policy question, not a technical one.
   `az postgres flexible-server update --admin-password` if it is ever needed. The site's
   connection string, with `sslmode=verify-full`, is the Container App secret `database-url`.
 - **Migrations:** `./infra/azure/db-job.sh migrate` builds a small image (migration runner, SQL,
-  pg) and runs it as the Container Apps job `caj-casa-website-db`, recreated on every run with only
-  the secrets that task needs. `deploy.sh` runs it before updating the app.
+  pg) and runs it as a Container Apps job of its own, `caj-casa-website-db-<time>`, with only the
+  secrets that task needs, removed when the run ends. Since 2026-10-20 the job is no longer one fixed
+  name recreated each time, because that left Azure holding the old job's secret and every run hung.
+  `deploy.sh` runs it before updating the app.
 - **Checked before connecting:** every public page was compared, text for text, with and without
   a database. The database lacked the exam sessions (fixed by `db/seeds/0005_exam_sessions.sql`);
   the remaining differences were intended (the application form appears, a finished term is

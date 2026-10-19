@@ -29,7 +29,10 @@ set -euo pipefail
 TASK="${1:-status}"
 RG=rg-casa-website-prod
 APP=ca-casa-website
-JOB=caj-casa-website-db
+# A job of its own per run, removed afterwards (2026-10-20): recreating one fixed name left Azure
+# holding the old job's secret, and every run under that name hung before its container started.
+JOB_PREFIX=caj-casa-website-db
+JOB="$JOB_PREFIX-$(date -u +%m%d%H%M%S)"
 ACR=acrcasaprodf8d745
 ENV_ID=$(az containerapp env show -n cae-casa-prod -g rg-casa-platform-prod --query id -o tsv)
 IDENTITY=$(az identity show -n id-casa-website-prod -g "$RG" --query id -o tsv)
@@ -87,7 +90,10 @@ if ! az acr repository show-tags -n "$ACR" --repository casa-website-db -o tsv 2
 fi
 
 echo "==> job $JOB: $TASK"
-az containerapp job delete -n "$JOB" -g "$RG" --yes -o none 2>/dev/null || true
+for old in $(az containerapp job list -g "$RG" --query "[?starts_with(name, '$JOB_PREFIX')].name" -o tsv 2>/dev/null); do
+  az containerapp job delete -n "$old" -g "$RG" --yes -o none 2>/dev/null || true
+done
+trap 'rm -rf "${CTX:-}"; az containerapp job delete -n "$JOB" -g "$RG" --yes -o none 2>/dev/null || true' EXIT
 az containerapp job create -n "$JOB" -g "$RG" --environment "$ENV_ID" \
   --trigger-type Manual --replica-timeout "$TIMEOUT" --replica-retry-limit 0 \
   --parallelism 1 --replica-completion-count 1 \

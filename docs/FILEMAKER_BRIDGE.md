@@ -541,8 +541,10 @@ open in FileMaker Pro and `az` signed in:
    its importer, taking the importer from the image's own list and never from the bundle, and stops at
    the first failure. It logs the importers' summary lines and the row counts before and after, then
    records the run in `bridge_runs` (0073).
-4. Back on the Mac, `bridge.sh` deletes the bundle again in any case and removes the job, which held the
-   key.
+4. Back on the Mac, `bridge.sh` deletes the bundle again in any case. `db-job.sh` gives every run a job
+   of its own and removes it afterwards, so the job that held the key does not stay. Recreating one
+   fixed job name had left Azure holding the old job's secret on 2026-10-19, and every later run under
+   that name hung before it started.
 
 **What the workspace says.**
 - The Overview's head reads „SchoolMan · Stand heute, 07:12" from the last run that went through. A
