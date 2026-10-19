@@ -1232,6 +1232,20 @@ day as one moves between them.
   part; the search finds a learner (named on the row), a teacher, a room or a course. A row opens
   the class in a side panel (`lesson-panel.tsx`): room, teacher, the learners with their addresses,
   and its attendance sheet, an email to all (BCC) and its page.
+  - **Liste für die Lehrkraft** (`/admin/day/contacts?lesson=`). Teachers ask for their learners'
+    addresses; until the Klassenbuch gives them those, the office sends this: an A4 sheet of the
+    learners in the class that day, name and email, with course, teacher, room and time — printed
+    or saved as a PDF (`@page contacts`), or „E-Mail an …" opening a mail to the teacher with the
+    list in its text.
+  - **Ändern** — the teacher or the room changed from the panel (Rahman: „a shortcut … reflected
+    all over … with a warning popup"). The select names who is away that day and which room or
+    teacher another class already has at the same time. „Nur am …" changes the one day
+    (`changeDay`: a new teacher becomes a Vertretung); „Ab … bis Kursende" changes that day and
+    every later one that had the old value, and the class's week plan (`replaceFromDay`), so
+    Tagesplan, Raumplan, Kursplanung, the course and the attendance sheet all follow. Always
+    through a confirm saying what changes. The teacher needs `kursplanung` at `edit`, the room
+    `rooms` at `edit` — the same rights as changing them where they live; without them the section
+    is not shown, and the action checks both.
 - **Raumplan** (`/admin/day/rooms`). SchoolMan's ClassroomToday drawn: a row per room, floor by
   floor, alternating shades, hours and half hours across, each class a block in its part of the
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class

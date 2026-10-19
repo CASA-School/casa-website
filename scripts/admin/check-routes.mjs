@@ -99,6 +99,7 @@ const routes = [
   lessonDate && `/admin/day/courses?date=${lessonDate}`,
   lessonDate && `/admin/day/rooms?date=${lessonDate}`,
   course && `/admin/day/attendance?course=${course}&group=1`,
+  lessonDay && `/admin/day/contacts?lesson=${lessonDay}`,
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
   '/admin/kursplanung/lehrkraefte',

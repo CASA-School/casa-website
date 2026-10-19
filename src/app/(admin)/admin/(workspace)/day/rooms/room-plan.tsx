@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Search } from '../courses/courses-table';
-import { floorName, LessonPanel, shortName } from '../lesson-panel';
+import { floorName, LessonPanel, shortName, type LessonEditing } from '../lesson-panel';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson } from '@/lib/admin/day-plan';
 import { SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
@@ -30,7 +30,19 @@ const BLOCK: Record<Session, string> = {
  * with its course and teacher; cover in amber, a missing teacher in red, a cancelled class striped. A
  * free room is plain to see. The search lights up what it finds; a click opens the class at the side.
  */
-export function RoomPlan({ day, today, lessons, rooms }: { day: string; today: string; lessons: DayLesson[]; rooms: { id: string; name: string; floor: number | null }[] }) {
+export function RoomPlan({
+  day,
+  today,
+  lessons,
+  rooms,
+  editing,
+}: {
+  day: string;
+  today: string;
+  lessons: DayLesson[];
+  rooms: { id: string; name: string; floor: number | null }[];
+  editing?: Omit<LessonEditing, 'lessons'>;
+}) {
   const { t, lang } = useWsLang();
   const [q, setQ] = useState('');
   const [openId, setOpenId] = useState<string | null>(null);
@@ -163,7 +175,7 @@ export function RoomPlan({ day, today, lessons, rooms }: { day: string; today: s
         </div>
       </div>
       {lessons.length === 0 ? <p className="border-t border-ws-line-soft px-5 py-4 text-center text-[0.86rem] text-[var(--casa-muted)]">{t('An diesem Tag ist kein Unterricht.', 'No lessons on this day.')}</p> : null}
-      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} onClose={() => setOpenId(null)} />
+      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} onClose={() => setOpenId(null)} />
     </section>
   );
 }

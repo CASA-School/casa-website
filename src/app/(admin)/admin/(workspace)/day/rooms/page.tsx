@@ -1,6 +1,6 @@
 import { DayHeader, pickDay, weekOf } from '../day-header';
 import { RoomPlan } from './room-plan';
-import { dayLessons, openTasksByDay, planRooms } from '@/lib/admin/day-plan';
+import { dayLessons, lessonChoices, openTasksByDay, planRooms } from '@/lib/admin/day-plan';
 import { canAccess } from '@/lib/admin/access';
 import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
@@ -12,11 +12,19 @@ export default async function DayRoomsPage({ searchParams }: { searchParams: Pro
   const today = berlinDay(new Date());
   const day = pickDay(params.date, today);
   const week = weekOf(day);
-  const [lessons, rooms, openByDay] = await Promise.all([dayLessons(day), planRooms(), openTasksByDay(week[0], week[6])]);
+  const canTeacher = canAccess(user, 'kursplanung', 'edit');
+  const canRoom = canAccess(user, 'rooms', 'edit');
+  const [lessons, rooms, openByDay, choices] = await Promise.all([
+    dayLessons(day),
+    planRooms(),
+    openTasksByDay(week[0], week[6]),
+    canTeacher || canRoom ? lessonChoices(day) : Promise.resolve(null),
+  ]);
+  const back = day === today ? '/admin/day/rooms' : `/admin/day/rooms?date=${day}`;
   return (
     <>
       <DayHeader view="rooms" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} t={t} lang={lang} />
-      <RoomPlan day={day} today={today} lessons={lessons} rooms={rooms} />
+      <RoomPlan day={day} today={today} lessons={lessons} rooms={rooms} editing={choices ? { choices, canTeacher, canRoom, back } : undefined} />
     </>
   );
 }

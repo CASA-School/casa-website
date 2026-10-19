@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { isTaskStatus } from '@/lib/admin/day-plan-labels';
-import { createTask, deleteTask, markPresence, setTaskStatus, updateTask, type TaskInput } from '@/lib/admin/day-plan';
+import { canAccess } from '@/lib/admin/access';
+import { changeDay } from '@/lib/admin/course-days';
+import { createTask, deleteTask, markPresence, replaceFromDay, setTaskStatus, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { pick } from '@/lib/admin/i18n';
@@ -121,4 +123,29 @@ export async function reportAbsenceAction(formData: FormData): Promise<void> {
   const result = await addAbsence(staffId, start, end, reason, actor);
   if (!result.ok) fail(from, pick(lang, result.reason));
   done(from);
+}
+
+/**
+ * A lesson's teacher or room changed from the Tagesplan's class panel (2026-10-19, Rahman: "a shortcut
+ * … with a warning popup"): on its day only — another teacher than the plan's is then a substitute —
+ * or from that day to the end of the course. The same rights as on the course's page: the teacher is
+ * Kursplanung's, the room the rooms'. Nothing changes without the confirmation.
+ */
+export async function changeLessonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const raw = String(formData.get('back') ?? '');
+  const back = raw.startsWith('/admin/day') ? raw : '/admin/day/courses';
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const dayId = String(formData.get('dayId') ?? '');
+  const what = formData.get('what') === 'room' ? 'room' : 'teacher';
+  const value = String(formData.get('value') ?? '');
+  if (!UUID.test(dayId) || (value && !UUID.test(value))) throw new Error('Invalid lesson change');
+  if (!canAccess(actor, what === 'teacher' ? 'kursplanung' : 'rooms', 'edit')) throw new Error('Not allowed');
+  const result =
+    formData.get('scope') === 'rest'
+      ? await replaceFromDay(dayId, what, value || null, actor)
+      : await changeDay(dayId, what === 'teacher' ? { teacherId: value || null } : { roomId: value || null }, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(back);
 }

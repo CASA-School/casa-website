@@ -2,7 +2,7 @@ import 'server-only';
 
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
-import { query, queryFirst } from './db';
+import { query, queryFirst, withTransaction } from './db';
 import type { Bilingual } from './i18n';
 import type { AbsenceReason } from './kursplanung/types';
 import { SHEET_DAYS, type Desk, type Session, type TaskStatus } from './day-plan-labels';
@@ -179,6 +179,7 @@ export type DayLesson = {
   roomId: string | null;
   roomName: string | null;
   floor: number | null;
+  teacherId: string | null;
   teacherName: string | null;
   substitute: boolean;
   replacedTeacherName: string | null;
@@ -212,6 +213,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
     room_id: string | null;
     room_name: string | null;
     floor: number | null;
+    teacher_id: string | null;
     teacher_name: string | null;
     is_substitute: boolean;
     replaced_teacher_name: string | null;
@@ -223,7 +225,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
             coalesce(c.session, i.session) AS session, c.level_code, c.title, coalesce(ty.name_de, ty.name) AS type_name,
             coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
             d.room_id, coalesce(r.nickname, r.name) AS room_name, r.floor,
-            ${NAME('tp')} AS teacher_name, d.is_substitute, ${NAME('rp')} AS replaced_teacher_name,
+            d.teacher_id, ${NAME('tp')} AS teacher_name, d.is_substitute, ${NAME('rp')} AS replaced_teacher_name,
             CASE WHEN d.is_substitute THEN NULL
                  ELSE (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) END AS teacher_away,
             d.cancelled, d.merged
@@ -267,6 +269,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       roomId: r.room_id,
       roomName: r.room_name,
       floor: r.floor,
+      teacherId: r.teacher_id,
       teacherName: r.teacher_name,
       substitute: r.is_substitute,
       replacedTeacherName: r.replaced_teacher_name,
@@ -618,4 +621,140 @@ export async function saveStaffDesk(staffId: string, input: StaffDesk, actor: St
   }
   await logActivity({ actor, entity: 'staff_member', entityId: staffId, action: 'staff_desk_saved', detail: { desk: input.desk, shifts: input.shifts.length } });
   return { ok: true };
+}
+
+// ------------------------------------------------------------ changing a lesson
+
+export type LessonChoices = {
+  teachers: { id: string; name: string }[];
+  rooms: { id: string; name: string }[];
+  /** The teachers away on the day, with why. */
+  away: Record<string, string>;
+};
+
+/** Who can teach and where, for changing a lesson of the day from the Tagesplan; who is away that day. */
+export async function lessonChoices(day: string): Promise<LessonChoices> {
+  const [teachers, rooms, away] = await Promise.all([
+    query<{ id: string; name: string }>(
+      `SELECT m.id, ${NAME('p')} AS name FROM staff_members m JOIN people p ON p.id = m.person_id
+        WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
+        ORDER BY p.first_name, p.last_name`
+    ),
+    query<{ id: string; name: string }>(`SELECT id, coalesce(nickname, name) AS name FROM rooms WHERE is_active AND is_bookable AND kind = 'classroom' ORDER BY name`),
+    query<{ staff_member_id: string; reason: string }>(`SELECT staff_member_id, reason FROM staff_absences WHERE on_date = $1::date`, [day]),
+  ]);
+  return { teachers, rooms, away: Object.fromEntries(away.map((a) => [a.staff_member_id, a.reason])) };
+}
+
+/**
+ * A lesson's teacher or room replaced from its day to the end of the course (2026-10-19): wherever this
+ * group still has the one it had that day, it has the new one — no longer a substitute, the weekly plan
+ * changed with it, so the days the plan makes later agree. A day called off stays off.
+ */
+export async function replaceFromDay(dayId: string, what: 'teacher' | 'room', value: string | null, actor: StaffUser): Promise<Result & { count?: number }> {
+  const day = await queryFirst<{ course_id: string; group_index: number; on_date: string; teacher_id: string | null; room_id: string | null }>(
+    `SELECT course_id, group_index, to_char(on_date, 'YYYY-MM-DD') AS on_date, teacher_id, room_id FROM course_days WHERE id = $1`,
+    [dayId]
+  );
+  if (!day) return refuse('Diesen Tag gibt es nicht mehr.', 'That day no longer exists.');
+  const old = what === 'teacher' ? day.teacher_id : day.room_id;
+  let count = 0;
+  await withTransaction(async (client) => {
+    const days =
+      what === 'teacher'
+        ? await client.query(
+            `UPDATE course_days SET teacher_id = $5, replaced_teacher_id = NULL, is_substitute = false, changed_by = $6, updated_at = timezone('utc', now())
+              WHERE course_id = $1 AND group_index = $2 AND on_date >= $3::date AND NOT cancelled AND teacher_id IS NOT DISTINCT FROM $4`,
+            [day.course_id, day.group_index, day.on_date, old, value, actor.id]
+          )
+        : await client.query(
+            `UPDATE course_days SET room_id = $5, replaced_room_id = NULL, changed_by = $6, updated_at = timezone('utc', now())
+              WHERE course_id = $1 AND group_index = $2 AND on_date >= $3::date AND NOT cancelled AND room_id IS NOT DISTINCT FROM $4`,
+            [day.course_id, day.group_index, day.on_date, old, value, actor.id]
+          );
+    count = days.rowCount ?? 0;
+    await client.query(
+      what === 'teacher'
+        ? `UPDATE course_week_plans SET teacher_id = $4, updated_by = $5, updated_at = timezone('utc', now()) WHERE course_id = $1 AND group_index = $2 AND teacher_id IS NOT DISTINCT FROM $3`
+        : `UPDATE course_week_plans SET room_id = $4, updated_by = $5, updated_at = timezone('utc', now()) WHERE course_id = $1 AND group_index = $2 AND room_id IS NOT DISTINCT FROM $3`,
+      [day.course_id, day.group_index, old, value, actor.id]
+    );
+  });
+  await logActivity({ actor, entity: 'course', entityId: day.course_id, action: what === 'teacher' ? 'course_teacher_replaced' : 'course_room_replaced', detail: { from: day.on_date, group: day.group_index, days: count } });
+  return { ok: true, count };
+}
+
+// --------------------------------------------------------- the class's list
+
+export type ClassContacts = {
+  courseId: string;
+  groupIndex: number;
+  label: string;
+  typeName: string;
+  number: string | null;
+  date: string;
+  hours: string | null;
+  roomName: string | null;
+  teacherName: string | null;
+  teacherEmail: string | null;
+  learners: { name: string; email: string | null }[];
+};
+
+/**
+ * A class's learners with their addresses, for its teacher (2026-10-19, Rahman: teachers ask for them;
+ * until the Klassenbuch gives them, the office sends this list): who is booked into the class on the
+ * lesson's day, and the teacher with their address.
+ */
+export async function classContacts(courseDayId: string): Promise<ClassContacts | null> {
+  const head = await queryFirst<{
+    course_id: string;
+    group_index: number;
+    on_date: string;
+    hours: string | null;
+    label: string;
+    type_name: string;
+    number: string | null;
+    room_name: string | null;
+    teacher_name: string | null;
+    teacher_email: string | null;
+  }>(
+    `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date,
+            to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS hours,
+            coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, coalesce(ty.name_de, ty.name) AS type_name,
+            coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number, coalesce(r.nickname, r.name) AS room_name,
+            ${NAME('tp')} AS teacher_name,
+            (SELECT e.address FROM emails e WHERE e.person_id = tp.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS teacher_email
+       FROM course_days d
+       JOIN course_day_times t ON t.id = d.id
+       JOIN courses c ON c.id = d.course_id JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
+       LEFT JOIN rooms r ON r.id = d.room_id
+       LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
+      WHERE d.id = $1`,
+    [courseDayId]
+  );
+  if (!head) return null;
+  const learners = await query<{ name: string; email: string | null }>(
+    `SELECT concat_ws(', ', p.last_name, p.first_name) AS name,
+            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+       FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
+      WHERE bp.course_id = $1 AND (bp.group_index IS NULL OR bp.group_index = $2)
+        AND bp.start_date <= $3::date AND bp.end_date >= $3::date
+        AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
+      GROUP BY p.id, p.last_name, p.first_name
+      ORDER BY p.last_name, p.first_name`,
+    [head.course_id, head.group_index, head.on_date]
+  );
+  return {
+    courseId: head.course_id,
+    groupIndex: head.group_index,
+    label: head.label,
+    typeName: head.type_name,
+    number: head.number,
+    date: head.on_date,
+    hours: head.hours,
+    roomName: head.room_name,
+    teacherName: head.teacher_name,
+    teacherEmail: head.teacher_email,
+    learners,
+  };
 }

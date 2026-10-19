@@ -2435,6 +2435,17 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   size: A4 landscape;
   margin: 9mm 9mm 10mm;
 }
+/* A class's list for its teacher (the Tagesplan, 2026-10-19): A4 upright. */
+@page contacts {
+  size: A4;
+  margin: 14mm 14mm 14mm;
+}
+@media print {
+  .ws-contacts-print {
+    display: block !important;
+    page: contacts;
+  }
+}
 @media print {
   .ws-attendance-print {
     display: block !important;
