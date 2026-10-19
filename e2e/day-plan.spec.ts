@@ -158,9 +158,11 @@ test.describe('Tagesplan', () => {
     const panel = page.getByRole('dialog');
     await expect(panel).toContainText(full);
     await panel.getByRole('link', { name: 'Anwesenheitsliste' }).click();
+    // The class's sheet for four weeks, not the day's: weeks across, the learner on a row.
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Anwesenheitsliste');
-    await expect(page.getByText('Verspätung').first()).toBeVisible();
-    await expect(page.getByText('Hausaufgaben').first()).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/day\/attendance\?course=[0-9a-f-]{36}&group=\d&from=\d{4}-\d{2}-\d{2}$/);
+    await expect(page.getByRole('columnheader', { name: /^KW \d+/ })).toHaveCount(4);
+    await expect(page.getByRole('row').filter({ hasText: full.split(' ').at(-1)! }).first()).toBeVisible();
 
     await page.goto(`/admin/day/rooms?date=${on_date}`);
     await page.getByRole('button', { name: new RegExp(`^${label.replace(/[.+]/g, '\\$&')}`) }).first().click();

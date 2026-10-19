@@ -46,7 +46,7 @@ export function LessonPanel({ lesson, day, onClose }: { lesson: DayLesson | null
         l ? (
           <span className="flex flex-wrap gap-2">
             <Link
-              href={`/admin/day/attendance?lesson=${l.id}`}
+              href={`/admin/day/attendance?course=${l.courseId}&group=${l.groupIndex}&from=${day}`}
               className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--fm-navy)] px-3.5 text-[0.84rem] font-semibold text-white transition-opacity outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4"
             >
               {Icon.statement}

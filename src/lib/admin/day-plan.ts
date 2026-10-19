@@ -5,7 +5,7 @@ import type { StaffUser } from './auth';
 import { query, queryFirst } from './db';
 import type { Bilingual } from './i18n';
 import type { AbsenceReason } from './kursplanung/types';
-import type { Desk, Session, TaskStatus } from './day-plan-labels';
+import { SHEET_DAYS, type Desk, type Session, type TaskStatus } from './day-plan-labels';
 
 /**
  * The Tagesplan (Rahman, 2026-10-19; docs/ADMIN_WORKSPACE.md §Tagesplan): FileMaker's calendar — the
@@ -479,76 +479,117 @@ export async function registerColleagues(): Promise<{ id: string; name: string }
 
 export type AttendanceSheet = {
   courseId: string;
+  groupIndex: number;
   label: string;
   typeName: string;
   number: string | null;
   roomName: string | null;
-  teacherName: string | null;
-  /** Covering for this teacher, when the day's teacher stands in. */
-  replacedTeacherName: string | null;
-  date: string;
-  startsAt: string | null;
-  endsAt: string | null;
-  learners: { name: string }[];
+  /** The teachers of the four weeks, the one with the most days first. */
+  teachers: string[];
+  /** The lesson hours, when every day of the four weeks keeps the same. */
+  hours: string | null;
+  courseStart: string;
+  courseEnd: string;
+  /** The Monday the sheet starts on; it shows `SHEET_DAYS` days from it. */
+  from: string;
+  /** The course's sheets, four weeks each, from its first lesson week to its end. */
+  blocks: string[];
+  /** The days the class is taught in the four weeks. */
+  lessons: string[];
+  /** A row per learner booked into the class in those weeks, by when they start, then by name. */
+  learners: { name: string; from: string; to: string }[];
 };
 
+const mondayOf = (iso: string) => {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+};
+const plusDays = (iso: string, n: number) => new Date(Date.parse(`${iso}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+
 /**
- * A lesson day's attendance sheet, as SchoolMan prints it (`SingleDateCourse_PresencePrint`): the
- * course, the teacher and the day; a row for each learner booked that day with Anwesenheit, Verspätung
- * and Kommentar to fill in; and boxes for what was done (Inhalt), the homework and a comment.
+ * A class's attendance sheet, as SchoolMan makes it (`MakeCoursePlan.DateBooking_Course`, then
+ * `FillRowCalendar.AllWeekDay.Presence.Loop_DateBooking`): for the course, not for a day — four weeks
+ * across, every learner booked into the class in them down, and a box on each of their lesson days;
+ * a day without a lesson for them grey, a day the school is closed marked. `from` picks the four weeks;
+ * without it, those of today when the course is running, else its first.
  */
-export async function attendanceSheet(courseDayId: string): Promise<AttendanceSheet | null> {
-  const head = await queryFirst<{
-    course_id: string;
-    group_index: number;
-    on_date: string;
-    starts_at: string | null;
-    ends_at: string | null;
-    label: string;
-    type_name: string;
-    number: string | null;
-    room_name: string | null;
-    teacher_name: string | null;
-    replaced_teacher_name: string | null;
-  }>(
-    `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date,
-            to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
-            coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, coalesce(ty.name_de, ty.name) AS type_name,
-            coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number, coalesce(r.nickname, r.name) AS room_name,
-            ${NAME('tp')} AS teacher_name, CASE WHEN d.is_substitute THEN ${NAME('rp')} END AS replaced_teacher_name
-       FROM course_days d
-       JOIN course_day_times t ON t.id = d.id
-       JOIN courses c ON c.id = d.course_id JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
-       LEFT JOIN rooms r ON r.id = d.room_id
-       LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
-       LEFT JOIN staff_members rm ON rm.id = d.replaced_teacher_id LEFT JOIN people rp ON rp.id = rm.person_id
-      WHERE d.id = $1`,
-    [courseDayId]
+export async function attendanceSheet(courseId: string, groupIndex: number, from: string | null, today: string): Promise<AttendanceSheet | null> {
+  const head = await queryFirst<{ label: string; type_name: string; number: string | null; room_name: string | null; start_date: string; end_date: string; first_day: string | null; last_day: string | null }>(
+    `SELECT coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, coalesce(ty.name_de, ty.name) AS type_name,
+            coalesce(c.filemaker_group_ids[$2], c.filemaker_course_id) AS number, coalesce(r.nickname, r.name) AS room_name,
+            to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
+            (SELECT to_char(min(on_date), 'YYYY-MM-DD') FROM course_days WHERE course_id = c.id AND group_index = $2 AND NOT cancelled) AS first_day,
+            (SELECT to_char(max(on_date), 'YYYY-MM-DD') FROM course_days WHERE course_id = c.id AND group_index = $2 AND NOT cancelled) AS last_day
+       FROM courses c JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
+       LEFT JOIN rooms r ON r.id = c.room_id
+      WHERE c.id = $1`,
+    [courseId, groupIndex]
   );
   if (!head) return null;
-  const learners = await query<{ name: string }>(
-    `SELECT concat_ws(', ', p.last_name, p.first_name) AS name
-       FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
-      WHERE bp.course_id = $1 AND (bp.group_index IS NULL OR bp.group_index = $2)
-        AND bp.start_date <= $3::date AND bp.end_date >= $3::date
-        AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
-      GROUP BY p.id, p.last_name, p.first_name
-      ORDER BY p.last_name, p.first_name`,
-    [head.course_id, head.group_index, head.on_date]
-  );
+  const first = mondayOf(head.first_day ?? head.start_date);
+  const last = head.last_day ?? head.end_date;
+  const blocks: string[] = [];
+  for (let b = first; b <= last && blocks.length < 26; b = plusDays(b, SHEET_DAYS)) blocks.push(b);
+  if (!blocks.length) blocks.push(first);
+  // The four weeks asked for, else today's when the course runs, else the first.
+  const wanted = from ? mondayOf(from) : today;
+  const start = [...blocks].reverse().find((b) => b <= wanted) ?? blocks[0];
+  const end = plusDays(start, SHEET_DAYS - 1);
+
+  const [days, learners] = await Promise.all([
+    query<{ on_date: string; teacher: string | null; room: string | null; hours: string | null }>(
+      `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, ${NAME('tp')} AS teacher, coalesce(r.nickname, r.name) AS room,
+              to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS hours
+         FROM course_days d JOIN course_day_times t ON t.id = d.id
+         LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
+         LEFT JOIN rooms r ON r.id = d.room_id
+        WHERE d.course_id = $1 AND d.group_index = $2 AND NOT d.cancelled AND d.on_date BETWEEN $3::date AND $4::date
+        ORDER BY d.on_date`,
+      [courseId, groupIndex, start, end]
+    ),
+    query<{ name: string; start_date: string; end_date: string }>(
+      `SELECT concat_ws(', ', p.last_name, p.first_name) AS name, to_char(min(bp.start_date), 'YYYY-MM-DD') AS start_date, to_char(max(bp.end_date), 'YYYY-MM-DD') AS end_date
+         FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
+        WHERE bp.course_id = $1 AND (bp.group_index IS NULL OR bp.group_index = $2)
+          AND bp.start_date <= $4::date AND bp.end_date >= $3::date
+          AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed', 'completed')
+        GROUP BY p.id, p.last_name, p.first_name
+        ORDER BY min(bp.start_date), p.last_name, p.first_name`,
+      [courseId, groupIndex, start, end]
+    ),
+  ]);
+  const most = (values: (string | null)[]) => {
+    const counts = new Map<string, number>();
+    for (const v of values) if (v) counts.set(v, (counts.get(v) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v);
+  };
+  const hours = most(days.map((d) => d.hours));
   return {
-    courseId: head.course_id,
+    courseId,
+    groupIndex,
     label: head.label,
     typeName: head.type_name,
     number: head.number,
-    roomName: head.room_name,
-    teacherName: head.teacher_name,
-    replacedTeacherName: head.replaced_teacher_name,
-    date: head.on_date,
-    startsAt: head.starts_at,
-    endsAt: head.ends_at,
-    learners,
+    roomName: most(days.map((d) => d.room))[0] ?? head.room_name,
+    teachers: most(days.map((d) => d.teacher)),
+    hours: hours[0] ?? null,
+    courseStart: head.first_day ?? head.start_date,
+    courseEnd: last,
+    from: start,
+    blocks,
+    lessons: days.map((d) => d.on_date),
+    learners: learners.map((l) => ({ name: l.name, from: l.start_date, to: l.end_date })),
   };
+}
+
+/** The class a lesson day belongs to, for a sheet opened from that day. */
+export async function lessonClass(courseDayId: string): Promise<{ courseId: string; groupIndex: number; date: string } | null> {
+  const row = await queryFirst<{ course_id: string; group_index: number; on_date: string }>(
+    `SELECT course_id, group_index, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM course_days WHERE id = $1`,
+    [courseDayId]
+  );
+  return row ? { courseId: row.course_id, groupIndex: row.group_index, date: row.on_date } : null;
 }
 
 // ------------------------------------------------------------- the desk

@@ -15,7 +15,7 @@ import { PersonPicker } from '@/components/admin/person-picker';
 import { dayRange } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
-import { Badge, Button, Card, RecordHeader } from '@/components/admin/ui';
+import { Badge, Button, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffUser } from '@/lib/admin/auth';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -188,6 +188,12 @@ export async function CoursePage({
             >
               <CourseActions courseId={id} here kursplanung={course.intensive && canAccess(user, 'kursplanung')} />
             </CourseActionsProvider>
+            {/* The class's attendance sheet, four weeks at a time, as SchoolMan prints it (the Tagesplan, 2026-10-19). */}
+            {canAccess(user, 'day') ? (
+              <ButtonLink href={`/admin/day/attendance?course=${id}&group=${group}`} variant="secondary">
+                {t('Anwesenheitsliste', 'Attendance sheet')}
+              </ButtonLink>
+            ) : null}
             {canBook ? (
               <FormDialog
                 trigger={t('Buchen', 'Book')}

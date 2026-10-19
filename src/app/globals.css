@@ -2429,6 +2429,21 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   margin: 0 0 16mm;
 }
 
+/* A class's attendance sheet (the Tagesplan, 2026-10-19): four weeks across, as SchoolMan prints it —
+   A4 in Querformat. Shown on paper through `[data-letter-print]`, like a letter. */
+@page attendance {
+  size: A4 landscape;
+  margin: 9mm 9mm 10mm;
+}
+@media print {
+  .ws-attendance-print {
+    display: block !important;
+    page: attendance;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 /* The ground's grain (--casa-grain): only on the page's own `main`, under every
    band, card and photograph. Print stays plain. */
 main.bg-\[var\(--casa-canvas\)\] {

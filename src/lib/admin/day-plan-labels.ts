@@ -39,3 +39,6 @@ export const DESK_LABELS: Record<Desk, Bilingual> = {
   front: { de: 'Rezeption', en: 'Reception' },
   back: { de: 'Büro', en: 'Office' },
 };
+
+/** How many days one attendance sheet shows: four weeks, as SchoolMan's `DateBooking_FourWeekPresence.Dynamic`. */
+export const SHEET_DAYS = 28;

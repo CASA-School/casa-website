@@ -1237,11 +1237,18 @@ day as one moves between them.
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class
   striped, a free room „frei"; a legend, how many rooms are in use, a line at now. The search lights
   up what it finds; a block opens the same side panel.
-- **Anwesenheitsliste** (`/admin/day/attendance?lesson=`). As SchoolMan prints it
-  (`SingleDateCourse_PresencePrint`, read from the DDR): one lesson day, A4 upright — Kurs, Lehrkraft
-  and Tag at the top, a row per learner booked that day with Anwesenheit, Verspätung and Kommentar,
-  a few blank rows, then boxes for Inhalt, Hausaufgaben and Kommentar. Printed or saved as a PDF on
-  its own, as a letter is.
+- **Anwesenheitsliste** (`/admin/day/attendance?course=&group=&from=`). For the class, not the day
+  (Rahman: „not daily, it is for the course … Querformat"), as SchoolMan makes it
+  (`MakeCoursePlan.DateBooking_Course` and `FillRowCalendar.AllWeekDay.Presence.Loop_DateBooking`
+  onto `DateBooking_FourWeekPresence.Dynamic`, read from the DDR): A4 across, four weeks at a time —
+  the course's sheets are its four-week blocks from its first lesson week, chosen above the sheet,
+  today's by default. The head: course and number, time, room, the teachers of those weeks, the
+  period and „Woche 5–8 von 8". Then a row per learner booked into the class in those weeks (by when
+  they start, then by name; from and until when inside the weeks) and a column per day under its
+  week (KW), the weekends narrow and in red: a learner's lesson day is an empty box, a day without a
+  lesson for them grey, a day the school is closed hatched; a few blank rows, a legend and the
+  teacher's signature. Opened from a class in the Tagesplan (its day's four weeks) and from the
+  course's page; printed or saved as a PDF on its own, `@page attendance` in globals.css.
 
 **From SchoolMan.** `scripts/filemaker/read_day.py | node scripts/filemaker/import-day.mjs`
 (read-only, counts only): the calendar's WorkFlow entries from 30 days back to 180 ahead

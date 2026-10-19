@@ -98,7 +98,7 @@ const routes = [
   '/admin/day/rooms',
   lessonDate && `/admin/day/courses?date=${lessonDate}`,
   lessonDate && `/admin/day/rooms?date=${lessonDate}`,
-  lessonDay && `/admin/day/attendance?lesson=${lessonDay}`,
+  course && `/admin/day/attendance?course=${course}&group=1`,
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
   '/admin/kursplanung/lehrkraefte',
