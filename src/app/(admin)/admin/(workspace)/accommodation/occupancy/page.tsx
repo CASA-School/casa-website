@@ -7,7 +7,9 @@ import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
 import { wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { flatOccupancy } from '@/lib/admin/occupancy';
+import { canAccess } from '@/lib/admin/access';
+import { allFlatDuties } from '@/lib/admin/cleaning';
+import { flatOccupancy, placeableStays } from '@/lib/admin/occupancy';
 import { cn } from '@/lib/utils';
 
 /**
@@ -20,13 +22,19 @@ const noon = (iso: string) => new Date(`${iso}T12:00:00Z`);
 const plus = (iso: string, n: number) => new Date(noon(iso).getTime() + n * 86_400_000).toISOString().slice(0, 10);
 const mondayOf = (iso: string) => plus(iso, -((noon(iso).getUTCDay() + 6) % 7));
 
-export default async function OccupancyPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
-  const [params, , { t, lang }] = await Promise.all([searchParams, requireModule('accommodation'), getI18n()]);
+export default async function OccupancyPage({ searchParams }: { searchParams: Promise<{ date?: string; error?: string }> }) {
+  const [params, user, { t, lang }] = await Promise.all([searchParams, requireModule('accommodation'), getI18n()]);
   const today = berlinDay(new Date());
   const asked = params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date) && !Number.isNaN(noon(params.date).getTime()) ? params.date : today;
   const from = mondayOf(asked);
   const to = plus(from, 27);
-  const { flats, stays, holds } = await flatOccupancy(from, to);
+  const canPlace = canAccess(user, 'accommodation', 'edit');
+  // Learners still without a room: those whose stay runs into these weeks or the next two months.
+  const [{ flats, stays, holds }, placeable, duties] = await Promise.all([
+    flatOccupancy(from, to),
+    canPlace ? placeableStays(from, plus(to, 60)) : Promise.resolve([]),
+    allFlatDuties(),
+  ]);
   const thisWeek = mondayOf(today);
   const href = (monday: string) => (monday === thisWeek ? PATH : `${PATH}?date=${monday}`);
   const day = (iso: string, options: Intl.DateTimeFormatOptions) => noon(iso).toLocaleDateString(wsLocale(lang), { ...options, timeZone: 'UTC' });
@@ -64,7 +72,22 @@ export default async function OccupancyPage({ searchParams }: { searchParams: Pr
           <DayJump day={from} today={today} path={PATH} />
         </nav>
       </header>
-      <OccupancyPlan from={from} today={today} flats={flats} stays={stays} holds={holds} />
+      {params.error ? (
+        <p role="alert" className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {params.error}
+        </p>
+      ) : null}
+      <OccupancyPlan
+        from={from}
+        today={today}
+        flats={flats}
+        stays={stays}
+        holds={holds}
+        placeable={placeable}
+        duties={duties}
+        canPlace={canPlace}
+        back={from === thisWeek ? PATH : `${PATH}?date=${from}`}
+      />
     </>
   );
 }

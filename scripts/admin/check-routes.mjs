@@ -139,6 +139,8 @@ const routes = [
   ledger && `/admin/bookings/${ledger}`,
   publisher && `/admin/organisations/${publisher}`,
   flat && `/admin/accommodation/${flat}`,
+  flat && `/admin/accommodation/${flat}?tab=cleaning`,
+  flat && `/admin/accommodation/${flat}/cleaning`,
   keyHolder && `/admin/staff/${keyHolder}`,
   programmeGroup && `/admin/groups/${programmeGroup}`,
   '/admin/accommodation/occupancy',

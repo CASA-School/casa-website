@@ -19,7 +19,7 @@ async function readStdin() {
 
 const data = await readStdin();
 const client = await connect();
-const count = { programme: 0, services: 0, internships: 0, publishersMade: 0, orders: 0, lines: 0, keys: 0, jobs: 0, weeks: 0, notHere: 0 };
+const count = { programme: 0, services: 0, internships: 0, publishersMade: 0, orders: 0, lines: 0, keys: 0, jobs: 0, weeks: 0, duties: 0, notHere: 0 };
 
 try {
   await client.query('BEGIN');
@@ -151,6 +151,23 @@ try {
     );
     count.weeks++;
   }
+  // A flat's task lists become its Putzplan's duties (0072), once: the duties are the workspace's after that.
+  count.duties = (
+    await client.query(
+      `INSERT INTO cleaning_duties (accommodation_id, position, name_de, name_en, tasks, filemaker_ref)
+       SELECT accommodation_id, row_number() OVER (PARTITION BY accommodation_id ORDER BY filemaker_ref)::smallint,
+              CASE WHEN bool_or(job_de ILIKE '%dusch%') THEN 'Bad' WHEN bool_or(job_de ILIKE '%toilette%') THEN 'Gäste-WC'
+                   WHEN bool_or(job_de ILIKE '%flur%') THEN 'Flur & Müll' WHEN bool_or(job_de ILIKE '%herd%') THEN 'Küche 1' ELSE 'Küche 2' END,
+              CASE WHEN bool_or(job_de ILIKE '%dusch%') THEN 'Bathroom' WHEN bool_or(job_de ILIKE '%toilette%') THEN 'Guest toilet'
+                   WHEN bool_or(job_de ILIKE '%flur%') THEN 'Corridor & rubbish' WHEN bool_or(job_de ILIKE '%herd%') THEN 'Kitchen 1' ELSE 'Kitchen 2' END,
+              array_agg(btrim(regexp_replace(job_de, '\\s+', ' ', 'g')) ORDER BY filemaker_id), filemaker_ref
+         FROM cleaning_jobs j
+        WHERE filemaker_ref IS NOT NULL AND NOT EXISTS (SELECT 1 FROM cleaning_duties d WHERE d.accommodation_id = j.accommodation_id)
+        GROUP BY accommodation_id, filemaker_ref
+       ON CONFLICT DO NOTHING`
+    )
+  ).rowCount;
+  await client.query(`UPDATE accommodations SET cleaning_from = DATE '2026-01-05' WHERE cleaning_from IS NULL AND id IN (SELECT accommodation_id FROM cleaning_duties)`);
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -162,5 +179,5 @@ try {
 
 console.log(
   `programme ${count.programme} · services ${count.services} · internship places ${count.internships} · book orders ${count.orders} (${count.lines} lines, ` +
-    `${count.publishersMade} publishers new) · keys ${count.keys} · cleaning jobs ${count.jobs}, weeks ${count.weeks} · ${count.notHere} not here`
+    `${count.publishersMade} publishers new) · keys ${count.keys} · cleaning jobs ${count.jobs}, weeks ${count.weeks}, duties made ${count.duties} · ${count.notHere} not here`
 );

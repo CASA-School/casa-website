@@ -664,34 +664,3 @@ export async function placePayouts(id: string): Promise<PlacePayout[]> {
   return rows.map((r) => ({ id: r.id, paidOn: r.paid_on, amount: Number(r.amount), bookingId: r.booking_id, bookingNumber: r.number, personName: r.person_name, note: r.note }));
 }
 
-export type CleaningPlan = {
-  /** The weeks from this one on: each room of the flat with its job's number. */
-  weeks: { from: string; to: string | null; rooms: { room: string; job: number | null }[] }[];
-  /** The task lists, as SchoolMan groups them. */
-  tasks: { group: string; items: string[] }[];
-};
-
-/** A CASA flat's cleaning plan (0068/0069): this week and the next three, and the task lists. */
-export async function placeCleaning(id: string): Promise<CleaningPlan | null> {
-  const [weeks, tasks] = await Promise.all([
-    query<{ starts_on: string; ends_on: string | null; room: string | null; job_number: number | null }>(
-      `SELECT to_char(w.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(w.ends_on, 'YYYY-MM-DD') AS ends_on, r.name AS room, w.job_number
-         FROM cleaning_weeks w LEFT JOIN accommodation_rooms r ON r.id = w.room_id
-        WHERE w.accommodation_id = $1 AND w.ends_on >= current_date
-          AND w.starts_on < current_date + 28
-        ORDER BY w.starts_on, r.name NULLS LAST`,
-      [id]
-    ),
-    query<{ filemaker_ref: string | null; job_de: string }>(`SELECT filemaker_ref, job_de FROM cleaning_jobs WHERE accommodation_id = $1 ORDER BY filemaker_ref, filemaker_id`, [id]),
-  ]);
-  if (!weeks.length && !tasks.length) return null;
-  const byWeek = new Map<string, CleaningPlan['weeks'][number]>();
-  for (const w of weeks) {
-    const week = byWeek.get(w.starts_on) ?? { from: w.starts_on, to: w.ends_on, rooms: [] };
-    week.rooms.push({ room: w.room ?? '—', job: w.job_number });
-    byWeek.set(w.starts_on, week);
-  }
-  const groups = new Map<string, string[]>();
-  for (const t of tasks) groups.set(t.filemaker_ref ?? '', [...(groups.get(t.filemaker_ref ?? '') ?? []), t.job_de]);
-  return { weeks: [...byWeek.values()], tasks: [...groups.entries()].map(([group, items]) => ({ group, items })) };
-}

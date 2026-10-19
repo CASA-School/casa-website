@@ -1277,7 +1277,39 @@ amber. SchoolMan writes an extension as a stay of its own: the same learner in t
 within two days is one bar (`occupancy.ts`). A stay without a room shows on its flat's „Ohne
 Zimmer" row. The search lights up a learner or a group; a bar opens at the side — arrival,
 departure, nights, booking, course, room, address and phone, and the way to the booking and the
-person. Placing a stay stays on Aufenthalte.
+person, and the deposit (Kaution) charged on the booking.
+
+**Placing from the plan (Rahman: „let them place a stay from a free bed").** A bed's empty line is a
+button: clicked on a day, a side panel says which room is free from when until when and lists every
+learner still without a room in a flat (`placeableStays`: a stay in a CASA flat without a room, or of
+the type „CASA – WG" without a place) — those whose stay fits the free time first and marked „passt",
+then the nearest arrivals — each with „Einziehen". A stay's panel has „Zimmer wechseln", every active
+room of the flats to choose. Both post `placeFromPlanAction`, which places the stay as Aufenthalte does
+(`placeStay`) once the room has a bed for every night of it: the most others there on any night, the
+learner's own other stays left out, against its beds (`roomHasBed`); otherwise it says so. A flat's
+band opens the flat at the side: who lives in each room now and until when, who cleans what this week,
+who arrives and leaves in the next two weeks, and the way to the flat and its Putzplan.
+
+**The Putzplan (migration 0072; Rahman: „they have a Putzplan and so on, see what we are missing").**
+SchoolMan keeps a row per room per week pointing at a numbered job, and the numbers point at other
+flats' jobs (0069), so its weeks are not carried on. A flat here has its **duties** in order —
+„Bad", „Küche 1", „Flur & Müll" … (`cleaning_duties`: the name in German and English, the tasks, one a
+line) — and the Monday the plan counts from (`accommodations.cleaning_from`). The weeks are worked out
+(`cleaning-plan.ts`, tested): each week every room, in the order of the rooms' names, moves one duty
+on; with more rooms than duties a room has a free week in turn. Nothing per week is stored, so the
+plan never runs out. 0072 made the duties of the three flats SchoolMan had a plan for out of its task
+lists, named as the flats name them; `import-rest.mjs` does the same for a flat read across later.
+
+The flat's „Putzplan" tab: the next four weeks — each room, who lives there that week, and their duty
+in its colour — then the duties as cards with their tasks, to change, move earlier or later, or delete
+(with the confirmation). „Ab dieser Woche neu beginnen" restarts the rotation. A flat without a plan
+adds a duty or takes over another flat's plan. „Drucken" opens the plan for the flat's notice board
+(`/admin/accommodation/[id]/cleaning`): A4 across, in German and English, four weeks with who cleans
+what and every duty's tasks as boxes to tick.
+
+**What SchoolMan has for the flats and is not here, on purpose.** Its keys (`Key`) are CASA's own —
+the doors at Am Dobben and the BGS school, on Mitarbeitende → Schlüssel — not the flats'. Its
+complaints (`Complaint`, 23) are about courses. Neither belongs to a flat.
 
 ## Organisations (2026-10-18, migration 0057)
 

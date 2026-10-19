@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { RecordFoot } from '../../bookings/record-foot';
+import { CleaningTab } from './cleaning-tab';
 import { EditPlaceForm, MemberForm, RoomForm } from '../accommodation-forms';
 import { deletePlaceAction, removeMemberAction, removeRoomAction, setPlaceActiveAction } from '../actions';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
@@ -17,7 +18,6 @@ import {
   getPlace,
   placeDeletable,
   placeMembers,
-  placeCleaning,
   placePayouts,
   placeReservations,
   placeRooms,
@@ -26,6 +26,8 @@ import {
   type PlaceStay,
 } from '@/lib/admin/accommodation';
 import { ACCOMMODATION_KIND_LABELS, MEMBER_ROLE_LABELS } from '@/lib/admin/accommodation-labels';
+import { cleaningTemplates, flatCleaning } from '@/lib/admin/cleaning';
+import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -53,21 +55,23 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const canDelete = canAccess(user, 'accommodation', 'full');
   const seesBookings = canAccess(user, 'bookings');
   const seesGroups = canAccess(user, 'groups');
+  const today = berlinDay(new Date());
+  const plus = (iso: string, n: number) => new Date(Date.parse(`${iso}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 
-  const [members, rooms, stays, reservations, payouts, letters, cleaning, notes, activity, types, deletable] = await Promise.all([
+  const [members, rooms, stays, reservations, payouts, letters, cleaning, templates, notes, activity, types, deletable] = await Promise.all([
     placeMembers(id),
     placeRooms(id),
     placeStays(id),
     placeReservations(id),
     seesBookings ? placePayouts(id) : Promise.resolve([]),
     seesBookings ? lettersForPlace(id) : Promise.resolve([]),
-    place.kind === 'casa_flat' ? placeCleaning(id) : Promise.resolve(null),
+    place.kind === 'casa_flat' ? flatCleaning(id, today, plus(today, 34)) : Promise.resolve(null),
+    place.kind === 'casa_flat' && canEdit ? cleaningTemplates(id) : Promise.resolve([]),
     listNotes('accommodation', id),
     activityFor('accommodation', id, 50),
     canEdit ? roomTypes() : Promise.resolve([]),
     canDelete ? placeDeletable(id) : Promise.resolve(false),
   ]);
-  const today = new Date().toISOString().slice(0, 10);
   const stayingNow = stays.current.filter((s) => s.from <= today);
   const coming = stays.current.filter((s) => s.from > today);
   const isFamily = place.kind === 'host_family';
@@ -81,7 +85,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     ...(reservations.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: reservations.length }] : []),
     ...(payouts.length ? [{ id: 'rent', label: t('Miete', 'Rent'), icon: Icon.money, count: payouts.length }] : []),
     ...(letters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
-    ...(cleaning ? [{ id: 'cleaning', label: t('Putzplan', 'Cleaning'), icon: Icon.calendar }] : []),
+    ...(cleaning ? [{ id: 'cleaning', label: t('Putzplan', 'Cleaning'), icon: Icon.calendar, count: cleaning.duties.length || undefined }] : []),
   ];
   const thisYear = String(new Date().getFullYear());
   const rentThisYear = payouts.filter((p) => p.paidOn?.startsWith(thisYear)).reduce((s, p) => s + p.amount, 0);
@@ -367,36 +371,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
 
       {cleaning ? (
         <RecordTabPanel id="cleaning">
-          <div className="space-y-4">
-            <Card title={t('Diese und die nächsten Wochen', 'This week and the next')} icon={Icon.calendar} tint="blue">
-              {cleaning.weeks.length ? (
-                <ul className="-my-1 divide-y divide-ws-line-soft">
-                  {cleaning.weeks.map((w) => (
-                    <li key={w.from} className="py-2 text-[0.86rem]">
-                      <span className="block font-semibold tabular-nums text-[var(--casa-ink)]">{dayRange(w.from, w.to ?? w.from, lang)}</span>
-                      <span className="text-[var(--casa-muted)]">
-                        {w.rooms.map((r) => t(`${r.room}: Aufgabe ${r.job ?? '?'}`, `${r.room}: job ${r.job ?? '?'}`)).join(' · ')}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-[var(--casa-muted)]">{t('Für die nächsten Wochen ist nichts geplant.', 'Nothing planned for the next weeks.')}</p>
-              )}
-            </Card>
-            {cleaning.tasks.length ? (
-              <Card title={t('Aufgaben', 'Jobs')} icon={Icon.check} tint="green">
-                <ol className="-my-1 space-y-3">
-                  {cleaning.tasks.map((g, i) => (
-                    <li key={g.group} className="text-[0.86rem]">
-                      <span className="font-semibold text-[var(--casa-ink)]">{t(`Liste ${i + 1}`, `List ${i + 1}`)}</span>
-                      <span className="block text-[var(--casa-muted)]">{g.items.join(' · ')}</span>
-                    </li>
-                  ))}
-                </ol>
-              </Card>
-            ) : null}
-          </div>
+          <CleaningTab placeId={id} plan={cleaning} templates={templates} today={today} canEdit={canEdit} canDelete={canDelete} t={t} lang={lang} />
         </RecordTabPanel>
       ) : null}
 

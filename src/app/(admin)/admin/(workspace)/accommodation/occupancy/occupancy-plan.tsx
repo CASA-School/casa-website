@@ -1,21 +1,17 @@
 'use client';
 
-import Link from 'next/link';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type MouseEvent, type ReactNode } from 'react';
 
+import { between, FlatPanel, fmt, FreeBedPanel, StayPanel, type FlatDuties, type FreeBed, type Item } from './occupancy-panels';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
-import { Avatar } from '@/components/admin/list';
-import { SidePanel } from '@/components/admin/side-panel';
-import { pick, wsLocale, type WsLang } from '@/lib/admin/i18n';
-import type { OccupancyFlat, OccupancyHold, OccupancyRoom, OccupancyStay } from '@/lib/admin/occupancy';
+import { pick, type WsLang } from '@/lib/admin/i18n';
+import type { OccupancyFlat, OccupancyHold, OccupancyRoom, OccupancyStay, PlaceableStay } from '@/lib/admin/occupancy';
 import { cn } from '@/lib/utils';
 
 const DAYS = 28;
 const noon = (iso: string) => new Date(`${iso}T12:00:00Z`);
 const plus = (iso: string, n: number) => new Date(noon(iso).getTime() + n * 86_400_000).toISOString().slice(0, 10);
-const between = (a: string, b: string) => Math.round((noon(b).getTime() - noon(a).getTime()) / 86_400_000);
-const fmt = (iso: string, lang: WsLang, options: Intl.DateTimeFormatOptions) => noon(iso).toLocaleDateString(wsLocale(lang), { ...options, timeZone: 'UTC' });
 const weekend = (iso: string) => noon(iso).getUTCDay() % 6 === 0;
 function isoWeek(iso: string): number {
   const d = noon(iso);
@@ -25,7 +21,6 @@ function isoWeek(iso: string): number {
   return 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 86_400_000));
 }
 
-type Item = { kind: 'stay'; stay: OccupancyStay } | { kind: 'hold'; hold: OccupancyHold };
 const itemFrom = (i: Item) => (i.kind === 'stay' ? i.stay.from : i.hold.from);
 const itemTo = (i: Item) => (i.kind === 'stay' ? i.stay.to : i.hold.to);
 
@@ -34,19 +29,46 @@ const itemTo = (i: Item) => (i.kind === 'stay' ? i.stay.to : i.hold.to);
  * interface [to the Raumplan] for CASA WGs"). A band for each flat, a row for each of its rooms with a
  * line for each bed, the days across; a learner's stay runs from the middle of the day they arrive to
  * the middle of the day they leave, so one leaving and one arriving on the same day share it. Living
- * there now in teal, still to come in blue, gone in grey, a room held for a group hatched in amber. A
- * free bed is an empty line. The search lights up a learner; a stay opens at the side.
+ * there now in teal, still to come in blue, gone in grey, a room held for a group hatched in amber.
+ *
+ * Everything opens at the side: a stay (with its deposit, and another room to move to), a free bed —
+ * an empty line, clicked on its day — with the learners still without a room to move in, and a flat's
+ * band with who lives there, this week's Putzplan and who comes and goes. The search lights up a learner.
  */
-export function OccupancyPlan({ from, today, flats, stays, holds }: { from: string; today: string; flats: OccupancyFlat[]; stays: OccupancyStay[]; holds: OccupancyHold[] }) {
+export function OccupancyPlan({
+  from,
+  today,
+  flats,
+  stays,
+  holds,
+  placeable,
+  duties,
+  canPlace,
+  back,
+}: {
+  from: string;
+  today: string;
+  flats: OccupancyFlat[];
+  stays: OccupancyStay[];
+  holds: OccupancyHold[];
+  placeable: PlaceableStay[];
+  duties: FlatDuties;
+  canPlace: boolean;
+  back: string;
+}) {
   const { t, lang } = useWsLang();
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<Item | null>(null);
+  const [bed, setBed] = useState<FreeBed | null>(null);
+  const [flatOpen, setFlatOpen] = useState<OccupancyFlat | null>(null);
   const needle = q.trim().toLowerCase();
   const days = useMemo(() => Array.from({ length: DAYS }, (_, i) => plus(from, i)), [from]);
   const last = days[DAYS - 1];
   const todayIndex = today >= from && today <= last ? between(from, today) : -1;
-  const roomsTotal = flats.reduce((n, f) => n + f.rooms.length, 0);
+  const roomsTotal = flats.reduce((n, f) => n + f.rooms.filter((r) => r.active).length, 0);
   const occupiedToday = new Set(stays.filter((s) => s.roomId && s.from <= today && s.to > today).map((s) => s.roomId)).size;
+  // Every other room a shade darker, across the flats: the eye keeps to its row.
+  const order = new Map(flats.flatMap((f) => f.rooms).map((r, i) => [r.id, i]));
 
   // A stay's span on the days: from the middle of its first to the middle of its last, cut at the edges.
   const span = (a: string, b: string) => {
@@ -69,11 +91,20 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
     return lines;
   };
 
+  // A click on a bed's empty line: the day under the pointer, and until when that line stays free.
+  const openBed = (e: MouseEvent<HTMLButtonElement>, flat: OccupancyFlat, room: OccupancyRoom, line: Item[]) => {
+    const box = e.currentTarget.getBoundingClientRect();
+    const index = e.clientX ? Math.min(DAYS - 1, Math.max(0, Math.floor(((e.clientX - box.left) / box.width) * DAYS))) : Math.max(0, todayIndex);
+    const day = days[index] < today ? today : days[index];
+    const next = line.map(itemFrom).filter((d) => d > day).sort()[0] ?? null;
+    setBed({ flat, room, day, until: next });
+  };
+
   const block = (item: Item) => {
     const s = span(itemFrom(item), itemTo(item));
     const stay = item.kind === 'stay' ? item.stay : null;
     const state = stay ? (stay.to <= today ? 'gone' : stay.from > today ? 'coming' : 'here') : 'hold';
-    const label = stay ? stay.name : `${item.kind === 'hold' ? (item.hold.groupName ?? t('Gruppe', 'Group')) : ''}`;
+    const label = stay ? stay.name : item.kind === 'hold' ? (item.hold.groupName ?? t('Gruppe', 'Group')) : '';
     return (
       <button
         key={stay ? stay.id : item.kind === 'hold' ? item.hold.id : ''}
@@ -100,17 +131,26 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
     );
   };
 
-  const roomRow = (key: string, label: ReactNode, sub: string | null, items: Item[], beds: number | null, zebra: boolean) => {
-    const lines = lanes(items, beds);
+  const roomRow = (flat: OccupancyFlat, room: OccupancyRoom | null, items: Item[], zebra: boolean) => {
+    const lines = lanes(items, room?.beds ?? 1);
     return (
-      <div key={key} className={cn('grid grid-cols-[13rem_1fr] border-b border-ws-line-soft last:border-b-0', zebra ? 'bg-[#fafbfd]' : 'bg-white')}>
+      <div key={room?.id ?? `${flat.id}-none`} className={cn('grid grid-cols-[13rem_1fr] border-b border-ws-line-soft last:border-b-0', zebra ? 'bg-[#fafbfd]' : 'bg-white')}>
         <div className="sticky left-0 z-20 flex flex-col justify-center border-r border-ws-line bg-inherit px-4 py-1.5">
-          <span className="truncate text-[0.86rem] font-bold text-[var(--casa-ink)]">{label}</span>
-          {sub ? <span className="truncate text-[0.72rem] text-[var(--casa-muted)]">{sub}</span> : null}
+          <span className="truncate text-[0.86rem] font-bold text-[var(--casa-ink)]">{room?.name ?? t('Ohne Zimmer', 'No room')}</span>
+          {room ? <span className="truncate text-[0.72rem] text-[var(--casa-muted)]">{roomLine(room, lang, t)}</span> : null}
         </div>
         <div className="py-[3px]">
           {lines.map((line, i) => (
-            <div key={i} className={cn('relative h-[30px]', i > 0 && 'border-t border-dashed border-[#e7ebf1]')}>
+            <div key={i} className={cn('group/bed relative h-[30px]', i > 0 && 'border-t border-dashed border-[#e7ebf1]')}>
+              {/* The bed itself, under its stays: clicked where it is free, it takes a learner. */}
+              {canPlace && room && room.active ? (
+                <button
+                  type="button"
+                  onClick={(e) => openBed(e, flat, room, line)}
+                  aria-label={t(`${flat.name}, ${room.name}, Bett ${i + 1}: jemanden einziehen lassen`, `${flat.name}, ${room.name}, bed ${i + 1}: move someone in`)}
+                  className="absolute inset-0 z-0 cursor-cell rounded-md outline-none hover:bg-[#e1f4f0]/50 focus-visible:ring-2 focus-visible:ring-[#0f8a7a]/40"
+                />
+              ) : null}
               {line.map(block)}
             </div>
           ))}
@@ -119,8 +159,6 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
     );
   };
 
-  // Every other room a shade darker, across the flats: the eye keeps to its row.
-  const order = new Map(flats.flatMap((f) => f.rooms).map((r, i) => [r.id, i]));
   return (
     <section className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-line px-4 py-3">
@@ -130,6 +168,11 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
           <Legend swatch="border border-[#c4cbd6] bg-[#eef1f5]">{t('Abgereist', 'Left')}</Legend>
           <Legend swatch="border border-[#d99a00] bg-[repeating-linear-gradient(135deg,#fff4d9_0_3px,#ffe9b3_3px_6px)]">{t('Für eine Gruppe reserviert', 'Held for a group')}</Legend>
           {todayIndex >= 0 ? <li className="text-[var(--casa-ink)]">{t(`Heute ${occupiedToday} von ${roomsTotal} Zimmern belegt`, `Today ${occupiedToday} of ${roomsTotal} rooms taken`)}</li> : null}
+          {canPlace && placeable.length ? (
+            <li className="inline-flex h-6 items-center rounded-full bg-[#fff2d6] px-2 text-[#6e4700]">
+              {placeable.length === 1 ? t('1 wartet auf ein Zimmer', '1 waiting for a room') : t(`${placeable.length} warten auf ein Zimmer`, `${placeable.length} waiting for a room`)}
+            </li>
+          ) : null}
         </ul>
         <label className="relative flex items-center">
           <span aria-hidden="true" className="pointer-events-none absolute left-3 text-[var(--casa-muted)] [&_svg]:size-4">
@@ -193,27 +236,31 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
                 ...holds.filter((h) => h.flatId === flat.id && h.roomId === roomId).map((hold): Item => ({ kind: 'hold', hold })),
               ];
               const homeless = own(null);
-              const freeToday = flat.rooms.filter((r) => !stays.some((s) => s.roomId === r.id && s.from <= today && s.to > today)).length;
+              const freeToday = flat.rooms.filter((r) => r.active && !stays.some((s) => s.roomId === r.id && s.from <= today && s.to > today)).length;
               return (
                 <div key={flat.id} className="relative">
-                  <div className="grid grid-cols-[13rem_1fr] border-b border-ws-line bg-[#f2f5f9]">
-                    <div className="sticky left-0 z-20 border-r border-ws-line bg-[#f2f5f9] px-4 py-2">
+                  {/* The flat's band: it opens the flat at the side. */}
+                  <button type="button" onClick={() => setFlatOpen(flat)} className="group/flat grid w-full grid-cols-[13rem_1fr] border-b border-ws-line bg-[#f2f5f9] text-left outline-none hover:bg-[#eaeff6] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--casa-blue)]/40">
+                    <span className="sticky left-0 z-20 border-r border-ws-line bg-inherit px-4 py-2">
                       <span className="flex items-center gap-2 text-[0.86rem] font-extrabold text-[var(--casa-ink)] [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]">
                         {Icon.home}
-                        <span className="truncate">{flat.name}</span>
+                        <span className="truncate group-hover/flat:underline">{flat.name}</span>
                       </span>
-                    </div>
-                    <div className="flex items-center gap-3 px-3 text-[0.76rem] text-[var(--casa-muted)]">
+                    </span>
+                    <span className="flex items-center gap-3 px-3 text-[0.76rem] text-[var(--casa-muted)]">
                       {flat.address ? <span className="truncate">{flat.address}</span> : null}
                       {todayIndex >= 0 ? (
                         <span className={cn('ml-auto shrink-0 font-semibold', freeToday ? 'text-[#0b6b5e]' : 'text-[var(--casa-muted)]')}>
                           {freeToday === 0 ? t('heute voll', 'full today') : freeToday === 1 ? t('heute 1 Zimmer frei', '1 room free today') : t(`heute ${freeToday} Zimmer frei`, `${freeToday} rooms free today`)}
                         </span>
                       ) : null}
-                    </div>
-                  </div>
-                  {flat.rooms.map((room) => roomRow(room.id, room.name, roomLine(room, lang, t), own(room.id), room.beds, (order.get(room.id) ?? 0) % 2 === 1))}
-                  {homeless.length ? roomRow(`${flat.id}-none`, t('Ohne Zimmer', 'No room'), null, homeless, 1, false) : null}
+                      <span aria-hidden="true" className={cn('shrink-0 [&_svg]:size-4', todayIndex < 0 && 'ml-auto')}>
+                        {Icon.chevronRight}
+                      </span>
+                    </span>
+                  </button>
+                  {flat.rooms.map((room) => roomRow(flat, room, own(room.id), (order.get(room.id) ?? 0) % 2 === 1))}
+                  {homeless.length ? roomRow(flat, null, homeless, false) : null}
                 </div>
               );
             })}
@@ -221,7 +268,9 @@ export function OccupancyPlan({ from, today, flats, stays, holds }: { from: stri
         </div>
       </div>
 
-      <StayPanel item={open} lang={lang} flats={flats} onClose={() => setOpen(null)} />
+      <StayPanel item={open} lang={lang} flats={flats} canPlace={canPlace} back={back} onClose={() => setOpen(null)} />
+      <FreeBedPanel bed={bed} candidates={placeable} lang={lang} back={back} onClose={() => setBed(null)} />
+      <FlatPanel flat={flatOpen} stays={stays} duties={duties} today={today} lang={lang} onClose={() => setFlatOpen(null)} />
     </section>
   );
 }
@@ -236,84 +285,5 @@ function Legend({ swatch, children }: { swatch: string; children: ReactNode }) {
       <span aria-hidden="true" className={cn('inline-block h-3.5 w-5 rounded-[4px]', swatch)} />
       {children}
     </li>
-  );
-}
-
-/** A stay — or a room held for a group — at the side: who, where, from when to when, and the way on. */
-function StayPanel({ item, lang, flats, onClose }: { item: Item | null; lang: WsLang; flats: OccupancyFlat[]; onClose: () => void }) {
-  const t = (de: string, en: string) => (lang === 'en' ? en : de);
-  const flatId = item ? (item.kind === 'stay' ? item.stay.flatId : item.hold.flatId) : null;
-  const roomId = item ? (item.kind === 'stay' ? item.stay.roomId : item.hold.roomId) : null;
-  const flat = flats.find((f) => f.id === flatId);
-  const room = flat?.rooms.find((r) => r.id === roomId);
-  const where = [flat?.name, room?.name ?? t('ohne Zimmer', 'no room')].filter(Boolean).join(' · ');
-  const longDay = (iso: string) => fmt(iso, lang, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-  const stay = item?.kind === 'stay' ? item.stay : null;
-  const hold = item?.kind === 'hold' ? item.hold : null;
-  const link = 'inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[0.84rem] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4';
-  return (
-    <SidePanel
-      open={item !== null}
-      onOpenChange={(o) => !o && onClose()}
-      icon={stay ? Icon.home : Icon.group}
-      tint={stay ? 'ink' : 'sun'}
-      title={stay ? stay.name : (hold?.groupName ?? t('Für eine Gruppe reserviert', 'Held for a group'))}
-      subtitle={where}
-      footer={
-        stay ? (
-          <span className="flex flex-wrap gap-2">
-            <Link href={`/admin/bookings/${stay.bookingId}`} className={cn(link, 'bg-[var(--fm-navy)] text-white hover:opacity-90')}>
-              {Icon.bookings}
-              {t('Zur Buchung', 'Open the booking')}
-            </Link>
-            <Link href={`/admin/people/${stay.personId}`} className={cn(link, 'bg-white text-[var(--casa-ink)] ring-1 ring-ws-line ring-inset hover:bg-ws-sunk')}>
-              {Icon.person}
-              {t('Zur Person', 'Open the person')}
-            </Link>
-          </span>
-        ) : hold?.groupId ? (
-          <Link href={`/admin/groups/${hold.groupId}`} className={cn(link, 'bg-[var(--fm-navy)] text-white hover:opacity-90')}>
-            {Icon.group}
-            {t('Zur Gruppe', 'Open the group')}
-          </Link>
-        ) : null
-      }
-    >
-      {item ? (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-5 px-6 py-5">
-          <Fact label={t('Anreise', 'Arrival')}>{longDay(stay?.from ?? hold!.from)}</Fact>
-          <Fact label={t('Abreise', 'Departure')}>
-            {longDay(stay?.to ?? hold!.to)}
-            {stay?.departureConfirmed ? <span className="mt-0.5 block text-[0.78rem] font-semibold text-[#0b6b5e]">{t('Abreise bestätigt', 'Departure confirmed')}</span> : null}
-          </Fact>
-          <Fact label={t('Nächte', 'Nights')}>{between(stay?.from ?? hold!.from, stay?.to ?? hold!.to)}</Fact>
-          {stay ? <Fact label={t('Buchung', 'Booking')}>{stay.bookingNumber ?? '—'}</Fact> : <Fact label={t('Personen', 'People')}>{hold?.people ?? '—'}</Fact>}
-          {stay?.course ? <Fact label={t('Kurs', 'Course')}>{stay.course}</Fact> : null}
-          {room ? <Fact label={t('Zimmer', 'Room')}>{[room.name, room.type ? pick(lang, room.type) : null].filter(Boolean).join(' · ')}</Fact> : null}
-          {stay && (stay.email || stay.phone) ? (
-            <div className="col-span-2 flex items-center gap-3 rounded-xl bg-ws-sunk/60 px-3.5 py-3">
-              <Avatar name={stay.name} size="sm" />
-              <span className="min-w-0 text-[0.84rem]">
-                {stay.email ? (
-                  <a href={`mailto:${stay.email}`} className="block truncate font-semibold text-[var(--casa-accent-text)] hover:underline">
-                    {stay.email}
-                  </a>
-                ) : null}
-                {stay.phone ? <span className="block text-[var(--casa-muted)] tabular-nums">{stay.phone}</span> : null}
-              </span>
-            </div>
-          ) : null}
-        </dl>
-      ) : null}
-    </SidePanel>
-  );
-}
-
-function Fact({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[0.75rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
-      <dd className="mt-0.5 text-[0.92rem] font-bold text-[var(--casa-ink)]">{children}</dd>
-    </div>
   );
 }

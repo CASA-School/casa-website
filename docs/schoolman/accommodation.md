@@ -48,8 +48,11 @@ families, 8 CASA flats (three flagged, five WGs found by their stays), 3 others;
 rooms, 542 group reservations, 99 comments. Members carry name and role only.
 
 Since then also the rent paid to hosts (`payouts`, 0063 — the place's „Miete" tab) and the letters to
-hosts (`StatementLandlord`, 0067 — the place's „Briefe" tab). Not yet: keys and the flats' cleaning plan
-(`Key`, `CleaningDetail`, `SingleWeekCleaning`).
+hosts (`StatementLandlord`, 0067 — the place's „Briefe" tab). The flats' cleaning plan (`CleaningDetail`,
+`SingleWeekCleaning`, `CleaningJobReference`: Bad, Küche 1, Küche 2, Gäste WC, Flur / Müll) became
+duties that rotate by themselves (0072, docs/ADMIN_WORKSPACE.md §WG-Belegung): SchoolMan's weekly rows
+point at other flats' job numbers and are not carried on. The keys (`Key`) are CASA's building keys,
+held by staff (Mitarbeitende → Schlüssel), not the flats'.
 
 ## For the bridge
 

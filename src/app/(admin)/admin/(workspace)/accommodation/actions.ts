@@ -16,6 +16,8 @@ import {
   updatePlace,
 } from '@/lib/admin/accommodation';
 import { ACCOMMODATION_KINDS, MEMBER_ROLES } from '@/lib/admin/accommodation-labels';
+import { copyDuties, deleteDuty, moveDuty, restartCleaning, saveDuty } from '@/lib/admin/cleaning';
+import { roomHasBed, stayDates } from '@/lib/admin/occupancy';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -212,4 +214,103 @@ export async function placeStayAction(formData: FormData): Promise<void> {
   const result = await placeStay(stayId.data, place?.data ?? null, room?.data ?? null, actor);
   if (!result.ok) fail(to, pick((await getI18n()).lang, result.reason));
   done(to);
+}
+
+// ------------------------------------------------------------------ the flats' plan (2026-10-19)
+
+const OCCUPANCY = '/admin/accommodation/occupancy';
+const backTo = (formData: FormData, base: string) => {
+  const back = String(formData.get('back') ?? '');
+  return back.startsWith(base) ? back : base;
+};
+
+/**
+ * A stay given a bed from the WG-Belegung — a free bed clicked, or a learner moved to another room — once
+ * the room has a bed for the whole stay; the same placing as on Aufenthalte (`placeStay`).
+ */
+export async function placeFromPlanAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'edit');
+  const to = backTo(formData, OCCUPANCY);
+  const stayId = uuid.safeParse(formData.get('stayId'));
+  const flatId = uuid.safeParse(formData.get('accommodationId'));
+  const roomId = uuid.safeParse(formData.get('roomId'));
+  if (!stayId.success || !flatId.success || !roomId.success) redirect(to);
+  const { t, lang } = await getI18n();
+  const stay = await stayDates(stayId.data);
+  if (!stay) fail(to, t('Diesen Aufenthalt gibt es nicht mehr.', 'This stay no longer exists.'));
+  const bed = await roomHasBed(roomId.data, stayId.data, stay.from, stay.to);
+  if (!bed.ok) {
+    fail(
+      to,
+      bed.beds === 1
+        ? t('Das Zimmer ist in dieser Zeit schon belegt.', 'The room is taken for some of that time.')
+        : t(`Alle ${bed.beds} Betten sind in dieser Zeit schon belegt.`, `All ${bed.beds} beds are taken for some of that time.`)
+    );
+  }
+  const result = await placeStay(stayId.data, flatId.data, roomId.data, actor);
+  if (!result.ok) fail(to, pick(lang, result.reason));
+  done(to);
+}
+
+const DUTY_TASKS = (formData: FormData) =>
+  String(formData.get('tasks') ?? '')
+    .split('\n')
+    .map((line) => line.replace(/^[-•*]\s*/, '').trim())
+    .filter(Boolean)
+    .slice(0, 30)
+    .map((line) => line.slice(0, 160));
+
+/** A duty of a flat's Putzplan added or changed: its name and its tasks, one a line. */
+export async function saveDutyAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'edit');
+  const placeId = uuid.parse(formData.get('placeId'));
+  const back = `/admin/accommodation/${placeId}?tab=cleaning`;
+  const raw = String(formData.get('dutyId') ?? '');
+  const dutyId = raw ? uuid.parse(raw) : null;
+  const { t, lang } = await getI18n();
+  const nameDe = String(formData.get('nameDe') ?? '').trim().slice(0, 80);
+  if (!nameDe) fail(back, t('Bitte gib dem Dienst einen Namen.', 'Give the duty a name.'));
+  const nameEn = String(formData.get('nameEn') ?? '').trim().slice(0, 80) || null;
+  const result = await saveDuty(placeId, dutyId, { nameDe, nameEn, tasks: DUTY_TASKS(formData) }, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
+}
+
+export async function deleteDutyAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'full');
+  const placeId = uuid.parse(formData.get('placeId'));
+  const back = `/admin/accommodation/${placeId}?tab=cleaning`;
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const result = await deleteDuty(placeId, uuid.parse(formData.get('dutyId')), actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/** A duty one place up or down: the rotation follows the order. */
+export async function moveDutyAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'edit');
+  const placeId = uuid.parse(formData.get('placeId'));
+  await moveDuty(placeId, uuid.parse(formData.get('dutyId')), formData.get('direction') === 'up' ? 'up' : 'down', actor);
+  done(`/admin/accommodation/${placeId}?tab=cleaning`);
+}
+
+/** Another flat's duties as this flat's Putzplan, starting this week. */
+export async function copyDutiesAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'edit');
+  const placeId = uuid.parse(formData.get('placeId'));
+  const back = `/admin/accommodation/${placeId}?tab=cleaning`;
+  const from = uuid.safeParse(formData.get('fromPlaceId'));
+  const { t, lang } = await getI18n();
+  if (!from.success) fail(back, t('Bitte wähle eine WG.', 'Choose a flat.'));
+  const result = await copyDuties(placeId, from.data, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
+}
+
+/** The rotation begins again this week. */
+export async function restartCleaningAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('accommodation', 'edit');
+  const placeId = uuid.parse(formData.get('placeId'));
+  await restartCleaning(placeId, actor);
+  done(`/admin/accommodation/${placeId}?tab=cleaning`);
 }
