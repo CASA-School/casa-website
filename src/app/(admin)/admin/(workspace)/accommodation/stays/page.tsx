@@ -4,7 +4,7 @@ import { PlaceStayForm } from '../accommodation-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { dayRange, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
-import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { listStays, placementChoices, stayCounts } from '@/lib/admin/accommodation';
 import { isStayView, STAY_VIEW_LABELS, STAY_VIEWS, type AccommodationKind, type StayView } from '@/lib/admin/accommodation-labels';
@@ -51,7 +51,14 @@ export default async function StaysPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title={t('Aufenthalte', 'Stays')} />
+      <PageHeader
+        title={t('Aufenthalte', 'Stays')}
+        actions={
+          <ButtonLink href="/admin/accommodation/occupancy" variant="secondary">
+            {t('WG-Belegung', 'Flat occupancy')}
+          </ButtonLink>
+        }
+      />
 
       {error ? (
         <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">

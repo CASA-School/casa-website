@@ -192,7 +192,13 @@ export async function WorkspaceShell({
                     accommodation colleague works them. */}
                 {canAccess(user, 'accommodation') ? (
                   <>
-                    <NavLink href="/admin/accommodation" icon={Icon.home} title={t('Unterkünfte', 'Accommodation')} exclude={['/admin/accommodation/stays']}>
+                    <NavLink
+                      href="/admin/accommodation"
+                      icon={Icon.home}
+                      title={t('Unterkünfte', 'Accommodation')}
+                      exclude={['/admin/accommodation/stays', '/admin/accommodation/occupancy']}
+                      items={[{ href: '/admin/accommodation/occupancy', label: t('WG-Belegung', 'Flat occupancy') }]}
+                    >
                       {t('Unterkünfte', 'Accommodation')}
                     </NavLink>
                     <NavLink href="/admin/accommodation/stays" icon={Icon.calendar} title={t('Aufenthalte', 'Stays')}>

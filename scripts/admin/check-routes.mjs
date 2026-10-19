@@ -141,6 +141,8 @@ const routes = [
   flat && `/admin/accommodation/${flat}`,
   keyHolder && `/admin/staff/${keyHolder}`,
   programmeGroup && `/admin/groups/${programmeGroup}`,
+  '/admin/accommodation/occupancy',
+  '/admin/accommodation/occupancy?date=2026-12-24',
   '/admin/accommodation/stays',
   '/admin/accommodation/stays?view=arriving',
   '/admin/accommodation/stays?view=leaving&kind=casa_flat',

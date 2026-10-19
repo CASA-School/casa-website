@@ -3,7 +3,7 @@ import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
-import { Badge, Card, Cell, DateText, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, Cell, DateText, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { listPlaces, placeCounts } from '@/lib/admin/accommodation';
 import { ACCOMMODATION_KIND_LABELS, isPlaceView, PLACE_VIEW_LABELS, PLACE_VIEWS, type PlaceView } from '@/lib/admin/accommodation-labels';
@@ -36,7 +36,12 @@ export default async function AccommodationPage({ searchParams }: { searchParams
       <PageHeader
         title={t('Unterkünfte', 'Accommodation')}
         actions={
-          canEdit ? (
+          <>
+            {/* Who lives in which room of CASA's flats, four weeks at a time (2026-10-19). */}
+            <ButtonLink href="/admin/accommodation/occupancy" variant="secondary">
+              {t('WG-Belegung', 'Flat occupancy')}
+            </ButtonLink>
+          {canEdit ? (
             <FormDialog
               icon={Icon.home}
               tint="ink"
@@ -48,7 +53,8 @@ export default async function AccommodationPage({ searchParams }: { searchParams
             >
               <NewPlaceForm />
             </FormDialog>
-          ) : null
+          ) : null}
+          </>
         }
       />
 

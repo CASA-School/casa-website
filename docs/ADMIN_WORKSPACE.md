@@ -1258,6 +1258,27 @@ shift per weekday, the most frequent start and end of the last ten weeks (`Singl
 re-run changes only what differs, never reopens a task, and never closes one a colleague reopened
 here (`done_by` is kept on reopening for that).
 
+## WG-Belegung (2026-10-19)
+
+Rahman, after the Raumplan: „a similar interface for CASA WGs, showing who is in which room … days
+for 4 weeks in one go", reached from the Tagesplan for whoever works the accommodation, and from
+Unterkünfte or Aufenthalte. `/admin/accommodation/occupancy` (module `accommodation`; a sub-item of
+Unterkünfte in the rail, a button on Unterkünfte, Aufenthalte and the Tagesplan's head, which opens
+it on the day's week).
+
+Four weeks from a Monday — this week by default, the arrows move a week, any date from a calendar.
+A band for each CASA flat (its address, and today how many rooms are free), a row for each of its
+rooms with its type and beds and a line for each bed, so a free bed in a double room shows as an
+empty line; the days across under their weeks (KW), weekends shaded, today lit. A learner's stay is
+a bar from the middle of the day they arrive to the middle of the day they leave, so one leaving and
+one arriving the same day share it; living there now teal, still to come blue, gone grey, a check
+when the departure is confirmed; a room held for a group (`accommodation_reservations`) hatched
+amber. SchoolMan writes an extension as a stay of its own: the same learner in the same room again
+within two days is one bar (`occupancy.ts`). A stay without a room shows on its flat's „Ohne
+Zimmer" row. The search lights up a learner or a group; a bar opens at the side — arrival,
+departure, nights, booking, course, room, address and phone, and the way to the booking and the
+person. Placing a stay stays on Aufenthalte.
+
 ## Organisations (2026-10-18, migration 0057)
 
 The agencies, companies, schools and offices CASA works with, in „Organisationen" under Schule (module

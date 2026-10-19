@@ -46,6 +46,7 @@ export function DayHeader({
   today,
   openByDay,
   lessons,
+  flats,
   t,
   lang,
 }: {
@@ -54,6 +55,8 @@ export function DayHeader({
   today: string;
   openByDay: Record<string, number>;
   lessons: number;
+  /** Who lives in which room of the CASA flats, for whoever works the accommodation. */
+  flats?: boolean;
   t: T;
   lang: WsLang;
 }) {
@@ -121,8 +124,9 @@ export function DayHeader({
         })}
       </ol>
 
-      {/* The three views of the day: a segmented control, the day kept. */}
-      <nav aria-label={t('Ansichten des Tages', 'Views of the day')} className="mt-4 inline-flex rounded-full bg-white p-1 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line">
+      {/* The three views of the day: a segmented control, the day kept; and the flats, beside it. */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <nav aria-label={t('Ansichten des Tages', 'Views of the day')} className="inline-flex rounded-full bg-white p-1 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line">
         {views.map((v) => {
           const on = v.key === view;
           return (
@@ -142,6 +146,16 @@ export function DayHeader({
           );
         })}
       </nav>
+      {flats ? (
+        <Link
+          href={`/admin/accommodation/occupancy?date=${day}`}
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.84rem] font-semibold text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]"
+        >
+          {Icon.home}
+          {t('WG-Belegung', 'Flat occupancy')}
+        </Link>
+      ) : null}
+      </div>
     </header>
   );
 }
