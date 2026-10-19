@@ -111,6 +111,17 @@ for _ in $(seq 1 $((TIMEOUT / 10))); do
   sleep 10
 done
 echo "==> $status"
-az containerapp job logs show -n "$JOB" -g "$RG" --execution "$EXECUTION" --container db --tail 500 2>/dev/null \
-  | sed -E 's/^\{"TimeStamp":"[^"]*","Log":"//; s/"\}$//' || echo "(logs not available yet; see Log Analytics)"
+OUT=$(az containerapp job logs show -n "$JOB" -g "$RG" --execution "$EXECUTION" --container db --tail 500 2>/dev/null \
+  | sed -E 's/^\{"TimeStamp":"[^"]*","Log":"//; s/"\}$//' || true)
+if [ -z "$OUT" ]; then
+  # A replica that has ended has no live stream; its lines reach Log Analytics a minute or two later.
+  WS=$(az containerapp env show --ids "$ENV_ID" --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId -o tsv)
+  for _ in $(seq 1 18); do
+    OUT=$(az monitor log-analytics query -w "$WS" -o tsv --analytics-query \
+      "ContainerAppConsoleLogs_CL | where ContainerJobName_s == '$JOB' | order by time_t asc, _timestamp_d asc | project Log_s" 2>/dev/null | cut -f1 || true)
+    [ -n "$OUT" ] && break
+    sleep 10
+  done
+fi
+echo "${OUT:-(no output found; see Log Analytics, job $JOB)}"
 [ "$status" = Succeeded ]
