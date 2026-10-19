@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRef, type ReactNode } from 'react';
 
 import {
@@ -25,6 +26,24 @@ const control =
   'inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[0.84rem] font-semibold text-[var(--casa-ink)] transition-colors outline-none hover:bg-white/80 focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 data-[state=open]:bg-white data-[state=open]:shadow-[0_1px_2px_rgba(16,24,40,0.06)]';
 
 export type CreateItem = { href: string; label: string; icon: ReactNode };
+
+/** A page of its own on the bar — the Tagesplan, FileMaker's Cmd+1 (2026-10-19) — marked while it is open. */
+export function BarLink({ href, label, icon }: { href: string; label: string; icon: ReactNode }) {
+  const pathname = usePathname();
+  const on = pathname === href || pathname.startsWith(`${href}/`);
+  return (
+    <Link
+      href={href}
+      aria-current={on ? 'page' : undefined}
+      className={cn(control, 'ring-1 ring-ws-line ring-inset bg-white/60', on && 'bg-white shadow-[0_1px_2px_rgba(16,24,40,0.06)] ring-[var(--casa-ink-deep)]/25')}
+    >
+      <span aria-hidden="true" className="[&_svg]:size-3.5">
+        {icon}
+      </span>
+      {label}
+    </Link>
+  );
+}
 
 /** "Neu": what this colleague may create, wherever they are. */
 export function CreateMenu({ items }: { items: readonly CreateItem[] }) {

@@ -928,6 +928,12 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     | Aktivität | — (by day) | chips: Alle · each colleague in the feed |
     | Räume | In Nutzung · Inaktiv | |
 
+10b. **A page shows the work; the rest is one click away (Rahman, 2026-10-19: "this will make people
+    afraid right away").** A page that gathers many things — the Tagesplan — leads with what is
+    worked on there and shows the others as tiles: the one figure that matters and a line under it,
+    opening a side panel (`SidePanel`) with the detail. Done or old things fold away (`<details>`).
+    A view that needs room of its own — a table, a timeline — gets a page under the same head, not a
+    tab inside a card.
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about
     (`RecordName`) — then when, how much, who has it, how recent. Never a
@@ -1182,6 +1188,68 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     Konto carries the language as a setting of the account (Deutsch | English,
     the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
     Räume were already in the shared design and kept as they are.
+
+## Tagesplan (2026-10-19, migration 0071)
+
+Rahman: FileMaker's calendar — Cmd+1, the screen colleagues see first when they open SchoolMan —
+needs „one more page like the Overview", reached from the top bar, „much cleaner, well designed,
+with a date navigation strip on top". Module `day`, everyone's and in full by default as SchoolMan's
+calendar is (`edit` writes tasks and reports a colleague away, `full` also deletes a task). On a
+phone, where there is no top bar, it stands beside Übersicht in the menu.
+
+The first version laid everything out on one page; Rahman: „this will make people afraid … not put
+everything out and open … some sections collapsible or with side popups … Kurse and Raumplan should
+have their own pages". So it is three pages under one head (`day-header.tsx`): the day written out
+with its week (KW), a step back and forth, Heute, any date from a calendar, the week as a strip with
+each day's open tasks, and a segmented control — **Überblick · Kurse · Raumplan** — that keeps the
+day as one moves between them.
+
+- **Überblick** (`/admin/day`). The day's tasks are the page; above them four tiles, each the one
+  figure that matters and a line under it, each opening a **side panel** (`SidePanel`, a dialog
+  sliding in from the right) with the rest:
+  - *Im Haus* — reception and the office. A colleague's desk (`staff_members.desk`) and usual week
+    (`staff_shifts`) are set on their page („Arbeitsplatz"); reception's shift shows by itself, as
+    in SchoolMan. „Ich bin da" / „Ich gehe" in the panel's foot writes when one came and went
+    (`staff_presence`, SchoolMan's Oval Office). Time sheets and balances stay finance's and the
+    Klassenbuch's.
+  - *Abwesend* — who is away on the day, ill first, until when, and who will be in the next two
+    weeks; „Abwesenheit eintragen" reports a colleague ill or on holiday with the day's right (the
+    same weekdays as on their page, `addAbsence`), because the team does it where it sees the day.
+  - *Unterricht* — the day by part, and the lessons of the next two weeks whose teacher is away with
+    nobody standing in yet (SchoolMan's ConflictTeacher); the tile is marked red when there are some.
+  - *Geburtstage* — colleagues' birthdays in the next two weeks, day and month only.
+
+  *Aufgaben* — SchoolMan's WorkFlow on the calendar, shared by the whole team (`day_tasks`, the day
+  board's table from 0012 reshaped). One quiet line „Neue Aufgabe für heute …" that shows the time
+  and whom it is for once a colleague starts; where a task stands is a menu — Offen, In Arbeit,
+  Erledigt — not „erledigt" typed into a field, and done keeps who and when. Done tasks fold away
+  under „Erledigt"; tasks written here and left open on the fourteen days before are carried onto
+  today in their own fold (SchoolMan's never are). Changed and deleted in a dialog.
+- **Kurse** (`/admin/day/courses`). SchoolMan's RoomPlan and TeacherPlan as a table: a band for each
+  part of the day in its colour (morning teal, afternoon blue, evening violet — amber is kept for
+  cover, red for a missing teacher), then a row per class — time, course and SchoolMan number, room
+  and floor, teacher with „Vertretung für …" or „fehlt · Krank", learners. Chips narrow the day to one
+  part; the search finds a learner (named on the row), a teacher, a room or a course. A row opens
+  the class in a side panel (`lesson-panel.tsx`): room, teacher, the learners with their addresses,
+  and its attendance sheet, an email to all (BCC) and its page.
+- **Raumplan** (`/admin/day/rooms`). SchoolMan's ClassroomToday drawn: a row per room, floor by
+  floor, alternating shades, hours and half hours across, each class a block in its part of the
+  day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class
+  striped, a free room „frei"; a legend, how many rooms are in use, a line at now. The search lights
+  up what it finds; a block opens the same side panel.
+- **Anwesenheitsliste** (`/admin/day/attendance?lesson=`). As SchoolMan prints it
+  (`SingleDateCourse_PresencePrint`, read from the DDR): one lesson day, A4 upright — Kurs, Lehrkraft
+  and Tag at the top, a row per learner booked that day with Anwesenheit, Verspätung and Kommentar,
+  a few blank rows, then boxes for Inhalt, Hausaufgaben and Kommentar. Printed or saved as a PDF on
+  its own, as a letter is.
+
+**From SchoolMan.** `scripts/filemaker/read_day.py | node scripts/filemaker/import-day.mjs`
+(read-only, counts only): the calendar's WorkFlow entries from 30 days back to 180 ahead
+(`_ID_PublicCalendar` = 1 — HR and course-planning notes stay out), done when `_ID_Completed` = 1;
+reception (`StaffMember._ID_ShiftReception` = 1) and the office as desks; and reception's usual
+shift per weekday, the most frequent start and end of the last ten weeks (`SingleDayStaff`). A
+re-run changes only what differs, never reopens a task, and never closes one a colleague reopened
+here (`done_by` is kept on reopening for that).
 
 ## Organisations (2026-10-18, migration 0057)
 
@@ -2424,4 +2492,5 @@ CI does not have — CI does not run e2e at all.
 | **Back to the page after sign-in** (2026-10-17) | A sign-in always lands on the overview; the guard and the Microsoft callback would have to carry `next` |
 | **Pro-rated own prices for joiners** (2026-10-17) | An evening term or module joined late is charged its share of class days (476 € × 18/34 → 252 €). Assumed; Rahman to confirm |
 | **Past courses** (2026-10-17) | Kurse → Vergangen lists what has ended since the SchoolMan import; earlier courses were not read across |
+| **Tagesplan: help, Klassenbuch, mail** (2026-10-19) | The calendar's eManual becomes a help page per area of the workspace (not built); a link to the Klassenbuch waits for the connection to it; SchoolMan's per-task „Email" is not offered — the workspace sends no mail (§Outbound email) |
 | **Booking letters from offers** | „Buchung anlegen" on an accepted offer opens the wizard at the offer's start; the offer's prices are not carried over (the booking prices from the list) |

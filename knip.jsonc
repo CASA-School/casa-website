@@ -36,6 +36,9 @@
     // Removal condition: delete when the FileMaker bridge brings staff across
     // (docs/FILEMAKER_BRIDGE.md) and this script is retired.
     "scripts/filemaker/import-staff.mjs",
+    // The Tagesplan's tasks, desks and shifts, from scripts/filemaker/read_day.py through a pipe
+    // (docs/ADMIN_WORKSPACE.md §Tagesplan).
+    "scripts/filemaker/import-day.mjs",
 
     // Writes SchoolMan's courses still running or ahead into `courses`, from
     // scripts/filemaker/read_courses.py through a pipe (docs/ADMIN_WORKSPACE.md

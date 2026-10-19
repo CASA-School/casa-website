@@ -103,6 +103,14 @@ export async function WorkspaceShell({
             <NavLink href="/admin" icon={Icon.overview} title={t('Übersicht', 'Overview')}>
               {t('Übersicht', 'Overview')}
             </NavLink>
+            {/* The Tagesplan is on the top bar; a phone has none, so it stands here beside the Overview. */}
+            {canAccess(user, 'day') ? (
+              <div className="lg:hidden">
+                <NavLink href="/admin/day" icon={Icon.calendar} title={t('Tagesplan', 'Day plan')}>
+                  {t('Tagesplan', 'Day plan')}
+                </NavLink>
+              </div>
+            ) : null}
 
             {canAccess(user, 'enquiries') || canAccess(user, 'registrations') || placementReview ? (
               <NavGroup

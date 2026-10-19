@@ -22,6 +22,7 @@ import type { Bilingual } from './i18n';
 
 export const MODULES = [
   'overview',
+  'day',
   'enquiries',
   'registrations',
   'placement',
@@ -63,6 +64,7 @@ const RANK: Record<AccessLevel, number> = { none: 0, view: 1, edit: 2, full: 3 }
 /** Read with `pick(lang, MODULE_LABELS[module])`. */
 export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   overview: { de: 'Übersicht', en: 'Overview' },
+  day: { de: 'Tagesplan', en: 'Day plan' },
   enquiries: { de: 'Anfragen', en: 'Enquiries' },
   registrations: { de: 'Anmeldungen', en: 'Registrations' },
   placement: { de: 'Einstufungstests', en: 'Placement' },
@@ -130,11 +132,16 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * `groups` — the group visits, a school class or a company's team coming together — is the team's too
  * (2026-10-18): its participants are learners the team books and houses. `edit` adds, changes and
  * confirms or calls one off; `full` also deletes a visit entered by mistake.
+ * `day` — the Tagesplan, FileMaker's calendar (2026-10-19): the day's tasks, who is at the desk and who
+ * is away, the lessons by room and teacher — is everyone's, and in full by default, as SchoolMan's
+ * calendar is: `edit` writes tasks and reports a colleague ill or on holiday, `full` also deletes a task
+ * entered by mistake. It can be lowered for one person on the Team screen.
  * `accommodation` — host families, CASA's flats, their rooms and the stays at them — is the team's
  * (2026-10-18; the placement is Natalia's daily work, and every colleague answers where a learner lives):
  * `edit` adds and changes a place, its family and rooms, and places a stay; `full` also deletes.
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
+  'day',
   'enquiries',
   'registrations',
   'placement',
@@ -159,7 +166,7 @@ const ROLE_DEFAULTS: Record<StaffRole, Access> = {
   admin: fill('full'),
   // Overview is the start page and only reads. Settings stays read-only —
   // the vocabularies are the super admin's, the prices finance's (`prices`).
-  staff: { ...fill('edit', STAFF_MODULES), overview: 'view', settings: 'view' },
+  staff: { ...fill('edit', STAFF_MODULES), overview: 'view', settings: 'view', day: 'full' },
 };
 
 export const isModule = (value: string): value is WorkspaceModule =>

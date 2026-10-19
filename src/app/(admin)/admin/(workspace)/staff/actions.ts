@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 
 import { readBankAccount, readPerson } from '../people/person-input';
 import { canAccess } from '@/lib/admin/access';
+import { saveStaffDesk } from '@/lib/admin/day-plan';
+import { DESKS, type Desk } from '@/lib/admin/day-plan-labels';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -160,6 +162,31 @@ export async function linkAccountAction(formData: FormData): Promise<void> {
   const result = await linkAccount(staffId, UUID.test(raw) ? raw : null, actor);
   if (!result.ok) fail(page(staffId), pick(lang, result.reason));
   done(page(staffId));
+}
+
+/**
+ * Where a colleague works in the office — reception or the office behind it — and their usual week
+ * there (2026-10-19): the Tagesplan shows reception's shifts by themselves from it.
+ */
+export async function saveDeskAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('staff', 'edit');
+  const staffId = id(formData, 'staffId');
+  const back = page(staffId);
+  const { t, lang } = await getI18n();
+  const raw = String(formData.get('desk') ?? '');
+  const desk = (DESKS as readonly string[]).includes(raw) ? (raw as Desk) : null;
+  const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const shifts: { weekday: number; from: string; to: string }[] = [];
+  for (let weekday = 1; weekday <= 6; weekday++) {
+    const from = String(formData.get(`from-${weekday}`) ?? '').trim();
+    const to = String(formData.get(`to-${weekday}`) ?? '').trim();
+    if (!from && !to) continue;
+    if (!TIME.test(from) || !TIME.test(to) || to <= from) fail(back, t('Bitte gib für jeden Tag Beginn und Ende an, das Ende nach dem Beginn.', 'Give each day a start and an end, the end after the start.'));
+    shifts.push({ weekday, from, to });
+  }
+  const result = await saveStaffDesk(staffId, { desk, shifts }, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
 }
 
 export async function addAbsenceAction(formData: FormData): Promise<void> {

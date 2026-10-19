@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup] =
+const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup, lessonDay] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -82,10 +82,23 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
     firstId(`SELECT a.id FROM accommodations a WHERE EXISTS (SELECT 1 FROM cleaning_weeks w WHERE w.accommodation_id = a.id) ORDER BY a.name LIMIT 1`),
     firstId(`SELECT s.id FROM staff_members s WHERE EXISTS (SELECT 1 FROM staff_keys k WHERE k.holder_id = s.id) LIMIT 1`),
     firstId(`SELECT g.id FROM group_visits g WHERE EXISTS (SELECT 1 FROM group_programme p WHERE p.group_visit_id = g.id) LIMIT 1`),
+    // A lesson day with learners on it: the Tagesplan of its day reads lessons, desks and absences; its sheet the week (0071).
+    firstId(`SELECT d.id FROM course_days d WHERE NOT d.cancelled AND d.on_date >= current_date - 7
+              AND EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.course_id = d.course_id AND bp.start_date <= d.on_date AND bp.end_date >= d.on_date)
+              ORDER BY d.on_date LIMIT 1`),
   ]);
+const lessonDate = lessonDay ? (await client.query(`SELECT to_char(on_date, 'YYYY-MM-DD') AS d FROM course_days WHERE id = $1`, [lessonDay])).rows[0]?.d : null;
 
 const routes = [
   '/admin',
+  '/admin/day',
+  '/admin/day?date=2026-12-24',
+  lessonDate && `/admin/day?date=${lessonDate}`,
+  '/admin/day/courses',
+  '/admin/day/rooms',
+  lessonDate && `/admin/day/courses?date=${lessonDate}`,
+  lessonDate && `/admin/day/rooms?date=${lessonDate}`,
+  lessonDay && `/admin/day/attendance?lesson=${lessonDay}`,
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
   '/admin/kursplanung/lehrkraefte',

@@ -146,6 +146,7 @@ copied into these pages; all of it should be changed and kept in the password ma
 | Accommodation | `Accommodation` 142 · `Room` 416 · `DateAccommodation` 2,465 · `DateRent` 543 | every place with family, rooms, group reservations, rent, letters, the flats' cleaning plan; the sample's stays placed | ✓ |
 | Letters and history | `Letter` 33,213 · `WorkFlow` 109,870 · `StatementLandlord` 752 | letters with their text and how they went, notes and history — the sample's; before 2025 not in reach | ◐ sample |
 | Staff and working time | `StaffMember` 82 · `SingleDayStaff` 86,664 | the staff register, accounts, absences; time sheets stay the Klassenbuch's | ◐ |
+| The calendar (Cmd+1) | `WorkFlow` on the calendar 4,222 · `StaffMember._ID_ShiftReception` · `SingleDayStaff` times | the Tagesplan: the day's tasks (30 days back, 180 ahead), reception and the office, reception's usual shifts (`read_day.py`, 2026-10-19) | ● |
 | Group programme | `SingleDateActivity` 31 · `ServiceDetail` 156 · `DatePlacement` 10 | a visit's programme, services and internship places (0068) — the group's „Programm" tab | ✓ |
 | Book orders | `Order` 506 · `OrderDetail` 2,139 · `Editorial` 8 | `book_orders` with their books (0068); each publisher an organisation („Verlag") with a „Bestellungen" tab | ✓ |
 | Keys | `Key` 118 | `staff_keys` (0068): number, door, holder — the colleague's „Schlüssel" tab; four keys are twice under one number in SchoolMan | ✓ |

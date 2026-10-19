@@ -15,7 +15,7 @@ import {
   updateStaffBankAccountAction,
   updateStaffPersonAction,
 } from '../actions';
-import { AbsenceForm, AccountForm, ContractForm, HrNumbersForm, LicenceForm, RolesForm, TeachingForm } from '../staff-forms';
+import { AbsenceForm, AccountForm, ContractForm, DeskForm, HrNumbersForm, LicenceForm, RolesForm, TeachingForm } from '../staff-forms';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
@@ -42,6 +42,8 @@ import {
   upcomingTeaching,
   type TeachingDay,
 } from '@/lib/admin/staff-members';
+import { staffDesk } from '@/lib/admin/day-plan';
+import { DESK_LABELS } from '@/lib/admin/day-plan-labels';
 
 /** How far ahead the lesson days are shown: four weeks unless a colleague asks for more (`?weeks=`). */
 const SPANS = [4, 8, 12, 26] as const;
@@ -56,6 +58,16 @@ const spanOf = (value: string | undefined): Span => SPANS.find((n) => String(n) 
  * contracts and HR numbers and their bank details, with `staff_private`. Who teaches which group on
  * which day is changed on the board; here it is read.
  */
+const WEEKDAY_NAMES: Record<number, { de: string; en: string }> = {
+  1: { de: 'Montag', en: 'Monday' },
+  2: { de: 'Dienstag', en: 'Tuesday' },
+  3: { de: 'Mittwoch', en: 'Wednesday' },
+  4: { de: 'Donnerstag', en: 'Thursday' },
+  5: { de: 'Freitag', en: 'Friday' },
+  6: { de: 'Samstag', en: 'Saturday' },
+  7: { de: 'Sonntag', en: 'Sunday' },
+};
+
 export default async function StaffMemberPage({
   params,
   searchParams,
@@ -79,7 +91,7 @@ export default async function StaffMemberPage({
   const teaches = member.roles.includes('teaching');
   const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
 
-  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys] = await Promise.all([
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
     upcomingTeaching(id, weeks * 7),
@@ -93,6 +105,7 @@ export default async function StaffMemberPage({
     canEdit ? listCountries() : Promise.resolve([]),
     canEdit && managesAccounts ? unlinkedAccounts() : Promise.resolve([]),
     staffKeys(id),
+    staffDesk(id),
   ]);
   if (!person) notFound();
   const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
@@ -222,6 +235,41 @@ export default async function StaffMemberPage({
             </Card>
           </div>
           <div className="space-y-4">
+            {/* Reception or the office, and the usual week: the Tagesplan shows reception's shifts from it (2026-10-19). */}
+            {desk.desk || (canEdit && !teaches) ? (
+              <Card
+                title={t('Arbeitsplatz', 'Desk')}
+                icon={Icon.clock}
+                tint="ink"
+                actions={
+                  canEdit ? (
+                    <FormDialog icon={Icon.clock} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={t('Arbeitsplatz und übliche Woche', 'Desk and usual week')} size="sm">
+                      <DeskForm staffId={id} desk={desk} />
+                    </FormDialog>
+                  ) : null
+                }
+              >
+                {desk.desk ? (
+                  <>
+                    <p className="text-sm font-semibold text-[var(--casa-ink)]">{pick(lang, DESK_LABELS[desk.desk])}</p>
+                    {desk.shifts.length ? (
+                      <ul className="mt-2 space-y-1 text-[0.84rem]">
+                        {desk.shifts.map((s) => (
+                          <li key={s.weekday} className="flex justify-between gap-3">
+                            <span className="text-[var(--casa-muted)]">{pick(lang, WEEKDAY_NAMES[s.weekday])}</span>
+                            <span className="font-semibold text-[var(--casa-ink)] tabular-nums">
+                              {s.from}–{s.to}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="text-sm text-[var(--casa-muted)]">{t('Kein Arbeitsplatz im Büro.', 'No desk in the office.')}</p>
+                )}
+              </Card>
+            ) : null}
             <Card title={t('Aufgaben', 'Roles')} icon={Icon.team} tint="blue" actions={rolesDialog}>
               {member.roles.length ? (
                 <div className="flex flex-wrap gap-1.5">

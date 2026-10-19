@@ -6,13 +6,14 @@ import { cn } from '@/lib/utils';
 import { CommandSearch } from './command-search';
 import { Icon } from './icons';
 import { LangSwitch } from './lang-switch';
-import { AccountMenu, CreateMenu, type CreateItem } from './top-bar-menus';
+import { AccountMenu, BarLink, CreateMenu, type CreateItem } from './top-bar-menus';
 
 /**
  * The top bar (Rahman, 2026-10-14: "a top nav but very sleek and elegant for
  * some of the functionalities"). Desktop only — on a phone the navy band is
  * already the top bar. What a colleague reaches for from any page: search on
- * the left, then "Neu", the language, and who is signed in. The navigation
+ * the left, then the Tagesplan (FileMaker's calendar, the screen the team opens
+ * first — 2026-10-19), "Neu", the language, and who is signed in. The navigation
  * stays in the sidebar; there is no notification bell until something real
  * would ring it (CLAUDE.md, workspace design standards).
  *
@@ -56,6 +57,7 @@ export async function TopBar({
       <div className={cn('flex h-14 items-center gap-3', focus ? 'px-6' : 'mx-auto max-w-[calc(1180px+4.5rem)] px-9')}>
         <CommandSearch variant="bar" />
         <div className="ml-auto flex items-center gap-1.5">
+          {canAccess(user, 'day') ? <BarLink href="/admin/day" label={t('Tagesplan', 'Day plan')} icon={Icon.calendar} /> : null}
           {creates.length ? <CreateMenu items={creates} /> : null}
           <span className="mx-1.5">
             <LangSwitch tone="page" />

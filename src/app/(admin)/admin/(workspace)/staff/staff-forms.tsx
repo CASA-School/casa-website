@@ -1,5 +1,6 @@
 import {
   addAbsenceAction,
+  saveDeskAction,
   createStaffAction,
   linkAccountAction,
   saveContractAction,
@@ -12,6 +13,8 @@ import { DateFormField } from '@/components/admin/date-picker';
 import { DialogFooter } from '@/components/admin/dialogs';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
+import type { StaffDesk } from '@/lib/admin/day-plan';
+import { DESK_LABELS, DESKS } from '@/lib/admin/day-plan-labels';
 import type { StaffLicence } from '@/lib/admin/examiners';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -140,6 +143,46 @@ export async function TeachingForm({ member }: { member: StaffDetail }) {
       <Field label={t('Notiz', 'Note')} htmlFor="teach-note">
         <Textarea id="teach-note" name="note" rows={2} maxLength={200} defaultValue={member.teaching.note ?? ''} />
       </Field>
+      <DialogFooter>
+        <Button type="submit">{t('Speichern', 'Save')}</Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+/** Reception, the office or neither, and the usual week there: a day left empty has no shift. */
+export async function DeskForm({ staffId, desk }: { staffId: string; desk: StaffDesk }) {
+  const { t, lang } = await getI18n();
+  const days = [1, 2, 3, 4, 5, 6] as const;
+  const names: Record<number, [string, string]> = { 1: ['Montag', 'Monday'], 2: ['Dienstag', 'Tuesday'], 3: ['Mittwoch', 'Wednesday'], 4: ['Donnerstag', 'Thursday'], 5: ['Freitag', 'Friday'], 6: ['Samstag', 'Saturday'] };
+  return (
+    <form action={saveDeskAction} className="space-y-4">
+      <input type="hidden" name="staffId" value={staffId} />
+      <Field label={t('Arbeitsplatz', 'Desk')} htmlFor="desk-kind">
+        <Select id="desk-kind" name="desk" defaultValue={desk.desk ?? ''}>
+          <option value="">{t('Keiner', 'None')}</option>
+          {DESKS.map((d) => (
+            <option key={d} value={d}>
+              {pick(lang, DESK_LABELS[d])}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <fieldset>
+        <legend className="mb-2 text-[0.8rem] font-semibold text-[var(--casa-ink)]">{t('Übliche Woche', 'Usual week')}</legend>
+        <div className="space-y-1.5">
+          {days.map((d) => {
+            const shift = desk.shifts.find((s) => s.weekday === d);
+            return (
+              <div key={d} className="grid grid-cols-[6.5rem_1fr_1fr] items-center gap-2">
+                <span className="text-[0.84rem] text-[var(--casa-ink)]">{t(names[d][0], names[d][1])}</span>
+                <Input name={`from-${d}`} type="time" step={300} defaultValue={shift?.from ?? ''} aria-label={t(`${names[d][0]}: Beginn`, `${names[d][1]}: start`)} />
+                <Input name={`to-${d}`} type="time" step={300} defaultValue={shift?.to ?? ''} aria-label={t(`${names[d][0]}: Ende`, `${names[d][1]}: end`)} />
+              </div>
+            );
+          })}
+        </div>
+      </fieldset>
       <DialogFooter>
         <Button type="submit">{t('Speichern', 'Save')}</Button>
       </DialogFooter>
