@@ -6,16 +6,24 @@ column, and no script, field or record is ever set. Values stay in memory —
 callers print counts, never a person's data (docs/schoolman/README.md, Method).
 """
 import subprocess
+import time
 
 DOCUMENT = 'SchoolMan.fmp12'
 _RS = chr(30)  # record separator: field values may hold line breaks
+# FileMaker answers „object not found" (-1728), a timeout (-1712) or a lost connection (-609) now and
+# then while it is busy or in use; the same read a few seconds later works (2026-10-20, first bridge run).
+_PASSING = ('-1728', '-1712', '-609')
 
 
 def _run(script: str) -> str:
-    result = subprocess.run(['osascript', '-'], input=script, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip()[:200])
-    return result.stdout.rstrip('\n')
+    for attempt in range(4):
+        result = subprocess.run(['osascript', '-'], input=script, capture_output=True, text=True)
+        if result.returncode == 0:
+            return result.stdout.rstrip('\n')
+        error = result.stderr.strip()
+        if attempt == 3 or not any(code in error for code in _PASSING):
+            raise RuntimeError(error[:200])
+        time.sleep(5 * (attempt + 1))
 
 
 def column(table: str, field: str) -> list[str]:
