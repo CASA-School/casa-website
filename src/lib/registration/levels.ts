@@ -11,10 +11,17 @@
  *
  * Client-safe: no server imports.
  */
+import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import type { ContentLocale } from '@/lib/content/types';
 
 /** Formats CASA sells by the half level or the whole level. */
 const SOLD_BY_LEVEL = new Set(['intensive-german']);
+
+/** Formats whose every term is half a level (the evening course: A1.1 in about 3½ months, then A1.2). */
+const TERM_IS_HALF_LEVEL = new Set(['evening-german']);
+
+/** Whether a term of this format teaches half a level, so a learner books a half (A1.1), not a whole level. */
+export const termIsHalfLevel = (slug: string | undefined) => Boolean(slug && TERM_IS_HALF_LEVEL.has(slug));
 
 /** Whether a format is sold by the half level, so a learner can start at a term's second half. */
 export const soldByLevel = (slug: string | undefined) => Boolean(slug && SOLD_BY_LEVEL.has(slug));
@@ -25,6 +32,20 @@ export const soldByLevel = (slug: string | undefined) => Boolean(slug && SOLD_BY
  * "B1+ is the same as the other intensive courses"). A half level runs four
  * weeks, a whole level eight.
  */
+
+/**
+ * The half levels a start offers (Rahman, 2026-10-21: „in the evening we don't have the B1+ course, you
+ * are not getting the right data"). From what the start runs (`levels`, its courses as SchoolMan and the
+ * workspace plan them): an intensive start runs a level's first half and teaches both, so A2.1 offers A2.1
+ * and A2.2; an evening start offers exactly its halves. Where a start has nothing planned yet, what the
+ * format runs on its other starts (`formatLevels`), else the range the format is set up for (`fallback`).
+ */
+export function offeredLevels(slug: string | undefined, levels: readonly string[] | undefined, formatLevels: readonly string[], fallback: readonly string[]): string[] {
+  const codes = levels?.length ? levels : formatLevels.length ? formatLevels : null;
+  if (!codes) return [...fallback];
+  const offered = soldByLevel(slug) ? codes.flatMap((code) => [`${levelOf(code)}.1`, `${levelOf(code)}.2`]) : [...codes];
+  return CASA_LEVEL_SEQUENCE.filter((code) => offered.includes(code));
+}
 
 /** The level a code belongs to: 'B2.1' → 'B2', 'B1+.2' → 'B1+', 'B1+' → 'B1+'. */
 export const levelOf = (code: string) => (code.includes('.') ? code.slice(0, code.lastIndexOf('.')) : code);

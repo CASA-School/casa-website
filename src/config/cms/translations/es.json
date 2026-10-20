@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 semanas (nivel completo)"
   },
+  "t.8-wochen.yzyfwz": {
+    "de": "8 Wochen",
+    "text": "8 semanas"
+  },
   "t.a1-bis-c1-in.151ni4p": {
     "de": "A1 bis C1 in drei Jahren",
     "text": "Del A1 al C1 en tres años"
@@ -643,6 +647,10 @@
     "de": "{value} ansehen",
     "text": "Ver {value}"
   },
+  "t.ansehen.4f07t9": {
+    "de": "{days} ansehen",
+    "text": "Ver {days}"
+  },
   "t.ansprechperson.150y9f2": {
     "de": "Ansprechperson",
     "text": "Persona de contacto"
@@ -830,6 +838,10 @@
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Empieza siempre por la prueba A1. Busca un momento tranquilo, tómate tu tiempo y haz la prueba sin ayuda de nadie ni recursos como diccionarios."
+  },
+  "t.beginnt-an-diesen-tagen.3b03ge": {
+    "de": "{level} beginnt an diesen Tagen gerade nicht.",
+    "text": "{level} no empieza estos días por ahora."
   },
   "t.begleitende-lehrerin-schuelergru.1gou3we": {
     "de": "Begleitende Lehrerin, Schülergruppe aus Sibirien",
@@ -2663,6 +2675,10 @@
     "de": "Eine Haftpflichtversicherung ist nicht vorgeschrieben, in Deutschland aber üblich, und viele Vermieterinnen und Vermieter fragen danach.",
     "text": "Un seguro de responsabilidad civil (Haftpflichtversicherung) no es obligatorio, pero en Alemania es habitual, y muchos arrendadores lo piden."
   },
+  "t.eine-halbe-niveaustufe.wvtq2y": {
+    "de": "eine halbe Niveaustufe",
+    "text": "medio nivel"
+  },
   "t.eine-hand-schreibt-die.1k3k77w": {
     "de": "Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2",
     "text": "Una mano escribe la tarea de la carta en una hoja de respuestas del examen telc Deutsch B2"
@@ -3006,6 +3022,10 @@
   "t.frag-im-buero-nach.7r3z8v": {
     "de": "Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.",
     "text": "Pregunta en la oficina qué datos del curso necesitas para tu solicitud."
+  },
+  "t.frag-uns-nach-dem.ol4zw3": {
+    "de": "Frag uns nach dem nächsten Start",
+    "text": "Pregúntanos por el próximo inicio"
   },
   "t.frag-uns-nach-niveau.teyemn": {
     "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",

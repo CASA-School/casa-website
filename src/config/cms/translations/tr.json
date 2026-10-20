@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 hafta (tam seviye)"
   },
+  "t.8-wochen.yzyfwz": {
+    "de": "8 Wochen",
+    "text": "8 hafta"
+  },
   "t.a1-bis-c1-in.151ni4p": {
     "de": "A1 bis C1 in drei Jahren",
     "text": "Üç yılda A1'den C1'e"
@@ -643,6 +647,10 @@
     "de": "{value} ansehen",
     "text": "{value} bölümüne göz atın"
   },
+  "t.ansehen.4f07t9": {
+    "de": "{days} ansehen",
+    "text": "{days} göster"
+  },
   "t.ansprechperson.150y9f2": {
     "de": "Ansprechperson",
     "text": "İrtibat kişiniz"
@@ -830,6 +838,10 @@
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Her zaman A1 testiyle başlayın. Sakin bir an seçin ve kendinize zaman tanıyın; testi tek başınıza ve sözlük gibi yardımcı araçlar olmadan çözün."
+  },
+  "t.beginnt-an-diesen-tagen.3b03ge": {
+    "de": "{level} beginnt an diesen Tagen gerade nicht.",
+    "text": "{level} şu anda bu günlerde başlamıyor."
   },
   "t.begleitende-lehrerin-schuelergru.1gou3we": {
     "de": "Begleitende Lehrerin, Schülergruppe aus Sibirien",
@@ -2663,6 +2675,10 @@
     "de": "Eine Haftpflichtversicherung ist nicht vorgeschrieben, in Deutschland aber üblich, und viele Vermieterinnen und Vermieter fragen danach.",
     "text": "Sorumluluk sigortası (Haftpflichtversicherung) zorunlu değildir, ancak Almanya'da yaygındır ve birçok ev sahibi bunu sorar."
   },
+  "t.eine-halbe-niveaustufe.wvtq2y": {
+    "de": "eine halbe Niveaustufe",
+    "text": "yarım seviye"
+  },
   "t.eine-hand-schreibt-die.1k3k77w": {
     "de": "Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2",
     "text": "Bir el, telc Deutsch B2 sınavının cevap kâğıdına mektup görevini yazıyor"
@@ -3006,6 +3022,10 @@
   "t.frag-im-buero-nach.7r3z8v": {
     "de": "Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.",
     "text": "Başvurunuz için kursla ilgili hangi bilgilere ihtiyacınız olduğunu ofisimize sorun."
+  },
+  "t.frag-uns-nach-dem.ol4zw3": {
+    "de": "Frag uns nach dem nächsten Start",
+    "text": "Bir sonraki başlangıcı bize sor"
   },
   "t.frag-uns-nach-niveau.teyemn": {
     "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",

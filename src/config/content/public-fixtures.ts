@@ -201,9 +201,11 @@ function courseInstance(
   endDate: string,
   schedule: CourseInstanceRow['schedule'],
   capacity = 16,
-  location = 'CASA Bremen - Am Dobben'
+  location = 'CASA Bremen - Am Dobben',
+  levels?: string[]
 ): CourseInstanceRow {
   return {
+    ...(levels ? { levels } : {}),
     id: `30000000-0000-4000-8000-${idSuffix}`,
     course_type_id: courseTypeId(slug),
     start_date: startDate,
@@ -259,28 +261,32 @@ function buildCourseInstances(): CourseInstanceRow[] {
   // Two intensive courses in parallel. The schedule field takes one range, so it
   // carries the span of the teaching day; the page explains the two blocks.
   const bildungszeitFullDay = { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '09:00-17:30' };
+  // The levels each start runs, as the workspace holds them from SchoolMan (2026-10-21): every intensive
+  // start all six levels; the evening starts differ by start and days, and never B1+.
+  const intensiveLevels = ['A1.1', 'A2.1', 'B1.1', 'B1+.1', 'B2.1', 'C1.1'];
+  const at = 'CASA Bremen - Am Dobben';
 
   return [
-    courseInstance('000000010001', 'intensive-german', '2026-08-31', '2026-10-23', intensiveMorning, 15),
-    courseInstance('000000010002', 'intensive-german', '2026-10-26', '2026-12-18', intensiveMorning, 15),
-    courseInstance('000000010003', 'intensive-german', '2027-01-04', '2027-02-26', intensiveMorning, 15),
-    courseInstance('000000010004', 'intensive-german', '2027-03-01', '2027-04-30', intensiveMorning, 15),
-    courseInstance('000000010005', 'intensive-german', '2026-08-03', '2026-09-24', intensiveAfternoon, 15),
-    courseInstance('000000010006', 'intensive-german', '2026-09-28', '2026-11-19', intensiveAfternoon, 15),
-    courseInstance('000000010007', 'intensive-german', '2026-11-23', '2027-01-28', intensiveAfternoon, 15),
-    courseInstance('000000010008', 'intensive-german', '2027-02-01', '2027-04-01', intensiveAfternoon, 15),
+    courseInstance('000000010001', 'intensive-german', '2026-08-31', '2026-10-23', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010002', 'intensive-german', '2026-10-26', '2026-12-18', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010003', 'intensive-german', '2027-01-04', '2027-02-26', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010004', 'intensive-german', '2027-03-01', '2027-04-30', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010005', 'intensive-german', '2026-08-03', '2026-09-24', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010006', 'intensive-german', '2026-09-28', '2026-11-19', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010007', 'intensive-german', '2026-11-23', '2027-01-28', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010008', 'intensive-german', '2027-02-01', '2027-04-01', intensiveAfternoon, 15, at, intensiveLevels),
     // From FileMaker, 2026-10-09 (db/seeds/0006): the terms starting within a year.
-    courseInstance('000000010009', 'intensive-german', '2027-05-03', '2027-06-25', intensiveMorning, 15),
-    courseInstance('000000010010', 'intensive-german', '2027-06-28', '2027-08-27', intensiveMorning, 15),
-    courseInstance('000000010011', 'intensive-german', '2027-08-30', '2027-10-22', intensiveMorning, 15),
-    courseInstance('000000010012', 'intensive-german', '2027-04-05', '2027-05-27', intensiveAfternoon, 15),
-    courseInstance('000000010013', 'intensive-german', '2027-05-31', '2027-07-29', intensiveAfternoon, 15),
-    courseInstance('000000010014', 'intensive-german', '2027-08-02', '2027-09-23', intensiveAfternoon, 15),
-    courseInstance('000000010015', 'intensive-german', '2027-09-27', '2027-11-18', intensiveAfternoon, 15),
-    courseInstance('000000020001', 'evening-german', '2026-08-24', '2026-12-16', eveningMondayWednesday, 12),
-    courseInstance('000000020002', 'evening-german', '2026-08-25', '2026-12-17', eveningTuesdayThursday, 12),
-    courseInstance('000000020003', 'evening-german', '2027-01-04', '2027-04-14', eveningMondayWednesday, 12),
-    courseInstance('000000020004', 'evening-german', '2027-01-05', '2027-04-15', eveningTuesdayThursday, 12),
+    courseInstance('000000010009', 'intensive-german', '2027-05-03', '2027-06-25', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010010', 'intensive-german', '2027-06-28', '2027-08-27', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010011', 'intensive-german', '2027-08-30', '2027-10-22', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010012', 'intensive-german', '2027-04-05', '2027-05-27', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010013', 'intensive-german', '2027-05-31', '2027-07-29', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010014', 'intensive-german', '2027-08-02', '2027-09-23', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010015', 'intensive-german', '2027-09-27', '2027-11-18', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000020001', 'evening-german', '2026-08-24', '2026-12-16', eveningMondayWednesday, 12, at, ['A2.1', 'A2.2', 'B1.2', 'B2.1', 'B2.2', 'C1.1']),
+    courseInstance('000000020002', 'evening-german', '2026-08-25', '2026-12-17', eveningTuesdayThursday, 12, at, ['A1.1', 'A1.2', 'B1.1', 'C1.2']),
+    courseInstance('000000020003', 'evening-german', '2027-01-04', '2027-04-14', eveningMondayWednesday, 12, at, ['A2.2', 'B1.1', 'B2.1', 'B2.2', 'C1.1']),
+    courseInstance('000000020004', 'evening-german', '2027-01-05', '2027-04-15', eveningTuesdayThursday, 12, at, ['A1.1', 'A1.2', 'A2.1', 'B1.2']),
     courseInstance('000000050001', 'bildungszeit', '2026-08-31', '2026-10-23', bildungszeitFullDay, 15),
     courseInstance('000000050002', 'bildungszeit', '2026-10-26', '2026-12-18', bildungszeitFullDay, 15),
     courseInstance('000000050003', 'bildungszeit', '2027-01-04', '2027-02-26', bildungszeitFullDay, 15),

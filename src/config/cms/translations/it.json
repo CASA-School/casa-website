@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 settimane (livello completo)"
   },
+  "t.8-wochen.yzyfwz": {
+    "de": "8 Wochen",
+    "text": "8 settimane"
+  },
   "t.a1-bis-c1-in.151ni4p": {
     "de": "A1 bis C1 in drei Jahren",
     "text": "Dall’A1 al C1 in tre anni"
@@ -643,6 +647,10 @@
     "de": "{value} ansehen",
     "text": "Vedi {value}"
   },
+  "t.ansehen.4f07t9": {
+    "de": "{days} ansehen",
+    "text": "Vedi {days}"
+  },
   "t.ansprechperson.150y9f2": {
     "de": "Ansprechperson",
     "text": "Referente"
@@ -830,6 +838,10 @@
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Inizia sempre dal test A1. Trova un momento tranquillo, prenditi il tuo tempo e fai il test senza l’aiuto di nessuno e senza strumenti come i dizionari."
+  },
+  "t.beginnt-an-diesen-tagen.3b03ge": {
+    "de": "{level} beginnt an diesen Tagen gerade nicht.",
+    "text": "{level} al momento non inizia in questi giorni."
   },
   "t.begleitende-lehrerin-schuelergru.1gou3we": {
     "de": "Begleitende Lehrerin, Schülergruppe aus Sibirien",
@@ -2663,6 +2675,10 @@
     "de": "Eine Haftpflichtversicherung ist nicht vorgeschrieben, in Deutschland aber üblich, und viele Vermieterinnen und Vermieter fragen danach.",
     "text": "Un’assicurazione di responsabilità civile (Haftpflichtversicherung) non è obbligatoria, ma in Germania è diffusa e molti proprietari di casa la chiedono."
   },
+  "t.eine-halbe-niveaustufe.wvtq2y": {
+    "de": "eine halbe Niveaustufe",
+    "text": "mezzo livello"
+  },
   "t.eine-hand-schreibt-die.1k3k77w": {
     "de": "Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2",
     "text": "Una mano scrive la lettera della prova scritta su un foglio risposte dell’esame telc Deutsch B2"
@@ -3006,6 +3022,10 @@
   "t.frag-im-buero-nach.7r3z8v": {
     "de": "Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.",
     "text": "Chiedi in segreteria quali dati sul corso ti servono per la tua domanda."
+  },
+  "t.frag-uns-nach-dem.ol4zw3": {
+    "de": "Frag uns nach dem nächsten Start",
+    "text": "Chiedici il prossimo inizio"
   },
   "t.frag-uns-nach-niveau.teyemn": {
     "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",

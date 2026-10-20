@@ -25,7 +25,7 @@ import {
 } from '@/lib/content/bookability';
 import { getCourseContentSlug } from '@/lib/content/course-routes';
 import { secondHalfStart } from '@/lib/registration/halves';
-import { soldByLevel } from '@/lib/registration/levels';
+import { offeredLevels, soldByLevel } from '@/lib/registration/levels';
 import { parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { sortByPublicCourseOrder } from '@/config/courses/course-order';
 import {
@@ -445,7 +445,8 @@ function buildCourseRegistrationOption(
   instance: CourseInstanceRow,
   courseType: CourseTypeRow,
   locale: ContentLocale,
-  today: string
+  today: string,
+  formatLevels: readonly string[] = []
 ): CourseRegistrationOption {
   // An intensive term under way is entered at its second half, so that day is its last way in.
   const half = soldByLevel(courseType.slug)
@@ -473,7 +474,7 @@ function buildCourseRegistrationOption(
     status: instance.status,
     levelMin: courseType.level_min,
     levelMax: courseType.level_max,
-    availableLevels: getAvailableLevels(courseType.level_min, courseType.level_max),
+    availableLevels: offeredLevels(courseType.slug, instance.levels, formatLevels, getAvailableLevels(courseType.level_min, courseType.level_max)),
   };
 }
 
@@ -508,6 +509,33 @@ function getDatabaseClient() {
 }
 
 type DatabaseClient = NonNullable<ReturnType<typeof getDb>>;
+
+/**
+ * The level codes each start runs (Rahman, 2026-10-21: the site must follow FileMaker and the workspace),
+ * read from the workspace's courses (SchoolMan's, by the bridge) as one list per start: an aggregate,
+ * never a course row, so hard rule 1 holds (CLAUDE.md). A cancelled course does not run. Without the
+ * workspace's table (a database before migration 0041) the starts stay as they are.
+ */
+async function withTermLevels(db: DatabaseClient, instances: CourseInstanceRow[]): Promise<CourseInstanceRow[]> {
+  if (instances.length === 0) return instances;
+  try {
+    const rows = await queryRows<{ id: string; levels: string[] }>(
+      db,
+      `
+        SELECT course_instance_id::text AS id, array_agg(DISTINCT level_code ORDER BY level_code) AS levels
+        FROM courses
+        WHERE course_instance_id = ANY($1::uuid[]) AND level_code IS NOT NULL AND status <> 'cancelled'
+        GROUP BY course_instance_id
+      `,
+      [instances.map((instance) => instance.id)]
+    );
+    const byId = new Map(rows.map((row) => [row.id, row.levels]));
+    return instances.map((instance) => (byId.has(instance.id) ? { ...instance, levels: byId.get(instance.id) } : instance));
+  } catch (error) {
+    logDatabaseFallback('withTermLevels (courses)', error);
+    return instances;
+  }
+}
 
 async function queryRows<T>(db: DatabaseClient, query: string, params: unknown[] = []) {
   return (await db.query(query, params)) as T[];
@@ -794,7 +822,7 @@ export async function getCourseDetail(slug: string, locale: ContentLocale): Prom
         );
 
         if (instanceRows.length > 0) {
-          instances = instanceRows.map(normalizeCourseInstanceRow);
+          instances = await withTermLevels(db, instanceRows.map(normalizeCourseInstanceRow));
         }
       }
     } catch (error) {
@@ -922,7 +950,7 @@ export async function getCourseRegistrationCatalog(
 
         const bookableRows = bookableTerms(instanceRows.map(normalizeCourseInstanceRow), courseTypes);
         if (bookableRows.length > 0) {
-          instances = bookableRows;
+          instances = await withTermLevels(db, bookableRows);
         }
       }
 
@@ -1005,9 +1033,11 @@ export async function getCourseRegistrationCatalog(
 
   const optionsByCourseTypeId: Record<string, CourseRegistrationOption[]> = {};
   courseTypes.forEach((courseType) => {
+    // What the format runs on its starts: the levels for a start with nothing planned yet.
+    const formatLevels = [...new Set(instances.filter((instance) => instance.course_type_id === courseType.id).flatMap((instance) => instance.levels ?? []))];
     const options = instances
       .filter((instance) => instance.course_type_id === courseType.id)
-      .map((instance) => buildCourseRegistrationOption(instance, courseType, locale, today))
+      .map((instance) => buildCourseRegistrationOption(instance, courseType, locale, today, formatLevels))
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
 
     optionsByCourseTypeId[courseType.id] = options;
