@@ -10,7 +10,7 @@ import type { Bilingual } from './i18n';
 import { CONTENT } from '@/lib/entry-test/content';
 import { finalizeOverdue, finalizeWith } from '@/lib/entry-test/attempts.server';
 import { KEYS } from '@/lib/entry-test/keys.server';
-import { DEFAULT_MINUTES, ENTRY_TESTS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
+import { DEFAULT_MINUTES, ENTRY_TESTS, cleanAnswers, entryTestFor, entryTestForClass, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
 import type { Answer, AttemptStatus, EntryTestId, EntryTestVersion } from '@/lib/entry-test/types';
 import { publicSiteAddress } from '@/lib/cms/origins';
 import { lanAddresses } from '@/lib/dev/lan';
@@ -360,6 +360,45 @@ export async function openEntryTest(input: { day: string; session: EntryTestSess
   if (!row) return refuse('Der Test ließ sich nicht öffnen.', 'The test could not be opened.');
   await logActivity({ actor, entity: 'entry_test', entityId: row.id, action: 'entry_test_opened', detail: { day: input.day, session: input.session, test: input.test } });
   return { ok: true, id: row.id };
+}
+
+/** A class a test can be opened for today: an A2, B1 or B1+ intensive class with a lesson today. */
+export type OpenableClass = { dayId: string; level: string; number: string | null; session: EntryTestSession; test: EntryTestId; startsAt: string | null; roomName: string | null; teacherName: string | null };
+
+const CLASS_DAY = `SELECT d.id AS day_id, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, c.level_code,
+              coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
+              coalesce(r.nickname, r.name) AS room_name, ${NAME('tp')} AS teacher_name,
+              to_char(t.starts_at, 'HH24:MI') AS starts_at, coalesce(c.session, i.session) AS session
+         FROM course_days d
+         JOIN course_day_times t ON t.id = d.id
+         JOIN courses c ON c.id = d.course_id
+         JOIN course_instances i ON i.id = c.course_instance_id
+         JOIN course_types ty ON ty.id = i.course_type_id
+         LEFT JOIN rooms r ON r.id = d.room_id
+         LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
+        WHERE NOT d.cancelled AND ty.slug = 'intensive-german' AND c.level_code ~ '^(A2|B1\\+?)(\\.[0-9]+)?$'`;
+
+type ClassDayRow = { day_id: string; on_date: string; level_code: string; number: string | null; room_name: string | null; teacher_name: string | null; starts_at: string | null; session: string | null };
+
+function openable(r: ClassDayRow): OpenableClass | null {
+  const test = entryTestForClass(r.level_code);
+  const session = sessionOf(r.session, r.starts_at);
+  if (!test || !session) return null;
+  return { dayId: r.day_id, level: r.level_code, number: r.number, session, test, startsAt: r.starts_at, roomName: r.room_name, teacherName: r.teacher_name };
+}
+
+/** Today's A2, B1 and B1+ intensive classes, for „Heute öffnen" (a late joiner, a make-up, a trial). */
+export async function openableClasses(day: string): Promise<OpenableClass[]> {
+  const rows = await query<ClassDayRow>(`${CLASS_DAY} AND d.on_date = $1::date ORDER BY t.starts_at NULLS LAST, c.level_code, d.group_index`, [day]);
+  return rows.map(openable).filter((c): c is OpenableClass => c !== null);
+}
+
+/** Opens today's sitting of the class's test, for its morning or afternoon. */
+export async function openEntryTestForClass(dayId: string, minutes: number, actor: StaffUser): Promise<Result> {
+  const row = await queryFirst<ClassDayRow>(`${CLASS_DAY} AND d.id = $1`, [dayId]);
+  const found = row ? openable(row) : null;
+  if (!row || !found || row.on_date !== berlinDay(new Date())) return refuse('Für diese Klasse lässt sich heute kein Test öffnen.', 'No test can be opened for this class today.');
+  return openEntryTest({ day: row.on_date, session: found.session, test: found.test, minutes }, actor);
 }
 
 /** No new starts; the phones that have started go on until they hand in or their time is up. */

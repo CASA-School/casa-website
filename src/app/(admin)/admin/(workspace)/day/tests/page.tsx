@@ -1,32 +1,84 @@
+import { openEntryTestForClassAction } from '../actions';
 import { dayLabel } from '../day-header';
 import { EntryTestCard } from '../entry-test-panel';
+import { DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { ButtonLink, Card, EmptyState, PageHeader } from '@/components/admin/ui';
+import { Button, ButtonLink, Card, EmptyState, Field, Input, PageHeader, Select } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { berlinDay } from '@/lib/admin/days';
-import { archivePastSittings, entryTestDays, entryTestOrigin, entryTestViews } from '@/lib/admin/entry-tests';
+import { archivePastSittings, entryTestDays, entryTestOrigin, entryTestViews, openableClasses } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
+import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
+import { pick } from '@/lib/admin/i18n';
+import { DEFAULT_MINUTES, ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
 
 /**
  * The day-one tests' archive (Rahman, 2026-10-20: once the day is over, its tests are archived): every
  * test day, the latest first, each test opening the same panel as on its day — results, answers, the
- * Excel, a paper booklet typed in late. Above them, the booklets and QR codes to print ahead of a start.
+ * Excel, a paper booklet typed in late. Above them, per test, the booklets and QR codes to print ahead of a
+ * start; and „Heute öffnen" (Rahman: tied to the intensive A2, B1 and B1+ classes) for a class's test on a
+ * day that is not its first: a late joiner, a make-up, a trial run.
  * A deletion period comes later (docs/ENTRY_TEST.md).
  */
-export default async function EntryTestArchivePage() {
-  const [user, { t, lang }] = await Promise.all([requireModule('day'), getI18n()]);
+export default async function EntryTestArchivePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const [params, user, { t, lang }] = await Promise.all([searchParams, requireModule('day'), getI18n()]);
   await archivePastSittings();
   const [days, origin] = await Promise.all([entryTestDays(), entryTestOrigin()]);
   const today = berlinDay(new Date());
   const archive = await Promise.all(days.map(async (day) => ({ day, tests: (await entryTestViews(day, origin)).filter((test) => test.sitting) })));
+  const canEdit = canAccess(user, 'day', 'edit');
+  const classes = canEdit ? await openableClasses(today) : [];
 
   return (
     <>
-      <PageHeader backHref="/admin/day" backLabel={t('Tagesplan', 'Day plan')} title={t('Einstufungstests', 'Placement tests')} />
+      <PageHeader
+        backHref="/admin/day"
+        backLabel={t('Tagesplan', 'Day plan')}
+        title={t('Einstufungstests', 'Placement tests')}
+        actions={
+          classes.length ? (
+            <FormDialog trigger={t('Heute öffnen', 'Open today')} triggerVariant="primary" title={t('Test heute öffnen', 'Open a test today')} icon={Icon.placement} tint="blue" width="md">
+              <form action={openEntryTestForClassAction}>
+                <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
+                  <Field label={t('Kurs', 'Course')} htmlFor="open-class">
+                    <Select id="open-class" name="dayId" required defaultValue="">
+                      <option value="" disabled>
+                        {t('Bitte wählen', 'Please choose')}
+                      </option>
+                      {ENTRY_TEST_IDS.filter((test) => classes.some((c) => c.test === test)).map((test) => (
+                        <optgroup key={test} label={ENTRY_TESTS[test].title}>
+                          {classes
+                            .filter((c) => c.test === test)
+                            .map((c) => (
+                              <option key={c.dayId} value={c.dayId}>
+                                {[c.level, pick(lang, SESSION_LABELS[c.session]), c.startsAt, c.number ? `#${c.number}` : null, c.roomName, c.teacherName].filter(Boolean).join(' · ')}
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label={t('Minuten', 'Minutes')} htmlFor="open-minutes">
+                    <Input id="open-minutes" name="minutes" type="number" min={5} max={180} defaultValue={DEFAULT_MINUTES} />
+                  </Field>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">{t('Öffnen', 'Open')}</Button>
+                </DialogFooter>
+              </form>
+            </FormDialog>
+          ) : null
+        }
+      />
 
-      <Card title={t('Testhefte und QR-Codes', 'Booklets and QR codes')} icon={Icon.placement} tint="blue" bleed>
+      {params.error ? (
+        <p role="alert" className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {params.error}
+        </p>
+      ) : null}
+
+      <Card title={t('Tests', 'Tests')} icon={Icon.placement} tint="blue" bleed>
         <ul className="divide-y divide-ws-line-soft">
           {ENTRY_TEST_IDS.map((test) => (
             <li key={test} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
@@ -61,7 +113,7 @@ export default async function EntryTestArchivePage() {
               day={day}
               isToday={day === today}
               archived={day < today}
-              canEdit={canAccess(user, 'day', 'edit')}
+              canEdit={canEdit}
               canDelete={canAccess(user, 'day', 'full')}
             />
           ))

@@ -65,8 +65,15 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    Tagesplan and the archive are read): the sitting is closed at the end of its day and a phone still
    writing or paused is handed in with what it saved. „Einstufungstests" beside the day's views in the
    Tagesplan opens the archive (`/admin/day/tests`): every test day, the latest first, each test opening
-   the same panel — results, answers, log, the Excel of the sitting or the day, a paper booklet typed in
-   late. A deletion period comes later; days are the unit it will drop.
+   the same panel — results, answers, log, the Excel and the PDF of the sitting or the day, a paper
+   booklet typed in late. A deletion period comes later; days are the unit it will drop.
+8. **Heute öffnen.** On the archive page, for a day that is not a class's first lesson: a late joiner, a
+   make-up, a trial run. Tied to the classes (Rahman, 2026-10-20): the list holds only today's intensive
+   A2, B1 and B1+ classes, either part of the level (A2.1, A2.2 — `entryTestForClass()`), and the class
+   chosen gives the test and the morning or afternoon; it opens that sitting as the Tagesplan's card would.
+9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
+   per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
+   notes, and the average; the Excel keeps every answer.
 
 No pass/fail and no level verdict: the points go to the teachers, who place the learner.
 
@@ -95,7 +102,7 @@ switch carry `neu.casa-bremen.de`: keep that hostname on the app after the switc
 | Phone flow | `src/lib/entry-test/attempts.server.ts`, `src/app/api/entry-test/route.ts` (one POST, one body per action, `src/lib/entry-test/types.ts`) |
 | Phone page | `src/app/(site)/[locale]/test`, `src/components/entry-test/` |
 | Workspace | `src/lib/admin/entry-tests.ts`, `day/entry-test-panel.tsx`, actions in `day/actions.ts`, Excel at `day/entry-test/export/route.ts` (checks the session and module `day` itself) |
-| Archive, print | `day/tests/page.tsx` (archive), `day/tests/booklet`, `day/tests/qr`, `day/tests/print-sheet.tsx`; `src/components/admin/qr-code.tsx` |
+| Archive, print | `day/tests/page.tsx` (archive, „Heute öffnen"), `day/tests/results` (PDF), `day/tests/booklet`, `day/tests/qr`, `day/tests/print-sheet.tsx`; `src/components/admin/qr-code.tsx` |
 
 Access: module `day` — `view` sees the card, the results and the Excel; `edit` opens, closes, releases,
 hands in and types in paper; `full` deletes an attempt (with its result on the learner's record).
@@ -115,6 +122,16 @@ letter, so the key and every result stay valid:
 | b1 A 17, statement 3 | „Wer nicht mitfahren kann, soll sich bis Donnerstagabend melden." (the text says „bis 18 Uhr") | „… soll sich spätestens am Donnerstag im Kursbüro melden." | richtig |
 | b1 A 25 (C), B 9 (D) | distractor „Weil" (a grammatical sentence) | „Denn" (cannot open a clause with the verb at the end) | Wenn |
 | b1plus B 21 (C) | distractor „daran" („sich an etwas freuen", borderline) | „davon" | A darüber |
+
+The teachers' second review (Rahman, „Final Corrections", 2026-10-20), keys unchanged:
+
+| Item | Now |
+| --- | --- |
+| b1 A 7 | „Ich arbeite am liebsten morgens. Dann kann ich mich am besten konzentrieren." / „___ Ich arbeite lieber abends, weil ich dann mehr schaffe." (the gap takes no full stop: the options end with one) — key A „Das sehe ich anders." |
+| b1 B 22 | the reply „Ja, ich habe nachgesehen: Am Feiertag ist er geschlossen." — key B ob |
+| b1plus B 35 | „Wir akzeptieren ___ Bargeld ___ Kartenzahlung." — already two gaps here and in the PDF, unchanged — key D sowohl / als auch |
+| b1 A 17 | „Die Fahrkarte ist schon bezahlt." (was „bereits", Jannik: more familiar) |
+| b1 A 36, statement 3 | „Svitlana nutzt sowohl Serien als auch Bücher, um Deutsch zu lernen." — richtig |
 
 The printed PDFs still carry the old wording; print the booklet from the dashboard instead.
 

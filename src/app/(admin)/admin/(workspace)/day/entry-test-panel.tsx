@@ -51,10 +51,15 @@ export function EntryTestCard({
         <h2 className="text-[0.95rem] font-extrabold text-[var(--casa-ink)]">{heading ?? t('Einstufungstest', 'Placement test')}</h2>
         <span className="ml-auto flex items-center gap-2">
           {tests.some((x) => x.detail?.attempts.length) ? (
-            <ButtonLink href={`/admin/day/entry-test/export?date=${day}`} plain variant="ghost" size="sm">
-              {Icon.download}
-              {t('Excel des Tages', 'The day’s Excel')}
-            </ButtonLink>
+            <>
+              <ButtonLink href={`/admin/day/tests/results?date=${day}`} variant="ghost" size="sm">
+                {t('PDF des Tages', 'The day’s PDF')}
+              </ButtonLink>
+              <ButtonLink href={`/admin/day/entry-test/export?date=${day}`} plain variant="ghost" size="sm">
+                {Icon.download}
+                {t('Excel des Tages', 'The day’s Excel')}
+              </ButtonLink>
+            </>
           ) : null}
           {heading ? null : (
             <ButtonLink href="/admin/day/tests" variant="ghost" size="sm">
@@ -254,10 +259,15 @@ function PanelFoot({ test, day, canEdit }: { test: EntryTestView; day: string; c
     <span className="flex flex-wrap gap-2">
       {canEdit ? <PaperForm key={detail.attempts.length} test={test} detail={detail} day={day} /> : null}
       {detail.attempts.length ? (
-        <ButtonLink href={`/admin/day/entry-test/export?date=${day}&sitting=${detail.id}`} plain variant="secondary" size="sm">
-          {Icon.download}
-          {t('Excel', 'Excel')}
-        </ButtonLink>
+        <>
+          <ButtonLink href={`/admin/day/tests/results?date=${day}&sitting=${detail.id}`} variant="secondary" size="sm">
+            {t('PDF', 'PDF')}
+          </ButtonLink>
+          <ButtonLink href={`/admin/day/entry-test/export?date=${day}&sitting=${detail.id}`} plain variant="secondary" size="sm">
+            {Icon.download}
+            {t('Excel', 'Excel')}
+          </ButtonLink>
+        </>
       ) : null}
     </span>
   );

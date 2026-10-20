@@ -78,7 +78,7 @@ test.describe('day-one placement test', () => {
 
   const openPanel = async (page: Page) => {
     await page.goto(`/admin/day?date=${today}`);
-    await page.getByRole('button', { name: /Einstufungstest B1 Tag 1/ }).click();
+    await page.getByRole('button', { name: /Vormittag.*Einstufungstest B1 Tag 1/ }).click();
     return page.getByRole('dialog', { name: 'Einstufungstest B1 Tag 1' });
   };
 
@@ -147,6 +147,50 @@ test.describe('day-one placement test', () => {
     await form.getByRole('button', { name: 'Eintragen' }).click();
     await expect.poll(async () => (await client.query(`SELECT 1 FROM entry_test_attempts WHERE sitting_id = $1 AND source = 'paper' AND status = 'submitted'`, [sitting])).rows.length).toBe(1);
     await client.query(`DELETE FROM entry_test_attempts WHERE sitting_id = $1 AND source = 'paper'`, [sitting]);
+  });
+
+  test('opened today for a class from the archive (an A2.2 class, a late joiner), written, its results as a PDF page', async ({ page }) => {
+    const taken = await client.query(`SELECT 1 FROM entry_test_sittings WHERE on_date = $1::date AND test = 'a2'`, [today]);
+    test.skip(taken.rows.length > 0, 'a real A2 test sitting exists today');
+    // A second part of A2, in the afternoon, whose first day was a week ago: it writes no test on the card.
+    const start = (
+      await client.query<{ id: string }>(
+        `INSERT INTO course_instances (course_type_id, start_date, end_date, schedule)
+         SELECT id, $1::date - 7, $1::date + 20, '{"time": "13:00-17:30"}'::jsonb FROM course_types WHERE slug = 'intensive-german' RETURNING id`,
+        [today]
+      )
+    ).rows[0].id;
+    const course = (await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'A2.2', 1, 14) RETURNING id`, [start])).rows[0].id;
+    await client.query(`INSERT INTO course_days (course_id, group_index, on_date) VALUES ($1, 1, $2::date - 7), ($1, 1, $2::date)`, [course, today]);
+    const dayId = (await client.query<{ id: string }>(`SELECT id FROM course_days WHERE course_id = $1 AND on_date = $2::date`, [course, today])).rows[0].id;
+    try {
+      await page.goto('/admin/day/tests');
+      await page.getByRole('button', { name: 'Heute öffnen' }).click();
+      const dialog = page.getByRole('dialog', { name: 'Test heute öffnen' });
+      await dialog.getByLabel('Kurs').selectOption(dayId);
+      await dialog.getByRole('button', { name: 'Öffnen' }).click();
+      await expect(page).toHaveURL(/\/admin\/day\/tests$/);
+      await expect(page.getByRole('button', { name: /Nachmittag.*Einstufungstest A2 Tag 1/ }).first()).toContainText(/Offen · Code \d{4}/);
+
+      // A learner writes it through the API and hands it in.
+      const email = `pdf-${EMAIL}`;
+      const info = (await (await page.request.post('/api/entry-test', { data: { action: 'info' } })).json()).data;
+      const sittingId = info.sittings.find((x: { test: string }) => x.test === 'a2').id;
+      const started = await page.request.post('/api/entry-test', { data: { action: 'start', name: 'Pia Probe', email, sittingId } });
+      const state = (await started.json()).data;
+      expect(state.title).toBe('Einstufungstest A2 Tag 1');
+      const answers = state.answers.map((_: string, i: number) => (i < 36 ? 'A' : 'richtig'));
+      await page.request.post('/api/entry-test', { data: { action: 'submit', token: state.token, answers } });
+
+      await page.goto(`/admin/day/tests/results?date=${today}`);
+      const row = page.getByRole('row').filter({ hasText: 'Pia Probe' }).first();
+      await expect(row).toContainText('/ 80');
+    } finally {
+      await client.query(`DELETE FROM entry_test_sittings WHERE on_date = $1::date AND test = 'a2'`, [today]);
+      await client.query(`DELETE FROM course_days WHERE course_id = $1`, [course]);
+      await client.query(`DELETE FROM courses WHERE id = $1`, [course]);
+      await client.query(`DELETE FROM course_instances WHERE id = $1`, [start]);
+    }
   });
 
   test('a past day is archived: closed, its unfinished phone handed in, in the archive with its booklets', async ({ page }) => {

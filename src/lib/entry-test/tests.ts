@@ -33,6 +33,16 @@ export function entryTestFor(level: string | null | undefined): EntryTestId | nu
   return match[1] === 'A2' ? 'a2' : match[1] === 'B1' ? 'b1' : 'b1plus';
 }
 
+/**
+ * The test for someone who joins an A2, B1 or B1+ intensive class after its first day („Heute öffnen"):
+ * by the level's family, either part (A2.1, A2.2).
+ */
+export function entryTestForClass(level: string | null | undefined): EntryTestId | null {
+  const match = /^(A2|B1\+|B1)(?:\.\d+)?$/.exec(level?.trim() ?? '');
+  if (!match) return null;
+  return match[1] === 'A2' ? 'a2' : match[1] === 'B1' ? 'b1' : 'b1plus';
+}
+
 /** Answer slots of a test, in order: one per multiple-choice task, one per reading statement. */
 export function slotKinds(tasks: Task[]): ('mc' | 'rf')[] {
   return tasks.flatMap((task) => (task.type === 'mc' ? (['mc'] as const) : task.statements.map(() => 'rf' as const)));

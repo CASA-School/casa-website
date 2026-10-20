@@ -7,7 +7,7 @@ import { isMergeReason, isTaskStatus } from '@/lib/admin/day-plan-labels';
 import { canAccess } from '@/lib/admin/access';
 import { changeDay } from '@/lib/admin/course-days';
 import { berlinDay } from '@/lib/admin/days';
-import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, releaseAttempt } from '@/lib/admin/entry-tests';
+import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, openEntryTestForClass, releaseAttempt } from '@/lib/admin/entry-tests';
 import { createTask, deleteTask, markPresence, mergeLesson, replaceFromDay, setTaskStatus, unmergeLesson, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -212,6 +212,17 @@ export async function openEntryTestAction(formData: FormData): Promise<void> {
   const result = await openEntryTest({ day, session, test, minutes: Number(formData.get('minutes') ?? 0) }, actor);
   if (!result.ok) fail(back(day), pick(lang, result.reason));
   revalidatePath('/admin/day');
+}
+
+/** „Heute öffnen" on the tests page: the chosen class's test, today, for its morning or afternoon. */
+export async function openEntryTestForClassAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const dayId = String(formData.get('dayId') ?? '');
+  if (!UUID.test(dayId)) throw new Error('Invalid class');
+  const result = await openEntryTestForClass(dayId, Number(formData.get('minutes') ?? 0), actor);
+  if (!result.ok) fail('/admin/day/tests', pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin/day');
+  redirect('/admin/day/tests');
 }
 
 export async function closeEntryTestAction(formData: FormData): Promise<void> {
