@@ -819,10 +819,6 @@
     "de": "Bedarfsanalyse",
     "text": "Analisi dei bisogni"
   },
-  "t.beendet.10ow81": {
-    "de": "beendet",
-    "text": "concluso"
-  },
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Inizia sempre dal test A1. Trova un momento tranquillo, prenditi il tuo tempo e fai il test senza l’aiuto di nessuno e senza strumenti come i dizionari."
@@ -1134,6 +1130,10 @@
   "t.bis.1ate970": {
     "de": "bis ",
     "text": "fino a "
+  },
+  "t.bis.1pubo9t": {
+    "de": "bis {date}",
+    "text": "fino al {date}"
   },
   "t.bisher-findet-der-kurs.1yi9mgk": {
     "de": "Bisher findet der Kurs freitags von 13 bis 16:30 Uhr statt. Wenn wir wissen, wann du kannst, planen wir die Gruppe danach.",
@@ -1619,6 +1619,10 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Il tuo livello e i tuoi orari"
   },
+  "t.dein-niveau-waehlst-du.17ko9f3": {
+    "de": "Dein Niveau wählst du in der Anmeldung. Du bist unsicher?",
+    "text": "Scegli il tuo livello durante l’iscrizione. Non sei sicuro?"
+  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Dal tuo livello di lingua dipendono i corsi di studio a cui puoi accedere e quante cose riesci a sbrigare senza aiuto nella vita quotidiana."
@@ -1650,6 +1654,10 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Non è stato possibile inviare i tuoi dati. Riprova."
+  },
+  "t.deine-auswahl.ouc0m0": {
+    "de": "Deine Auswahl",
+    "text": "La tua scelta"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -1898,10 +1906,6 @@
   "t.deutschland.4qkali": {
     "de": "Deutschland",
     "text": "Germania"
-  },
-  "t.di.1g61aj1": {
-    "de": "Di",
-    "text": "Mar"
   },
   "t.di.2pheey": {
     "de": "Di",
@@ -2162,10 +2166,6 @@
   "t.diskussionspraxis-hilft-lernende.1p6ienb": {
     "de": "Diskussionspraxis hilft Lernenden vom Verstehen ins Sprechen.",
     "text": "Esercitarsi nella discussione aiuta gli studenti a passare dal capire al parlare."
-  },
-  "t.do.8iovp6": {
-    "de": "Do",
-    "text": "Gio"
   },
   "t.do.q4ox4b": {
     "de": "Do",
@@ -2755,6 +2755,10 @@
     "de": "Einschreibegebühr",
     "text": "Quota d’iscrizione"
   },
+  "t.einstieg-moeglich.em45ta": {
+    "de": "Einstieg möglich",
+    "text": "Puoi iscriverti"
+  },
   "t.einstufung-anfragen.1gepwut": {
     "de": "Einstufung anfragen",
     "text": "Richiedi il test di livello"
@@ -2990,10 +2994,6 @@
   "t.fotos-zur-dokumentation-erstellt.rsjmba": {
     "de": "Fotos zur Dokumentation erstellt",
     "text": "Foto scattate come documentazione"
-  },
-  "t.fr.2fxcvv": {
-    "de": "Fr",
-    "text": "Ven"
   },
   "t.frag-bei-der-hochschule.1obv5or": {
     "de": "Frag bei der Hochschule, der Bank und der Versicherung nach, welche Unterlagen sie wann brauchen. So kannst du die einzelnen Schritte gut aufeinander abstimmen.",
@@ -4427,6 +4427,10 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "Gratis, dall’A1 al C1"
   },
+  "t.kostenloser-einstufungstest.1snfv6v": {
+    "de": "Kostenloser Einstufungstest",
+    "text": "Test di livello gratuito"
+  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "Calcolatore dei costi"
@@ -4650,10 +4654,6 @@
   "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
     "de": "Läuferinnen laufen jubelnd durch das Zielband",
     "text": "Alcune podiste tagliano esultanti il nastro del traguardo"
-  },
-  "t.laeuft-bereits.qmroe8": {
-    "de": "läuft bereits",
-    "text": "già in corso"
   },
   "t.lampe.hiavx3": {
     "de": "Lampe",
@@ -4963,10 +4963,6 @@
     "de": "Mi",
     "text": "Me"
   },
-  "t.mi.d0osxu": {
-    "de": "Mi",
-    "text": "Mer"
-  },
   "t.miau.15s2y3h": {
     "de": "Miau!",
     "text": "Miao!"
@@ -5114,10 +5110,6 @@
   "t.mo-und-mi-18.nxi02x": {
     "de": "Mo und Mi, 18:30–20 Uhr",
     "text": "Lun e Mer, 18:30–20:00"
-  },
-  "t.mo.25y85a": {
-    "de": "Mo",
-    "text": "Lun"
   },
   "t.modell.17dztdr": {
     "de": "Modell",
@@ -5987,10 +5979,6 @@
     "de": "Ruhige Orte zum Lernen in der Umgebung finden",
     "text": "Trovare posti tranquilli per studiare nei dintorni"
   },
-  "t.sa.1w52yzg": {
-    "de": "Sa",
-    "text": "Sab"
-  },
   "t.sag-uns-bescheid.mro1gk": {
     "de": "Sag uns Bescheid",
     "text": "Faccelo sapere"
@@ -6322,10 +6310,6 @@
   "t.so-wohnst-du.t26nym": {
     "de": "So wohnst du",
     "text": "La tua sistemazione"
-  },
-  "t.so.8us3es": {
-    "de": "So",
-    "text": "Dom"
   },
   "t.so.zf3136": {
     "de": "So",
@@ -7595,6 +7579,14 @@
     "de": "Wann möchtest du anfangen, und was heißt das für heute?",
     "text": "Quando vuoi iniziare, e cosa significa per te oggi?"
   },
+  "t.wann-moechtest-du-lernen.k35wy3": {
+    "de": "Wann möchtest du lernen?",
+    "text": "Quando vuoi studiare?"
+  },
+  "t.wann-moechtest-du-starten.136ogm8": {
+    "de": "Wann möchtest du starten?",
+    "text": "Quando vuoi iniziare?"
+  },
   "t.warmes-mittagessen-an-jedem.18txuzw": {
     "de": "Warmes Mittagessen an jedem Schultag, zwischen Unterricht und Nachmittagsprogramm.",
     "text": "Un pranzo caldo ogni giorno di scuola, tra le lezioni e il programma pomeridiano."
@@ -7786,6 +7778,10 @@
   "t.weiss-ich-nicht.1ppcj8w": {
     "de": "Weiß ich nicht",
     "text": "Non lo so"
+  },
+  "t.weiter-zur-anmeldung.19kcd7f": {
+    "de": "Weiter zur Anmeldung",
+    "text": "Continua con l’iscrizione"
   },
   "t.weiter.1tg7ggn": {
     "de": "Weiter",

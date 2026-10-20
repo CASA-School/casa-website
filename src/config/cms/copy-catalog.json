@@ -1937,16 +1937,6 @@
   ],
   "pages": []
  },
- "t.beendet.10ow81": {
-  "de": "beendet",
-  "en": "finished",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.beginne-immer-mit-dem.pbpzom": {
   "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
   "en": "Always start with the A1 test. Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.",
@@ -2788,6 +2778,16 @@
   ],
   "pages": [
    "/registration/course"
+  ]
+ },
+ "t.bis.1pubo9t": {
+  "de": "bis {date}",
+  "en": "to {date}",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.bisher-findet-der-kurs.1yi9mgk": {
@@ -4246,6 +4246,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.dein-niveau-waehlst-du.17ko9f3": {
+  "de": "Dein Niveau wählst du in der Anmeldung. Du bist unsicher?",
+  "en": "You choose your level when you register. Not sure?",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
   "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
   "en": "Your level of German decides which programmes are open to you and how much of everyday life you can manage without help.",
@@ -4347,6 +4357,16 @@
   "en": "Your details could not be sent. Please try again.",
   "files": [
    "src/components/courses/interest-dialog.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.deine-auswahl.ouc0m0": {
+  "de": "Deine Auswahl",
+  "en": "Your choice",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/courses/[slug]"
@@ -5036,16 +5056,6 @@
   "pages": [
    "/partners",
    "/ueber-uns/gemeinnuetzigkeit"
-  ]
- },
- "t.di.1g61aj1": {
-  "de": "Di",
-  "en": "Tue",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.di.2pheey": {
@@ -5870,16 +5880,6 @@
    "/exams/[code]",
    "/faq",
    "/team"
-  ]
- },
- "t.do.8iovp6": {
-  "de": "Do",
-  "en": "Thu",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.do.q4ox4b": {
@@ -7814,6 +7814,16 @@
    "/calculator"
   ]
  },
+ "t.einstieg-moeglich.em45ta": {
+  "de": "Einstieg möglich",
+  "en": "Join now",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.einstufung-anfragen.1gepwut": {
   "de": "Einstufung anfragen",
   "en": "Ask about placement",
@@ -8499,16 +8509,6 @@
   ],
   "pages": [
    "/accommodation/[type]"
-  ]
- },
- "t.fr.2fxcvv": {
-  "de": "Fr",
-  "en": "Fri",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.frag-bei-der-hochschule.1obv5or": {
@@ -12450,6 +12450,16 @@
    "/placement-test"
   ]
  },
+ "t.kostenloser-einstufungstest.1snfv6v": {
+  "de": "Kostenloser Einstufungstest",
+  "en": "Free placement test",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.kostenrechner.ikj22o": {
   "de": "Kostenrechner",
   "en": "Cost calculator",
@@ -13127,16 +13137,6 @@
    "/placement-test",
    "/search",
    "/team"
-  ]
- },
- "t.laeuft-bereits.qmroe8": {
-  "de": "läuft bereits",
-  "en": "under way",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.lampe.hiavx3": {
@@ -13968,16 +13968,6 @@
    "/team"
   ]
  },
- "t.mi.d0osxu": {
-  "de": "Mi",
-  "en": "Wed",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.miau.15s2y3h": {
   "de": "Miau!",
   "en": "Miaow!",
@@ -14360,16 +14350,6 @@
   ],
   "pages": [
    "/exams/[code]"
-  ]
- },
- "t.mo.25y85a": {
-  "de": "Mo",
-  "en": "Mon",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.modell.17dztdr": {
@@ -14818,11 +14798,13 @@
   "en": "Next start",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx",
-   "src/app/(site)/[locale]/page.tsx"
+   "src/app/(site)/[locale]/page.tsx",
+   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/",
-   "/courses"
+   "/courses",
+   "/courses/[slug]"
   ]
  },
  "t.naechster-termin.1x0fmar": {
@@ -16662,16 +16644,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.sa.1w52yzg": {
-  "de": "Sa",
-  "en": "Sat",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.sag-uns-bescheid.mro1gk": {
   "de": "Sag uns Bescheid",
   "en": "Let us know",
@@ -17518,16 +17490,6 @@
    "src/config/content/heroes.ts"
   ],
   "pages": []
- },
- "t.so.8us3es": {
-  "de": "So",
-  "en": "Sun",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
  },
  "t.so.zf3136": {
   "de": "So",
@@ -21247,6 +21209,26 @@
    "/resources/why-germany"
   ]
  },
+ "t.wann-moechtest-du-lernen.k35wy3": {
+  "de": "Wann möchtest du lernen?",
+  "en": "When would you like to learn?",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.wann-moechtest-du-starten.136ogm8": {
+  "de": "Wann möchtest du starten?",
+  "en": "When would you like to start?",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.warmes-mittagessen-an-jedem.18txuzw": {
   "de": "Warmes Mittagessen an jedem Schultag, zwischen Unterricht und Nachmittagsprogramm.",
   "en": "A hot lunch on every school day, between class and the afternoon programme.",
@@ -21746,6 +21728,16 @@
   "en": "Not sure",
   "files": [
    "src/config/courses/interest-list.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.weiter-zur-anmeldung.19kcd7f": {
+  "de": "Weiter zur Anmeldung",
+  "en": "Continue to registration",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/courses/[slug]"
