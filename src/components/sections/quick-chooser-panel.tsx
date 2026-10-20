@@ -140,7 +140,7 @@ export function QuickChooserPanel({
       data-testid="course-finder-filter"
     >
       <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-        <Compass className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
+        <Compass className="h-4 w-4 text-[var(--casa-accent-text)]" />
         {badgeLabel}
       </p>
       <h2 className="mt-3 text-xl font-bold text-[var(--casa-ink)]">{title}</h2>

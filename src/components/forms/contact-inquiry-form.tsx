@@ -34,7 +34,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { meaningClasses, type Meaning } from '@/config/brand/meaning';
+import type { Meaning } from '@/config/brand/meaning';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@/i18n/navigation';
 import { trackCasaEvent } from '@/lib/analytics/client';
@@ -51,6 +51,7 @@ import {
 } from '@/lib/validation/contact';
 import { organiserCopy, type OrganiserChoiceField, type OrganiserCopy } from '@/config/forms/organiser-brief-copy';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 type ContactInquiryFormCopy = {
   formTitle: string;
@@ -555,9 +556,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                       }
                       className="sr-only"
                     />
-                    <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[look.meaning].circle)}>
-                      <TopicIcon className="size-[1.125rem]" aria-hidden />
-                    </span>
+                    <IconBadge icon={TopicIcon} meaning={look.meaning} />
                     <span className="min-w-0">{option.label}</span>
                     {checked ? <CheckCircle2 className="absolute right-2.5 top-2.5 size-4 text-[var(--casa-accent-text)]" aria-hidden /> : null}
                   </label>

@@ -6,9 +6,9 @@ import { ArrowRight, ChevronLeft, ChevronRight, Mail, Menu, Phone, X } from 'luc
 
 import { footerText } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { meaningClasses } from '@/config/brand/meaning';
 import { footerConfig } from '@/config/footer';
 import { iconMap } from '@/config/icon-map';
 import { localizeNavDescription, localizeNavText, navConfig, type NavDropdown, type NavItem } from '@/config/nav';
@@ -134,7 +134,6 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
   );
 
   const dropdown = shown !== null ? (navConfig.main[shown] as NavDropdown) : null;
-  const meaning = meaningClasses[dropdown?.meaning ?? 'orientation'];
 
   return (
     <Sheet
@@ -368,11 +367,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                                 aria-current={active ? 'page' : undefined}
                                 className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-[var(--casa-ground)]/60 focus-visible:bg-[var(--casa-ground)] focus-visible:outline-none active:bg-[var(--casa-ground)]"
                               >
-                                {Icon ? (
-                                  <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-full', meaning.circle)}>
-                                    <Icon className="size-5" aria-hidden />
-                                  </span>
-                                ) : null}
+                                {Icon ? <IconBadge icon={Icon} meaning={dropdown?.meaning ?? 'orientation'} /> : null}
                                 <span className="min-w-0 flex-1">
                                   <span
                                     className={cn(

@@ -36,3 +36,12 @@ export const meaningClasses: Record<Meaning, { bar: string; circle: string; link
     hover: 'hover:bg-[var(--casa-sun)]/[0.06] hover:ring-[color:var(--casa-sun)]/60',
   },
 };
+
+/** A search result's colour, by what it is (the search page and the header's search). */
+export const searchResultMeaning = {
+  pages: 'orientation',
+  courses: 'courses',
+  exams: 'exams',
+  faq: 'orientation',
+  news: 'orientation',
+} as const satisfies Record<string, Meaning>;

@@ -34,7 +34,6 @@ import { coursePlan, CourseItemFields, ExamAddOn, planRowDates, planRowSchedule 
 import type { CourseFormData, CourseFormSubmission } from '@/components/registration/course-form-types';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
-import { meaningClasses } from '@/config/brand/meaning';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
@@ -48,6 +47,7 @@ import {
   requiresLevelField,
 } from '@/lib/validation/registration-submissions';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 type FormData = CourseFormData;
 type FormSubmissionData = CourseFormSubmission;
@@ -539,9 +539,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
             <div className={cn(formTileClassName, 'space-y-3')}>
               <div className="flex items-center gap-3">
-                <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses.arrival.circle)}>
-                  <Home className="size-4" aria-hidden />
-                </span>
+                <IconBadge icon={Home} meaning="arrival" />
                 <p className="text-sm font-semibold text-[var(--casa-ink)]">
                   {t('Accommodation (optional)', 'Unterkunft (optional)')}
                 </p>

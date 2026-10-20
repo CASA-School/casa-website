@@ -148,7 +148,7 @@ export function EditorialSplit({
         <ul className={cn('mt-8 grid gap-x-8 gap-y-4 border-t border-[color:var(--casa-sand)] pt-6', pointColumns(bullets.length))}>
           {bullets.map((bullet) => (
             <li key={bullet} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)] md:text-base">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-blue)] md:mt-1" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-accent-text)] md:mt-1" aria-hidden />
               <span>{bullet}</span>
             </li>
           ))}

@@ -109,7 +109,7 @@ export default async function CareersPage() {
                 className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
               >
                 {copy.noOpeningsCta}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </article>
           ) : (
@@ -127,7 +127,7 @@ export default async function CareersPage() {
                     <article className="flex h-full flex-col rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 shadow-[var(--shadow-card)]">
                       <div className="flex items-center justify-between gap-3">
                         <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
-                          <Briefcase className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
+                          <Briefcase className="h-4 w-4 text-[var(--casa-accent-text)]" />
                           {copy.openingLabel}
                         </p>
                         {position.isFeatured ? (
@@ -204,7 +204,7 @@ export default async function CareersPage() {
                           className="inline-flex items-center gap-1 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
                         >
                           {copy.apply}
-                          <ArrowRight className="h-3.5 w-3.5" />
+                          <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
                     </article>

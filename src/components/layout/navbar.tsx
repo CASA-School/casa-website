@@ -8,6 +8,7 @@ import { Globe, Menu } from 'lucide-react';
 
 import { Logo } from '@/components/ui/logo';
 import { Button } from '@/components/ui/button';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { Container } from '@/components/ui/container';
 import { HeaderSearchPopover } from '@/components/layout/header-search-popover';
 import { MobileNav } from '@/components/layout/mobile-nav';
@@ -562,16 +563,21 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                           href={subItem.href}
                                           aria-current={isActivePath(subItem.href) ? 'page' : undefined}
                                           className={cn(
-                                            'group/item flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[var(--casa-canvas)]',
+                                            'group/item flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[var(--casa-canvas)]',
                                             isActivePath(subItem.href)
                                               ? 'bg-[var(--casa-surface-subtle)] text-[var(--casa-ink)]'
                                               : 'text-[var(--casa-ink)]'
                                           )}
                                           onClick={closeDropdown}
                                         >
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[color:var(--casa-sand)] bg-white text-[var(--casa-text-subtle)] transition-colors group-hover/item:border-[var(--casa-blue)]/20 group-hover/item:text-[var(--casa-accent-text)]">
-                                          {Icon ? <Icon className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-[var(--casa-sand)]" />}
-                                        </div>
+                                        {/* The phone menu's badge: the area's logo colour (2026-10-20, was a grey bordered square). */}
+                                        {Icon ? (
+                                          <IconBadge icon={Icon} meaning={dropdown.meaning ?? 'orientation'} />
+                                        ) : (
+                                          <span aria-hidden className="flex size-10 shrink-0 items-center justify-center">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--casa-sand)]" />
+                                          </span>
+                                        )}
 
                                         <div>
                                           <p className="text-sm font-semibold text-[var(--casa-ink)] group-hover/item:text-[var(--casa-accent-text)]">

@@ -1,6 +1,7 @@
 import { Compass, GraduationCap, HeartHandshake, LaptopMinimalCheck, MessageCircle, NotebookPen, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
 
 import { CasaImage } from '@/components/ui/casa-image';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { TextCta } from '@/components/ui/text-cta';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { LEVELS_PATH } from '@/config/content/cefr-levels';
@@ -195,15 +196,16 @@ export function CourseLevelGoals({
         turned down a grid of icon cards twice („basic“, then a dark panel of numbered golden tiles:
         „not premium, the numbers are redundant“). It is a bento now, carried by CASA's own
         photographs: the class with its teacher large, the shared breakfast wide, the walk through
-        Bremen in the corner, and the other five as calm white tiles, a fine line icon and the
-        feature in the display serif. Four across from `lg` (three rows), two from `sm`; on a phone one
+        Bremen in the corner, and the other five as calm white tiles, the icon in a badge of its
+        meaning colour (config/content/school-features) and the feature in the display serif at
+        20px, the size below which Playfair's hairlines break up. Four across from `lg` (three rows), two from `sm`; on a phone one
         column, the five as rows with the icon beside the feature, since the serif in half a phone's
         width broke „Zusatzmaterial“ mid-word. Nothing moves on hover: the tiles are not links.
       */}
       {features.length ? (
         <div className="mt-12">
           <h3 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] md:text-3xl">{featuresTitle}</h3>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:mt-8 lg:auto-rows-[12.5rem] lg:grid-cols-4">
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:mt-8 lg:auto-rows-[14rem] lg:grid-cols-4">
             {features.map((feature) => {
               const FeatureIcon = FEATURE_ICONS[feature.icon];
               if (feature.photo) {
@@ -212,7 +214,7 @@ export function CourseLevelGoals({
                     key={feature.icon}
                     className={cn(
                       'relative isolate flex items-end overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] p-5 shadow-[var(--shadow-card)] lg:p-6',
-                      PHOTO_TILE[feature.icon] ?? 'h-48 sm:h-auto sm:min-h-[9.5rem]'
+                      PHOTO_TILE[feature.icon] ?? 'h-48 sm:h-auto sm:min-h-[11rem]'
                     )}
                   >
                     <CasaImage
@@ -235,10 +237,10 @@ export function CourseLevelGoals({
               return (
                 <li
                   key={feature.icon}
-                  className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-[var(--shadow-soft)] sm:min-h-[9.5rem] sm:flex-col sm:items-start sm:justify-between sm:gap-5 sm:p-5 lg:p-6"
+                  className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-[var(--shadow-soft)] sm:min-h-[11rem] sm:flex-col sm:items-start sm:justify-between sm:gap-5 sm:p-5 lg:p-6"
                 >
-                  <FeatureIcon aria-hidden className="h-7 w-7 shrink-0 text-[var(--casa-ink)]" strokeWidth={1.4} />
-                  <h4 className="text-lg font-semibold leading-snug text-[var(--casa-ink)] [font-family:var(--font-display),Georgia,serif]">
+                  <IconBadge icon={FeatureIcon} meaning={feature.meaning ?? 'courses'} size="lg" />
+                  <h4 className="text-xl font-semibold leading-snug text-[var(--casa-ink)] [font-family:var(--font-display),Georgia,serif]">
                     {feature.label}
                   </h4>
                 </li>

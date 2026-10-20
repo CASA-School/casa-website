@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -249,7 +249,7 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
             <div className="mt-8 flex justify-end border-t border-[var(--casa-sand)] pt-5">
               <Button variant="prism" size="lg" disabled={!ready} onClick={() => setDetails(true)}>
                 {t.next}
-                <ChevronRight aria-hidden />
+                <ArrowRight aria-hidden />
               </Button>
             </div>
           </>

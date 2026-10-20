@@ -4,6 +4,7 @@ import { Building2, ChartNoAxesColumn, Check, Mail } from 'lucide-react';
 import { HeroSurface } from '@/components/heroes/shared';
 import { KlettLevelTests } from '@/components/sections';
 import { Container } from '@/components/ui/container';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { TextCta } from '@/components/ui/text-cta';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getPlacementNarrative } from '@/lib/content/repository';
@@ -165,9 +166,7 @@ export default async function PlacementTestPage() {
         <Container>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
             <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] sm:p-8">
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-coral)]/14 text-[var(--casa-coral)]">
-                <Building2 className="h-5 w-5" aria-hidden />
-              </div>
+              <IconBadge icon={Building2} meaning="orientation" size="lg" className="mb-4" />
               <h2 className="text-2xl font-bold tracking-tight">{copy.inPersonTitle}</h2>
               <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{copy.inPersonBody}</p>
               <dl className="mt-5 grid content-start gap-3 sm:grid-cols-2">
@@ -197,9 +196,7 @@ export default async function PlacementTestPage() {
 
             <div className="grid gap-6">
               <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]">
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                  <Check className="h-5 w-5" aria-hidden />
-                </div>
+                <IconBadge icon={Check} meaning="courses" size="lg" className="mb-4" />
                 <h2 className="text-2xl font-bold tracking-tight">{copy.beginnerTitle}</h2>
                 <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.beginnerBody}</p>
                 <div className="mt-6">
@@ -207,9 +204,7 @@ export default async function PlacementTestPage() {
                 </div>
               </article>
               <article className="flex flex-col rounded-3xl bg-white p-7 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)]">
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-                  <ChartNoAxesColumn className="h-5 w-5" aria-hidden />
-                </div>
+                <IconBadge icon={ChartNoAxesColumn} meaning="orientation" size="lg" className="mb-4" />
                 <h2 className="text-2xl font-bold tracking-tight">{copy.levelsTitle}</h2>
                 <p className="mt-3 flex-1 text-base leading-relaxed text-[var(--casa-muted)]">{copy.levelsBody}</p>
                 <div className="mt-6">

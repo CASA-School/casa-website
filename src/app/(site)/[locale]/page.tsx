@@ -15,6 +15,7 @@ import { TextCta } from '@/components/ui/text-cta';
 import { BandSeam } from '@/components/ui/band-seam';
 import { CardRail } from '@/components/ui/card-rail';
 import { Container } from '@/components/ui/container';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getCoursePhoto } from '@/config/courses/course-photos';
@@ -868,9 +869,7 @@ export default async function HomePage() {
             {tandemProgram ? (
               <article className="flex flex-col justify-between rounded-xl bg-[var(--casa-warm-panel)] p-6 md:col-span-2 md:p-7 lg:col-span-1 lg:h-[23rem]">
                 <div>
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-[var(--casa-accent-text)]" aria-hidden>
-                    <TandemIcon className="h-6 w-6" />
-                  </span>
+                  <IconBadge icon={TandemIcon} meaning="orientation" size="lg" />
                   <h3 className="mt-5 text-xl font-bold text-[var(--casa-ink)]">{tandemProgram.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemProgram.summary}</p>
                 </div>

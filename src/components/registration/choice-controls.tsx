@@ -3,10 +3,11 @@
 import { CheckCircle2, type LucideIcon } from 'lucide-react';
 
 import { formErrorClassName, formFieldGroupClassName, formHintClassName, formLabelClassName, RequiredMark } from '@/components/forms/form-styles';
-import { meaningClasses, type Meaning } from '@/config/brand/meaning';
+import type { Meaning } from '@/config/brand/meaning';
 import type { ContentLocale } from '@/lib/content/types';
 import { clockRange, dateTileParts } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 /*
  * The registration forms' choices (2026-10-05): chips for a kind of course or
@@ -43,9 +44,7 @@ export function ChoiceChip({ name, value, checked, icon: Icon, meaning, title, m
       )}
     >
       <input type="radio" name={name} value={value} checked={checked} onChange={onSelect} className="sr-only" />
-      <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', meaningClasses[meaning].circle)}>
-        <Icon className="size-[1.125rem]" aria-hidden />
-      </span>
+      <IconBadge icon={Icon} meaning={meaning} />
       <span className="min-w-0 leading-snug">
         <span className="block text-sm font-semibold text-[var(--casa-ink)]">{title}</span>
         {meta ? <span className="block text-xs text-[var(--casa-muted)]">{meta}</span> : null}

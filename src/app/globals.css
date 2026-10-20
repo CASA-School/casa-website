@@ -804,6 +804,22 @@ h3 {
   letter-spacing: 0.006em;
 }
 
+/*
+ * ONE LINE WEIGHT FOR EVERY ICON (2026-10-20). The icon set (lib/icons/streamline-lucide-adapter)
+ * draws on a 14-unit grid with a 1-unit line, so its line grew with the icon: 1.1px at 16px, 1.7px
+ * at 24px, 2px at 28px. Icons of different sizes on one page read as different sets. The line is
+ * now 1.5px on screen at every size; an icon's own `strokeWidth` sets another (in px).
+ */
+@layer base {
+  svg[data-casa-icon] {
+    stroke-width: var(--casa-icon-stroke, 1.5px);
+  }
+
+  svg[data-casa-icon] :is(path, circle, ellipse, line, polyline, polygon, rect) {
+    vector-effect: non-scaling-stroke;
+  }
+}
+
 [data-casa-site-frame] {
   margin-inline: auto;
   width: 100%;

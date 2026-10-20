@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { Search } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { IconBadge } from '@/components/ui/icon-badge';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
@@ -71,10 +72,8 @@ export function UnifiedSearchPanel({ locale, defaultScope = 'all', className }: 
 
   return (
     <section data-reveal="true" className={cn('rounded-xl border border-[color:var(--casa-sand)] bg-white p-5 shadow-[var(--shadow-soft)] md:p-6', className)}>
-      <h2 className="flex items-center gap-2 text-xl font-bold text-[var(--casa-ink)] md:text-2xl">
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-          <Search className="h-4 w-4" aria-hidden="true" />
-        </span>
+      <h2 className="flex items-center gap-3 text-xl font-bold text-[var(--casa-ink)] md:text-2xl">
+        <IconBadge icon={Search} meaning="orientation" />
         {dictionary.title}
       </h2>
 
