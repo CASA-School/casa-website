@@ -228,9 +228,8 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
    */
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('courseId')) return;
-    const chosen = document.querySelector<HTMLInputElement>('input[name="course-0-option"]:checked');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    chosen?.closest('label')?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    document.getElementById('course-0-option')?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
   }, []);
 
   const onSubmit = async (data: FormSubmissionData) => {

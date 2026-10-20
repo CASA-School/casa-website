@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
-import { choiceLook } from '@/components/registration/choice-controls';
+import { formControlClassName } from '@/components/forms/form-styles';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from '@/i18n/navigation';
 import type { ContentLocale } from '@/lib/content/types';
-import { dateTileParts, formatDay, termRange } from '@/lib/registration/term-format';
-import { cn } from '@/lib/utils';
+import { termRange } from '@/lib/registration/term-format';
 
 export type CourseTermGroup = {
   key: string;
@@ -17,7 +17,7 @@ export type CourseTermGroup = {
   daytime: string;
   /** "Mo–Fr · 09:00–12:30". */
   schedule: string;
-  /** "Mo–Fr" and "09:00–12:30", for a slot named by its days. */
+  /** "Montag und Mittwoch" or "Mo–Fr", for a slot named by its days. */
   days: string;
   time: string;
   /** Only terms a learner can still book, soonest first. */
@@ -33,171 +33,88 @@ export type CourseTermGroup = {
 };
 
 /**
- * KURSTERMINE AS A CHOICE, NOT A TABLE (Rahman, 2026-10-20: „rows and columns of excel … can we sell
- * courses like this?").
- *
- * It was the term list in two columns, every term a row, past and running ones included, and a
- * reader had to work out from the column head which week they were choosing and from the row what
- * they would be booking. Now it asks the two questions the registration form asks, in its look
- * (choiceLook, the date tiles), and says what is being booked before anyone clicks:
- *
- *   1. Wann möchtest du lernen? — the slots as cards, „Vormittags · Mo–Fr · 09:00–12:30";
- *   2. Wann möchtest du starten? — that slot's starts as tiles, the next one named;
- *   then „Deine Auswahl": the course, the slot, the dates, and one button that opens the form with
- *   all of it chosen (`?courseId=`, getCourseRegistrationCatalog). The level is the form's one
- *   question left, said under the button with the free placement test beside it.
- *
- * Only bookable terms: a running or past term is not something to sell, and the facts rail already
- * names the next start. A format with one slot skips the first question.
+ * KURSTERMINE AS OFFERS (Rahman, 2026-10-20). It was the term list in two columns, every term a row
+ * („rows and columns of excel … can we sell courses like this?"), then a chooser of boxed date
+ * tiles („awful"). Now each weekly slot is one card, a thing to book: its name („Vormittags", or the
+ * days where two slots share a part of the day), its hours, the start as a dropdown like the
+ * registration form's (the next one chosen), and „Anmelden", which opens the form with the course,
+ * the slot and the start chosen (`?courseId=`). Only terms a learner can still book.
  */
 export function CourseTermTable({
   groups,
   locale,
-  courseName,
   note,
 }: {
   groups: CourseTermGroup[];
   locale: ContentLocale;
-  courseName: string;
   note?: string;
 }) {
   const { say } = useSiteCopy();
   const open = groups.filter((group) => group.terms.length > 0);
-  const [slotKey, setSlotKey] = useState(open[0]?.key ?? '');
-  const slot = open.find((group) => group.key === slotKey) ?? open[0];
-  const [termId, setTermId] = useState(slot?.terms[0]?.id ?? '');
-
-  if (!slot) {
+  if (open.length === 0) {
     return null;
   }
 
-  const term = slot.terms.find((candidate) => candidate.id === termId) ?? slot.terms[0];
-  const chooseSlot = (key: string) => {
-    setSlotKey(key);
-    setTermId(open.find((group) => group.key === key)?.terms[0]?.id ?? '');
-  };
-  const askSlot = open.length > 1;
-  // Slots named by the part of the day, unless that does not tell them apart (two evening slots): then by their days.
+  // Named by the part of the day, unless that does not tell the slots apart (two evening slots).
   const byDays = new Set(open.map((group) => group.daytime)).size < open.length;
-  const slotTitle = (group: CourseTermGroup) => (byDays ? group.days : group.daytime) || group.schedule;
-  const slotDetail = (group: CourseTermGroup) => (byDays ? [group.daytime, group.time] : [group.schedule]).filter(Boolean).join(' · ');
 
   return (
     <section>
       <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{say(locale, 'Kurstermine', 'Course dates')}</h2>
-
-      <div className="mt-7 rounded-2xl bg-white p-5 shadow-[var(--shadow-card)] sm:p-7 lg:p-8">
-        {askSlot ? (
-          <fieldset>
-            <legend className="flex items-center gap-2.5 text-base font-semibold text-[var(--casa-ink)]">
-              <StepNumber>1</StepNumber>
-              {say(locale, 'Wann möchtest du lernen?', 'When would you like to learn?')}
-            </legend>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {open.map((group) => {
-                const checked = group.key === slot.key;
-                return (
-                  <label
-                    key={group.key}
-                    className={cn(
-                      'relative flex cursor-pointer flex-col rounded-xl border px-4 py-3.5 transition-[border-color,background-color,box-shadow] duration-150',
-                      choiceLook.focus,
-                      checked ? choiceLook.checked : choiceLook.idle
-                    )}
-                  >
-                    <input type="radio" name="term-slot" value={group.key} checked={checked} onChange={() => chooseSlot(group.key)} className="sr-only" />
-                    <span className="pr-6 text-base font-semibold text-[var(--casa-ink)]">{slotTitle(group)}</span>
-                    {slotDetail(group) !== slotTitle(group) ? (
-                      <span className="mt-0.5 text-sm tabular-nums text-[var(--casa-muted)]">{slotDetail(group)}</span>
-                    ) : null}
-                    {checked ? <Check aria-hidden className="absolute right-3.5 top-3.5 h-4 w-4 text-[var(--casa-accent-text)]" /> : null}
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-        ) : null}
-
-        <fieldset className={askSlot ? 'mt-8' : undefined}>
-          <legend className="flex items-center gap-2.5 text-base font-semibold text-[var(--casa-ink)]">
-            {askSlot ? <StepNumber>2</StepNumber> : null}
-            {say(locale, 'Wann möchtest du starten?', 'When would you like to start?')}
-          </legend>
-          {!askSlot ? (
-            <p className="mt-1 text-sm tabular-nums text-[var(--casa-muted)]">{[slot.daytime, slot.schedule].filter(Boolean).join(' · ')}</p>
-          ) : null}
-          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] gap-2.5">
-            {slot.terms.map((candidate, index) => {
-              const parts = dateTileParts(candidate.start, locale);
-              const checked = candidate.id === term.id;
-              const tag = candidate.joinable
-                ? say(locale, 'Einstieg möglich', 'Join now')
-                : index === 0
-                  ? say(locale, 'Nächster Start', 'Next start')
-                  : null;
-              return (
-                <label
-                  key={candidate.id}
-                  className={cn(
-                    'flex cursor-pointer flex-col items-center rounded-xl border px-2 pb-3 pt-2.5 text-center transition-[border-color,background-color,box-shadow] duration-150',
-                    choiceLook.focus,
-                    checked ? choiceLook.checked : choiceLook.idle
-                  )}
-                >
-                  <input type="radio" name="term-start" value={candidate.id} checked={checked} onChange={() => setTermId(candidate.id)} className="sr-only" />
-                  <span className="sr-only">{tag ? `${parts.full}, ${tag}` : parts.full}</span>
-                  <span aria-hidden className={cn('text-3xl font-bold leading-tight tabular-nums', checked ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]')}>
-                    {parts.day}
-                  </span>
-                  <span aria-hidden className="text-sm font-medium text-[var(--casa-ink)]">{parts.monthYear}</span>
-                  <span aria-hidden className="mt-1 text-xs text-[var(--casa-muted)]">
-                    {say(locale, 'bis {date}', 'to {date}', { date: formatDay(candidate.end, locale) })}
-                  </span>
-                  {tag ? (
-                    <span aria-hidden className="mt-2 whitespace-nowrap rounded-full bg-[var(--casa-blue-tint)] px-2 py-0.5 text-[0.6875rem] font-semibold leading-tight text-[var(--casa-accent-text)]">
-                      {tag}
-                    </span>
-                  ) : null}
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <div className="mt-8 flex flex-col gap-5 border-t border-[color:var(--casa-sand)] pt-6 md:flex-row md:items-center md:justify-between">
-          <div aria-live="polite">
-            <p className="text-sm text-[var(--casa-muted)]">{say(locale, 'Deine Auswahl', 'Your choice')}</p>
-            <p className="mt-1 text-lg font-semibold leading-snug text-[var(--casa-ink)]">
-              {courseName}
-              {slot.daytime ? <span className="font-normal text-[var(--casa-muted)]"> · {slot.daytime}</span> : null}
-            </p>
-            <p className="mt-0.5 text-base tabular-nums text-[var(--casa-ink)]">{termRange(term.start, term.end, locale)}</p>
-            <p className="text-sm tabular-nums text-[var(--casa-muted)]">{slot.schedule}</p>
-          </div>
-          <Button asChild variant="prism" size="lg" className="shrink-0">
-            <Link href={term.href}>
-              {say(locale, 'Weiter zur Anmeldung', 'Continue to registration')}
-              <ArrowRight aria-hidden className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        <p className="mt-4 text-sm leading-relaxed text-[var(--casa-muted)]">
-          {say(locale, 'Dein Niveau wählst du in der Anmeldung. Du bist unsicher?', 'You choose your level when you register. Not sure?')}{' '}
-          <Link href="/placement-test" className="font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline">
-            {say(locale, 'Kostenloser Einstufungstest', 'Free placement test')}
-          </Link>
-        </p>
+      <div className="mt-7 grid gap-5 md:grid-cols-2">
+        {open.map((group) => (
+          <TermOffer
+            key={group.key}
+            group={group}
+            title={(byDays ? group.days : group.daytime) || group.schedule}
+            detail={(byDays ? [group.daytime, group.time] : [group.schedule]).filter(Boolean).join(' · ')}
+            locale={locale}
+          />
+        ))}
       </div>
-
       {note ? <p className="mt-6 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">{note}</p> : null}
     </section>
   );
 }
 
-function StepNumber({ children }: { children: React.ReactNode }) {
+function TermOffer({ group, title, detail, locale }: { group: CourseTermGroup; title: string; detail: string; locale: ContentLocale }) {
+  const { say } = useSiteCopy();
+  const [termId, setTermId] = useState(group.terms[0].id);
+  const term = group.terms.find((candidate) => candidate.id === termId) ?? group.terms[0];
+  const fieldId = `term-${group.key.replace(/[^a-z0-9]+/gi, '-')}`;
+
   return (
-    <span aria-hidden className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--casa-ink-deep)] text-xs font-bold text-white">
-      {children}
-    </span>
+    <article className="flex min-w-0 flex-col rounded-2xl bg-white p-6 shadow-[var(--shadow-card)] sm:p-7">
+      <h3 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">{title}</h3>
+      {detail && detail !== title ? <p className="mt-1.5 text-base tabular-nums text-[var(--casa-muted)]">{detail}</p> : null}
+
+      <label htmlFor={fieldId} className="mt-6 block text-sm font-semibold text-[var(--casa-ink)]">
+        {say(locale, 'Starttermin', 'Start date')}
+      </label>
+      <Select value={term.id} onValueChange={setTermId}>
+        <SelectTrigger id={fieldId} className={`${formControlClassName} mt-2 min-w-0`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {group.terms.map((candidate, index) => (
+            <SelectItem key={candidate.id} value={candidate.id}>
+              <span className="tabular-nums">{termRange(candidate.start, candidate.end, locale)}</span>
+              {candidate.joinable ? (
+                <span className="text-[var(--casa-muted)]"> · {say(locale, 'Einstieg möglich', 'Join now')}</span>
+              ) : index === 0 ? (
+                <span className="text-[var(--casa-muted)]"> · {say(locale, 'Nächster Start', 'Next start')}</span>
+              ) : null}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Button asChild variant="prism" size="lg" className="mt-5 w-full">
+        <Link href={term.href}>
+          {say(locale, 'Anmelden', 'Register')}
+          <ArrowRight aria-hidden className="h-4 w-4" />
+        </Link>
+      </Button>
+    </article>
   );
 }
