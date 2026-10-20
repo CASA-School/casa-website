@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { CoursePracticalDetails } from '@/components/courses/course-practical-details';
 import { CourseTermTable } from '@/components/courses/course-term-table';
-import type { CourseTermGroup } from '@/components/courses/course-term-table';
+import type { CourseTermDate, CourseTermLevel } from '@/components/courses/course-term-table';
 import { SpecialCourseCatalogue } from '@/components/courses/special-course-catalogue';
 import { publishedPrices } from '@/lib/content/published-prices.server';
 import { HeroCUtilityRail } from '@/components/heroes';
@@ -20,7 +20,7 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import type { ContentLocale, TermDaytime } from '@/lib/content/types';
+import type { TermDaytime } from '@/lib/content/types';
 import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
@@ -36,9 +36,8 @@ import { getCourseContactKey, getCourseLevelGoals, getCoursePhotoKey, getCourseP
 import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
-import { bremenToday, isCourseTermBookable, isSecondHalfBookable, nextCourseStartDate, scheduleDays } from '@/lib/content/bookability';
-import { secondHalfStart } from '@/lib/registration/halves';
-import { levelChoiceGroups, soldByLevel } from '@/lib/registration/levels';
+import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
+import { levelOf, soldByLevel } from '@/lib/registration/levels';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 import { daytimeLabel, parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { getAvailableLevels, getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
@@ -176,58 +175,53 @@ export default async function CourseDetailPage({
   };
 
   /*
-   * Group the published terms by weekly slot, named as the registration form names it
-   * ("Vormittags · Mo–Fr · 09:00–12:30", lib/registration/term-format).
-   *
-   * The group label has to carry the days as well as the time. The intensive
-   * course's two cohorts are not "the same course at two times of day": mornings
-   * run Mon-Fri and afternoons Mon-Thu, so choosing the afternoon is choosing a
-   * four-day week. That difference belongs in the label a reader compares on,
-   * not in a footnote.
-   *
-   * A term opens the registration form with itself chosen (2026-10-20); a format that is not
-   * registered online keeps its terms on this page.
+   * Kurstermine (2026-10-20): every start a learner can book, in one list whatever its time of day,
+   * so CASA assigns the group and can balance them (Rahman). Where the starts differ by their days
+   * (the evening course), each start says its days; the times are one sentence under the choice.
    */
-  const termGroups: CourseTermGroup[] = (() => {
-    const groups = new Map<string, CourseTermGroup>();
-
-    // Only what a learner can still book: the section is a choice now, not the year's table. An
-    // intensive term under way whose second half is ahead is offered at its second half.
-    const secondHalfOnly = detail.instances.filter((courseInstance) => isSecondHalfBookable(courseInstance, detail.course.slug, today));
-    const offered = [...bookableInstances, ...secondHalfOnly].sort((a, b) => a.start_date.localeCompare(b.start_date));
-    for (const courseInstance of offered) {
-      const schedule = parseSchedule(courseInstance.schedule, locale);
-      const daytime = schedule?.daytime ? daytimeLabel(schedule.daytime, locale) : '';
-      const scheduleText = schedule ? scheduleLine(schedule, locale) : '';
-      const key = `${daytime}|${scheduleText}`;
-
-      if (!groups.has(key)) {
-        groups.set(key, { key, daytime, schedule: scheduleText, days: slotDays(courseInstance.schedule, schedule?.days ?? '', locale), time: schedule?.time ?? '', terms: [] });
-      }
-
-      groups.get(key)!.terms.push({
-        id: courseInstance.id,
-        start: courseInstance.start_date,
-        end: courseInstance.end_date,
-        href: isQuoteOnly(detail.course)
-          ? `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`
-          : `/registration/course?courseId=${encodeURIComponent(courseInstance.id)}`,
-        joinable: !secondHalfOnly.includes(courseInstance) && !nextCourseStartDate(courseInstance, detail.course.slug, today),
-        secondHalfStart: soldByLevel(detail.course.slug)
-          ? secondHalfStart(courseInstance.start_date, courseInstance.end_date, scheduleDays(courseInstance.schedule))
-          : null,
-        secondHalfOnly: secondHalfOnly.includes(courseInstance),
-      });
+  const termSchedules = new Map<string, { daytime: TermDaytime | null; days: string; time: string; line: string }>();
+  for (const courseInstance of bookableInstances) {
+    const schedule = parseSchedule(courseInstance.schedule, locale);
+    if (schedule) {
+      termSchedules.set(scheduleLine(schedule, locale), { daytime: schedule.daytime, days: schedule.days, time: schedule.time, line: scheduleLine(schedule, locale) });
     }
-
-    // Mornings first, as the registration form orders its schedules.
-    const rank = (group: CourseTermGroup) => ['morning', 'fullDay', 'afternoon', 'evening'].findIndex((daytime) => group.daytime === daytimeLabel(daytime as TermDaytime, locale));
-    return [...groups.values()].sort((a, b) => (rank(a) < 0 ? 9 : rank(a)) - (rank(b) < 0 ? 9 : rank(b)));
+  }
+  const scheduleList = [...termSchedules.values()];
+  const daysTellApart = scheduleList.length > 1 && new Set(scheduleList.map((item) => item.daytime)).size < scheduleList.length;
+  const termDates: CourseTermDate[] = bookableInstances
+    .map((courseInstance) => ({
+      id: courseInstance.id,
+      start: courseInstance.start_date,
+      end: courseInstance.end_date,
+      href: isQuoteOnly(detail.course)
+        ? `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`
+        : `/registration/course?courseId=${encodeURIComponent(courseInstance.id)}`,
+      joinable: !nextCourseStartDate(courseInstance, detail.course.slug, today),
+      days: daysTellApart ? parseSchedule(courseInstance.schedule, locale)?.days ?? '' : '',
+    }))
+    .sort((a, b) => Number(b.joinable) - Number(a.joinable) || a.start.localeCompare(b.start));
+  const termScheduleNote = (() => {
+    if (scheduleList.length === 0) return '';
+    const part = (item: (typeof scheduleList)[number]) =>
+      item.daytime ? `${daytimeLabel(item.daytime, locale)} (${[item.days, item.time].filter(Boolean).join(', ')})` : item.line;
+    if (scheduleList.length === 1) return part(scheduleList[0]);
+    if (daysTellApart) {
+      const first = scheduleList[0];
+      return [first.daytime ? daytimeLabel(first.daytime, locale) : '', first.time].filter(Boolean).join(', ');
+    }
+    return say(locale, '{slots}. Die Gruppe teilen wir dir nach deiner Anmeldung zu.', '{slots}. We assign your group after you register.', {
+      // „Vormittags (…) oder nachmittags (…)": the second part of the day starts lower case mid-sentence.
+      slots: scheduleList.map((item, i) => (i > 0 ? part(item).charAt(0).toLowerCase() + part(item).slice(1) : part(item))).join(say(locale, ' oder ', ' or ')),
+    });
   })();
 
-  // The card asks the level the registration asks (lib/registration/levels), so the form opens with it.
-  const termLevels = requiresLevelField(detail.course.slug)
-    ? levelChoiceGroups(detail.course.slug, getAvailableLevels(detail.course.level_min, detail.course.level_max), locale)
+  // The levels in a row (lib/registration/levels): the whole level where the format sells one, else its first half.
+  const availableLevels = getAvailableLevels(detail.course.level_min, detail.course.level_max);
+  const termLevels: CourseTermLevel[] = requiresLevelField(detail.course.slug)
+    ? [...new Set(availableLevels.map(levelOf))].map((level) => ({
+        label: level,
+        value: soldByLevel(detail.course.slug) || !availableLevels.includes(`${level}.1`) ? level : `${level}.1`,
+      }))
     : [];
 
   // Each course format has an Ansprechpartner. Formats without a confirmed
@@ -575,8 +569,10 @@ export default async function CourseDetailPage({
                   return (
                   <CourseTermTable
                     key={sectionKey}
-                    groups={termGroups}
+                    dates={termDates}
                     levels={termLevels}
+                    scheduleNote={termScheduleNote}
+                    weeks={soldByLevel(detail.course.slug) ? 8 : null}
                     locale={locale}
                     note={
                       detail.course.slug === 'bildungszeit'
@@ -912,16 +908,4 @@ export default async function CourseDetailPage({
       {interestCourse ? <InterestDialog course={interestCourse} locale={locale} /> : null}
     </main>
   );
-}
-
-/** A slot's days for a card title: two or so days by name („Montag und Mittwoch"), a run as it is („Mo–Fr"). */
-function slotDays(schedule: unknown, compact: string, locale: ContentLocale): string {
-  const days = (schedule as { days?: unknown } | null)?.days;
-  if (!Array.isArray(days) || days.length === 0 || days.length > 2) return compact;
-  const names: Record<string, [string, string]> = {
-    Mon: ['Montag', 'Monday'], Tue: ['Dienstag', 'Tuesday'], Wed: ['Mittwoch', 'Wednesday'], Thu: ['Donnerstag', 'Thursday'],
-    Fri: ['Freitag', 'Friday'], Sat: ['Samstag', 'Saturday'], Sun: ['Sonntag', 'Sunday'],
-  };
-  const named = days.map((day) => names[String(day)]?.[locale === 'de' ? 0 : 1] ?? String(day));
-  return named.join(locale === 'de' ? ' und ' : ' and ');
 }

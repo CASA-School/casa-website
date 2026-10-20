@@ -202,7 +202,8 @@ describe('course registration route', () => {
     const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: running.id, level: 'B1.2' }] }));
     expect(response.status).toBe(200);
     const stored = mocks.store.mock.calls[0][0];
-    expect(JSON.stringify(stored)).toContain('2. Hälfte ab 26. Okt. 2026');
+    expect(JSON.stringify(stored)).toContain('26. Okt. 2026 - 19. Nov. 2026 (2. Hälfte)');
+    expect(JSON.stringify(stored)).toContain('Vormittags oder nachmittags, CASA teilt die Gruppe zu');
   });
 
   it('refuses an exam date the exam catalogue does not offer', async () => {
@@ -232,7 +233,7 @@ describe('course registration route', () => {
       'A2 komplett · 8 Wochen',
       'B1 komplett · 8 Wochen',
     ]);
-    expect(rows[1].courseInstanceLabel).toBe('01. Feb. 2027 - 01. Apr. 2027 | Mo-Do 13:00-17:30 | CASA Bremen');
+    expect(rows[1].courseInstanceLabel).toBe('01. Feb. 2027 - 01. Apr. 2027 | Vormittags oder nachmittags, CASA teilt die Gruppe zu | CASA Bremen');
     expect(rows[2]).toMatchObject({ courseInstanceId: '', courseInstanceLabel: 'Termin wird noch festgelegt', levelCode: 'B1.1' });
     expect(new Set(rows.map((row: { requestId: string }) => row.requestId)).size).toBe(3);
   });

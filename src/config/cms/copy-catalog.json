@@ -300,16 +300,6 @@
   ],
   "pages": []
  },
- "t.ab-der-5-kurswoche.1saj8tm": {
-  "de": "ab der 5. Kurswoche",
-  "en": "from the fifth week",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.ab-einem-niveau-von.82hvcg": {
   "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
   "en": "You can join from level B1 upwards.",
@@ -332,6 +322,16 @@
   "pages": [
    "/courses/[slug]",
    "/registration/course"
+  ]
+ },
+ "t.ab.i4idfn": {
+  "de": "ab {date}",
+  "en": "from {date}",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.ab.zuehjf": {
@@ -4258,6 +4258,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.dein-niveau.c37azp": {
+  "de": "Dein Niveau",
+  "en": "Your level",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
   "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
   "en": "Your level of German decides which programmes are open to you and how much of everyday life you can manage without help.",
@@ -5272,6 +5282,16 @@
   "en": "The group comes together",
   "files": [
    "src/config/courses/course-page-content.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.die-gruppe-teilen-wir.1rp827p": {
+  "de": "{slots}. Die Gruppe teilen wir dir nach deiner Anmeldung zu.",
+  "en": "{slots}. We assign your group after you register.",
+  "files": [
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
   "pages": [
    "/courses/[slug]"
@@ -7806,9 +7826,9 @@
    "/calculator"
   ]
  },
- "t.einstieg-moeglich.em45ta": {
-  "de": "Einstieg möglich",
-  "en": "Join now",
+ "t.einstieg-in-den-laufenden.14qz0fk": {
+  "de": "Einstieg in den laufenden Kurs, bis {date}",
+  "en": "Join the running course, until {date}",
   "files": [
    "src/components/courses/course-term-table.tsx"
   ],
@@ -11694,6 +11714,16 @@
    "/careers/[slug]"
   ]
  },
+ "t.jetzt-einsteigen.1xx5upm": {
+  "de": "Jetzt einsteigen",
+  "en": "Join now",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.jeweils.1y2sb58": {
   "de": "jeweils",
   "en": "each",
@@ -13129,6 +13159,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.laeuft.b478k8": {
+  "de": "Läuft",
+  "en": "Running",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.lampe.hiavx3": {
@@ -14790,13 +14830,11 @@
   "en": "Next start",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx",
-   "src/app/(site)/[locale]/page.tsx",
-   "src/components/courses/course-term-table.tsx"
+   "src/app/(site)/[locale]/page.tsx"
   ],
   "pages": [
    "/",
-   "/courses",
-   "/courses/[slug]"
+   "/courses"
   ]
  },
  "t.naechster-termin.1x0fmar": {
@@ -14995,16 +15033,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.niveau-auswaehlen.1z0043x": {
-  "de": "Niveau auswählen…",
-  "en": "Choose a level…",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.niveau-finden.8937o4": {
   "de": "Niveau finden",
   "en": "Find your level",
@@ -15053,7 +15081,6 @@
   "en": "Level",
   "files": [
    "src/app/(site)/[locale]/exams/[code]/page.tsx",
-   "src/components/courses/course-term-table.tsx",
    "src/components/courses/special-course-catalogue.tsx"
   ],
   "pages": [
@@ -15197,6 +15224,16 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.oder.1vt7gpj": {
+  "de": " oder ",
+  "en": " or ",
+  "files": [
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.oeffentlicher-traeger-oder-foerd.mqfvv2": {
@@ -23128,6 +23165,7 @@
   "de": "{weeks} Wochen",
   "en": "{weeks} weeks",
   "files": [
+   "src/components/courses/course-term-table.tsx",
    "src/components/sections/cefr-level-rows.tsx"
   ],
   "pages": [

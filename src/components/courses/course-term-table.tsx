@@ -1,184 +1,186 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
-import { formControlClassName } from '@/components/forms/form-styles';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from '@/i18n/navigation';
 import type { ContentLocale } from '@/lib/content/types';
-import { isSecondHalf } from '@/lib/registration/halves';
-import type { LevelChoiceGroup } from '@/lib/registration/levels';
-import { termRange } from '@/lib/registration/term-format';
+import { formatStart } from '@/lib/registration/term-format';
+import { cn } from '@/lib/utils';
 
-export type CourseTermGroup = {
-  key: string;
-  /** The part of the day, "Vormittags"; empty when the schedule has no time. */
-  daytime: string;
-  /** "Mo–Fr · 09:00–12:30". */
-  schedule: string;
-  /** "Montag und Mittwoch" or "Mo–Fr", for a slot named by its days. */
+export type CourseTermDate = {
+  id: string;
+  start: string;
+  end: string;
+  /** The registration form with this term chosen; the course page for a format not registered online. */
+  href: string;
+  /** Begun and still open to join (an evening term). */
+  joinable: boolean;
+  /** „Mo + Mi", where the course's starts differ by their days (the evening course); else empty. */
   days: string;
-  time: string;
-  /** Terms a learner can still book, soonest first. */
-  terms: {
-    id: string;
-    start: string;
-    end: string;
-    /** The registration form with this term chosen; the course page for a format not registered online. */
-    href: string;
-    /** Begun and still open to join (an evening term). */
-    joinable: boolean;
-    /** An intensive term's second half: its first day, null where the term does not say (lib/registration/halves). */
-    secondHalfStart: string | null;
-    /** Begun, and open only at its second half. */
-    secondHalfOnly: boolean;
-  }[];
 };
 
+export type CourseTermLevel = { label: string; value: string };
+
 /**
- * KURSTERMINE AS OFFERS (Rahman, 2026-10-20). It was the term list in two columns, every term a row
- * („rows and columns of excel … can we sell courses like this?"), then a chooser of boxed date
- * tiles („awful"). Now each weekly slot is one card, a thing to book: its name („Vormittags", or the
- * days where two slots share a part of the day), its hours, the start as a dropdown like the
- * registration form's, and „Anmelden", which opens the form with all of it chosen.
+ * KURSTERMINE: A LEVEL AND A START (Rahman, 2026-10-20). After a two-column table, a tile chooser and
+ * a card per slot: „one row with levels like a1, a2, b1 … and the start dates, and don't define
+ * morning and afternoon so we can balance our number of students".
  *
- * THE LEVEL, AND A START AT THE SECOND HALF (Rahman: „you didn't add the course levels … and what if
- * someone wants to start from the second half"). One „Niveau" field above the cards asks what the form
- * asks (lib/registration/levels: „A2 komplett", A2.1, A2.2). At a second half the starts are the second
- * halves' first days, a term already under way among them while its second half is ahead, or „ab der
- * 5. Kurswoche" where the term does not say the date (lib/registration/halves). „Anmelden" carries the
- * level (`?courseId=…&level=…`), so the form opens with the course, the slot, the start and the level.
+ * So one card: the levels in a row (whole levels; the form asks a half where the format sells one),
+ * the starts in a row under their year, every start of the course in one list whatever its time of
+ * day, the choice said back in a line, and „Anmelden" with the course, the start and the level
+ * (`?courseId=…&level=…`). Morning and afternoon are a sentence under it: CASA assigns the group.
+ * Pills, not tiles or dropdowns; selected is the ink fill the site's primary buttons use.
  */
 export function CourseTermTable({
-  groups,
+  dates,
   levels,
+  scheduleNote,
+  weeks,
   locale,
   note,
 }: {
-  groups: CourseTermGroup[];
-  levels: LevelChoiceGroup[];
+  dates: CourseTermDate[];
+  levels: CourseTermLevel[];
+  /** How the course is timed, said once: „Vormittags (Mo–Fr, 09:00–12:30) oder nachmittags …". */
+  scheduleNote: string;
+  /** Weeks a whole level takes, where the format sells one (the intensive course): 8. */
+  weeks: number | null;
   locale: ContentLocale;
   note?: string;
 }) {
   const { say } = useSiteCopy();
   const [level, setLevel] = useState('');
-  const half = isSecondHalf(level);
-  const open = groups
-    .map((group) => ({ ...group, terms: group.terms.filter((term) => half || !term.secondHalfOnly) }))
-    .filter((group) => group.terms.length > 0);
-  if (open.length === 0) {
+  const [dateId, setDateId] = useState(dates[0]?.id ?? '');
+  if (dates.length === 0) {
     return null;
   }
 
-  // Named by the part of the day, unless that does not tell the slots apart (two evening slots).
-  const byDays = new Set(open.map((group) => group.daytime)).size < open.length;
+  const date = dates.find((candidate) => candidate.id === dateId) ?? dates[0];
+  const href = level ? `${date.href}${date.href.includes('?') ? '&' : '?'}level=${encodeURIComponent(level)}` : date.href;
+  const levelLabel = levels.find((candidate) => candidate.value === level)?.label;
+  const years = [...new Set(dates.map((candidate) => (candidate.joinable ? 'now' : candidate.start.slice(0, 4))))];
+  const dayMonth = (value: string) =>
+    new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
 
   return (
     <section>
       <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{say(locale, 'Kurstermine', 'Course dates')}</h2>
 
-      {levels.length > 0 ? (
-        <div className="mt-7 max-w-md">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <label htmlFor="term-level" className="text-sm font-semibold text-[var(--casa-ink)]">
-              {say(locale, 'Niveau', 'Level')}
-            </label>
-            <Link href="/placement-test" className="text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline">
-              {say(locale, 'Kostenloser Einstufungstest', 'Free placement test')}
-            </Link>
-          </div>
-          <Select value={level} onValueChange={setLevel}>
-            <SelectTrigger id="term-level" className={`${formControlClassName} mt-2 min-w-0`}>
-              <SelectValue placeholder={say(locale, 'Niveau auswählen…', 'Choose a level…')} />
-            </SelectTrigger>
-            <SelectContent>
-              {levels.map((group, index) => (
-                <Fragment key={group.level}>
-                  {index > 0 ? <SelectSeparator /> : null}
-                  <SelectGroup>
-                    {group.choices.map((choice) => (
-                      <SelectItem key={choice.value} value={choice.value}>
-                        {choice.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </Fragment>
+      <div className="mt-7 rounded-2xl bg-white p-6 shadow-[var(--shadow-card)] sm:p-8">
+        {levels.length > 0 ? (
+          <fieldset>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <legend className="text-sm font-semibold text-[var(--casa-ink)]">{say(locale, 'Dein Niveau', 'Your level')}</legend>
+              <Link href="/placement-test" className="text-sm font-semibold text-[var(--casa-accent-text)] underline-offset-4 hover:underline">
+                {say(locale, 'Kostenloser Einstufungstest', 'Free placement test')}
+              </Link>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {levels.map((candidate) => (
+                <Pill
+                  key={candidate.value}
+                  name="term-level"
+                  value={candidate.value}
+                  checked={candidate.value === level}
+                  onChange={() => setLevel(candidate.value === level ? '' : candidate.value)}
+                  className="min-w-14 justify-center font-bold"
+                >
+                  {candidate.label}
+                </Pill>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
+            </div>
+          </fieldset>
+        ) : null}
 
-      <div className="mt-7 grid gap-5 md:grid-cols-2">
-        {open.map((group) => (
-          <TermOffer
-            // A new level starts the card at its next start.
-            key={`${group.key}|${level}`}
-            group={group}
-            title={(byDays ? group.days : group.daytime) || group.schedule}
-            detail={(byDays ? [group.daytime, group.time] : [group.schedule]).filter(Boolean).join(' · ')}
-            level={level}
-            locale={locale}
-          />
-        ))}
+        <fieldset className={levels.length > 0 ? 'mt-7' : undefined}>
+          <legend className="text-sm font-semibold text-[var(--casa-ink)]">{say(locale, 'Starttermin', 'Start date')}</legend>
+          <div className="mt-3 space-y-3">
+            {years.map((year) => (
+              <div key={year} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-4">
+                <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-[var(--casa-muted)]">
+                  {year === 'now' ? say(locale, 'Läuft', 'Running') : year}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {dates
+                    .filter((candidate) => (candidate.joinable ? 'now' : candidate.start.slice(0, 4)) === year)
+                    .map((candidate) => (
+                      <Pill
+                        key={candidate.id}
+                        name="term-start"
+                        value={candidate.id}
+                        checked={candidate.id === date.id}
+                        onChange={() => setDateId(candidate.id)}
+                        label={formatStart(candidate.start, locale)}
+                      >
+                        <span className="tabular-nums">
+                          {candidate.joinable ? say(locale, 'Jetzt einsteigen', 'Join now') : dayMonth(candidate.start)}
+                        </span>
+                        {candidate.days ? <span className="font-normal opacity-70">{candidate.days}</span> : null}
+                      </Pill>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="mt-8 flex flex-col gap-5 border-t border-[color:var(--casa-sand)] pt-6 md:flex-row md:items-center md:justify-between">
+          <p aria-live="polite" className="text-base leading-relaxed text-[var(--casa-ink)]">
+            {levelLabel ? <span className="font-semibold">{levelLabel} · </span> : null}
+            {date.joinable
+              ? say(locale, 'Einstieg in den laufenden Kurs, bis {date}', 'Join the running course, until {date}', { date: formatStart(date.end, locale) })
+              : say(locale, 'ab {date}', 'from {date}', { date: formatStart(date.start, locale) })}
+            {weeks && levelLabel && !date.joinable ? <span className="text-[var(--casa-muted)]"> · {say(locale, '{weeks} Wochen', '{weeks} weeks', { weeks })}</span> : null}
+          </p>
+          <Button asChild variant="prism" size="lg" className="shrink-0">
+            <Link href={href}>
+              {say(locale, 'Anmelden', 'Register')}
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        {scheduleNote ? <p className="mt-4 text-sm leading-relaxed text-[var(--casa-muted)]">{scheduleNote}</p> : null}
       </div>
+
       {note ? <p className="mt-6 max-w-measure text-sm leading-relaxed text-[var(--casa-muted)]">{note}</p> : null}
     </section>
   );
 }
 
-function TermOffer({ group, title, detail, level, locale }: { group: CourseTermGroup; title: string; detail: string; level: string; locale: ContentLocale }) {
-  const { say } = useSiteCopy();
-  const half = isSecondHalf(level);
-  // At a second half a term is its second half: from its first day to the term's end.
-  const starts = group.terms
-    .map((term) => ({ ...term, from: half ? term.secondHalfStart ?? term.start : term.start, dated: !half || Boolean(term.secondHalfStart) }))
-    .sort((a, b) => a.from.localeCompare(b.from));
-  const [termId, setTermId] = useState(starts[0].id);
-  const term = starts.find((candidate) => candidate.id === termId) ?? starts[0];
-  const fieldId = `term-${group.key.replace(/[^a-z0-9]+/gi, '-')}`;
-  const href = level ? `${term.href}${term.href.includes('?') ? '&' : '?'}level=${encodeURIComponent(level)}` : term.href;
-
+function Pill({
+  name,
+  value,
+  checked,
+  onChange,
+  label,
+  className,
+  children,
+}: {
+  name: string;
+  value: string;
+  checked: boolean;
+  onChange: () => void;
+  /** What a screen reader says, where the visible text is short. */
+  label?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <article className="flex min-w-0 flex-col rounded-2xl bg-white p-6 shadow-[var(--shadow-card)] sm:p-7">
-      <h3 className="text-2xl font-bold leading-tight text-[var(--casa-ink)]">{title}</h3>
-      {detail && detail !== title ? <p className="mt-1.5 text-base tabular-nums text-[var(--casa-muted)]">{detail}</p> : null}
-
-      <label htmlFor={fieldId} className="mt-6 block text-sm font-semibold text-[var(--casa-ink)]">
-        {say(locale, 'Starttermin', 'Start date')}
-      </label>
-      <Select value={term.id} onValueChange={setTermId}>
-        <SelectTrigger id={fieldId} className={`${formControlClassName} mt-2 min-w-0`}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {starts.map((candidate, index) => {
-            const tag = !candidate.dated
-              ? say(locale, 'ab der 5. Kurswoche', 'from the fifth week')
-              : candidate.joinable
-                ? say(locale, 'Einstieg möglich', 'Join now')
-                : index === 0
-                  ? say(locale, 'Nächster Start', 'Next start')
-                  : null;
-            return (
-              <SelectItem key={candidate.id} value={candidate.id}>
-                <span className="tabular-nums">{termRange(candidate.from, candidate.end, locale)}</span>
-                {tag ? <span className="text-[var(--casa-muted)]"> · {tag}</span> : null}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-
-      <Button asChild variant="prism" size="lg" className="mt-5 w-full">
-        <Link href={href}>
-          {say(locale, 'Anmelden', 'Register')}
-          <ArrowRight aria-hidden className="h-4 w-4" />
-        </Link>
-      </Button>
-    </article>
+    <label
+      className={cn(
+        'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--casa-blue)]/40 has-[:focus-visible]:ring-offset-2',
+        checked
+          ? 'bg-[var(--casa-ink-deep)] text-white'
+          : 'bg-white text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)] hover:ring-[color:var(--casa-field-edge-hover)]',
+        className
+      )}
+    >
+      <input type="radio" name={name} value={value} checked={checked} onChange={onChange} aria-label={label} className="sr-only" />
+      {children}
+    </label>
   );
 }

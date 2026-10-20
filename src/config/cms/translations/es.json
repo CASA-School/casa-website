@@ -239,10 +239,6 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "Del A1 al C1 en tres años"
   },
-  "t.ab-der-5-kurswoche.1saj8tm": {
-    "de": "ab der 5. Kurswoche",
-    "text": "desde la 5.ª semana del curso"
-  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "Puedes participar a partir del nivel B1."
@@ -250,6 +246,10 @@
   "t.ab.11lr5ih": {
     "de": "ab",
     "text": "desde"
+  },
+  "t.ab.i4idfn": {
+    "de": "ab {date}",
+    "text": "desde el {date}"
   },
   "t.ab.zuehjf": {
     "de": "ab {amount}",
@@ -1623,6 +1623,10 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Tu nivel y tus horarios"
   },
+  "t.dein-niveau.c37azp": {
+    "de": "Dein Niveau",
+    "text": "Tu nivel"
+  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Tu nivel de idioma determina a qué programas de estudio puedes acceder y cuántas cosas del día a día puedes resolver sin ayuda."
@@ -1970,6 +1974,10 @@
   "t.die-gruppe-kommt-zusammen.1trjtn2": {
     "de": "Die Gruppe kommt zusammen",
     "text": "El grupo se forma"
+  },
+  "t.die-gruppe-teilen-wir.1rp827p": {
+    "de": "{slots}. Die Gruppe teilen wir dir nach deiner Anmeldung zu.",
+    "text": "{slots}. Te asignamos el grupo después de tu inscripción."
   },
   "t.die-gruppen-sind-klein.12c1rxv": {
     "de": "Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.",
@@ -2751,9 +2759,9 @@
     "de": "Einschreibegebühr",
     "text": "Tasa de inscripción"
   },
-  "t.einstieg-moeglich.em45ta": {
-    "de": "Einstieg möglich",
-    "text": "Puedes unirte"
+  "t.einstieg-in-den-laufenden.14qz0fk": {
+    "de": "Einstieg in den laufenden Kurs, bis {date}",
+    "text": "Incorporación al curso en marcha, hasta el {date}"
   },
   "t.einstufung-anfragen.1gepwut": {
     "de": "Einstufung anfragen",
@@ -4175,6 +4183,10 @@
     "de": "Jetzt bewerben",
     "text": "Envía tu solicitud"
   },
+  "t.jetzt-einsteigen.1xx5upm": {
+    "de": "Jetzt einsteigen",
+    "text": "Únete ahora"
+  },
   "t.jeweils.1y2sb58": {
     "de": "jeweils",
     "text": "todos"
@@ -4650,6 +4662,10 @@
   "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
     "de": "Läuferinnen laufen jubelnd durch das Zielband",
     "text": "Unas corredoras cruzan la cinta de meta entre gritos de alegría"
+  },
+  "t.laeuft.b478k8": {
+    "de": "Läuft",
+    "text": "En marcha"
   },
   "t.lampe.hiavx3": {
     "de": "Lampe",
@@ -5359,10 +5375,6 @@
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "Acoge en tu casa a estudiantes de todo el mundo."
   },
-  "t.niveau-auswaehlen.1z0043x": {
-    "de": "Niveau auswählen…",
-    "text": "Elige un nivel…"
-  },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",
     "text": "Niveles y prueba de nivel"
@@ -5438,6 +5450,10 @@
   "t.ob-ein-zimmer-frei.p0ytcz": {
     "de": "Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.",
     "text": "Te confirmamos si hay una habitación libre después de recibir tu solicitud."
+  },
+  "t.oder.1vt7gpj": {
+    "de": " oder ",
+    "text": " o "
   },
   "t.oeffentlicher-traeger-oder-foerd.mqfvv2": {
     "de": "Öffentlicher Träger oder Förderprogramm",

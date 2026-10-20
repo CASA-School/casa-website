@@ -7,7 +7,7 @@ import { rateLimit } from '@/lib/api/rate-limit';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
 import { buildLevelPath, continuationLevels } from '@/lib/registration/level-path';
 import { isSecondHalf } from '@/lib/registration/halves';
-import { describeBookedLevel } from '@/lib/registration/levels';
+import { describeBookedLevel, soldByLevel } from '@/lib/registration/levels';
 import { formatDay } from '@/lib/registration/term-format';
 
 import {
@@ -142,13 +142,12 @@ export async function POST(request: NextRequest) {
       : [];
     if (steps.length > 1) {
       for (const [stepIndex, step] of steps.entries()) {
-        const half = stepIndex === 0 && secondHalf ? secondHalfLabel(step.option?.secondHalfStart ?? null, payload.locale) : null;
         courses.push({
           typeId: courseType.id,
           instanceId: step.option?.id ?? '',
           typeLabel: courseType.name,
           instanceLabel: step.option
-            ? [half, step.option.dateRangeLabel, step.option.scheduleLabel, step.option.locationLabel].filter(Boolean).join(' | ')
+            ? termLabel(step.option, courseType.slug, stepIndex === 0 && secondHalf, payload.locale)
             : payload.locale === 'de' ? 'Termin wird noch festgelegt' : 'Date to be arranged',
           level: { label: step.label, startCode: step.startCode },
         });
@@ -159,12 +158,7 @@ export async function POST(request: NextRequest) {
       typeId: courseType.id,
       instanceId: option.id,
       typeLabel: courseType.name,
-      instanceLabel: [
-        secondHalf ? secondHalfLabel(option.secondHalfStart ?? null, payload.locale) : null,
-        option.dateRangeLabel,
-        option.scheduleLabel,
-        option.locationLabel,
-      ].filter(Boolean).join(' | '),
+      instanceLabel: termLabel(option, courseType.slug, secondHalf, payload.locale),
       level,
     });
   }
@@ -290,8 +284,24 @@ export async function POST(request: NextRequest) {
   });
 }
 
-/** What staff read for a second half: its first day, or the week where the term does not say. */
-function secondHalfLabel(start: string | null, locale: 'de' | 'en') {
-  if (start) return locale === 'de' ? `2. Hälfte ab ${formatDay(start, locale)}` : `Second half from ${formatDay(start, locale)}`;
-  return locale === 'de' ? '2. Hälfte ab der 5. Kurswoche' : 'Second half from the fifth week';
+/**
+ * The term as staff read it, „dates | schedule | place" (the workspace parses it, registrations/option-label).
+ * A second half is its own dates, from its first day (lib/registration/halves). The intensive course is
+ * booked without a time of day (2026-10-20): CASA assigns the group, so its schedule says so.
+ */
+function termLabel(
+  option: { dateRangeLabel: string; scheduleLabel: string; locationLabel: string; startDate?: string; endDate?: string; secondHalfStart?: string | null },
+  slug: string,
+  secondHalf: boolean,
+  locale: 'de' | 'en'
+) {
+  const dates = secondHalf && option.secondHalfStart && option.endDate
+    ? `${formatDay(option.secondHalfStart, locale)} - ${formatDay(option.endDate, locale)} (${locale === 'de' ? '2. Hälfte' : 'second half'})`
+    : secondHalf
+      ? `${option.dateRangeLabel} (${locale === 'de' ? '2. Hälfte ab der 5. Kurswoche' : 'second half from the fifth week'})`
+      : option.dateRangeLabel;
+  const schedule = soldByLevel(slug)
+    ? locale === 'de' ? 'Vormittags oder nachmittags, CASA teilt die Gruppe zu' : 'Mornings or afternoons, CASA assigns the group'
+    : option.scheduleLabel;
+  return [dates, schedule, option.locationLabel].join(' | ');
 }

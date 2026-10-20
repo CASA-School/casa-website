@@ -50,7 +50,7 @@ import type {
 } from '@/lib/content/types';
 import { isSecondHalf } from '@/lib/registration/halves';
 import { buildLevelPath, continuationLevels, pathWeeks } from '@/lib/registration/level-path';
-import { levelChoiceGroups } from '@/lib/registration/levels';
+import { levelChoiceGroups, soldByLevel } from '@/lib/registration/levels';
 import { daytimeLabel, formatDay, scheduleLine, termRange, weeksLabel } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
@@ -279,10 +279,32 @@ export function termsForLevel(options: readonly CourseRegistrationOption[], leve
   return options.filter((option) => half || !option.secondHalfOnly);
 }
 
-/** A format's terms for a level, one group per schedule, mornings first. */
-function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale, level: string): DateTileGroup[] {
+/**
+ * A format's terms for a level, one group per schedule, mornings first. The intensive course's are one
+ * group (Rahman, 2026-10-20: „don't define morning and afternoon so we can balance our number of
+ * students"): every start in one list, its times said once, and CASA assigns the group.
+ */
+function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale, level: string, slug: string | undefined): DateTileGroup[] {
   const groups = new Map<string, { schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
   const half = isSecondHalf(level);
+  const oneList = soldByLevel(slug);
+
+  if (oneList) {
+    const tiles = termsForLevel(options, level)
+      .map((option) => ({
+        id: option.id,
+        date: half ? option.secondHalfStart ?? option.startDate : option.startDate,
+        note: half && !option.secondHalfStart ? (locale === 'de' ? 'ab der 5. Kurswoche' : 'from the fifth week') : undefined,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const slots = [...new Map(options.filter((option) => option.schedule).map((option) => [scheduleLine(option.schedule!, locale), option.schedule!])).values()]
+      .sort((a, b) => (a.daytime ? DAYTIME_ORDER[a.daytime] : 4) - (b.daytime ? DAYTIME_ORDER[b.daytime] : 4))
+      .map((schedule) => (schedule.daytime ? `${daytimeLabel(schedule.daytime, locale)} (${scheduleLine(schedule, locale)})` : scheduleLine(schedule, locale)));
+    const meta = slots.length > 1
+      ? `${slots.map((slot, i) => (i > 0 ? slot.charAt(0).toLowerCase() + slot.slice(1) : slot)).join(locale === 'de' ? ' oder ' : ' or ')}${locale === 'de' ? ': die Gruppe teilen wir dir zu' : ': we assign your group'}`
+      : slots[0];
+    return tiles.length > 0 ? [{ key: 'all', meta, tiles }] : [];
+  }
 
   for (const option of termsForLevel(options, level)) {
     const key = option.schedule ? `${option.schedule.days}|${option.schedule.time}` : option.scheduleLabel;
@@ -471,7 +493,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
           id={`course-${index}-option`}
           name={`course-${index}-option`}
           legend={termIsLevel ? t('Start', 'Beginn') : t('Dates', 'Termin')}
-          groups={termGroups(options, locale, level)}
+          groups={termGroups(options, locale, level, courseType?.slug)}
           value={instanceId}
           onChange={(value) => {
             setValue(`courses.${index}.courseInstanceId`, value, { shouldDirty: true });
