@@ -32,8 +32,8 @@
     "text": "Kurs ayrıntıları"
   },
   "coursePage.goals.practiceTitle": {
-    "de": "Das übst du",
-    "text": "Çalışacağınız konular"
+    "de": "Unsere Merkmale",
+    "text": "Özelliklerimiz"
   },
   "coursePage.info.dates": {
     "de": "Zeitraum",
@@ -84,24 +84,24 @@
     "text": "CASA'daki diğer kurslar"
   },
   "coursePage.steps.1.text": {
-    "de": "Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.",
-    "text": "Ücretsiz çevrim içi testi yapın ya da seviye tespiti için bize uğrayın. Hiç Almanca bilmiyorsanız doğrudan A1'den başlarsınız."
+    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
+    "text": "Zaten Almanca konuşuyorsanız seviye tespiti kurs seçiminde bize yardımcı olur. Bizzat okulumuza uğrayın ya da ücretsiz bir çevrim içi test çözüp sonucunuzu bize gönderin. Okulda durumunuza daha yakından bakar ve böylece size uygun kursu buluruz."
   },
   "coursePage.steps.1.title": {
     "de": "Einstufung machen",
     "text": "Seviyenizi belirleyin"
   },
   "coursePage.steps.2.text": {
-    "de": "Such dir einen Starttermin aus und schick uns deine Anmeldung.",
-    "text": "Size uygun bir başlangıç tarihi seçin ve kayıt formunuzu bize gönderin."
+    "de": "Nenne uns deinen gewünschten Kursstarttermin und schick uns deine Anmeldung.",
+    "text": "İstediğiniz kurs başlangıç tarihini bize bildirin ve kayıt formunuzu gönderin."
   },
   "coursePage.steps.2.title": {
-    "de": "Termin buchen",
-    "text": "Başlangıç tarihinizi seçin"
+    "de": "Kursbuchung",
+    "text": "Kursa kaydolun"
   },
   "coursePage.steps.3.text": {
-    "de": "Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.",
-    "text": "Zamanınızı planlayın ve belgelerinizi hazırlayın. Bremen'de henüz kalacak bir yeriniz yoksa size seve seve bir oda ayarlarız."
+    "de": "Bereite deine Ankunft in Bremen vor. Wenn du noch eine Unterkunft brauchst, vermitteln wir dir gerne ein Zimmer.",
+    "text": "Bremen'e gelişinize hazırlanın. Henüz kalacak bir yeriniz yoksa size seve seve bir oda ayarlarız."
   },
   "coursePage.steps.3.title": {
     "de": "Start vorbereiten",
@@ -319,10 +319,6 @@
     "de": "AGB",
     "text": "Genel koşullar"
   },
-  "t.aktive-kommunikation-in-alltagss.1nopxtj": {
-    "de": "Aktive Kommunikation in Alltagssituationen",
-    "text": "Günlük durumlarda etkin iletişim"
-  },
   "t.aktiver-gruppenunterricht-macht-.m80676": {
     "de": "Aktiver Gruppenunterricht macht Sprache sichtbar, praktisch und gemeinsam erlebbar.",
     "text": "Etkin grup dersi, dili görünür, uygulamalı ve birlikte deneyimlenebilir kılar."
@@ -438,6 +434,10 @@
   "t.altersgruppe.qqathq": {
     "de": "Altersgruppe",
     "text": "Yaş grubu"
+  },
+  "t.am-abend-deutsch-lernen.10n40uo": {
+    "de": "Am Abend Deutsch lernen und das Gelernte gleich in Beruf und Alltag anwenden.",
+    "text": "Akşamları Almanca öğrenin ve öğrendiklerinizi hemen işte ve gündelik hayatta kullanın."
   },
   "t.am-dobben-14-16.16zlzfr": {
     "de": "Am Dobben 14–16, 28203 Bremen",
@@ -706,6 +706,10 @@
   "t.auch-bei-einem-englischsprachige.1hfvhxb": {
     "de": "Auch bei einem englischsprachigen Studium hilft dir Deutsch bei der Wohnungssuche, bei Terminen und wenn du neue Leute kennenlernst.",
     "text": "İngilizce bir programda okusanız bile Almanca, ev ararken, randevularda ve yeni insanlarla tanışırken işinize yarar."
+  },
+  "t.auch-dieser-unterricht-orientier.1lmh6mg": {
+    "de": "Auch dieser Unterricht orientiert sich am GER und an der alltäglichen und beruflichen Kommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
+    "text": "Bu dersler de Avrupa Ortak Dil Referans Çerçevesi'ne dayanır, günlük hayatta ve iş hayatında iletişime odaklanır ve küçük uluslararası gruplarda yapılır. Gruplar için ara sıra boş zaman ve kültür etkinlikleri de düzenliyoruz."
   },
   "t.auf-anfrage.10nwwwc": {
     "de": "Auf Anfrage",
@@ -1271,6 +1275,10 @@
     "de": "CASA durchsuchen",
     "text": "CASA'da arayın"
   },
+  "t.casa-eigenes-zusatzmaterial.1tvmyap": {
+    "de": "CASA-eigenes Zusatzmaterial",
+    "text": "CASA'nın kendi ek materyalleri"
+  },
   "t.casa-heisst-auf-deutsch.lwy2qk": {
     "de": "CASA heißt auf Deutsch „Haus“. Unsere gemeinnützige Sprachschule ist ein Ort der Begegnung, an dem Menschen unterschiedlichster Herkunft zusammenkommen und Raum finden, sich mit ihrem kulturellen Hintergrund in eine Gemeinschaft einzubringen. Gegründet wurde CASA 1983 von einer Gruppe junger Pädagoginnen und Pädagogen. Unseren Leitspruch versuchen wir jeden Tag zu leben, mit unseren Lernenden genauso wie mit unseren Kolleginnen und Kollegen und unseren Partnern.",
     "text": "CASA “ev” demektir. Kâr amacı gütmeyen dil okulumuz, çok farklı kökenlerden insanların bir araya geldiği ve kendi kültürel birikimleriyle bir topluluğa katkı sunabilecekleri bir buluşma yeridir. CASA, 1983 yılında bir grup genç eğitimci tarafından kuruldu. Öğrencilerimizle olduğu kadar meslektaşlarımızla ve ortaklarımızla da şiarımızı her gün yaşatmaya çalışıyoruz."
@@ -1411,9 +1419,9 @@
     "de": "Dafür schaffen wir im Unterricht und darüber hinaus Raum für Begegnung und Austausch:",
     "text": "Bunun için derslerde ve ders dışında buluşmaya ve paylaşıma alan açıyoruz:"
   },
-  "t.damit-du-gut-vorankommst.3uqvm4": {
-    "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.",
-    "text": "İyi ilerleyebilmeniz için doğru seviyede olmanız önemlidir. Bu yüzden seviyenizi okulda belirliyoruz; bir sertifikanız olsa bile kurs seviyenizi gerektiğinde değiştirme hakkımız saklıdır."
+  "t.damit-du-gut-vorankommst.legsps": {
+    "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen.",
+    "text": "İyi ilerleyebilmeniz için doğru seviyede olmanız önemlidir. Bu yüzden seviyenizi okulda belirliyoruz; kurs seviyenizi gerektiğinde değiştirme hakkımız saklıdır."
   },
   "t.damit-ein-sprachkurs-als.42mzw1": {
     "de": "Damit ein Sprachkurs als Bildungszeit anerkannt wird, braucht er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Dafür besuchst du gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.",
@@ -1506,6 +1514,10 @@
   "t.das-international-office-deiner.158fabh": {
     "de": "Das International Office deiner Hochschule hilft dir bei der Orientierung. Die Ausländerbehörde kann dir die Bedingungen deines Aufenthaltstitels bestätigen.",
     "text": "Üniversitenizin Uluslararası Ofisi (International Office) yolunuzu bulmanıza yardımcı olur. Yabancılar Dairesi (Ausländerbehörde) oturum izninizin koşullarını size teyit edebilir."
+  },
+  "t.das-ist-moeglich-fuer.vav9qy": {
+    "de": "Das ist möglich für alle, die sich intensiv mit Deutsch beschäftigen möchten – für dein Studium, deinen Beruf und deinen Alltag.",
+    "text": "Bu, Almancaya yoğun biçimde çalışmak isteyen herkes için mümkün – üniversite eğitiminiz, mesleğiniz ve gündelik hayatınız için."
   },
   "t.das-offizielle-portal-fuer.17a7aqu": {
     "de": "Das offizielle Portal für Studiengänge und Planung.",
@@ -1663,9 +1675,9 @@
     "de": "Deine Kursgebühren fördern Bildung.",
     "text": "Kurs ücretleriniz eğitimi destekler."
   },
-  "t.deine-lehrkraefte-ergaenzen-das.1ljua9a": {
-    "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit eigenen Materialien, die den Unterricht aktuell, anregend und unterhaltsam machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir möchten auf die Bedürfnisse jeder und jedes Einzelnen eingehen.",
-    "text": "Öğretmenleriniz ders kitabını, dersleri güncel, ilham verici ve keyifli kılan kendi materyalleriyle tamamlar. Ayrıca yazılı çalışmalarınızı düzenli olarak düzeltir ve size kişisel olarak yol gösterirler; çünkü her bireyin ihtiyaçlarına cevap vermek istiyoruz."
+  "t.deine-lehrkraefte-ergaenzen-das.uu6xk7": {
+    "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit CASA-eigenen Materialien, die den Unterricht aktuell, anregend und interessant machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir gehen auf deine individuellen Bedürfnisse ein.",
+    "text": "Öğretmenleriniz ders kitabını, CASA'nın kendi hazırladığı ve dersleri güncel, ilham verici ve ilgi çekici kılan materyallerle tamamlar. Ayrıca yazılı çalışmalarınızı düzenli olarak düzeltir ve size kişisel olarak yol gösterirler; çünkü bireysel ihtiyaçlarınızı dikkate alıyoruz."
   },
   "t.deine-nachricht.m5qpn": {
     "de": "Deine Nachricht",
@@ -1799,10 +1811,6 @@
     "de": "Der Preis hängt von der Niveaustufe ab.",
     "text": "Ücret seviyeye göre değişir."
   },
-  "t.der-unterricht-orientiert-sich.dxa6aq": {
-    "de": "Der Unterricht orientiert sich an der Alltagskommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
-    "text": "Dersler günlük iletişime odaklanır ve küçük uluslararası gruplarda yapılır. Gruplar için zaman zaman boş zaman ve kültür etkinlikleri de düzenliyoruz."
-  },
   "t.der-unterricht-umfasst-unterrich.1nvd406": {
     "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
     "text": "Dersler, kendi geliştirdiğimiz ya da özel olarak derlediğimiz materyallerle haftada {course.german-for-groups.lessons} ders saatinden oluşur. Ağırlık konuşma diline ve onun sohbette kullanımına verilir; bunun için elbette dilbilgisi de çalışırız. Özel içerikler ya da farklı bir ders saati sayısı isterseniz isteklerinizi memnuniyetle hayata geçiririz."
@@ -1862,10 +1870,6 @@
   "t.deutsch-lernen-in-bremen.wgd8if": {
     "de": "Deutsch lernen in Bremen · seit 1983",
     "text": "Bremen'de Almanca öğrenin · 1983'ten beri"
-  },
-  "t.deutsch-lernen-neben-dem.lj9hgo": {
-    "de": "Deutsch lernen neben dem Beruf",
-    "text": "İşinizi sürdürürken Almanca öğrenin"
   },
   "t.deutsch-lernen-und-bremen.5q5wxi": {
     "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
@@ -1971,6 +1975,10 @@
     "de": "Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.",
     "text": "Gruplar küçüktür. Kaydınızla birlikte yerinizi ayırtmış olursunuz."
   },
+  "t.die-inhalte-der-niveaustufen.4tz0j6": {
+    "de": "Die Inhalte der Niveaustufen richten sich nach dem Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Für jede Kursstufe haben wir ein passendes Lehrwerk ausgewählt, das wir durchgängig mit unseren eigens erstellten Materialien ergänzen.",
+    "text": "Seviyelerin içerikleri Avrupa Ortak Dil Referans Çerçevesi'ne (CEFR) göre belirlenir. Her kurs seviyesi için uygun bir ders kitabı seçtik ve bu kitabı baştan sona kendi hazırladığımız materyallerle tamamlıyoruz."
+  },
   "t.die-inhalte-richten-sich.sgtuqn": {
     "de": "Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.",
     "text": "İçerikler, grubun uzmanlık alanlarına ve bilgi düzeyine göre belirlenir."
@@ -1991,9 +1999,9 @@
     "de": "Die Kurse finden das ganze Jahr über in der Regel zweimal pro Woche von 18:30 bis 20:00 Uhr statt, entweder montags und mittwochs oder dienstags und donnerstags.",
     "text": "Kurslar yıl boyunca, genellikle haftada iki kez 18:30–20:00 saatleri arasında, ya pazartesi ve çarşamba ya da salı ve perşembe günleri yapılır."
   },
-  "t.die-kurse-finden-vormittags.1p1eus6": {
-    "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt. Der Nachmittagskurs hat also vier Unterrichtstage in der Woche.",
-    "text": "Kurslar sabahları pazartesiden cumaya saat 9–12:30 arasında ya da öğleden sonraları pazartesiden perşembeye saat 13–17:30 arasında yapılır. Yani öğleden sonra kursunda haftada dört ders günü vardır."
+  "t.die-kurse-finden-vormittags.wo00rx": {
+    "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt.",
+    "text": "Kurslar sabahları pazartesiden cumaya saat 9–12:30 arasında ya da öğleden sonraları pazartesiden perşembeye saat 13–17:30 arasında yapılır."
   },
   "t.die-kursziele-stimmen-wir.19yyu5h": {
     "de": "Die Kursziele stimmen wir auf das Sprachniveau deines Teams ab.",
@@ -2099,10 +2107,6 @@
     "de": "Die Unterrichtssprache berücksichtigen",
     "text": "Öğretim dilini dikkate alın"
   },
-  "t.die-vorbereitung-auf-eine.1h64ja4": {
-    "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
-    "text": "Sınava hazırlık yoğun kursların bir parçası değildir. Bir telc sertifikasına ihtiyacınız varsa ek olarak bir hazırlık kursu alabilirsiniz."
-  },
   "t.die-vorbereitung-gehoert-nicht.1vomj1w": {
     "de": "Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.",
     "text": "Hazırlık, yoğun kurslara dahil değildir. Sertifikaya ihtiyacınız varsa hazırlık kursunu ayrıca alırsınız."
@@ -2138,6 +2142,10 @@
   "t.dieses-programm-anfragen.1nkejor": {
     "de": "Dieses Programm anfragen",
     "text": "Bu programı talep edin"
+  },
+  "t.digitale-raumausstattung.2mf7rf": {
+    "de": "Digitale Raumausstattung",
+    "text": "Dijital donanımlı sınıflar"
   },
   "t.direkt-beantwortet.1dd88et": {
     "de": "Direkt beantwortet",
@@ -2231,10 +2239,6 @@
     "de": "Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.",
     "text": "En az B1 seviyesinde Almanca bilmeniz gerekir."
   },
-  "t.du-buchst-und-bezahlst.19b6j84": {
-    "de": "Du buchst und bezahlst immer ein Trimester.",
-    "text": "Her seferinde bir dönem için kaydolur ve ödeme yaparsınız."
-  },
   "t.du-entscheidest-was-dein.1ebwyj1": {
     "de": "Du entscheidest, was dein Gast mitbenutzen darf, etwa Küche, Bad, Waschmaschine und WLAN.",
     "text": "Misafirinizin neleri kullanabileceğine siz karar verirsiniz; örneğin mutfak, banyo, çamaşır makinesi ve kablosuz internet."
@@ -2295,13 +2299,9 @@
     "de": "Du legst die Hausregeln fest, zum Beispiel zu Rauchen, Besuch und Reinigung.",
     "text": "Ev kurallarını siz belirlersiniz; örneğin sigara içme, ziyaretçiler ve temizlik konusunda."
   },
-  "t.du-lernst-an-zwei.1kkgacc": {
-    "de": "Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.",
-    "text": "Haftada iki akşam, pazartesi ve çarşamba ya da salı ve perşembe günleri 18:30–20:00 saatleri arasında ders alırsınız."
-  },
-  "t.du-lernst-das-ganze.p4bfmh": {
-    "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 15 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Hörverstehen, Lesen, Schreiben und besonders das Sprechen.",
-    "text": "Yıl boyunca 10 ila 15 kişilik uluslararası gruplarda öğrenirsiniz. Dersler Avrupa Ortak Dil Referans Çerçevesi'ne sıkı sıkıya bağlıdır; dinlediğini anlama, okuma, yazma ve özellikle konuşma becerilerini hedefli olarak geliştirir."
+  "t.du-lernst-das-ganze.3te892": {
+    "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.",
+    "text": "Yıl boyunca 10 ila 16 kişilik uluslararası gruplarda öğrenirsiniz. Dersler Avrupa Ortak Dil Referans Çerçevesi'ne sıkı sıkıya bağlıdır; okuma, dinleme, yazma ve özellikle konuşma becerilerini hedefli olarak geliştirir."
   },
   "t.du-lernst-die-fachsprache.3m1y53": {
     "de": "Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.",
@@ -2315,9 +2315,9 @@
     "de": "Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
     "text": "Haftada {course.intensive-german.lessons} ders saati eğitim alırsınız."
   },
-  "t.du-lernst-vormittags-oder.1ku1u9y": {
-    "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
-    "text": "Sabah ya da öğleden sonra ders alırsınız. Öğleden sonra kursu pazartesiden perşembeye kadar sürer."
+  "t.du-lernst-vormittags-oder.1xlolv5": {
+    "de": "Du lernst vormittags oder nachmittags, je nach Kursstart.",
+    "text": "Kursun başlangıç tarihine göre sabah ya da öğleden sonra ders alırsınız."
   },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
@@ -2459,9 +2459,9 @@
     "de": "Eigenes möbliertes Zimmer",
     "text": "Size ait eşyalı oda"
   },
-  "t.ein-abendkurs-dauert-etwa.1fpp7lz": {
-    "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
-    "text": "Bir akşam kursu yaklaşık 3½ ay sürer. Bu sürede yarım seviyeyi, örneğin A1.2 ya da B2.1'i tamamlarsınız. Böylece bir yılda yaklaşık 1½ seviye ilerlersiniz."
+  "t.ein-abendkurs-dauert-etwa.1n0hb9i": {
+    "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit kannst du eine halbe Niveaustufe abschließen.",
+    "text": "Bir akşam kursu yaklaşık 3½ ay sürer. Bu sürede bir seviyenin yarısını tamamlayabilirsiniz."
   },
   "t.ein-baby-krabbelt-und.acgqmh": {
     "de": "Ein Baby krabbelt und schaut neugierig nach oben",
@@ -2787,6 +2787,14 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "Bireysel öğrenciler ya da gruplar"
   },
+  "t.elementare-sprachverwendung-anfa.1kd77ny": {
+    "de": "Elementare Sprachverwendung · Anfänger",
+    "text": "Temel kullanıcı · başlangıç düzeyi"
+  },
+  "t.elementare-sprachverwendung-grun.2txgib": {
+    "de": "Elementare Sprachverwendung · grundlegende Kenntnisse",
+    "text": "Temel kullanıcı · temel bilgi düzeyi"
+  },
   "t.elementare-sprachverwendung.17h254x": {
     "de": "Elementare Sprachverwendung",
     "text": "Temel kullanıcı"
@@ -2874,6 +2882,10 @@
   "t.fallbasierte-spracharbeit-mit-di.1rgrz1e": {
     "de": "Fallbasierte Spracharbeit mit direktem Feedback",
     "text": "Anında geri bildirimle vakaya dayalı dil çalışması"
+  },
+  "t.familiaere-atmosphaere.15uj53g": {
+    "de": "Familiäre Atmosphäre",
+    "text": "Aile sıcaklığında bir ortam"
   },
   "t.fang-frueh-mit-der.3b43z1": {
     "de": "Fang früh mit der Wohnungssuche an und halte die Unterlagen für Anfragen und Besichtigungen bereit.",
@@ -2966,10 +2978,6 @@
   "t.fluessigere-muendliche-kommunika.15smhn9": {
     "de": "Flüssigere mündliche Kommunikation",
     "text": "Daha akıcı sözlü iletişim"
-  },
-  "t.fluessigeres-verstehen-und-sprec.1hy5ao4": {
-    "de": "Flüssigeres Verstehen und Sprechen",
-    "text": "Daha akıcı anlama ve konuşma"
   },
   "t.fortschritte-auf-deinem-sprachni.8km5eu": {
     "de": "Fortschritte auf deinem Sprachniveau",
@@ -3174,10 +3182,6 @@
   "t.fuer-gruppen.1rhk86e": {
     "de": "Für Gruppen",
     "text": "Gruplar için"
-  },
-  "t.fuer-jede-niveaustufe-haben.1z0c8d0": {
-    "de": "Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.",
-    "text": "Her seviye için uygun bir ders kitabı seçtik. A1'den B1'e kadar Netzwerk neu ile, B1+ seviyesinden C1'e kadar Kontext ile öğrenirsiniz."
   },
   "t.fuer-schulklassen-und-gruppen.8u5pfs": {
     "de": "Für Schulklassen und Gruppen",
@@ -3695,6 +3699,10 @@
     "de": "Hinweis zur neuen Website",
     "text": "Yeni web sitemiz hakkında"
   },
+  "t.hochqualifizierte-lehrkraefte.cg5vip": {
+    "de": "Hochqualifizierte Lehrkräfte",
+    "text": "Yüksek nitelikli öğretmenler"
+  },
   "t.hochschulen-fuer-angewandte-wiss.s1d4fz": {
     "de": "Hochschulen für angewandte Wissenschaften verbinden das Studium häufig mit Praxisprojekten und Praktika.",
     "text": "Uygulamalı bilimler üniversiteleri öğrenimi çoğu zaman uygulama projeleri ve stajlarla birleştirir."
@@ -3898,10 +3906,6 @@
   "t.in-einem-jahr-von.cxhquh": {
     "de": "In einem Jahr von A1 bis C1",
     "text": "Bir yılda A1'den C1'e"
-  },
-  "t.in-einem-trimester-schliesst.1a0mqse": {
-    "de": "In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.",
-    "text": "Bir dönemde yarım seviye, yani bir yılda yaklaşık 1½ seviye tamamlarsınız."
   },
   "t.in-einer-casa-wg.m88nl0": {
     "de": "In einer CASA-WG hast du ein eigenes Zimmer und teilst den Alltag mit anderen, die in Bremen Deutsch lernen.",
@@ -4415,6 +4419,10 @@
     "de": "Kosten",
     "text": "Ücretler"
   },
+  "t.kostenfreies-sprachcaf-fuer-unse.z5zwy9": {
+    "de": "Kostenfreies Sprachcafé für unsere Teilnehmenden",
+    "text": "Katılımcılarımız için ücretsiz dil kafe"
+  },
   "t.kostenlos-von-a1-bis.45ucxk": {
     "de": "Kostenlos, von A1 bis C1",
     "text": "Ücretsiz, A1'den C1'e"
@@ -4466,6 +4474,10 @@
   "t.kultur-vor-ort-in.1r6hui1": {
     "de": "Kultur vor Ort in Bremer Gastfamilien kennenlernen",
     "text": "Bremen'deki konukçu ailelerde yerel kültürü tanımak"
+  },
+  "t.kulturelle-angebote.d3rfht": {
+    "de": "Kulturelle Angebote",
+    "text": "Kültürel etkinlikler"
   },
   "t.kulturelle-stationen-geben-grupp.1diyo0m": {
     "de": "Kulturelle Stationen geben Gruppenkursen eine konkrete Bremen-Erinnerung.",
@@ -5027,9 +5039,9 @@
     "de": "Mit mehr Sicherheit in die Prüfung",
     "text": "Sınava daha güvenle girin"
   },
-  "t.mit-netzwerk-neu-lernst.evlstb": {
-    "de": "Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.",
-    "text": "Netzwerk neu ile gündelik hayat için kelimeleri ve dilbilgisinin temellerini öğrenir, diyaloglar üzerinde pratik yaparsınız."
+  "t.mit-netzwerk-neu-lernst.loxz3i": {
+    "de": "Mit Netzwerk neu lernst du Wörter für den Alltag, die Grundlagen der Grammatik, Dialoge und Texte.",
+    "text": "Netzwerk neu ile gündelik hayat için kelimeleri, dilbilgisinin temellerini, diyalogları ve metinleri öğrenirsiniz."
   },
   "t.mit-oder-ohne-verpflegung.1xq1des": {
     "de": "Mit oder ohne Verpflegung, je nach Absprache",
@@ -5047,9 +5059,9 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "telc Deutsch C1 Hochschule ile Almancanızın üniversite eğitimi için yeterli olduğunu kanıtlarsınız. Almanca eğitim veren birçok üniversite, kabul için bu sertifikayı ister."
   },
-  "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
-    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
-    "text": "Haftada {course.intensive-german.lessons} ders saatiyle bir seviyenin tamamını 8 haftada bitirirsiniz."
+  "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
+    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
+    "text": "Haftada {course.intensive-german.lessons} ders saatiyle bir sonraki seviyeye 8 haftada ulaşabilirsiniz."
   },
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
@@ -5215,10 +5227,6 @@
     "de": "Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.",
     "text": "Rezervasyondan sonra varışınızı ve anahtar teslimini sizinle birlikte konuşuruz."
   },
-  "t.nach-feierabend-deutsch-lernen.bj13cr": {
-    "de": "Nach Feierabend Deutsch lernen und das Gelernte gleich im Alltag anwenden.",
-    "text": "İş çıkışı Almanca öğrenin ve öğrendiklerinizi hemen gündelik hayatta kullanın."
-  },
   "t.nach-feierabend-lernst-du.ofz4y6": {
     "de": "Nach Feierabend lernst du meist zweimal pro Woche.",
     "text": "İş çıkışında, genellikle haftada iki kez ders alırsınız."
@@ -5323,6 +5331,10 @@
     "de": "Nein",
     "text": "Hayır"
   },
+  "t.nette-gespraeche-in-unserer.17tmm1o": {
+    "de": "Nette Gespräche in unserer Cafeteria",
+    "text": "Kafeteryamızda keyifli sohbetler"
+  },
   "t.neu-beginnen.1yx0aj2": {
     "de": "Neu beginnen",
     "text": "Yeniden başla"
@@ -5330,10 +5342,6 @@
   "t.neue-kurse-beginnen-jeden.19bgyiy": {
     "de": "Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag",
     "text": "Yeni kurslar her ay başlar; bir seviyenin ilk bölümü dönüşümlü olarak sabah ya da öğleden sonra başlar"
-  },
-  "t.neue-kurse-beginnen-jeden.nkdyw1": {
-    "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
-    "text": "Her ay yeni kurslar başlar; seviye tespiti hangi seviyeden başlayacağınızı gösterir."
   },
   "t.neue-menschen-kennenlernen.vttdpm": {
     "de": "Neue Menschen kennenlernen",
@@ -5483,6 +5491,10 @@
     "de": "Ohne Termin",
     "text": "Randevusuz"
   },
+  "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
+    "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
+    "text": "Hiç Almanca bilmiyorsanız her zaman bir kursun başlangıcında A1.1 seviyesiyle başlarsınız."
+  },
   "t.oktober-2026.ckuz5g": {
     "de": "Oktober 2026",
     "text": "Ekim 2026"
@@ -5583,6 +5595,10 @@
     "de": "Persönliche Beratung",
     "text": "Kişisel danışmanlık"
   },
+  "t.persoenliche-lernberatung.1b7lirs": {
+    "de": "Persönliche Lernberatung",
+    "text": "Kişisel öğrenme danışmanlığı"
+  },
   "t.persoenliche-vermittlung.t3zji6": {
     "de": "Persönliche Vermittlung",
     "text": "Oda bulmada kişisel destek"
@@ -5646,10 +5662,6 @@
   "t.portraet-von.175a2gq": {
     "de": "Porträt von {name}",
     "text": "Portre: {name}"
-  },
-  "t.praeziser-einsatz-zentraler-gram.sj9m70": {
-    "de": "Präziser Einsatz zentraler Grammatikstrukturen",
-    "text": "Temel dilbilgisi yapılarının doğru kullanımı"
   },
   "t.praezises-verfassen-von-arztbrie.14xpizj": {
     "de": "Präzises Verfassen von Arztbriefen",
@@ -6194,6 +6206,18 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "Kendiniz oluşturun"
+  },
+  "t.selbststaendige-sprachverwendung.10je5n6": {
+    "de": "Selbstständige Sprachverwendung 3",
+    "text": "Bağımsız kullanıcı 3"
+  },
+  "t.selbststaendige-sprachverwendung.19e0ut6": {
+    "de": "Selbstständige Sprachverwendung 1",
+    "text": "Bağımsız kullanıcı 1"
+  },
+  "t.selbststaendige-sprachverwendung.1mm6kcg": {
+    "de": "Selbstständige Sprachverwendung 2",
+    "text": "Bağımsız kullanıcı 2"
   },
   "t.selbststaendige-sprachverwendung.m7p0gc": {
     "de": "Selbstständige Sprachverwendung",
@@ -6955,9 +6979,9 @@
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
     "text": "Yoğun kurslarımız 10 ila 15 katılımcılı küçük, uluslararası gruplarda yapılır. Akşam ve özel kurslar da küçük gruplardan oluşur. Böylece konuşmaya daha fazla zaman kalır; öğretmenler size kişisel geri bildirim verebilir ve yazılı çalışmalarınızı düzeltebilir."
   },
-  "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
-    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-    "text": "Yoğun kurslarımız haftada 45 dakikalık {course.intensive-german.lessons} ders saatinden oluşur. Bir seviyenin tamamı 8 hafta sürer. Böylece bir yılda A1'den C1'e kadar tüm seviyeleri tamamlar, Almanya'da üniversite eğitimi ya da nitelikli bir iş için sağlam bir temel atarsınız."
+  "t.unsere-intensivkurse-umfassen-un.13jxzd9": {
+    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So kannst du in einem Jahr die Niveaustufen A1 bis C1 durchlaufen und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+    "text": "Yoğun kurslarımız haftada 45 dakikalık {course.intensive-german.lessons} ders saatinden oluşur. Bir seviyenin tamamı 8 hafta sürer. Böylece bir yılda A1'den C1'e kadar tüm seviyeleri tamamlayabilir ve Almanya'da üniversite eğitimi ya da nitelikli bir iş için sağlam bir temel atabilirsiniz."
   },
   "t.unsere-kooperationspartner.4fwxyo": {
     "de": "Unsere Kooperationspartner",
@@ -7867,10 +7891,6 @@
     "de": "Wenn du mit deinem Deutsch weiterkommen möchtest, empfehlen wir dir gern einen passenden Kurs und einen realistischen Zeitplan.",
     "text": "Almancanızı ilerletmek istiyorsanız size seve seve uygun bir kurs ve gerçekçi bir zaman planı öneririz."
   },
-  "t.wenn-du-noch-keine.1qckvvn": {
-    "de": "Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.",
-    "text": "Hiç Almanca bilmiyorsanız (A1.1) kursa her zaman en baştan başlamanız gerekir."
-  },
   "t.wenn-du-schon-deutsch.f8eac6": {
     "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
     "text": "Zaten Almanca konuşuyorsanız seviye tespiti kurs seçiminde bize yardımcı olur. Bizzat okulumuza uğrayın ya da ücretsiz bir çevrim içi test çözüp sonucunuzu bize gönderin. Okulda durumunuza daha yakından bakar ve böylece size uygun kursu buluruz."
@@ -8474,6 +8494,10 @@
   "t.zur-deutschen-fassung.1esgk92": {
     "de": "Zur deutschen Fassung",
     "text": "Almanca sürüme gidin"
+  },
+  "t.zur-intensiven-vorbereitung-auf.l3nfcv": {
+    "de": "Zur intensiven Vorbereitung auf eine Prüfung empfehlen wir, im Anschluss an den Intensivkurs einen Vorbereitungskurs zu buchen.",
+    "text": "Bir sınava kapsamlı şekilde hazırlanmak için, yoğun kursun ardından bir hazırlık kursu almanızı öneririz."
   },
   "t.zur-kursanmeldung.pofxnf": {
     "de": "Zur Kursanmeldung",

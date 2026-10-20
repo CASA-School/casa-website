@@ -1,7 +1,9 @@
+import { Compass, GraduationCap, HeartHandshake, LaptopMinimalCheck, MessageCircle, NotebookPen, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
+
 import { TextCta } from '@/components/ui/text-cta';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { LEVELS_PATH } from '@/config/content/cefr-levels';
-import { cn } from '@/lib/utils';
+import type { SchoolFeatureIcon } from '@/config/content/school-features';
 import { say } from '@/lib/cms/copy';
 
 type LevelGoalItem = {
@@ -32,8 +34,9 @@ type CourseLevelGoalsProps = {
   title: string;
   description: string;
   levels: LevelGoalItem[];
-  practices: string[];
-  practiceTitle?: string;
+  /** „Unsere Merkmale“, the same eight on every course page (config/content/school-features). */
+  features: { icon: SchoolFeatureIcon; label: string }[];
+  featuresTitle: string;
   locale: 'en' | 'de';
 };
 
@@ -75,8 +78,8 @@ export function CourseLevelGoals({
   title,
   description,
   levels,
-  practices,
-  practiceTitle = 'What you practise',
+  features,
+  featuresTitle,
   locale = 'en',
 }: CourseLevelGoalsProps) {
   const netzwerkLevels = levels.filter((l) => l.textbook === 'netzwerk');
@@ -97,7 +100,7 @@ export function CourseLevelGoals({
       label: say(locale, 'Lehrwerk Netzwerk neu', 'Netzwerk neu textbook'),
       range: 'A1 – B1',
       blurb:
-        say(locale, 'Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.', 'With Netzwerk neu you learn everyday vocabulary and the basics of grammar, and you practise dialogues.'),
+        say(locale, 'Mit Netzwerk neu lernst du Wörter für den Alltag, die Grundlagen der Grammatik, Dialoge und Texte.', 'With Netzwerk neu you learn everyday vocabulary, the basics of grammar, dialogues and texts.'),
     },
     {
       items: kontextLevels,
@@ -107,20 +110,6 @@ export function CourseLevelGoals({
         say(locale, 'Mit Kontext übst du komplexe Satzstrukturen, Fachsprache und Diskussionen.', 'With Kontext you practise complex sentence structures, specialist language and discussions.'),
     },
   ].filter((group) => group.items.length > 0);
-
-  /*
-   * Columns follow the count, so three outcomes fill three columns instead of
-   * leaving a fourth empty and wrapping "Improved speaking confidence" onto two
-   * lines to fill the gap. Same rule as the fee strip on CoursePracticalDetails.
-   */
-  const shown = practices.slice(0, 4);
-  const practiceColumns =
-    {
-      1: '',
-      2: 'sm:grid-cols-2',
-      3: 'sm:grid-cols-3',
-      4: 'sm:grid-cols-2 lg:grid-cols-4',
-    }[shown.length as 1 | 2 | 3 | 4] ?? 'sm:grid-cols-2 lg:grid-cols-4';
 
   return (
     <section>
@@ -178,7 +167,10 @@ export function CourseLevelGoals({
                   {/* Body copy at body size. This was `text-sm` — 14px, a step
                       below the 17px every lead paragraph on the page uses, which
                       is what made the section read small. */}
-                  <p className="text-base leading-relaxed text-[var(--casa-ink)]">{item.focus}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[var(--casa-muted)]">{levelBand(item.level, locale)}</p>
+                    <p className="mt-0.5 text-base leading-relaxed text-[var(--casa-ink)]">{item.focus}</p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -197,28 +189,83 @@ export function CourseLevelGoals({
       </div>
 
       {/*
-        The practice list, at the end and at full width.
-
-        Four across on desktop rather than a stacked column in a corner: these
-        are short parallel phrases, and set as a row they read as a set of
-        outcomes instead of a bulleted afterthought.
+        „Unsere Merkmale“, at the end and at full width (CASA's content review, 2026-10-20; Rahman:
+        „more premium … something that stands out“). The one dark block on the section, ink as the
+        emphasis it is elsewhere on the site, with eight frosted cards on it: a golden icon tile in the
+        logo's sun, the card's number, the feature. One column of rows on a phone, so no word breaks;
+        two, then four cards across from a tablet up. A slight lift on hover, none for reduced motion.
       */}
-      {shown.length ? (
-        <div className="mt-8 rounded-xl bg-[var(--casa-warm-panel)] px-5 py-5 md:px-7 md:py-6">
-          <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-            {practiceTitle}
-          </p>
-          <ul className={cn('mt-4 grid gap-x-8 gap-y-3', practiceColumns)}>
-            {shown.map((practice) => (
-              <li key={practice} className="flex gap-2.5 text-base leading-relaxed text-[var(--casa-ink)]">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--casa-blue)]" />
-                {/* „Anamnesegespräche" is wider than a three-column grid's column at 1280. */}
-                <span className="min-w-0 hyphens-auto">{practice}</span>
-              </li>
-            ))}
+      {features.length ? (
+        <div className="relative mt-10 overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] px-5 py-8 text-white md:px-10 md:py-11">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(255,213,0,0.16),transparent_68%)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(0,159,227,0.14),transparent_70%)]"
+          />
+          <h3 className="relative text-2xl font-bold leading-tight text-white md:text-3xl">{featuresTitle}</h3>
+          <ul className="relative mt-6 grid gap-3 sm:grid-cols-2 md:mt-8 lg:grid-cols-4">
+            {features.map((feature, index) => {
+              const FeatureIcon = FEATURE_ICONS[feature.icon];
+              return (
+                <li
+                  key={feature.icon}
+                  className="group flex items-center gap-4 rounded-xl bg-white/[0.05] p-4 ring-1 ring-white/10 transition duration-300 hover:bg-white/[0.09] hover:ring-white/25 motion-safe:hover:-translate-y-0.5 sm:min-h-[9.5rem] sm:flex-col sm:items-start sm:gap-0 sm:p-5"
+                >
+                  <div className="flex shrink-0 items-center justify-between sm:w-full">
+                    <span
+                      aria-hidden
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffe27a] via-[#ffd500] to-[#f0a500] text-[var(--casa-ink-deep)] shadow-[0_8px_18px_-8px_rgba(255,190,0,0.65)] transition-transform duration-300 motion-safe:group-hover:scale-105"
+                    >
+                      <FeatureIcon className="h-5 w-5" />
+                    </span>
+                    <span aria-hidden className="hidden text-xs font-semibold tabular-nums tracking-wide text-white/35 sm:inline">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <p className="min-w-0 text-[1rem] font-semibold leading-snug text-white sm:mt-auto sm:pt-5">{feature.label}</p>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}
     </section>
   );
+}
+
+const FEATURE_ICONS: Record<SchoolFeatureIcon, LucideIcon> = {
+  teachers: GraduationCap,
+  atmosphere: HeartHandshake,
+  materials: NotebookPen,
+  cafeteria: UsersRound,
+  digital: LaptopMinimalCheck,
+  advice: Compass,
+  'language-cafe': MessageCircle,
+  culture: Sparkles,
+};
+
+/**
+ * Each level's band in the GER, as CASA's content review names it (2026-10-20, for Bettina to
+ * confirm): A elementary, B independent in three steps, C proficient.
+ */
+function levelBand(level: string, locale: 'en' | 'de'): string {
+  switch (level) {
+    case 'A1':
+      return say(locale, 'Elementare Sprachverwendung · Anfänger', 'Basic user · beginner');
+    case 'A2':
+      return say(locale, 'Elementare Sprachverwendung · grundlegende Kenntnisse', 'Basic user · elementary');
+    case 'B1':
+      return say(locale, 'Selbstständige Sprachverwendung 1', 'Independent user 1');
+    case 'B1+':
+      return say(locale, 'Selbstständige Sprachverwendung 2', 'Independent user 2');
+    case 'B2':
+      return say(locale, 'Selbstständige Sprachverwendung 3', 'Independent user 3');
+    case 'C1':
+      return say(locale, 'Kompetente Sprachverwendung', 'Proficient user');
+    default:
+      return '';
+  }
 }

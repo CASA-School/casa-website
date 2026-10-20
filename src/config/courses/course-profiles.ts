@@ -138,7 +138,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
     'intensive-german': {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
       description:
-        say(locale, 'Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.', 'We have chosen a suitable textbook for each level. From A1 to B1 you learn with Netzwerk neu, and from B1+ to C1 with Kontext.'),
+        say(locale, 'Die Inhalte der Niveaustufen richten sich nach dem Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Für jede Kursstufe haben wir ein passendes Lehrwerk ausgewählt, das wir durchgängig mit unseren eigens erstellten Materialien ergänzen.', 'The content of each level follows the Common European Framework of Reference for Languages (CEFR). For every level we have chosen a suitable textbook, which we supplement throughout with materials we create ourselves.'),
       levels: levelRows(['A1', 'A2', 'B1', 'B1+', 'B2', 'C1']),
     },
     'evening-german': {

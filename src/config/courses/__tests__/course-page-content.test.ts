@@ -15,10 +15,16 @@ import { fallbackCourseTypes } from '@/config/content/public-fixtures';
  * found that only the numbers changed.
  */
 describe('per-course page content', () => {
-  const registered = ['intensive-german', 'evening-german', 'bildungszeit', 'medical-german', 'special-courses'];
+  // The evening page has no audience section since CASA's content review (2026-10-20).
+  const registered = ['intensive-german', 'bildungszeit', 'medical-german', 'special-courses'];
+  const audience = (slug: string, locale: 'en' | 'de') => getCourseAudienceContent(slug, locale) || undefined;
+
+  it('leaves the evening page without „Deutsch lernen neben dem Beruf"', () => {
+    expect(getCourseAudienceContent('evening-german', 'de')).toBe(false);
+  });
 
   it('gives every registered course its own audience heading', () => {
-    const titles = registered.map((slug) => getCourseAudienceContent(slug, 'en')?.title);
+    const titles = registered.map((slug) => audience(slug, 'en')?.title);
 
     expect(titles.every(Boolean)).toBe(true);
     expect(new Set(titles).size).toBe(registered.length);
@@ -26,7 +32,7 @@ describe('per-course page content', () => {
 
   it('never reuses the generic filler heading', () => {
     for (const slug of publicCourseOrder) {
-      const title = getCourseAudienceContent(slug, 'en')?.title;
+      const title = audience(slug, 'en')?.title;
       if (!title) continue;
       expect(title).not.toMatch(/structure and human support/i);
     }
@@ -34,8 +40,8 @@ describe('per-course page content', () => {
 
   it('translates both locales for every registered course', () => {
     for (const slug of registered) {
-      const en = getCourseAudienceContent(slug, 'en');
-      const de = getCourseAudienceContent(slug, 'de');
+      const en = audience(slug, 'en');
+      const de = audience(slug, 'de');
 
       expect(en?.bullets.length, `${slug} en bullets`).toBeGreaterThan(0);
       expect(de?.bullets.length, `${slug} de bullets`).toBe(en?.bullets.length);

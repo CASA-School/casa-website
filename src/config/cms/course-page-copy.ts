@@ -69,7 +69,7 @@ export const COURSE_PAGE_COPY = {
     kind: 'note',
   },
 
-  'coursePage.goals.practiceTitle': { de: 'Das übst du', en: 'What you practise', label: 'Practice heading', section: 'Learning goals', kind: 'heading' },
+  'coursePage.goals.practiceTitle': { de: 'Unsere Merkmale', en: 'What CASA offers you', label: 'Features heading', section: 'Learning goals', kind: 'heading' },
 
   'coursePage.steps.title': { de: 'So geht es weiter', en: 'What happens next', label: 'Heading', section: 'Next steps', kind: 'heading' },
   'coursePage.steps.lead': {
@@ -81,24 +81,24 @@ export const COURSE_PAGE_COPY = {
   },
   'coursePage.steps.1.title': { de: 'Einstufung machen', en: 'Take the placement test', label: 'Step 1 · Title', section: 'Next steps', kind: 'card-title' },
   'coursePage.steps.1.text': {
-    de: 'Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.',
-    en: 'Do the free online test, or come to the school and take the placement test in person. If you do not speak any German yet, you start straight at A1.',
+    de: 'Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.',
+    en: 'If you already speak some German, a placement test helps us choose the right course for you. Come and see us in person, or take a free online test and send us your result. Here at the school we take a closer look and find the right course together.',
     label: 'Step 1 · Text',
     section: 'Next steps',
     kind: 'card-text',
   },
-  'coursePage.steps.2.title': { de: 'Termin buchen', en: 'Book your start date', label: 'Step 2 · Title', section: 'Next steps', kind: 'card-title' },
+  'coursePage.steps.2.title': { de: 'Kursbuchung', en: 'Booking your course', label: 'Step 2 · Title', section: 'Next steps', kind: 'card-title' },
   'coursePage.steps.2.text': {
-    de: 'Such dir einen Starttermin aus und schick uns deine Anmeldung.',
-    en: 'Choose a start date and send us your registration.',
+    de: 'Nenne uns deinen gewünschten Kursstarttermin und schick uns deine Anmeldung.',
+    en: 'Tell us the start date you would like and send us your registration.',
     label: 'Step 2 · Text',
     section: 'Next steps',
     kind: 'card-text',
   },
   'coursePage.steps.3.title': { de: 'Start vorbereiten', en: 'Get ready to start', label: 'Step 3 · Title', section: 'Next steps', kind: 'card-title' },
   'coursePage.steps.3.text': {
-    de: 'Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.',
-    en: 'Plan your time and get your documents ready. If you still need somewhere to live in Bremen, we are happy to arrange a room for you.',
+    de: 'Bereite deine Ankunft in Bremen vor. Wenn du noch eine Unterkunft brauchst, vermitteln wir dir gerne ein Zimmer.',
+    en: 'Get ready for your arrival in Bremen. If you still need somewhere to live, we are happy to arrange a room for you.',
     label: 'Step 3 · Text',
     section: 'Next steps',
     kind: 'card-text',

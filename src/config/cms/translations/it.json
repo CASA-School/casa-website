@@ -32,8 +32,8 @@
     "text": "Dettagli del corso"
   },
   "coursePage.goals.practiceTitle": {
-    "de": "Das übst du",
-    "text": "Su cosa ti eserciti"
+    "de": "Unsere Merkmale",
+    "text": "Le nostre caratteristiche"
   },
   "coursePage.info.dates": {
     "de": "Zeitraum",
@@ -84,24 +84,24 @@
     "text": "Altri corsi di CASA"
   },
   "coursePage.steps.1.text": {
-    "de": "Mach den kostenlosen Online-Test oder komm zur Einstufung bei uns vorbei. Wenn du noch gar kein Deutsch sprichst, beginnst du direkt bei A1.",
-    "text": "Fai il test online gratuito o vieni da noi per il test di livello. Se non parli ancora per niente il tedesco, parti direttamente dal livello A1."
+    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
+    "text": "Se parli già tedesco, il test di livello ci aiuta a scegliere il corso. Passa da noi di persona oppure fai un test online gratuito e mandaci il risultato. Qui a scuola guardiamo ancora più da vicino e così troviamo il corso giusto per te."
   },
   "coursePage.steps.1.title": {
     "de": "Einstufung machen",
     "text": "Fai il test di livello"
   },
   "coursePage.steps.2.text": {
-    "de": "Such dir einen Starttermin aus und schick uns deine Anmeldung.",
-    "text": "Scegli una data di inizio e inviaci la tua iscrizione."
+    "de": "Nenne uns deinen gewünschten Kursstarttermin und schick uns deine Anmeldung.",
+    "text": "Indicaci la data di inizio del corso che preferisci e inviaci la tua iscrizione."
   },
   "coursePage.steps.2.title": {
-    "de": "Termin buchen",
-    "text": "Prenota la data di inizio"
+    "de": "Kursbuchung",
+    "text": "Prenota il corso"
   },
   "coursePage.steps.3.text": {
-    "de": "Plane deine Zeit und leg deine Unterlagen bereit. Wenn du noch eine Unterkunft in Bremen brauchst, vermitteln wir dir gern ein Zimmer.",
-    "text": "Organizza il tuo tempo e prepara i documenti. Se hai ancora bisogno di un alloggio a Brema, ti troviamo volentieri una stanza."
+    "de": "Bereite deine Ankunft in Bremen vor. Wenn du noch eine Unterkunft brauchst, vermitteln wir dir gerne ein Zimmer.",
+    "text": "Prepara il tuo arrivo a Brema. Se hai ancora bisogno di un alloggio, ti troviamo volentieri una stanza."
   },
   "coursePage.steps.3.title": {
     "de": "Start vorbereiten",
@@ -319,10 +319,6 @@
     "de": "AGB",
     "text": "Condizioni generali"
   },
-  "t.aktive-kommunikation-in-alltagss.1nopxtj": {
-    "de": "Aktive Kommunikation in Alltagssituationen",
-    "text": "Comunicazione attiva nelle situazioni quotidiane"
-  },
   "t.aktiver-gruppenunterricht-macht-.m80676": {
     "de": "Aktiver Gruppenunterricht macht Sprache sichtbar, praktisch und gemeinsam erlebbar.",
     "text": "Le lezioni di gruppo attive rendono la lingua visibile, pratica e da vivere insieme."
@@ -438,6 +434,10 @@
   "t.altersgruppe.qqathq": {
     "de": "Altersgruppe",
     "text": "Fascia d’età"
+  },
+  "t.am-abend-deutsch-lernen.10n40uo": {
+    "de": "Am Abend Deutsch lernen und das Gelernte gleich in Beruf und Alltag anwenden.",
+    "text": "Imparare il tedesco la sera e usare subito ciò che si è imparato al lavoro e nella vita quotidiana."
   },
   "t.am-dobben-14-16.16zlzfr": {
     "de": "Am Dobben 14–16, 28203 Bremen",
@@ -706,6 +706,10 @@
   "t.auch-bei-einem-englischsprachige.1hfvhxb": {
     "de": "Auch bei einem englischsprachigen Studium hilft dir Deutsch bei der Wohnungssuche, bei Terminen und wenn du neue Leute kennenlernst.",
     "text": "Anche se studi in inglese, il tedesco ti aiuta quando cerchi casa, agli appuntamenti e quando conosci persone nuove."
+  },
+  "t.auch-dieser-unterricht-orientier.1lmh6mg": {
+    "de": "Auch dieser Unterricht orientiert sich am GER und an der alltäglichen und beruflichen Kommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
+    "text": "Anche queste lezioni seguono il QCER, sono incentrate sulla comunicazione nella vita quotidiana e al lavoro e si svolgono in piccoli gruppi internazionali. Per i gruppi organizziamo di tanto in tanto anche attività culturali e del tempo libero."
   },
   "t.auf-anfrage.10nwwwc": {
     "de": "Auf Anfrage",
@@ -1271,6 +1275,10 @@
     "de": "CASA durchsuchen",
     "text": "Cerca nel sito di CASA"
   },
+  "t.casa-eigenes-zusatzmaterial.1tvmyap": {
+    "de": "CASA-eigenes Zusatzmaterial",
+    "text": "Materiali integrativi creati da CASA"
+  },
   "t.casa-heisst-auf-deutsch.lwy2qk": {
     "de": "CASA heißt auf Deutsch „Haus“. Unsere gemeinnützige Sprachschule ist ein Ort der Begegnung, an dem Menschen unterschiedlichster Herkunft zusammenkommen und Raum finden, sich mit ihrem kulturellen Hintergrund in eine Gemeinschaft einzubringen. Gegründet wurde CASA 1983 von einer Gruppe junger Pädagoginnen und Pädagogen. Unseren Leitspruch versuchen wir jeden Tag zu leben, mit unseren Lernenden genauso wie mit unseren Kolleginnen und Kollegen und unseren Partnern.",
     "text": "CASA, in tedesco, si dice «Haus». La nostra scuola di lingue senza scopo di lucro è un luogo d’incontro, dove persone delle più diverse provenienze si ritrovano e trovano lo spazio per portare il proprio bagaglio culturale in una comunità. CASA è stata fondata nel 1983 da un gruppo di giovani educatrici ed educatori. Ogni giorno cerchiamo di vivere il nostro motto, con i nostri studenti così come con le colleghe, i colleghi e i nostri partner."
@@ -1411,9 +1419,9 @@
     "de": "Dafür schaffen wir im Unterricht und darüber hinaus Raum für Begegnung und Austausch:",
     "text": "Per questo, a lezione e non solo, creiamo spazio per l’incontro e lo scambio:"
   },
-  "t.damit-du-gut-vorankommst.3uqvm4": {
-    "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.",
-    "text": "Per fare buoni progressi è importante essere nel corso giusto. Per questo valutiamo il tuo livello qui a scuola e ci riserviamo di adattare il livello del tuo corso, anche se hai già un certificato."
+  "t.damit-du-gut-vorankommst.legsps": {
+    "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen.",
+    "text": "Per fare buoni progressi è importante essere al livello giusto. Per questo valutiamo le tue competenze qui a scuola e ci riserviamo di adattare il livello del tuo corso."
   },
   "t.damit-ein-sprachkurs-als.42mzw1": {
     "de": "Damit ein Sprachkurs als Bildungszeit anerkannt wird, braucht er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Dafür besuchst du gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.",
@@ -1506,6 +1514,10 @@
   "t.das-international-office-deiner.158fabh": {
     "de": "Das International Office deiner Hochschule hilft dir bei der Orientierung. Die Ausländerbehörde kann dir die Bedingungen deines Aufenthaltstitels bestätigen.",
     "text": "L’International Office della tua università ti aiuta a orientarti. L’ufficio stranieri (Ausländerbehörde) può confermarti le condizioni del tuo permesso di soggiorno."
+  },
+  "t.das-ist-moeglich-fuer.vav9qy": {
+    "de": "Das ist möglich für alle, die sich intensiv mit Deutsch beschäftigen möchten – für dein Studium, deinen Beruf und deinen Alltag.",
+    "text": "È possibile per chiunque voglia dedicarsi intensamente al tedesco – per lo studio, il lavoro e la vita quotidiana."
   },
   "t.das-offizielle-portal-fuer.17a7aqu": {
     "de": "Das offizielle Portal für Studiengänge und Planung.",
@@ -1663,9 +1675,9 @@
     "de": "Deine Kursgebühren fördern Bildung.",
     "text": "La tua quota del corso sostiene l’istruzione."
   },
-  "t.deine-lehrkraefte-ergaenzen-das.1ljua9a": {
-    "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit eigenen Materialien, die den Unterricht aktuell, anregend und unterhaltsam machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir möchten auf die Bedürfnisse jeder und jedes Einzelnen eingehen.",
-    "text": "I tuoi insegnanti integrano il libro di testo con materiali propri, che rendono le lezioni attuali, stimolanti e piacevoli. Inoltre correggono regolarmente i tuoi compiti scritti e ti danno consigli personali, perché vogliamo rispondere alle esigenze di ogni singola persona."
+  "t.deine-lehrkraefte-ergaenzen-das.uu6xk7": {
+    "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit CASA-eigenen Materialien, die den Unterricht aktuell, anregend und interessant machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir gehen auf deine individuellen Bedürfnisse ein.",
+    "text": "I tuoi insegnanti integrano il libro di testo con materiali creati da CASA, che rendono le lezioni attuali, stimolanti e interessanti. Inoltre correggono regolarmente i tuoi compiti scritti e ti danno consigli personalizzati, perché teniamo conto delle tue esigenze individuali."
   },
   "t.deine-nachricht.m5qpn": {
     "de": "Deine Nachricht",
@@ -1799,10 +1811,6 @@
     "de": "Der Preis hängt von der Niveaustufe ab.",
     "text": "Il prezzo dipende dal livello."
   },
-  "t.der-unterricht-orientiert-sich.dxa6aq": {
-    "de": "Der Unterricht orientiert sich an der Alltagskommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
-    "text": "Le lezioni sono incentrate sulla comunicazione quotidiana e si svolgono in piccoli gruppi internazionali. Per i gruppi organizziamo di tanto in tanto anche attività culturali e del tempo libero."
-  },
   "t.der-unterricht-umfasst-unterrich.1nvd406": {
     "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
     "text": "Il corso prevede {course.german-for-groups.lessons} lezioni a settimana, con materiali sviluppati da noi o selezionati appositamente. L’accento è sulla lingua parlata e sul suo uso nella conversazione, e per questo, naturalmente, facciamo anche grammatica. Se desideri contenuti particolari o un numero di ore diverso, realizziamo volentieri le tue idee."
@@ -1862,10 +1870,6 @@
   "t.deutsch-lernen-in-bremen.wgd8if": {
     "de": "Deutsch lernen in Bremen · seit 1983",
     "text": "Imparare il tedesco a Brema · dal 1983"
-  },
-  "t.deutsch-lernen-neben-dem.lj9hgo": {
-    "de": "Deutsch lernen neben dem Beruf",
-    "text": "Imparare il tedesco mentre lavori"
   },
   "t.deutsch-lernen-und-bremen.5q5wxi": {
     "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
@@ -1971,6 +1975,10 @@
     "de": "Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.",
     "text": "I gruppi sono piccoli. Con l’iscrizione ti riservi un posto."
   },
+  "t.die-inhalte-der-niveaustufen.4tz0j6": {
+    "de": "Die Inhalte der Niveaustufen richten sich nach dem Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Für jede Kursstufe haben wir ein passendes Lehrwerk ausgewählt, das wir durchgängig mit unseren eigens erstellten Materialien ergänzen.",
+    "text": "I contenuti dei livelli seguono il Quadro comune europeo di riferimento per le lingue (QCER). Per ogni livello abbiamo scelto un libro di testo adatto, che integriamo costantemente con materiali creati da noi."
+  },
   "t.die-inhalte-richten-sich.sgtuqn": {
     "de": "Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.",
     "text": "I contenuti si basano sulle specializzazioni e sul livello di conoscenze del gruppo."
@@ -1991,9 +1999,9 @@
     "de": "Die Kurse finden das ganze Jahr über in der Regel zweimal pro Woche von 18:30 bis 20:00 Uhr statt, entweder montags und mittwochs oder dienstags und donnerstags.",
     "text": "I corsi si svolgono tutto l’anno, di norma due volte a settimana dalle 18:30 alle 20:00, il lunedì e il mercoledì oppure il martedì e il giovedì."
   },
-  "t.die-kurse-finden-vormittags.1p1eus6": {
-    "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt. Der Nachmittagskurs hat also vier Unterrichtstage in der Woche.",
-    "text": "I corsi si svolgono al mattino dal lunedì al venerdì, dalle 9 alle 12:30, oppure al pomeriggio dal lunedì al giovedì, dalle 13 alle 17:30. Il corso pomeridiano ha quindi quattro giorni di lezione a settimana."
+  "t.die-kurse-finden-vormittags.wo00rx": {
+    "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt.",
+    "text": "I corsi si svolgono al mattino dal lunedì al venerdì, dalle 9 alle 12:30, oppure al pomeriggio dal lunedì al giovedì, dalle 13 alle 17:30."
   },
   "t.die-kursziele-stimmen-wir.19yyu5h": {
     "de": "Die Kursziele stimmen wir auf das Sprachniveau deines Teams ab.",
@@ -2099,10 +2107,6 @@
     "de": "Die Unterrichtssprache berücksichtigen",
     "text": "Considerare la lingua d’insegnamento"
   },
-  "t.die-vorbereitung-auf-eine.1h64ja4": {
-    "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
-    "text": "La preparazione agli esami non fa parte dei corsi intensivi. Se ti serve un certificato telc, puoi prenotare in aggiunta un corso di preparazione."
-  },
   "t.die-vorbereitung-gehoert-nicht.1vomj1w": {
     "de": "Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.",
     "text": "La preparazione non fa parte dei corsi intensivi. Se ti serve il certificato, la prenoti a parte."
@@ -2138,6 +2142,10 @@
   "t.dieses-programm-anfragen.1nkejor": {
     "de": "Dieses Programm anfragen",
     "text": "Richiedi questo programma"
+  },
+  "t.digitale-raumausstattung.2mf7rf": {
+    "de": "Digitale Raumausstattung",
+    "text": "Aule con dotazione digitale"
   },
   "t.direkt-beantwortet.1dd88et": {
     "de": "Direkt beantwortet",
@@ -2231,10 +2239,6 @@
     "de": "Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.",
     "text": "Devi avere almeno un livello B1."
   },
-  "t.du-buchst-und-bezahlst.19b6j84": {
-    "de": "Du buchst und bezahlst immer ein Trimester.",
-    "text": "Prenoti e paghi sempre un trimestre alla volta."
-  },
   "t.du-entscheidest-was-dein.1ebwyj1": {
     "de": "Du entscheidest, was dein Gast mitbenutzen darf, etwa Küche, Bad, Waschmaschine und WLAN.",
     "text": "Decidi tu cosa può usare il tuo ospite, per esempio cucina, bagno, lavatrice e Wi-Fi."
@@ -2295,13 +2299,9 @@
     "de": "Du legst die Hausregeln fest, zum Beispiel zu Rauchen, Besuch und Reinigung.",
     "text": "Stabilisci tu le regole della casa, per esempio su fumo, visite e pulizie."
   },
-  "t.du-lernst-an-zwei.1kkgacc": {
-    "de": "Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.",
-    "text": "Studi due sere a settimana dalle 18:30 alle 20:00, il lunedì e il mercoledì oppure il martedì e il giovedì."
-  },
-  "t.du-lernst-das-ganze.p4bfmh": {
-    "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 15 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Hörverstehen, Lesen, Schreiben und besonders das Sprechen.",
-    "text": "Studi tutto l’anno in gruppi internazionali da 10 a 15 partecipanti. Le lezioni seguono rigorosamente il Quadro comune europeo di riferimento e allenano in modo mirato ascolto, lettura, scrittura e soprattutto il parlato."
+  "t.du-lernst-das-ganze.3te892": {
+    "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.",
+    "text": "Studi tutto l’anno in gruppi internazionali da 10 a 16 partecipanti. Le lezioni seguono rigorosamente il Quadro comune europeo di riferimento e allenano in modo mirato lettura, ascolto, scrittura e soprattutto il parlato."
   },
   "t.du-lernst-die-fachsprache.3m1y53": {
     "de": "Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.",
@@ -2315,9 +2315,9 @@
     "de": "Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
     "text": "Segui {course.intensive-german.lessons} lezioni a settimana."
   },
-  "t.du-lernst-vormittags-oder.1ku1u9y": {
-    "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
-    "text": "Studi al mattino o al pomeriggio. Il corso pomeridiano si tiene dal lunedì al giovedì."
+  "t.du-lernst-vormittags-oder.1xlolv5": {
+    "de": "Du lernst vormittags oder nachmittags, je nach Kursstart.",
+    "text": "Studi al mattino o al pomeriggio, a seconda di quando inizia il corso."
   },
   "t.du-moechtest-in-deutschland.1b4asxf": {
     "de": "Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.",
@@ -2459,9 +2459,9 @@
     "de": "Eigenes möbliertes Zimmer",
     "text": "Stanza arredata tutta tua"
   },
-  "t.ein-abendkurs-dauert-etwa.1fpp7lz": {
-    "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
-    "text": "Un corso serale dura circa 3½ mesi. In questo periodo completi mezzo livello, per esempio A1.2 o B2.1. In un anno riesci così a completare circa 1½ livelli."
+  "t.ein-abendkurs-dauert-etwa.1n0hb9i": {
+    "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit kannst du eine halbe Niveaustufe abschließen.",
+    "text": "Un corso serale dura circa 3½ mesi. In questo periodo puoi completare mezzo livello."
   },
   "t.ein-baby-krabbelt-und.acgqmh": {
     "de": "Ein Baby krabbelt und schaut neugierig nach oben",
@@ -2787,6 +2787,14 @@
     "de": "Einzelne Lernende oder Gruppen",
     "text": "Singoli studenti o gruppi"
   },
+  "t.elementare-sprachverwendung-anfa.1kd77ny": {
+    "de": "Elementare Sprachverwendung · Anfänger",
+    "text": "Utente base · principiante"
+  },
+  "t.elementare-sprachverwendung-grun.2txgib": {
+    "de": "Elementare Sprachverwendung · grundlegende Kenntnisse",
+    "text": "Utente base · conoscenze elementari"
+  },
   "t.elementare-sprachverwendung.17h254x": {
     "de": "Elementare Sprachverwendung",
     "text": "Utente base"
@@ -2874,6 +2882,10 @@
   "t.fallbasierte-spracharbeit-mit-di.1rgrz1e": {
     "de": "Fallbasierte Spracharbeit mit direktem Feedback",
     "text": "Lavoro linguistico su casi concreti, con feedback immediato"
+  },
+  "t.familiaere-atmosphaere.15uj53g": {
+    "de": "Familiäre Atmosphäre",
+    "text": "Atmosfera familiare"
   },
   "t.fang-frueh-mit-der.3b43z1": {
     "de": "Fang früh mit der Wohnungssuche an und halte die Unterlagen für Anfragen und Besichtigungen bereit.",
@@ -2966,10 +2978,6 @@
   "t.fluessigere-muendliche-kommunika.15smhn9": {
     "de": "Flüssigere mündliche Kommunikation",
     "text": "Comunicazione orale più scorrevole"
-  },
-  "t.fluessigeres-verstehen-und-sprec.1hy5ao4": {
-    "de": "Flüssigeres Verstehen und Sprechen",
-    "text": "Capire e parlare con più scioltezza"
   },
   "t.fortschritte-auf-deinem-sprachni.8km5eu": {
     "de": "Fortschritte auf deinem Sprachniveau",
@@ -3174,10 +3182,6 @@
   "t.fuer-gruppen.1rhk86e": {
     "de": "Für Gruppen",
     "text": "Per gruppi"
-  },
-  "t.fuer-jede-niveaustufe-haben.1z0c8d0": {
-    "de": "Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.",
-    "text": "Per ogni livello abbiamo scelto un libro di testo adatto. Dall’A1 al B1 impari con Netzwerk neu, dal B1+ al C1 con Kontext."
   },
   "t.fuer-schulklassen-und-gruppen.8u5pfs": {
     "de": "Für Schulklassen und Gruppen",
@@ -3695,6 +3699,10 @@
     "de": "Hinweis zur neuen Website",
     "text": "Avviso sul nuovo sito"
   },
+  "t.hochqualifizierte-lehrkraefte.cg5vip": {
+    "de": "Hochqualifizierte Lehrkräfte",
+    "text": "Corpo docente altamente qualificato"
+  },
   "t.hochschulen-fuer-angewandte-wiss.s1d4fz": {
     "de": "Hochschulen für angewandte Wissenschaften verbinden das Studium häufig mit Praxisprojekten und Praktika.",
     "text": "Le università di scienze applicate uniscono spesso lo studio a progetti pratici e tirocini."
@@ -3898,10 +3906,6 @@
   "t.in-einem-jahr-von.cxhquh": {
     "de": "In einem Jahr von A1 bis C1",
     "text": "Dall’A1 al C1 in un anno"
-  },
-  "t.in-einem-trimester-schliesst.1a0mqse": {
-    "de": "In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.",
-    "text": "In un trimestre completi mezzo livello, quindi circa 1½ livelli all’anno."
   },
   "t.in-einer-casa-wg.m88nl0": {
     "de": "In einer CASA-WG hast du ein eigenes Zimmer und teilst den Alltag mit anderen, die in Bremen Deutsch lernen.",
@@ -4415,6 +4419,10 @@
     "de": "Kosten",
     "text": "Costi"
   },
+  "t.kostenfreies-sprachcaf-fuer-unse.z5zwy9": {
+    "de": "Kostenfreies Sprachcafé für unsere Teilnehmenden",
+    "text": "Caffè linguistico gratuito per chi frequenta i nostri corsi"
+  },
   "t.kostenlos-von-a1-bis.45ucxk": {
     "de": "Kostenlos, von A1 bis C1",
     "text": "Gratis, dall’A1 al C1"
@@ -4466,6 +4474,10 @@
   "t.kultur-vor-ort-in.1r6hui1": {
     "de": "Kultur vor Ort in Bremer Gastfamilien kennenlernen",
     "text": "Conoscere la cultura locale nelle famiglie ospitanti di Brema"
+  },
+  "t.kulturelle-angebote.d3rfht": {
+    "de": "Kulturelle Angebote",
+    "text": "Proposte culturali"
   },
   "t.kulturelle-stationen-geben-grupp.1diyo0m": {
     "de": "Kulturelle Stationen geben Gruppenkursen eine konkrete Bremen-Erinnerung.",
@@ -5027,9 +5039,9 @@
     "de": "Mit mehr Sicherheit in die Prüfung",
     "text": "Affrontare l’esame con più sicurezza"
   },
-  "t.mit-netzwerk-neu-lernst.evlstb": {
-    "de": "Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.",
-    "text": "Con Netzwerk neu impari le parole della vita quotidiana e le basi della grammatica, e ti eserciti con i dialoghi."
+  "t.mit-netzwerk-neu-lernst.loxz3i": {
+    "de": "Mit Netzwerk neu lernst du Wörter für den Alltag, die Grundlagen der Grammatik, Dialoge und Texte.",
+    "text": "Con Netzwerk neu impari le parole della vita quotidiana, le basi della grammatica, dialoghi e testi."
   },
   "t.mit-oder-ohne-verpflegung.1xq1des": {
     "de": "Mit oder ohne Verpflegung, je nach Absprache",
@@ -5047,9 +5059,9 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "Con il telc Deutsch C1 Hochschule dimostri che il tuo tedesco è sufficiente per studiare all’università. Molte università di lingua tedesca richiedono questo certificato per l’ammissione."
   },
-  "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
-    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
-    "text": "Con {course.intensive-german.lessons} lezioni a settimana completi un intero livello in 8 settimane."
+  "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
+    "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
+    "text": "Con {course.intensive-german.lessons} lezioni a settimana puoi raggiungere il livello successivo in 8 settimane."
   },
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
@@ -5215,10 +5227,6 @@
     "de": "Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.",
     "text": "Dopo la prenotazione concordiamo con te l’arrivo e la consegna delle chiavi."
   },
-  "t.nach-feierabend-deutsch-lernen.bj13cr": {
-    "de": "Nach Feierabend Deutsch lernen und das Gelernte gleich im Alltag anwenden.",
-    "text": "Imparare il tedesco dopo il lavoro e usare subito nella vita quotidiana ciò che si è imparato."
-  },
   "t.nach-feierabend-lernst-du.ofz4y6": {
     "de": "Nach Feierabend lernst du meist zweimal pro Woche.",
     "text": "Impari dopo il lavoro, di solito due volte a settimana."
@@ -5323,6 +5331,10 @@
     "de": "Nein",
     "text": "No"
   },
+  "t.nette-gespraeche-in-unserer.17tmm1o": {
+    "de": "Nette Gespräche in unserer Cafeteria",
+    "text": "Piacevoli chiacchierate nella nostra caffetteria"
+  },
   "t.neu-beginnen.1yx0aj2": {
     "de": "Neu beginnen",
     "text": "Ricomincia"
@@ -5330,10 +5342,6 @@
   "t.neue-kurse-beginnen-jeden.19bgyiy": {
     "de": "Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag",
     "text": "Ogni mese partono nuovi corsi; la prima parte di ogni livello inizia alternando mattina e pomeriggio"
-  },
-  "t.neue-kurse-beginnen-jeden.nkdyw1": {
-    "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
-    "text": "Ogni mese partono nuovi corsi, e il test di livello ti dice da quale livello cominci."
   },
   "t.neue-menschen-kennenlernen.vttdpm": {
     "de": "Neue Menschen kennenlernen",
@@ -5483,6 +5491,10 @@
     "de": "Ohne Termin",
     "text": "Senza appuntamento"
   },
+  "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
+    "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
+    "text": "Se non conosci ancora il tedesco, parti dall’A1.1, sempre il primo giorno di un nuovo corso."
+  },
   "t.oktober-2026.ckuz5g": {
     "de": "Oktober 2026",
     "text": "Ottobre 2026"
@@ -5583,6 +5595,10 @@
     "de": "Persönliche Beratung",
     "text": "Consulenza personale"
   },
+  "t.persoenliche-lernberatung.1b7lirs": {
+    "de": "Persönliche Lernberatung",
+    "text": "Consulenza personale per lo studio"
+  },
   "t.persoenliche-vermittlung.t3zji6": {
     "de": "Persönliche Vermittlung",
     "text": "Ricerca dell’alloggio su misura"
@@ -5646,10 +5662,6 @@
   "t.portraet-von.175a2gq": {
     "de": "Porträt von {name}",
     "text": "Ritratto di {name}"
-  },
-  "t.praeziser-einsatz-zentraler-gram.sj9m70": {
-    "de": "Präziser Einsatz zentraler Grammatikstrukturen",
-    "text": "Uso preciso delle strutture grammaticali principali"
   },
   "t.praezises-verfassen-von-arztbrie.14xpizj": {
     "de": "Präzises Verfassen von Arztbriefen",
@@ -6194,6 +6206,18 @@
   "t.selbst-zusammenstellen.mvc58b": {
     "de": "Selbst zusammenstellen",
     "text": "Crea il tuo programma"
+  },
+  "t.selbststaendige-sprachverwendung.10je5n6": {
+    "de": "Selbstständige Sprachverwendung 3",
+    "text": "Utente autonomo 3"
+  },
+  "t.selbststaendige-sprachverwendung.19e0ut6": {
+    "de": "Selbstständige Sprachverwendung 1",
+    "text": "Utente autonomo 1"
+  },
+  "t.selbststaendige-sprachverwendung.1mm6kcg": {
+    "de": "Selbstständige Sprachverwendung 2",
+    "text": "Utente autonomo 2"
   },
   "t.selbststaendige-sprachverwendung.m7p0gc": {
     "de": "Selbstständige Sprachverwendung",
@@ -6955,9 +6979,9 @@
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
     "text": "I nostri corsi intensivi si svolgono in piccoli gruppi internazionali da 10 a 15 partecipanti. Anche i corsi serali e i corsi speciali sono in piccoli gruppi. Così resta più tempo per parlare, e gli insegnanti possono darti un feedback personale e correggere i tuoi elaborati scritti."
   },
-  "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
-    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-    "text": "I nostri corsi intensivi prevedono {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura 8 settimane. Così in un anno percorri i livelli dall’A1 al C1 e costruisci una base solida per studiare all’università o per un lavoro qualificato in Germania."
+  "t.unsere-intensivkurse-umfassen-un.13jxzd9": {
+    "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So kannst du in einem Jahr die Niveaustufen A1 bis C1 durchlaufen und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+    "text": "I nostri corsi intensivi prevedono {course.intensive-german.lessons} lezioni da 45 minuti a settimana. Un livello completo dura 8 settimane. Così in un anno puoi percorrere i livelli dall’A1 al C1 e costruire una base solida per studiare all’università o per un lavoro qualificato in Germania."
   },
   "t.unsere-kooperationspartner.4fwxyo": {
     "de": "Unsere Kooperationspartner",
@@ -7867,10 +7891,6 @@
     "de": "Wenn du mit deinem Deutsch weiterkommen möchtest, empfehlen wir dir gern einen passenden Kurs und einen realistischen Zeitplan.",
     "text": "Se vuoi fare progressi con il tuo tedesco, ti consigliamo volentieri un corso adatto e una tabella di marcia realistica."
   },
-  "t.wenn-du-noch-keine.1qckvvn": {
-    "de": "Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.",
-    "text": "Se non conosci ancora il tedesco (A1.1), devi sempre cominciare il primo giorno di un nuovo corso."
-  },
   "t.wenn-du-schon-deutsch.f8eac6": {
     "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
     "text": "Se parli già tedesco, il test di livello ci aiuta a scegliere il corso. Passa da noi di persona oppure fai un test online gratuito e mandaci il risultato. Qui a scuola guardiamo ancora più da vicino e così troviamo il corso giusto per te."
@@ -8474,6 +8494,10 @@
   "t.zur-deutschen-fassung.1esgk92": {
     "de": "Zur deutschen Fassung",
     "text": "Vai alla versione tedesca"
+  },
+  "t.zur-intensiven-vorbereitung-auf.l3nfcv": {
+    "de": "Zur intensiven Vorbereitung auf eine Prüfung empfehlen wir, im Anschluss an den Intensivkurs einen Vorbereitungskurs zu buchen.",
+    "text": "Per prepararti in modo intensivo a un esame, ti consigliamo di prenotare un corso di preparazione dopo il corso intensivo."
   },
   "t.zur-kursanmeldung.pofxnf": {
     "de": "Zur Kursanmeldung",

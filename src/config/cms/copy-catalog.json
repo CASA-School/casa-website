@@ -532,16 +532,6 @@
   ],
   "pages": []
  },
- "t.aktive-kommunikation-in-alltagss.1nopxtj": {
-  "de": "Aktive Kommunikation in Alltagssituationen",
-  "en": "Active communication in everyday situations",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.aktiver-gruppenunterricht-macht-.m80676": {
   "de": "Aktiver Gruppenunterricht macht Sprache sichtbar, praktisch und gemeinsam erlebbar.",
   "en": "Active group teaching keeps language visible, practical, and shared.",
@@ -832,6 +822,14 @@
   "pages": [
    "/contact"
   ]
+ },
+ "t.am-abend-deutsch-lernen.10n40uo": {
+  "de": "Am Abend Deutsch lernen und das Gelernte gleich in Beruf und Alltag anwenden.",
+  "en": "Learn German in the evening and use what you’ve learnt at work and in everyday life straight away.",
+  "files": [
+   "src/config/content/course-narratives.ts"
+  ],
+  "pages": []
  },
  "t.am-tisch-der-gastfamilie.1yrvhly": {
   "de": "Am Tisch der Gastfamilie",
@@ -1618,6 +1616,17 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.auch-dieser-unterricht-orientier.1lmh6mg": {
+  "de": "Auch dieser Unterricht orientiert sich am GER und an der alltäglichen und beruflichen Kommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
+  "en": "These lessons also follow the CEFR, focus on communication in everyday life and at work, and take place in small international groups. Now and then we also organise leisure and cultural activities for the groups.",
+  "files": [
+   "src/config/courses/course-practical-facts.ts"
+  ],
+  "pages": [
+   "/courses",
+   "/courses/[slug]"
   ]
  },
  "t.auf-anfrage.10nwwwc": {
@@ -3164,6 +3173,16 @@
    "*"
   ]
  },
+ "t.casa-eigenes-zusatzmaterial.1tvmyap": {
+  "de": "CASA-eigenes Zusatzmaterial",
+  "en": "CASA’s own extra materials",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.casa-heisst-auf-deutsch.lwy2qk": {
   "de": "CASA heißt auf Deutsch „Haus“. Unsere gemeinnützige Sprachschule ist ein Ort der Begegnung, an dem Menschen unterschiedlichster Herkunft zusammenkommen und Raum finden, sich mit ihrem kulturellen Hintergrund in eine Gemeinschaft einzubringen. Gegründet wurde CASA 1983 von einer Gruppe junger Pädagoginnen und Pädagogen. Unseren Leitspruch versuchen wir jeden Tag zu leben, mit unseren Lernenden genauso wie mit unseren Kolleginnen und Kollegen und unseren Partnern.",
   "en": "CASA means ‘house’. Our non-profit language school is a meeting place where people from all kinds of backgrounds come together and find room to bring their own culture into a community. CASA was founded in 1983 by a group of young educators. We try to live by our motto every day, with our learners just as much as with our colleagues and our partners.",
@@ -3645,9 +3664,9 @@
    "/about"
   ]
  },
- "t.damit-du-gut-vorankommst.3uqvm4": {
-  "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.",
-  "en": "To make good progress, you need to be in a course at the right level. That is why we assess you here at the school and may adjust your course level, even if you already have a certificate.",
+ "t.damit-du-gut-vorankommst.legsps": {
+  "de": "Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen.",
+  "en": "To make good progress, you need to be in a course at the right level. That is why we assess you here at the school and may adjust your course level.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -3932,6 +3951,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.das-ist-moeglich-fuer.vav9qy": {
+  "de": "Das ist möglich für alle, die sich intensiv mit Deutsch beschäftigen möchten – für dein Studium, deinen Beruf und deinen Alltag.",
+  "en": "It is possible for anyone who wants to work intensively on their German – for your studies, your job and your everyday life.",
+  "files": [
+   "src/config/courses/course-page-content.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.das-offizielle-portal-fuer.17a7aqu": {
@@ -4387,9 +4416,9 @@
    "/"
   ]
  },
- "t.deine-lehrkraefte-ergaenzen-das.1ljua9a": {
-  "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit eigenen Materialien, die den Unterricht aktuell, anregend und unterhaltsam machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir möchten auf die Bedürfnisse jeder und jedes Einzelnen eingehen.",
-  "en": "Your teachers add their own materials to the textbook to keep lessons up to date, stimulating and enjoyable. They also correct your written work regularly and give you personal guidance, because we want to respond to what each person needs.",
+ "t.deine-lehrkraefte-ergaenzen-das.uu6xk7": {
+  "de": "Deine Lehrkräfte ergänzen das Lehrwerk mit CASA-eigenen Materialien, die den Unterricht aktuell, anregend und interessant machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir gehen auf deine individuellen Bedürfnisse ein.",
+  "en": "Your teachers add CASA’s own materials to the textbook to keep lessons up to date, stimulating and interesting. They also correct your written work regularly and give you personal guidance, because we respond to your individual needs.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -4759,17 +4788,6 @@
    "/courses/[slug]"
   ]
  },
- "t.der-unterricht-orientiert-sich.dxa6aq": {
-  "de": "Der Unterricht orientiert sich an der Alltagskommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.",
-  "en": "Lessons focus on everyday communication and take place in small international groups. Now and then we also organise leisure and cultural activities for the groups.",
-  "files": [
-   "src/config/courses/course-practical-facts.ts"
-  ],
-  "pages": [
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.der-unterricht-umfasst-unterrich.1nvd406": {
   "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
   "en": "Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.",
@@ -4937,16 +4955,6 @@
   ],
   "pages": [
    "/"
-  ]
- },
- "t.deutsch-lernen-neben-dem.lj9hgo": {
-  "de": "Deutsch lernen neben dem Beruf",
-  "en": "Learning German alongside your job",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.deutsch-lernen-und-bremen.5q5wxi": {
@@ -5277,6 +5285,18 @@
    "/courses/[slug]"
   ]
  },
+ "t.die-inhalte-der-niveaustufen.4tz0j6": {
+  "de": "Die Inhalte der Niveaustufen richten sich nach dem Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Für jede Kursstufe haben wir ein passendes Lehrwerk ausgewählt, das wir durchgängig mit unseren eigens erstellten Materialien ergänzen.",
+  "en": "The content of each level follows the Common European Framework of Reference for Languages (CEFR). For every level we have chosen a suitable textbook, which we supplement throughout with materials we create ourselves.",
+  "files": [
+   "src/config/courses/course-profiles.ts"
+  ],
+  "pages": [
+   "/",
+   "/courses",
+   "/courses/[slug]"
+  ]
+ },
  "t.die-inhalte-richten-sich.sgtuqn": {
   "de": "Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.",
   "en": "The content follows the specialisms and current level of the group.",
@@ -5332,9 +5352,9 @@
    "/courses/[slug]"
   ]
  },
- "t.die-kurse-finden-vormittags.1p1eus6": {
-  "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt. Der Nachmittagskurs hat also vier Unterrichtstage in der Woche.",
-  "en": "Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30. So the afternoon course has four days of lessons a week.",
+ "t.die-kurse-finden-vormittags.wo00rx": {
+  "de": "Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt.",
+  "en": "Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -5673,17 +5693,6 @@
    "/resources/why-germany"
   ]
  },
- "t.die-vorbereitung-auf-eine.1h64ja4": {
-  "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
-  "en": "Exam preparation is not part of the intensive courses. If you need a telc certificate, you can book a preparation course as well.",
-  "files": [
-   "src/config/courses/course-practical-facts.ts"
-  ],
-  "pages": [
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.die-vorbereitung-gehoert-nicht.1vomj1w": {
   "de": "Die Vorbereitung gehört nicht zu den Intensivkursen. Wenn du das Zertifikat brauchst, buchst du sie zusätzlich.",
   "en": "Preparation is not part of the intensive courses. If you need the certificate, you book it separately.",
@@ -5797,6 +5806,16 @@
   "files": [
    "src/components/gruppen/esel-builder.tsx",
    "src/components/gruppen/gruppen-package-dialog.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.digitale-raumausstattung.2mf7rf": {
+  "de": "Digitale Raumausstattung",
+  "en": "Digitally equipped classrooms",
+  "files": [
+   "src/config/content/school-features.ts"
   ],
   "pages": [
    "/courses/[slug]"
@@ -6090,16 +6109,6 @@
    "/courses/[slug]"
   ]
  },
- "t.du-buchst-und-bezahlst.19b6j84": {
-  "de": "Du buchst und bezahlst immer ein Trimester.",
-  "en": "You always book and pay for one trimester at a time.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.du-entscheidest-was-dein.1ebwyj1": {
   "de": "Du entscheidest, was dein Gast mitbenutzen darf, etwa Küche, Bad, Waschmaschine und WLAN.",
   "en": "You decide what your guest may use, such as the kitchen, bathroom, washing machine and Wi-Fi.",
@@ -6268,19 +6277,9 @@
    "/accommodation/become-host"
   ]
  },
- "t.du-lernst-an-zwei.1kkgacc": {
-  "de": "Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.",
-  "en": "You study on two evenings a week from 18:30 to 20:00, on Mondays and Wednesdays or on Tuesdays and Thursdays.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.du-lernst-das-ganze.p4bfmh": {
-  "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 15 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Hörverstehen, Lesen, Schreiben und besonders das Sprechen.",
-  "en": "You learn all year round in international groups of 10 to 15 people. Teaching keeps strictly to the Common European Framework of Reference and works on listening, reading, writing and, above all, speaking.",
+ "t.du-lernst-das-ganze.3te892": {
+  "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.",
+  "en": "You learn all year round in international groups of 10 to 16 people. Teaching keeps strictly to the Common European Framework of Reference and works on reading, listening, writing and, above all, speaking.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -6311,9 +6310,9 @@
    "/about"
   ]
  },
- "t.du-lernst-vormittags-oder.1ku1u9y": {
-  "de": "Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.",
-  "en": "You study in the morning or in the afternoon. The afternoon course runs from Monday to Thursday.",
+ "t.du-lernst-vormittags-oder.1xlolv5": {
+  "de": "Du lernst vormittags oder nachmittags, je nach Kursstart.",
+  "en": "You study in the morning or in the afternoon, depending on when your course starts.",
   "files": [
    "src/config/courses/course-page-content.ts"
   ],
@@ -6823,9 +6822,9 @@
    "/accommodation/[type]"
   ]
  },
- "t.ein-abendkurs-dauert-etwa.1fpp7lz": {
-  "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.",
-  "en": "An evening course lasts about three and a half months. In that time you complete half a level, for example A1.2 or B2.1, so in a year you can manage about one and a half levels.",
+ "t.ein-abendkurs-dauert-etwa.1n0hb9i": {
+  "de": "Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit kannst du eine halbe Niveaustufe abschließen.",
+  "en": "An evening course lasts about three and a half months. In that time you can complete half a level.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -7909,6 +7908,38 @@
    "/accommodation/become-host"
   ]
  },
+ "t.elementare-sprachverwendung-anfa.1kd77ny": {
+  "de": "Elementare Sprachverwendung · Anfänger",
+  "en": "Basic user · beginner",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.elementare-sprachverwendung-grun.2txgib": {
+  "de": "Elementare Sprachverwendung · grundlegende Kenntnisse",
+  "en": "Basic user · elementary",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.elementare-sprachverwendung.17h254x": {
   "de": "Elementare Sprachverwendung",
   "en": "Basic user",
@@ -8176,6 +8207,16 @@
   ],
   "pages": []
  },
+ "t.familiaere-atmosphaere.15uj53g": {
+  "de": "Familiäre Atmosphäre",
+  "en": "A warm, family atmosphere",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.fang-frueh-mit-der.3b43z1": {
   "de": "Fang früh mit der Wohnungssuche an und halte die Unterlagen für Anfragen und Besichtigungen bereit.",
   "en": "Start looking for somewhere to live early, and have your documents ready for enquiries and viewings.",
@@ -8431,16 +8472,6 @@
    "src/config/content/exam-narratives.ts"
   ],
   "pages": []
- },
- "t.fluessigeres-verstehen-und-sprec.1hy5ao4": {
-  "de": "Flüssigeres Verstehen und Sprechen",
-  "en": "Stronger listening and speaking fluency",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
  },
  "t.fortschritte-auf-deinem-sprachni.8km5eu": {
   "de": "Fortschritte auf deinem Sprachniveau",
@@ -8940,18 +8971,6 @@
    "/exams/[code]",
    "/faq",
    "/team"
-  ]
- },
- "t.fuer-jede-niveaustufe-haben.1z0c8d0": {
-  "de": "Für jede Niveaustufe haben wir ein passendes Lehrwerk ausgewählt. Von A1 bis B1 lernst du mit Netzwerk neu, von B1+ bis C1 mit Kontext.",
-  "en": "We have chosen a suitable textbook for each level. From A1 to B1 you learn with Netzwerk neu, and from B1+ to C1 with Kontext.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
   ]
  },
  "t.fuer-schulklassen-und-gruppen.8u5pfs": {
@@ -10385,6 +10404,16 @@
    "*"
   ]
  },
+ "t.hochqualifizierte-lehrkraefte.cg5vip": {
+  "de": "Hochqualifizierte Lehrkräfte",
+  "en": "Highly qualified teachers",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.hochschulen-fuer-angewandte-wiss.s1d4fz": {
   "de": "Hochschulen für angewandte Wissenschaften verbinden das Studium häufig mit Praxisprojekten und Praktika.",
   "en": "Universities of applied sciences often combine study with practical projects and work placements.",
@@ -10944,16 +10973,6 @@
  "t.in-einem-jahr-von.cxhquh": {
   "de": "In einem Jahr von A1 bis C1",
   "en": "From A1 to C1 in a year",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.in-einem-trimester-schliesst.1a0mqse": {
-  "de": "In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.",
-  "en": "In one trimester you complete half a level, so about one and a half levels a year.",
   "files": [
    "src/config/courses/course-page-content.ts"
   ],
@@ -12220,6 +12239,7 @@
   "de": "Kompetente Sprachverwendung",
   "en": "Proficient user",
   "files": [
+   "src/components/signatures/course-level-goals.tsx",
    "src/config/content/cefr-levels.ts"
   ],
   "pages": [
@@ -12410,6 +12430,16 @@
    "/courses"
   ]
  },
+ "t.kostenfreies-sprachcaf-fuer-unse.z5zwy9": {
+  "de": "Kostenfreies Sprachcafé für unsere Teilnehmenden",
+  "en": "A free language café for our learners",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.kostenlos-von-a1-bis.45ucxk": {
   "de": "Kostenlos, von A1 bis C1",
   "en": "Free, from A1 to C1",
@@ -12554,6 +12584,16 @@
    "src/config/content/course-narratives.ts"
   ],
   "pages": []
+ },
+ "t.kulturelle-angebote.d3rfht": {
+  "de": "Kulturelle Angebote",
+  "en": "Cultural activities",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
  },
  "t.kulturelle-stationen-geben-grupp.1diyo0m": {
   "de": "Kulturelle Stationen geben Gruppenkursen eine konkrete Bremen-Erinnerung.",
@@ -14126,9 +14166,9 @@
    "/exams"
   ]
  },
- "t.mit-netzwerk-neu-lernst.evlstb": {
-  "de": "Mit Netzwerk neu lernst du Wörter für den Alltag und die Grundlagen der Grammatik und übst Dialoge.",
-  "en": "With Netzwerk neu you learn everyday vocabulary and the basics of grammar, and you practise dialogues.",
+ "t.mit-netzwerk-neu-lernst.loxz3i": {
+  "de": "Mit Netzwerk neu lernst du Wörter für den Alltag, die Grundlagen der Grammatik, Dialoge und Texte.",
+  "en": "With Netzwerk neu you learn everyday vocabulary, the basics of grammar, dialogues and texts.",
   "files": [
    "src/components/signatures/course-level-goals.tsx"
   ],
@@ -14188,9 +14228,9 @@
   ],
   "pages": []
  },
- "t.mit-unterrichtseinheiten-pro-woc.1s1nce4": {
-  "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.",
-  "en": "With {course.intensive-german.lessons} lessons a week, you complete a whole level in 8 weeks.",
+ "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
+  "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
+  "en": "With {course.intensive-german.lessons} lessons a week, you can reach the next level in 8 weeks.",
   "files": [
    "src/config/courses/course-page-content.ts"
   ],
@@ -14596,14 +14636,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.nach-feierabend-deutsch-lernen.bj13cr": {
-  "de": "Nach Feierabend Deutsch lernen und das Gelernte gleich im Alltag anwenden.",
-  "en": "Learn German after work and use what you’ve learnt in everyday life straight away.",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
- },
  "t.nach-ruecksprache.10x8e42": {
   "de": "Nach Rücksprache",
   "en": "On request",
@@ -14903,6 +14935,16 @@
   ],
   "pages": []
  },
+ "t.nette-gespraeche-in-unserer.17tmm1o": {
+  "de": "Nette Gespräche in unserer Cafeteria",
+  "en": "Friendly conversations in our cafeteria",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.neu-beginnen.1yx0aj2": {
   "de": "Neu beginnen",
   "en": "Start again",
@@ -14921,16 +14963,6 @@
   ],
   "pages": [
    "/courses"
-  ]
- },
- "t.neue-kurse-beginnen-jeden.nkdyw1": {
-  "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
-  "en": "New courses begin every month, and the placement test shows which level you start at.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.neue-menschen-kennenlernen.vttdpm": {
@@ -15288,6 +15320,17 @@
    "/placement-test"
   ]
  },
+ "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
+  "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
+  "en": "With no knowledge of German, you start with A1.1, always at the beginning of a course.",
+  "files": [
+   "src/config/courses/course-practical-facts.ts"
+  ],
+  "pages": [
+   "/courses",
+   "/courses/[slug]"
+  ]
+ },
  "t.oktober-2026.ckuz5g": {
   "de": "Oktober 2026",
   "en": "October 2026",
@@ -15556,6 +15599,16 @@
    "/faq"
   ]
  },
+ "t.persoenliche-lernberatung.1b7lirs": {
+  "de": "Persönliche Lernberatung",
+  "en": "Personal learning advice",
+  "files": [
+   "src/config/content/school-features.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.persoenliche-vermittlung.t3zji6": {
   "de": "Persönliche Vermittlung",
   "en": "Personal help finding a room",
@@ -15733,16 +15786,6 @@
    "/accommodation/[type]",
    "/courses/[slug]",
    "/exams/[code]"
-  ]
- },
- "t.praeziser-einsatz-zentraler-gram.sj9m70": {
-  "de": "Präziser Einsatz zentraler Grammatikstrukturen",
-  "en": "More precise grammar usage in context",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.praezises-verfassen-von-arztbrie.14xpizj": {
@@ -17175,6 +17218,54 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.selbststaendige-sprachverwendung.10je5n6": {
+  "de": "Selbstständige Sprachverwendung 3",
+  "en": "Independent user 3",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.selbststaendige-sprachverwendung.19e0ut6": {
+  "de": "Selbstständige Sprachverwendung 1",
+  "en": "Independent user 1",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.selbststaendige-sprachverwendung.1mm6kcg": {
+  "de": "Selbstständige Sprachverwendung 2",
+  "en": "Independent user 2",
+  "files": [
+   "src/components/signatures/course-level-goals.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.selbststaendige-sprachverwendung.m7p0gc": {
@@ -19380,9 +19471,9 @@
    "/"
   ]
  },
- "t.unsere-intensivkurse-umfassen-un.1mvpco1": {
-  "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
-  "en": "Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.",
+ "t.unsere-intensivkurse-umfassen-un.13jxzd9": {
+  "de": "Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So kannst du in einem Jahr die Niveaustufen A1 bis C1 durchlaufen und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.",
+  "en": "Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 weeks, so in a year you can work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -21963,17 +22054,6 @@
    "/news/[slug]"
   ]
  },
- "t.wenn-du-noch-keine.1qckvvn": {
-  "de": "Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.",
-  "en": "If you have no German yet (A1.1), you always need to start at the beginning of a course.",
-  "files": [
-   "src/config/courses/course-practical-facts.ts"
-  ],
-  "pages": [
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.wenn-du-schon-deutsch.f8eac6": {
   "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
   "en": "If you already speak some German, a placement test helps us choose the right course for you. Come and see us in person, or take a free online test and send us your result. Here at the school we take a closer look and find the right course together.",
@@ -23584,6 +23664,17 @@
   ],
   "pages": [
    "*"
+  ]
+ },
+ "t.zur-intensiven-vorbereitung-auf.l3nfcv": {
+  "de": "Zur intensiven Vorbereitung auf eine Prüfung empfehlen wir, im Anschluss an den Intensivkurs einen Vorbereitungskurs zu buchen.",
+  "en": "For thorough exam preparation, we recommend booking a preparation course after the intensive course.",
+  "files": [
+   "src/config/courses/course-practical-facts.ts"
+  ],
+  "pages": [
+   "/courses",
+   "/courses/[slug]"
   ]
  },
  "t.zur-kursanmeldung.pofxnf": {
