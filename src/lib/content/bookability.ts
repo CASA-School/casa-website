@@ -1,5 +1,7 @@
 import { addDays, bremenDate } from '@/lib/appointments/schedule';
 import { toDateInputValue } from '@/lib/dates';
+import { secondHalfStart } from '@/lib/registration/halves';
+import { soldByLevel } from '@/lib/registration/levels';
 
 /**
  * Which published terms and exam sittings a learner can still book.
@@ -76,6 +78,22 @@ export function isCourseTermBookable(term: CourseTerm, slug: string, today: stri
  * Bildungszeit the coming Monday. Null when the term is no longer bookable, and
  * for an evening term already under way — that is joined, it has no start date.
  */
+/**
+ * An intensive term that has begun but whose second half is still ahead (lib/registration/halves):
+ * open to a learner who starts at a `.2` level, on the second half's first day.
+ */
+export function isSecondHalfBookable(term: CourseTerm & { schedule?: unknown }, slug: string, today: string): boolean {
+  if (!soldByLevel(slug) || term.status !== 'scheduled' || isCourseTermBookable(term, slug, today)) return false;
+  const half = secondHalfStart(term.start_date, term.end_date, scheduleDays(term.schedule));
+  return Boolean(half && today <= half);
+}
+
+/** A stored schedule's days (`{ days: ['Mon', …] }`). */
+export function scheduleDays(schedule: unknown): string[] | null {
+  const days = (schedule as { days?: unknown } | null)?.days;
+  return Array.isArray(days) ? days.filter((day): day is string => typeof day === 'string') : null;
+}
+
 export function nextCourseStartDate(term: CourseTerm, slug: string, today: string): string | null {
   if (!isCourseTermBookable(term, slug, today)) {
     return null;

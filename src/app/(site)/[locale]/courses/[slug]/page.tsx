@@ -20,7 +20,7 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import type { ContentLocale } from '@/lib/content/types';
+import type { ContentLocale, TermDaytime } from '@/lib/content/types';
 import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
@@ -36,9 +36,12 @@ import { getCourseContactKey, getCourseLevelGoals, getCoursePhotoKey, getCourseP
 import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
-import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
+import { bremenToday, isCourseTermBookable, isSecondHalfBookable, nextCourseStartDate, scheduleDays } from '@/lib/content/bookability';
+import { secondHalfStart } from '@/lib/registration/halves';
+import { levelChoiceGroups, soldByLevel } from '@/lib/registration/levels';
+import { requiresLevelField } from '@/lib/validation/registration-submissions';
 import { daytimeLabel, parseSchedule, scheduleLine } from '@/lib/registration/term-format';
-import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
+import { getAvailableLevels, getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { getPageContent } from '@/lib/cms/content.server';
 import { createPublicMetadata } from '@/lib/seo';
 import { intl, pick, say } from '@/lib/cms/copy';
@@ -188,8 +191,11 @@ export default async function CourseDetailPage({
   const termGroups: CourseTermGroup[] = (() => {
     const groups = new Map<string, CourseTermGroup>();
 
-    // Only what a learner can still book: the section is a choice now, not the year's table.
-    for (const courseInstance of bookableInstances) {
+    // Only what a learner can still book: the section is a choice now, not the year's table. An
+    // intensive term under way whose second half is ahead is offered at its second half.
+    const secondHalfOnly = detail.instances.filter((courseInstance) => isSecondHalfBookable(courseInstance, detail.course.slug, today));
+    const offered = [...bookableInstances, ...secondHalfOnly].sort((a, b) => a.start_date.localeCompare(b.start_date));
+    for (const courseInstance of offered) {
       const schedule = parseSchedule(courseInstance.schedule, locale);
       const daytime = schedule?.daytime ? daytimeLabel(schedule.daytime, locale) : '';
       const scheduleText = schedule ? scheduleLine(schedule, locale) : '';
@@ -206,12 +212,23 @@ export default async function CourseDetailPage({
         href: isQuoteOnly(detail.course)
           ? `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`
           : `/registration/course?courseId=${encodeURIComponent(courseInstance.id)}`,
-        joinable: !nextCourseStartDate(courseInstance, detail.course.slug, today),
+        joinable: !secondHalfOnly.includes(courseInstance) && !nextCourseStartDate(courseInstance, detail.course.slug, today),
+        secondHalfStart: soldByLevel(detail.course.slug)
+          ? secondHalfStart(courseInstance.start_date, courseInstance.end_date, scheduleDays(courseInstance.schedule))
+          : null,
+        secondHalfOnly: secondHalfOnly.includes(courseInstance),
       });
     }
 
-    return [...groups.values()];
+    // Mornings first, as the registration form orders its schedules.
+    const rank = (group: CourseTermGroup) => ['morning', 'fullDay', 'afternoon', 'evening'].findIndex((daytime) => group.daytime === daytimeLabel(daytime as TermDaytime, locale));
+    return [...groups.values()].sort((a, b) => (rank(a) < 0 ? 9 : rank(a)) - (rank(b) < 0 ? 9 : rank(b)));
   })();
+
+  // The card asks the level the registration asks (lib/registration/levels), so the form opens with it.
+  const termLevels = requiresLevelField(detail.course.slug)
+    ? levelChoiceGroups(detail.course.slug, getAvailableLevels(detail.course.level_min, detail.course.level_max), locale)
+    : [];
 
   // Each course format has an Ansprechpartner. Formats without a confirmed
   // owner fall back to the general office rather than naming someone who has
@@ -559,6 +576,7 @@ export default async function CourseDetailPage({
                   <CourseTermTable
                     key={sectionKey}
                     groups={termGroups}
+                    levels={termLevels}
                     locale={locale}
                     note={
                       detail.course.slug === 'bildungszeit'

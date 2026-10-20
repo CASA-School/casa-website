@@ -239,6 +239,10 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "Dall’A1 al C1 in tre anni"
   },
+  "t.ab-der-5-kurswoche.1saj8tm": {
+    "de": "ab der 5. Kurswoche",
+    "text": "dalla 5ª settimana del corso"
+  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "Puoi partecipare a partire dal livello B1."
@@ -4419,6 +4423,10 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "Gratis, dall’A1 al C1"
   },
+  "t.kostenloser-einstufungstest.1snfv6v": {
+    "de": "Kostenloser Einstufungstest",
+    "text": "Test di livello gratuito"
+  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "Calcolatore dei costi"
@@ -5350,6 +5358,10 @@
   "t.nimm-lernende-aus-aller.r2epvm": {
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "Ospita a casa tua studenti da tutto il mondo."
+  },
+  "t.niveau-auswaehlen.1z0043x": {
+    "de": "Niveau auswählen…",
+    "text": "Scegli un livello…"
   },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",

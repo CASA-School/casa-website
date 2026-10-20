@@ -4,6 +4,7 @@ import { CourseWizard } from '@/components/registration/course-wizard';
 import { RegistrationPageShell } from '@/components/registration/registration-page-shell';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
+import { describeBookedLevel } from '@/lib/registration/levels';
 import { createPublicMetadata } from '@/lib/seo';
 import { say } from '@/lib/cms/copy';
 
@@ -24,13 +25,20 @@ export default async function CourseRegistrationPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const locale = await getContentLocale();
-  const { courseId } = await searchParams;
+  const { courseId, level } = await searchParams;
   const requestedInstanceId = typeof courseId === 'string' ? courseId : undefined;
   // The exam catalogue too: an exam can be booked with the courses.
-  const [registrationData, examCatalog] = await Promise.all([
+  const [catalog, examCatalog] = await Promise.all([
     getCourseRegistrationCatalog(locale, requestedInstanceId),
     getExamRegistrationCatalog(locale),
   ]);
+  // A course page's Kurstermine card names the level too (`?level=A2.2`); kept when the course offers it.
+  const slug = catalog.courseTypes.find((type) => type.id === catalog.defaultCourseTypeId)?.slug;
+  const option = catalog.defaultCourseTypeId
+    ? catalog.optionsByCourseTypeId[catalog.defaultCourseTypeId]?.find((candidate) => candidate.id === catalog.defaultOptionId)
+    : undefined;
+  const requestedLevel = typeof level === 'string' && option && describeBookedLevel(slug, level, option.availableLevels, locale) ? level : undefined;
+  const registrationData = requestedLevel ? { ...catalog, defaultLevel: requestedLevel } : catalog;
 
   return (
     <RegistrationPageShell

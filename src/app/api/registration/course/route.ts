@@ -6,7 +6,9 @@ import { levelCodeFrom } from '@/lib/admin/normalize';
 import { rateLimit } from '@/lib/api/rate-limit';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
 import { buildLevelPath, continuationLevels } from '@/lib/registration/level-path';
+import { isSecondHalf } from '@/lib/registration/halves';
 import { describeBookedLevel } from '@/lib/registration/levels';
+import { formatDay } from '@/lib/registration/term-format';
 
 import {
   createCourseRegistrationSubmissionSchema,
@@ -117,6 +119,11 @@ export async function POST(request: NextRequest) {
     if ((item.level && !level) || (levelRequired && !level)) {
       return NextResponse.json({ status: 'error', message: levelMessage(payload.locale) }, { status: 400 });
     }
+    // A term under way is open only at its second half (lib/registration/halves).
+    const secondHalf = Boolean(level && !level.complete && isSecondHalf(level.startCode));
+    if (option.secondHalfOnly && !secondHalf) {
+      return NextResponse.json({ status: 'error', message: unavailableMessage(payload.locale) }, { status: 400 });
+    }
     if (item.pathTo && !continuationLevels(courseType.slug, item.level, levels).includes(item.pathTo)) {
       return NextResponse.json({ status: 'error', message: levelMessage(payload.locale) }, { status: 400 });
     }
@@ -134,13 +141,14 @@ export async function POST(request: NextRequest) {
         })
       : [];
     if (steps.length > 1) {
-      for (const step of steps) {
+      for (const [stepIndex, step] of steps.entries()) {
+        const half = stepIndex === 0 && secondHalf ? secondHalfLabel(step.option?.secondHalfStart ?? null, payload.locale) : null;
         courses.push({
           typeId: courseType.id,
           instanceId: step.option?.id ?? '',
           typeLabel: courseType.name,
           instanceLabel: step.option
-            ? `${step.option.dateRangeLabel} | ${step.option.scheduleLabel} | ${step.option.locationLabel}`
+            ? [half, step.option.dateRangeLabel, step.option.scheduleLabel, step.option.locationLabel].filter(Boolean).join(' | ')
             : payload.locale === 'de' ? 'Termin wird noch festgelegt' : 'Date to be arranged',
           level: { label: step.label, startCode: step.startCode },
         });
@@ -151,7 +159,12 @@ export async function POST(request: NextRequest) {
       typeId: courseType.id,
       instanceId: option.id,
       typeLabel: courseType.name,
-      instanceLabel: `${option.dateRangeLabel} | ${option.scheduleLabel} | ${option.locationLabel}`,
+      instanceLabel: [
+        secondHalf ? secondHalfLabel(option.secondHalfStart ?? null, payload.locale) : null,
+        option.dateRangeLabel,
+        option.scheduleLabel,
+        option.locationLabel,
+      ].filter(Boolean).join(' | '),
       level,
     });
   }
@@ -275,4 +288,10 @@ export async function POST(request: NextRequest) {
     stored,
     message: successMessage(payload.locale),
   });
+}
+
+/** What staff read for a second half: its first day, or the week where the term does not say. */
+function secondHalfLabel(start: string | null, locale: 'de' | 'en') {
+  if (start) return locale === 'de' ? `2. Hälfte ab ${formatDay(start, locale)}` : `Second half from ${formatDay(start, locale)}`;
+  return locale === 'de' ? '2. Hälfte ab der 5. Kurswoche' : 'Second half from the fifth week';
 }

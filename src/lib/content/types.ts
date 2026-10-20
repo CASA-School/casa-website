@@ -335,6 +335,10 @@ export type CourseRegistrationOption = {
   schedule?: TermSchedule | null;
   /** Begun and still open to join: an evening course any day, Bildungszeit on a Monday. */
   underway?: boolean;
+  /** An intensive term's second half: its first day, or null where the term does not say (lib/registration/halves). */
+  secondHalfStart?: string | null;
+  /** Begun, and open only to a learner starting at its second half (a `.2` level). */
+  secondHalfOnly?: boolean;
   locationLabel: string;
   fee: number;
   currency: string;
@@ -376,6 +380,8 @@ export type RegistrationCourseCatalog = {
   unavailableCourseTypes?: Array<{ slug: string; name: string }>;
   defaultCourseTypeId?: string;
   defaultOptionId?: string;
+  /** A level asked for by the link that opened the form (`?level=`), when the default course offers it. */
+  defaultLevel?: string;
 };
 
 export type RegistrationExamCatalog = {

@@ -239,6 +239,10 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "Üç yılda A1'den C1'e"
   },
+  "t.ab-der-5-kurswoche.1saj8tm": {
+    "de": "ab der 5. Kurswoche",
+    "text": "5. kurs haftasından itibaren"
+  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "B1 seviyesinden itibaren katılabilirsiniz."
@@ -4419,6 +4423,10 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "Ücretsiz, A1'den C1'e"
   },
+  "t.kostenloser-einstufungstest.1snfv6v": {
+    "de": "Kostenloser Einstufungstest",
+    "text": "Ücretsiz seviye testi"
+  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "Ücret hesaplayıcı"
@@ -5350,6 +5358,10 @@
   "t.nimm-lernende-aus-aller.r2epvm": {
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "Dünyanın dört bir yanından öğrencileri evinizde ağırlayın."
+  },
+  "t.niveau-auswaehlen.1z0043x": {
+    "de": "Niveau auswählen…",
+    "text": "Seviye seç…"
   },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",

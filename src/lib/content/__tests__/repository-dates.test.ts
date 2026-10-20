@@ -76,9 +76,12 @@ describe('course registration catalog (fallback mode)', () => {
   it('offers intensive terms from their first day only, soonest first, and defaults to the next one', async () => {
     const catalog = await getCourseRegistrationCatalog('de');
 
-    // 3 Aug (afternoon) and 31 Aug (morning) have begun and cannot be joined.
+    // 3 Aug (afternoon) has begun and cannot be joined; 31 Aug (morning) has begun, and is open
+    // only at its second half on 28 Sep (lib/registration/halves).
     // The terms through autumn 2027 come from FileMaker (db/seeds/0006).
-    expect(catalog.optionsByCourseTypeId[INTENSIVE].map((option) => option.startDate)).toEqual([
+    const options = catalog.optionsByCourseTypeId[INTENSIVE];
+    expect(options.map((option) => option.startDate)).toEqual([
+      '2026-08-31',
       '2026-09-28',
       '2026-10-26',
       '2026-11-23',
@@ -93,6 +96,9 @@ describe('course registration catalog (fallback mode)', () => {
       '2027-08-30',
       '2027-09-27',
     ]);
+    expect(options[0]).toMatchObject({ secondHalfOnly: true, secondHalfStart: '2026-09-28' });
+    expect(options.slice(1).every((option) => !option.secondHalfOnly)).toBe(true);
+    // The default is never a term open only at its second half: no level is chosen yet.
     expect(catalog.defaultCourseTypeId).toBe(INTENSIVE);
     expect(catalog.defaultOptionId).toBe('30000000-0000-4000-8000-000000010006');
   });
@@ -318,7 +324,7 @@ describe.each(ZONES)('database mode, server in %s: pg returns date columns as Da
         if (sql.includes('FROM course_instances')) {
           const schedule = { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '09:00-12:30' };
           return [
-            // Begun on 31 August, so not offered.
+            // Begun on 31 August: offered only at its second half, 28 September.
             { ...row, id: 'term-begun', course_type_id: 'course-intensive', start_date: new Date(2026, 7, 31), end_date: new Date(2026, 9, 23), schedule, location: null },
             { ...row, id: 'term-next', course_type_id: 'course-intensive', start_date: new Date(2026, 9, 26), end_date: new Date(2026, 11, 18), schedule, location: null },
           ];
@@ -329,8 +335,9 @@ describe.each(ZONES)('database mode, server in %s: pg returns date columns as Da
 
     const catalog = await getCourseRegistrationCatalog('de');
 
-    expect(catalog.optionsByCourseTypeId['course-intensive'].map((option) => [option.id, option.startDate, option.endDate])).toEqual([
-      ['term-next', '2026-10-26', '2026-12-18'],
+    expect(catalog.optionsByCourseTypeId['course-intensive'].map((option) => [option.id, option.startDate, option.endDate, option.secondHalfOnly])).toEqual([
+      ['term-begun', '2026-08-31', '2026-10-23', true],
+      ['term-next', '2026-10-26', '2026-12-18', false],
     ]);
     expect(catalog.defaultOptionId).toBe('term-next');
   });

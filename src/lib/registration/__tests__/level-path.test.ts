@@ -38,10 +38,14 @@ describe('a learning path through the levels', () => {
     expect(pathWeeks(steps)).toBe(32);
   });
 
-  it('finishes a level it starts at its first half, and runs a second half as its four weeks first', () => {
+  it('finishes a level it starts at its first half, and runs a second half in its term\'s last four weeks', () => {
     expect(path('A2.1', 'B1').map((step) => step.level)).toEqual(['A2', 'B1']);
-    const fromSecondHalf = path('A2.2', 'B1');
-    expect(fromSecondHalf.map((step) => [step.level, step.option?.id])).toEqual([['A2.2', 'oct'], ['B1', 'nov']]);
+    // A second half is weeks five to eight of its term (lib/registration/halves), so the next level
+    // starts in the first term after it: January, not the November start in the middle of it.
+    const oct = { ...terms[0], secondHalfStart: '2026-11-23' };
+    const fromSecondHalf = path('A2.2', 'B1', oct);
+    expect(fromSecondHalf.map((step) => [step.level, step.option?.id])).toEqual([['A2.2', 'oct'], ['B1', 'jan']]);
+    expect([fromSecondHalf[0].start, fromSecondHalf[0].end]).toEqual(['2026-11-23', '2026-12-18']);
     expect(pathWeeks(fromSecondHalf)).toBe(12);
   });
 

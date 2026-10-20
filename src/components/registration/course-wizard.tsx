@@ -82,13 +82,13 @@ const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
 };
 
 /** A course row as the form starts it: the catalogue's default, or empty for a further course. */
-function courseRow(catalog: RegistrationCourseCatalog, typeId = '', instanceId = '') {
+function courseRow(catalog: RegistrationCourseCatalog, typeId = '', instanceId = '', level = '') {
   const slug = catalog.courseTypes.find((courseType) => courseType.id === typeId)?.slug;
   const options = catalog.optionsByCourseTypeId[typeId] ?? [];
   return {
     courseTypeId: typeId,
     courseInstanceId: instanceId,
-    level: '',
+    level,
     levelRequired: requiresLevelField(slug) && (options[0]?.availableLevels.length ?? 0) > 0,
     pathTo: '',
   };
@@ -127,7 +127,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
-      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '')],
+      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '', catalog.defaultLevel)],
       examEnabled: false,
       exam: { examTypeId: '', examSessionId: '', registrationType: undefined },
       officialNameConfirmed: false,
@@ -156,7 +156,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
     setStep(1);
     form.reset({
       salutation: '' as 'mr' | 'ms' | 'mx' | 'neutral',
-      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '')],
+      courses: [courseRow(catalog, catalog.defaultCourseTypeId || catalog.courseTypes[0]?.id || '', catalog.defaultOptionId || '', catalog.defaultLevel)],
       examEnabled: false,
       exam: { examTypeId: '', examSessionId: '', registrationType: undefined },
       officialNameConfirmed: false,
@@ -223,8 +223,8 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
   }, [stepFailures]);
 
   /*
-   * Arrived from a course page's term table (`?courseId=`, 2026-10-20): the course and the term are
-   * chosen, so the chosen date is brought into view, the level above it the one choice left.
+   * Arrived from a course page's Kurstermine card (`?courseId=`, `&level=`, 2026-10-20): the course,
+   * the term and often the level are chosen, so the start field is brought into view.
    */
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('courseId')) return;

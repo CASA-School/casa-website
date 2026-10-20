@@ -15,11 +15,12 @@
  * what the learner saw is what staff receive; the workspace's offers build a
  * learner's course from it too, over its own cohorts. Client-safe.
  */
+import { isSecondHalf } from './halves';
 import type { ContentLocale, CourseRegistrationOption } from '@/lib/content/types';
 import { describeBookedLevel, levelChoiceGroups, levelOf } from './levels';
 
 /** A term as the path needs it: its dates. A registration option, or a workspace cohort. */
-export type PathTerm = { startDate: string; endDate: string };
+export type PathTerm = { startDate: string; endDate: string; secondHalfStart?: string | null };
 
 export type PathStep<T extends PathTerm = CourseRegistrationOption> = {
   /** 'B1' for a whole level, 'A2.2' for a four-week block. */
@@ -78,8 +79,11 @@ export function buildLevelPath<T extends PathTerm = CourseRegistrationOption>(in
 
   // A step of eight weeks fills its term; a half level ends after four weeks.
   const endIn = (term: T, weeks: number) => (weeks >= 8 ? term.endDate : addDays(term.startDate, 25));
-  const firstEnd = endIn(option, first.weeks);
-  const steps: PathStep<T>[] = [{ level: value, label: first.label, startCode: first.startCode, complete: first.complete, weeks: first.weeks, option, start: option.startDate, end: firstEnd }];
+  // A second half runs from its own first day to the term's end (lib/registration/halves).
+  const secondHalf = !first.complete && isSecondHalf(first.startCode);
+  const firstStart = secondHalf ? option.secondHalfStart ?? option.startDate : option.startDate;
+  const firstEnd = secondHalf ? option.endDate : endIn(option, first.weeks);
+  const steps: PathStep<T>[] = [{ level: value, label: first.label, startCode: first.startCode, complete: first.complete, weeks: first.weeks, option, start: firstStart, end: firstEnd }];
   if (stop < 0) return steps;
 
   const terms = [...input.options].sort((a, b) => a.startDate.localeCompare(b.startDate));

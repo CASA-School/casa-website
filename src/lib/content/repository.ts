@@ -18,10 +18,14 @@ import {
   bremenToday,
   isCourseTermBookable,
   isExamSittingBookable,
+  isSecondHalfBookable,
   lastCourseEntryDate,
   nextCourseStartDate,
+  scheduleDays,
 } from '@/lib/content/bookability';
 import { getCourseContentSlug } from '@/lib/content/course-routes';
+import { secondHalfStart } from '@/lib/registration/halves';
+import { soldByLevel } from '@/lib/registration/levels';
 import { parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { sortByPublicCourseOrder } from '@/config/courses/course-order';
 import {
@@ -372,7 +376,7 @@ function deadlineLabel(status: 'open' | 'closing-soon' | 'closed' | 'not-applica
  * (inclusive, case-insensitive prefix match). Returns an empty array if either
  * bound is null, meaning the course type has no fixed level range.
  */
-function getAvailableLevels(levelMin: string | null, levelMax: string | null): string[] {
+export function getAvailableLevels(levelMin: string | null, levelMax: string | null): string[] {
   if (!levelMin && !levelMax) return [];
 
   const normalize = (raw: string) => raw.trim().toUpperCase();
@@ -443,7 +447,12 @@ function buildCourseRegistrationOption(
   locale: ContentLocale,
   today: string
 ): CourseRegistrationOption {
-  const status = courseDeadlineStatus(lastCourseEntryDate(instance, courseType.slug), today);
+  // An intensive term under way is entered at its second half, so that day is its last way in.
+  const half = soldByLevel(courseType.slug)
+    ? secondHalfStart(instance.start_date, instance.end_date, scheduleDays(instance.schedule))
+    : null;
+  const secondHalfOnly = soldByLevel(courseType.slug) && !isCourseTermBookable(instance, courseType.slug, today);
+  const status = courseDeadlineStatus(secondHalfOnly && half ? half : lastCourseEntryDate(instance, courseType.slug), today);
 
   return {
     id: instance.id,
@@ -454,6 +463,7 @@ function buildCourseRegistrationOption(
     scheduleLabel: formatScheduleLabel(instance.schedule, locale),
     schedule: parseSchedule(instance.schedule, locale),
     underway: instance.start_date < today,
+    ...(soldByLevel(courseType.slug) ? { secondHalfStart: half, secondHalfOnly } : {}),
     locationLabel: instance.location || (say(locale, 'CASA Bremen Campus', 'CASA Bremen Campus')),
     fee: courseType.default_price,
     currency: courseType.currency,
@@ -847,7 +857,7 @@ export async function getCourseRegistrationCatalog(
     const slugByTypeId = new Map(types.map((type) => [type.id, type.slug]));
     return rows.filter((row) => {
       const slug = slugByTypeId.get(row.course_type_id);
-      return slug !== undefined && isCourseTermBookable(row, slug, today);
+      return slug !== undefined && (isCourseTermBookable(row, slug, today) || isSecondHalfBookable(row, slug, today));
     });
   };
 
@@ -1027,7 +1037,8 @@ export async function getCourseRegistrationCatalog(
     selectedOptionId && Object.values(optionsByCourseTypeId).flat().some((option) => option.id === selectedOptionId)
       ? selectedOptionId
       : resolvedCourseTypeId
-        ? optionsByCourseTypeId[resolvedCourseTypeId]?.[0]?.id
+        // Never a term open only at its second half: no level is chosen yet.
+        ? optionsByCourseTypeId[resolvedCourseTypeId]?.find((option) => !option.secondHalfOnly)?.id
         : undefined;
 
   return {
