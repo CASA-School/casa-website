@@ -300,6 +300,16 @@
   ],
   "pages": []
  },
+ "t.ab-der-5-kurswoche.1saj8tm": {
+  "de": "ab der 5. Kurswoche",
+  "en": "from the fifth week",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.ab-einem-niveau-von.82hvcg": {
   "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
   "en": "You can join from level B1 upwards.",
@@ -12432,6 +12442,16 @@
    "/placement-test"
   ]
  },
+ "t.kostenloser-einstufungstest.1snfv6v": {
+  "de": "Kostenloser Einstufungstest",
+  "en": "Free placement test",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.kostenrechner.ikj22o": {
   "de": "Kostenrechner",
   "en": "Cost calculator",
@@ -14975,6 +14995,16 @@
    "/accommodation/[type]"
   ]
  },
+ "t.niveau-auswaehlen.1z0043x": {
+  "de": "Niveau auswählen…",
+  "en": "Choose a level…",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.niveau-finden.8937o4": {
   "de": "Niveau finden",
   "en": "Find your level",
@@ -15023,6 +15053,7 @@
   "en": "Level",
   "files": [
    "src/app/(site)/[locale]/exams/[code]/page.tsx",
+   "src/components/courses/course-term-table.tsx",
    "src/components/courses/special-course-catalogue.tsx"
   ],
   "pages": [

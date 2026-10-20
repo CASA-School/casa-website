@@ -48,6 +48,7 @@ import type {
   TermDaytime,
   TermSchedule,
 } from '@/lib/content/types';
+import { isSecondHalf } from '@/lib/registration/halves';
 import { buildLevelPath, continuationLevels, pathWeeks } from '@/lib/registration/level-path';
 import { levelChoiceGroups } from '@/lib/registration/levels';
 import { daytimeLabel, formatDay, scheduleLine, termRange, weeksLabel } from '@/lib/registration/term-format';
@@ -268,14 +269,28 @@ function PlanSummary({ plan, locale }: { plan: CoursePlan; locale: ContentLocale
 
 const DAYTIME_ORDER: Record<TermDaytime, number> = { morning: 0, fullDay: 1, afternoon: 2, evening: 3 };
 
-/** A format's terms as tile groups, one per schedule, mornings first. */
-function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale): DateTileGroup[] {
-  const groups = new Map<string, { schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
+/**
+ * The terms a level can start in: a term under way only at a second half (`secondHalfOnly`), and a
+ * second half on its own first day, or „ab der 5. Kurswoche" where the term does not say it
+ * (lib/registration/halves).
+ */
+export function termsForLevel(options: readonly CourseRegistrationOption[], level: string) {
+  const half = isSecondHalf(level);
+  return options.filter((option) => half || !option.secondHalfOnly);
+}
 
-  for (const option of options) {
+/** A format's terms for a level, one group per schedule, mornings first. */
+function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale, level: string): DateTileGroup[] {
+  const groups = new Map<string, { schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
+  const half = isSecondHalf(level);
+
+  for (const option of termsForLevel(options, level)) {
     const key = option.schedule ? `${option.schedule.days}|${option.schedule.time}` : option.scheduleLabel;
     const group = groups.get(key) ?? { schedule: option.schedule, label: option.scheduleLabel, tiles: [] };
-    group.tiles.push({ id: option.id, date: option.startDate, note: option.underway ? (locale === 'de' ? 'läuft bereits' : 'under way') : undefined });
+    const note = half
+      ? option.secondHalfStart ? undefined : locale === 'de' ? 'ab der 5. Kurswoche' : 'from the fifth week'
+      : option.underway ? (locale === 'de' ? 'läuft bereits' : 'under way') : undefined;
+    group.tiles.push({ id: option.id, date: half ? option.secondHalfStart ?? option.startDate : option.startDate, note });
     groups.set(key, group);
   }
 
@@ -327,7 +342,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
     const nextOptions = catalog.optionsByCourseTypeId[id] ?? [];
     const slug = catalog.courseTypes.find((candidate) => candidate.id === id)?.slug;
     setValue(`courses.${index}.courseTypeId`, id, { shouldDirty: true });
-    setValue(`courses.${index}.courseInstanceId`, nextOptions[0]?.id ?? '', { shouldDirty: true });
+    setValue(`courses.${index}.courseInstanceId`, termsForLevel(nextOptions, '')[0]?.id ?? '', { shouldDirty: true });
     setValue(`courses.${index}.level`, '', { shouldDirty: true });
     setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
     setValue(`courses.${index}.levelRequired`, requiresLevelField(slug) && (nextOptions[0]?.availableLevels.length ?? 0) > 0);
@@ -396,6 +411,11 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
             value={level || ''}
             onValueChange={(value) => {
               setValue(`courses.${index}.level`, value, { shouldDirty: true });
+              // A term under way is open only at a second half: off a `.2`, the start moves to one that is not.
+              const open = termsForLevel(options, value);
+              if (!open.some((candidate) => candidate.id === instanceId)) {
+                setValue(`courses.${index}.courseInstanceId`, open[0]?.id ?? '', { shouldDirty: true });
+              }
               // A path ends where it ended, if the new level can still reach it.
               if (pathTo && !continuationLevels(courseType?.slug, value, levels).includes(pathTo)) {
                 setValue(`courses.${index}.pathTo`, '', { shouldDirty: true });
@@ -451,7 +471,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
           id={`course-${index}-option`}
           name={`course-${index}-option`}
           legend={termIsLevel ? t('Start', 'Beginn') : t('Dates', 'Termin')}
-          groups={termGroups(options, locale)}
+          groups={termGroups(options, locale, level)}
           value={instanceId}
           onChange={(value) => {
             setValue(`courses.${index}.courseInstanceId`, value, { shouldDirty: true });

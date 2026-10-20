@@ -239,6 +239,10 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "من A1 إلى C1 في ثلاث سنوات"
   },
+  "t.ab-der-5-kurswoche.1saj8tm": {
+    "de": "ab der 5. Kurswoche",
+    "text": "من الأسبوع الخامس للدورة"
+  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "يمكنك المشاركة بدءًا من المستوى B1."
@@ -4419,6 +4423,10 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "مجانًا، من A1 إلى C1"
   },
+  "t.kostenloser-einstufungstest.1snfv6v": {
+    "de": "Kostenloser Einstufungstest",
+    "text": "اختبار تحديد المستوى المجاني"
+  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "حاسبة التكاليف"
@@ -5350,6 +5358,10 @@
   "t.nimm-lernende-aus-aller.r2epvm": {
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "استقبل في بيتك متعلمين من جميع أنحاء العالم."
+  },
+  "t.niveau-auswaehlen.1z0043x": {
+    "de": "Niveau auswählen…",
+    "text": "اختر المستوى…"
   },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",

@@ -183,6 +183,28 @@ describe('course registration route', () => {
     expect(mocks.store).not.toHaveBeenCalled();
   });
 
+  it('takes a term under way only at its second half, and names that half for staff', async () => {
+    const running = {
+      id: '20000000-0000-4000-8000-000000000009', dateRangeLabel: '28. Sep. 2026 - 19. Nov. 2026', startDate: '2026-09-28', endDate: '2026-11-19',
+      secondHalfStart: '2026-10-26', secondHalfOnly: true,
+      scheduleLabel: 'Mo-Do 13:00-17:30', locationLabel: 'CASA Bremen', availableLevels: ['A1.1', 'A1.2', 'A2.1', 'A2.2', 'B1.1', 'B1.2'],
+    };
+    mocks.catalog.mockResolvedValue({ ...catalog, optionsByCourseTypeId: { ...catalog.optionsByCourseTypeId, [INTENSIVE_ID]: [running] } });
+    mocks.store.mockResolvedValue({ stored: true });
+    mocks.notify.mockResolvedValue(true);
+
+    for (const level of ['B1', 'B1.1']) {
+      const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: running.id, level }] }));
+      expect(response.status, level).toBe(400);
+    }
+    expect(mocks.store).not.toHaveBeenCalled();
+
+    const response = await POST(request({ ...valid, courses: [{ courseTypeId: INTENSIVE_ID, courseInstanceId: running.id, level: 'B1.2' }] }));
+    expect(response.status).toBe(200);
+    const stored = mocks.store.mock.calls[0][0];
+    expect(JSON.stringify(stored)).toContain('2. Hälfte ab 26. Okt. 2026');
+  });
+
   it('refuses an exam date the exam catalogue does not offer', async () => {
     mocks.catalog.mockResolvedValue(catalog);
     mocks.examCatalog.mockResolvedValue(examCatalog);

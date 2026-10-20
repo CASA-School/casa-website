@@ -16,6 +16,9 @@ import type { ContentLocale } from '@/lib/content/types';
 /** Formats CASA sells by the half level or the whole level. */
 const SOLD_BY_LEVEL = new Set(['intensive-german']);
 
+/** Whether a format is sold by the half level, so a learner can start at a term's second half. */
+export const soldByLevel = (slug: string | undefined) => Boolean(slug && SOLD_BY_LEVEL.has(slug));
+
 /*
  * B1+ is the level between B1 and B2, taught with Kontext, and sold like every
  * other: the whole level, or its halves B1+.1 and B1+.2 (Rahman, 2026-10-13:
@@ -57,7 +60,7 @@ export function levelChoiceGroups(
   availableLevels: readonly string[],
   locale: ContentLocale
 ): LevelChoiceGroup[] {
-  const soldByLevel = Boolean(slug && SOLD_BY_LEVEL.has(slug));
+  const byLevel = soldByLevel(slug);
   const groups = new Map<string, string[]>();
 
   for (const half of availableLevels) {
@@ -68,7 +71,7 @@ export function levelChoiceGroups(
   return [...groups].map(([level, halves]) => {
     const first = `${level}.1`;
     const second = `${level}.2`;
-    const whole = soldByLevel && halves.includes(first) && halves.includes(second)
+    const whole = byLevel && halves.includes(first) && halves.includes(second)
       ? [{
           value: level,
           // "komplett" says both halves; the codes beside it only repeated the group.
@@ -80,7 +83,7 @@ export function levelChoiceGroups(
       level,
       choices: [
         ...whole,
-        ...halves.map((half) => ({ value: half, label: soldByLevel ? `${half} · ${weeks(weeksOf(false), locale)}` : half })),
+        ...halves.map((half) => ({ value: half, label: byLevel ? `${half} · ${weeks(weeksOf(false), locale)}` : half })),
       ],
     };
   });
