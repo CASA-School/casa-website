@@ -84,10 +84,11 @@ export async function recentActivity(
   }));
 }
 
+/** A record's whole history for its line of time; the card shows the newest, the panel all (2026-10-20). */
 export async function activityFor(
   entity: string,
   entityId: string,
-  limit = 20
+  limit = 500
 ): Promise<ActivityEntry[]> {
   const rows = await query<{
     id: string;

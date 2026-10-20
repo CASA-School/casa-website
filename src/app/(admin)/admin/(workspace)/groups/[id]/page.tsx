@@ -70,7 +70,7 @@ export default async function GroupPage({
     seesAccommodation ? groupReservations(id) : Promise.resolve([]),
     groupProgramme(id),
     listNotes('group_visit', id),
-    activityFor('group_visit', id, 100),
+    activityFor('group_visit', id),
     canEdit ? groupOptions([group.organisationId, group.agencyId, group.courseTypeId]) : Promise.resolve(null),
     canDelete ? groupDeletable(id) : Promise.resolve(false),
   ]);

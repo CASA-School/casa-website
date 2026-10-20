@@ -68,7 +68,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     place.kind === 'casa_flat' ? flatCleaning(id, today, plus(today, 34)) : Promise.resolve(null),
     place.kind === 'casa_flat' && canEdit ? cleaningTemplates(id) : Promise.resolve([]),
     listNotes('accommodation', id),
-    activityFor('accommodation', id, 50),
+    activityFor('accommodation', id),
     canEdit ? roomTypes() : Promise.resolve([]),
     canDelete ? placeDeletable(id) : Promise.resolve(false),
   ]);

@@ -40,7 +40,7 @@ export default async function Page({
     individual ? courseCatalogue() : Promise.resolve({ courses: [], books: [], exams: [], prices: [] }),
     individual && record.meta.personId ? learnerHistory(record.meta.personId) : Promise.resolve(null),
     listNotes('offer', id),
-    activityFor('offer', id, 50),
+    activityFor('offer', id),
   ]);
   const own = offerEvents(record, activity, t);
   // An accepted offer to a learner leads to their booking: the person's wizard, at the offer's course.

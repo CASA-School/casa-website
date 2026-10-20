@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { isValidElement, type ReactNode } from 'react';
 
 import { addNoteAction, assignAction, updateStatusAction } from '@/app/(admin)/admin/(workspace)/actions';
 import { describeActivity, type ActivityEntry } from '@/lib/admin/activity';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { ChoiceMenu } from './choice-menu';
 import { Icon } from './icons';
 import { Avatar } from './list';
+import { TimelineEntries, type TimelineKind, type TimelineRow } from './timeline-entries';
 import { ButtonLink, Card } from './ui';
 
 /**
@@ -346,6 +347,126 @@ export async function Timeline({
   // Today's entries by the clock, older ones by the day.
   const when = (at: Date) => (berlinDay(at) === today ? berlinTime(at, lang) : shortDay(at, lang));
   const someone = t('Jemand', 'Someone');
+  const draw = (item: TimelineItem, index: number): ReactNode => {
+    const key =
+      item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : item.kind === 'own' ? `r-${item.event.id}` : `o-${index}`;
+    if (item.kind === 'note') {
+      const author = item.note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague');
+      return (
+        <li key={key} className="relative flex gap-3">
+          <span className="relative z-[1] mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white">
+            <Avatar name={author} staff size="sm" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <Meta who={author} what={t('hat notiert', 'wrote')} at={when(item.at)} title={full(item.at)} />
+            <p data-tl-text className="mt-1.5 rounded-xl rounded-tl-sm bg-[#fff8e1] px-3 py-2.5 text-[0.86rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)] ring-1 ring-[#eedfa6] ring-inset">
+              {item.note.body}
+            </p>
+          </div>
+        </li>
+      );
+    }
+    if (item.kind === 'origin') {
+      return (
+        <li key={key} className="relative flex gap-3">
+          <Mark className="bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]">{item.icon ?? Icon.enquiries}</Mark>
+          <div className="min-w-0 flex-1 pt-1">
+            <Meta who={item.label} what={item.what} at={full(item.at)} />
+            {item.body ? <div data-tl-text className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{item.body}</div> : null}
+          </div>
+        </li>
+      );
+    }
+    if (item.kind === 'own') {
+      const { event } = item;
+      return (
+        <li key={key} className="relative flex gap-3">
+          <Mark
+            className={
+              event.tone === 'good'
+                ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]'
+                : event.tone === 'watch'
+                  ? 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]'
+                  : 'bg-white text-[var(--casa-muted)] ring-[#d3dbe6]'
+            }
+          >
+            {event.icon}
+          </Mark>
+          <div className="min-w-0 flex-1 pt-1">
+            <Meta who={event.who} what={event.what} at={when(item.at)} title={full(item.at)} />
+            {event.body ? <div data-tl-text className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{event.body}</div> : null}
+          </div>
+        </li>
+      );
+    }
+    const { entry } = item;
+    const who = entry.staffName ?? someone;
+    const detail = entry.detail ?? {};
+    if (entry.action === 'status_changed' && typeof detail.to === 'string') {
+      return (
+        <li key={key} className="relative flex gap-3">
+          <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.check}</Mark>
+          <div className="min-w-0 flex-1 pt-1">
+            <Meta who={who} what={t('hat den Status geändert', 'changed the status')} at={when(item.at)} title={full(item.at)} />
+            <p className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {typeof detail.from === 'string' ? (
+                <>
+                  <StatePill status={normaliseStatus(detail.from)} lang={lang} />
+                  <span aria-hidden="true" className="text-[var(--casa-muted)] [&_svg]:size-3">
+                    {Icon.chevronRight}
+                  </span>
+                </>
+              ) : null}
+              <StatePill status={normaliseStatus(detail.to)} lang={lang} />
+            </p>
+          </div>
+        </li>
+      );
+    }
+    if (entry.action === 'schoolman_log') {
+      return (
+        <li key={key} className="relative flex gap-3">
+          <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.note}</Mark>
+          <div className="min-w-0 flex-1 pt-1">
+            <Meta who={who} what={t('in SchoolMan', 'in SchoolMan')} at={when(item.at)} title={full(item.at)} />
+            <p data-tl-text className="mt-1 text-[0.82rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{String(detail.text ?? '')}</p>
+          </div>
+        </li>
+      );
+    }
+    if (entry.action === 'assigned' || entry.action === 'unassigned') {
+      const to = typeof detail.to === 'string' ? detail.to : null;
+      const what =
+        entry.action === 'unassigned'
+          ? t('hat die Zuständigkeit entfernt', 'removed the owner')
+          : to === who
+            ? t('hat übernommen', 'took it')
+            : t(`hat ${to ?? someone} eingetragen`, `assigned ${to ?? someone}`);
+      return (
+        <li key={key} className="relative flex gap-3">
+          <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.person}</Mark>
+          <div className="min-w-0 flex-1 pt-1">
+            <Meta who={who} what={what} at={when(item.at)} title={full(item.at)} />
+          </div>
+        </li>
+      );
+    }
+    return (
+      <li key={key} className="relative flex gap-3">
+        <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{activityIcon(entry)}</Mark>
+        <div className="min-w-0 flex-1 pt-1">
+          <Meta who={who} what={describeActivity(entry, lang)} at={when(item.at)} title={full(item.at)} />
+        </div>
+      </li>
+    );
+  };
+  const rows: TimelineRow[] = items.map((item, index) => ({
+    key: item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : item.kind === 'own' ? `r-${item.event.id}` : `o-${index}`,
+    kind: kindOf(item),
+    at: item.at.toISOString(),
+    search: searchOf(item, lang).toLocaleLowerCase('de'),
+    node: draw(item, index),
+  }));
 
   return (
     <Card title={t('Notizen und Verlauf', 'Notes and history')} icon={Icon.note} tint="sun">
@@ -375,125 +496,41 @@ export async function Timeline({
       </form>
       ) : null}
 
-      {items.length ? (
-        <ol className="relative mt-5 space-y-4 before:absolute before:top-3 before:bottom-3 before:left-[13px] before:w-px before:bg-[#d3dbe6]">
-          {items.map((item, index) => {
-            const key =
-              item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : item.kind === 'own' ? `r-${item.event.id}` : `o-${index}`;
-            if (item.kind === 'note') {
-              const author = item.note.authorName ?? t('Ehemaliges Teammitglied', 'A former colleague');
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <span className="relative z-[1] mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-white">
-                    <Avatar name={author} staff size="sm" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <Meta who={author} what={t('hat notiert', 'wrote')} at={when(item.at)} title={full(item.at)} />
-                    <p className="mt-1.5 rounded-xl rounded-tl-sm bg-[#fff8e1] px-3 py-2.5 text-[0.86rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)] ring-1 ring-[#eedfa6] ring-inset">
-                      {item.note.body}
-                    </p>
-                  </div>
-                </li>
-              );
-            }
-            if (item.kind === 'origin') {
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <Mark className="bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]">{item.icon ?? Icon.enquiries}</Mark>
-                  <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={item.label} what={item.what} at={full(item.at)} />
-                    {item.body ? <div className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{item.body}</div> : null}
-                  </div>
-                </li>
-              );
-            }
-            if (item.kind === 'own') {
-              const { event } = item;
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <Mark
-                    className={
-                      event.tone === 'good'
-                        ? 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]'
-                        : event.tone === 'watch'
-                          ? 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]'
-                          : 'bg-white text-[var(--casa-muted)] ring-[#d3dbe6]'
-                    }
-                  >
-                    {event.icon}
-                  </Mark>
-                  <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={event.who} what={event.what} at={when(item.at)} title={full(item.at)} />
-                    {event.body ? <div className="mt-1 text-[0.8rem] leading-relaxed text-[var(--casa-muted)]">{event.body}</div> : null}
-                  </div>
-                </li>
-              );
-            }
-            const { entry } = item;
-            const who = entry.staffName ?? someone;
-            const detail = entry.detail ?? {};
-            if (entry.action === 'status_changed' && typeof detail.to === 'string') {
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.check}</Mark>
-                  <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={who} what={t('hat den Status geändert', 'changed the status')} at={when(item.at)} title={full(item.at)} />
-                    <p className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      {typeof detail.from === 'string' ? (
-                        <>
-                          <StatePill status={normaliseStatus(detail.from)} lang={lang} />
-                          <span aria-hidden="true" className="text-[var(--casa-muted)] [&_svg]:size-3">
-                            {Icon.chevronRight}
-                          </span>
-                        </>
-                      ) : null}
-                      <StatePill status={normaliseStatus(detail.to)} lang={lang} />
-                    </p>
-                  </div>
-                </li>
-              );
-            }
-            if (entry.action === 'schoolman_log') {
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.note}</Mark>
-                  <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={who} what={t('in SchoolMan', 'in SchoolMan')} at={when(item.at)} title={full(item.at)} />
-                    <p className="mt-1 text-[0.82rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{String(detail.text ?? '')}</p>
-                  </div>
-                </li>
-              );
-            }
-            if (entry.action === 'assigned' || entry.action === 'unassigned') {
-              const to = typeof detail.to === 'string' ? detail.to : null;
-              const what =
-                entry.action === 'unassigned'
-                  ? t('hat die Zuständigkeit entfernt', 'removed the owner')
-                  : to === who
-                    ? t('hat übernommen', 'took it')
-                    : t(`hat ${to ?? someone} eingetragen`, `assigned ${to ?? someone}`);
-              return (
-                <li key={key} className="relative flex gap-3">
-                  <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.person}</Mark>
-                  <div className="min-w-0 flex-1 pt-1">
-                    <Meta who={who} what={what} at={when(item.at)} title={full(item.at)} />
-                  </div>
-                </li>
-              );
-            }
-            return (
-              <li key={key} className="relative flex gap-3">
-                <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{activityIcon(entry)}</Mark>
-                <div className="min-w-0 flex-1 pt-1">
-                  <Meta who={who} what={describeActivity(entry, lang)} at={when(item.at)} title={full(item.at)} />
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-      ) : null}
+      {rows.length ? <TimelineEntries rows={rows} title={t('Notizen und Verlauf', 'Notes and history')} /> : null}
     </Card>
   );
+}
+
+/** Which of the panel's kinds an entry is: the team's words, SchoolMan's log, or a change. */
+function kindOf(item: TimelineItem): TimelineKind {
+  if (item.kind === 'note') return 'note';
+  if (item.kind === 'event' && item.entry.action === 'schoolman_log') return 'schoolman';
+  return 'change';
+}
+
+/** An entry's words as plain text, for the panel's search. */
+function searchOf(item: TimelineItem, lang: WsLang): string {
+  switch (item.kind) {
+    case 'note':
+      return `${item.note.authorName ?? ''} ${item.note.body}`;
+    case 'event':
+      return item.entry.action === 'schoolman_log'
+        ? `${item.entry.staffName ?? ''} ${String(item.entry.detail?.text ?? '')}`
+        : `${item.entry.staffName ?? ''} ${describeActivity(item.entry, lang)}`;
+    case 'own':
+      return `${plain(item.event.who)} ${plain(item.event.what)} ${plain(item.event.body)}`;
+    default:
+      return `${plain(item.label)} ${plain(item.what)} ${plain(item.body)}`;
+  }
+}
+
+/** The text inside a drawn piece: strings and numbers, through elements' children. */
+function plain(node: ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(plain).join(' ');
+  if (isValidElement(node)) return plain((node.props as { children?: ReactNode }).children);
+  return '';
 }
 
 /** An entry's round mark on the line of time. */
