@@ -239,10 +239,6 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "Üç yılda A1'den C1'e"
   },
-  "t.ab-der-5-kurswoche.1saj8tm": {
-    "de": "ab der 5. Kurswoche",
-    "text": "5. kurs haftasından itibaren"
-  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "B1 seviyesinden itibaren katılabilirsiniz."
@@ -250,6 +246,10 @@
   "t.ab.11lr5ih": {
     "de": "ab",
     "text": "başlangıç fiyatı"
+  },
+  "t.ab.i4idfn": {
+    "de": "ab {date}",
+    "text": "{date} tarihinden itibaren"
   },
   "t.ab.zuehjf": {
     "de": "ab {amount}",
@@ -1623,6 +1623,10 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Seviyeniz ve uygun zamanlarınız"
   },
+  "t.dein-niveau.c37azp": {
+    "de": "Dein Niveau",
+    "text": "Seviyen"
+  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Dil seviyeniz, hangi bölümlerin size açık olduğunu ve günlük hayatta ne kadarını yardımsız halledebileceğinizi belirler."
@@ -1970,6 +1974,10 @@
   "t.die-gruppe-kommt-zusammen.1trjtn2": {
     "de": "Die Gruppe kommt zusammen",
     "text": "Grup oluşur"
+  },
+  "t.die-gruppe-teilen-wir.1rp827p": {
+    "de": "{slots}. Die Gruppe teilen wir dir nach deiner Anmeldung zu.",
+    "text": "{slots}. Grubunu kaydından sonra biz belirleriz."
   },
   "t.die-gruppen-sind-klein.12c1rxv": {
     "de": "Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.",
@@ -2751,9 +2759,9 @@
     "de": "Einschreibegebühr",
     "text": "Kayıt ücreti"
   },
-  "t.einstieg-moeglich.em45ta": {
-    "de": "Einstieg möglich",
-    "text": "Katılım mümkün"
+  "t.einstieg-in-den-laufenden.14qz0fk": {
+    "de": "Einstieg in den laufenden Kurs, bis {date}",
+    "text": "Devam eden kursa katılım, {date} tarihine kadar"
   },
   "t.einstufung-anfragen.1gepwut": {
     "de": "Einstufung anfragen",
@@ -4175,6 +4183,10 @@
     "de": "Jetzt bewerben",
     "text": "Hemen başvurun"
   },
+  "t.jetzt-einsteigen.1xx5upm": {
+    "de": "Jetzt einsteigen",
+    "text": "Şimdi katıl"
+  },
   "t.jeweils.1y2sb58": {
     "de": "jeweils",
     "text": "her biri"
@@ -4650,6 +4662,10 @@
   "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
     "de": "Läuferinnen laufen jubelnd durch das Zielband",
     "text": "Kadın koşucular sevinç içinde bitiş şeridini göğüslüyor"
+  },
+  "t.laeuft.b478k8": {
+    "de": "Läuft",
+    "text": "Devam ediyor"
   },
   "t.lampe.hiavx3": {
     "de": "Lampe",
@@ -5359,10 +5375,6 @@
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "Dünyanın dört bir yanından öğrencileri evinizde ağırlayın."
   },
-  "t.niveau-auswaehlen.1z0043x": {
-    "de": "Niveau auswählen…",
-    "text": "Seviye seç…"
-  },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",
     "text": "Seviyeler ve seviye tespiti"
@@ -5438,6 +5450,10 @@
   "t.ob-ein-zimmer-frei.p0ytcz": {
     "de": "Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.",
     "text": "Bir odanın boş olup olmadığını, talebinizi aldıktan sonra size teyit ederiz."
+  },
+  "t.oder.1vt7gpj": {
+    "de": " oder ",
+    "text": " veya "
   },
   "t.oeffentlicher-traeger-oder-foerd.mqfvv2": {
     "de": "Öffentlicher Träger oder Förderprogramm",

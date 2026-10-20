@@ -239,10 +239,6 @@
     "de": "A1 bis C1 in drei Jahren",
     "text": "Від A1 до C1 за три роки"
   },
-  "t.ab-der-5-kurswoche.1saj8tm": {
-    "de": "ab der 5. Kurswoche",
-    "text": "з 5-го тижня курсу"
-  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "Ви можете приєднатися з рівня B1."
@@ -250,6 +246,10 @@
   "t.ab.11lr5ih": {
     "de": "ab",
     "text": "від"
+  },
+  "t.ab.i4idfn": {
+    "de": "ab {date}",
+    "text": "з {date}"
   },
   "t.ab.zuehjf": {
     "de": "ab {amount}",
@@ -1623,6 +1623,10 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Ваш рівень і зручний час"
   },
+  "t.dein-niveau.c37azp": {
+    "de": "Dein Niveau",
+    "text": "Твій рівень"
+  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Від вашого рівня мови залежить, які освітні програми вам доступні і скільки справ у повсякденні ви зможете вирішувати без сторонньої допомоги."
@@ -1970,6 +1974,10 @@
   "t.die-gruppe-kommt-zusammen.1trjtn2": {
     "de": "Die Gruppe kommt zusammen",
     "text": "Група збирається"
+  },
+  "t.die-gruppe-teilen-wir.1rp827p": {
+    "de": "{slots}. Die Gruppe teilen wir dir nach deiner Anmeldung zu.",
+    "text": "{slots}. Групу ми визначимо після твоєї реєстрації."
   },
   "t.die-gruppen-sind-klein.12c1rxv": {
     "de": "Die Gruppen sind klein. Mit deiner Anmeldung reservierst du dir einen Platz.",
@@ -2751,9 +2759,9 @@
     "de": "Einschreibegebühr",
     "text": "Реєстраційний внесок"
   },
-  "t.einstieg-moeglich.em45ta": {
-    "de": "Einstieg möglich",
-    "text": "Можна приєднатися"
+  "t.einstieg-in-den-laufenden.14qz0fk": {
+    "de": "Einstieg in den laufenden Kurs, bis {date}",
+    "text": "Приєднання до курсу, що триває, до {date}"
   },
   "t.einstufung-anfragen.1gepwut": {
     "de": "Einstufung anfragen",
@@ -4175,6 +4183,10 @@
     "de": "Jetzt bewerben",
     "text": "Подати заявку зараз"
   },
+  "t.jetzt-einsteigen.1xx5upm": {
+    "de": "Jetzt einsteigen",
+    "text": "Приєднатися зараз"
+  },
   "t.jeweils.1y2sb58": {
     "de": "jeweils",
     "text": "кожен"
@@ -4650,6 +4662,10 @@
   "t.laeuferinnen-laufen-jubelnd-durc.qgxe0l": {
     "de": "Läuferinnen laufen jubelnd durch das Zielband",
     "text": "Бігунки з радісними вигуками розривають фінішну стрічку"
+  },
+  "t.laeuft.b478k8": {
+    "de": "Läuft",
+    "text": "Триває"
   },
   "t.lampe.hiavx3": {
     "de": "Lampe",
@@ -5359,10 +5375,6 @@
     "de": "Nimm Lernende aus aller Welt bei dir auf.",
     "text": "Приймайте в себе слухачів з усього світу."
   },
-  "t.niveau-auswaehlen.1z0043x": {
-    "de": "Niveau auswählen…",
-    "text": "Обери рівень…"
-  },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",
     "text": "Рівень та його визначення"
@@ -5438,6 +5450,10 @@
   "t.ob-ein-zimmer-frei.p0ytcz": {
     "de": "Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.",
     "text": "Чи є вільна кімната, ми підтвердимо після вашого запиту."
+  },
+  "t.oder.1vt7gpj": {
+    "de": " oder ",
+    "text": " або "
   },
   "t.oeffentlicher-traeger-oder-foerd.mqfvv2": {
     "de": "Öffentlicher Träger oder Förderprogramm",

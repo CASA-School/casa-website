@@ -2,17 +2,17 @@ import { expect, test } from '@playwright/test';
 
 /*
  * The course registration's choices (2026-10-05): a whole level, a learning
- * path built from one click on the level ladder, the start as a dropdown under a
- * switch for its schedule, and an exam booked with the courses. Read from the running
+ * path built from one click on the level ladder, the start as one dropdown, the
+ * group assigned by CASA, and an exam booked with the courses. Read from the running
  * catalogue, so it asserts shapes and wording, not dates.
  */
 test('the intensive course books a whole level and a learning path from one choice', async ({ page }) => {
   await page.goto('/anmeldung/anmeldeformular');
   await page.locator('label', { has: page.locator('input[name="course-0-type"]') }).filter({ hasText: 'Intensivkurse' }).click();
 
-  // The schedule is a switch, the start a dropdown with the first start of that schedule chosen.
-  await expect(page.locator('input[name="course-0-option-slot"]:checked')).toHaveCount(1);
-  await expect(page.locator('#course-0-option label').first()).toContainText(/Vormittags|Nachmittags|Ganztags|Abends/);
+  // Every start in one dropdown, no morning-or-afternoon switch: CASA assigns the group (2026-10-20).
+  await expect(page.locator('input[name="course-0-option-slot"]')).toHaveCount(0);
+  await expect(page.locator('#course-0-option')).toContainText('die Gruppe teilen wir dir zu');
   await expect(page.locator('#course-0-option-select')).toContainText(/\d{4}/);
 
   await page.locator('#course-0-level').click();
