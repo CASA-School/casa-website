@@ -11,8 +11,9 @@
 import type { Ref } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
-import { meaningClasses, type Meaning } from '@/config/brand/meaning';
+import type { Meaning } from '@/config/brand/meaning';
 import { cn } from '@/lib/utils';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 /** `min-w-0`: in a grid, a long select value would otherwise hold its column open past the card. */
 export const formFieldGroupClassName = 'min-w-0 space-y-2';
@@ -107,9 +108,7 @@ type FormStepHeaderProps = {
 export function FormStepHeader({ icon: Icon, meaning, title, description, headingRef }: FormStepHeaderProps) {
   return (
     <div className={cn('flex gap-4', description ? 'items-start' : 'items-center')}>
-      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-full', meaningClasses[meaning].circle)}>
-        <Icon className="size-5" aria-hidden />
-      </span>
+      <IconBadge icon={Icon} meaning={meaning} size="lg" />
       <div className="min-w-0">
         <h2 ref={headingRef} tabIndex={-1} className="text-xl font-bold tracking-tight text-[var(--casa-ink)] md:text-2xl">
           {title}

@@ -139,7 +139,7 @@ export function CourseFormatRows({
                     <CheckCircle2
                       className={cn(
                         'mt-0.5 h-4 w-4 shrink-0',
-                        isDark ? 'text-[var(--casa-sun)]' : 'text-[var(--casa-blue)]'
+                        isDark ? 'text-[var(--casa-sun)]' : 'text-[var(--casa-accent-text)]'
                       )}
                       aria-hidden
                     />

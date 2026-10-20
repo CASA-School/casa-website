@@ -148,6 +148,23 @@ Moved from `src/config/brand/usage-rules.ts` on 2026-10-09 with the internal des
 - Always provide meaningful alt text that describes human context, not file content.
 - Mark temporary placeholders so they can be replaced once authentic media is available.
 
+### Icons (2026-10-20)
+
+- One set: the Streamline line icons behind `lucide-react` (`src/lib/icons/streamline-lucide-adapter.tsx`).
+  A missing glyph is drawn on the set's 14-unit grid with round caps, never taken from another set.
+- One line weight: 1.5px on screen at every size (`svg[data-casa-icon]` in `globals.css`). An icon's
+  `strokeWidth` prop sets another weight in px, for a reason.
+- An icon set on its own sits in an `IconBadge` (`src/components/ui/icon-badge.tsx`): a circle in the
+  tint of its meaning colour (`src/config/brand/meaning.ts`), the icon in that colour's text shade.
+  `md` (40px) beside a line of text (menus, rows, choices, contact cards), `lg` (48px) leading a card or
+  tile. No rounded squares, no translucent or off-palette grounds, no other sizes.
+- Inline icons are 16px beside small text and 20px beside a two-line item. On light grounds they take
+  `--casa-accent-text` (list checks, facts) or the meaning link colour of their card; on dark grounds
+  `--casa-sun`. Controls (close, chevrons, carousel arrows) take their control's colour.
+- A chevron opens, closes or drills down; an arrow goes somewhere (`ArrowRight` in CTAs and links).
+- The desktop menu and the phone menu show the same badges: the area's meaning colour.
+- Exception: `/aktuelles` keeps the newsletter's rubric medallions.
+
 ### Registration
 
 - Single high-contrast form column with clear next-step guidance and no account prerequisites.

@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
-import { ArrowRight, BookOpen, CalendarDays, FileText, HelpCircle, Newspaper, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, FileText, HelpCircle, Newspaper, Sparkles, type LucideIcon } from 'lucide-react';
 
 import { HeroEMinimal } from '@/components/heroes';
 import { UnifiedSearchPanel } from '@/components/sections';
 import { Container } from '@/components/ui/container';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { getSearchScope, searchPublicContent, type PublicSearchResultType } from '@/lib/search/public-search';
 import { createPublicMetadata } from '@/lib/seo';
-import { cn } from '@/lib/utils';
 import { say } from '@/lib/cms/copy';
+import { searchResultMeaning, type Meaning } from '@/config/brand/meaning';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -63,17 +64,17 @@ function SearchResultCard({
   meta = [],
   badges = [],
   actionLabel,
-  tone = 'default',
+  meaning,
 }: {
   href: string;
-  icon: ReactNode;
+  icon: LucideIcon;
   eyebrow: string;
   title: string;
   snippet: string;
   meta?: string[];
   badges?: string[];
   actionLabel: string;
-  tone?: 'default' | 'blue';
+  meaning: Meaning;
 }) {
   return (
     <li>
@@ -81,14 +82,7 @@ function SearchResultCard({
         href={href}
         className="group grid gap-3 rounded-xl border border-transparent bg-transparent p-3 text-[var(--casa-ink)] transition-colors hover:border-[color:var(--casa-sand)]/80 hover:bg-[var(--casa-bg)] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-start sm:p-4"
       >
-        <span
-          className={cn(
-            'inline-flex h-10 w-10 items-center justify-center rounded-full',
-            tone === 'blue' ? 'bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]' : 'bg-white text-[var(--casa-muted)]'
-          )}
-        >
-          {icon}
-        </span>
+        <IconBadge icon={icon} meaning={meaning} />
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{eyebrow}</span>
@@ -260,19 +254,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             resultGroups[type].length > 0 ? (
               <SearchResultGroup key={type} title={groupTitles[type]} count={search.counts[type]}>
                 {resultGroups[type].map((result) => {
-                  const Icon = groupIcons[type];
                   return (
                     <SearchResultCard
                       key={result.id}
                       href={result.href}
-                      icon={<Icon className="h-4 w-4" aria-hidden="true" />}
+                      icon={groupIcons[type]}
                       eyebrow={result.context ?? resultTypeLabels[type]}
                       title={result.title}
                       snippet={result.snippet}
                       badges={result.badges}
                       meta={result.meta}
                       actionLabel={resultActionLabels[type]}
-                      tone={type === 'courses' || type === 'exams' ? 'blue' : 'default'}
+                      meaning={searchResultMeaning[type]}
                     />
                   );
                 })}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Clock, Check } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Clock, Check } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -196,7 +196,7 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
               </div>
             </section>
           </div>
-          <div className="mt-7 flex justify-end border-t border-[var(--casa-sand)] pt-5"><Button variant="prism" size="lg" disabled={!time} onClick={() => setDetails(true)}>{t.next}<ChevronRight aria-hidden /></Button></div>
+          <div className="mt-7 flex justify-end border-t border-[var(--casa-sand)] pt-5"><Button variant="prism" size="lg" disabled={!time} onClick={() => setDetails(true)}>{t.next}<ArrowRight aria-hidden /></Button></div>
         </> : <form onSubmit={submit} className="space-y-5">
           <div className="rounded-lg bg-[var(--casa-surface-wash)] p-4">
             <p className="text-sm font-semibold">{dateLabel(date)} · {time} · 30 min</p>

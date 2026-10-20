@@ -6,6 +6,7 @@ import { iconMap, type IconKey } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
 import { pickTree, say } from '@/lib/cms/copy';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 type PersonaKey =
   | 'new-learners'
@@ -168,11 +169,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
               />
 
               <div>
-                <div
-                  className={cn('inline-flex h-12 w-12 items-center justify-center rounded-full', meaning.circle)}
-                >
-                  <Icon className="h-6 w-6" />
-                </div>
+                <IconBadge icon={Icon} meaning={personaMeaning[pathway.key]} size="lg" />
                 <h3 className="mt-7 text-2xl font-bold leading-tight text-[var(--casa-ink)]">
                   {pathway.title}
                 </h3>

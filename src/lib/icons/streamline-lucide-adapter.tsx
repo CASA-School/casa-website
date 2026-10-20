@@ -165,21 +165,23 @@ const ICON_DATA: Record<string, StreamlineIconData> = {
     "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.85.5L10 6.65a.48.48 0 0 1 0 .7L3.85 13.5\"/>",
     "hidden": true
   },
-  "interface-arrows-button-up-arrow-up-keyboard": {
-    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M.5 10.15L6.65 4a.48.48 0 0 1 .7 0l6.15 6.15\"/>",
-    "hidden": true
+  /*
+   * Chevrons, added 2026-10-20. ChevronDown, ChevronLeft and ChevronRight mapped to the set's
+   * keyboard ARROWS (a shaft and a head), so every select, accordion, breadcrumb and drill-down
+   * row showed an arrow where a chevron belongs: the search page's select read as "↓". Drawn on
+   * the set's 14-unit grid with its round caps, 7 units wide and 3.5 deep (Lucide's proportion).
+   */
+  "chevron-down": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.5 5.25L7 8.75l3.5-3.5\"/>"
   },
-  "interface-arrows-down-arrow-down-keyboard": {
-    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7 .5v13m3.5-3.5L7 13.5L3.5 10\"/>",
-    "hidden": true
+  "chevron-up": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.5 8.75L7 5.25l3.5 3.5\"/>"
   },
-  "interface-arrows-left-arrow-keyboard-left": {
-    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.5 7H.5M4 3.5L.5 7L4 10.5\"/>",
-    "hidden": true
+  "chevron-left": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M8.75 3.5L5.25 7l3.5 3.5\"/>"
   },
-  "interface-arrows-right-arrow-right-keyboard": {
-    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M.5 7h13M10 10.5L13.5 7L10 3.5\"/>",
-    "hidden": true
+  "chevron-right": {
+    "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5.25 3.5L8.75 7l-3.5 3.5\"/>"
   },
   "interface-arrows-synchronize-arrows-loading-load-sync-synchronize-arrow-reload": {
     "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m11 9l2-.5l.5 2\"/><path d=\"M13 8.5A6.76 6.76 0 0 1 7 13h0a6 6 0 0 1-5.64-3.95M3 5l-2 .5l-.5-2\"/><path d=\"M1 5.5C1.84 3.2 4.42 1 7 1h0a6 6 0 0 1 5.64 4\"/></g>",
@@ -424,12 +426,12 @@ const ICON_NAME_BY_EXPORT = {
   Check: "check",
   CheckCircle2: "interface-validation-check-circle-checkmark-addition-circle-success-check-validation-add-form",
   CheckIcon: "check",
-  ChevronDown: "interface-arrows-down-arrow-down-keyboard",
-  ChevronDownIcon: "interface-arrows-down-arrow-down-keyboard",
-  ChevronLeft: "interface-arrows-left-arrow-keyboard-left",
-  ChevronRight: "interface-arrows-right-arrow-right-keyboard",
-  ChevronRightIcon: "interface-arrows-right-arrow-right-keyboard",
-  ChevronUpIcon: "interface-arrows-button-up-arrow-up-keyboard",
+  ChevronDown: "chevron-down",
+  ChevronDownIcon: "chevron-down",
+  ChevronLeft: "chevron-left",
+  ChevronRight: "chevron-right",
+  ChevronRightIcon: "chevron-right",
+  ChevronUpIcon: "chevron-up",
   CircleCheck: "interface-validation-check-circle-checkmark-addition-circle-success-check-validation-add-form",
   CircleGauge: "dashboard-circle",
   CircleIcon: "circle",
@@ -518,7 +520,8 @@ function createIcon(displayName: string, iconName: string): LucideIcon {
       size = 24,
       color,
       absoluteStrokeWidth: _absoluteStrokeWidth,
-      strokeWidth: _strokeWidth,
+      strokeWidth,
+      style,
       dangerouslySetInnerHTML: _dangerouslySetInnerHTML,
       children: _children,
       ...props
@@ -526,7 +529,6 @@ function createIcon(displayName: string, iconName: string): LucideIcon {
     ref
   ) {
     void _absoluteStrokeWidth;
-    void _strokeWidth;
     void _dangerouslySetInnerHTML;
     void _children;
 
@@ -544,6 +546,8 @@ function createIcon(displayName: string, iconName: string): LucideIcon {
         role={hasAccessibleLabel ? 'img' : 'presentation'}
         aria-hidden={hasAccessibleLabel ? undefined : true}
         focusable="false"
+        data-casa-icon=""
+        style={strokeWidth === undefined ? style : ({ ...style, '--casa-icon-stroke': `${strokeWidth}px` } as React.CSSProperties)}
         {...props}
         dangerouslySetInnerHTML={{ __html: icon.body }}
       />

@@ -20,6 +20,8 @@ import type { ContentLocale } from '@/lib/content/types';
 import type { PublicSearchResponse, PublicSearchResult, PublicSearchResultType } from '@/lib/search/public-search';
 import { cn } from '@/lib/utils';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { IconBadge } from '@/components/ui/icon-badge';
+import { searchResultMeaning } from '@/config/brand/meaning';
 
 type HeaderSearchPopoverProps = {
   locale: ContentLocale;
@@ -139,11 +141,9 @@ function ResultRow({
     <Link
       href={result.href}
       onClick={onNavigate}
-      className="group flex items-start gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2.5 text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-panel)]"
+      className="group flex items-center gap-3 rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2.5 text-[var(--casa-ink)] transition-colors hover:border-[var(--casa-blue)]/35 hover:bg-[var(--casa-warm-panel)]"
     >
-      <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--casa-blue)]/10 text-[var(--casa-accent-text)]">
-        <Icon className="h-4 w-4" aria-hidden="true" />
-      </span>
+      <IconBadge icon={Icon} meaning={searchResultMeaning[result.type]} />
       <span className="min-w-0 flex-1">
         <span className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{label}</span>
         <span className="mt-0.5 block truncate text-sm font-bold">{result.title}</span>

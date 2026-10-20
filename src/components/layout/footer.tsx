@@ -146,7 +146,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
 
           <div className="mt-8 space-y-2.5">
             <div className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-amber)]" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
               <a
                 href={footerConfig.contact.mapsHref}
                 target="_blank"
@@ -157,7 +157,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </a>
             </div>
             <div className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-[var(--casa-amber)]" />
+              <Phone className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
               <a
                 href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                 className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -167,7 +167,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
             </div>
             {footerConfig.contact.emails.map((email) => (
               <div key={email.label} className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 shrink-0 text-[var(--casa-amber)]" />
+                <Mail className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
                 <a
                   href={email.href}
                   className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -201,7 +201,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
                 <a
                   href={footerConfig.contact.mapsHref}
                   target="_blank"
@@ -212,7 +212,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
+                <Phone className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
                 <a
                   href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                   className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -223,7 +223,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               <div className="space-y-2">
                 {footerConfig.contact.emails.map((email) => (
                   <div key={email.label} className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 shrink-0 text-[var(--casa-amber)]" />
+                    <Mail className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
                     <a
                       href={email.href}
                       className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"

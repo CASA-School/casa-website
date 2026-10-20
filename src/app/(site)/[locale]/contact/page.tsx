@@ -6,12 +6,12 @@ import { ContactInquiryForm } from '@/components/forms/contact-inquiry-form';
 import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
-import { meaningClasses, type Meaning } from '@/config/brand/meaning';
+import { IconBadge } from '@/components/ui/icon-badge';
+import type { Meaning } from '@/config/brand/meaning';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { Link } from '@/i18n/navigation';
 import { getContentLocale } from '@/lib/content/locale.server';
 import { createPublicMetadata, toAbsoluteUrl } from '@/lib/seo';
-import { cn } from '@/lib/utils';
 import { pick, pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -263,9 +263,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                           href={item.href}
                           className="group flex items-center gap-3 rounded-lg py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
                         >
-                          <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-full', meaningClasses[item.meaning].circle)}>
-                            <Icon className="size-5" aria-hidden />
-                          </span>
+                          <IconBadge icon={Icon} meaning={item.meaning} />
                           <span className="min-w-0 flex-1">
                             <span className="block text-sm font-semibold text-[var(--casa-ink)]">{pick(locale, item.label)}</span>
                             <span className="block text-sm text-[var(--casa-muted)]">{pick(locale, item.detail)}</span>
