@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { socialProofByLocale, socialProofForCourse } from '@/config/content/social-proof';
+import { googleReviewsFor, socialProofByLocale, socialProofForCourse } from '@/config/content/social-proof';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
 
 /**
@@ -84,5 +84,33 @@ describe('German pages and English testimonials', () => {
     const laura = socialProofByLocale.de.find((item) => item.id === 'laura-medical-de');
     expect(laura?.country).toContain('aus dem Englischen übersetzt');
     expect(socialProofByLocale.en.find((item) => item.id === 'laura-medical-en')?.quote).toContain('makes justice to its name');
+  });
+});
+
+describe('Google reviews (2026-10-20)', () => {
+  it('carry their stars and link to CASA’s listing', () => {
+    const reviews = googleReviewsFor('de');
+    expect(reviews.length).toBeGreaterThanOrEqual(6);
+    for (const review of reviews) {
+      expect(review.sourcePlatform).toBe('google_reviews');
+      expect(review.rating).toBe(5);
+      expect(review.sourceUrl).toContain('maps.google.com');
+    }
+  });
+
+  it('are labelled as translations on English pages', () => {
+    for (const review of googleReviewsFor('en')) {
+      expect(review.country, `${review.id} must say it is translated`).toContain('translated from German');
+    }
+  });
+
+  it('replace the published quotes on the intensive and evening pages', () => {
+    for (const slug of ['intensive-german', 'evening-german']) {
+      const shown = socialProofForCourse(slug, 'de').slice(0, 3);
+      expect(shown.every((item) => item.sourcePlatform === 'google_reviews'), `${slug}: ${shown.map((item) => item.id).join(', ')}`).toBe(true);
+    }
+    const intensive = socialProofForCourse('intensive-german', 'de').slice(0, 3).map((item) => item.id);
+    const evening = socialProofForCourse('evening-german', 'de').slice(0, 3).map((item) => item.id);
+    expect(intensive.filter((id) => evening.includes(id))).toEqual(['olexandra-google-de']);
   });
 });

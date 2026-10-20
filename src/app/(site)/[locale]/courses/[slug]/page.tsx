@@ -415,6 +415,7 @@ export default async function CourseDetailPage({
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
+    rating: story.rating,
   }));
 
   /*

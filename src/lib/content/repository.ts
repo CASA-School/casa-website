@@ -2,7 +2,7 @@ import { getDb, logDatabaseFallback } from '@/lib/db/server';
 import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
 import { heroSpecsByLocale } from '@/config/content/heroes';
 import { proofMetricsByLocale } from '@/config/content/proof-metrics';
-import { socialProofById, socialProofFor, socialProofForCourse } from '@/config/content/social-proof';
+import { googleReviewsFor, socialProofById, socialProofFor, socialProofForCourse } from '@/config/content/social-proof';
 import { faqText } from '@/config/content/faq';
 import { courseNarrativesByLocale } from '@/config/content/course-narratives';
 import { examNarrativesByLocale } from '@/config/content/exam-narratives';
@@ -520,6 +520,11 @@ export function getProofMetrics(locale: ContentLocale): ProofMetric[] {
 
 export function getSocialProof(locale: ContentLocale): SocialProofItem[] {
   return socialProofFor(locale);
+}
+
+/** The Google reviews CASA chose for the homepage (2026-10-20), with their stars. */
+export function getGoogleReviews(locale: ContentLocale): SocialProofItem[] {
+  return googleReviewsFor(locale);
 }
 
 /**

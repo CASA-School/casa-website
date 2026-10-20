@@ -79,6 +79,8 @@ export type SocialProofItem = {
   sourcePlatform: 'instagram' | 'google_reviews' | 'website';
   sourceUrl: string;
   verificationStatus: VerificationStatus;
+  /** Stars, for a review that carries them (Google). */
+  rating?: number;
 };
 
 export type HeroStorySnippet = {
