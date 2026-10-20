@@ -1265,6 +1265,44 @@ day as one moves between them.
     through a confirm saying what changes. The teacher needs `kursplanung` at `edit`, the room
     `rooms` at `edit` — the same rights as changing them where they live; without them the section
     is not shown, and the action checks both.
+  - **Zusammenlegung** (0074, 2026-10-20). A group taught with a parallel group of the same level:
+    - **When it happens.** Rahman: „every now and then for different reasons, especially if a teacher
+      is sick … sometimes for one day, sometimes for several". With three parallel groups, one is
+      shared out between the other two.
+    - **The link.** A day that joins others points at their days (`course_day_merges`): one host, or
+      several. Who sits where is not recorded, because it happens at short notice. Each group keeps
+      its own attendance sheet.
+    - **What the group keeps.** It gives up its room and teacher and keeps them underneath
+      (`replaced_room_id`, `replaced_teacher_id`). Lifting the merge puts them back; where SchoolMan
+      left none, the weekly plan's are used.
+    - **The reason.** Krankheit, Urlaub, zu wenige Teilnehmende, Raum or Sonstiges, with a note.
+      Krankheit or Urlaub is preset when the teacher's absence says so.
+    - **Merging from the panel.** „Zusammenlegen mit" lists the groups of the same level at the same
+      time that have a room, each with how many would sit there against the room's seats. Choose one
+      or more, then „Nur am …" or „Bis …" (preset to the end of the teacher's absence), a reason,
+      and confirm.
+    - **Lifting it.** The joining group's panel has „Zusammenlegung aufheben", for the day or for every
+      merged day from it on.
+    - **How it shows.**
+      - Raumplan: one block in the host's room, „C1.1 #4783 + #5072", with how many sit there
+        against the seats, framed amber above the room's capacity and red above its maximum.
+      - Kurse list: the joining group's row says „bei #4783 · Dresden" with the reason.
+      - Course week grid: „bei #4783" on the joining group's day, „+ #5072" on the host's.
+      - The host's panel: the room check and the free rooms that would hold everyone.
+      - The joining group is neither „Ohne Raum" nor missing a teacher, and the room count takes
+        only real rooms.
+    - **Two classes in one room at the same time.** SchoolMan does not stop this. On 20 October it had
+      B2.1 #4777 and #5058 both in Dresden without a merge mark. The Raumplan gives each class a lane
+      in the room's row, so neither hides the other. Both get a dashed red frame and the legend says
+      „Raum doppelt belegt". The panel names the other class; when it is the same level, „Zusammenlegen
+      mit" offers it.
+    - **From SchoolMan.** `link_course_day_merges()` runs in the migration and after every import of
+      lesson days. A day marked „Zusammenlegung" without a room joins the days of the same level, on
+      the same date, at overlapping times, that have one. SchoolMan keeps the room only on the host,
+      and often marks only the joining day; two hosts mean the group was shared out. The reason is
+      preset from the replaced teacher's absence.
+    - **Measured locally on 2026-10-20:** 18 links, 4 of them shared out. 3 merged days stay unlinked,
+      because no group of their level had a room.
 - **Raumplan** (`/admin/day/rooms`). SchoolMan's ClassroomToday drawn: a row per room, floor by
   floor, alternating shades, hours and half hours across, each class a block in its part of the
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class

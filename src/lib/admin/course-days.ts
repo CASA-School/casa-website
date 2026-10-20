@@ -325,6 +325,10 @@ export type CourseDay = {
   cancelReason: string | null;
   /** Taught together with another group that day (SchoolMan's Zusammenlegung, 0048). */
   merged: boolean;
+  /** On a merged day (0074): the groups it joins and their rooms, or the groups that join it. */
+  mergedInto: string | null;
+  mergedRoom: string | null;
+  joinedBy: string | null;
   note: string | null;
   /** On Kursplanung's board. */
   onBoard: boolean;
@@ -356,6 +360,9 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     cancelled: boolean;
     cancel_reason: string | null;
     merged: boolean;
+    merged_into: string | null;
+    merged_room: string | null;
+    joined_by: string | null;
     note: string | null;
     on_board: boolean;
     teacher_away: string | null;
@@ -365,6 +372,12 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
             ${NAME('rp')} AS replaced_teacher_name, rm.short_name AS replaced_teacher_short,
             d.is_substitute, d.is_tentative, d.room_id, coalesce(r.nickname, r.name) AS room_name, coalesce(rr.nickname, rr.name) AS replaced_room_name,
             d.cancelled, d.cancel_reason, d.merged, d.note, d.group_id IS NOT NULL AS on_board,
+            (SELECT string_agg('#' || coalesce(hc.filemaker_group_ids[h.group_index], hc.filemaker_course_id, hc.level_code), ', ')
+               FROM course_day_merges m JOIN course_days h ON h.id = m.host_day_id JOIN courses hc ON hc.id = h.course_id WHERE m.guest_day_id = d.id) AS merged_into,
+            (SELECT string_agg(coalesce(hr.nickname, hr.name), ', ')
+               FROM course_day_merges m JOIN course_days h ON h.id = m.host_day_id LEFT JOIN rooms hr ON hr.id = h.room_id WHERE m.guest_day_id = d.id) AS merged_room,
+            (SELECT string_agg('#' || coalesce(gc.filemaker_group_ids[g.group_index], gc.filemaker_course_id, gc.level_code), ', ')
+               FROM course_day_merges m JOIN course_days g ON g.id = m.guest_day_id JOIN courses gc ON gc.id = g.course_id WHERE m.host_day_id = d.id) AS joined_by,
             (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) AS teacher_away
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
@@ -396,6 +409,9 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     cancelled: r.cancelled,
     cancelReason: r.cancel_reason,
     merged: r.merged,
+    mergedInto: r.merged_into,
+    mergedRoom: r.merged_room,
+    joinedBy: r.joined_by,
     note: r.note,
     onBoard: r.on_board,
     teacherAway: r.teacher_away,

@@ -648,7 +648,13 @@ function DayGrid({
       d.teacherName
         ? `${d.teacherName}${d.substitute ? (d.replacedTeacherName ? t(` für ${d.replacedTeacherName}`, ` for ${d.replacedTeacherName}`) : t(' (Vertretung)', ' (cover)')) : ''}${away ? ` (${away})` : ''}${d.tentative ? ' ?' : ''}`
         : null,
-      d.merged ? t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group') : null,
+      d.mergedInto
+        ? t(`Zusammengelegt: bei ${d.mergedInto} (${d.mergedRoom ?? '—'})`, `Merged: with ${d.mergedInto} (${d.mergedRoom ?? '—'})`)
+        : d.joinedBy
+          ? t(`Zusammengelegt mit ${d.joinedBy}`, `Merged with ${d.joinedBy}`)
+          : d.merged
+            ? t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group')
+            : null,
       d.roomName ? `${d.roomName}${d.replacedRoomName ? t(` statt ${d.replacedRoomName}`, ` instead of ${d.replacedRoomName}`) : ''}` : null,
       d.note,
     ]
@@ -682,6 +688,8 @@ function DayGrid({
                 {d.tentative ? <span className="font-semibold text-[var(--casa-muted)]"> ?</span> : null}
                 {d.substitute && replaced ? <span className="text-[var(--casa-muted)]"> {t(`für ${replaced}`, `for ${replaced}`)}</span> : null}
               </>
+            ) : d.mergedInto ? (
+              <span className="font-semibold text-[var(--casa-muted)]">{t(`bei ${d.mergedInto}`, `with ${d.mergedInto}`)}</span>
             ) : d.merged ? (
               <span className="text-[var(--casa-muted)]">{t('Zusammengelegt', 'Merged')}</span>
             ) : past ? (
@@ -696,14 +704,18 @@ function DayGrid({
                 d.cancelReason
               ) : (
                 <>
-                  {d.roomName ?? <span className="text-[var(--casa-text-subtle)]">—</span>}
+                  {d.roomName ?? d.mergedRoom ?? <span className="text-[var(--casa-text-subtle)]">—</span>}
                   {d.replacedRoomName ? <span> {t(`statt ${d.replacedRoomName}`, `instead of ${d.replacedRoomName}`)}</span> : null}
                 </>
               )}
             </span>
             {d.ownHours && hours(d) ? <span className="shrink-0 font-semibold text-[var(--casa-ink)] tabular-nums">{hours(d)}</span> : null}
             {d.teacherAway && !d.cancelled ? <span className={cn(PILL, 'bg-[#fdecec] text-[#9b1c1c] ring-[#f3c4c4]')}>{absenceWord(d.teacherAway, lang) ?? t('abwesend', 'absent')}</span> : null}
-            {d.merged && teacher && !d.cancelled ? <span className={cn(PILL, 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]')}>{t('zusammengelegt', 'merged')}</span> : null}
+            {d.joinedBy && !d.cancelled ? (
+              <span className={cn(PILL, 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]')}>+ {d.joinedBy}</span>
+            ) : d.merged && teacher && !d.cancelled && !d.mergedInto ? (
+              <span className={cn(PILL, 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]')}>{t('zusammengelegt', 'merged')}</span>
+            ) : null}
             {d.note ? (
               <span aria-hidden="true" className="shrink-0 [&_svg]:size-3">
                 {Icon.note}

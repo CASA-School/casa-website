@@ -23,7 +23,7 @@ async function readStdin() {
 
 const { classrooms, plans, days, closed } = await readStdin();
 const client = await connect();
-const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0 };
+const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0 };
 
 try {
   await client.query('BEGIN');
@@ -85,6 +85,8 @@ try {
   for (const id of touched) await client.query(`SELECT make_course_board_groups($1)`, [id]);
   await client.query(`SELECT link_course_groups()`);
   await client.query(`SELECT link_course_days()`);
+  // SchoolMan's „Zusammenlegung": the day without a room joins its parallel groups' days (0074).
+  count.merges = (await client.query(`SELECT link_course_day_merges() AS n`)).rows[0].n;
 
   const plan = new Map(
     (await client.query(`SELECT course_id, group_index, weekday, to_char(starts_at, 'HH24:MI') AS f, to_char(ends_at, 'HH24:MI') AS t, lessons FROM course_week_plans WHERE course_id = ANY($1::uuid[])`, [[...touched]])).rows.map(
@@ -180,5 +182,5 @@ try {
 console.log(
   `${count.days} lesson days read (${closed} in a closure left out): ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
     `${count.kept} changed here and kept · ${count.plans} weekly-plan rows · skipped: ${count.noCourse} of a course not here · ` +
-    `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references`
+    `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked`
 );

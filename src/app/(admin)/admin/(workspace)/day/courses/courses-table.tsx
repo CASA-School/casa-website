@@ -2,11 +2,11 @@
 
 import { useMemo, useState, type ReactNode } from 'react';
 
-import { floorName, LessonPanel, type LessonEditing } from '../lesson-panel';
+import { floorName, groupName, LessonPanel, shortName, type LessonEditing } from '../lesson-panel';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson } from '@/lib/admin/day-plan';
-import { SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
+import { MERGE_REASON_LABELS, SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
 import { pick } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
@@ -131,7 +131,11 @@ export function CoursesTable({ day, lessons, editing }: { day: string; lessons: 
                         </button>
                         <span className="mt-1 flex flex-wrap gap-1">
                           {l.cancelled ? <Tag tone="quiet">{t('Fällt aus', 'Cancelled')}</Tag> : null}
-                          {l.merged ? <Tag tone="quiet">{t('Zusammengelegt', 'Merged')}</Tag> : null}
+                          {l.joinedBy.length ? (
+                            <Tag tone="quiet">{t(`+ ${l.joinedBy.map((g) => (g.number ? `#${g.number}` : g.label)).join(', ')}`, `+ ${l.joinedBy.map((g) => (g.number ? `#${g.number}` : g.label)).join(', ')}`)}</Tag>
+                          ) : l.merged ? (
+                            <Tag tone="quiet">{t('Zusammengelegt', 'Merged')}</Tag>
+                          ) : null}
                           {(named.get(l.id) ?? []).map((name) => (
                             <span key={name} className="rounded-md bg-[#fff3c4] px-1.5 py-0.5 text-[0.76rem] font-semibold text-[#5c4300]">
                               {name}
@@ -139,6 +143,22 @@ export function CoursesTable({ day, lessons, editing }: { day: string; lessons: 
                           ))}
                         </span>
                       </td>
+                      {l.joins.length ? (
+                        // A group taught with others that day: where, and by whom, is theirs.
+                        <td colSpan={2} className="py-3 pr-3 align-top">
+                          <span className="block text-[0.9rem] font-semibold text-[var(--casa-ink)]">
+                            {l.joins.length === 1
+                              ? t(`bei ${groupName(l.joins[0])} · ${l.joins[0].roomName ?? '—'}`, `with ${groupName(l.joins[0])} · ${l.joins[0].roomName ?? '—'}`)
+                              : t(`aufgeteilt: ${l.joins.map((h) => `${groupName(h)} (${h.roomName ?? '—'})`).join(', ')}`, `shared out: ${l.joins.map((h) => `${groupName(h)} (${h.roomName ?? '—'})`).join(', ')}`)}
+                          </span>
+                          <Tag tone="quiet">
+                            {[t('Zusammengelegt', 'Merged'), l.mergeReason ? pick(lang, MERGE_REASON_LABELS[l.mergeReason]) : null, l.joins.map((h) => shortName(h.teacherName)).filter(Boolean).join(', ') || null]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </Tag>
+                        </td>
+                      ) : (
+                        <>
                       <td className="py-3 pr-3 align-top">
                         <span className="block text-[0.9rem] font-semibold text-[var(--casa-ink)]">{l.roomName ?? '—'}</span>
                         {l.floor !== null ? <span className="block text-[0.76rem] text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
@@ -151,6 +171,8 @@ export function CoursesTable({ day, lessons, editing }: { day: string; lessons: 
                           <Tag tone="red">{t(`fehlt · ${l.teacherAway}`, `away · ${l.teacherAway}`)}</Tag>
                         ) : null}
                       </td>
+                        </>
+                      )}
                       <td className="py-3 pr-5 text-right align-top">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-ws-sunk px-2.5 py-1 text-[0.84rem] font-bold text-[var(--casa-ink)] tabular-nums [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]">
                           {Icon.people}

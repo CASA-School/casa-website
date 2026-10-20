@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Search } from '../courses/courses-table';
-import { floorName, LessonPanel, shortName, type LessonEditing } from '../lesson-panel';
+import { floorName, groupName, LessonPanel, shortName, together, type LessonEditing } from '../lesson-panel';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson } from '@/lib/admin/day-plan';
 import { SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
@@ -63,28 +63,65 @@ export function RoomPlan({
   // The plan's rooms with a class that takes place: a class without a room, or in a room off the plan,
   // has its own row below and is no room in use (it read „15 von 14", 2026-10-20).
   const used = rooms.filter((r) => lessons.some((l) => !l.cancelled && l.roomId === r.id)).length;
-  const homeless = lessons.filter((l) => !l.roomId || !rooms.some((r) => r.id === l.roomId));
+  // A group taught with others that day sits in their room: it is not without one.
+  const homeless = lessons.filter((l) => !l.joins.length && (!l.roomId || !rooms.some((r) => r.id === l.roomId)));
   const hours = Array.from({ length: LAST - FIRST + 1 }, (_, i) => FIRST + i);
   const showNow = now && minutes(now) >= FIRST * 60 && minutes(now) <= LAST * 60;
   const sessions = SESSIONS.filter((s) => lessons.some((l) => l.session === s));
+  const doubled = lessons.some(
+    (l) => l.roomId && !l.cancelled && lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && l.startsAt && l.endsAt && o.startsAt && o.endsAt && o.startsAt < l.endsAt && o.endsAt > l.startsAt)
+  );
 
-  const row = (key: string, name: ReactNode, own: DayLesson[], zebra: boolean) => (
+  const row = (key: string, name: ReactNode, own: DayLesson[], zebra: boolean, room = true) => {
+    // Two classes in one room at the same time (SchoolMan does not stop it, 2026-10-20): each gets a lane
+    // of its own, so both can be seen and opened, and both are marked; merging them is in their panel.
+    const timed = own.filter((l) => l.startsAt && l.endsAt && !l.cancelled).sort((a, b) => a.startsAt!.localeCompare(b.startsAt!));
+    const lane = new Map<string, number>();
+    const ends: string[] = [];
+    for (const l of timed) {
+      const free = ends.findIndex((end) => end <= l.startsAt!);
+      const index = free === -1 ? ends.length : free;
+      ends[index] = l.endsAt!;
+      lane.set(l.id, index);
+    }
+    const lanes = Math.max(1, ends.length);
+    const clash = (l: DayLesson) => room && timed.some((o) => o.id !== l.id && o.startsAt! < l.endsAt! && o.endsAt! > l.startsAt!);
+    return (
     <div key={key} className={cn('grid grid-cols-[10rem_1fr] border-b border-ws-line-soft last:border-b-0', zebra && 'bg-[#fafbfd]')}>
       <div className="sticky left-0 z-20 flex items-center border-r border-ws-line bg-inherit px-4 py-2">
         <span className={cn('block truncate text-[0.86rem] font-bold', own.length ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>{name}</span>
       </div>
-      <div className="relative h-[3.6rem]">
+      <div className="relative" style={{ height: `${3.6 + (lanes - 1) * 3.1}rem` }}>
         {own.length === 0 ? <span className="absolute inset-y-0 left-3 flex items-center text-[0.74rem] font-semibold text-[var(--casa-text-subtle)]">{t('frei', 'free')}</span> : null}
-        {own.map((l) =>
-          l.startsAt && l.endsAt ? (
+        {own.map((l) => {
+          // Who sits here with the groups that join it, against the room's seats (0074).
+          const total = l.joinedBy.length ? together(l, lessons) : 0;
+          const full = total && l.roomMax && total > l.roomMax ? 'over' : total && l.roomCapacity && total > l.roomCapacity ? 'tight' : null;
+          const both = clash(l);
+          const index = lane.get(l.id) ?? 0;
+          return l.startsAt && l.endsAt ? (
             <button
               key={l.id}
               type="button"
               onClick={() => setOpenId(l.id)}
-              title={[`${l.label} ${l.typeName}`, `${l.startsAt}–${l.endsAt}`, l.teacherName].filter(Boolean).join(' · ')}
-              style={{ left: `${at(l.startsAt)}%`, width: `${Math.max(3, at(l.endsAt) - at(l.startsAt))}%` }}
+              title={[
+                `${l.label} ${l.typeName}`,
+                `${l.startsAt}–${l.endsAt}`,
+                l.teacherName,
+                l.joinedBy.length ? t(`zusammengelegt mit ${l.joinedBy.map(groupName).join(', ')}`, `merged with ${l.joinedBy.map(groupName).join(', ')}`) : null,
+                total ? t(`etwa ${total} Lernende · ${l.roomCapacity ?? '?'} Plätze`, `about ${total} learners · ${l.roomCapacity ?? '?'} seats`) : null,
+                both ? t('Zur gleichen Zeit eine andere Gruppe im selben Raum', 'Another group in the same room at the same time') : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+              style={{
+                left: `${at(l.startsAt)}%`,
+                width: `${Math.max(3, at(l.endsAt) - at(l.startsAt))}%`,
+                top: `${0.375 + index * 3.1}rem`,
+                height: `${3.6 - 0.75}rem`,
+              }}
               className={cn(
-                'absolute top-1.5 bottom-1.5 z-10 flex min-w-0 flex-col justify-center overflow-hidden rounded-lg border-l-4 px-2.5 text-left leading-tight shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[transform,box-shadow,opacity] outline-none hover:-translate-y-px hover:shadow-[0_8px_18px_-10px_rgba(15,23,42,0.45)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/50',
+                'absolute z-10 flex min-w-0 flex-col justify-center overflow-hidden rounded-lg border-l-4 px-2.5 text-left leading-tight shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[transform,box-shadow,opacity] outline-none hover:-translate-y-px hover:shadow-[0_8px_18px_-10px_rgba(15,23,42,0.45)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/50',
                 l.cancelled
                   ? 'border-[#b8c0cc] bg-[repeating-linear-gradient(135deg,#f3f5f8_0_6px,#e8ecf1_6px_12px)] text-[var(--casa-muted)]'
                   : l.teacherAway
@@ -94,20 +131,28 @@ export function RoomPlan({
                       : l.session
                         ? BLOCK[l.session]
                         : 'border-[var(--fm-navy)] bg-[#e9effa] text-[#1d2f52]',
+                full === 'over' && 'ring-2 ring-[#d14343] ring-inset',
+                full === 'tight' && 'ring-2 ring-[#d99a00] ring-inset',
+                both && 'outline-2 outline-offset-1 outline-[#d14343] outline-dashed',
                 needle && !hit(l) && 'opacity-25',
                 needle && hit(l) && 'ring-2 ring-[var(--casa-ink-deep)]'
               )}
             >
               <span className="truncate text-[0.8rem] font-extrabold">
                 {l.label} <span className="font-semibold opacity-70">{l.number ? `#${l.number}` : ''}</span>
+                {l.joinedBy.length ? <span className="font-semibold"> + {l.joinedBy.map((g) => (g.number ? `#${g.number}` : g.label)).join(', ')}</span> : null}
               </span>
-              <span className="truncate text-[0.72rem] font-medium opacity-85">{shortName(l.teacherName)}</span>
+              <span className="truncate text-[0.72rem] font-medium opacity-85">
+                {shortName(l.teacherName)}
+                {total ? ` · ${total}/${l.roomCapacity ?? '?'}` : ''}
+              </span>
             </button>
-          ) : null
-        )}
+          ) : null;
+        })}
       </div>
     </div>
-  );
+    );
+  };
 
   // Every other room a shade darker, across the floors: the eye keeps to its row.
   const order = new Map(rooms.map((r, i) => [r.id, i]));
@@ -123,6 +168,7 @@ export function RoomPlan({
           <Legend swatch="border-l-4 border-[#d99a00] bg-[#ffeec2]">{t('Vertretung', 'Cover')}</Legend>
           <Legend swatch="border-l-4 border-[#d14343] bg-[#fde3e3]">{t('Lehrkraft fehlt', 'Teacher away')}</Legend>
           <Legend swatch="border-l-4 border-[#b8c0cc] bg-[repeating-linear-gradient(135deg,#f3f5f8_0_3px,#e8ecf1_3px_6px)]">{t('Fällt aus', 'Cancelled')}</Legend>
+          {doubled ? <Legend swatch="outline-2 outline-offset-1 outline-[#d14343] outline-dashed">{t('Raum doppelt belegt', 'Room double-booked')}</Legend> : null}
           <li className="text-[var(--casa-ink)]">{t(`${used} von ${rooms.length} Räumen belegt`, `${used} of ${rooms.length} rooms in use`)}</li>
         </ul>
         <Search value={q} onChange={setQ} placeholder={t('Name oder Kurs', 'Name or course')} label={t('Im Raumplan suchen', 'Search the room plan')} />
@@ -170,7 +216,7 @@ export function RoomPlan({
             {homeless.length ? (
               <div>
                 <p className="border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{t('Ohne Raum', 'No room')}</p>
-                {row('none', '—', homeless, false)}
+                {row('none', '—', homeless, false, false)}
               </div>
             ) : null}
           </div>

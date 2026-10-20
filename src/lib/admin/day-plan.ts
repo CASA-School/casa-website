@@ -5,7 +5,7 @@ import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import type { Bilingual } from './i18n';
 import type { AbsenceReason } from './kursplanung/types';
-import { SHEET_DAYS, type Desk, type Session, type TaskStatus } from './day-plan-labels';
+import { SHEET_DAYS, type Desk, type MergeReason, type Session, type TaskStatus } from './day-plan-labels';
 
 /**
  * The Tagesplan (Rahman, 2026-10-19; docs/ADMIN_WORKSPACE.md §Tagesplan): FileMaker's calendar — the
@@ -187,8 +187,23 @@ export type DayLesson = {
   teacherAway: string | null;
   cancelled: boolean;
   merged: boolean;
+  /** The days this group joins on a merged day (0074): one host, or several when the group is shared out. */
+  joins: MergePart[];
+  /** The groups that join this one that day. */
+  joinedBy: MergePart[];
+  mergeReason: MergeReason | null;
+  mergeNote: string | null;
+  /** The course's level, for finding its parallel groups. */
+  level: string | null;
+  /** How many learners the group has that week: SchoolMan's count, or those booked here when more. */
+  headcount: number;
+  roomCapacity: number | null;
+  roomMax: number | null;
   learners: DayLearner[];
 };
+
+/** Another group of a merge, as the class panel and the plans name it. */
+export type MergePart = { dayId: string; label: string; number: string | null; roomName: string | null; teacherName: string | null; headcount: number };
 
 const sessionOf = (session: string | null, startsAt: string | null): Session | null => {
   if (session === 'morning' || session === 'afternoon' || session === 'evening') return session;
@@ -220,6 +235,11 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
     teacher_away: string | null;
     cancelled: boolean;
     merged: boolean;
+    merge_reason: MergeReason | null;
+    merge_note: string | null;
+    room_capacity: number | null;
+    room_max: number | null;
+    week_count: number | null;
   }>(
     `SELECT d.id, d.course_id, d.group_index, to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
             coalesce(c.session, i.session) AS session, c.level_code, c.title, coalesce(ty.name_de, ty.name) AS type_name,
@@ -228,7 +248,9 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
             d.teacher_id, ${NAME('tp')} AS teacher_name, d.is_substitute, ${NAME('rp')} AS replaced_teacher_name,
             CASE WHEN d.is_substitute THEN NULL
                  ELSE (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) END AS teacher_away,
-            d.cancelled, d.merged
+            d.cancelled, d.merged, d.merge_reason, d.merge_note, r.capacity AS room_capacity, r.capacity_max AS room_max,
+            (SELECT w.learners FROM course_week_learners w
+              WHERE w.course_id = d.course_id AND w.group_index = d.group_index AND w.monday = date_trunc('week', d.on_date)::date) AS week_count
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
        JOIN courses c ON c.id = d.course_id
@@ -253,9 +275,18 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
         [courseIds, day]
       )
     : [];
-  return rows.map((r) => {
+  const links = rows.length
+    ? await query<{ guest: string; host: string }>(
+        `SELECT m.guest_day_id AS guest, m.host_day_id AS host FROM course_day_merges m JOIN course_days g ON g.id = m.guest_day_id WHERE g.on_date = $1::date`,
+        [day]
+      )
+    : [];
+  const lessons = rows.map((r) => {
     const own = learners.filter((l) => l.course_id === r.course_id && (l.group_index === null || l.group_index === r.group_index));
     const seen = new Set<string>();
+    const people = own
+      .filter((l) => (seen.has(l.person_id) ? false : (seen.add(l.person_id), true)))
+      .map((l) => ({ personId: l.person_id, name: l.name, email: l.email }));
     return {
       id: r.id,
       courseId: r.course_id,
@@ -276,17 +307,33 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       teacherAway: r.teacher_away,
       cancelled: r.cancelled,
       merged: r.merged,
-      learners: own
-        .filter((l) => (seen.has(l.person_id) ? false : (seen.add(l.person_id), true)))
-        .map((l) => ({ personId: l.person_id, name: l.name, email: l.email })),
+      joins: [] as MergePart[],
+      joinedBy: [] as MergePart[],
+      mergeReason: r.merge_reason,
+      mergeNote: r.merge_note,
+      level: r.level_code,
+      headcount: Math.max(r.week_count ?? 0, people.length),
+      roomCapacity: r.room_capacity,
+      roomMax: r.room_max,
+      learners: people,
     };
   });
+  const byId = new Map(lessons.map((l) => [l.id, l]));
+  const part = (l: DayLesson): MergePart => ({ dayId: l.id, label: l.label, number: l.number, roomName: l.roomName, teacherName: l.teacherName, headcount: l.headcount });
+  for (const link of links) {
+    const guest = byId.get(link.guest);
+    const host = byId.get(link.host);
+    if (!guest || !host) continue;
+    guest.joins.push(part(host));
+    host.joinedBy.push(part(guest));
+  }
+  return lessons;
 }
 
 /** The rooms that can hold a lesson, floor by floor, for the room plan's rows. */
-export async function planRooms(): Promise<{ id: string; name: string; floor: number | null }[]> {
-  return query<{ id: string; name: string; floor: number | null }>(
-    `SELECT id, coalesce(nickname, name) AS name, floor FROM rooms
+export async function planRooms(): Promise<{ id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null }[]> {
+  return query<{ id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null }>(
+    `SELECT id, coalesce(nickname, name) AS name, floor, capacity, capacity_max AS "capacityMax" FROM rooms
       WHERE is_active AND is_bookable ORDER BY floor NULLS LAST, coalesce(nickname, name)`
   );
 }
@@ -436,7 +483,7 @@ export async function missingCover(day: string, days = 14): Promise<MissingCover
        JOIN courses c ON c.id = d.course_id JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
        JOIN staff_absences a ON a.staff_member_id = d.teacher_id AND a.on_date = d.on_date
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
-      WHERE d.on_date BETWEEN $1::date AND $1::date + $2::int AND NOT d.cancelled AND NOT d.is_substitute
+      WHERE d.on_date BETWEEN $1::date AND $1::date + $2::int AND NOT d.cancelled AND NOT d.is_substitute AND NOT d.merged
       ORDER BY d.on_date, t.starts_at NULLS LAST, c.level_code`,
     [day, days]
   );
@@ -627,9 +674,11 @@ export async function saveStaffDesk(staffId: string, input: StaffDesk, actor: St
 
 export type LessonChoices = {
   teachers: { id: string; name: string }[];
-  rooms: { id: string; name: string }[];
+  rooms: { id: string; name: string; capacity: number | null; capacityMax: number | null }[];
   /** The teachers away on the day, with why. */
   away: Record<string, string>;
+  /** The last day of each absence that runs through the day (a weekend in between does not end it). */
+  awayUntil: Record<string, string>;
 };
 
 /** Who can teach and where, for changing a lesson of the day from the Tagesplan; who is away that day. */
@@ -640,10 +689,118 @@ export async function lessonChoices(day: string): Promise<LessonChoices> {
         WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
         ORDER BY p.first_name, p.last_name`
     ),
-    query<{ id: string; name: string }>(`SELECT id, coalesce(nickname, name) AS name FROM rooms WHERE is_active AND is_bookable AND kind = 'classroom' ORDER BY name`),
-    query<{ staff_member_id: string; reason: string }>(`SELECT staff_member_id, reason FROM staff_absences WHERE on_date = $1::date`, [day]),
+    query<{ id: string; name: string; capacity: number | null; capacityMax: number | null }>(
+      `SELECT id, coalesce(nickname, name) AS name, capacity, capacity_max AS "capacityMax" FROM rooms WHERE is_active AND is_bookable AND kind = 'classroom' ORDER BY name`
+    ),
+    query<{ staff_member_id: string; reason: string; on_date: string }>(
+      `SELECT staff_member_id, reason, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM staff_absences
+        WHERE on_date BETWEEN $1::date AND $1::date + 60 AND staff_member_id IN (SELECT staff_member_id FROM staff_absences WHERE on_date = $1::date)
+        ORDER BY staff_member_id, on_date`,
+      [day]
+    ),
   ]);
-  return { teachers, rooms, away: Object.fromEntries(away.map((a) => [a.staff_member_id, a.reason])) };
+  const today = away.filter((a) => a.on_date === day);
+  const awayUntil: Record<string, string> = {};
+  for (const a of away) {
+    const last = awayUntil[a.staff_member_id] ?? day;
+    if ((Date.parse(`${a.on_date}T12:00:00Z`) - Date.parse(`${last}T12:00:00Z`)) / 86_400_000 <= 3) awayUntil[a.staff_member_id] = a.on_date;
+  }
+  return { teachers, rooms, away: Object.fromEntries(today.map((a) => [a.staff_member_id, a.reason])), awayUntil };
+}
+
+/**
+ * A group taught with others (0074): on its day, and on each of its days up to `until`, it joins the same
+ * hosts' days — one host, or several when it is shared out — and gives up its room and teacher, which it
+ * keeps underneath to have them back. A date where none of the hosts teaches is left as it is.
+ */
+export async function mergeLesson(
+  { guestDayId, hostDayIds, until, reason, note }: { guestDayId: string; hostDayIds: string[]; until: string; reason: MergeReason; note: string | null },
+  actor: StaffUser
+): Promise<Result & { count?: number; skipped?: number }> {
+  const guest = await queryFirst<{ course_id: string; group_index: number; on_date: string }>(
+    `SELECT course_id, group_index, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM course_days WHERE id = $1 AND NOT cancelled`,
+    [guestDayId]
+  );
+  if (!guest) return refuse('Diesen Tag gibt es nicht mehr.', 'That day no longer exists.');
+  const hosts = await query<{ course_id: string; group_index: number }>(
+    `SELECT course_id, group_index FROM course_days WHERE id = ANY($1::uuid[]) AND on_date = $2::date AND id <> $3 AND room_id IS NOT NULL AND NOT cancelled`,
+    [hostDayIds, guest.on_date, guestDayId]
+  );
+  if (!hosts.length || hosts.length !== hostDayIds.length) return refuse('Mit dieser Gruppe geht es an dem Tag nicht.', 'That group cannot take it on that day.');
+  let count = 0;
+  let skipped = 0;
+  await withTransaction(async (client) => {
+    const days = await client.query<{ id: string; on_date: string }>(
+      `SELECT id, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM course_days
+        WHERE course_id = $1 AND group_index = $2 AND on_date BETWEEN $3::date AND greatest($3::date, $4::date) AND NOT cancelled ORDER BY on_date`,
+      [guest.course_id, guest.group_index, guest.on_date, until]
+    );
+    for (const d of days.rows) {
+      const found = await client.query<{ id: string }>(
+        `SELECT h.id FROM course_days h
+          WHERE h.on_date = $1::date AND h.room_id IS NOT NULL AND NOT h.cancelled
+            AND (h.course_id, h.group_index) IN (SELECT * FROM unnest($2::uuid[], $3::int[]))`,
+        [d.on_date, hosts.map((h) => h.course_id), hosts.map((h) => h.group_index)]
+      );
+      if (!found.rows.length) {
+        skipped++;
+        continue;
+      }
+      // The room and teacher it gives up stay underneath, unless it was merged already.
+      await client.query(
+        `UPDATE course_days
+            SET replaced_teacher_id = CASE WHEN merged THEN replaced_teacher_id ELSE coalesce(replaced_teacher_id, teacher_id) END, teacher_id = NULL,
+                replaced_room_id = CASE WHEN merged THEN replaced_room_id ELSE coalesce(room_id, replaced_room_id) END, room_id = NULL,
+                merged = true, is_substitute = false, merge_reason = $2, merge_note = $3, changed_by = $4, updated_at = timezone('utc', now())
+          WHERE id = $1`,
+        [d.id, reason, note, actor.id]
+      );
+      await client.query(`DELETE FROM course_day_merges WHERE guest_day_id = $1`, [d.id]);
+      for (const h of found.rows) await client.query(`INSERT INTO course_day_merges (guest_day_id, host_day_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [d.id, h.id]);
+      count++;
+    }
+  });
+  await logActivity({ actor, entity: 'course', entityId: guest.course_id, action: 'course_days_merged', detail: { from: guest.on_date, until, group: guest.group_index, days: count, reason } });
+  return { ok: true, count, skipped };
+}
+
+/**
+ * A merge lifted, on its day or from it on: the group has its room and teacher back — those it gave up,
+ * else its weekly plan's (SchoolMan keeps no room on the joining day, and sometimes the host's).
+ */
+export async function unmergeLesson(guestDayId: string, scope: 'day' | 'rest', actor: StaffUser): Promise<Result & { count?: number }> {
+  const guest = await queryFirst<{ course_id: string; group_index: number; on_date: string }>(
+    `SELECT course_id, group_index, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM course_days WHERE id = $1`,
+    [guestDayId]
+  );
+  if (!guest) return refuse('Diesen Tag gibt es nicht mehr.', 'That day no longer exists.');
+  let count = 0;
+  await withTransaction(async (client) => {
+    const days = await client.query<{ id: string }>(
+      scope === 'day'
+        ? `SELECT id FROM course_days WHERE id = $1 AND merged`
+        : `SELECT id FROM course_days WHERE course_id = $1 AND group_index = $2 AND on_date >= $3::date AND merged`,
+      scope === 'day' ? [guestDayId] : [guest.course_id, guest.group_index, guest.on_date]
+    );
+    const ids = days.rows.map((r) => r.id);
+    if (!ids.length) return;
+    await client.query(
+      `UPDATE course_days d
+          SET teacher_id = coalesce(d.replaced_teacher_id, p.teacher_id),
+              room_id = coalesce(CASE WHEN d.replaced_room_id IN (SELECT h.room_id FROM course_day_merges m JOIN course_days h ON h.id = m.host_day_id WHERE m.guest_day_id = d.id)
+                                      THEN NULL ELSE d.replaced_room_id END, p.room_id),
+              replaced_teacher_id = NULL, replaced_room_id = NULL, merged = false, merge_reason = NULL, merge_note = NULL,
+              changed_by = $2, updated_at = timezone('utc', now())
+         FROM course_days self
+         LEFT JOIN course_week_plans p ON p.course_id = self.course_id AND p.group_index = self.group_index AND p.weekday = extract(isodow FROM self.on_date)
+        WHERE d.id = self.id AND d.id = ANY($1::uuid[])`,
+      [ids, actor.id]
+    );
+    await client.query(`DELETE FROM course_day_merges WHERE guest_day_id = ANY($1::uuid[])`, [ids]);
+    count = ids.length;
+  });
+  await logActivity({ actor, entity: 'course', entityId: guest.course_id, action: 'course_days_unmerged', detail: { from: guest.on_date, group: guest.group_index, days: count, scope } });
+  return { ok: true, count };
 }
 
 /**

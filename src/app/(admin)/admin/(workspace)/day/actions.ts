@@ -3,10 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { isTaskStatus } from '@/lib/admin/day-plan-labels';
+import { isMergeReason, isTaskStatus } from '@/lib/admin/day-plan-labels';
 import { canAccess } from '@/lib/admin/access';
 import { changeDay } from '@/lib/admin/course-days';
-import { createTask, deleteTask, markPresence, replaceFromDay, setTaskStatus, updateTask, type TaskInput } from '@/lib/admin/day-plan';
+import { createTask, deleteTask, markPresence, mergeLesson, replaceFromDay, setTaskStatus, unmergeLesson, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { pick } from '@/lib/admin/i18n';
@@ -145,6 +145,46 @@ export async function changeLessonAction(formData: FormData): Promise<void> {
     formData.get('scope') === 'rest'
       ? await replaceFromDay(dayId, what, value || null, actor)
       : await changeDay(dayId, what === 'teacher' ? { teacherId: value || null } : { roomId: value || null }, actor);
+  if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(back);
+}
+
+/**
+ * A group taught with others (0074), from the class panel: on its day or up to a date, with one or more
+ * parallel groups — Kursplanung's right, as the teacher's change is.
+ */
+export async function mergeLessonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const raw = String(formData.get('back') ?? '');
+  const back = raw.startsWith('/admin/day') ? raw : '/admin/day/courses';
+  if (!canAccess(actor, 'kursplanung', 'edit')) throw new Error('Not allowed');
+  const dayId = String(formData.get('dayId') ?? '');
+  const hosts = formData.getAll('host').map(String);
+  const day = String(formData.get('day') ?? '');
+  const until = formData.get('scope') === 'until' ? String(formData.get('until') ?? '') : day;
+  const reason = formData.get('reason');
+  const note = String(formData.get('note') ?? '').trim().slice(0, 300) || null;
+  if (!UUID.test(dayId) || !DAY.test(day) || !DAY.test(until) || !isMergeReason(reason) || hosts.some((h) => !UUID.test(h))) throw new Error('Invalid merge');
+  const { lang } = await getI18n();
+  if (!hosts.length) fail(back, pick(lang, { de: 'Wähle mindestens eine Gruppe.', en: 'Choose at least one group.' }));
+  if (until < day) fail(back, pick(lang, { de: 'Das Ende liegt vor dem Tag.', en: 'The end is before the day.' }));
+  const result = await mergeLesson({ guestDayId: dayId, hostDayIds: hosts, until, reason, note }, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  revalidatePath('/admin', 'layout');
+  redirect(back);
+}
+
+/** A merge lifted, on its day or from it on: the group has its room and teacher back. */
+export async function unmergeLessonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const raw = String(formData.get('back') ?? '');
+  const back = raw.startsWith('/admin/day') ? raw : '/admin/day/courses';
+  if (formData.get('confirmed') !== '1') redirect(back);
+  if (!canAccess(actor, 'kursplanung', 'edit')) throw new Error('Not allowed');
+  const dayId = String(formData.get('dayId') ?? '');
+  if (!UUID.test(dayId)) throw new Error('Invalid lesson');
+  const result = await unmergeLesson(dayId, formData.get('scope') === 'rest' ? 'rest' : 'day', actor);
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   revalidatePath('/admin', 'layout');
   redirect(back);

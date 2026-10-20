@@ -42,3 +42,15 @@ export const DESK_LABELS: Record<Desk, Bilingual> = {
 
 /** How many days one attendance sheet shows: four weeks, as SchoolMan's `DateBooking_FourWeekPresence.Dynamic`. */
 export const SHEET_DAYS = 28;
+
+/** Why a group is taught with another (0074): preset „Krankheit" when its teacher is reported sick. */
+export const MERGE_REASONS = ['sick', 'holiday', 'few_learners', 'room', 'other'] as const;
+export type MergeReason = (typeof MERGE_REASONS)[number];
+export const isMergeReason = (value: unknown): value is MergeReason => (MERGE_REASONS as readonly unknown[]).includes(value);
+export const MERGE_REASON_LABELS: Record<MergeReason, Bilingual> = {
+  sick: { de: 'Krankheit', en: 'Illness' },
+  holiday: { de: 'Urlaub', en: 'Holiday' },
+  few_learners: { de: 'Zu wenige Teilnehmende', en: 'Too few learners' },
+  room: { de: 'Raum', en: 'Room' },
+  other: { de: 'Sonstiges', en: 'Other' },
+};

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 
-import { changeLessonAction } from './actions';
+import { changeLessonAction, mergeLessonAction, unmergeLessonAction } from './actions';
 import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
@@ -11,7 +11,7 @@ import { Avatar } from '@/components/admin/list';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button, Select } from '@/components/admin/ui';
 import type { DayLesson, LessonChoices } from '@/lib/admin/day-plan';
-import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
+import { MERGE_REASONS, MERGE_REASON_LABELS, SESSION_LABELS, type MergeReason } from '@/lib/admin/day-plan-labels';
 import { pick, type T } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
@@ -85,7 +85,20 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
     >
       {l ? (
         <>
-          {l.cancelled || l.teacherAway || l.merged ? (
+          {!l.cancelled && l.roomId && editing?.lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && overlapping(l, o)) ? (
+            // Two classes in one room at the same time: said, so it is fixed — by a room, or by merging them.
+            <div className="px-6 pt-4">
+              <p className="rounded-xl bg-[#fdecec] px-3.5 py-2.5 text-[0.84rem] font-semibold text-[#9b1c1c]">
+                {t(
+                  `Zur gleichen Zeit in ${l.roomName}: ${editing.lessons.filter((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && overlapping(l, o)).map(groupName).join(', ')}`,
+                  `At the same time in ${l.roomName}: ${editing.lessons.filter((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && overlapping(l, o)).map(groupName).join(', ')}`
+                )}
+              </p>
+            </div>
+          ) : null}
+          {!l.cancelled && (l.joins.length || l.joinedBy.length) ? (
+            <MergeNote lesson={l} editing={editing} />
+          ) : l.cancelled || l.teacherAway || l.merged ? (
             <div className="px-6 pt-4">
               <p
                 className={cn(
@@ -103,11 +116,11 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
           ) : null}
           <dl className="grid grid-cols-2 gap-x-4 gap-y-4 px-6 py-5">
             <Fact label={t('Raum', 'Room')}>
-              {l.roomName ?? '—'}
+              {l.roomName ?? (l.joins.length ? l.joins.map((h) => h.roomName ?? '—').join(', ') : '—')}
               {l.floor !== null ? <span className="block text-[0.78rem] font-medium text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
             </Fact>
             <Fact label={t('Lehrkraft', 'Teacher')}>
-              {l.teacherName ?? '—'}
+              {l.teacherName ?? (l.joins.length ? l.joins.map((h) => h.teacherName ?? '—').join(', ') : '—')}
               {l.substitute ? (
                 <span className="mt-0.5 block text-[0.78rem] font-semibold text-[#8a5a00]">
                   {l.replacedTeacherName ? t(`Vertretung für ${l.replacedTeacherName}`, `Covering for ${l.replacedTeacherName}`) : t('Vertretung', 'Cover')}
@@ -119,8 +132,15 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
             <section className="border-t border-ws-line-soft py-3">
               <h3 className="px-6 pb-2 text-[0.76rem] font-bold text-[var(--casa-muted)]">{t('Ändern', 'Change')}</h3>
               <div className="space-y-3 px-6 pb-1">
-                {editing.canTeacher ? <ChangeForm lesson={l} day={day} what="teacher" editing={editing} /> : null}
-                {editing.canRoom ? <ChangeForm lesson={l} day={day} what="room" editing={editing} /> : null}
+                {l.joins.length ? (
+                  editing.canTeacher ? <UnmergeForm lesson={l} day={day} editing={editing} /> : null
+                ) : (
+                  <>
+                    {editing.canTeacher ? <ChangeForm lesson={l} day={day} what="teacher" editing={editing} /> : null}
+                    {editing.canRoom ? <ChangeForm lesson={l} day={day} what="room" editing={editing} /> : null}
+                    {editing.canTeacher && !l.joinedBy.length ? <MergeForm lesson={l} day={day} editing={editing} /> : null}
+                  </>
+                )}
               </div>
             </section>
           ) : null}
@@ -233,6 +253,219 @@ function ChangeForm({ lesson: l, day, what, editing }: { lesson: DayLesson; day:
             {t(`${label} ändern`, `Change ${label.toLowerCase()}`)}
           </Button>
         )}
+      </div>
+    </form>
+  );
+}
+
+const dayLabel = (day: string, lang: string) =>
+  new Date(`${day}T12:00:00Z`).toLocaleDateString(lang === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
+export const groupName = (p: { label: string; number: string | null }) => `${p.label}${p.number ? ` #${p.number}` : ''}`;
+const overlapping = (a: DayLesson, b: DayLesson) => !a.startsAt || !b.startsAt || !a.endsAt || !b.endsAt || (b.startsAt < a.endsAt && b.endsAt > a.startsAt);
+
+/**
+ * How many sit in a host's room on a merged day: its own, and a share of each group that joins it (a group
+ * shared out between two hosts counts half in each, as nobody records who goes where).
+ */
+export function together(host: DayLesson, lessons: readonly DayLesson[] | undefined): number {
+  return Math.round(host.headcount + host.joinedBy.reduce((sum, g) => sum + g.headcount / Math.max(1, lessons?.find((o) => o.id === g.dayId)?.joins.length ?? 1), 0));
+}
+
+/** Free rooms at the lesson's time that hold `needed`, the smallest first. */
+function roomsThatFit(l: DayLesson, needed: number, editing: LessonEditing | undefined) {
+  if (!editing) return [];
+  return editing.choices.rooms
+    .filter((r) => r.id !== l.roomId && (r.capacityMax ?? r.capacity ?? 0) >= needed && !editing.lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === r.id && overlapping(l, o)))
+    .sort((a, b) => (a.capacityMax ?? a.capacity ?? 0) - (b.capacityMax ?? b.capacity ?? 0))
+    .slice(0, 3);
+}
+
+/** A merged day, said plainly: where the group is taught, or who joins it, why — and whether the room holds them. */
+function MergeNote({ lesson: l, editing }: { lesson: DayLesson; editing?: LessonEditing }) {
+  const { t, lang } = useWsLang();
+  const reason = l.mergeReason ? pick(lang, MERGE_REASON_LABELS[l.mergeReason]) : null;
+  const total = l.joinedBy.length ? together(l, editing?.lessons) : 0;
+  const tone = total && l.roomMax && total > l.roomMax ? 'red' : total && l.roomCapacity && total > l.roomCapacity ? 'amber' : null;
+  const fit = tone ? roomsThatFit(l, total, editing) : [];
+  return (
+    <div className="space-y-2 px-6 pt-4">
+      <div className="rounded-xl bg-[#eef3fb] px-3.5 py-2.5 text-[0.84rem] text-[#1d3a6b]">
+        <p className="font-semibold">
+          {l.joins.length === 1
+            ? t(`Zusammengelegt: bei ${groupName(l.joins[0])} · ${l.joins[0].roomName ?? '—'}`, `Merged: with ${groupName(l.joins[0])} · ${l.joins[0].roomName ?? '—'}`)
+            : l.joins.length > 1
+              ? t(`Aufgeteilt auf ${l.joins.map((h) => `${groupName(h)} (${h.roomName ?? '—'})`).join(' und ')}`, `Shared out to ${l.joins.map((h) => `${groupName(h)} (${h.roomName ?? '—'})`).join(' and ')}`)
+              : t(`Zusammengelegt mit ${l.joinedBy.map(groupName).join(', ')}`, `Merged with ${l.joinedBy.map(groupName).join(', ')}`)}
+        </p>
+        {reason || l.mergeNote ? <p className="mt-0.5 text-[0.8rem]">{[reason, l.mergeNote].filter(Boolean).join(' · ')}</p> : null}
+      </div>
+      {tone ? (
+        <p className={cn('rounded-xl px-3.5 py-2.5 text-[0.82rem] font-semibold', tone === 'red' ? 'bg-[#fdecec] text-[#9b1c1c]' : 'bg-[#fff4d6] text-[#7a5200]')}>
+          {t(
+            `Zusammen etwa ${total} Lernende · ${l.roomName} hat ${l.roomCapacity ?? '?'} Plätze${l.roomMax ? ` (höchstens ${l.roomMax})` : ''}.`,
+            `About ${total} learners together · ${l.roomName} seats ${l.roomCapacity ?? '?'}${l.roomMax ? ` (at most ${l.roomMax})` : ''}.`
+          )}
+          {fit.length ? (
+            <span className="mt-0.5 block font-medium">
+              {t('Frei und groß genug: ', 'Free and big enough: ')}
+              {fit.map((r) => `${r.name} (${r.capacityMax ?? r.capacity})`).join(', ')}
+            </span>
+          ) : null}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * A group taught with others, from here (0074): the same level's groups at the same time, one or more —
+ * a group can be shared out — on this day or up to a day (when the teacher is back, if their absence says
+ * so), with a reason, preset when the teacher is away; said once more before it is done.
+ */
+function MergeForm({ lesson: l, day, editing }: { lesson: DayLesson; day: string; editing: LessonEditing }) {
+  const { t, lang } = useWsLang();
+  const candidates = editing.lessons.filter((o) => o.id !== l.id && !o.cancelled && l.level && o.level === l.level && o.roomId && !o.joins.length && overlapping(l, o));
+  const [chosen, setChosen] = useState<string[]>([]);
+  const awayUntil = l.teacherId ? editing.choices.awayUntil[l.teacherId] : undefined;
+  const [scope, setScope] = useState<'day' | 'until'>(awayUntil && awayUntil > day ? 'until' : 'day');
+  const [until, setUntil] = useState(awayUntil && awayUntil > day ? awayUntil : day);
+  const away = l.teacherId ? editing.choices.away[l.teacherId] : undefined;
+  const [reason, setReason] = useState<MergeReason | ''>(away === 'Krank' ? 'sick' : away === 'Urlaub' ? 'holiday' : '');
+  if (!candidates.length) return null;
+  const hosts = candidates.filter((c) => chosen.includes(c.id));
+  const share = (c: DayLesson) => Math.round(c.headcount + l.headcount / Math.max(1, chosen.length || 1) + c.joinedBy.reduce((sum, g) => sum + g.headcount, 0));
+  const span = scope === 'until' && until > day ? t(`vom ${dayLabel(day, lang)} bis ${dayLabel(until, lang)}`, `from ${dayLabel(day, lang)} to ${dayLabel(until, lang)}`) : t(`am ${dayLabel(day, lang)}`, `on ${dayLabel(day, lang)}`);
+  const where = hosts.map((h) => `${groupName(h)} (${h.roomName ?? '—'})`).join(t(' und ', ' and '));
+  return (
+    <form action={mergeLessonAction} className="rounded-xl bg-ws-sunk/50 p-3">
+      <input type="hidden" name="dayId" value={l.id} />
+      <input type="hidden" name="day" value={day} />
+      <input type="hidden" name="back" value={editing.back} />
+      <fieldset>
+        <legend className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Zusammenlegen mit', 'Merge with')}</legend>
+        <ul className="space-y-1">
+          {candidates.map((c) => {
+            const total = share(c);
+            const over = c.roomMax ? total > c.roomMax : c.roomCapacity ? total > c.roomCapacity : false;
+            const tight = !over && c.roomCapacity ? total > c.roomCapacity : false;
+            return (
+              <li key={c.id}>
+                <label className="flex items-start gap-2 rounded-lg px-1.5 py-1 text-[0.82rem] hover:bg-white">
+                  <input
+                    type="checkbox"
+                    name="host"
+                    value={c.id}
+                    checked={chosen.includes(c.id)}
+                    onChange={(e) => setChosen((was) => (e.target.checked ? [...was, c.id] : was.filter((id) => id !== c.id)))}
+                    className="mt-0.5 accent-[var(--fm-navy)]"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="font-semibold text-[var(--casa-ink)]">{groupName(c)}</span>
+                    <span className="text-[var(--casa-muted)]"> · {[c.roomName, shortName(c.teacherName)].filter(Boolean).join(' · ')}</span>
+                  </span>
+                  <span className={cn('shrink-0 tabular-nums', over ? 'font-semibold text-[#b42318]' : tight ? 'font-semibold text-[#9a5b00]' : 'text-[var(--casa-muted)]')} title={t('Zusammen / Plätze im Raum', 'Together / seats in the room')}>
+                    {total}/{c.roomCapacity ?? '?'}
+                  </span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </fieldset>
+      {hosts.length ? (
+        <div className="mt-2.5 space-y-2">
+          <fieldset className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8rem]">
+            <legend className="sr-only">{t('Wann', 'When')}</legend>
+            <label className="inline-flex items-center gap-1.5">
+              <input type="radio" name="scope" value="day" checked={scope === 'day'} onChange={() => setScope('day')} className="accent-[var(--fm-navy)]" />
+              {t(`Nur am ${dayLabel(day, lang)}`, `On ${dayLabel(day, lang)} only`)}
+            </label>
+            <label className="inline-flex items-center gap-1.5">
+              <input type="radio" name="scope" value="until" checked={scope === 'until'} onChange={() => setScope('until')} className="accent-[var(--fm-navy)]" />
+              {t('Bis', 'Until')}
+              <input
+                type="date"
+                name="until"
+                min={day}
+                value={until}
+                onChange={(e) => {
+                  setUntil(e.target.value);
+                  setScope('until');
+                }}
+                className="h-7 rounded-md border border-ws-line bg-white px-1.5 text-[0.8rem]"
+              />
+            </label>
+          </fieldset>
+          <label className="block">
+            <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Grund', 'Reason')}</span>
+            <Select name="reason" required value={reason} onChange={(e) => setReason(e.target.value as MergeReason)}>
+              <option value="" disabled>
+                {t('Grund wählen', 'Choose a reason')}
+              </option>
+              {MERGE_REASONS.map((r) => (
+                <option key={r} value={r}>
+                  {pick(lang, MERGE_REASON_LABELS[r])}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <input
+            name="note"
+            maxLength={300}
+            placeholder={t('Notiz (optional)', 'Note (optional)')}
+            aria-label={t('Notiz', 'Note')}
+            className="h-9 w-full rounded-lg border border-ws-line bg-white px-2.5 text-[0.84rem] outline-none placeholder:text-[var(--casa-text-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+          />
+          <div className="flex justify-end">
+            <ConfirmSubmit
+              variant="secondary"
+              title={t('Zusammenlegen?', 'Merge?')}
+              description={t(
+                `${groupName(l)} wird ${span} bei ${where} unterrichtet. Raum und Lehrkraft der Gruppe ruhen und kommen zurück, wenn du die Zusammenlegung aufhebst. Die Anwesenheitslisten bleiben getrennt.`,
+                `${groupName(l)} is taught ${span} with ${where}. The group's room and teacher rest and come back when you lift the merge. The attendance sheets stay separate.`
+              )}
+              confirmLabel={t('Ja, zusammenlegen', 'Yes, merge')}
+            >
+              {t('Zusammenlegen', 'Merge')}
+            </ConfirmSubmit>
+          </div>
+        </div>
+      ) : null}
+    </form>
+  );
+}
+
+/** A merge lifted: the group has its room and teacher back, on this day or on every merged day from it on. */
+function UnmergeForm({ lesson: l, day, editing }: { lesson: DayLesson; day: string; editing: LessonEditing }) {
+  const { t, lang } = useWsLang();
+  const [scope, setScope] = useState<'day' | 'rest'>('day');
+  return (
+    <form action={unmergeLessonAction} className="rounded-xl bg-ws-sunk/50 p-3">
+      <input type="hidden" name="dayId" value={l.id} />
+      <input type="hidden" name="back" value={editing.back} />
+      <fieldset className="flex flex-wrap gap-x-4 gap-y-1 text-[0.8rem]">
+        <legend className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Zusammenlegung aufheben', 'Lift the merge')}</legend>
+        <label className="inline-flex items-center gap-1.5">
+          <input type="radio" name="scope" value="day" checked={scope === 'day'} onChange={() => setScope('day')} className="accent-[var(--fm-navy)]" />
+          {t(`Nur am ${dayLabel(day, lang)}`, `On ${dayLabel(day, lang)} only`)}
+        </label>
+        <label className="inline-flex items-center gap-1.5">
+          <input type="radio" name="scope" value="rest" checked={scope === 'rest'} onChange={() => setScope('rest')} className="accent-[var(--fm-navy)]" />
+          {t(`Ab ${dayLabel(day, lang)} an allen Tagen`, `From ${dayLabel(day, lang)} on, every day`)}
+        </label>
+      </fieldset>
+      <div className="mt-2.5 flex justify-end">
+        <ConfirmSubmit
+          variant="secondary"
+          title={t('Zusammenlegung aufheben?', 'Lift the merge?')}
+          description={t(
+            `${groupName(l)} hat ${scope === 'day' ? `am ${dayLabel(day, lang)}` : `ab ${dayLabel(day, lang)}`} wieder ihren eigenen Raum und ihre Lehrkraft.`,
+            `${groupName(l)} has its own room and teacher back ${scope === 'day' ? `on ${dayLabel(day, lang)}` : `from ${dayLabel(day, lang)} on`}.`
+          )}
+          confirmLabel={t('Ja, aufheben', 'Yes, lift it')}
+        >
+          {t('Aufheben', 'Lift')}
+        </ConfirmSubmit>
       </div>
     </form>
   );

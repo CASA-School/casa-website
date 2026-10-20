@@ -565,6 +565,16 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
         `hat ${texts(entry, lang)} vor der Veröffentlichung zurückgezogen`,
         `withdrew ${texts(entry, lang)} before they went live`
       );
+    // A group taught with another, and that lifted (0074).
+    case 'course_days_merged':
+    case 'course_days_unmerged': {
+      const n = Number(entry.detail?.days ?? 0);
+      const days = { de: n === 1 ? 'einen Tag' : `${n} Tage`, en: n === 1 ? 'one day' : `${n} days` };
+      const group = entry.detail?.group ? { de: ` der Gruppe ${entry.detail.group}`, en: ` of group ${entry.detail.group}` } : { de: '', en: '' };
+      return entry.action === 'course_days_merged'
+        ? t(`hat ${days.de}${group.de} zusammengelegt`, `merged ${days.en}${group.en}`)
+        : t(`hat die Zusammenlegung an ${days.de}${group.de} aufgehoben`, `lifted the merge on ${days.en}${group.en}`);
+    }
     default:
       return t(`${entry.action.replace(/_/g, ' ')} bei ${dat}`, `${entry.action.replace(/_/g, ' ')} on ${subject}`);
   }
