@@ -81,6 +81,8 @@ export const routes: readonly RouteDefinition[] = [
   { internal: '/placement-test', de: '/anmeldung/einstufungstest' },
   { internal: '/placement-test/test', de: '/anmeldung/einstufungstest/test' },
   { internal: '/placement-test/result/[token]', de: '/anmeldung/einstufungstest/ergebnis/[token]' },
+  // The test on the first day of an intensive course: learners type casa-bremen.de/test from the board.
+  { internal: '/test', de: '/test' },
 
   { internal: '/contact', de: '/kontakt' },
   { internal: '/faq', de: '/faq' },

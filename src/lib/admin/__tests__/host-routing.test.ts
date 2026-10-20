@@ -351,4 +351,15 @@ describe('workspace auth gate', () => {
     expect(route).toContain('attachment;');
     expect(route).toContain('nosniff');
   });
+
+  it('checks the session and the Tagesplan module in the placement-test results download', () => {
+    // The same reason as the CV: a route handler sits outside every layout, and the file holds
+    // learners' names, addresses and results.
+    const route = readFileSync(path.join(ADMIN_APP, '(workspace)/day/entry-test/export/route.ts'), 'utf8');
+    expect(route).toContain('getStaffUser');
+    expect(route).toContain("redirect('/admin/sign-in')");
+    expect(route).toMatch(/if \(!canAccess\(user, 'day', 'view'\)\) \{\s*return new Response\('Not found', \{ status: 404 \}\);/);
+    expect(route.indexOf("canAccess(user, 'day'")).toBeLessThan(route.indexOf('exportSittings('));
+    expect(route).toContain('attachment;');
+  });
 });

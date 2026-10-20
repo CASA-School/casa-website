@@ -1,0 +1,1082 @@
+{
+  "A": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "Im Programm steht: „Fotokurs: 45 Euro, einschließlich Material.“ Muss ich das Material extra bezahlen?",
+        "________"
+      ],
+      "options": {
+        "A": "Nein, der gesamte Kurs ist kostenlos.",
+        "B": "Ja, zum Kurspreis kommen noch Materialkosten dazu.",
+        "C": "Nein, das Material ist im Kurspreis enthalten.",
+        "D": "Ja, aber nur, wenn Sie keine eigene Kamera haben."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Wer ist die Frau am Empfang?",
+        "Das ist die Mitarbeiterin, ________ ich gestern meine Unterlagen gegeben habe."
+      ],
+      "options": {
+        "A": "der",
+        "B": "die",
+        "C": "den",
+        "D": "deren"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "Wie hast du deine neue Arbeit gefunden?",
+        "Ich ________ eine Anzeige in der Zeitung und bewarb mich sofort."
+      ],
+      "options": {
+        "A": "lies",
+        "B": "gelesen",
+        "C": "lese",
+        "D": "las"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "Was gibt es nach der Besprechung?",
+        "In der Küche steht ________ Kaffee für alle bereit."
+      ],
+      "options": {
+        "A": "frische",
+        "B": "frisches",
+        "C": "frischer",
+        "D": "frischen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "War das Schwimmbad leer?",
+        "Nein. ________ es erst sechs Uhr morgens war, standen schon viele Menschen vor dem Eingang."
+      ],
+      "options": {
+        "A": "Deshalb",
+        "B": "Obwohl",
+        "C": "Trotz",
+        "D": "Trotzdem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "Sind das deine Handschuhe?",
+        "Nein, ________ sind schwarz. Diese hier sind grau."
+      ],
+      "options": {
+        "A": "meine",
+        "B": "meiner",
+        "C": "meinen",
+        "D": "meins"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Weshalb schickst du deiner Nachbarin ein Foto von dem Brief?",
+        "Ich schicke es ihr, ________."
+      ],
+      "options": {
+        "A": "damit sie die Adresse lesen kann",
+        "B": "damit sie kann die Adresse lesen",
+        "C": "damit die Adresse lesen zu können",
+        "D": "um sie die Adresse lesen zu können"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Im Restaurant kann man leider nur in bar bezahlen.",
+        "Dann muss ich vorher am Automaten Geld ________."
+      ],
+      "options": {
+        "A": "eröffnen",
+        "B": "kündigen",
+        "C": "abheben",
+        "D": "überweisen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "Konntest du dich beim Vortrag gut konzentrieren?",
+        "Ja, mein Telefon blieb ________ des gesamten Vortrags ausgeschaltet."
+      ],
+      "options": {
+        "A": "bei",
+        "B": "seit",
+        "C": "bis",
+        "D": "während"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Schneidest du dir die Haare selbst?",
+        "Nein, ich ________ sie von einer Friseurin schneiden."
+      ],
+      "options": {
+        "A": "werde",
+        "B": "habe",
+        "C": "bin",
+        "D": "lasse"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Hat dir der Berufsinformationstag geholfen?",
+        "Ja, alles, ________ ich dort erfahren habe, war für meine Bewerbung nützlich."
+      ],
+      "options": {
+        "A": "wer",
+        "B": "wem",
+        "C": "welche",
+        "D": "was"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Warum kaufst du kein gebrauchtes Fahrrad?",
+        "Wenn ich es selbst reparieren ________, würde ich eins kaufen. Aber mit Technik kenne ich mich nicht aus."
+      ],
+      "options": {
+        "A": "können",
+        "B": "könntet",
+        "C": "könnte",
+        "D": "konnte"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Warum ist die Bibliothek diese Woche geschlossen?",
+        "Die Fenster ________ werden ausgetauscht."
+      ],
+      "options": {
+        "A": "dem Gebäude",
+        "B": "das Gebäude",
+        "C": "den Gebäuden",
+        "D": "des Gebäudes"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Hat eure Wohnung einen Platz zum Draußensitzen?",
+        "Leider nicht. Sie hat ________ einen Balkon ________ eine Terrasse."
+      ],
+      "options": {
+        "A": "entweder / oder",
+        "B": "weder / noch",
+        "C": "sowohl / als auch",
+        "D": "nicht nur / sondern auch"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Darf ich den Stecker schon einstecken?",
+        "Nein. Lies bitte die Anleitung, ________ du das Gerät zum ersten Mal einschaltest."
+      ],
+      "options": {
+        "A": "bevor",
+        "B": "als",
+        "C": "seitdem",
+        "D": "nachdem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Warum kontrollierst du die Liste noch einmal?",
+        "Ich achte ________, dass keine Adresse fehlt."
+      ],
+      "options": {
+        "A": "daran",
+        "B": "damit",
+        "C": "darauf",
+        "D": "dafür"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 17,
+      "prompt": [
+        "Können wir die Anmeldung so abgeben?",
+        "Noch nicht. Sie ________. Ohne Unterschrift ist sie ungültig."
+      ],
+      "options": {
+        "A": "muss noch werden unterschrieben",
+        "B": "muss noch unterschrieben wird",
+        "C": "muss noch unterschrieben werden",
+        "D": "muss noch unterschreiben werden"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Welchen Weg zum Bahnhof nehmen wir?",
+        "Den ________. Wir haben nur zehn Minuten Zeit."
+      ],
+      "options": {
+        "A": "kürzesten",
+        "B": "am kürzesten",
+        "C": "kürzeste",
+        "D": "kürzester"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "Meldest du dich heute für den Erste-Hilfe-Kurs an?",
+        "Ja, ich habe mir vorgenommen, das Formular gleich ________."
+      ],
+      "options": {
+        "A": "zu ausfüllen",
+        "B": "auszufüllen",
+        "C": "ausgefüllt",
+        "D": "ausfüllen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "Hat Leo auf deine Nachricht reagiert?",
+        "Nein, ________."
+      ],
+      "options": {
+        "A": "er hat mir noch nicht geantwortet",
+        "B": "er hat noch mir nicht geantwortet",
+        "C": "er mir hat noch nicht geantwortet",
+        "D": "er hat mir geantwortet noch nicht"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Wie schalte ich dieses Gerät ein?",
+        "Halte die Taste gedrückt, ________ die Lampe grün leuchtet. Dann kannst du die Taste loslassen."
+      ],
+      "options": {
+        "A": "seit",
+        "B": "bis",
+        "C": "als",
+        "D": "nachdem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Dürfen kleine Kinder allein an der Führung teilnehmen?",
+        "Nein, sie müssen von einem ________ begleitet werden."
+      ],
+      "options": {
+        "A": "Erwachsene",
+        "B": "Erwachsenen",
+        "C": "Erwachsenes",
+        "D": "Erwachsener"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Warum musstet ihr draußen warten?",
+        "Der Raum war so voll, ________ niemand mehr hineingehen konnte."
+      ],
+      "options": {
+        "A": "deshalb",
+        "B": "um",
+        "C": "trotzdem",
+        "D": "dass"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Ist das die Werkstatt, ________ du dein Praktikum gemacht hast?",
+        "Ja, genau die."
+      ],
+      "options": {
+        "A": "in die",
+        "B": "in der",
+        "C": "die in",
+        "D": "in dem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "Sind die Plätze am Fenster noch frei?",
+        "Nein, sie sind ________."
+      ],
+      "options": {
+        "A": "reserviertes",
+        "B": "reservierend",
+        "C": "reservieren",
+        "D": "reserviert"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Erinnerst du dich noch an unseren ersten Schultag?",
+        "Ja, ich erinnere mich gut ________."
+      ],
+      "options": {
+        "A": "damit",
+        "B": "darauf",
+        "C": "daran",
+        "D": "dafür"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Was passiert mit den alten Fahrrädern?",
+        "Sie ________ in unserer Werkstatt von Freiwilligen repariert."
+      ],
+      "options": {
+        "A": "werden",
+        "B": "worden",
+        "C": "werdet",
+        "D": "wird"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Weshalb beginnt die Veranstaltung später?",
+        "________ eines technischen Problems. Das Mikrofon funktioniert nicht."
+      ],
+      "options": {
+        "A": "Wegen",
+        "B": "Seit",
+        "C": "Trotz",
+        "D": "Während"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Warum kommst du nicht zum Training?",
+        "Ich habe ________ gestern den Knöchel verletzt."
+      ],
+      "options": {
+        "A": "mein",
+        "B": "mir",
+        "C": "mich",
+        "D": "sich"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "Warum übst du jeden Tag?",
+        "Für mich funktioniert das gut: ________ regelmäßiger ich übe, ________ sicherer werde ich."
+      ],
+      "options": {
+        "A": "Desto / je",
+        "B": "Je / desto",
+        "C": "Umso / je",
+        "D": "Je / als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Soll ich die Eintrittskarten ausdrucken?",
+        "Nein, du ________ sie nicht auszudrucken. Wir können sie auf dem Handy zeigen."
+      ],
+      "options": {
+        "A": "musst",
+        "B": "brauchst",
+        "C": "sollst",
+        "D": "darfst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Was plant der Sportverein für das nächste Jahr?",
+        "Er ________."
+      ],
+      "options": {
+        "A": "wird einen neuen Kurs anbietet",
+        "B": "wird einen neuen Kurs angeboten",
+        "C": "werden einen neuen Kurs anbieten",
+        "D": "wird einen neuen Kurs anbieten"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Wer bezahlt die Reparatur?",
+        "Nicht ich, ________ die Vermieterin übernimmt die Kosten."
+      ],
+      "options": {
+        "A": "sowohl",
+        "B": "entweder",
+        "C": "sondern",
+        "D": "weder"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Welchen Stift brauchst du?",
+        "Gib mir bitte ________ Stift. Die Farbe ist egal."
+      ],
+      "options": {
+        "A": "irgendeinem",
+        "B": "irgendwelche",
+        "C": "irgendeinen",
+        "D": "irgendein"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Warum konntet ihr erst am Nachmittag losfahren?",
+        "Wir mussten auf die Schlüssel warten. Nachdem wir sie ________, fuhren wir sofort los."
+      ],
+      "options": {
+        "A": "abgeholt hatten",
+        "B": "abgeholt waren",
+        "C": "abholen waren",
+        "D": "abholen hatten"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 36,
+      "prompt": [
+        "Ich finde, dass die Bibliothek auch sonntags öffnen sollte. Was meinst du?",
+        "________"
+      ],
+      "options": {
+        "A": "Das hängt davon ab, wie viele Seiten das Buch hat.",
+        "B": "Ich habe das Buch gestern schon zurückgebracht.",
+        "C": "Den Weg zur Bibliothek kenne ich leider nicht.",
+        "D": "Ich bin auch dafür, weil viele Menschen nur am Wochenende Zeit haben."
+      }
+    },
+    {
+      "type": "reading",
+      "n": 37,
+      "title": "Eine neue Aufgabe im Stadtteil",
+      "intro": "Lesen Sie die Texte. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Liebe Samira,",
+        "seit zwei Wochen helfe ich bei der Lebensmittelausgabe in unserem Stadtteil. Dort werden Lebensmittel, die Geschäfte nicht mehr verkaufen können, kostenlos verteilt. Ich hatte zuerst gedacht, dass ich jeden Samstag Zeit haben müsste. Zum Glück stimmt das nicht: Jeder trägt sich selbst in einen Plan ein. So kann ich auch während meiner Ausbildung mithelfen.",
+        "Bei meinem ersten Besuch war ich ziemlich unsicher. Ich sollte die Lebensmittel sortieren und hatte Angst, etwas falsch zu machen. Eine erfahrene Helferin hat mir aber alles in Ruhe gezeigt. Inzwischen klappt es gut. Besonders gern spreche ich mit den Menschen, die zur Ausgabe kommen. Dabei merke ich, dass es nicht nur um Lebensmittel geht: Viele freuen sich auch über ein kurzes Gespräch.",
+        "Nächsten Monat brauchen wir zusätzliche Hilfe. Du hattest doch gesagt, dass du gern etwas im Stadtteil machen würdest. Du musst dich nicht sofort festlegen. Du kannst erst einmal an einem Samstag zuschauen und danach entscheiden. Sag mir bitte bis Mittwoch Bescheid, damit ich der Organisatorin schreiben kann.",
+        "Liebe Grüße",
+        "Nele"
+      ],
+      "statements": [
+        "Nele muss jeden Samstag bei der Lebensmittelausgabe helfen.",
+        "Samira kann sich die Arbeit ansehen, bevor sie entscheidet, ob sie mithelfen möchte."
+      ]
+    },
+    {
+      "type": "reading",
+      "n": 38,
+      "title": "Weniger Platz, mehr Begegnungen?",
+      "intro": "Lesen Sie die Texte. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Seit einem halben Jahr wohnen mein Partner und ich in einem Haus, in dem mehrere Räume gemeinsam genutzt werden. Unsere eigene Wohnung ist kleiner als die alte. Dafür gibt es im Erdgeschoss eine große Küche, ein Gästezimmer und einen Raum für Feiern. Bevor wir eingezogen sind, habe ich gezweifelt: Würde ich zu wenig Ruhe haben?",
+        "Heute sehe ich das anders. Niemand muss an den gemeinsamen Aktivitäten teilnehmen. Wenn ich allein sein möchte, bleibe ich in unserer Wohnung. Gleichzeitig kenne ich inzwischen fast alle Nachbarn. Einmal pro Woche kochen einige von uns zusammen. Wer mag, bringt etwas mit oder hilft beim Aufräumen. Gerade weil ich oft von zu Hause arbeite, sind diese Abende für mich wichtig.",
+        "Natürlich gibt es auch Schwierigkeiten. Am Anfang haben mehrere Leute das Gästezimmer für dasselbe Wochenende eingeplant. Deshalb reservieren wir es jetzt über einen gemeinsamen Kalender. Das funktioniert meistens gut. Billiger wohnen wir hier allerdings nicht: Wir zahlen ungefähr so viel wie vorher. Trotzdem möchte ich nicht zurück in unsere alte Wohnung. Der Kontakt zu den Nachbarn ist mir wichtiger als ein paar zusätzliche Quadratmeter. Das Modell passt sicher nicht zu allen, aber für uns ist es richtig.",
+        "Ruben"
+      ],
+      "statements": [
+        "Ruben schätzt das Zusammenleben heute mehr, als er vor dem Einzug erwartet hatte.",
+        "Ein wichtiger Vorteil für Ruben ist, dass er jetzt deutlich weniger Miete zahlt."
+      ]
+    }
+  ],
+  "B": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "Welche Tasche kann ich für die Bücher nehmen?",
+        "Nimm ________ Tasche aus dem Schrank. Sie sind alle groß genug."
+      ],
+      "options": {
+        "A": "irgendeiner",
+        "B": "irgendwelche",
+        "C": "irgendeine",
+        "D": "irgendein"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Warum haben wir die Durchsage nicht verstanden?",
+        "Es war im Bahnhof so laut, ________ wir kein Wort hören konnten."
+      ],
+      "options": {
+        "A": "dass",
+        "B": "deswegen",
+        "C": "um",
+        "D": "trotzdem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "Wie heißt das Restaurant, ________ ihr euren Hochzeitstag gefeiert habt?",
+        "Es heißt „Am Garten“."
+      ],
+      "options": {
+        "A": "in das",
+        "B": "in der",
+        "C": "in dem",
+        "D": "das in"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "Müssen wir eigene Werkzeuge mitbringen?",
+        "Nein, ihr ________ nichts mitzubringen. Alles liegt im Kursraum bereit."
+      ],
+      "options": {
+        "A": "braucht",
+        "B": "dürft",
+        "C": "sollt",
+        "D": "müsst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "Ich finde, die Stadt sollte mehr Radwege bauen. Wie siehst du das?",
+        "________"
+      ],
+      "options": {
+        "A": "Zum Rathaus biegen Sie an der nächsten Kreuzung links ab.",
+        "B": "Ich halte das für sinnvoll, weil Radfahren dann sicherer wird.",
+        "C": "Mein Fahrrad steht seit gestern im Keller.",
+        "D": "Wie viel hat dein neues Fahrrad gekostet?"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "Warum kam Mara gestern so spät zur Probe?",
+        "Nachdem sie den falschen Bus ________, musste sie ein Stück zu Fuß gehen."
+      ],
+      "options": {
+        "A": "genommen hatte",
+        "B": "nehmen war",
+        "C": "nehmen hatte",
+        "D": "genommen war"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Weshalb fährt der Bus heute eine andere Strecke?",
+        "________ einer Baustelle. Die Hauptstraße ist gesperrt."
+      ],
+      "options": {
+        "A": "Während",
+        "B": "Wegen",
+        "C": "Trotz",
+        "D": "Seit"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Ist das dein Rucksack?",
+        "Nein, ________ ist blau. Dieser hier ist rot."
+      ],
+      "options": {
+        "A": "meinen",
+        "B": "meins",
+        "C": "meine",
+        "D": "meiner"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "Was steht im neuen Programm des Museums?",
+        "Das Museum ________."
+      ],
+      "options": {
+        "A": "wird im Herbst eine neue Ausstellung gezeigt",
+        "B": "wird im Herbst eine neue Ausstellung zeigt",
+        "C": "werden im Herbst eine neue Ausstellung zeigen",
+        "D": "wird im Herbst eine neue Ausstellung zeigen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Kaufst du die Kamera extra für den Urlaub?",
+        "Nein, ich habe ________ eine von meiner Schwester ausgeliehen."
+      ],
+      "options": {
+        "A": "mein",
+        "B": "mich",
+        "C": "sich",
+        "D": "mir"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Ist der Betriebsausflug ausgefallen?",
+        "Nein. ________ es stark regnete, fand der Ausflug wie geplant statt."
+      ],
+      "options": {
+        "A": "Deshalb",
+        "B": "Trotzdem",
+        "C": "Obwohl",
+        "D": "Trotz"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Wieso ist dieser Platz im Regal frei?",
+        "Dort sollen die gestern ________ Bücher stehen. Sie sind noch nicht geliefert worden."
+      ],
+      "options": {
+        "A": "bestellen",
+        "B": "bestellten",
+        "C": "bestellte",
+        "D": "bestellende"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Glaubst du noch an den Erfolg unseres Projekts?",
+        "Ja, ich glaube fest ________."
+      ],
+      "options": {
+        "A": "darüber",
+        "B": "darauf",
+        "C": "dafür",
+        "D": "daran"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Was verkauft der Hofladen im Sommer?",
+        "Dort gibt es ________ Obst aus der Region."
+      ],
+      "options": {
+        "A": "frische",
+        "B": "frischer",
+        "C": "frisches",
+        "D": "frischen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Kann die alte Brücke schon wieder benutzt werden?",
+        "Nein. Sie ________. Die Arbeiten beginnen erst morgen."
+      ],
+      "options": {
+        "A": "muss noch repariert wird",
+        "B": "muss noch repariert werden",
+        "C": "muss noch reparieren werden",
+        "D": "muss noch werden repariert"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Auf dem Ticket steht: „Eintritt 12 Euro. Die Führung kostet zusätzlich 4 Euro.“ Ist die Führung im Eintritt enthalten?",
+        "________"
+      ],
+      "options": {
+        "A": "Ja, die Führung kostet Sie nichts extra.",
+        "B": "Nein, der Eintritt kostet zusammen mit der Führung vier Euro.",
+        "C": "Nein, für Eintritt und Führung zusammen zahlen Sie 16 Euro.",
+        "D": "Ja, und Sie erhalten noch vier Euro zurück."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 17,
+      "prompt": [
+        "Warum sollten wir die Bahnkarten jetzt schon kaufen?",
+        "Oft gilt: ________ früher man bucht, ________ günstiger sind die Fahrkarten."
+      ],
+      "options": {
+        "A": "Desto / je",
+        "B": "Je / als",
+        "C": "Umso / je",
+        "D": "Je / desto"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Kennst du den Mann an der Kasse?",
+        "Ja, das ist der Kunde, ________ ich gestern eine E-Mail geschickt habe."
+      ],
+      "options": {
+        "A": "dem",
+        "B": "dessen",
+        "C": "den",
+        "D": "der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "War die Rückfahrt teuer?",
+        "Nein. Wir ________ den letzten Bus nach Hause und brauchten kein Taxi."
+      ],
+      "options": {
+        "A": "nimmt",
+        "B": "nehmen",
+        "C": "nahmen",
+        "D": "genommen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "Soll ich dir die Datei per E-Mail schicken?",
+        "Bitte nicht per E-Mail, ________ über unser Kursportal. Dort finde ich sie leichter wieder."
+      ],
+      "options": {
+        "A": "als",
+        "B": "sondern",
+        "C": "ob",
+        "D": "denn"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Wie gefällt Lena die neue Wohnung?",
+        "Sie freut sich besonders ________, dass sie jetzt einen Balkon hat."
+      ],
+      "options": {
+        "A": "darüber",
+        "B": "damit",
+        "C": "daran",
+        "D": "dafür"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Für wen ist der Computerkurs?",
+        "Er richtet sich an alle ________, die noch keine Erfahrung mit Computern haben."
+      ],
+      "options": {
+        "A": "Erwachsenen",
+        "B": "Erwachsener",
+        "C": "Erwachsenes",
+        "D": "Erwachsene"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Streicht ihr die Küche selbst?",
+        "Nein, wir haben wenig Zeit. Wir ________ sie von einem Maler streichen."
+      ],
+      "options": {
+        "A": "werden",
+        "B": "haben",
+        "C": "lassen",
+        "D": "sind"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Wann habt ihr die Unterlagen gelesen?",
+        "________ der zweistündigen Zugfahrt hatten wir genug Zeit dafür."
+      ],
+      "options": {
+        "A": "Ohne",
+        "B": "Während",
+        "C": "Für",
+        "D": "Bis"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "Warum bringt eure Kursleiterin Bilder mit?",
+        "Sie zeigt sie uns, ________."
+      ],
+      "options": {
+        "A": "damit wir können uns die neuen Wörter besser merken",
+        "B": "damit uns die neuen Wörter besser merken zu können",
+        "C": "damit wir uns die neuen Wörter besser merken können",
+        "D": "um wir uns die neuen Wörter besser merken zu können"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Was passiert mit den Bewerbungen?",
+        "Sie ________ zuerst von zwei Mitarbeitern geprüft."
+      ],
+      "options": {
+        "A": "wird",
+        "B": "worden",
+        "C": "werdet",
+        "D": "werden"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Wo finde ich Informationen zum Schwimmkurs?",
+        "Auf der Internetseite ________ stehen alle Termine."
+      ],
+      "options": {
+        "A": "das Verein",
+        "B": "des Vereins",
+        "C": "den Verein",
+        "D": "dem Verein"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Hast du schon eine Idee für den Vereinsabend?",
+        "Ja. Ich habe vorgeschlagen, gemeinsam das neue Museum ________."
+      ],
+      "options": {
+        "A": "ansehen",
+        "B": "angesehen",
+        "C": "zu ansehen",
+        "D": "anzusehen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Kann ich das Fahrrad heute noch abholen?",
+        "Nein, die Werkstatt ist schon geschlossen. Du musst warten, ________ sie morgen wieder öffnet."
+      ],
+      "options": {
+        "A": "nachdem",
+        "B": "bis",
+        "C": "seit",
+        "D": "als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "Was möchten Sie am Schalter erledigen?",
+        "Ich habe hier 150 Euro in bar, die ich auf mein Konto ________ möchte."
+      ],
+      "options": {
+        "A": "einzahlen",
+        "B": "abheben",
+        "C": "kündigen",
+        "D": "eröffnen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Welches Zimmer im Haus würdest du nehmen?",
+        "Das ________. Es liegt hinten zum Garten, weit weg von der Straße."
+      ],
+      "options": {
+        "A": "ruhigsten",
+        "B": "ruhigster",
+        "C": "am ruhigsten",
+        "D": "ruhigste"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Wie heißt unser neuer Nachbar?",
+        "Leider ________."
+      ],
+      "options": {
+        "A": "kann ich mich nicht an seinen Namen erinnern",
+        "B": "kann ich mich nicht an seinen Namen erinnert",
+        "C": "ich kann mich nicht an seinen Namen erinnern",
+        "D": "kann ich mich an seinen Namen erinnern nicht"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Warum ziehst du nicht näher ins Zentrum?",
+        "Wenn ich mehr Geld ________, würde ich dort eine Wohnung mieten. Leider sind die Mieten für mich zu hoch."
+      ],
+      "options": {
+        "A": "haben",
+        "B": "hätte",
+        "C": "hatte",
+        "D": "hättet"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Was soll ich von meinem alten Laptop sichern?",
+        "Kopiere alles, ________ du später noch brauchst, auf eine externe Festplatte."
+      ],
+      "options": {
+        "A": "welche",
+        "B": "wem",
+        "C": "was",
+        "D": "wer"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Kann man im Café mit Karte bezahlen oder geht nur Bargeld?",
+        "Beides ist möglich. Wir akzeptieren ________ Bargeld ________ Kartenzahlung."
+      ],
+      "options": {
+        "A": "entweder / noch",
+        "B": "zwar / sondern",
+        "C": "weder / noch",
+        "D": "sowohl / als auch"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 36,
+      "prompt": [
+        "Soll ich den Kuchen sofort aus der Form nehmen?",
+        "Nein. Lass ihn erst abkühlen, ________ du ihn aus der Form nimmst."
+      ],
+      "options": {
+        "A": "bevor",
+        "B": "nachdem",
+        "C": "als",
+        "D": "seitdem"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 37,
+      "title": "Ein anderer Platz zum Lernen",
+      "intro": "Lesen Sie die Texte. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Lieber Mateo,",
+        "du hast gefragt, wie ich mich auf die Abschlussprüfung vorbereite. Seit Anfang des Monats gehe ich zweimal pro Woche in einen offenen Lernraum im Nachbarschaftshaus. Zu Hause war ich ständig abgelenkt: Erst musste ich noch die Küche aufräumen, dann rief jemand an. Im Lernraum kann ich mich viel besser konzentrieren.",
+        "Am ersten Tag dachte ich, dass dort alle gemeinsam dieselben Aufgaben bearbeiten. Tatsächlich bringt aber jeder seine eigenen Unterlagen mit. Man lernt meist allein. Nur in den Pausen tauschen wir uns aus. Dabei habe ich eine Frau kennengelernt, die dieselbe Prüfung macht wie ich. Jetzt üben wir manchmal zusammen.",
+        "Der Raum ist kostenlos, aber die Zahl der Plätze ist begrenzt. Normalerweise muss man sich deshalb vorher online anmelden. Am kommenden Donnerstag gibt es einen offenen Nachmittag für neue Besucher. Dafür braucht man ausnahmsweise keine Anmeldung. Du könntest mitkommen und dir alles ansehen. Ich bin ab vier Uhr dort. Bring am besten deine Kursunterlagen mit, falls du gleich etwas lernen möchtest. Danach könnten wir zusammen etwas essen gehen.",
+        "Viele Grüße",
+        "Derya"
+      ],
+      "statements": [
+        "Derya kann im Lernraum ungestörter lernen als zu Hause.",
+        "Mateo muss sich für den offenen Nachmittag am Donnerstag vorher anmelden."
+      ]
+    },
+    {
+      "type": "reading",
+      "n": 38,
+      "title": "Ohne eigenes Auto zur Arbeit",
+      "intro": "Lesen Sie die Texte. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Als unser Auto im Frühjahr kaputtging, wollten meine Frau und ich zunächst sofort ein anderes kaufen. Dann beschlossen wir, erst einmal drei Monate ohne eigenes Auto auszukommen. Meine Frau konnte schon vorher mit dem Bus zur Arbeit fahren. Für mich war die Umstellung größer, weil meine Arbeitsstelle außerhalb der Stadt liegt.",
+        "In der ersten Woche brauchte ich mit Bus und Bahn fast doppelt so lange wie mit dem Auto. Das war anstrengend. Inzwischen fahre ich zweimal pro Woche mit einer Kollegin und an den anderen Tagen mit dem Zug. Die Fahrt dauert zwar etwas länger als früher, aber ich kann lesen, statt mich über den Verkehr zu ärgern. Oft komme ich entspannter an.",
+        "Auf ein Auto verzichten wir trotzdem nicht ganz. Wenn wir meine Eltern besuchen, leihen wir eines. Mit öffentlichen Verkehrsmitteln wären wir zu ihrem Dorf viel zu lange unterwegs. Solche Besuche müssen wir jetzt früher planen. Das finde ich manchmal unpraktisch. Trotzdem haben wir entschieden, vorerst kein eigenes Auto mehr zu kaufen. Wir geben insgesamt weniger Geld für unsere Fahrten aus. Außerdem hat mich überrascht, wie vieles auch ohne eigenes Auto gut funktioniert. Für Menschen mit anderen Arbeitszeiten kann das natürlich schwieriger sein.",
+        "Niko"
+      ],
+      "statements": [
+        "Seit dem Defekt ihres Autos fahren Niko und seine Frau überhaupt nicht mehr mit dem Auto.",
+        "Obwohl manches mehr Planung erfordert, bewertet Niko den Versuch insgesamt positiv."
+      ]
+    }
+  ]
+}

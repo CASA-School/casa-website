@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { presenceAction, setTaskStatusAction } from './actions';
 import { DayHeader, dayLabel, pickDay, viewHref, weekOf } from './day-header';
+import { EntryTestCard, type EntryTestView } from './entry-test-panel';
 import { EditTaskForm, ReportAbsenceForm } from './forms';
 import { TaskComposer } from './task-composer';
 import { ChoiceMenu } from '@/components/admin/choice-menu';
@@ -29,6 +30,7 @@ import {
 } from '@/lib/admin/day-plan';
 import { DESK_LABELS, SESSION_LABELS, SESSIONS, TASK_STATUS_DOTS, TASK_STATUS_LABELS, TASK_STATUSES } from '@/lib/admin/day-plan-labels';
 import { berlinDay } from '@/lib/admin/days';
+import { dayEntryTests, paperLayout, sittingDetail } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -51,7 +53,7 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
   const canEdit = canAccess(user, 'day', 'edit');
   const canDelete = canAccess(user, 'day', 'full');
 
-  const [tasks, openByDay, lessons, desk, away, soon, cover, birthdays, colleagues, register] = await Promise.all([
+  const [tasks, openByDay, lessons, desk, away, soon, cover, birthdays, colleagues, register, entryTests] = await Promise.all([
     dayTasks(day, today),
     openTasksByDay(week[0], week[6]),
     dayLessons(day),
@@ -62,6 +64,7 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
     birthdaysSoon(day),
     canEdit ? taskColleagues() : Promise.resolve([]),
     canEdit ? registerColleagues() : Promise.resolve([]),
+    entryTestViews(day),
   ]);
   const isToday = day === today;
   const dayName = isToday ? t('heute', 'today') : dayLabel(day, lang, { weekday: 'long', day: 'numeric', month: 'long' });
@@ -270,6 +273,8 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
         </SidePanel>
       </div>
 
+      {entryTests.length ? <EntryTestCard tests={entryTests} day={day} isToday={isToday} canEdit={canEdit} canDelete={canDelete} /> : null}
+
       <Card
         title={t('Aufgaben', 'Tasks')}
         icon={Icon.check}
@@ -281,6 +286,20 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
         <TaskList tasks={tasks} day={day} t={t} lang={lang} canEdit={canEdit} canDelete={canDelete} colleagues={colleagues} />
       </Card>
     </>
+  );
+}
+
+/** The day-one tests of the day (0075), each with its attempts once opened; none on most days. */
+async function entryTestViews(day: string): Promise<EntryTestView[]> {
+  const tests = await dayEntryTests(day);
+  return Promise.all(
+    tests.map(async (test) => {
+      // Read after the attempts whose time is up were handed in, so the line's counts agree with the panel.
+      const detail = test.sitting ? await sittingDetail(test.sitting.id) : null;
+      const count = (...statuses: string[]) => detail?.attempts.filter((a) => statuses.includes(a.status)).length ?? 0;
+      const sitting = test.sitting && { ...test.sitting, running: count('running'), paused: count('paused'), handedIn: count('submitted', 'expired') };
+      return { ...test, sitting, detail, paper: paperLayout(test.test) };
+    })
   );
 }
 

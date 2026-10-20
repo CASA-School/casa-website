@@ -47,8 +47,14 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
    * Scoped to `/placement-test/test` only. The landing page and the result page
    * are ordinary pages and keep the full site frame — a learner reading their
    * result should be able to get to courses and registration from it.
+   *
+   * `/test` (2026-10-20) is the day-one test of an intensive course, written on
+   * the learner's phone in class. Same reasons, and one more: leaving the page
+   * pauses the test until the teacher's code releases it, so a link that leads
+   * away from it — the navbar, the footer, CLARA, the new-site notice — is a
+   * trap there, not a convenience.
    */
-  const isFocusedTestSurface = pathname === '/placement-test/test';
+  const isFocusedTestSurface = pathname === '/placement-test/test' || pathname === '/test';
   const hideSiteChrome = isFocusedTestSurface;
 
   return (

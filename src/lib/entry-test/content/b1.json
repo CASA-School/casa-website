@@ -1,0 +1,1018 @@
+{
+  "A": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "Entschuldigung, ________ Sie mir sagen, welcher Bus zum Hauptbahnhof fährt?",
+        "Ja, nehmen Sie die Linie 24."
+      ],
+      "options": {
+        "A": "könnten",
+        "B": "wollen",
+        "C": "müssen",
+        "D": "sollen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Was habt ihr gestern gemacht?",
+        "Wir ________ das neue Schwimmbad ________."
+      ],
+      "options": {
+        "A": "sind / besucht",
+        "B": "haben / besucht",
+        "C": "haben / besuchen",
+        "D": "sind / besuchen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "Ich bin seit gestern erkältet und habe Fieber.",
+        "________"
+      ],
+      "options": {
+        "A": "Herzlichen Glückwunsch!",
+        "B": "Oh je. Gute Besserung!",
+        "C": "Gute Reise!",
+        "D": "Viel Spaß beim Feiern!"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "Wie kommt Mara zur Arbeit?",
+        "Sie fährt jeden Morgen mit ________ Fahrrad."
+      ],
+      "options": {
+        "A": "ihr",
+        "B": "ihren",
+        "C": "ihrem",
+        "D": "ihrer"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "Warum bleibt David heute zu Hause?",
+        "Weil ________."
+      ],
+      "options": {
+        "A": "er muss auf den Handwerker warten",
+        "B": "er auf den Handwerker warten muss",
+        "C": "muss er auf den Handwerker warten",
+        "D": "auf den Handwerker er warten muss"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "Wann bist du nach Deutschland gezogen?",
+        "________ ich 19 war, bin ich nach Köln gezogen."
+      ],
+      "options": {
+        "A": "Wenn",
+        "B": "Wann",
+        "C": "Weil",
+        "D": "Als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Ich arbeite lieber abends als morgens.",
+        "________ Ich bin morgens viel produktiver."
+      ],
+      "options": {
+        "A": "Das sehe ich anders.",
+        "B": "Genau so denke ich auch.",
+        "C": "Da stimme ich dir zu.",
+        "D": "Das finde ich auch."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Wie war dein erster Tag im neuen Job?",
+        "Gut. Ich habe viel mit den ________ Kolleginnen gesprochen."
+      ],
+      "options": {
+        "A": "freundlich",
+        "B": "freundlichen",
+        "C": "freundliche",
+        "D": "freundlicher"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "Wissen Sie, ________ das Bürgerbüro heute überhaupt geöffnet ist?",
+        "Ja, heute ist es geöffnet."
+      ],
+      "options": {
+        "A": "ob",
+        "B": "wann",
+        "C": "wie lange",
+        "D": "wo"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Wie war die Feier?",
+        "Gut. Ich habe ________ lange mit einer Nachbarin unterhalten."
+      ],
+      "options": {
+        "A": "sich",
+        "B": "euch",
+        "C": "mich",
+        "D": "uns"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Fährst du mit dem Taxi?",
+        "Nein, der Bus ist viel ________ das Taxi."
+      ],
+      "options": {
+        "A": "so günstig wie",
+        "B": "günstiger als",
+        "C": "günstiger wie",
+        "D": "am günstigsten als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Wo ist die Sprachschule?",
+        "Direkt gegenüber ________ Bäckerei."
+      ],
+      "options": {
+        "A": "die",
+        "B": "den",
+        "C": "dem",
+        "D": "der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Durftest du gestern früher gehen?",
+        "Nein, ich ________ bis 18 Uhr arbeiten."
+      ],
+      "options": {
+        "A": "durfte",
+        "B": "wollte",
+        "C": "konnte",
+        "D": "musste"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Warum stehst du hier an der Haltestelle?",
+        "Ich warte ________ den Bus."
+      ],
+      "options": {
+        "A": "mit",
+        "B": "auf",
+        "C": "über",
+        "D": "für"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Wie gefällt dir dein neuer Kurs?",
+        "Gut. Ich finde, ________."
+      ],
+      "options": {
+        "A": "dass der Lehrer alles sehr klar erklärt",
+        "B": "dass erklärt der Lehrer alles sehr klar",
+        "C": "dass der Lehrer alles erklärt sehr klar",
+        "D": "dass alles sehr klar der Lehrer erklärt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Kannst du deiner Kollegin die Datei schicken?",
+        "Ja, ich schicke ________ die Datei gleich."
+      ],
+      "options": {
+        "A": "sie",
+        "B": "ihm",
+        "C": "ihr",
+        "D": "ihn"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 17,
+      "title": "Kursausflug nach Bremerhaven",
+      "intro": "Lesen Sie die Information. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Am Freitag fährt unser Kurs nach Bremerhaven. Wir treffen uns um 8:15 Uhr vor dem Haupteingang des Bremer Hauptbahnhofs. Der Zug fährt um 8:42 Uhr. Die Fahrkarte ist bereits bezahlt. Für das Museum am Hafen bezahlt jede Person vor Ort 8 Euro. Wir bringen etwas zum Frühstück mit; mittags gehen wir gemeinsam in ein Café. Wer krank ist oder nicht mitfahren kann, meldet sich bitte spätestens am Donnerstag bis 18 Uhr im Kursbüro."
+      ],
+      "statements": [
+        "Die Gruppe trifft sich um 8:15 Uhr am Bremer Hauptbahnhof.",
+        "Die Teilnehmer:innen müssen die Zugfahrkarte noch selbst bezahlen.",
+        "Wer nicht mitfahren kann, soll sich bis Donnerstagabend melden."
+      ]
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Meine Schwester hat eine neue Stelle bekommen!",
+        "________"
+      ],
+      "options": {
+        "A": "Das tut mir leid.",
+        "B": "Gute Besserung!",
+        "C": "Schade, vielleicht nächstes Mal.",
+        "D": "Das ist ja super. Herzlichen Glückwunsch!"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "Was wünschst du dir für das Wochenende?",
+        "Ich ________ gern einen freien Samstag."
+      ],
+      "options": {
+        "A": "wäre",
+        "B": "würde",
+        "C": "habe",
+        "D": "hätte"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "Was sucht ihr?",
+        "Wir suchen ein ________ Zimmer in einer WG."
+      ],
+      "options": {
+        "A": "ruhiger",
+        "B": "ruhige",
+        "C": "ruhiges",
+        "D": "ruhigen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Der Termin am Mittwoch passt mir nicht.",
+        "Können wir ihn auf Freitag ________?"
+      ],
+      "options": {
+        "A": "beraten",
+        "B": "bestellen",
+        "C": "verlassen",
+        "D": "verschieben"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Der Zug hatte 30 Minuten Verspätung.",
+        "________ war ich noch pünktlich bei der Arbeit."
+      ],
+      "options": {
+        "A": "Trotzdem",
+        "B": "Deshalb",
+        "C": "Denn",
+        "D": "Weil"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Wer ist Frau Yilmaz?",
+        "Das ist die Kollegin, ________ den neuen Kurs organisiert."
+      ],
+      "options": {
+        "A": "der",
+        "B": "den",
+        "C": "die",
+        "D": "dem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Weißt du, ________?",
+        "Ja, um 9:30 Uhr."
+      ],
+      "options": {
+        "A": "wann beginnt der Unterricht",
+        "B": "wann der Unterricht beginnt",
+        "C": "wann der Unterricht beginnen",
+        "D": "wann beginnt den Unterricht"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "________ du morgen Zeit hast, können wir zusammen lernen.",
+        "Gute Idee."
+      ],
+      "options": {
+        "A": "Als",
+        "B": "Dass",
+        "C": "Weil",
+        "D": "Wenn"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Wo ist dein Reisepass?",
+        "Er ________ in der Schublade im Schlafzimmer."
+      ],
+      "options": {
+        "A": "stellt",
+        "B": "legt",
+        "C": "liegt",
+        "D": "hängt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Was möchte Luis nach der Schule machen?",
+        "Er möchte eine ________ zum Koch machen."
+      ],
+      "options": {
+        "A": "Ausbildung",
+        "B": "Rechnung",
+        "C": "Miete",
+        "D": "Führung"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Wie lange wohnst du schon hier?",
+        "Ich wohne ________ drei Monaten in Bremen."
+      ],
+      "options": {
+        "A": "vor",
+        "B": "ab",
+        "C": "bis",
+        "D": "seit"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Hat jemand im Büro angerufen?",
+        "Nein, ________."
+      ],
+      "options": {
+        "A": "etwas",
+        "B": "niemand",
+        "C": "jemand",
+        "D": "nichts"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "________ freust du dich am meisten?",
+        "Auf den Besuch meiner Eltern."
+      ],
+      "options": {
+        "A": "Womit",
+        "B": "Warum",
+        "C": "Worauf",
+        "D": "Woran"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Ich kann nachts schlecht schlafen.",
+        "Du ________ abends weniger Kaffee trinken."
+      ],
+      "options": {
+        "A": "solltest",
+        "B": "wolltest",
+        "C": "musstest",
+        "D": "konntest"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Was machst du in deiner Freizeit gern?",
+        "________ gehe ich schwimmen."
+      ],
+      "options": {
+        "A": "Mehr",
+        "B": "Lieber als",
+        "C": "Am besten",
+        "D": "Am liebsten"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Wie bist du gestern vom Bahnhof nach Hause gekommen?",
+        "Meine Schwester hat mich ________."
+      ],
+      "options": {
+        "A": "abholen",
+        "B": "abgeholt",
+        "C": "geabholt",
+        "D": "holt ab"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Entschuldigung, hier dürfen Sie kein Fahrrad abstellen.",
+        "________"
+      ],
+      "options": {
+        "A": "Oh, entschuldigen Sie. Ich stelle es sofort weg.",
+        "B": "Ja, das ist eine gute Idee.",
+        "C": "Das ist aber sehr nett von Ihnen.",
+        "D": "Kein Problem, ich komme morgen wieder."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Wie komme ich von hier zum Flughafen?",
+        "Fahren Sie mit der Linie 4 bis zum Hauptbahnhof. Dort müssen Sie in die Linie 6 ________."
+      ],
+      "options": {
+        "A": "halten",
+        "B": "ankommen",
+        "C": "umsteigen",
+        "D": "aussteigen"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 36,
+      "title": "Wie lernen Sie Deutsch im Alltag?",
+      "intro": "Lesen Sie die drei kurzen Aussagen. Entscheiden Sie: richtig oder falsch.",
+      "text": [
+        "Mona, 33: Auf dem Weg zur Arbeit höre ich oft kurze Podcasts auf Deutsch. Neue Wörter speichere ich manchmal in einer App. Lange Texte lese ich unter der Woche selten.",
+        "Thiago, 41: Dienstags treffe ich einen Tandempartner. Wir sprechen eine Stunde Deutsch und danach eine Stunde Spanisch. Grammatik übe ich lieber allein zu Hause.",
+        "Svitlana, 26: Ich schaue Serien mit deutschen Untertiteln. Am Wochenende gehe ich oft in die Bibliothek und leihe einfache Bücher aus. Später möchte ich auch deutsche Zeitungen lesen."
+      ],
+      "statements": [
+        "Mona nutzt ihren Arbeitsweg zum Deutschlernen.",
+        "Thiago übt nie, Deutsch zu sprechen.",
+        "Svitlana schaut Serien mit deutschen Untertiteln."
+      ]
+    }
+  ],
+  "B": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "Entschuldigung, können Sie mir sagen, ________?",
+        "Ja, im zweiten Stock, rechts."
+      ],
+      "options": {
+        "A": "wo ist der Raum 204",
+        "B": "wo der Raum 204",
+        "C": "wo der Raum 204 ist",
+        "D": "wo der Raum ist 204"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Ich habe starke Halsschmerzen und bleibe heute zu Hause.",
+        "________"
+      ],
+      "options": {
+        "A": "Gute Besserung!",
+        "B": "Herzlichen Glückwunsch!",
+        "C": "Guten Appetit!",
+        "D": "Viel Spaß im Urlaub!"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "Wie war euer Sonntag?",
+        "Schön. Wir ________ an der Weser ________."
+      ],
+      "options": {
+        "A": "sind / spazieren gegangen",
+        "B": "haben / spazieren gegangen",
+        "C": "sind / spazieren gehen",
+        "D": "haben / gegangen spazieren"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "Wo ist die Post?",
+        "Direkt gegenüber ________ Supermarkt."
+      ],
+      "options": {
+        "A": "den",
+        "B": "dem",
+        "C": "der",
+        "D": "die"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "Ich habe morgen einen langen Arbeitstag und bin schon müde.",
+        "Dann ________ du heute früh ins Bett gehen."
+      ],
+      "options": {
+        "A": "musstest",
+        "B": "wolltest",
+        "C": "konntest",
+        "D": "solltest"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "Kannst du deinem Vater die Adresse schicken?",
+        "Ja, ich schicke ________ die Adresse gleich."
+      ],
+      "options": {
+        "A": "ihn",
+        "B": "sie",
+        "C": "ihm",
+        "D": "er"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Wie ist eure neue Wohnung?",
+        "Sehr schön. Wir haben eine ________ Wohnung gefunden."
+      ],
+      "options": {
+        "A": "helles",
+        "B": "helle",
+        "C": "heller",
+        "D": "hellen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Ich finde, alle Geschäfte sollten sonntags geöffnet sein.",
+        "________ Für die Mitarbeiter:innen wäre das schwierig."
+      ],
+      "options": {
+        "A": "Genau!",
+        "B": "Da bin ich ganz deiner Meinung.",
+        "C": "Das finde ich auch.",
+        "D": "Das sehe ich anders."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "________ du heute früher fertig bist, können wir noch einen Kaffee trinken.",
+        "Gern."
+      ],
+      "options": {
+        "A": "Als",
+        "B": "Dass",
+        "C": "Wenn",
+        "D": "Weil"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Hast du die neuen Nachbarn schon kennengelernt?",
+        "Ja, ich habe ________ gestern kurz mit ihnen unterhalten."
+      ],
+      "options": {
+        "A": "uns",
+        "B": "mich",
+        "C": "sich",
+        "D": "euch"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Nimmst du das Fahrrad oder den Bus?",
+        "Mit dem Fahrrad bin ich ________ mit dem Bus."
+      ],
+      "options": {
+        "A": "schneller als",
+        "B": "so schneller wie",
+        "C": "am schneller als",
+        "D": "schnell als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Der Arzttermin am Montag passt mir nicht.",
+        "Dann musst du ihn wahrscheinlich ________."
+      ],
+      "options": {
+        "A": "bestätigen",
+        "B": "besuchen",
+        "C": "verschieben",
+        "D": "bestellen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Warum kommt Leyla heute nicht mit?",
+        "Weil ________."
+      ],
+      "options": {
+        "A": "sie muss für die Prüfung lernen",
+        "B": "sie für die Prüfung lernen muss",
+        "C": "muss sie für die Prüfung lernen",
+        "D": "für die Prüfung sie lernen muss"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Wie lange arbeitest du schon in der Firma?",
+        "________ letztem November."
+      ],
+      "options": {
+        "A": "Seit",
+        "B": "Vor",
+        "C": "Ab",
+        "D": "Bis"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Entschuldigung, ________ Sie das bitte etwas langsamer sagen?",
+        "Ja, natürlich."
+      ],
+      "options": {
+        "A": "müssen",
+        "B": "sollen",
+        "C": "könnten",
+        "D": "wollen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Was macht deine Tochter nach der Schule?",
+        "Sie beginnt im August eine ________ zur Pflegefachkraft."
+      ],
+      "options": {
+        "A": "Ausbildung",
+        "B": "Miete",
+        "C": "Rechnung",
+        "D": "Haltestelle"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 17,
+      "title": "Stadtbibliothek - neue Zeiten",
+      "intro": "Lesen Sie die Information. Entscheiden Sie bei jeder Aussage: richtig oder falsch.",
+      "text": [
+        "Ab 5. Oktober öffnet die Stadtbibliothek montags erst um 12 Uhr. Von Dienstag bis Freitag ist sie von 10 bis 18 Uhr geöffnet, samstags von 10 bis 14 Uhr. Der Rückgabeautomat vor dem Eingang kann jeden Tag zwischen 7 und 22 Uhr benutzt werden. Diesen Mittwoch gibt es um 16 Uhr eine kostenlose Einführung in die Online-Ausleihe. Wer teilnehmen möchte, muss sich bis Dienstag per E-Mail anmelden."
+      ],
+      "statements": [
+        "Am Montagvormittag ist die Bibliothek geschlossen.",
+        "Bücher kann man nur während der Öffnungszeiten zurückgeben.",
+        "Die Einführung in die Online-Ausleihe kostet nichts."
+      ]
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Wer ist Herr Demir?",
+        "Das ist der Nachbar, ________ im Erdgeschoss wohnt."
+      ],
+      "options": {
+        "A": "der",
+        "B": "den",
+        "C": "dem",
+        "D": "die"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "Hattest du als Kind viel Freizeit?",
+        "Nicht wirklich. Ich ________ oft im Restaurant meiner Eltern helfen."
+      ],
+      "options": {
+        "A": "durfte",
+        "B": "musste",
+        "C": "wollte",
+        "D": "konnte"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "________ wartest du?",
+        "Auf eine Antwort von der Firma."
+      ],
+      "options": {
+        "A": "Warum",
+        "B": "Woran",
+        "C": "Auf wen",
+        "D": "Worauf"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Wie war der Kurs?",
+        "Sehr gut. Besonders die Arbeit mit den ________ Teilnehmern hat mir gefallen."
+      ],
+      "options": {
+        "A": "freundliche",
+        "B": "freundlicher",
+        "C": "freundlichen",
+        "D": "freundlich"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Weißt du, ________ der Supermarkt am Feiertag geöffnet ist?",
+        "Nein, leider nicht."
+      ],
+      "options": {
+        "A": "wann",
+        "B": "ob",
+        "C": "wo",
+        "D": "wie lange"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Wann hast du deinen Führerschein gemacht?",
+        "________ ich 20 war."
+      ],
+      "options": {
+        "A": "Wenn",
+        "B": "Weil",
+        "C": "Wann",
+        "D": "Als"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Warum benutzt du die App so gern?",
+        "Ich finde, ________."
+      ],
+      "options": {
+        "A": "dass man kann damit schnell bezahlen",
+        "B": "dass damit man schnell bezahlen kann",
+        "C": "dass man damit schnell kann bezahlen",
+        "D": "dass man damit schnell bezahlen kann"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "Wie komme ich zum Messezentrum?",
+        "Fahren Sie bis Domsheide. Dort müssen Sie in die Linie 6 ________."
+      ],
+      "options": {
+        "A": "umsteigen",
+        "B": "ankommen",
+        "C": "halten",
+        "D": "aussteigen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Hat jemand meine E-Mail beantwortet?",
+        "Nein, bisher ________."
+      ],
+      "options": {
+        "A": "etwas",
+        "B": "jemand",
+        "C": "nichts",
+        "D": "niemand"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Es hat den ganzen Nachmittag geregnet.",
+        "________ haben wir den Ausflug nicht abgesagt."
+      ],
+      "options": {
+        "A": "Deshalb",
+        "B": "Denn",
+        "C": "Weil",
+        "D": "Trotzdem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Jonas hat seine Abschlussprüfung bestanden!",
+        "________"
+      ],
+      "options": {
+        "A": "Gute Reise!",
+        "B": "Das tut mir leid.",
+        "C": "Herzlichen Glückwunsch!",
+        "D": "Gute Besserung!"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Was machst du nach der Arbeit gern?",
+        "________ gehe ich eine Runde spazieren."
+      ],
+      "options": {
+        "A": "Am liebsten",
+        "B": "Mehr",
+        "C": "Am besten als",
+        "D": "Lieber wie"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "Warum bist du so früh hier?",
+        "Ich warte ________ meine Kollegin."
+      ],
+      "options": {
+        "A": "mit",
+        "B": "auf",
+        "C": "für",
+        "D": "über"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Wo ist die Rechnung?",
+        "Sie ________ auf dem Schreibtisch neben dem Drucker."
+      ],
+      "options": {
+        "A": "stellt",
+        "B": "legt",
+        "C": "hängt",
+        "D": "liegt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Wie fährt Ben zur Arbeit?",
+        "Meistens mit ________ alten Fahrrad."
+      ],
+      "options": {
+        "A": "sein",
+        "B": "seinen",
+        "C": "seinem",
+        "D": "seiner"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Wie bist du gestern nach Hause gekommen?",
+        "Mein Bruder hat mich mit dem Auto ________."
+      ],
+      "options": {
+        "A": "abgeholt",
+        "B": "abholen",
+        "C": "geabholt",
+        "D": "holt ab"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Entschuldigung, in diesem Raum darf man nicht essen.",
+        "________"
+      ],
+      "options": {
+        "A": "Das finde ich auch.",
+        "B": "Gern, ich nehme noch etwas.",
+        "C": "Oh, tut mir leid. Ich packe es sofort weg.",
+        "D": "Herzlichen Glückwunsch!"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Was wünschst du dir für das nächste Jahr?",
+        "Ich ________ gern mehr Zeit für meine Familie."
+      ],
+      "options": {
+        "A": "wäre",
+        "B": "hätte",
+        "C": "würde",
+        "D": "habe"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 36,
+      "title": "Wie organisieren Sie Ihre Woche?",
+      "intro": "Lesen Sie die drei kurzen Aussagen. Entscheiden Sie: richtig oder falsch.",
+      "text": [
+        "Eva, 38: Sonntags plane ich die neue Woche und trage wichtige Termine in meinen Kalender ein. Am Sonntagabend koche ich oft schon das Mittagessen für Montag und Dienstag.",
+        "Omar, 30: Ich arbeite im Schichtdienst. An freien Tagen mache ich morgens Sport. Einkaufen gehe ich meistens direkt nach der Arbeit, damit ich später nicht noch einmal los muss.",
+        "Yuki, 23: Ich fahre mit der Straßenbahn zur Hochschule. Zwischen zwei Veranstaltungen lerne ich oft in der Bibliothek. Sonntags telefoniere ich länger mit meiner Familie in Japan."
+      ],
+      "statements": [
+        "Eva plant ihre Woche normalerweise am Sonntag.",
+        "Omar macht Sport nur direkt nach der Arbeit.",
+        "Yuki lernt zwischen Veranstaltungen häufig in der Bibliothek."
+      ]
+    }
+  ]
+}

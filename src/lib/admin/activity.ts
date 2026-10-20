@@ -1,4 +1,5 @@
 import { query } from './db';
+import { ENTRY_TESTS, isEntryTestId } from '@/lib/entry-test/tests';
 import type { StaffUser } from './auth';
 import { dayRange, pick, translator, wsLocale, type WsLang } from './i18n';
 import { queueLabel, queuePath, STATUS_LABELS, type QueueEntity, type WorkStatus } from './queues';
@@ -575,6 +576,20 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
         ? t(`hat ${days.de}${group.de} zusammengelegt`, `merged ${days.en}${group.en}`)
         : t(`hat die Zusammenlegung an ${days.de}${group.de} aufgehoben`, `lifted the merge on ${days.en}${group.en}`);
     }
+    // The day-one test (0075).
+    case 'entry_test_opened':
+    case 'entry_test_closed':
+    case 'entry_test_paper_entered':
+    case 'entry_test_attempt_deleted':
+    case 'entry_test_exported': {
+      const test = isEntryTestId(entry.detail?.test) ? ENTRY_TESTS[entry.detail.test].title : t('Einstufungstest', 'placement test');
+      const which = isEntryTestId(entry.detail?.test) ? { de: `den ${test}`, en: `the ${test}` } : { de: 'den Einstufungstest', en: 'the placement test' };
+      if (entry.action === 'entry_test_opened') return t(`hat ${which.de} geöffnet`, `opened ${which.en}`);
+      if (entry.action === 'entry_test_closed') return t(`hat ${which.de} geschlossen`, `closed ${which.en}`);
+      if (entry.action === 'entry_test_paper_entered') return t(`hat einen Papierbogen für ${which.de} eingetragen`, `entered a paper booklet for ${which.en}`);
+      if (entry.action === 'entry_test_attempt_deleted') return t(`hat einen Test aus ${which.de.replace(/^den /, 'dem ')} gelöscht`, `deleted a test from ${which.en}`);
+      return t('hat die Ergebnisse des Einstufungstests heruntergeladen', 'downloaded the placement test results');
+    }
     default:
       return t(`${entry.action.replace(/_/g, ' ')} bei ${dat}`, `${entry.action.replace(/_/g, ' ')} on ${subject}`);
   }
@@ -632,6 +647,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'website_release') {
     return '/admin/website';
+  }
+
+  if (entry.entity === 'entry_test' && typeof entry.detail?.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(entry.detail.day)) {
+    return `/admin/day?date=${entry.detail.day}`;
   }
 
   return null;

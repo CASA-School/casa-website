@@ -6,12 +6,15 @@ import { redirect } from 'next/navigation';
 import { isMergeReason, isTaskStatus } from '@/lib/admin/day-plan-labels';
 import { canAccess } from '@/lib/admin/access';
 import { changeDay } from '@/lib/admin/course-days';
+import { berlinDay } from '@/lib/admin/days';
+import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, releaseAttempt } from '@/lib/admin/entry-tests';
 import { createTask, deleteTask, markPresence, mergeLesson, replaceFromDay, setTaskStatus, unmergeLesson, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { pick } from '@/lib/admin/i18n';
 import { isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { addAbsence } from '@/lib/admin/staff-members';
+import { isEntryTestId } from '@/lib/entry-test/tests';
 
 /**
  * The Tagesplan's actions (2026-10-19). Each asks for the right it uses — the page's layout is not in
@@ -188,4 +191,85 @@ export async function unmergeLessonAction(formData: FormData): Promise<void> {
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
   revalidatePath('/admin', 'layout');
   redirect(back);
+}
+
+// ---------------------------------------------------------------- the day-one test (0075)
+
+/*
+ * The test's actions stay where they were done: the panel stays open and the page revalidates. A refusal
+ * goes back to the day with its message.
+ */
+
+/** Opens a session's test for the phones, on the day itself (the phones see only today's). */
+export async function openEntryTestAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const day = dayOf(formData);
+  const session = formData.get('session');
+  const test = formData.get('test');
+  if (!day || (session !== 'morning' && session !== 'afternoon') || !isEntryTestId(test)) throw new Error('Invalid test');
+  const { lang } = await getI18n();
+  if (day !== berlinDay(new Date())) fail(back(day), pick(lang, { de: 'Ein Test öffnet nur an seinem Tag.', en: 'A test opens on its own day only.' }));
+  const result = await openEntryTest({ day, session, test, minutes: Number(formData.get('minutes') ?? 0) }, actor);
+  if (!result.ok) fail(back(day), pick(lang, result.reason));
+  revalidatePath('/admin/day');
+}
+
+export async function closeEntryTestAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const id = String(formData.get('sittingId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid test');
+  const result = await closeEntryTest(id, actor);
+  if (!result.ok) fail(back(dayOf(formData)), pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin/day');
+}
+
+/** A paused phone goes on without the teacher's code. */
+export async function releaseAttemptAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const id = String(formData.get('attemptId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid attempt');
+  const result = await releaseAttempt(id, actor);
+  if (!result.ok) fail(back(dayOf(formData)), pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin/day');
+}
+
+/** Handed in from the office with what the phone saved. */
+export async function handInAttemptAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  if (formData.get('confirmed') !== '1') return;
+  const id = String(formData.get('attemptId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid attempt');
+  const result = await handInAttempt(id, actor);
+  if (!result.ok) fail(back(dayOf(formData)), pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin/day');
+}
+
+/** A test run or a mistake, with its result on the learner's record. */
+export async function deleteAttemptAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'full');
+  if (formData.get('confirmed') !== '1') return;
+  const id = String(formData.get('attemptId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid attempt');
+  const result = await deleteAttempt(id, actor);
+  if (!result.ok) fail(back(dayOf(formData)), pick((await getI18n()).lang, result.reason));
+  revalidatePath('/admin/day');
+}
+
+/** A paper booklet typed in. */
+export async function enterPaperAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const day = dayOf(formData);
+  const sittingId = String(formData.get('sittingId') ?? '');
+  const version = formData.get('version');
+  if (!UUID.test(sittingId) || (version !== 'A' && version !== 'B')) throw new Error('Invalid paper');
+  const { lang } = await getI18n();
+  const name = String(formData.get('name') ?? '').trim().replace(/\s+/g, ' ').slice(0, 80);
+  const email = String(formData.get('email') ?? '').trim().slice(0, 120);
+  if (name.length < 3) fail(back(day), pick(lang, { de: 'Bitte Vor- und Nachnamen eintragen.', en: 'Enter the first and last name.' }));
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail(back(day), pick(lang, { de: 'Diese E-Mail-Adresse stimmt nicht.', en: 'This e-mail address is not right.' }));
+  const slots = Number(formData.get('slots') ?? 0);
+  const answers = Array.from({ length: Math.max(0, Math.min(80, slots)) }, (_, i) => String(formData.get(`a${i}`) ?? ''));
+  const result = await enterPaper({ sittingId, name, email: email || null, version, answers }, actor);
+  if (!result.ok) fail(back(day), pick(lang, result.reason));
+  revalidatePath('/admin/day');
 }

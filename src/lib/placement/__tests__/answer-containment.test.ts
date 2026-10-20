@@ -34,6 +34,10 @@ const ANSWER_BEARING = [
   'lib/placement/score-item',
   'lib/placement/route',
   'lib/placement/finalise',
+  // The day-one test's keys (0075), and the modules that mark with them.
+  'lib/entry-test/keys.server',
+  'lib/entry-test/attempts.server',
+  'lib/admin/entry-tests',
 ];
 
 function walk(directory: string): string[] {
@@ -74,6 +78,8 @@ function importsOf(file: string): string[] {
 
   for (const pattern of patterns) {
     for (const match of source.matchAll(pattern)) {
+      // `import type` is erased at compile time and ships nothing.
+      if (/^\s*(?:import|export)\s+type\s/.test(match[0])) continue;
       const resolved = resolveImport(file, match[1]);
       if (resolved) specifiers.push(resolved.replace(/\.tsx?$/, ''));
     }
@@ -94,6 +100,16 @@ const CLIENT_MODULES = ALL_SOURCE_FILES.filter((file) => {
   return /^\s*(?:\/\*[\s\S]*?\*\/\s*)?['"]use client['"]/.test(source);
 }).map((file) => file.slice(SRC.length + 1).replace(/\.tsx?$/, ''));
 
+/**
+ * Server-action modules: a client component that imports one gets a reference to call, never its code,
+ * so the walk stops there (the day-one test's actions mark with its keys on the server).
+ */
+const SERVER_ACTION_MODULES = new Set(
+  ALL_SOURCE_FILES.filter((file) => /^\s*(?:\/\*[\s\S]*?\*\/\s*)?['"]use server['"]/.test(readFileSync(file, 'utf8'))).map((file) =>
+    file.slice(SRC.length + 1).replace(/\.tsx?$/, '')
+  )
+);
+
 /** Depth-first reachability through the import graph. */
 function reaches(from: string, targets: readonly string[]): string[] {
   const seen = new Set<string>();
@@ -106,6 +122,7 @@ function reaches(from: string, targets: readonly string[]): string[] {
     seen.add(current);
 
     if (targets.includes(current)) hits.push(current);
+    if (current !== from && SERVER_ACTION_MODULES.has(current)) continue;
 
     // Directory imports resolve to `index`; try both spellings.
     for (const next of IMPORT_GRAPH.get(current) ?? IMPORT_GRAPH.get(`${current}/index`) ?? []) {

@@ -88,12 +88,22 @@ const [enquiry, courseReg, examReg, person, booking, room, attempt, application,
               ORDER BY d.on_date LIMIT 1`),
   ]);
 const lessonDate = lessonDay ? (await client.query(`SELECT to_char(on_date, 'YYYY-MM-DD') AS d FROM course_days WHERE id = $1`, [lessonDay])).rows[0]?.d : null;
+// The next first day of an intensive A2, B1 or B1+ class: the Tagesplan's Einstufungstest card (0075).
+const testDate = (
+  await client.query(
+    `SELECT to_char(min(d.on_date), 'YYYY-MM-DD') AS d FROM course_days d JOIN courses c ON c.id = d.course_id
+       JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
+      WHERE ty.slug = 'intensive-german' AND c.level_code IN ('A2.1', 'B1.1', 'B1+.1') AND d.on_date >= current_date
+        AND d.on_date = (SELECT min(x.on_date) FROM course_days x WHERE x.course_id = c.id)`
+  )
+).rows[0]?.d;
 
 const routes = [
   '/admin',
   '/admin/day',
   '/admin/day?date=2026-12-24',
   lessonDate && `/admin/day?date=${lessonDate}`,
+  testDate && `/admin/day?date=${testDate}`,
   '/admin/day/courses',
   '/admin/day/rooms',
   lessonDate && `/admin/day/courses?date=${lessonDate}`,

@@ -1303,6 +1303,10 @@ day as one moves between them.
       preset from the replaced teacher's absence.
     - **Measured locally on 2026-10-20:** 18 links, 4 of them shared out. 3 merged days stay unlinked,
       because no group of their level had a room.
+  - **Einstufungstest** (0075, 2026-10-20; **docs/ENTRY_TEST.md**). On the first day of an intensive
+    A2, B1 or B1+ course a card above the tasks, one line per test and session; the line opens the test
+    at the side: open it, its code for the teachers, the phones as they write, release a paused one,
+    hand one in, type in a paper booklet, the Excel download. Learners write at `casa-bremen.de/test`.
 - **Raumplan** (`/admin/day/rooms`). SchoolMan's ClassroomToday drawn: a row per room, floor by
   floor, alternating shades, hours and half hours across, each class a block in its part of the
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class

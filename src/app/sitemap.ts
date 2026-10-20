@@ -11,8 +11,9 @@ import { toAbsoluteUrl } from '@/lib/seo';
  * One entry per page and language, each listing every language version, so a
  * search engine sees /sprachkurse and /en/courses as one page in two languages.
  *
- * Internal review surfaces, the search page and the placement runner and result
- * pages are left out: they are noindex or per-visitor.
+ * Internal review surfaces, the search page, the placement runner and result
+ * pages and the day-one test at /test are left out: they are noindex or
+ * per-visitor. The knowledge index reads this list, so they stay out of it too.
  */
 const STATIC_ROUTES: Array<{ path: string; priority: number; lastModified?: Date }> = [
   { path: '/', priority: 1 },

@@ -450,6 +450,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/DESIGN_ALIGNMENT_WITH_STUDENT_APP.md` | Token comparison with the CASA student app and what should converge |
 | `docs/RESPONSIVE_AND_BROWSERS.md` | **Read before changing layout.** Supported browsers (Safari 16.4, Chrome/Edge 111, Firefox 128; no IE), the 24 sizes, the audit and screenshot scripts, and the rules that keep phones, foldables, tablets and large screens right |
 | `docs/CLARA_AND_SEARCH.md` | **Read before touching CLARA or the search.** The knowledge index of the live site, quick answers from live values, CLARA's turn, the switched-off AI mode, the 124 golden questions and how to measure |
+| `docs/ENTRY_TEST.md` | **Read before touching the day-one test** (Einstufungstest Tag 1): which class writes which booklet, the phone page at `/test`, the Tagesplan card, scoring, keys kept server-side, the switch-over from Google |
 | `docs/TRANSLATIONS.md` | **Read when the German changes.** The site is kept translated into tr, ar, es, it, ru, uk (prepared, not routed): the run, the brief, the glossary |
 | `docs/VOICE_AND_TONE.md` | How the public site writes in German (du) and British English |
 | `docs/TEAM_UPDATE_2026-06-23.md` | Team-facing status, demo flow, open decisions |

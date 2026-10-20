@@ -79,7 +79,12 @@ const readPastHero = () => window.scrollY > window.innerHeight * PAST_HERO;
 
 /** Pages where the notice would only be in the way. */
 function isQuietPath(pathname: string) {
-  return pathname === '/contact' || pathname.startsWith('/registration') || pathname.startsWith('/placement-test/test');
+  return (
+    pathname === '/contact' ||
+    pathname === '/test' ||
+    pathname.startsWith('/registration') ||
+    pathname.startsWith('/placement-test/test')
+  );
 }
 
 export function NewSiteNotice({ contentLocale }: { contentLocale: ContentLocale }) {

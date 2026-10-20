@@ -1,0 +1,1084 @@
+{
+  "A": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "Wo ist mein Schlüssel?",
+        "Da! ________ Schlüssel liegt auf dem Tisch."
+      ],
+      "options": {
+        "A": "Der",
+        "B": "Die",
+        "C": "Den",
+        "D": "Das"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Was macht deine Schwester?",
+        "Sie ________ in einer Bäckerei."
+      ],
+      "options": {
+        "A": "arbeiten",
+        "B": "arbeitet",
+        "C": "arbeitest",
+        "D": "arbeite"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "________ kommst du, Nabil?",
+        "Aus Marokko."
+      ],
+      "options": {
+        "A": "Wo",
+        "B": "Wohin",
+        "C": "Wer",
+        "D": "Woher"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "________ beginnt der Film?",
+        "Heute um 19 Uhr."
+      ],
+      "options": {
+        "A": "Wer",
+        "B": "Wann",
+        "C": "Wie",
+        "D": "Wo"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "Was fehlt noch für die Küche?",
+        "Wir brauchen ________ Tisch."
+      ],
+      "options": {
+        "A": "ein",
+        "B": "einen",
+        "C": "eine",
+        "D": "einem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "Was macht ihr am Abend?",
+        "________"
+      ],
+      "options": {
+        "A": "Wir oft kochen zusammen.",
+        "B": "Zusammen wir kochen oft.",
+        "C": "Wir kochen oft zusammen.",
+        "D": "Wir zusammen oft kochen."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Guten Morgen, Frau Peters! Wie geht es Ihnen?",
+        "________"
+      ],
+      "options": {
+        "A": "In der Küche, links.",
+        "B": "Am Donnerstag, um neun.",
+        "C": "Aus Spanien, aus Madrid.",
+        "D": "Danke, gut. Und Ihnen?"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Lena und Tim, ________ ihr heute zu Hause?",
+        "Ja, wir haben frei."
+      ],
+      "options": {
+        "A": "sind",
+        "B": "ist",
+        "C": "bist",
+        "D": "seid"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "Wann beginnt dein Termin?",
+        "Morgen ________ zehn Uhr."
+      ],
+      "options": {
+        "A": "von",
+        "B": "um",
+        "C": "im",
+        "D": "am"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Wem gehört das Fahrrad?",
+        "Meinem Bruder. Das ist ________ Fahrrad."
+      ],
+      "options": {
+        "A": "seinen",
+        "B": "sein",
+        "C": "seine",
+        "D": "seinem"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Was ________ ihr trinken?",
+        "Zwei Apfelsäfte, bitte."
+      ],
+      "options": {
+        "A": "möchtet",
+        "B": "möchten",
+        "C": "möchte",
+        "D": "möchtest"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Hast du Geschwister?",
+        "Nein, ich habe ________ Geschwister."
+      ],
+      "options": {
+        "A": "keinem",
+        "B": "keinen",
+        "C": "keine",
+        "D": "kein"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Wie kommst du zur Arbeit?",
+        "Mit ________ Bus."
+      ],
+      "options": {
+        "A": "den",
+        "B": "dem",
+        "C": "die",
+        "D": "der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Was machst du jetzt?",
+        "Ich ________."
+      ],
+      "options": {
+        "A": "rufe meine Mutter an",
+        "B": "anrufe meine Mutter",
+        "C": "meine Mutter anrufen",
+        "D": "meine Mutter anrufe"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Trinkst du gern Milch?",
+        "Nein. Meine Kinder ________ Milch, aber ich nicht."
+      ],
+      "options": {
+        "A": "mag",
+        "B": "mögt",
+        "C": "magst",
+        "D": "mögen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Wie groß ist die Wohnung?",
+        "________"
+      ],
+      "options": {
+        "A": "Sie liegt im Zentrum.",
+        "B": "Sie kostet 600 Euro.",
+        "C": "Sie hat 45 Quadratmeter.",
+        "D": "Sie hat einen Balkon."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 17,
+      "prompt": [
+        "Hattest du gestern frei?",
+        "Nein, ich ________ im Büro."
+      ],
+      "options": {
+        "A": "war",
+        "B": "waren",
+        "C": "warst",
+        "D": "wart"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Die Lehrerin spricht mit Herrn Ali:",
+        "„________ bitte Ihren Namen an die Tafel!“"
+      ],
+      "options": {
+        "A": "Schreiben Ihnen",
+        "B": "Schreibt Sie",
+        "C": "Schreiben Sie",
+        "D": "Schreib Sie"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "Dein Koffer ist schwer. Ich helfe ________.",
+        "Danke, das ist nett."
+      ],
+      "options": {
+        "A": "dein",
+        "B": "dir",
+        "C": "du",
+        "D": "dich"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "Kann Leo heute frei nehmen?",
+        "Nein, er ________ heute arbeiten. Der Chef braucht ihn."
+      ],
+      "options": {
+        "A": "muss",
+        "B": "müssen",
+        "C": "musst",
+        "D": "müsst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Welchen Mantel nimmst du?",
+        "Ich nehme ________ Mantel hier."
+      ],
+      "options": {
+        "A": "dieser",
+        "B": "dieses",
+        "C": "diese",
+        "D": "diesen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Wo wartet die Gruppe?",
+        "________ Bahnhof, direkt vor dem Eingang."
+      ],
+      "options": {
+        "A": "Vom",
+        "B": "Aus",
+        "C": "Am",
+        "D": "Zum"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Was hat die Lehrerin gesagt?",
+        "Ich ________ die Aufgabe zu Hause machen."
+      ],
+      "options": {
+        "A": "soll",
+        "B": "sollst",
+        "C": "sollt",
+        "D": "sollen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Eine Freundin lädt dich zum Frühstück ein. Du hast Zeit und möchtest kommen. Was schreibst du?",
+        "________"
+      ],
+      "options": {
+        "A": "Tut mir leid, ich kann nicht kommen.",
+        "B": "Schade, ich habe keine Zeit.",
+        "C": "Danke, ich komme gern.",
+        "D": "Leider muss ich arbeiten."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "Was habt ihr am Sonntag gemacht?",
+        "Wir ________ unsere Freunde besucht."
+      ],
+      "options": {
+        "A": "hat",
+        "B": "haben",
+        "C": "ist",
+        "D": "sind"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Ist das Geschenk für deine Schwester?",
+        "Ja, es ist für ________."
+      ],
+      "options": {
+        "A": "ihnen",
+        "B": "ihr",
+        "C": "sie",
+        "D": "ihre"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Die Mutter spricht mit ihrem Sohn:",
+        "„________ bitte leise! Das Baby schläft.“"
+      ],
+      "options": {
+        "A": "Sei",
+        "B": "Seid",
+        "C": "Sein",
+        "D": "Bist"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Am Telefon hörst du: „Mein Name ist Nowak.“",
+        "Du weißt nicht: Wie schreibt man den Namen?",
+        "Was fragst du?",
+        "________"
+      ],
+      "options": {
+        "A": "Wann haben Sie Geburtstag?",
+        "B": "Wo ist bitte die Haltestelle?",
+        "C": "Können Sie den Namen bitte buchstabieren?",
+        "D": "Wie viel kostet die Fahrkarte?"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Wohin gehen wir jetzt?",
+        "________ Park. Dort können wir Fußball spielen."
+      ],
+      "options": {
+        "A": "In den",
+        "B": "Im",
+        "C": "In dem",
+        "D": "In der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "Hier ist Rauchen verboten. Das bedeutet:",
+        "Sie ________ hier rauchen."
+      ],
+      "options": {
+        "A": "dürfen",
+        "B": "müssen",
+        "C": "müssen nicht",
+        "D": "dürfen nicht"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Hast du noch Hunger?",
+        "Nein, ich habe gerade ein Käsebrot ________."
+      ],
+      "options": {
+        "A": "essen",
+        "B": "isst",
+        "C": "geesst",
+        "D": "gegessen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Eine Firma schreibt an eine neue Kundin.",
+        "Welche Anrede passt?",
+        "________,",
+        "Ihre Bestellung ist da. Sie können sie heute abholen."
+      ],
+      "options": {
+        "A": "Bis morgen",
+        "B": "Mit freundlichen Grüßen",
+        "C": "Gute Nacht",
+        "D": "Sehr geehrte Frau Özdemir"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Gibt es hier eine Bibliothek?",
+        "Ja. Dort kann ________ Bücher lesen."
+      ],
+      "options": {
+        "A": "Menschen",
+        "B": "man",
+        "C": "Leute",
+        "D": "Mann"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Warum sieht dein Zimmer jetzt so schön aus?",
+        "Ich habe es ________."
+      ],
+      "options": {
+        "A": "geaufräumt",
+        "B": "aufräumen",
+        "C": "aufgeräumt",
+        "D": "aufräumt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Was passt am Anfang?",
+        "________ ziehen wir die Jacken an. Dann gehen wir nach draußen."
+      ],
+      "options": {
+        "A": "Zum Schluss",
+        "B": "Später",
+        "C": "Danach",
+        "D": "Zuerst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 36,
+      "prompt": [
+        "Mit ________ telefonierst du gerade?",
+        "Mit meinem Vater."
+      ],
+      "options": {
+        "A": "wem",
+        "B": "was",
+        "C": "wen",
+        "D": "wer"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 37,
+      "title": "Ein Kochabend",
+      "intro": "Lesen Sie die Texte. Kreuzen Sie bei jedem Satz richtig oder falsch an.",
+      "text": [
+        "Liebe Eva,",
+        "am Mittwoch machen wir einen Kochabend bei mir. Wir treffen uns aber schon um 17 Uhr vor dem Supermarkt in der Marktstraße. Dort kaufen wir zusammen ein. Der Kochabend beginnt um 18 Uhr. Tom bringt Brot und Käse mit. Ich kaufe Gemüse und Wasser. Bring bitte etwas Obst mit. Nach dem Essen spielen wir Karten. Ruf mich bitte heute Abend an.",
+        "Liebe Grüße",
+        "Mina"
+      ],
+      "statements": [
+        "Der Kochabend beginnt um 17 Uhr.",
+        "Eva soll Obst mitbringen."
+      ]
+    },
+    {
+      "type": "reading",
+      "n": 38,
+      "title": "Ein Tag im Restaurant",
+      "intro": "Lesen Sie die Texte. Kreuzen Sie bei jedem Satz richtig oder falsch an.",
+      "text": [
+        "Hallo Ben,",
+        "ich habe am Samstag zum ersten Mal in einem Restaurant gearbeitet. Ich war um neun Uhr dort. Zuerst habe ich mit Sara die Tische geputzt. Um elf Uhr haben wir die Tür geöffnet. Dann sind viele Gäste gekommen. Ich habe Getränke gebracht und Teller getragen. Sara hat das Essen gebracht. Um 15 Uhr war meine Arbeit zu Ende. Ich war müde, aber der Tag hat mir gefallen. Nächsten Samstag arbeite ich wieder dort. Abends bin ich zu Hause geblieben und habe Musik gehört.",
+        "Viele Grüße",
+        "Luis"
+      ],
+      "statements": [
+        "Luis war am Samstagabend zu Hause.",
+        "Sara hat die Getränke gebracht."
+      ]
+    }
+  ],
+  "B": [
+    {
+      "type": "mc",
+      "n": 1,
+      "prompt": [
+        "________ wohnen Ihre Eltern?",
+        "In Porto."
+      ],
+      "options": {
+        "A": "Wer",
+        "B": "Wo",
+        "C": "Woher",
+        "D": "Wohin"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 2,
+      "prompt": [
+        "Ist das die Küche?",
+        "Ja. Und hier ist ________ Bad."
+      ],
+      "options": {
+        "A": "das",
+        "B": "die",
+        "C": "den",
+        "D": "der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 3,
+      "prompt": [
+        "Guten Tag. ________ Sie Frau Neumann?",
+        "Ja, das bin ich."
+      ],
+      "options": {
+        "A": "Seid",
+        "B": "Bist",
+        "C": "Ist",
+        "D": "Sind"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 4,
+      "prompt": [
+        "Wo wohnst du jetzt?",
+        "Ich ________ in der Gartenstraße."
+      ],
+      "options": {
+        "A": "wohnen",
+        "B": "wohnt",
+        "C": "wohne",
+        "D": "wohnst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 5,
+      "prompt": [
+        "Gibt es hier einen Garten?",
+        "Nein, das Haus hat ________ Garten."
+      ],
+      "options": {
+        "A": "keinen",
+        "B": "keine",
+        "C": "keinem",
+        "D": "kein"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 6,
+      "prompt": [
+        "________ kommt die Ärztin?",
+        "Am Freitag."
+      ],
+      "options": {
+        "A": "Wie",
+        "B": "Wann",
+        "C": "Wohin",
+        "D": "Was"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 7,
+      "prompt": [
+        "Was kaufst du?",
+        "Ich kaufe ________ Rucksack für die Reise."
+      ],
+      "options": {
+        "A": "einem",
+        "B": "ein",
+        "C": "einen",
+        "D": "eine"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 8,
+      "prompt": [
+        "Hallo, Mila! Wie geht’s dir?",
+        "________"
+      ],
+      "options": {
+        "A": "Aus Italien, aus Rom.",
+        "B": "Gut, danke. Und dir?",
+        "C": "Zwei Euro, bitte.",
+        "D": "Im Bus, ganz hinten."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 9,
+      "prompt": [
+        "Wie viel kostet das Zimmer im Monat?",
+        "________"
+      ],
+      "options": {
+        "A": "Es ist 20 Quadratmeter groß.",
+        "B": "Es kostet 400 Euro.",
+        "C": "Es liegt im Erdgeschoss.",
+        "D": "Es hat zwei Fenster."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 10,
+      "prompt": [
+        "Guten Tag, was wünschen Sie?",
+        "Ich ________ bitte zwei Fahrkarten nach Hannover."
+      ],
+      "options": {
+        "A": "möchtet",
+        "B": "möchten",
+        "C": "möchtest",
+        "D": "möchte"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 11,
+      "prompt": [
+        "Was machst du nach dem Kurs?",
+        "________"
+      ],
+      "options": {
+        "A": "Danach kaufe ich Brot.",
+        "B": "Danach ich kaufe Brot.",
+        "C": "Danach ich Brot kaufe.",
+        "D": "Danach Brot ich kaufe."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 12,
+      "prompt": [
+        "Wem gehört die Tasche?",
+        "Anna. Das ist ________ Tasche."
+      ],
+      "options": {
+        "A": "ihr",
+        "B": "ihrem",
+        "C": "ihre",
+        "D": "ihren"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 13,
+      "prompt": [
+        "Was isst du gern?",
+        "Ich ________ Reis und Gemüse."
+      ],
+      "options": {
+        "A": "magst",
+        "B": "mögen",
+        "C": "mögt",
+        "D": "mag"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 14,
+      "prompt": [
+        "Wann spielt eure Mannschaft?",
+        "________ Sonntag."
+      ],
+      "options": {
+        "A": "Vom",
+        "B": "Um",
+        "C": "Im",
+        "D": "Am"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 15,
+      "prompt": [
+        "Was macht ihr nach dem Frühstück?",
+        "Wir ________."
+      ],
+      "options": {
+        "A": "räumen die Küche auf",
+        "B": "aufräumen die Küche",
+        "C": "die Küche aufgeräumt",
+        "D": "die Küche aufräumen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 16,
+      "prompt": [
+        "Fährst du allein zum See?",
+        "Nein, ich fahre mit ________ Schwester."
+      ],
+      "options": {
+        "A": "meine",
+        "B": "meiner",
+        "C": "mein",
+        "D": "meinen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 17,
+      "prompt": [
+        "Im Hotel spricht ein Mitarbeiter mit Frau Costa:",
+        "„________ bitte einen Moment!“"
+      ],
+      "options": {
+        "A": "Warten Ihnen",
+        "B": "Warte Sie",
+        "C": "Wartet Sie",
+        "D": "Warten Sie"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 18,
+      "prompt": [
+        "Wie findest du die Schuhe?",
+        "________ Schuhe hier gefallen mir."
+      ],
+      "options": {
+        "A": "Diesem",
+        "B": "Dieser",
+        "C": "Dieses",
+        "D": "Diese"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 19,
+      "prompt": [
+        "Warum fahrt ihr so früh los?",
+        "Wir ________ um sieben Uhr am Bahnhof sein."
+      ],
+      "options": {
+        "A": "muss",
+        "B": "musst",
+        "C": "müssen",
+        "D": "müsst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 20,
+      "prompt": [
+        "Warum warst du gestern nicht im Kurs?",
+        "Ich ________ Fieber."
+      ],
+      "options": {
+        "A": "hatten",
+        "B": "hattet",
+        "C": "hattest",
+        "D": "hatte"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 21,
+      "prompt": [
+        "Was sagt euer Trainer?",
+        "Wir ________ morgen um acht Uhr da sein."
+      ],
+      "options": {
+        "A": "sollen",
+        "B": "soll",
+        "C": "sollst",
+        "D": "sollt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 22,
+      "prompt": [
+        "Die Kinder verstehen die Aufgabe nicht. Die Lehrerin hilft ________."
+      ],
+      "options": {
+        "A": "ihnen",
+        "B": "ihre",
+        "C": "ihr",
+        "D": "sie"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 23,
+      "prompt": [
+        "Du kannst nicht zu Leas Party kommen. Was schreibst du?",
+        "________"
+      ],
+      "options": {
+        "A": "Ich komme gern und bringe Brot mit.",
+        "B": "Danke, ich bin um acht da.",
+        "C": "Ja, bis Samstag bei dir!",
+        "D": "Danke für die Einladung. Leider habe ich keine Zeit."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 24,
+      "prompt": [
+        "Wo ist die Milch?",
+        "Sie steht ________ Kühlschrank."
+      ],
+      "options": {
+        "A": "ins",
+        "B": "im",
+        "C": "aus",
+        "D": "zum"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 25,
+      "prompt": [
+        "Können wir mit ins Kino kommen?",
+        "Ja, ich hole ________ um sechs Uhr ab."
+      ],
+      "options": {
+        "A": "eurem",
+        "B": "euch",
+        "C": "euer",
+        "D": "ihr"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 26,
+      "prompt": [
+        "Wie bist du nach Bremen gekommen?",
+        "Ich ________ mit dem Zug gefahren."
+      ],
+      "options": {
+        "A": "hat",
+        "B": "bin",
+        "C": "habe",
+        "D": "ist"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 27,
+      "prompt": [
+        "Im Bus steht: „Bitte nicht essen!“ Das bedeutet:",
+        "Man ________ hier essen."
+      ],
+      "options": {
+        "A": "muss",
+        "B": "muss nicht",
+        "C": "darf nicht",
+        "D": "darf"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 28,
+      "prompt": [
+        "Wohin gehst du nach dem Kurs?",
+        "________ Bibliothek."
+      ],
+      "options": {
+        "A": "In die",
+        "B": "Am",
+        "C": "Im",
+        "D": "In der"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 29,
+      "prompt": [
+        "Am Telefon hast du die Adresse nicht verstanden. Was sagst du?",
+        "________"
+      ],
+      "options": {
+        "A": "Vielen Dank, die Adresse habe ich verstanden.",
+        "B": "Ja, ich kenne die Adresse schon.",
+        "C": "Können Sie die Adresse bitte wiederholen?",
+        "D": "Danke, ich habe die Adresse schon notiert."
+      }
+    },
+    {
+      "type": "mc",
+      "n": 30,
+      "prompt": [
+        "Ein Vater spricht mit seinem Sohn:",
+        "„________ bitte deine Jacke. Es ist kalt.“"
+      ],
+      "options": {
+        "A": "Nimmst",
+        "B": "Nimm",
+        "C": "Nehmen",
+        "D": "Nehmt"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 31,
+      "prompt": [
+        "Welche Grußformel passt am Ende der Nachricht?",
+        "Sehr geehrter Herr Berger,",
+        "vielen Dank für Ihre Nachricht. Wir schicken Ihnen die Rechnung heute.",
+        "________",
+        "Mara Wolf"
+      ],
+      "options": {
+        "A": "Mit freundlichen Grüßen",
+        "B": "Guten Morgen",
+        "C": "Sehr geehrter Herr Berger",
+        "D": "Herzlich willkommen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 32,
+      "prompt": [
+        "Was hast du gestern Abend gemacht?",
+        "Ich habe ein Buch ________."
+      ],
+      "options": {
+        "A": "lesen",
+        "B": "liest",
+        "C": "geliest",
+        "D": "gelesen"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 33,
+      "prompt": [
+        "Mit ________ fährt Jana zum Arzt?",
+        "Mit ihrer Mutter."
+      ],
+      "options": {
+        "A": "wem",
+        "B": "wen",
+        "C": "wer",
+        "D": "wo"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 34,
+      "prompt": [
+        "Was passt am Ende?",
+        "Zuerst waschen wir das Gemüse. Dann kochen wir. ________ essen wir."
+      ],
+      "options": {
+        "A": "Vorher",
+        "B": "Am Anfang",
+        "C": "Zum Schluss",
+        "D": "Zuerst"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 35,
+      "prompt": [
+        "Was hast du vor dem Frühstück gemacht?",
+        "Ich habe im Supermarkt ________."
+      ],
+      "options": {
+        "A": "einkaufen",
+        "B": "geeinkauft",
+        "C": "eingekauft",
+        "D": "einkauft"
+      }
+    },
+    {
+      "type": "mc",
+      "n": 36,
+      "prompt": [
+        "Brauchst du hier ein Auto?",
+        "Nein. In dieser Stadt ________ man gut mit dem Bus fahren."
+      ],
+      "options": {
+        "A": "kannst",
+        "B": "könnt",
+        "C": "kann",
+        "D": "können"
+      }
+    },
+    {
+      "type": "reading",
+      "n": 37,
+      "title": "Der Kurs am Donnerstag",
+      "intro": "Lesen Sie die Texte. Kreuzen Sie bei jedem Satz richtig oder falsch an.",
+      "text": [
+        "Hallo Deniz,",
+        "unser Deutschkurs ist am Donnerstag nicht in Raum 2. Wir lernen diesmal in Raum 5 im ersten Stock. Der Unterricht beginnt wie immer um 9 Uhr. Bitte bring dein Kursbuch und einen Stift mit. Wir haben dort keine Wörterbücher. Dein Handy bleibt bitte in der Tasche. Nach der Pause sprechen wir über Essen und Trinken. Der Kurs endet um 12 Uhr.",
+        "Bis Donnerstag",
+        "Sina"
+      ],
+      "statements": [
+        "Am Donnerstag ist der Kurs in Raum 5.",
+        "Deniz soll sein Kursbuch mitbringen."
+      ]
+    },
+    {
+      "type": "reading",
+      "n": 38,
+      "title": "Ein Besuch bei Oma",
+      "intro": "Lesen Sie die Texte. Kreuzen Sie bei jedem Satz richtig oder falsch an.",
+      "text": [
+        "Liebe Nora,",
+        "gestern bin ich mit meinem Bruder Alex nach Hannover gefahren. Wir haben dort unsere Oma besucht. Am Vormittag haben wir zusammen gekocht. Alex hat eine Suppe gemacht und ich habe einen Kuchen gebacken. Nach dem Essen sind wir in den Park gegangen. Es war warm und trocken. Wir haben auf einer Bank gesessen und viel gesprochen. Um sechs Uhr haben Alex und ich den Zug nach Hause genommen. Unsere Oma ist zu Hause geblieben. Der Tag war schön. Am Sonntag wollen wir sie wieder besuchen.",
+        "Liebe Grüße",
+        "Emilia"
+      ],
+      "statements": [
+        "Emilias Oma hat den Kuchen gebacken.",
+        "Emilia und Alex sind mit dem Auto nach Hause gefahren."
+      ]
+    }
+  ]
+}
