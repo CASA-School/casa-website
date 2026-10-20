@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 أسابيع (مستوى كامل)"
   },
+  "t.8-wochen.yzyfwz": {
+    "de": "8 Wochen",
+    "text": "8 أسابيع"
+  },
   "t.a1-bis-c1-in.151ni4p": {
     "de": "A1 bis C1 in drei Jahren",
     "text": "من A1 إلى C1 في ثلاث سنوات"
@@ -643,6 +647,10 @@
     "de": "{value} ansehen",
     "text": "عرض {value}"
   },
+  "t.ansehen.4f07t9": {
+    "de": "{days} ansehen",
+    "text": "عرض {days}"
+  },
   "t.ansprechperson.150y9f2": {
     "de": "Ansprechperson",
     "text": "جهة الاتصال"
@@ -830,6 +838,10 @@
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "ابدأ دائمًا باختبار A1. خذ وقتك في مكان هادئ، وأجرِ الاختبار وحدك ومن دون وسائل مساعدة كالقواميس."
+  },
+  "t.beginnt-an-diesen-tagen.3b03ge": {
+    "de": "{level} beginnt an diesen Tagen gerade nicht.",
+    "text": "لا يبدأ {level} في هذه الأيام حاليًا."
   },
   "t.begleitende-lehrerin-schuelergru.1gou3we": {
     "de": "Begleitende Lehrerin, Schülergruppe aus Sibirien",
@@ -2663,6 +2675,10 @@
     "de": "Eine Haftpflichtversicherung ist nicht vorgeschrieben, in Deutschland aber üblich, und viele Vermieterinnen und Vermieter fragen danach.",
     "text": "تأمين المسؤولية المدنية (Haftpflichtversicherung) ليس إلزاميًا، لكنه شائع في ألمانيا، ويسأل عنه كثير من المؤجّرين."
   },
+  "t.eine-halbe-niveaustufe.wvtq2y": {
+    "de": "eine halbe Niveaustufe",
+    "text": "نصف مستوى"
+  },
   "t.eine-hand-schreibt-die.1k3k77w": {
     "de": "Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2",
     "text": "يد تكتب مهمة الرسالة على ورقة إجابة امتحان telc Deutsch B2"
@@ -3006,6 +3022,10 @@
   "t.frag-im-buero-nach.7r3z8v": {
     "de": "Frag im Büro nach, welche Angaben zum Kurs du für deinen Antrag brauchst.",
     "text": "اسأل في المكتب عن بيانات الدورة التي تحتاجها لطلبك."
+  },
+  "t.frag-uns-nach-dem.ol4zw3": {
+    "de": "Frag uns nach dem nächsten Start",
+    "text": "اسألنا عن موعد البدء القادم"
   },
   "t.frag-uns-nach-niveau.teyemn": {
     "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",

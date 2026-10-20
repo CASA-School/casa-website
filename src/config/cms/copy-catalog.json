@@ -292,6 +292,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.8-wochen.yzyfwz": {
+  "de": "8 Wochen",
+  "en": "8 weeks",
+  "files": [
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.a1-bis-c1-in.151ni4p": {
   "de": "A1 bis C1 in drei Jahren",
   "en": "A1 to C1 in three years",
@@ -1441,6 +1451,16 @@
    "*"
   ]
  },
+ "t.ansehen.4f07t9": {
+  "de": "{days} ansehen",
+  "en": "See {days}",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.ansprechperson.150y9f2": {
   "de": "Ansprechperson",
   "en": "Your contact",
@@ -1967,6 +1987,16 @@
   ],
   "pages": [
    "/placement-test"
+  ]
+ },
+ "t.beginnt-an-diesen-tagen.3b03ge": {
+  "de": "{level} beginnt an diesen Tagen gerade nicht.",
+  "en": "{level} does not start on these days at the moment.",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.begleitende-lehrerin-schuelergru.1gou3we": {
@@ -7474,6 +7504,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.eine-halbe-niveaustufe.wvtq2y": {
+  "de": "eine halbe Niveaustufe",
+  "en": "half a level",
+  "files": [
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.eine-hand-schreibt-die.1k3k77w": {
   "de": "Eine Hand schreibt die Briefaufgabe auf einem Antwortbogen der telc-Prüfung Deutsch B2",
   "en": "A hand writing the letter task on a telc Deutsch B2 answer sheet",
@@ -8540,6 +8580,16 @@
   "en": "Ask us in the office which course details you need for your application.",
   "files": [
    "src/config/courses/course-page-content.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
+ "t.frag-uns-nach-dem.ol4zw3": {
+  "de": "Frag uns nach dem nächsten Start",
+  "en": "Ask us about the next start",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/courses/[slug]"
@@ -13098,6 +13148,7 @@
   "de": "Kurstage",
   "en": "Course days",
   "files": [
+   "src/components/courses/course-term-table.tsx",
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
@@ -23165,7 +23216,6 @@
   "de": "{weeks} Wochen",
   "en": "{weeks} weeks",
   "files": [
-   "src/components/courses/course-term-table.tsx",
    "src/components/sections/cefr-level-rows.tsx"
   ],
   "pages": [

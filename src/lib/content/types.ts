@@ -287,6 +287,11 @@ export type CourseInstanceRow = {
   status: string;
   created_at: string;
   updated_at: string;
+  /**
+   * The level codes this start runs (its courses, as SchoolMan and the workspace plan them: „A2.2",
+   * „B1+.1"), as a list and nothing more (lib/content/term-levels). Missing where none is planned yet.
+   */
+  levels?: string[];
 };
 
 export type ExamTypeRow = {

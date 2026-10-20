@@ -37,7 +37,8 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
-import { levelOf, soldByLevel } from '@/lib/registration/levels';
+import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
+import { levelOf, offeredLevels, soldByLevel, termIsHalfLevel } from '@/lib/registration/levels';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 import { daytimeLabel, parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { getAvailableLevels, getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
@@ -175,6 +176,29 @@ export default async function CourseDetailPage({
   };
 
   /*
+   * The levels in a row (lib/registration/levels). The intensive course is booked by the whole level;
+   * an evening term is half a level, so the evening course offers the halves (A1.1, A1.2, …), in pairs
+   * per level (Rahman, 2026-10-21). Elsewhere the level, booked at its first half.
+   */
+  // What each start offers, from what it runs (lib/registration/levels `offeredLevels`, 2026-10-21).
+  const formatLevels = [...new Set(bookableInstances.flatMap((courseInstance) => courseInstance.levels ?? []))];
+  const genericLevels = getAvailableLevels(detail.course.level_min, detail.course.level_max);
+  const offeredBy = new Map(
+    bookableInstances.map((courseInstance) => [courseInstance.id, offeredLevels(detail.course.slug, courseInstance.levels, formatLevels, genericLevels)])
+  );
+  const availableLevels: string[] = CASA_LEVEL_SEQUENCE.filter((code) => [...offeredBy.values()].some((codes) => codes.includes(code)));
+  // A pill's value: the half itself (evening), the whole level (intensive), else the level's first half.
+  const pillValue = (code: string) =>
+    termIsHalfLevel(detail.course.slug)
+      ? code
+      : soldByLevel(detail.course.slug) || !availableLevels.includes(`${levelOf(code)}.1`)
+        ? levelOf(code)
+        : `${levelOf(code)}.1`;
+  const termLevels: CourseTermLevel[] = !requiresLevelField(detail.course.slug)
+    ? []
+    : [...new Set(availableLevels.map(pillValue))].map((value) => ({ label: value, value, level: levelOf(value) }));
+
+  /*
    * Kurstermine (2026-10-20): every start a learner can book, in one list whatever its time of day,
    * so CASA assigns the group and can balance them (Rahman). Where the starts differ by their days
    * (the evening course), each start says its days; the times are one sentence under the choice.
@@ -197,7 +221,8 @@ export default async function CourseDetailPage({
         ? `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`
         : `/registration/course?courseId=${encodeURIComponent(courseInstance.id)}`,
       joinable: !nextCourseStartDate(courseInstance, detail.course.slug, today),
-      days: daysTellApart ? parseSchedule(courseInstance.schedule, locale)?.days ?? '' : '',
+      days: daysTellApart ? longDays(courseInstance.schedule, locale) : '',
+      levels: [...new Set((offeredBy.get(courseInstance.id) ?? []).map(pillValue))],
     }))
     .sort((a, b) => Number(b.joinable) - Number(a.joinable) || a.start.localeCompare(b.start));
   const termScheduleNote = (() => {
@@ -215,14 +240,11 @@ export default async function CourseDetailPage({
     });
   })();
 
-  // The levels in a row (lib/registration/levels): the whole level where the format sells one, else its first half.
-  const availableLevels = getAvailableLevels(detail.course.level_min, detail.course.level_max);
-  const termLevels: CourseTermLevel[] = requiresLevelField(detail.course.slug)
-    ? [...new Set(availableLevels.map(levelOf))].map((level) => ({
-        label: level,
-        value: soldByLevel(detail.course.slug) || !availableLevels.includes(`${level}.1`) ? level : `${level}.1`,
-      }))
-    : [];
+  const termLevelSpan = soldByLevel(detail.course.slug)
+    ? say(locale, '8 Wochen', '8 weeks')
+    : termIsHalfLevel(detail.course.slug)
+      ? say(locale, 'eine halbe Niveaustufe', 'half a level')
+      : null;
 
   // Each course format has an Ansprechpartner. Formats without a confirmed
   // owner fall back to the general office rather than naming someone who has
@@ -572,7 +594,8 @@ export default async function CourseDetailPage({
                     dates={termDates}
                     levels={termLevels}
                     scheduleNote={termScheduleNote}
-                    weeks={soldByLevel(detail.course.slug) ? 8 : null}
+                    levelSpan={termLevelSpan}
+                    datesAreTerms={!soldByLevel(detail.course.slug)}
                     locale={locale}
                     note={
                       detail.course.slug === 'bildungszeit'
@@ -908,4 +931,15 @@ export default async function CourseDetailPage({
       {interestCourse ? <InterestDialog course={interestCourse} locale={locale} /> : null}
     </main>
   );
+}
+
+/** A slot's days for the evening course's tabs: „Montag + Mittwoch". */
+function longDays(schedule: unknown, locale: 'de' | 'en'): string {
+  const days = (schedule as { days?: unknown } | null)?.days;
+  if (!Array.isArray(days)) return '';
+  const names: Record<string, [string, string]> = {
+    Mon: ['Montag', 'Monday'], Tue: ['Dienstag', 'Tuesday'], Wed: ['Mittwoch', 'Wednesday'], Thu: ['Donnerstag', 'Thursday'],
+    Fri: ['Freitag', 'Friday'], Sat: ['Samstag', 'Saturday'], Sun: ['Sonntag', 'Sunday'],
+  };
+  return days.map((day) => names[String(day)]?.[locale === 'de' ? 0 : 1] ?? String(day)).join(' + ');
 }
