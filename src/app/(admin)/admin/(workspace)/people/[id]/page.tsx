@@ -37,6 +37,7 @@ import {
   listBankAccounts,
   listCountries,
   personTests,
+  type PersonTest,
   personTimeline,
   type Address,
   type AddressKind,
@@ -48,6 +49,7 @@ import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { personExamEntries } from '@/lib/admin/exams';
 import { LetterList } from '@/components/admin/letters/letter-list';
+import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { staffIdForPerson } from '@/lib/admin/staff-members';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
@@ -312,6 +314,7 @@ export default async function PersonPage({
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const openCases = cases.filter((c) => c.open);
   const pastCases = cases.filter((c) => !c.open);
+  const levelPath = levelsOverTime(tests);
 
   const owed = bookings.filter((b) => b.status !== 'cancelled').reduce((sum, b) => sum + Math.max(0, b.charged - b.paid), 0);
 
@@ -545,9 +548,27 @@ export default async function PersonPage({
       <RecordTabPanel id="cases">
         <Card>
           {cases.length ? (
+            // What is open in full; what is closed a click away, or its latest few when nothing is open (2026-10-20).
             <div className="-mx-4 -my-4">
               {openCases.length ? <CaseGroup label={t('Offen', 'Open')} cases={openCases} lang={lang} /> : null}
-              {pastCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases} lang={lang} quiet /> : null}
+              {!openCases.length ? <CaseGroup label={t('Abgeschlossen', 'Closed')} cases={pastCases.slice(0, CLOSED_SHOWN)} count={pastCases.length} lang={lang} quiet /> : null}
+              {pastCases.length > (openCases.length ? 0 : CLOSED_SHOWN) ? (
+                <div className="px-4 pt-1 pb-4">
+                  <MoreInPanel
+                    title={t('Abgeschlossen', 'Closed')}
+                    label={t('Frühere Anfragen und Buchungen', 'Earlier enquiries and bookings')}
+                    icon={Icon.bookings}
+                    tint="sun"
+                    listClassName="-mx-6"
+                    rows={pastCases.map((c) => ({
+                      key: c.key,
+                      node: <CaseLine c={c} lang={lang} quiet />,
+                      search: [c.title, pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' '),
+                      at: c.at ? new Date(c.at).toISOString() : undefined,
+                    }))}
+                  />
+                </div>
+              ) : null}
             </div>
           ) : (
             <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Anfragen oder Buchungen.', 'No enquiries or bookings yet.')}</p>
@@ -748,23 +769,47 @@ export default async function PersonPage({
       {/* Their tests (0066): placement and progress tests, the level reached and the score — the level history. */}
       {tests.length ? (
         <RecordTabPanel id="tests">
+          {/* The latest test and the way the level went, on top; every test at the side (2026-10-20). */}
           <Card bleed>
             <ul className="divide-y divide-ws-line-soft">
-              {tests.map((test) => (
-                <li key={test.id} className="flex items-start gap-3 px-4 py-3">
-                  <span className="w-24 shrink-0 pt-0.5 text-[0.82rem] text-[var(--casa-muted)] tabular-nums">{test.takenOn ? <DateText value={test.takenOn} compact /> : '—'}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[0.88rem] font-semibold text-[var(--casa-ink)]">{test.test ?? t('Test', 'Test')}</span>
-                    {test.comment ? <span className="mt-0.5 block text-[0.8rem] whitespace-pre-line text-[var(--casa-muted)]">{test.comment}</span> : null}
-                    {test.authorName ? <span className="mt-0.5 block text-[0.74rem] text-[var(--casa-muted)]">{test.authorName}</span> : null}
-                  </span>
-                  <span className="shrink-0 text-right">
-                    {test.level ? <Badge tone="accent">{test.level}</Badge> : null}
-                    <span className="mt-1 block text-[0.84rem] font-semibold tabular-nums text-[var(--casa-ink)]">{test.score != null ? `${num(lang, test.score)} %` : (test.result ?? '')}</span>
-                  </span>
+              {tests.slice(0, TESTS_SHOWN).map((test) => (
+                <li key={test.id}>
+                  <TestLine test={test} t={t} lang={lang} />
                 </li>
               ))}
             </ul>
+            {levelPath.length > 1 ? (
+              <div className="border-t border-ws-line-soft px-4 py-3">
+                <p className="text-xs font-bold text-[var(--casa-ink)]">{t('Erreichtes Niveau', 'Level reached')}</p>
+                <ol className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {levelPath.map((step, i) => (
+                    <li key={`${step.level}-${i}`} className="flex items-center gap-1.5">
+                      {i ? <span aria-hidden="true" className="text-[var(--casa-muted)] [&_svg]:size-3">{Icon.chevronRight}</span> : null}
+                      <span title={step.on ?? undefined}>
+                        <Badge tone={i === levelPath.length - 1 ? 'accent' : 'neutral'}>{step.level}</Badge>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+            {tests.length > TESTS_SHOWN ? (
+              <div className="px-4 pt-1 pb-4">
+                <MoreInPanel
+                  title={t('Tests', 'Tests')}
+                  label={t('Alle Tests', 'All tests')}
+                  icon={Icon.award}
+                  tint="green"
+                  listClassName="-mx-6 divide-y divide-ws-line-soft"
+                  rows={tests.map((test) => ({
+                    key: test.id,
+                    node: <TestLine test={test} t={t} lang={lang} />,
+                    search: [test.test, test.level, test.comment, test.authorName, test.result].filter(Boolean).join(' '),
+                    at: test.takenOn ? `${test.takenOn}T12:00:00Z` : undefined,
+                  }))}
+                />
+              </div>
+            ) : null}
           </Card>
         </RecordTabPanel>
       ) : null}
@@ -875,11 +920,11 @@ function wizardStart(
 }
 
 /** A group of cases — open or closed — under its label and count. */
-function CaseGroup({ label, cases, lang, quiet = false }: { label: string; cases: readonly Case[]; lang: WsLang; quiet?: boolean }) {
+function CaseGroup({ label, cases, count, lang, quiet = false }: { label: string; cases: readonly Case[]; count?: number; lang: WsLang; quiet?: boolean }) {
   return (
     <section className="border-t border-ws-line-soft first:border-t-0">
       <h3 className="px-4 pt-3.5 pb-1.5 text-xs font-bold text-[var(--casa-ink)]">
-        {label} <span className="ml-1 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">{cases.length}</span>
+        {label} <span className="ml-1 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">{count ?? cases.length}</span>
       </h3>
       <CaseRows cases={cases} lang={lang} quiet={quiet} />
     </section>
@@ -891,12 +936,21 @@ function CaseRows({ cases, lang, quiet = false }: { cases: readonly Case[]; lang
   return (
     <ul className="py-1.5">
       {cases.map((c) => (
-        // The link covers the row, so a booking's colour can be a control of its own above it: a button
-        // may not sit inside a link.
-        <li
-          key={c.key}
-          className="relative flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)] has-[a:focus-visible]:bg-[var(--ws-row-hover)]"
-        >
+        <li key={c.key}>
+          <CaseLine c={c} lang={lang} quiet={quiet} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** How many closed cases show when nothing is open; the rest are at the side. */
+const CLOSED_SHOWN = 8;
+
+/** One case: the link covers the row, so a booking's colour can be a control of its own above it (a button may not sit inside a link). */
+function CaseLine({ c, lang, quiet = false }: { c: Case; lang: WsLang; quiet?: boolean }) {
+  return (
+        <div className="relative flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)] has-[a:focus-visible]:bg-[var(--ws-row-hover)]">
           <Link href={c.href} aria-label={[c.title, pick(lang, KINDS[c.kind].label), c.detail].filter(Boolean).join(' · ')} className="absolute inset-0 outline-none" />
           <span className={cn(quiet && 'opacity-70')}>
               <IconChip icon={KINDS[c.kind].icon} tint={KINDS[c.kind].tint} />
@@ -916,10 +970,48 @@ function CaseRows({ cases, lang, quiet = false }: { cases: readonly Case[]; lang
                 <DateText value={c.at} compact />
               </span>
             )}
-        </li>
-      ))}
-    </ul>
+        </div>
   );
+}
+
+/** How many tests show; the rest are at the side. */
+const TESTS_SHOWN = 3;
+
+/** One test: when, which, what was noted and by whom, the level reached and the score. */
+function TestLine({ test, t, lang }: { test: PersonTest; t: T; lang: WsLang }) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3">
+      <span className="w-24 shrink-0 pt-0.5 text-[0.82rem] text-[var(--casa-muted)] tabular-nums">{test.takenOn ? <DateText value={test.takenOn} compact /> : '—'}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.88rem] font-semibold text-[var(--casa-ink)]">{test.test ?? t('Test', 'Test')}</span>
+        {test.comment ? <span className="mt-0.5 line-clamp-2 block text-[0.8rem] whitespace-pre-line text-[var(--casa-muted)]">{test.comment}</span> : null}
+        {test.authorName ? <span className="mt-0.5 block text-[0.74rem] text-[var(--casa-muted)]">{test.authorName}</span> : null}
+      </span>
+      <span className="shrink-0 text-right">
+        {test.level ? <Badge tone="accent">{test.level}</Badge> : null}
+        <span className="mt-1 block text-[0.84rem] font-semibold tabular-nums text-[var(--casa-ink)]">{test.score != null ? `${num(lang, test.score)} %` : (test.result ?? '')}</span>
+      </span>
+    </div>
+  );
+}
+
+/** A level's place on the scale (A1 < A2.1 < A2 < B1 < B1+ < B2 …); null for anything else. */
+function levelRank(level: string): number | null {
+  const m = /^([ABC])([12])(\+)?(?:\.(\d))?/.exec(level.trim().toUpperCase());
+  return m ? ('ABC'.indexOf(m[1]) * 2 + Number(m[2])) * 100 + (m[3] ? 50 : 0) + Number(m[4] ?? 0) : null;
+}
+
+/**
+ * The highest level a learner's tests had reached, as it rose, oldest first: B1 › B1+ › B2. SchoolMan's
+ * tests mix placement and progress tests of every level, so the plain sequence goes up and down.
+ */
+function levelsOverTime(tests: readonly PersonTest[]): { level: string; on: string | null }[] {
+  const path: { level: string; on: string | null; rank: number }[] = [];
+  for (const test of [...tests].reverse()) {
+    const rank = test.level ? levelRank(test.level) : null;
+    if (rank != null && rank > (path.at(-1)?.rank ?? -1)) path.push({ level: test.level!, on: test.takenOn, rank });
+  }
+  return path;
 }
 
 const DAY = 86_400_000;

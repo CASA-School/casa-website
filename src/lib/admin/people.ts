@@ -4,6 +4,7 @@ import { logActivity } from './activity';
 import { countryCodeFromName, normalizeEmail, normalizePhone, parseIsoDate } from './normalize';
 import { displayName } from './normalize';
 import type { Bilingual, WsLang } from './i18n';
+import { isUuid } from './ids';
 
 /**
  * People — one row per human, from first contact.
@@ -141,6 +142,7 @@ export async function getPersonSummary(id: string): Promise<PersonSummary | null
 
 /** The canonical person for an id, with channels and anything linked into it. */
 export async function getPerson(id: string): Promise<PersonDetail | null> {
+  if (!isUuid(id)) return null;
   const row = await queryFirst<Row>(
     `${SELECT} WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
     [id]

@@ -254,8 +254,8 @@ export type PlaceStay = {
   roomName: string | null;
 };
 
-/** How many earlier stays the tab shows. */
-export const EARLIER_STAYS_SHOWN = 30;
+/** How many earlier stays are loaded: the tab shows today's and the coming ones, the panel these (2026-10-20). */
+const EARLIER_STAYS_SHOWN = 1000;
 
 /** The stays at a place: today's and the coming ones by arrival, then the latest earlier ones. */
 export async function placeStays(id: string): Promise<{ current: PlaceStay[]; earlier: PlaceStay[]; earlierTotal: number }> {

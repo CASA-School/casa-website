@@ -74,12 +74,13 @@ test.describe('person page', () => {
     await expect(page.getByRole('heading', { name: 'Offen', exact: true }).locator('xpath=ancestor::section[1]')).toContainText('Abendkurs im Januar');
     await expect(page.getByRole('heading', { name: 'Zuletzt abgeschlossen' }).locator('xpath=ancestor::section[1]')).toContainText('Unterkunft im Sommer');
 
-    // All of it on the „Anfragen & Buchungen" tab, each group its heading's own section.
+    // All of it on the „Anfragen & Buchungen" tab: what is open in place, what is closed at the side.
     await page.getByRole('tab', { name: /^Anfragen & Buchungen/ }).click();
     const open = page.getByRole('heading', { name: /^Offen/ }).locator('xpath=..');
-    const closed = page.getByRole('heading', { name: /^Abgeschlossen/ }).locator('xpath=..');
     await expect(open).toContainText('Abendkurs im Januar');
-    await expect(closed).toContainText('Unterkunft im Sommer');
+    await page.getByRole('tabpanel').getByRole('button', { name: /^Frühere Anfragen und Buchungen/ }).click();
+    await expect(page.getByRole('dialog', { name: 'Abgeschlossen' })).toContainText('Unterkunft im Sommer');
+    await page.keyboard.press('Escape');
 
     // In the register, with what is open beside the name.
     await page.goto(`/admin/people?q=${encodeURIComponent('Prüfperson')}`);

@@ -26,7 +26,7 @@ test.describe('Lesson days', () => {
   let otherId = '';
   const level = 'A1.1';
   let groupsBefore: string[] = [];
-  let teachers: { id: string; name: string }[] = [];
+  let teachers: { id: string; name: string; short: string }[] = [];
   let rooms: { id: string; name: string }[] = [];
 
   test.beforeAll(async () => {
@@ -48,8 +48,8 @@ test.describe('Lesson days', () => {
       await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code) VALUES ($1, 'A1.1'), ($1, 'A2.1') RETURNING id`, [startId])
     ).rows.map((r) => r.id);
     teachers = (
-      await client.query<{ id: string; name: string }>(
-        `SELECT m.id, concat_ws(' ', p.first_name, p.last_name) AS name FROM staff_members m JOIN people p ON p.id = m.person_id
+      await client.query<{ id: string; name: string; short: string }>(
+        `SELECT m.id, concat_ws(' ', p.first_name, p.last_name) AS name, m.short_name AS short FROM staff_members m JOIN people p ON p.id = m.person_id
           WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
             AND NOT EXISTS (SELECT 1 FROM staff_absences a WHERE a.staff_member_id = m.id AND a.on_date > current_date)
           ORDER BY p.last_name LIMIT 2`
@@ -134,19 +134,19 @@ test.describe('Lesson days', () => {
     expect(groups.map((g) => g.phase)).toEqual(['1', '2']);
     expect(made.filter((d) => d.group_id).length).toBeGreaterThan(10);
 
-    // Ill: someone else teaches the first day, in another room.
+    // Ill: someone else teaches the first day, in another room. A day of the week grid opens its dialog.
     const dialog = page.getByRole('dialog');
-    await page.getByRole('button', { name: 'Ändern' }).first().click();
+    await page.getByRole('button', { name: 'Mo 26.02. ändern' }).click();
     await dialog.locator('select[name="teacherId"]').selectOption(b.id);
     await dialog.locator('select[name="roomId"]').selectOption(rooms[1].id);
     await dialog.getByRole('button', { name: 'Speichern' }).click();
-    await expect(page.getByText(`für ${a.name}`)).toBeVisible();
+    await expect(page.getByRole('cell').filter({ hasText: `für ${a.short}` })).toBeVisible();
     await expect(page.getByText(`statt ${rooms[0].name}`)).toBeVisible();
     const [first] = (await days(courseId)).rows;
     expect(first).toMatchObject({ teacher_id: b.id, is_substitute: true, replaced_teacher_id: a.id, room_id: rooms[1].id, replaced_room_id: rooms[0].id });
 
     // The second day is called off, with its reason.
-    await page.getByRole('button', { name: 'Ändern' }).nth(1).click();
+    await page.getByRole('button', { name: 'Di 27.02. ändern' }).click();
     await dialog.getByLabel('Fällt aus').check();
     await dialog.getByLabel('Grund').fill('e2e: Lehrkraft krank');
     await dialog.getByRole('button', { name: 'Speichern' }).click();
@@ -154,11 +154,11 @@ test.describe('Lesson days', () => {
     expect((await days(courseId)).rows[1].cancelled).toBe(true);
 
     // The third day's group is taught with another: no teacher of its own, and none missing.
-    await page.getByRole('button', { name: 'Ändern' }).nth(2).click();
+    await page.getByRole('button', { name: 'Mi 28.02. ändern' }).click();
     await dialog.locator('select[name="teacherId"]').selectOption('');
     await dialog.getByLabel('Mit einer anderen Gruppe zusammengelegt').check();
     await dialog.getByRole('button', { name: 'Speichern' }).click();
-    await expect(page.getByRole('cell', { name: 'Mit einer anderen Gruppe zusammengelegt' })).toBeVisible();
+    await expect(page.getByRole('cell').filter({ hasText: 'Zusammengelegt' })).toBeVisible();
     expect((await days(courseId)).rows[2]).toMatchObject({ teacher_id: null, merged: true });
   });
 
@@ -167,7 +167,7 @@ test.describe('Lesson days', () => {
     await page.goto(`/admin/catalogue/courses/${otherId}`);
     await page.getByRole('button', { name: 'Kurstage erzeugen' }).click();
     await expect(page.getByRole('button', { name: 'Fehlende Tage erzeugen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Ändern' }).first().click();
+    await page.getByRole('button', { name: 'Mo 26.02. ändern' }).click();
     await expect(page.getByRole('dialog').locator('select[name="teacherId"] option', { hasText: `${b.name} · unterrichtet ${level}` })).toHaveCount(1);
   });
 
@@ -180,7 +180,8 @@ test.describe('Lesson days', () => {
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
     }).toPass({ timeout: 15_000 });
     await page.getByRole('dialog').getByRole('button', { name: 'Übernehmen' }).click();
-    await expect(page.getByText(`für ${a.name}`)).toHaveCount(0);
+    // The days' tab is behind the plan's: its cells are counted hidden or not.
+    await expect(page.locator('td', { hasText: `für ${a.short}` })).toHaveCount(0);
     const rows = (await days(courseId)).rows;
     expect(rows[0]).toMatchObject({ teacher_id: a.id, is_substitute: false, replaced_teacher_id: null });
     // A day called off stays off; the merged day has the plan's teacher again.

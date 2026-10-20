@@ -13,6 +13,7 @@ import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
+import { SearchableRows } from '@/components/admin/more-in-panel';
 import { groupReservations } from '@/lib/admin/accommodation';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
@@ -218,8 +219,17 @@ export default async function GroupPage({
 
       {participants.length ? (
         <RecordTabPanel id="participants">
+          {/* The list staff work from, kept whole: one line each, and a search once it is long (2026-10-20). */}
           <Card bleed>
-            <ParticipantRows participants={participants} lang={lang} t={t} />
+            <SearchableRows
+              placeholder={t('Teilnehmende suchen', 'Search the students')}
+              listClassName="py-1.5"
+              rows={participants.map((p) => ({
+                key: p.bookingId,
+                node: <ParticipantLine participant={p} lang={lang} t={t} />,
+                search: [p.personName, p.number, p.stay].filter(Boolean).join(' '),
+              }))}
+            />
           </Card>
         </RecordTabPanel>
       ) : null}
@@ -454,37 +464,26 @@ function Row({
 }
 
 /** The participants: the learner, the booking's colour, number, dates and stay, what is still open. */
-function ParticipantRows({ participants, lang, t }: { participants: readonly GroupParticipant[]; lang: WsLang; t: T }) {
+/** One learner of the group on one line: their booking's colour, name, number, dates and stay, what is open. */
+function ParticipantLine({ participant: p, lang, t }: { participant: GroupParticipant; lang: WsLang; t: T }) {
+  const open = p.charged - p.paid;
+  const cancelled = p.status === 'cancelled';
   return (
-    <Rows>
-      {participants.map((p) => {
-        const open = p.charged - p.paid;
-        return (
-          <Row
-            key={p.bookingId}
-            href={`/admin/bookings/${p.bookingId}`}
-            quiet={p.status === 'cancelled'}
-            icon={<IconChip icon={Icon.bookings} tint="sun" />}
-            title={p.personName}
-            state={
-              <BookingLightDot
-                light={bookingLight(p)}
-                label={pick(lang, bookingLightLabel(p))}
-                size="md"
-              />
-            }
-            detail={[p.number, range(p.startDate, p.endDate, lang) ?? t('Keine Daten', 'No dates'), p.stay].filter(Boolean).join(' · ')}
-            end={
-              p.status !== 'cancelled' && open > 0.005 ? (
-                <>
-                  <span className="block text-[0.86rem] font-bold text-[#9a5b00]">{euros(open)}</span>
-                  <span className="block text-[0.72rem]">{t('offen', 'open')}</span>
-                </>
-              ) : null
-            }
-          />
-        );
-      })}
-    </Rows>
+    <div className="relative flex items-center gap-3 px-4 py-2 transition-colors hover:bg-[var(--ws-row-hover)] has-[a:focus-visible]:bg-[var(--ws-row-hover)]">
+      <Link href={`/admin/bookings/${p.bookingId}`} aria-label={p.personName} className="absolute inset-0 outline-none" />
+      {/* The colour sits above the row's link: its word on hover. */}
+      <span className="relative z-10 inline-flex">
+        <BookingLightDot light={bookingLight(p)} label={pick(lang, bookingLightLabel(p))} size="md" />
+      </span>
+      <span className={cn('w-[34%] min-w-0 shrink-0 truncate text-[0.88rem] font-semibold', cancelled ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{p.personName}</span>
+      <span className="min-w-0 flex-1 truncate text-[0.8rem] text-[var(--casa-muted)]">
+        {[p.number, range(p.startDate, p.endDate, lang) ?? t('Keine Daten', 'No dates'), p.stay].filter(Boolean).join(' · ')}
+      </span>
+      {!cancelled && open > 0.005 ? (
+        <span className="shrink-0 text-[0.82rem] font-bold text-[#9a5b00] tabular-nums">
+          {euros(open)} <span className="font-medium">{t('offen', 'open')}</span>
+        </span>
+      ) : null}
+    </div>
   );
 }

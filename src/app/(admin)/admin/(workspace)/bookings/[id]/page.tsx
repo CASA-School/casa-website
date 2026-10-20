@@ -14,9 +14,11 @@ import {
 import { BookingColour } from '../booking-colour';
 import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
+import { RowMenu } from '../row-menu';
 import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { dayRange } from '@/components/admin/list';
 import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader } from '@/components/admin/ui';
@@ -33,6 +35,8 @@ import {
   carryOverTargets,
   CHARGE_KIND_LABELS,
   getBooking,
+  type BookingCharge,
+  type Payment,
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -64,7 +68,7 @@ const money = (n: number, currency: string) =>
 
 /**
  * A line of a ledger: what it is, its amount in a fixed column, and the slot
- * for its remove button. The column widths are fixed so the amounts of every
+ * for its row menu („…"). The column widths are fixed so the amounts of every
  * line and the total in the card's foot stand under one another.
  */
 function LedgerLine({
@@ -85,9 +89,48 @@ function LedgerLine({
     <div className={cn('flex items-center gap-3', className)}>
       <div className="min-w-0 flex-1">{children}</div>
       <div className="w-28 shrink-0 text-right text-sm tabular-nums">{amount}</div>
-      {withAction ? <div className="flex w-20 shrink-0 justify-end">{action}</div> : null}
+      {withAction ? <div className="flex w-6 shrink-0 justify-end">{action}</div> : null}
     </div>
   );
+}
+
+/**
+ * The cost lines as the card shows them (2026-10-20): a charge and its reversal — „Kurspreis · Storno
+ * Kurspreis 9 Wochen" at −1.057,50 € against „Kurspreis · 9 Wochen" at 1.057,50 € — are one line,
+ * cancelled. A reversal is a line below zero of the same kind and the same amount; when several lines
+ * could be the one it reverses, it is the one whose words it repeats. The lines that count come first,
+ * in their order, then the cancelled ones; nothing is hidden, so the total adds up on the card.
+ */
+function foldReversals(charges: readonly BookingCharge[]): { line: BookingCharge; reversal: BookingCharge | null }[] {
+  const words = (text: string) =>
+    new Set(
+      text
+        .toLocaleLowerCase('de')
+        .replace(/·/g, ' ')
+        .split(/\s+/)
+        .filter((w) => w && w !== 'storno')
+    );
+  const reversalOf = new Map<string, BookingCharge>();
+  for (const minus of charges) {
+    if (minus.amount >= 0) continue;
+    const own = words(minus.description);
+    let best: BookingCharge | null = null;
+    let bestShared = -1;
+    for (const plus of charges) {
+      if (plus.amount <= 0 || plus.kind !== minus.kind || reversalOf.has(plus.id) || Math.abs(plus.amount + minus.amount) > 0.005) continue;
+      const shared = [...words(plus.description)].filter((w) => own.has(w)).length;
+      if (shared > bestShared) {
+        best = plus;
+        bestShared = shared;
+      }
+    }
+    if (best) reversalOf.set(best.id, minus);
+  }
+  const reversals = new Set([...reversalOf.values()].map((c) => c.id));
+  return [
+    ...charges.filter((c) => !reversalOf.has(c.id) && !reversals.has(c.id)).map((line) => ({ line, reversal: null })),
+    ...charges.filter((c) => reversalOf.has(c.id)).map((line) => ({ line, reversal: reversalOf.get(line.id)! })),
+  ];
 }
 
 /**
@@ -167,6 +210,63 @@ export default async function BookingPage({
   const weeks = booking.startDate && booking.endDate ? teachingWeeks(toDateInputValue(booking.startDate), toDateInputValue(booking.endDate)) : null;
   const stay = booking.accommodation;
   const removesCharges = canFull && open;
+  // A cost line in words: its own text (its kind's label in this language when that is all it says),
+  // and its kind when the text does not already say it.
+  const chargeWords = (c: BookingCharge) => {
+    const kindLabel = CHARGE_KIND_LABELS[c.kind];
+    const isKind = c.description === kindLabel.en || c.description === kindLabel.de;
+    const description = isKind ? pick(lang, kindLabel) : storedWords(c.description, lang);
+    const said = [kindLabel.de, kindLabel.en].some((k) => description.toLocaleLowerCase('de').includes(k.toLocaleLowerCase('de')));
+    return { description, kind: said ? null : pick(lang, kindLabel) };
+  };
+  // Removing one cost line, asked once more, from its row menu.
+  const removeChargeForm = (c: BookingCharge, description: string, label: string) => (
+    <form action={removeChargeAction}>
+      <input type="hidden" name="bookingId" value={booking.id} />
+      <input type="hidden" name="chargeId" value={c.id} />
+      <ConfirmSubmit
+        title={t(`„${description}“ entfernen?`, `Remove "${description}"?`)}
+        description={t('Der Posten wird aus der Buchung entfernt.', 'The line is removed from the booking.')}
+        confirmLabel={t('Entfernen', 'Remove')}
+        variant="ghost"
+      >
+        {label}
+      </ConfirmSubmit>
+    </form>
+  );
+  // The payments that count are lines on the card; the voided ones open at the side, newest first.
+  const received = booking.payments.filter((p) => !p.voidedAt);
+  const voided = booking.payments.filter((p) => p.voidedAt).reverse();
+  const voidsPayments = canFull && received.length > 0;
+  // A reference SchoolMan kept twice, or in both languages on two lines, on one line.
+  const paymentReference = (reference: string | null) =>
+    reference ? [...new Set(reference.split('\n').map((l) => l.trim()).filter(Boolean))].join(' / ') : null;
+  // A payment's day, how it came (a carry-over: the booking on its other side) and its reference.
+  const paymentWhen = (p: Payment) => {
+    const reference = paymentReference(p.reference);
+    return (
+      <>
+        <DateText value={p.receivedAt} compact /> ·{' '}
+        {p.counterpart ? (
+          <>
+            {p.amount < 0 ? t('an ', 'to ') : t('von ', 'from ')}
+            <Link href={`/admin/bookings/${p.counterpart.id}`} className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+              {p.counterpart.courseTypeName ?? t('Buchung', 'Booking')}
+              {p.counterpart.startDate ? (
+                <>
+                  {t(' ab ', ' from ')}
+                  <DateText value={p.counterpart.startDate} compact />
+                </>
+              ) : null}
+            </Link>
+          </>
+        ) : (
+          pick(lang, PAYMENT_METHOD_LABELS[p.method])
+        )}
+        {reference ? ` · ${reference}` : ''}
+      </>
+    );
+  };
   // The record's own fields, those that have a value: when it was booked is
   // in the head, so a booking with nothing else has no card for it.
   const single = booking.periods.length === 1 ? booking.periods[0] : null;
@@ -513,7 +613,8 @@ export default async function BookingPage({
         </p>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+      {/* One column on a phone that never grows past the screen: a ledger line shortens its words instead. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
           {booking.periods.length > 1 ? (
             <Card title={t('Zeiträume', 'Periods')} icon={Icon.calendar} tint="blue">
@@ -560,6 +661,8 @@ export default async function BookingPage({
             title={t('Kosten', 'Cost')}
             icon={Icon.catalogue}
             tint="red"
+            // The row menus open over the lines below and past the card's foot.
+            overflow="visible"
             actions={
               canEdit && open ? (
                 <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
@@ -581,49 +684,45 @@ export default async function BookingPage({
             {booking.charges.length === 0 ? (
               <p className="text-sm text-[var(--casa-muted)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
             ) : (
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {booking.charges.map((c) => {
-                  // A line whose text is its kind's label, in either language, reads in this one.
-                  const kindLabel = CHARGE_KIND_LABELS[c.kind];
-                  const isKind = c.description === kindLabel.en || c.description === kindLabel.de;
-                  const description = isKind ? pick(lang, kindLabel) : storedWords(c.description, lang);
+              <ul className="-my-2 divide-y divide-ws-line-soft">
+                {foldReversals(booking.charges).map(({ line, reversal }) => {
+                  const { description, kind } = chargeWords(line);
                   return (
-                    <li key={c.id}>
+                    <li key={line.id} title={reversal ? `${description} · ${chargeWords(reversal).description}` : description}>
                       <LedgerLine
-                        className="py-2.5"
+                        className="min-h-7 py-0.5"
                         withAction={removesCharges}
                         amount={
-                          <span
-                            className={cn(
-                              'font-semibold',
-                              c.amount < 0 ? 'text-[var(--casa-danger-text)]' : ''
-                            )}
-                          >
-                            {money(c.amount, booking.currency)}
-                          </span>
+                          reversal ? (
+                            // Cancelled: the amount it was, struck through; it does not count.
+                            <span className="text-[var(--casa-muted)] line-through">{money(line.amount, booking.currency)}</span>
+                          ) : (
+                            <span className={cn('font-semibold', line.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
+                              {money(line.amount, booking.currency)}
+                            </span>
+                          )
                         }
                         action={
                           removesCharges ? (
-                            <form action={removeChargeAction}>
-                              <input type="hidden" name="bookingId" value={booking.id} />
-                              <input type="hidden" name="chargeId" value={c.id} />
-                              <ConfirmSubmit
-                                title={t(`„${description}“ entfernen?`, `Remove "${description}"?`)}
-                                description={t('Der Posten wird aus der Buchung entfernt.', 'The line is removed from the booking.')}
-                                confirmLabel={t('Entfernen', 'Remove')}
-                                variant="ghost"
-                              >
-                                {t('Entfernen', 'Remove')}
-                              </ConfirmSubmit>
-                            </form>
+                            <RowMenu label={t(`Aktionen: ${description}`, `Actions: ${description}`)}>
+                              {reversal ? (
+                                <>
+                                  {removeChargeForm(line, description, t('Posten entfernen', 'Remove the line'))}
+                                  {removeChargeForm(reversal, chargeWords(reversal).description, t('Storno entfernen', 'Remove the reversal'))}
+                                </>
+                              ) : (
+                                removeChargeForm(line, description, t('Entfernen', 'Remove'))
+                              )}
+                            </RowMenu>
                           ) : null
                         }
                       >
-                        <span className="block text-sm font-semibold">{description}</span>
-                        {/* The kind only when the line's own text does not already say it. */}
-                        {!isKind ? (
-                          <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">{pick(lang, kindLabel)}</span>
-                        ) : null}
+                        <span className={cn('flex min-w-0 items-center gap-1.5 text-sm', reversal && 'text-[var(--casa-muted)]')}>
+                          <span className={cn('truncate', reversal ? 'min-w-0 font-medium line-through' : 'max-w-full shrink-0 font-semibold')}>{description}</span>
+                          {/* The kind only when the line's own words do not already say it. */}
+                          {kind ? <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">· {kind}</span> : null}
+                          {reversal ? <Badge tone="quiet" className="shrink-0">{t('Storniert', 'Cancelled')}</Badge> : null}
+                        </span>
                       </LedgerLine>
                     </li>
                   );
@@ -636,6 +735,7 @@ export default async function BookingPage({
             title={t('Zahlungen', 'Payments')}
             icon={Icon.money}
             tint="green"
+            overflow="visible"
             actions={
               canEdit && (open || carriesOver) ? (
                 <>
@@ -664,7 +764,7 @@ export default async function BookingPage({
             }
             footer={
               <LedgerLine
-                withAction={canFull && booking.payments.some((p) => !p.voidedAt)}
+                withAction={voidsPayments}
                 amount={
                   <span className="font-extrabold text-[var(--casa-success-text)]">
                     {money(booking.paid, booking.currency)}
@@ -675,83 +775,98 @@ export default async function BookingPage({
               </LedgerLine>
             }
           >
-            {booking.payments.length === 0 ? (
+            {received.length === 0 ? (
               <p className="text-sm text-[var(--casa-muted)]">{t('Noch nichts eingegangen.', 'Nothing received yet.')}</p>
             ) : (
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {booking.payments.map((p) => (
-                  <li key={p.id} className={p.voidedAt ? 'opacity-60' : undefined}>
-                    <LedgerLine
-                      className="py-2.5"
-                      withAction={canFull && booking.payments.some((x) => !x.voidedAt)}
-                      amount={
-                        <span className={cn('font-semibold', p.voidedAt ? 'line-through' : '', p.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
-                          {money(p.amount, booking.currency)}
+              <ul className="-my-2 divide-y divide-ws-line-soft">
+                {received.map((p) => {
+                  const subject = storedWords(p.subject, lang);
+                  return (
+                    <li key={p.id} title={[subject, paymentReference(p.reference), p.recordedByName].filter(Boolean).join(' · ')}>
+                      <LedgerLine
+                        className="min-h-7 py-0.5"
+                        withAction={voidsPayments}
+                        amount={
+                          <span className={cn('font-semibold', p.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
+                            {money(p.amount, booking.currency)}
+                          </span>
+                        }
+                        action={
+                          voidsPayments ? (
+                            <RowMenu label={t(`Aktionen: ${subject} ${money(p.amount, booking.currency)}`, `Actions: ${subject} ${money(p.amount, booking.currency)}`)}>
+                              <form action={voidPaymentAction}>
+                                <input type="hidden" name="bookingId" value={booking.id} />
+                                <input type="hidden" name="paymentId" value={p.id} />
+                                <input type="hidden" name="reason" value="Voided by staff" />
+                                <ConfirmSubmit
+                                  title={t(`${money(p.amount, booking.currency)} stornieren?`, `Void ${money(p.amount, booking.currency)}?`)}
+                                  description={
+                                    p.counterpart
+                                      ? t(
+                                          'Die Übertragung wird auf beiden Buchungen storniert: das Guthaben ist wieder dort, wo es war.',
+                                          'The carry-over is voided on both bookings: the credit is back where it was.'
+                                        )
+                                      : t(
+                                          'Die Zahlung bleibt als storniert auf dem Datensatz und zählt nicht mehr zum Saldo.',
+                                          'The payment stays on the record, marked void, and no longer counts towards the balance.'
+                                        )
+                                  }
+                                  confirmLabel={t('Stornieren', 'Void')}
+                                  variant="ghost"
+                                >
+                                  {t('Stornieren', 'Void')}
+                                </ConfirmSubmit>
+                              </form>
+                            </RowMenu>
+                          ) : null
+                        }
+                      >
+                        <span className="flex min-w-0 items-center gap-2 text-sm">
+                          <span className="max-w-full shrink-0 truncate font-semibold">{subject}</span>
+                          <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">{paymentWhen(p)}</span>
                         </span>
-                      }
-                      action={
-                        canFull && !p.voidedAt ? (
-                          <form action={voidPaymentAction}>
-                            <input type="hidden" name="bookingId" value={booking.id} />
-                            <input type="hidden" name="paymentId" value={p.id} />
-                            <input type="hidden" name="reason" value="Voided by staff" />
-                            <ConfirmSubmit
-                              title={t(`${money(p.amount, booking.currency)} stornieren?`, `Void ${money(p.amount, booking.currency)}?`)}
-                              description={
-                                p.counterpart
-                                  ? t(
-                                      'Die Übertragung wird auf beiden Buchungen storniert: das Guthaben ist wieder dort, wo es war.',
-                                      'The carry-over is voided on both bookings: the credit is back where it was.'
-                                    )
-                                  : t(
-                                      'Die Zahlung bleibt als storniert auf dem Datensatz und zählt nicht mehr zum Saldo.',
-                                      'The payment stays on the record, marked void, and no longer counts towards the balance.'
-                                    )
-                              }
-                              confirmLabel={t('Stornieren', 'Void')}
-                              variant="ghost"
-                            >
-                              {t('Stornieren', 'Void')}
-                            </ConfirmSubmit>
-                          </form>
-                        ) : null
-                      }
-                    >
-                      <span className="flex items-center gap-2 text-sm font-semibold">
-                        {storedWords(p.subject, lang)}
-                        {p.voidedAt ? <Badge tone="quiet">{t('Storniert', 'Voided')}</Badge> : null}
-                      </span>
-                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
-                        <DateText value={p.receivedAt} /> ·{' '}
-                        {p.counterpart ? (
-                          // A carry-over names the booking on its other side.
-                          <>
-                            {p.amount < 0 ? t('an ', 'to ') : t('von ', 'from ')}
-                            <Link
-                              href={`/admin/bookings/${p.counterpart.id}`}
-                              className="font-medium text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                            >
-                              {p.counterpart.courseTypeName ?? t('Buchung', 'Booking')}
-                              {p.counterpart.startDate ? (
-                                <>
-                                  {t(' ab ', ' from ')}
-                                  <DateText value={p.counterpart.startDate} compact />
-                                </>
-                              ) : null}
-                            </Link>
-                          </>
-                        ) : (
-                          pick(lang, PAYMENT_METHOD_LABELS[p.method])
-                        )}
-                        {p.reference ? ` · ${p.reference}` : ''}
-                        {p.recordedByName ? ` · ${p.recordedByName}` : ''}
-                        {p.voidReason ? ` · ${storedWords(p.voidReason, lang)}` : ''}
-                      </span>
-                    </LedgerLine>
-                  </li>
-                ))}
+                      </LedgerLine>
+                    </li>
+                  );
+                })}
               </ul>
             )}
+            {voided.length ? (
+              // Voided payments count for nothing: they wait at the side, each with when and why.
+              <MoreInPanel
+                className={cn('w-full', received.length ? 'mt-4' : 'mt-3')}
+                title={t('Stornierte Zahlungen', 'Voided payments')}
+                label={t('Stornierte Zahlungen', 'Voided payments')}
+                icon={Icon.money}
+                tint="green"
+                rows={voided.map((p) => {
+                  const subject = storedWords(p.subject, lang);
+                  return {
+                    key: p.id,
+                    at: new Date(p.receivedAt).toISOString(),
+                    search: [subject, pick(lang, PAYMENT_METHOD_LABELS[p.method]), paymentReference(p.reference), p.voidReason ? storedWords(p.voidReason, lang) : null, money(p.amount, booking.currency)]
+                      .filter(Boolean)
+                      .join(' '),
+                    node: (
+                      <div className="flex items-center gap-3 px-4 py-2.5">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-[var(--casa-ink)]">{subject}</span>
+                          <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                            {paymentWhen(p)}
+                            {p.recordedByName ? ` · ${p.recordedByName}` : ''}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
+                            {t('Storniert', 'Voided')} <DateText value={p.voidedAt} />
+                            {p.voidReason ? ` · ${storedWords(p.voidReason, lang)}` : ''}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-sm text-[var(--casa-muted)] tabular-nums line-through">{money(p.amount, booking.currency)}</span>
+                      </div>
+                    ),
+                  };
+                })}
+              />
+            ) : null}
           </Card>
           {/* The rest of SchoolMan's ledger for this booking, read as it is (0063): its payment plan, its agency's
               commission, what was paid out for it, its invoices. Finance keeps the accounts in DATEV. */}

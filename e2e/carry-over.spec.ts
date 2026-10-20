@@ -76,19 +76,19 @@ test.describe('carry-over', () => {
 
     // More than the credit is refused.
     await page.goto(`/admin/bookings/${sourceId}`);
-    await payments.getByRole('button', { name: 'Guthaben übertragen' }).click();
+    await payments.getByRole('button', { name: 'Guthaben übertragen', exact: true }).click();
     await dialog.getByLabel('Betrag').fill('500');
     await dialog.getByRole('button', { name: 'Guthaben übertragen' }).click();
     await expect(page.getByText('Der Betrag ist höher als das Guthaben dieser Buchung.')).toBeVisible();
 
     // The whole credit, which the amount starts at.
     await page.goto(`/admin/bookings/${sourceId}`);
-    await payments.getByRole('button', { name: 'Guthaben übertragen' }).click();
+    await payments.getByRole('button', { name: 'Guthaben übertragen', exact: true }).click();
     await expect(dialog.getByLabel('Betrag')).toHaveValue('260.00');
     await dialog.getByRole('button', { name: 'Guthaben übertragen' }).click();
     await expect(light).toHaveAttribute('data-light', 'ok');
     await expect(payments).toContainText('-260,00 €');
-    await expect(payments.getByRole('button', { name: 'Guthaben übertragen' })).toHaveCount(0);
+    await expect(payments.getByRole('button', { name: 'Guthaben übertragen', exact: true })).toHaveCount(0);
 
     // The other side: the line names where it came from, and 680 € are still open.
     await payments.getByRole('link', { name: /^Buchung ab/ }).click();
@@ -98,12 +98,16 @@ test.describe('carry-over', () => {
     await expect(payments).toContainText('Guthaben übertragen');
     await expect(page.getByText('hat 260,00 € Guthaben von einer anderen Buchung übertragen')).toBeVisible();
 
-    // Voided here, voided there: the credit is back on the first booking.
+    // Voided here, voided there, from the line's row menu: the credit is back on the first booking.
+    await payments.getByRole('button', { name: /^Aktionen: / }).click();
     await payments.getByRole('button', { name: 'Stornieren' }).click();
     await dialog.getByRole('button', { name: 'Stornieren' }).click();
     await expect(light).toContainText('Offen');
     await expect(light).toContainText('940,00 €');
+    // The voided line leaves the card for the side panel.
+    await expect(payments.getByRole('button', { name: /^Aktionen: / })).toHaveCount(0);
+    await expect(payments.getByRole('button', { name: /^Stornierte Zahlungen/ })).toBeVisible();
     await page.goto(`/admin/bookings/${sourceId}`);
-    await expect(payments.getByRole('button', { name: 'Guthaben übertragen' })).toBeVisible();
+    await expect(payments.getByRole('button', { name: 'Guthaben übertragen', exact: true })).toBeVisible();
   });
 });

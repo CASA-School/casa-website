@@ -312,7 +312,10 @@ export type CourseDay = {
   ownHours: boolean;
   teacherId: string | null;
   teacherName: string | null;
+  /** The board's short name („Claudia G"), for the week grid. */
+  teacherShort: string | null;
   replacedTeacherName: string | null;
+  replacedTeacherShort: string | null;
   substitute: boolean;
   tentative: boolean;
   roomId: string | null;
@@ -342,7 +345,9 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     own_hours: boolean;
     teacher_id: string | null;
     teacher_name: string | null;
+    teacher_short: string | null;
     replaced_teacher_name: string | null;
+    replaced_teacher_short: string | null;
     is_substitute: boolean;
     is_tentative: boolean;
     room_id: string | null;
@@ -356,7 +361,8 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     teacher_away: string | null;
   }>(
     `SELECT d.id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
-            t.lessons, d.starts_at IS NOT NULL AS own_hours, d.teacher_id, ${NAME('tp')} AS teacher_name, ${NAME('rp')} AS replaced_teacher_name,
+            t.lessons, d.starts_at IS NOT NULL AS own_hours, d.teacher_id, ${NAME('tp')} AS teacher_name, tm.short_name AS teacher_short,
+            ${NAME('rp')} AS replaced_teacher_name, rm.short_name AS replaced_teacher_short,
             d.is_substitute, d.is_tentative, d.room_id, coalesce(r.nickname, r.name) AS room_name, coalesce(rr.nickname, rr.name) AS replaced_room_name,
             d.cancelled, d.cancel_reason, d.merged, d.note, d.group_id IS NOT NULL AS on_board,
             (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) AS teacher_away
@@ -379,7 +385,9 @@ export async function listCourseDays(courseId: string): Promise<CourseDay[]> {
     ownHours: r.own_hours,
     teacherId: r.teacher_id,
     teacherName: r.teacher_name,
+    teacherShort: r.teacher_short,
     replacedTeacherName: r.replaced_teacher_name,
+    replacedTeacherShort: r.replaced_teacher_short,
     substitute: r.is_substitute,
     tentative: r.is_tentative,
     roomId: r.room_id,

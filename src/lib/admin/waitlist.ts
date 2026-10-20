@@ -9,6 +9,7 @@ import type { Bilingual } from './i18n';
 import { resolveCourse } from './courses';
 import { sittingWords } from './exams';
 import { setQueueStatus } from './queues';
+import { isUuid } from './ids';
 
 /**
  * The waiting list (2026-10-16, migration 0031; docs/ADMIN_WORKSPACE.md §Waiting list), and the places
@@ -256,6 +257,7 @@ export type CourseStart = {
 };
 
 export async function getCourseStart(id: string): Promise<CourseStart | null> {
+  if (!isUuid(id)) return null;
   const row = await queryFirst<{
     id: string;
     course_type_name: string;

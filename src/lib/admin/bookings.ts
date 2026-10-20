@@ -10,6 +10,7 @@ import { raiseFlag } from './flags';
 import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './waitlist';
 import { bookedLevelLabel, PAYMENT_SUBJECTS } from './booking-levels';
 import { pick, type Bilingual, type WsLang } from './i18n';
+import { isUuid } from './ids';
 
 /**
  * Bookings — a person's confirmed place on a course, with dates, cost lines
@@ -420,19 +421,27 @@ const FILTERS: Record<BookingFilter, string> = {
 export async function listBookings({
   filter = 'current',
   search,
+  payerId,
   limit = 40,
   offset = 0,
 }: {
   filter?: BookingFilter;
   search?: string;
+  /** Only the bookings this organisation pays, as its page lists them (2026-10-20). */
+  payerId?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ items: BookingListItem[]; total: number }> {
   const params: unknown[] = [];
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})`;
+  if (payerId) {
+    params.push(payerId);
+    where += ` AND b.payer_organisation_id = $${params.length}`;
+  }
   if (search) {
     params.push(`%${search}%`);
-    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE $1 OR concat_ws(' ', p.last_name, p.first_name) ILIKE $1 OR t.name ILIKE $1 OR t.name_de ILIKE $1 OR et.name ILIKE $1 OR b.number ILIKE $1)`;
+    const n = `$${params.length}`;
+    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE ${n} OR concat_ws(' ', p.last_name, p.first_name) ILIKE ${n} OR t.name ILIKE ${n} OR t.name_de ILIKE ${n} OR et.name ILIKE ${n} OR b.number ILIKE ${n})`;
   }
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -446,11 +455,12 @@ export async function listBookings({
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
 }
 
-export async function bookingCounts(): Promise<Record<BookingFilter, number>> {
+export async function bookingCounts(payerId?: string): Promise<Record<BookingFilter, number>> {
   const out = {} as Record<BookingFilter, number>;
   for (const key of Object.keys(FILTERS) as BookingFilter[]) {
     const row = await queryFirst<{ n: string }>(
-      `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[key]})`
+      `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[key]})${payerId ? ' AND b.payer_organisation_id = $1' : ''}`,
+      payerId ? [payerId] : []
     );
     out[key] = Number(row?.n ?? 0);
   }
@@ -458,14 +468,15 @@ export async function bookingCounts(): Promise<Record<BookingFilter, number>> {
 }
 
 /** What is still owed across every booking that is not cancelled: the figure finance looks at first. */
-export async function bookingsOwed(): Promise<{ amount: number; bookings: number }> {
+export async function bookingsOwed(payerId?: string): Promise<{ amount: number; bookings: number }> {
   const row = await queryFirst<{ amount: string | null; bookings: string }>(
     `SELECT sum(owed) AS amount, count(*) AS bookings FROM (
        SELECT coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
             - coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS owed
          FROM bookings b JOIN people p ON p.id = b.person_id
-        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status <> 'cancelled'
-     ) balances WHERE owed > 0.005`
+        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status <> 'cancelled'${payerId ? ' AND b.payer_organisation_id = $1' : ''}
+     ) balances WHERE owed > 0.005`,
+    payerId ? [payerId] : []
   );
   return { amount: Number(row?.amount ?? 0), bookings: Number(row?.bookings ?? 0) };
 }
@@ -490,6 +501,7 @@ export async function carryOverTargets(bookingId: string): Promise<BookingListIt
 }
 
 export async function getBooking(id: string): Promise<BookingDetail | null> {
+  if (!isUuid(id)) return null;
   const row = await queryFirst<
     ListRow & {
       course_type_id: string | null;

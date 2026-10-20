@@ -13,6 +13,7 @@ import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader } from '@/components/admin/ui';
 import { LetterList } from '@/components/admin/letters/letter-list';
+import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import {
@@ -308,10 +309,28 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
                 <StayRows stays={stays.current} lang={lang} linked={seesBookings} />
               </Group>
             ) : null}
-            {stays.earlier.length ? (
+            {/* Earlier stays a click away; their latest few here only when nothing is current (2026-10-20). */}
+            {!stays.current.length && stays.earlier.length ? (
               <Group label={t('Frühere', 'Earlier')} count={stays.earlierTotal}>
-                <StayRows stays={stays.earlier} lang={lang} linked={seesBookings} quiet />
+                <StayRows stays={stays.earlier.slice(0, EARLIER_SHOWN)} lang={lang} linked={seesBookings} quiet />
               </Group>
+            ) : null}
+            {stays.earlier.length > (stays.current.length ? 0 : EARLIER_SHOWN) ? (
+              <div className="px-4 pt-1 pb-4">
+                <MoreInPanel
+                  title={t('Frühere Aufenthalte', 'Earlier stays')}
+                  label={t('Frühere Aufenthalte', 'Earlier stays')}
+                  icon={Icon.person}
+                  tint="sun"
+                  listClassName="-mx-6"
+                  rows={stays.earlier.map((s) => ({
+                    key: s.stayId,
+                    node: <StayLine stay={s} lang={lang} linked={seesBookings} quiet />,
+                    search: [s.personName, s.roomName, s.bookingNumber].filter(Boolean).join(' '),
+                    at: `${s.from}T12:00:00Z`,
+                  }))}
+                />
+              </div>
             ) : null}
           </Card>
         </RecordTabPanel>
@@ -473,30 +492,36 @@ function Group({ label, count, children }: { label: string; count: number; child
 function StayRows({ stays, lang, linked, quiet = false }: { stays: readonly PlaceStay[]; lang: WsLang; linked: boolean; quiet?: boolean }) {
   return (
     <ul className="py-1.5">
-      {stays.map((s) => {
-        const body = (
-          <>
-            <span className={cn(quiet && 'opacity-70')}>
-              <IconChip icon={Icon.person} tint="sun" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className={cn('block truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{s.personName}</span>
-              <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">{[dayRange(s.from, s.to, lang), s.roomName, s.bookingNumber].filter(Boolean).join(' · ')}</span>
-            </span>
-          </>
-        );
-        return (
-          <li key={s.stayId}>
-            {linked ? (
-              <Link href={`/admin/bookings/${s.bookingId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
-                {body}
-              </Link>
-            ) : (
-              <div className="flex items-center gap-3 px-4 py-2.5">{body}</div>
-            )}
-          </li>
-        );
-      })}
+      {stays.map((s) => (
+        <li key={s.stayId}>
+          <StayLine stay={s} lang={lang} linked={linked} quiet={quiet} />
+        </li>
+      ))}
     </ul>
+  );
+}
+
+/** How many earlier stays show when nothing is current; the rest are at the side. */
+const EARLIER_SHOWN = 8;
+
+/** One stay: who, when, which room, which booking — a link to the booking for whoever may open it. */
+function StayLine({ stay: s, lang, linked, quiet = false }: { stay: PlaceStay; lang: WsLang; linked: boolean; quiet?: boolean }) {
+  const body = (
+    <>
+      <span className={cn(quiet && 'opacity-70')}>
+        <IconChip icon={Icon.person} tint="sun" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={cn('block truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{s.personName}</span>
+        <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">{[dayRange(s.from, s.to, lang), s.roomName, s.bookingNumber].filter(Boolean).join(' · ')}</span>
+      </span>
+    </>
+  );
+  return linked ? (
+    <Link href={`/admin/bookings/${s.bookingId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
+      {body}
+    </Link>
+  ) : (
+    <div className="flex items-center gap-3 px-4 py-2.5">{body}</div>
   );
 }

@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { BookingLightDot } from '@/components/admin/booking-light';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
+import { Icon } from '@/components/admin/icons';
 import { Pagination } from '@/components/admin/pagination';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import {
@@ -15,6 +17,8 @@ import {
 import { addDays } from '@/lib/admin/offers/stay';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
+import { isUuid } from '@/lib/admin/ids';
+import { organisationName } from '@/lib/admin/organisations';
 import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
@@ -87,11 +91,15 @@ export default async function BookingsPage({
   const filter: BookingFilter = VIEWS.some((v) => v.key === rawFilter) ? (rawFilter as BookingFilter) : 'current';
   const search = firstParam(params.q);
   const page = clampPage(params.page);
+  // From an organisation's page: only the bookings it pays (2026-10-20).
+  const rawPayer = firstParam(params.org);
+  const payerId = rawPayer && isUuid(rawPayer) ? rawPayer : undefined;
 
-  const [{ items, total }, counts, owed, { t, lang }] = await Promise.all([
-    listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page) }),
-    bookingCounts(),
-    bookingsOwed(),
+  const [{ items, total }, counts, owed, payerName, { t, lang }] = await Promise.all([
+    listBookings({ filter, search, payerId, limit: PAGE_SIZE, offset: offsetFor(page) }),
+    bookingCounts(payerId),
+    bookingsOwed(payerId),
+    payerId ? organisationName(payerId) : Promise.resolve(null),
     getI18n(),
   ]);
 
@@ -115,14 +123,29 @@ export default async function BookingsPage({
         : [{ key: filter, label: '', rows: items }];
   const span = 4;
   const hide = 'hidden md:table-cell';
-  const href = (key: BookingFilter) => `/admin/bookings${key === 'current' ? '' : `?filter=${key}`}`;
+  const href = (key: BookingFilter) => {
+    const query = new URLSearchParams({ ...(key === 'current' ? {} : { filter: key }), ...(payerId ? { org: payerId } : {}) }).toString();
+    return `/admin/bookings${query ? `?${query}` : ''}`;
+  };
 
   return (
     <>
       <PageHeader title={t('Buchungen', 'Bookings')} />
 
       {/* What is still owed across all bookings: the one figure the tabs do not carry. */}
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap items-center gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
+        {payerId ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
+            {t(`Bezahlt von ${payerName ?? '…'}`, `Paid by ${payerName ?? '…'}`)}
+            <Link
+              href={`/admin/bookings${filter === 'current' ? '' : `?filter=${filter}`}`}
+              aria-label={t('Alle Buchungen zeigen', 'Show all bookings')}
+              className="grid size-5 place-items-center rounded-full text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)] [&_svg]:size-3"
+            >
+              {Icon.close}
+            </Link>
+          </span>
+        ) : null}
         {owed.amount > 0.005 ? (
           <span className="inline-flex items-center gap-2">
             <span aria-hidden="true" className="size-2 rounded-full bg-[#e0a100]" />
@@ -140,7 +163,7 @@ export default async function BookingsPage({
             action: '/admin/bookings',
             value: search,
             placeholder: t('Name, Buchungsnummer oder Kurs', 'Name, booking number or course'),
-            keep: { filter: filter === 'current' ? undefined : filter },
+            keep: { filter: filter === 'current' ? undefined : filter, org: payerId },
           }}
         />
         {items.length === 0 ? (

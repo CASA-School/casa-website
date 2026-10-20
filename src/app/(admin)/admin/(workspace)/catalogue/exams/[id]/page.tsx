@@ -447,7 +447,11 @@ function sittingWhen(sitting: ExamSitting, lang: WsLang): string {
   return `${from.toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · ${time(from)}–${time(to)}`;
 }
 
-/** One candidate: the tick for the report, the name to the booking, the parts, the money, and telc. */
+/**
+ * One candidate on one line (2026-10-20: the exam-day list kept whole, each row short): the tick for the
+ * report, the booking's colour, the name to the booking, the parts when not all, the booking number, and
+ * telc — reported, what is missing, or the result — with its one action at the end.
+ */
 function CandidateRow({
   candidate: c,
   handles,
@@ -467,8 +471,9 @@ function CandidateRow({
   const overall = c.result ? overallOutcome(c.parts, c.result) : null;
   const money = { status: c.status, observationReason: c.observationReason as ObservationReason | null, charged: c.charged, paid: c.paid };
   const light = bookingLight(money);
+  const missing = c.missing.map((f) => pick(lang, TELC_FIELD_LABELS[f])).join(', ');
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-3">
+    <li className="flex min-h-10 flex-wrap items-center gap-x-3 gap-y-0.5 px-5 py-1 sm:flex-nowrap">
       {files ? (
         <input
           type="checkbox"
@@ -479,25 +484,21 @@ function CandidateRow({
           className="size-4 shrink-0 rounded border-ws-line-firm accent-[var(--casa-accent-surface)] disabled:opacity-30"
         />
       ) : null}
-      <div className="min-w-0 flex-1">
-        <Link href={`/admin/bookings/${c.bookingId}`} className="block truncate text-[0.9rem] font-semibold text-[var(--casa-ink)] hover:underline">
-          {c.personName}
-        </Link>
-        <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
-          {c.number}
-          {c.parts !== 'full' ? ` · ${pick(lang, EXAM_PARTS_LABELS[c.parts])}` : ''}
-        </p>
-      </div>
-      <BookingLightDot light={light} label={pick(lang, bookingLightLabel(money))} size="md" />
-      <span className="w-full text-[0.8rem] sm:w-56 sm:text-right">
+      <BookingLightDot light={light} label={pick(lang, bookingLightLabel(money))} />
+      <Link href={`/admin/bookings/${c.bookingId}`} className="min-w-0 flex-1 truncate text-[0.88rem] font-semibold text-[var(--casa-ink)] hover:underline">
+        {c.personName}
+      </Link>
+      {c.parts !== 'full' ? <span className="shrink-0 text-[0.78rem] text-[var(--casa-muted)]">{pick(lang, EXAM_PARTS_LABELS[c.parts])}</span> : null}
+      <span className="w-24 shrink-0 text-[0.78rem] text-[var(--casa-muted)] tabular-nums">{c.number}</span>
+      <span className="flex min-w-0 items-center gap-2 text-[0.8rem] max-sm:w-full max-sm:pl-7 sm:w-[19rem] sm:shrink-0 sm:justify-end">
         {c.result ? (
           // The result telc sent, then whether it was collected.
-          <span className="inline-flex flex-wrap items-center gap-x-2 sm:justify-end">
-            <span className={cn('font-semibold', overall === 'passed' ? 'text-[#17693a]' : overall === 'partial' ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
+          <>
+            <span className={cn('truncate font-semibold', overall === 'passed' ? 'text-[#17693a]' : overall === 'partial' ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
               {overall ? pick(lang, EXAM_OVERALL_LABELS[overall]) : t('Ergebnis unvollständig', 'Result incomplete')}
             </span>
             {c.result.collectedAt ? (
-              <span className="text-[var(--casa-muted)]" title={c.result.collectedNote ?? undefined}>
+              <span className="shrink-0 text-[var(--casa-muted)]" title={c.result.collectedNote ?? undefined}>
                 · {t('abgeholt', 'collected')} {new Date(c.result.collectedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
               </span>
             ) : handles && overall !== 'absent' ? (
@@ -514,20 +515,22 @@ function CandidateRow({
                 </form>
               </FormDialog>
             ) : null}
-          </span>
+          </>
         ) : c.filedAt ? (
-          <span className="inline-flex items-center gap-2 text-[#17693a]">
-            {t('Gemeldet', 'Reported')} {new Date(c.filedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
+          <>
+            <span className="text-[#17693a]">
+              {t('Gemeldet', 'Reported')} {new Date(c.filedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short' })}
+            </span>
             {handles ? (
               // Its own form, outside the report form: a form cannot hold another.
-              <button type="submit" form={`unfile-${c.bookingId}`} className="text-[0.76rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)] hover:underline">
+              <button type="submit" form={`unfile-${c.bookingId}`} className="shrink-0 text-[0.76rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)] hover:underline">
                 {t('Zurücknehmen', 'Undo')}
               </button>
             ) : null}
-          </span>
+          </>
         ) : c.missing.length ? (
-          <Link href={`/admin/people/${c.personId}?tab=details`} className="font-semibold text-[#9a5b00] hover:underline">
-            {t('Fehlt', 'Missing')}: {c.missing.map((f) => pick(lang, TELC_FIELD_LABELS[f])).join(', ')}
+          <Link href={`/admin/people/${c.personId}?tab=details`} title={`${t('Fehlt', 'Missing')}: ${missing}`} className="truncate font-semibold text-[#9a5b00] hover:underline">
+            {t('Fehlt', 'Missing')}: {missing}
           </Link>
         ) : (
           <span className="text-[var(--casa-muted)]">{t('Noch nicht gemeldet', 'Not reported yet')}</span>

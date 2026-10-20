@@ -934,6 +934,25 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     opening a side panel (`SidePanel`) with the detail. Done or old things fold away (`<details>`).
     A view that needs room of its own — a table, a timeline — gets a page under the same head, not a
     tab inside a card.
+10c. **A record's long list shows what matters now; the rest is at the side (Rahman, 2026-10-20:
+    "see where there is a long list … show a few and the rest in sidebar").** After SchoolMan's data came
+    across, some lists ran far down the page, measured on the busiest records: an agency's payouts
+    (208 rows, 13,000 px), its bookings (9,000 px), a booking's notes (60 entries) and letters (37).
+    The rule:
+    - Show the few in place:
+      - notes 5, letters 5 in a side card and 8 in a tab, tests 3, payouts 10;
+      - current and coming bookings and stays in full; closed ones at the side.
+    - Put everything under one button, „Alle … · N", which opens `SidePanel` with a search, chips per
+      kind, month headers, and a month's sum where the rows are money.
+    - Components: `MoreInPanel` (rows drawn on the server, `src/components/admin/more-in-panel.tsx`),
+      `TimelineEntries` and `LetterList`.
+    - Where "all" is a list of its own, link there narrowed instead of opening a panel: an
+      organisation's bookings open the Buchungen list with `?org=` („Bezahlt von …", the counts and the
+      owed sum narrowed too).
+    - A list the team works from stays whole and gets compact rows and a search instead: a group's
+      learners (`SearchableRows`), an exam date's candidates, a booking's costs and payments (the total
+      must visibly add up).
+    - Never a "mehr anzeigen" toggle.
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about
     (`RecordName`) — then when, how much, who has it, how recent. Never a
@@ -1790,11 +1809,18 @@ page already is — edit the course, Kursplanung (intensive), the waiting list,
 the open/closed switch — and „Buchen" stays the primary button. „Kurse" goes
 back to the view the course is listed in (intensive, evening, other; past).
 
-*Kurstage*: the days week by week — „KW 42 · Woche 7", this week marked —
-opening at this week, the weeks gone folded („Vergangene Wochen (6)"; a course
-that has ended shows all). Date, hours (bold when the day's own), lessons,
-teacher („für X" when someone replaced the plan's), room („statt Y"), called
-off; „Kurstage erzeugen" / „Fehlende Tage erzeugen" makes what is missing from
+*Kurstage* is a week grid (2026-10-20, rule 10c: 40 days had run to 2,100 px, now about 500 px):
+- **Rows and columns:** a row per teaching week („KW 44 · Woche 1" with its dates), and a column for
+  each weekday the course is taught (Mo–Fr intensive, Mo + Mi evening).
+- **Each day:** its date, the teacher's short name and the room.
+- **Marks:** amber with „für X" for a cover, red with „Fällt aus" for a day called off, a red tag when
+  the teacher is away, plus „zusammengelegt", the day's own hours and a note mark.
+- **Closures and today:** closures are hatched, and a week the school is closed is one row. Today is
+  outlined and this week tinted.
+- **Long courses:** past weeks fold only when a course has more than ten weeks.
+- **Opening a day:** a day ahead opens its popup as before; any day shows its full facts on hover.
+
+„Kurstage erzeugen" / „Fehlende Tage erzeugen" makes what is missing from
 the plan, leaving the school's closures out and a planned teacher off a day they
 are away; a day that exists is never touched. An intensive course's generation
 also makes its two board groups (`make_course_board_groups()`, 0047), so

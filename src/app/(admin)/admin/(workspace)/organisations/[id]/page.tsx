@@ -14,6 +14,7 @@ import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
+import { MoreInPanel, MoreLink } from '@/components/admin/more-in-panel';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
@@ -40,6 +41,7 @@ import {
   organisationOffers,
   organisationOrders,
   organisationPayouts,
+  type OrganisationPayout,
   type CommissionTerm,
   type OrganisationBooking,
 } from '@/lib/admin/organisations';
@@ -79,9 +81,9 @@ export default async function OrganisationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; error?: string; earlier?: string }>;
+  searchParams: Promise<{ tab?: string; error?: string }>;
 }) {
-  const [{ id }, { tab, error, earlier }, user] = await Promise.all([params, searchParams, requireModule('organisations')]);
+  const [{ id }, { tab, error }, user] = await Promise.all([params, searchParams, requireModule('organisations')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const organisation = await getOrganisation(id);
   if (!organisation) notFound();
@@ -99,7 +101,7 @@ export default async function OrganisationPage({
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
-    seesBookings ? organisationBookings(id, { allEarlier: earlier === 'all' }) : Promise.resolve(null),
+    seesBookings ? organisationBookings(id) : Promise.resolve(null),
     seesGroups ? organisationGroups(id) : Promise.resolve([]),
     seesCourses ? organisationCourses(id) : Promise.resolve([]),
     seesOffers ? organisationOffers(id) : Promise.resolve([]),
@@ -340,26 +342,25 @@ export default async function OrganisationPage({
 
       {bookings && bookingCount ? (
         <RecordTabPanel id="bookings">
+          {/* The soonest few here; all of them in the Buchungen list, narrowed to what it pays (2026-10-20). */}
           <Card bleed>
             {bookings.current.length ? (
               <Group label={t('Laufend und kommend', 'Current and upcoming')} count={bookings.current.length}>
-                <BookingRows bookings={bookings.current} lang={lang} t={t} />
+                <BookingRows bookings={bookings.current.slice(0, SHOWN)} lang={lang} t={t} />
               </Group>
-            ) : null}
-            {bookings.earlier.length ? (
+            ) : (
               <Group label={t('Frühere', 'Earlier')} count={bookings.earlierTotal}>
-                <BookingRows bookings={bookings.earlier} lang={lang} t={t} quiet />
-                {bookings.earlierTotal > bookings.earlier.length ? (
-                  <p className="px-4 pb-3">
-                    <Link
-                      href={`/admin/organisations/${id}?tab=bookings&earlier=all`}
-                      className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
-                    >
-                      {t(`Alle ${num(lang, bookings.earlierTotal)} anzeigen`, `Show all ${num(lang, bookings.earlierTotal)}`)}
-                    </Link>
-                  </p>
-                ) : null}
+                <BookingRows bookings={bookings.earlier.slice(0, SHOWN)} lang={lang} t={t} quiet />
               </Group>
+            )}
+            {bookings.current.length + bookings.earlierTotal > SHOWN ? (
+              <div className="px-4 pt-1 pb-4">
+                <MoreLink
+                  href={`/admin/bookings?${bookings.current.length ? '' : 'filter=all&'}org=${id}`}
+                  label={t('Alle Buchungen', 'All bookings')}
+                  count={bookings.current.length + bookings.earlierTotal}
+                />
+              </div>
             ) : null}
           </Card>
         </RecordTabPanel>
@@ -491,19 +492,32 @@ export default async function OrganisationPage({
 
       {payouts.length ? (
         <RecordTabPanel id="payouts">
+          {/* The last few here; every payout at the side, by month with the month's sum (2026-10-20). */}
           <Card bleed>
             <Rows>
-              {payouts.map((p) => (
-                <Row
-                  key={p.id}
-                  href={p.bookingId ? `/admin/bookings/${p.bookingId}` : `/admin/organisations/${id}?tab=payouts`}
-                  icon={<IconChip icon={Icon.money} tint="sun" />}
-                  title={[p.personName, p.bookingNumber].filter(Boolean).join(' · ') || t('Auszahlung', 'Payout')}
-                  detail={p.paidOn ? dayRange(p.paidOn, p.paidOn, lang) : null}
-                  end={euros(p.amount)}
-                />
+              {payouts.slice(0, SHOWN).map((p) => (
+                <li key={p.id}>
+                  <PayoutLine payout={p} id={id} t={t} lang={lang} />
+                </li>
               ))}
             </Rows>
+            {payouts.length > SHOWN ? (
+              <div className="px-4 pt-1 pb-4">
+                <MoreInPanel
+                  title={t('Ausgezahlt', 'Paid out')}
+                  label={t('Alle Auszahlungen', 'All payouts')}
+                  icon={Icon.money}
+                  tint="sun"
+                  rows={payouts.map((p) => ({
+                    key: p.id,
+                    node: <PayoutLine payout={p} id={id} t={t} lang={lang} />,
+                    search: [p.personName, p.bookingNumber].filter(Boolean).join(' '),
+                    at: p.paidOn ? `${p.paidOn}T12:00:00Z` : undefined,
+                    amount: p.amount,
+                  }))}
+                />
+              </div>
+            ) : null}
           </Card>
         </RecordTabPanel>
       ) : null}
@@ -563,21 +577,46 @@ function Rows({ children }: { children: ReactNode }) {
 }
 
 /** One row: its mark, what it is, its state, a line under it, and what stands at its end. */
-function Row({ href, icon, title, state, detail, end, quiet = false }: { href: string; icon: ReactNode; title: string; state?: ReactNode; detail?: string | null; end?: ReactNode; quiet?: boolean }) {
+function Row(props: RowProps) {
   return (
     <li>
-      <Link href={href} className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
-        <span className={cn(quiet && 'opacity-70')}>{icon}</span>
-        <span className="min-w-0 flex-1">
-          <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{title}</span>
-            {state}
-          </span>
-          {detail ? <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">{detail}</span> : null}
-        </span>
-        {end ? <span className="shrink-0 text-right text-[0.76rem] text-[var(--casa-muted)] tabular-nums">{end}</span> : null}
-      </Link>
+      <RowLink {...props} />
     </li>
+  );
+}
+
+type RowProps = { href: string; icon: ReactNode; title: string; state?: ReactNode; detail?: string | null; end?: ReactNode; quiet?: boolean };
+
+/** A row's link without its list item, for the side panel, which holds its own list. */
+function RowLink({ href, icon, title, state, detail, end, quiet = false }: RowProps) {
+  return (
+    <Link href={href} className="group flex items-center gap-3 px-4 py-2.5 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
+      <span className={cn(quiet && 'opacity-70')}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <span className={cn('truncate text-[0.88rem] font-semibold', quiet ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-ink)]')}>{title}</span>
+          {state}
+        </span>
+        {detail ? <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">{detail}</span> : null}
+      </span>
+      {end ? <span className="shrink-0 text-right text-[0.76rem] text-[var(--casa-muted)] tabular-nums">{end}</span> : null}
+    </Link>
+  );
+}
+
+/** How many rows a long tab shows before the rest is a click away (2026-10-20). */
+const SHOWN = 10;
+
+/** One payout: to whom, for which booking, when, how much. */
+function PayoutLine({ payout: p, id, t, lang }: { payout: OrganisationPayout; id: string; t: T; lang: WsLang }) {
+  return (
+    <RowLink
+      href={p.bookingId ? `/admin/bookings/${p.bookingId}` : `/admin/organisations/${id}?tab=payouts`}
+      icon={<IconChip icon={Icon.money} tint="sun" />}
+      title={[p.personName, p.bookingNumber].filter(Boolean).join(' · ') || t('Auszahlung', 'Payout')}
+      detail={p.paidOn ? dayRange(p.paidOn, p.paidOn, lang) : null}
+      end={euros(p.amount)}
+    />
   );
 }
 

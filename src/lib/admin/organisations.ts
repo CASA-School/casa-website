@@ -8,6 +8,7 @@ import type { Bilingual } from './i18n';
 import type { LetterKind } from './letters/types';
 import { formatOfferNumber, type OfferStatus } from './offers/types';
 import type { ContactSalutation, OrganisationKind, OrganisationRelation, OrganisationView } from './organisation-labels';
+import { isUuid } from './ids';
 
 /**
  * Organisations (2026-10-18, migration 0057; docs/ADMIN_WORKSPACE.md §Organisations): the agencies,
@@ -336,21 +337,26 @@ const toBooking = (r: BookingRow): OrganisationBooking => ({
   observationReason: r.observation_reason,
 });
 
-/** How many earlier bookings the tab shows before „Alle anzeigen". */
-export const EARLIER_SHOWN = 25;
+/** An organisation's name, for a list narrowed to it („Bezahlt von …"). */
+export async function organisationName(id: string): Promise<string | null> {
+  if (!isUuid(id)) return null;
+  return (await queryFirst<{ name: string }>(`SELECT name FROM organisations WHERE id = $1`, [id]))?.name ?? null;
+}
+
+/** How many earlier bookings are loaded; the rest are in the Buchungen list, narrowed to this organisation. */
+const EARLIER_SHOWN = 25;
 
 /**
  * The bookings it pays: those running or still to come, by start; then the rest — over, cancelled or
- * without dates — the latest first, the newest {@link EARLIER_SHOWN} unless all are asked for.
+ * without dates — the latest first, the newest {@link EARLIER_SHOWN}, and how many there are.
  */
 export async function organisationBookings(
-  organisationId: string,
-  { allEarlier = false }: { allEarlier?: boolean } = {}
+  organisationId: string
 ): Promise<{ current: OrganisationBooking[]; earlier: OrganisationBooking[]; earlierTotal: number }> {
   const [current, earlier, total] = await Promise.all([
     query<BookingRow>(`${BOOKINGS} AND ${PAYS_NOW('b')} ORDER BY start_date NULLS LAST, b.number, b.id`, [organisationId]),
     query<BookingRow>(
-      `${BOOKINGS} AND NOT (${PAYS_NOW('b')}) ORDER BY start_date DESC NULLS LAST, b.number DESC, b.id ${allEarlier ? '' : `LIMIT ${EARLIER_SHOWN}`}`,
+      `${BOOKINGS} AND NOT (${PAYS_NOW('b')}) ORDER BY start_date DESC NULLS LAST, b.number DESC, b.id LIMIT ${EARLIER_SHOWN}`,
       [organisationId]
     ),
     queryFirst<{ n: string }>(

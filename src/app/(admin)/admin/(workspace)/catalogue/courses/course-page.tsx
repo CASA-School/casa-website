@@ -11,6 +11,7 @@ import { toEditable } from '../editable';
 import { PersonForm } from '../../people/person-form';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { PersonPicker } from '@/components/admin/person-picker';
 import { dayRange } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
@@ -22,13 +23,14 @@ import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { courseDayChoices, courseInfo, hours, listCourseDays, weekPlans, type CourseDay, type WeekPlanRow } from '@/lib/admin/course-days';
 import { courseListRow, nextJoinMonday } from '@/lib/admin/course-list';
 import { roomChoice } from '@/lib/admin/course-starts';
-import { courseForEdit, courseLearners } from '@/lib/admin/courses';
+import { courseForEdit, courseLearners, type CourseLearner } from '@/lib/admin/courses';
 import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listCountries } from '@/lib/admin/people';
 import { ABSENCE_LABELS, isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
 import { listBookableRooms } from '@/lib/admin/rooms';
+import { SCHOOL_CLOSURES } from '@/config/school-closures';
 import { todayInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 
@@ -39,9 +41,9 @@ import { cn } from '@/lib/utils';
  * learners, so each has its own address (`courseHref`) and names the others of its level in its head.
  * The head says what the team reads on SchoolMan's course list — learners now against the places and
  * week by week, the main teachers, the room, the week it is in, who waits, open or closed — and holds
- * the list's „Aktionen". The lesson days open at this week, the weeks gone folded; the weekly plan
+ * the list's „Aktionen". The lesson days are a week grid (a day opens its dialog); the weekly plan
  * reads as sentences and is changed in its dialog; the learners are SchoolMan's per week and those
- * booked here by name.
+ * booked here by name, the ones whose period has ended at the side.
  */
 export async function CoursePage({
   id,
@@ -83,6 +85,9 @@ export async function CoursePage({
   const groupIndex = here.index || 1;
   // The names of this number's learners (a group of a split course: its own, and those booked here).
   const learners = canAccess(user, 'bookings') ? await courseLearners(id, groups.length > 1 && here.index > 0 ? here.index : undefined) : [];
+  // In the course now or still to come; whose period has ended (finished, or left early) goes to the side, the latest first.
+  const inCourse = learners.filter((l) => l.endDate >= today);
+  const leftCourse = learners.filter((l) => l.endDate < today).sort((a, b) => b.endDate.localeCompare(a.endDate));
   const shown = here.index === 0 ? days : days.filter((d) => d.groupIndex === groupIndex);
   const plan = plans.find((p) => p.groupIndex === groupIndex);
   const held = shown.filter((d) => !d.cancelled);
@@ -284,7 +289,7 @@ export async function CoursePage({
           }
         >
           {shown.length ? (
-            <DayTable days={shown} courseId={id} startDate={course.startDate} choices={choices} mayTeach={mayTeach} mayPlan={mayPlan} today={today} t={t} lang={lang} />
+            <DayGrid days={shown} courseId={id} startDate={course.startDate} weekdays={course.days} choices={choices} mayTeach={mayTeach} mayPlan={mayPlan} today={today} t={t} lang={lang} />
           ) : (
             <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">
               {plan?.rows.length ? t('Noch keine Kurstage.', 'No lesson days yet.') : t('Noch kein Wochenplan.', 'No weekly plan yet.')}
@@ -370,31 +375,42 @@ export async function CoursePage({
               title={
                 <>
                   {t('Buchungen', 'Bookings')}
-                  {learners.length ? <span className="ml-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{num(lang, learners.length)}</span> : null}
+                  {inCourse.length ? <span className="ml-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{num(lang, inCourse.length)}</span> : null}
                 </>
               }
               icon={Icon.bookings}
               tint="red"
               bleed
             >
-              {learners.length ? (
-                <ul className="divide-y divide-ws-line-soft">
-                  {/* Those in the course now or still to come first; whose period has ended, after them and quiet. */}
-                  {[...learners].sort((a, b) => Number(a.endDate < today) - Number(b.endDate < today)).map((l) => (
-                    <li key={`${l.bookingId}${l.startDate}`}>
-                      <Link
-                        href={`/admin/bookings/${l.bookingId}`}
-                        className={cn('flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[0.86rem] hover:bg-[var(--ws-row-hover)]', l.endDate < today && 'opacity-60')}
-                      >
-                        <span className="font-semibold text-[var(--casa-ink)]">{l.name}</span>
-                        <span className="text-[var(--casa-muted)] tabular-nums">{[l.levelCode, dayRange(l.startDate, l.endDate, lang)].filter(Boolean).join(' · ')}</span>
-                      </Link>
+              {inCourse.length ? (
+                // Those in the course now or still to come, by name, in two columns on a wide screen.
+                <ul className="py-1.5 lg:columns-2 lg:gap-0">
+                  {inCourse.map((l) => (
+                    <li key={`${l.bookingId}${l.startDate}`} className="break-inside-avoid">
+                      <LearnerLine learner={l} course={course} lang={lang} t={t} />
                     </li>
                   ))}
                 </ul>
-              ) : (
+              ) : !leftCourse.length ? (
                 <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch keine Buchung.', 'No booking yet.')}</p>
-              )}
+              ) : null}
+              {leftCourse.length ? (
+                // Whose period has ended — finished, or left early: at the side, by the month they left.
+                <div className={cn('px-4 pb-4', inCourse.length ? 'pt-1' : 'pt-4')}>
+                  <MoreInPanel
+                    title={t('Ausgeschieden und beendet', 'Left and finished')}
+                    label={t('Ausgeschieden und beendet', 'Left and finished')}
+                    icon={Icon.people}
+                    tint="red"
+                    rows={leftCourse.map((l) => ({
+                      key: `${l.bookingId}${l.startDate}`,
+                      node: <LearnerLine learner={l} lang={lang} t={t} />,
+                      search: [l.name, l.levelCode].filter(Boolean).join(' '),
+                      at: `${l.endDate}T12:00:00Z`,
+                    }))}
+                  />
+                </div>
+              ) : null}
             </Card>
           </div>
         </RecordTabPanel>
@@ -404,6 +420,24 @@ export async function CoursePage({
 }
 
 const Dash = () => <span className="font-semibold text-[var(--casa-text-subtle)]">—</span>;
+
+/**
+ * A learner on one line: the name to their booking, then only what differs from the course — another
+ * step, a later first day or an earlier last one (in the side panel, `course` left out, the whole period).
+ */
+function LearnerLine({ learner: l, course, lang, t }: { learner: CourseLearner; course?: { levelCode: string | null; startDate: string; endDate: string }; lang: WsLang; t: T }) {
+  const day = (iso: string) => dayRange(iso, iso, lang);
+  const later = course && l.startDate > course.startDate;
+  const earlier = course && l.endDate < course.endDate;
+  const period = !course || (later && earlier) ? dayRange(l.startDate, l.endDate, lang) : later ? t(`ab ${day(l.startDate)}`, `from ${day(l.startDate)}`) : earlier ? t(`bis ${day(l.endDate)}`, `until ${day(l.endDate)}`) : null;
+  const level = l.levelCode && l.levelCode !== course?.levelCode ? l.levelCode : null;
+  return (
+    <Link href={`/admin/bookings/${l.bookingId}`} className="flex items-center gap-3 px-5 py-1.5 text-[0.86rem] hover:bg-[var(--ws-row-hover)]">
+      <span className="min-w-0 flex-1 truncate font-semibold text-[var(--casa-ink)]">{l.name}</span>
+      {level || period ? <span className="shrink-0 text-[0.78rem] text-[var(--casa-muted)] tabular-nums">{[level, period].filter(Boolean).join(' · ')}</span> : null}
+    </Link>
+  );
+}
 
 /** An absence's reason as stored (`Krank`), in the reader's language. */
 const absenceWord = (reason: string, lang: WsLang) => (isAbsenceReason(reason) ? pick(lang, ABSENCE_LABELS[reason]) : null);
@@ -508,25 +542,42 @@ function LearnerWeeks({ weeks, week, places, today, t, lang }: { weeks: { monday
   );
 }
 
-const COLS = (
-  <colgroup>
-    <col className="w-[9.5rem]" />
-    <col className="w-[7.5rem]" />
-    <col className="w-[3.5rem]" />
-    <col />
-    <col className="w-[12rem]" />
-    <col className="w-[6.5rem]" />
-  </colgroup>
-);
+/** The day after `n` days. */
+function addDays(day: string, n: number): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** 1 Monday … 7 Sunday. */
+const isoDay = (day: string) => ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+
+const closureOn = (day: string) => SCHOOL_CLOSURES.find((c) => day >= c.from && day <= c.to) ?? null;
+
+/** A long grid — an evening term of seventeen weeks — folds the weeks gone; an eight-week course reads whole. */
+const FOLD_FROM = 10;
+
+/** The day dialog's button, stretched over its day: the cell is what is clicked, as `RowDialog` stretches over a row. */
+const STRETCH =
+  '[&>button]:absolute [&>button]:inset-0 [&>button]:z-[1] [&>button]:h-auto [&>button]:w-full [&>button]:cursor-pointer [&>button]:rounded-none [&>button]:bg-transparent [&>button]:px-0 [&>button:hover]:bg-[#1f3e6c]/[0.05]';
+
+/** A school closure, hatched. */
+const CLOSED = 'bg-[repeating-linear-gradient(135deg,#f5f7fa_0_6px,#edf1f5_6px_12px)]';
+
+const PILL = 'shrink-0 rounded-full px-1.5 text-[0.66rem] leading-4 font-semibold ring-1 ring-inset';
 
 /**
- * The days week by week: date, hours, lessons, teacher, room, and what changed on the day. It opens at
- * this week; the weeks gone sit folded above it.
+ * The lesson days as a week grid (2026-10-20, Rahman: make the long lists calm): a row per teaching week,
+ * „KW 44 · Woche 1" and its dates, a column per weekday the course is taught on. A day says its teacher
+ * (the board's short name; „für X" when covering) and its room, marked at its edge when covered (amber)
+ * or called off (red); a closure is hatched; today is outlined. Clicking a day ahead opens its dialog, as
+ * „Ändern" did; the whole of a day is on its hover and in its dialog's head.
  */
-function DayTable({
+function DayGrid({
   days,
   courseId,
   startDate,
+  weekdays,
   choices,
   mayTeach,
   mayPlan,
@@ -537,6 +588,8 @@ function DayTable({
   days: CourseDay[];
   courseId: string;
   startDate: string;
+  /** The start's days („Mon", „Wed"). */
+  weekdays: readonly string[];
   choices: Awaited<ReturnType<typeof courseDayChoices>>;
   mayTeach: boolean;
   mayPlan: boolean;
@@ -544,115 +597,221 @@ function DayTable({
   t: T;
   lang: WsLang;
 }) {
-  const weeks = new Map<string, CourseDay[]>();
-  for (const d of days) {
-    const monday = mondayOf(d.date);
-    weeks.set(monday, [...(weeks.get(monday) ?? []), d]);
-  }
+  const byDate = new Map<string, CourseDay[]>();
+  for (const d of days) byDate.set(d.date, [...(byDate.get(d.date) ?? []), d]);
+  const dates = [...byDate.keys()].sort();
+  const firstDay = dates[0];
+  const lastDay = dates[dates.length - 1];
+  // A column per weekday the course is taught on: Mo–Fr for an intensive course, Mo + Mi for an evening one,
+  // and a day's own when it falls on another (a day made up on a Thursday).
+  const planned = new Set(weekdays.map((d) => SCHEDULE_DAYS.indexOf(d) + 1).filter((n) => n > 0));
+  const columns = [...new Set([...planned, ...dates.map(isoDay)])].sort((a, b) => a - b);
+  const weeks: string[] = [];
+  for (let monday = mondayOf(firstDay); monday <= lastDay; monday = addDays(monday, 7)) weeks.push(monday);
   const thisMonday = mondayOf(today);
-  const all = [...weeks.entries()];
-  const ahead = all.filter(([monday]) => monday >= thisMonday);
-  // Folded only while there is a week to open at: a course that has ended shows all of it.
-  const gone = ahead.length ? all.filter(([monday]) => monday < thisMonday) : [];
-  const shown = ahead.length ? ahead : all;
+  const fold = weeks.length > FOLD_FROM && weeks.some((m) => m >= thisMonday) && weeks.some((m) => m < thisMonday);
+  const gone = fold ? weeks.filter((m) => m < thisMonday) : [];
+  const shown = fold ? weeks.filter((m) => m >= thisMonday) : weeks;
   const first = mondayOf(startDate);
   const courseWeek = (monday: string) => Math.round((Date.parse(monday) - Date.parse(first)) / (7 * 86_400_000)) + 1;
   const date = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), { day: '2-digit', month: '2-digit' });
-  const table = 'w-full min-w-[46rem] table-fixed text-left text-[0.86rem]';
+  const label = (iso: string) => `${weekdayName(isoDay(iso), lang)} ${date(iso)}`;
+  const table = cn('w-full table-fixed border-collapse text-left', columns.length > 2 ? 'min-w-[42rem]' : 'min-w-[24rem]');
+  const cols = (
+    <colgroup>
+      <col className="w-[9.5rem]" />
+      {columns.map((n) => (
+        <col key={n} />
+      ))}
+    </colgroup>
+  );
 
-  const rows = (list: [string, CourseDay[]][]) =>
-    list.flatMap(([monday, list]) => [
-      <tr key={`kw-${monday}`} className="bg-ws-sunk/60">
-        <td colSpan={6} className="px-5 py-1.5 text-[0.74rem] font-bold text-[var(--casa-muted)]">
-          {t(`KW ${isoWeek(monday)}`, `Week ${isoWeek(monday)}`)}
-          <span className="font-semibold"> · {t(`Woche ${courseWeek(monday)}`, `course week ${courseWeek(monday)}`)}</span>
-          {monday === thisMonday ? <span className="ml-2 rounded-full bg-[var(--casa-ink-deep)] px-1.5 py-px text-[0.66rem] font-semibold text-white">{t('Diese Woche', 'This week')}</span> : null}
-        </td>
-      </tr>,
-      ...list.map((d) => (
-        <tr key={d.id} className={cn('border-b border-ws-line-soft align-top', d.date < today && 'text-[var(--casa-muted)]', d.cancelled && 'bg-[#fbf3f3]')}>
-          <td className="px-5 py-2 whitespace-nowrap tabular-nums">
-            <span className="mr-2 inline-block w-6 font-semibold">{weekdayName(((new Date(`${d.date}T12:00:00Z`).getUTCDay() + 6) % 7) + 1, lang)}</span>
-            {date(d.date)}
-          </td>
-          <td className={cn('px-2 py-2 whitespace-nowrap tabular-nums', d.ownHours && 'font-semibold text-[var(--casa-ink)]')}>{hours(d) ?? '—'}</td>
-          <td className="px-2 py-2 text-right tabular-nums">{d.lessons ?? '—'}</td>
-          <td className="px-3 py-2">
+  /** The day of the month, filled when it is today. */
+  const dayNumber = (iso: string) => (
+    <span
+      className={cn(
+        'mt-px inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full text-[0.7rem] tabular-nums',
+        iso === today ? 'bg-[var(--casa-ink-deep)] px-1 font-bold text-white' : 'font-semibold text-[var(--casa-muted)]'
+      )}
+    >
+      {Number(iso.slice(8))}
+    </span>
+  );
+
+  /** Everything the day's row used to say, as one line: for its hover and its dialog's head. */
+  const facts = (d: CourseDay) => {
+    const away = d.teacherAway ? [t('abwesend', 'absent'), absenceWord(d.teacherAway, lang)].filter(Boolean).join(' · ') : null;
+    return [
+      hours(d),
+      d.lessons !== null ? t(`${num(lang, d.lessons)} UE`, `${num(lang, d.lessons)} lessons`) : null,
+      d.cancelled ? [t('Fällt aus', 'Called off'), d.cancelReason].filter(Boolean).join(': ') : null,
+      d.teacherName
+        ? `${d.teacherName}${d.substitute ? (d.replacedTeacherName ? t(` für ${d.replacedTeacherName}`, ` for ${d.replacedTeacherName}`) : t(' (Vertretung)', ' (cover)')) : ''}${away ? ` (${away})` : ''}${d.tentative ? ' ?' : ''}`
+        : null,
+      d.merged ? t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group') : null,
+      d.roomName ? `${d.roomName}${d.replacedRoomName ? t(` statt ${d.replacedRoomName}`, ` instead of ${d.replacedRoomName}`) : ''}` : null,
+      d.note,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  };
+
+  const day = (d: CourseDay) => {
+    const past = d.date < today;
+    const teacher = d.teacherShort ?? d.teacherName;
+    const replaced = d.replacedTeacherShort ?? d.replacedTeacherName;
+    const about = facts(d);
+    return (
+      <div
+        key={d.id}
+        title={`${label(d.date)} · ${about}`}
+        className={cn(
+          'relative flex gap-1.5 px-2 py-1.5',
+          d.cancelled ? 'bg-[#fbf3f3] shadow-[inset_3px_0_0_#d14343]' : d.substitute ? 'shadow-[inset_3px_0_0_#d99a00]' : null,
+          d.date === today && 'outline-2 -outline-offset-2 outline-[var(--casa-ink-deep)]'
+        )}
+      >
+        {dayNumber(d.date)}
+        <div className={cn('min-w-0 flex-1', past && 'opacity-60')}>
+          <p className="truncate text-[0.8rem] leading-5">
             {d.cancelled ? (
-              <span className="font-semibold text-[var(--casa-danger-text)]">
-                {t('Fällt aus', 'Called off')}
-                {d.cancelReason ? <span className="font-normal text-[var(--casa-muted)]"> · {d.cancelReason}</span> : null}
-              </span>
-            ) : d.teacherName ? (
-              <span className="flex flex-wrap items-center gap-1.5">
-                <span className={d.teacherAway ? 'text-[var(--casa-muted)]' : undefined}>{d.teacherName}</span>
-                {d.teacherAway ? (
-                  <Badge tone="danger">
-                    {t('abwesend', 'absent')}
-                    {absenceWord(d.teacherAway, lang) ? ` · ${absenceWord(d.teacherAway, lang)}` : ''}
-                  </Badge>
-                ) : null}
-                {d.substitute ? <Badge tone="warning">{d.replacedTeacherName ? t(`für ${d.replacedTeacherName}`, `for ${d.replacedTeacherName}`) : t('Vertretung', 'Cover')}</Badge> : null}
-                {d.tentative ? <Badge tone="quiet">?</Badge> : null}
-                {d.merged ? <Badge tone="quiet">{t('zusammengelegt', 'merged')}</Badge> : null}
-              </span>
+              <span className="font-semibold text-[var(--casa-danger-text)]">{t('Fällt aus', 'Called off')}</span>
+            ) : teacher ? (
+              <>
+                <span className={cn('font-semibold', d.teacherAway ? 'text-[var(--casa-muted)] line-through' : 'text-[var(--casa-ink)]')}>{teacher}</span>
+                {d.tentative ? <span className="font-semibold text-[var(--casa-muted)]"> ?</span> : null}
+                {d.substitute && replaced ? <span className="text-[var(--casa-muted)]"> {t(`für ${replaced}`, `for ${replaced}`)}</span> : null}
+              </>
             ) : d.merged ? (
-              <span className="text-[var(--casa-muted)]">{t('Mit einer anderen Gruppe zusammengelegt', 'Merged with another group')}</span>
-            ) : d.date < today ? (
+              <span className="text-[var(--casa-muted)]">{t('Zusammengelegt', 'Merged')}</span>
+            ) : past ? (
               <span className="text-[var(--casa-text-subtle)]">—</span>
             ) : (
               <span className="font-semibold text-[#9a5b00]">{t('Noch offen', 'Not yet')}</span>
             )}
-          </td>
-          <td className="px-3 py-2">
-            {d.roomName ?? <span className="text-[var(--casa-text-subtle)]">—</span>}
-            {d.replacedRoomName ? <span className="block text-[0.76rem] text-[var(--casa-muted)]">{t(`statt ${d.replacedRoomName}`, `instead of ${d.replacedRoomName}`)}</span> : null}
-            {d.note ? <span className="block text-[0.76rem] text-[var(--casa-muted)]">{d.note}</span> : null}
-          </td>
-          <td className="px-5 py-1.5 text-right">
-            {(mayTeach || mayPlan) && d.date >= today ? (
-              <FormDialog trigger={t('Ändern', 'Change')} title={`${weekdayName(((new Date(`${d.date}T12:00:00Z`).getUTCDay() + 6) % 7) + 1, lang)} ${date(d.date)}`} size="sm" triggerVariant="ghost">
-                <DayForm courseId={courseId} day={d} choices={choices} mayTeach={mayTeach} mayPlan={mayPlan} />
-              </FormDialog>
+          </p>
+          <p className="flex items-center gap-1 text-[0.74rem] leading-[18px] text-[var(--casa-muted)]">
+            <span className="min-w-0 flex-1 truncate">
+              {d.cancelled ? (
+                d.cancelReason
+              ) : (
+                <>
+                  {d.roomName ?? <span className="text-[var(--casa-text-subtle)]">—</span>}
+                  {d.replacedRoomName ? <span> {t(`statt ${d.replacedRoomName}`, `instead of ${d.replacedRoomName}`)}</span> : null}
+                </>
+              )}
+            </span>
+            {d.ownHours && hours(d) ? <span className="shrink-0 font-semibold text-[var(--casa-ink)] tabular-nums">{hours(d)}</span> : null}
+            {d.teacherAway && !d.cancelled ? <span className={cn(PILL, 'bg-[#fdecec] text-[#9b1c1c] ring-[#f3c4c4]')}>{absenceWord(d.teacherAway, lang) ?? t('abwesend', 'absent')}</span> : null}
+            {d.merged && teacher && !d.cancelled ? <span className={cn(PILL, 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]')}>{t('zusammengelegt', 'merged')}</span> : null}
+            {d.note ? (
+              <span aria-hidden="true" className="shrink-0 [&_svg]:size-3">
+                {Icon.note}
+              </span>
             ) : null}
+          </p>
+        </div>
+        {(mayTeach || mayPlan) && !past ? (
+          <span className={STRETCH}>
+            <FormDialog trigger={<span className="sr-only">{t(`${label(d.date)} ändern`, `Change ${label(d.date)}`)}</span>} title={label(d.date)} description={about} size="sm" triggerVariant="ghost">
+              <DayForm courseId={courseId} day={d} choices={choices} mayTeach={mayTeach} mayPlan={mayPlan} />
+            </FormDialog>
+          </span>
+        ) : null}
+      </div>
+    );
+  };
+
+  const row = (monday: string) => {
+    const cells = columns.map((n) => addDays(monday, n - 1));
+    const closures = cells.map((c) => (byDate.has(c) ? null : closureOn(c)));
+    const closedWeek = closures.every(Boolean) ? closures[0] : null;
+    const current = monday === thisMonday;
+    return (
+      <tr key={monday} className={cn('border-b border-ws-line-soft last:border-b-0', current && 'bg-[#f6f9fd]')}>
+        <th scope="row" className={cn('px-4 py-1.5 align-top font-normal', current && 'shadow-[inset_3px_0_0_var(--casa-ink-deep)]')}>
+          <span className="block truncate text-[0.8rem] leading-5 font-bold text-[var(--casa-ink)] tabular-nums">
+            {t(`KW ${isoWeek(monday)}`, `W${isoWeek(monday)}`)}
+            {closedWeek ? null : <span className="text-[0.72rem] font-semibold text-[var(--casa-muted)]"> · {t(`Woche ${courseWeek(monday)}`, `week ${courseWeek(monday)}`)}</span>}
+          </span>
+          <span className="block text-[0.72rem] leading-[18px] text-[var(--casa-muted)] tabular-nums">{dayRange(cells[0], cells[cells.length - 1], lang)}</span>
+        </th>
+        {closedWeek ? (
+          <td colSpan={columns.length} className={cn(CLOSED, 'border-l border-ws-line-soft px-3 text-[0.8rem] font-semibold text-[var(--casa-muted)]')}>
+            {t('Geschlossen', 'Closed')} · {closedWeek.label[lang]}
           </td>
-        </tr>
-      )),
-    ]);
+        ) : (
+          cells.map((c, i) => {
+            const list = byDate.get(c) ?? [];
+            const closure = closures[i];
+            return (
+              <td key={c} className={cn('border-l border-ws-line-soft p-0 align-top', !list.length && closure && CLOSED)}>
+                {list.length ? (
+                  list.map(day)
+                ) : c >= firstDay && c <= lastDay && (closure || planned.has(isoDay(c))) ? (
+                  <div className="flex gap-1.5 px-2 py-1.5" title={closure ? `${label(c)} · ${t('Geschlossen', 'Closed')} · ${closure.label[lang]}` : label(c)}>
+                    {dayNumber(c)}
+                    {closure ? (
+                      <div className="min-w-0 flex-1 text-[var(--casa-muted)]">
+                        <p className="truncate text-[0.8rem] leading-5 font-semibold">{t('Geschlossen', 'Closed')}</p>
+                        <p className="truncate text-[0.74rem] leading-[18px]">{closure.label[lang]}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </td>
+            );
+          })
+        )}
+      </tr>
+    );
+  };
+
+  const head = (
+    <thead>
+      <tr className="border-b border-ws-line text-xs text-[var(--casa-muted)]">
+        <th className="px-4 py-2 font-semibold">{t('Woche', 'Week')}</th>
+        {columns.map((n) => (
+          <th key={n} className="border-l border-ws-line-soft px-2 py-2 font-semibold">
+            {weekdayName(n, lang)}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
 
   return (
     <div className="overflow-x-auto">
-      <table className={table}>
-        {COLS}
-        <thead>
-          <tr className="border-b border-ws-line text-xs text-[var(--casa-muted)]">
-            <th className="px-5 py-2 font-semibold">{t('Tag', 'Day')}</th>
-            <th className="px-2 py-2 font-semibold">{t('Zeit', 'Time')}</th>
-            <th className="px-2 py-2 text-right font-semibold">{t('UE', 'Lessons')}</th>
-            <th className="px-3 py-2 font-semibold">{t('Lehrkraft', 'Teacher')}</th>
-            <th className="px-3 py-2 font-semibold">{t('Raum', 'Room')}</th>
-            <th className="px-5 py-2" />
-          </tr>
-        </thead>
-      </table>
       {gone.length ? (
-        <details className="group/past min-w-[46rem] border-b border-ws-line-soft">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] select-none hover:bg-[var(--ws-row-hover)] hover:text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
-            <span aria-hidden="true" className="inline-flex transition-transform group-open/past:rotate-90 [&_svg]:size-3.5">
-              {Icon.chevronRight}
-            </span>
-            {t(`Vergangene Wochen (${gone.length})`, `Past weeks (${gone.length})`)}
-          </summary>
+        <>
           <table className={table}>
-            {COLS}
-            <tbody>{rows(gone)}</tbody>
+            {cols}
+            {head}
           </table>
-        </details>
-      ) : null}
-      <table className={table}>
-        {COLS}
-        <tbody>{rows(shown)}</tbody>
-      </table>
+          <details className="group/past border-b border-ws-line">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] select-none hover:bg-[var(--ws-row-hover)] hover:text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
+              <span aria-hidden="true" className="inline-flex transition-transform group-open/past:rotate-90 [&_svg]:size-3.5">
+                {Icon.chevronRight}
+              </span>
+              {t(`Vergangene Wochen (${gone.length})`, `Past weeks (${gone.length})`)}
+            </summary>
+            <table className={cn(table, 'border-t border-ws-line-soft')}>
+              {cols}
+              <tbody>{gone.map(row)}</tbody>
+            </table>
+          </details>
+          <table className={table}>
+            {cols}
+            <tbody>{shown.map(row)}</tbody>
+          </table>
+        </>
+      ) : (
+        <table className={table}>
+          {cols}
+          {head}
+          <tbody>{shown.map(row)}</tbody>
+        </table>
+      )}
     </div>
   );
 }

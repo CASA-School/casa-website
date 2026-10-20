@@ -1,6 +1,7 @@
 import { query, queryFirst } from './db';
 import { inboxConditions, inboxOrder, type InboxPeriod, type InboxState } from './inbox';
 import { normaliseStatus, type WorkStatus } from './queues';
+import { isUuid } from './ids';
 
 /**
  * Reads for the enquiry queue.
@@ -144,6 +145,7 @@ export async function listEnquiries({
 }
 
 export async function getEnquiry(id: string): Promise<EnquiryDetail | null> {
+  if (!isUuid(id)) return null;
   const row = await queryFirst<Row>(`${SELECT} WHERE e.id = $1`, [id]);
 
   if (!row) {

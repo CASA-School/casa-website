@@ -133,7 +133,9 @@ test.describe('waiting list', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].status).toBe('booked');
     expect(rows[0].booking_id).not.toBeNull();
+    // The waiting-list entry is closed now: beside the open booking, among the earlier ones at the side.
     await page.goto(`/admin/people/${nextId}?tab=cases`);
-    await expect(page.getByRole('tabpanel').getByText('Gebucht').first()).toBeVisible();
+    await page.getByRole('tabpanel').getByRole('button', { name: /^Frühere Anfragen und Buchungen/ }).click();
+    await expect(page.getByRole('dialog').getByText('Gebucht').first()).toBeVisible();
   });
 });

@@ -167,8 +167,10 @@ test.describe('course starts', () => {
     const total = (await client.query<{ n: number }>(`SELECT count(*)::int AS n FROM course_days WHERE course_id = $1`, [course])).rows[0].n;
 
     await page.goto(`/admin/catalogue/courses/${course}`);
-    await expect(page.locator('tbody tr').filter({ hasText: 'E2E Lehrkraft' }).first()).toContainText('abwesend · Krank');
-    await expect(page.locator('tbody tr').filter({ hasText: 'E2E Lehrkraft' }).nth(1)).not.toContainText('abwesend');
+    // The week grid names the teacher by their short name, and marks the day they are away.
+    const taught = page.getByRole('cell').filter({ hasText: 'E2E L' });
+    await expect(taught.first()).toContainText('Krank');
+    await expect(taught.nth(1)).not.toContainText('Krank');
     // Every day but the one the teacher is there for.
     await expect(page.getByText('Ohne Lehrkraft').locator('..')).toContainText(String(total - 1));
   });
