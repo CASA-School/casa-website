@@ -25,7 +25,6 @@ import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import { BandHeading } from '@/components/sections/band-heading';
 import { intl, pick, pickTree, say } from '@/lib/cms/copy';
-import { stripTags } from '@/lib/cms/stega';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getContentLocale();
@@ -131,9 +130,9 @@ function buildSelectorCopy(course: SelectorCourseLike, locale: 'en' | 'de', sche
   if (normalizedSlug.includes('intensive')) {
     return {
       bestFor:
-        say(locale, 'Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.', 'Anyone who wants to make quick progress for study, work or a visa.'),
+        say(locale, 'Alle, die mit ihrem Studium, Beruf oder dem Visumsantrag schnell vorankommen möchten.', 'Anyone who wants to make quick progress with their studies, their work or a visa application.'),
       schedule:
-        say(locale, 'Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag', 'New courses every month, alternating between mornings and afternoons'),
+        say(locale, 'Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag', 'New courses start every month; the first part of each level starts alternately in the morning or the afternoon'),
       intensity: say(locale, '{course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche', '{course.intensive-german.lessons} lessons of 45 minutes a week'),
       outcomes: baseOutcomes,
       facts: registryFacts,
@@ -269,28 +268,6 @@ export default async function CoursesPage({
    * filters above already narrow it when a reader wants that.
    */
   const featuredCourses = filterCourses(finderData.courses, activeFacets);
-
-  /*
-   * The heading said "Six routes" as a literal, and went wrong as soon as a
-   * seventh format existed. Spelled from the array so it cannot drift again.
-   */
-  const courseCountWord = (() => {
-    const words: Record<number, { en: string; de: string }> = {
-      1: { en: 'One', de: 'Ein' },
-      2: { en: 'Two', de: 'Zwei' },
-      3: { en: 'Three', de: 'Drei' },
-      4: { en: 'Four', de: 'Vier' },
-      5: { en: 'Five', de: 'Fünf' },
-      6: { en: 'Six', de: 'Sechs' },
-      7: { en: 'Seven', de: 'Sieben' },
-      8: { en: 'Eight', de: 'Acht' },
-    };
-
-    return words[featuredCourses.length] ?? { en: String(featuredCourses.length), de: String(featuredCourses.length) };
-  })();
-  // The word in the page's language, so a prepared language (docs/TRANSLATIONS.md) does not show
-  // „Sieben"; untagged, since it sits inside the heading's own editable text.
-  const countWord = stripTags(pick(locale, courseCountWord));
 
   const courseRows = featuredCourses.map((course) => {
     /*
@@ -444,7 +421,7 @@ export default async function CoursesPage({
           <HeroLede
             eyebrow={hero.eyebrow}
             title={say(locale, 'Finde deinen Deutschkurs', 'Find your German course')}
-            description={say(locale, 'Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.', 'Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.')}
+            description={say(locale, 'Wir helfen dir, den passenden Deutschkurs zu finden – egal, ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest.', 'We help you find the right German course – whether you are starting out, learning alongside work or working towards a specific goal.')}
             ctas={pageConfig.ctas.slice(0, 1)}
             className="lg:py-6"
           />
@@ -492,7 +469,7 @@ export default async function CoursesPage({
               eyebrow={say(locale, 'Kursauswahl', 'Choosing a course')}
               title={say(locale, 'Unsere Kursformate im Überblick', 'Our course formats at a glance')}
               description={
-                say(locale, '{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.', '{en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.', { de: countWord, en: countWord })
+                say(locale, 'Verschiedene Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht in der Qualität.', 'Different ways to reach the same goal. What changes is the rhythm, not the quality.')
               }
             />
             {/* A level chosen on the staircase narrows the list; say so, and offer the way back. */}
@@ -588,39 +565,39 @@ export default async function CoursesPage({
           <BandHeading
             tone="light"
             eyebrow={say(locale, 'Vor der Anmeldung', 'Before you register')}
-            title={say(locale, 'Vier Dinge, die du vorher wissen solltest', 'Four things worth knowing first')}
+            title={say(locale, 'Wichtige Punkte für die Kursanmeldung', 'Good to know before you register')}
             description={
-              say(locale, 'Hier findest du Antworten zur Einstufung, zum Lerntempo und zur Prüfungsvorbereitung.', 'Here you’ll find answers about placement, the pace of learning and exam preparation.')
+              say(locale, 'Hier findest du Antworten zur Einstufung, zum Lerntempo, zur Prüfungsvorbereitung und zur Anmeldung mit Visum.', 'Here you’ll find answers about placement, the pace of learning, exam preparation and registering with a visa.')
             }
           />
 
           <ul className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
             {[
               {
-                title: say(locale, 'Dein Niveau steht am Anfang', 'Your level comes first'),
+                title: say(locale, 'Wir finden dein passendes Kursniveau', 'We find the right level for you'),
                 body:
-                  say(locale, 'Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Mach einen kostenlosen Online-Test und schick uns dein Ergebnis, oder komm persönlich bei uns vorbei.', 'If you already speak some German, a placement test helps us choose the right course for you. Take a free online test and send us your result, or come and see us in person.'),
+                  say(locale, 'Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.', 'If you already speak some German, a placement test helps us choose the right course for you. Come and see us in person, or take a free online test and send us your result. Here at the school we take a closer look and find the right course together.'),
                 linkHref: '/placement-test',
                 linkLabel: say(locale, 'Zum Einstufungstest', 'Take the placement test'),
               },
               {
                 title: say(locale, 'Wie lange ein Niveau dauert', 'How long a level takes'),
                 body:
-                  say(locale, 'Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes 8 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
+                  say(locale, 'Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs mit {course.evening-german.lessons} Unterrichtseinheiten pro Woche schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.', 'In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes 8 weeks. In the evening course, with {course.evening-german.lessons} lessons a week, you complete half a level in around 3.5 months, which is about 1.5 levels a year.'),
               },
               {
-                title: say(locale, 'Prüfungsvorbereitung ist ein eigener Kurs', 'Exam preparation is a separate course'),
+                title: say(locale, 'Prüfungsvorbereitung', 'Exam preparation'),
                 body:
-                  say(locale, 'Die Vorbereitung auf eine telc-Prüfung ist nicht im Intensivkurs enthalten. Wenn du ein Zertifikat brauchst, kannst du zusätzlich einen Vorbereitungskurs buchen.', 'Preparation for a telc exam is not part of the intensive course. If you need a certificate, you can book a preparation course as well.'),
+                  say(locale, 'Wir empfehlen einen Prüfungsvorbereitungskurs, in dem gezielt alle Fertigkeiten und Prüfungsformate trainiert werden.', 'We recommend a preparation course that trains every skill and exam format in a targeted way.'),
                 linkHref: '/exams',
                 linkLabel: say(locale, 'Prüfungen ansehen', 'See the exams'),
               },
               {
-                title: say(locale, 'Zwei Formate ohne Listenpreis', 'Two formats with no fixed price'),
+                title: say(locale, 'Anmeldung mit Visum', 'Registering with a visa'),
                 body:
-                  say(locale, 'Den Unterricht für Gruppen und den Firmenunterricht stellen wir nach Bedarf zusammen und machen dafür ein eigenes Angebot. Beim Gruppenkurs gehören Unterkunft, Kulturprogramm und ein Nahverkehrsticket dazu.', 'We plan classes for groups and in-company teaching around what you need and send you an individual quote. For groups, accommodation, a culture programme and a public transport ticket are part of the package.'),
-                linkHref: '/contact',
-                linkLabel: say(locale, 'Angebot anfragen', 'Request a quote'),
+                  say(locale, 'Sobald wir die Gebühr für mindestens den ersten Kurs erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Verzögert sich dein Visum, kannst du deinen Kurs bis 21 Tage vor Beginn einmal kostenfrei verschieben.', 'As soon as we have received the fee for at least your first course, we email you your visa letter. If your visa is delayed, you can move your course once, free of charge, up to 21 days before it starts.'),
+                linkHref: '/faq',
+                linkLabel: say(locale, 'Fragen zum Visum', 'Questions about visas'),
               },
             ].map((fact) => (
               <li key={fact.title} className="border-t border-[color:var(--casa-sand)] pt-6">
@@ -651,10 +628,10 @@ export default async function CoursesPage({
           <div className="mx-auto max-w-[76rem] border-t border-[color:var(--casa-sand)] pt-10 md:pt-12">
             <CoursesFormatSelector
               title={
-                say(locale, 'Und so läuft jedes Format konkret ab', 'And here is how each format actually runs')
+                say(locale, 'Kursformate', 'Course formats')
               }
               description={
-                say(locale, 'Wähle ein Format und sieh dir Rhythmus, Lernumfang und typische Ergebnisse an.', 'Choose a format and see its rhythm, workload and typical results.')
+                say(locale, 'Wähle ein Format und sieh dir den Lernrhythmus, den Lernumfang und die vorgesehene Lernprogression an.', 'Choose a format and see its rhythm, its workload and how you are expected to progress.')
               }
               items={selectorItems}
               labels={{

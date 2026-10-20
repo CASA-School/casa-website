@@ -39,6 +39,11 @@ import { pick } from '@/lib/cms/copy';
  *    words. The verbatim original stays in `quote` and on English pages.
  *
  * VERIFIED 2026-08-18 against the seven casa-bremen.de/sprachkurse/* pages.
+ *
+ * GOOGLE REVIEWS (2026-10-20). CASA's content review asked for better quotes on the homepage and the
+ * intensive and evening pages. Seven 5-star reviews from CASA's Google listing follow the published
+ * quotes, under the same rules, with their stars (`google`); the homepage shows only them, course
+ * pages lead with their own voices and fill from them. Narges and Fatameh left the course pages.
  */
 
 type TestimonialSource = {
@@ -73,15 +78,33 @@ type TestimonialSource = {
   /** What the learner says about themselves, used in place of a country. */
   context: { en: string; de: string };
   /**
-   * German pages' translation of an English quote. Same excerpt rule as above:
-   * the excerpt is a contiguous substring of the translated quote.
+   * The other language's translation, labelled wherever it shows: German pages' translation of an
+   * English quote, English pages' translation of a German one. Same excerpt rule as above: the
+   * excerpt is a contiguous substring of the translated quote.
    */
-  translation?: { de: { quote: string; excerpt: string } };
+  translation?: Partial<Record<ContentLocale, { quote: string; excerpt: string }>>;
+  /** A review on CASA's Google listing, with its stars, rather than a quote from casa-bremen.de. */
+  google?: { rating: number };
+  /** Further course pages it is about (Olexandra took the intensive and the evening course). */
+  alsoOn?: string[];
+  /**
+   * `false`: no longer on the course pages. CASA's content review (2026-10-20) asked for new quotes
+   * there and on the homepage, and Google reviews took their place; the quote stays for the page
+   * that names it (the exams page names Fatameh, who sat telc B2).
+   */
+  coursePage?: false;
 };
+
+/** Where a course page's fill of Google reviews starts. */
+const FILL_FROM: Record<string, string> = { 'intensive-german': 'mila-google', 'evening-german': 'roberto-google' };
+
+/** CASA's Google listing, where the reviews are. */
+const GOOGLE_LISTING = 'https://maps.google.com/?cid=4736578749741248132';
 
 const TESTIMONIALS: TestimonialSource[] = [
   {
     id: 'narges-intensive',
+    coursePage: false,
     person: 'Narges',
     courseSlug: 'intensive-german',
     writtenIn: 'en',
@@ -104,6 +127,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'fatameh-evening',
+    coursePage: false,
     person: 'Fatameh',
     courseSlug: 'evening-german',
     examCode: 'telc_b2',
@@ -203,11 +227,145 @@ const TESTIMONIALS: TestimonialSource[] = [
       de: 'Begleitende Lehrerin, Schülergruppe aus Sibirien',
     },
   },
+  /*
+   * Google reviews (CASA's listing, read 2026-10-20, Rahman: „better reviews … casa google reviews"):
+   * 5-star reviews from the last twelve months, written in German. `quote` is the review as posted,
+   * with only reaction counts and stray quotation marks removed; the excerpt is whole sentences of it.
+   * First name and the initial of the last name, as Google shows them.
+   */
+  {
+    id: 'mila-google',
+    person: 'Mila',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Ich habe an dieser Schule alle Kurse von A1 bis C1 besucht und danach die C1-Prüfung bestanden. Ich finde, dass die Lerninhalte dort bestmöglich an die Lernenden angepasst sind. Außerdem möchte ich mich bei Klaudia und Lutz bedanken – dank ihrer Unterstützung war ich gut auf die Prüfung vorbereitet, und auf meinem Zertifikat steht „Gut“.',
+    excerpt:
+      'Ich habe an dieser Schule alle Kurse von A1 bis C1 besucht und danach die C1-Prüfung bestanden. Ich finde, dass die Lerninhalte dort bestmöglich an die Lernenden angepasst sind.',
+    context: { de: 'Kurse A1 bis C1 und die C1-Prüfung', en: 'Courses A1 to C1 and the C1 exam' },
+    translation: {
+      en: {
+        quote:
+          'I attended all the courses from A1 to C1 at this school and then passed the C1 exam. I think the course content there is adapted to the learners as well as it possibly could be. I would also like to thank Klaudia and Lutz – thanks to their support I was well prepared for the exam, and my certificate says “Gut”.',
+        excerpt:
+          'I attended all the courses from A1 to C1 at this school and then passed the C1 exam. I think the course content there is adapted to the learners as well as it possibly could be.',
+      },
+    },
+  },
+  {
+    id: 'ty-google',
+    person: 'T. Y.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Vor zehn Jahren habe ich bei der CASA Sprachschule Deutsch von Grund auf bis zum C1-Niveau gelernt. Der Unterricht war gut strukturiert und die Lehrkräfte sehr engagiert. Axel und Maria waren immer geduldig und hilfsbereit ❤️ Ich habe hier nicht nur Deutsch gelernt, sondern auch viele Tipps und Buchempfehlungen bekommen ✨ Auch die Lernatmosphäre hat mir gut gefallen. In den Pausen konnte man sich gut mit anderen Schülern austauschen ☺️ Inzwischen habe ich meinen Bachelor und Master in einem MINT-Studiengang abgeschlossen, als Werkstudentin in einem großen Industrieunternehmen gearbeitet und nun Jobangebote in meinem Fachbereich erhalten. Die Zeit bei CASA hat einen wichtigen Beitrag zu meinem bisherigen Werdegang geleistet. Ich kann die Sprachschule auf jeden Fall weiterempfehlen 😊',
+    excerpt:
+      'Vor zehn Jahren habe ich bei der CASA Sprachschule Deutsch von Grund auf bis zum C1-Niveau gelernt. Der Unterricht war gut strukturiert und die Lehrkräfte sehr engagiert.',
+    context: { de: 'Von Anfang an bis C1, heute mit Bachelor und Master', en: 'From the start to C1, now with a bachelor’s and a master’s degree' },
+    translation: {
+      en: {
+        quote:
+          'Ten years ago I learnt German at the CASA language school from scratch up to C1 level. The lessons were well structured and the teachers very committed. Axel and Maria were always patient and helpful ❤️ I didn’t just learn German here, I also got lots of tips and book recommendations ✨ I liked the learning atmosphere too. In the breaks it was easy to talk with other students ☺️ Since then I have completed my bachelor’s and master’s degrees in a STEM subject, worked as a student employee at a large industrial company and now have job offers in my field. My time at CASA made an important contribution to my career so far. I can definitely recommend the school 😊',
+        excerpt:
+          'Ten years ago I learnt German at the CASA language school from scratch up to C1 level. The lessons were well structured and the teachers very committed.',
+      },
+    },
+  },
+  {
+    id: 'olexandra-google',
+    person: 'Olexandra N.',
+    courseSlug: 'evening-german',
+    alsoOn: ['intensive-german'],
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Mein Mann und ich haben gemeinsam die B1- und B2-Kurse bei CASA Bremen besucht. Wir haben an den Intensiv- und Abendkursen teilgenommen und sind absolut begeistert von unserer Erfahrung. Ein großes Dankeschön geht an die Studienleitung, Bettina Rick und Tanja Langenickel, für die hervorragende Organisation. Alles war sehr strukturiert und professionell. Besonders bedanken möchten wir uns bei den Lehrkräften. Der Unterricht war immer interessant und hat uns sehr geholfen, uns beim Sprechen viel sicherer zu fühlen. Auch das Team am Empfang war immer super freundlich und hilfsbereit bei allen Fragen. Wir können CASA Bremen jedem empfehlen, der mit Freude und Erfolg Deutsch lernen möchte. Vielen Dank für die schöne Zeit und die tolle Unterstützung!',
+    excerpt: 'Der Unterricht war immer interessant und hat uns sehr geholfen, uns beim Sprechen viel sicherer zu fühlen.',
+    context: { de: 'Intensiv- und Abendkurse B1 und B2', en: 'Intensive and evening courses, B1 and B2' },
+    translation: {
+      en: {
+        quote:
+          'My husband and I took the B1 and B2 courses at CASA Bremen together. We attended the intensive and the evening courses and are absolutely delighted with our experience. A big thank-you goes to the directors of studies, Bettina Rick and Tanja Langenickel, for the excellent organisation. Everything was very structured and professional. We would especially like to thank the teachers. The lessons were always interesting and helped us a lot to feel much more confident when speaking. The team at reception was also always super friendly and helpful with every question. We can recommend CASA Bremen to anyone who wants to learn German with joy and success. Thank you very much for the lovely time and the great support!',
+        excerpt: 'The lessons were always interesting and helped us a lot to feel much more confident when speaking.',
+      },
+    },
+  },
+  {
+    id: 'perwin-google',
+    person: 'Perwin S.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Meine Erfahrung an dieser Sprachschule war wirklich hervorragend. Alle Lehrkräfte und Mitarbeiter waren sehr freundlich, herzlich und hilfsbereit. Das Curriculum war ausgezeichnet und gut strukturiert. Dank dieser Schule habe ich viel gelernt und die C1-Prüfung erfolgreich bestanden. Vielen Dank an das gesamte Team',
+    excerpt:
+      'Das Curriculum war ausgezeichnet und gut strukturiert. Dank dieser Schule habe ich viel gelernt und die C1-Prüfung erfolgreich bestanden.',
+    context: { de: 'Die C1-Prüfung bestanden', en: 'Passed the C1 exam' },
+    translation: {
+      en: {
+        quote:
+          'My experience at this language school was truly excellent. All the teachers and staff were very friendly, warm and helpful. The curriculum was excellent and well structured. Thanks to this school I learnt a lot and passed the C1 exam. Many thanks to the whole team',
+        excerpt: 'The curriculum was excellent and well structured. Thanks to this school I learnt a lot and passed the C1 exam.',
+      },
+    },
+  },
+  {
+    id: 'roberto-google',
+    person: 'Roberto Z.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Ich habe hier in den letzten drei Jahren Deutsch von A1 bis C1 gelernt und kann es jedem wärmstens empfehlen, der die Sprache lernen möchte!',
+    excerpt:
+      'Ich habe hier in den letzten drei Jahren Deutsch von A1 bis C1 gelernt und kann es jedem wärmstens empfehlen, der die Sprache lernen möchte!',
+    context: { de: 'A1 bis C1 in drei Jahren', en: 'A1 to C1 in three years' },
+    translation: {
+      en: {
+        quote: 'I learnt German here from A1 to C1 over the last three years and can warmly recommend it to anyone who wants to learn the language!',
+        excerpt: 'I learnt German here from A1 to C1 over the last three years and can warmly recommend it to anyone who wants to learn the language!',
+      },
+    },
+  },
+  {
+    id: 'darwish-google',
+    person: 'Darwish B.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Der Unterricht ist hervorragend strukturiert, das gesamte Team – Lehrkräfte wie Büromitarbeiter – ist äußerst freundlich und professionell. Angenehme Lernatmosphäre und ein sehr gutes Preis-Leistungs-Verhältnis.',
+    excerpt:
+      'Der Unterricht ist hervorragend strukturiert, das gesamte Team – Lehrkräfte wie Büromitarbeiter – ist äußerst freundlich und professionell.',
+    context: { de: 'Über Unterricht und Team', en: 'On the lessons and the team' },
+    translation: {
+      en: {
+        quote:
+          'The lessons are excellently structured, and the whole team – teachers and office staff alike – is extremely friendly and professional. A pleasant learning atmosphere and very good value for money.',
+        excerpt: 'The lessons are excellently structured, and the whole team – teachers and office staff alike – is extremely friendly and professional.',
+      },
+    },
+  },
+  {
+    id: 'elif-google',
+    person: 'Elif Sude B.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Ich habe am Casa-Kurs von B1 bis C1 teilgenommen und war sehr zufrieden mit den Lehrern und den Lernmodulen. Besonders Claudia Groene hat mir unglaublich geholfen. Vieles, was ich gelernt habe, verdanke ich ihren liebevollen Anleitungen. Vielen Dank!',
+    excerpt: 'Ich habe am Casa-Kurs von B1 bis C1 teilgenommen und war sehr zufrieden mit den Lehrern und den Lernmodulen.',
+    context: { de: 'Kurse B1 bis C1', en: 'Courses B1 to C1' },
+    translation: {
+      en: {
+        quote:
+          'I took part in the CASA course from B1 to C1 and was very happy with the teachers and the learning modules. Claudia Groene in particular helped me enormously. I owe much of what I learnt to her caring guidance. Thank you very much!',
+        excerpt: 'I took part in the CASA course from B1 to C1 and was very happy with the teachers and the learning modules.',
+      },
+    },
+  },
 ];
 
 function toSocialProof(source: TestimonialSource, locale: ContentLocale): SocialProofItem {
-  // A German page shows the labelled translation of an English quote (rule 3).
-  const translated = locale === 'de' && source.writtenIn !== 'de' ? source.translation?.de : undefined;
+  // A page in the other language shows the labelled translation (rule 3).
+  const translated = locale !== source.writtenIn ? source.translation?.[locale] : undefined;
+  const label = locale === 'de' ? 'aus dem Englischen übersetzt' : 'translated from German';
 
   return {
     id: `${source.id}-${locale}`,
@@ -220,12 +378,13 @@ function toSocialProof(source: TestimonialSource, locale: ContentLocale): Social
     // The old field was `country`, filled with invented nationalities. CASA
     // publishes what the learner studied, not where they are from, and that is
     // the more useful line beside a course testimonial anyway.
-    country: translated ? `${pick(locale, source.context)} · aus dem Englischen übersetzt` : pick(locale, source.context),
+    country: translated ? `${pick(locale, source.context)} · ${label}` : pick(locale, source.context),
     courseSlug: source.courseSlug,
     examCode: source.examCode,
-    sourcePlatform: 'website',
-    sourceUrl: 'https://casa-bremen.de/sprachkurse/deutsch-intensiv',
+    sourcePlatform: source.google ? 'google_reviews' : 'website',
+    sourceUrl: source.google ? GOOGLE_LISTING : 'https://casa-bremen.de/sprachkurse/deutsch-intensiv',
     verificationStatus: 'verified',
+    rating: source.google?.rating,
   };
 }
 
@@ -251,11 +410,22 @@ export const socialProofByLocale: Record<ContentLocale, SocialProofItem[]> = {
  * populated section instead of a lonely single card.
  */
 export function socialProofForCourse(slug: string, locale: ContentLocale): SocialProofItem[] {
-  const all = socialProofFor(locale);
-  const own = all.filter((item) => item.courseSlug === slug);
-  const others = all.filter((item) => item.courseSlug !== slug);
+  const onPages = TESTIMONIALS.filter((item) => item.coursePage !== false);
+  const own = onPages.filter((item) => item.courseSlug === slug || item.alsoOn?.includes(slug));
+  // The school-wide Google reviews fill the rest, started at a different one per course so two
+  // course pages do not show the same three: the intensive page goes on with Mila and T. Y., the
+  // evening page with Roberto and Darwish (CASA's content review, 2026-10-20).
+  const pool = onPages.filter((item) => item.google && !item.courseSlug);
+  const chosen = pool.findIndex((item) => item.id === FILL_FROM[slug]);
+  const start = chosen >= 0 ? chosen : pool.length ? [...slug].reduce((sum, char) => sum + char.charCodeAt(0), 0) % pool.length : 0;
+  const rest = [...pool.slice(start), ...pool.slice(0, start)];
 
-  return [...own, ...others];
+  return [...own.filter((item) => item.google), ...own.filter((item) => !item.google), ...rest].map((item) => toSocialProof(item, locale));
+}
+
+/** The Google reviews, for the homepage's carousel. */
+export function googleReviewsFor(locale: ContentLocale): SocialProofItem[] {
+  return TESTIMONIALS.filter((item) => item.google).map((item) => toSocialProof(item, locale));
 }
 
 /**

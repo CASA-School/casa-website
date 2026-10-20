@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 тижнів (повний рівень)"
   },
+  "t.a1-bis-c1-in.151ni4p": {
+    "de": "A1 bis C1 in drei Jahren",
+    "text": "Від A1 до C1 за три роки"
+  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "Ви можете приєднатися з рівня B1."
@@ -286,14 +290,6 @@
   "t.absenden.8od49g": {
     "de": "Absenden",
     "text": "Надіслати"
-  },
-  "t.abspielen.1ijv4zn": {
-    "de": "Abspielen",
-    "text": "Відтворити"
-  },
-  "t.acht.15lnpkj": {
-    "de": "Acht",
-    "text": "Вісім"
   },
   "t.achte-darauf-dass-dein.1xdf53u": {
     "de": "Achte darauf, dass dein Name am Briefkasten steht und dass du Anrufe und Nachrichten empfangen kannst.",
@@ -355,13 +351,13 @@
     "de": "Aktuelles",
     "text": "Новини"
   },
-  "t.alle-die-fuer-studium.x24oyo": {
-    "de": "Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.",
-    "text": "Усі, кому потрібен швидкий прогрес для навчання, роботи чи візи."
-  },
   "t.alle-die-gezielt-an.y1tpsn": {
     "de": "Alle, die gezielt an Schreiben, Sprechen oder Grammatik arbeiten möchten.",
     "text": "Усі, хто хоче цілеспрямовано працювати над письмом, говорінням чи граматикою."
+  },
+  "t.alle-die-mit-ihrem.qlxac0": {
+    "de": "Alle, die mit ihrem Studium, Beruf oder dem Visumsantrag schnell vorankommen möchten.",
+    "text": "Усі, хто хоче швидко просунутися в навчанні, роботі чи з оформленням візи."
   },
   "t.alle-ergebnisse-ansehen.11k5ct3": {
     "de": "Alle Ergebnisse ansehen",
@@ -615,6 +611,10 @@
     "de": "Anmeldung geschlossen",
     "text": "Реєстрацію закрито"
   },
+  "t.anmeldung-mit-visum.42top8": {
+    "de": "Anmeldung mit Visum",
+    "text": "Реєстрація, якщо потрібна віза"
+  },
   "t.anmeldung.cdp46": {
     "de": "Anmeldung",
     "text": "Реєстрація"
@@ -782,14 +782,6 @@
   "t.auswertung-und-besprechung-deine.1m72i7f": {
     "de": "Auswertung und Besprechung deiner Fehler",
     "text": "Аналіз і розбір ваших помилок"
-  },
-  "t.automatischen-wechsel-pausieren.a6vgwj": {
-    "de": "Automatischen Wechsel pausieren",
-    "text": "Призупинити автоматичну зміну"
-  },
-  "t.automatischen-wechsel-starten.ilzeaq": {
-    "de": "Automatischen Wechsel starten",
-    "text": "Запустити автоматичну зміну"
   },
   "t.b-schreiben-b1-b2.e4s6l2": {
     "de": "B – Schreiben (B1/B2)",
@@ -971,9 +963,9 @@
     "de": "Beratung und Förderung",
     "text": "Консультації та фінансова підтримка"
   },
-  "t.beratung-zum-weiterlernen.1vzyhg9": {
-    "de": "Beratung zum Weiterlernen",
-    "text": "Консультація щодо подальшого навчання"
+  "t.beratung-zu-autonomen-lernoption.y3ul57": {
+    "de": "Beratung zu autonomen Lernoptionen",
+    "text": "Консультація щодо можливостей самостійного навчання"
   },
   "t.bereit-fuer-deutsch-in.23kshr": {
     "de": "Bereit für Deutsch in Bremen?",
@@ -1026,10 +1018,6 @@
   "t.berufstaetige-und-auszubildende-.12vrmtv": {
     "de": "Berufstätige und Auszubildende, die nach der Arbeit strukturiert lernen möchten.",
     "text": "Працівники та учні професійного навчання, які хочуть системно вчитися після роботи."
-  },
-  "t.berufstaetige-und-auszubildende-.1neidt": {
-    "de": "Berufstätige und Auszubildende mit begrenzter Zeit am Tag.",
-    "text": "Працівники та учні професійного навчання, у яких протягом дня мало часу."
   },
   "t.beschaedigt.jvuh5c": {
     "de": "beschädigt",
@@ -1615,10 +1603,6 @@
     "de": "Dein Niveau online herausfinden",
     "text": "Визначити рівень онлайн"
   },
-  "t.dein-niveau-steht-am.1lfh2x1": {
-    "de": "Dein Niveau steht am Anfang",
-    "text": "Усе починається з вашого рівня"
-  },
   "t.dein-niveau-und-deine.1t3mt4i": {
     "de": "Dein Niveau und deine Zeiten",
     "text": "Ваш рівень і зручний час"
@@ -1714,10 +1698,6 @@
   "t.den-preis-kalkulieren-wir.131dy5f": {
     "de": "Den Preis kalkulieren wir für jede Firma einzeln. Die Studienberatung und das Angebot sind stets unverbindlich.",
     "text": "Ціну ми розраховуємо для кожної компанії окремо. Консультація та пропозиція завжди ні до чого не зобов’язують."
-  },
-  "t.den-unterricht-fuer-gruppen.10xdr5e": {
-    "de": "Den Unterricht für Gruppen und den Firmenunterricht stellen wir nach Bedarf zusammen und machen dafür ein eigenes Angebot. Beim Gruppenkurs gehören Unterkunft, Kulturprogramm und ein Nahverkehrsticket dazu.",
-    "text": "Заняття для груп і корпоративне навчання ми складаємо відповідно до потреб і готуємо для цього індивідуальну пропозицію. До групового курсу входять проживання, культурна програма та квиток на громадський транспорт."
   },
   "t.den-weg-zur-schule.leezgc": {
     "de": "Den Weg zur Schule vorher einmal ausprobieren",
@@ -1843,6 +1823,10 @@
     "de": "Deutsch für besondere Ziele",
     "text": "Німецька для особливих цілей"
   },
+  "t.deutsch-fuer-deinen-arbeitsallta.k6e83g": {
+    "de": "Deutsch für deinen Arbeitsalltag in deinem Team",
+    "text": "Німецька для робочих буднів у вашій команді"
+  },
   "t.deutsch-fuer-deinen-naechsten.1xw3ik": {
     "de": "Deutsch für deinen nächsten Schritt",
     "text": "Німецька для вашого наступного кроку"
@@ -1883,9 +1867,9 @@
     "de": "Deutsch lernen neben dem Beruf",
     "text": "Вивчення німецької без відриву від роботи"
   },
-  "t.deutsch-lernen-und-bremen.38p4ja": {
-    "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu deiner Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.",
-    "text": "Вивчати німецьку й разом відкривати Бремен: ми плануємо заняття, культурну програму та проживання відповідно до вашої групи. Ця програма для шкільних класів, університетів і організацій, які хочуть приїхати до Бремена групою. Усі учасники отримують довідку про участь."
+  "t.deutsch-lernen-und-bremen.5q5wxi": {
+    "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
+    "text": "Вивчати німецьку й разом відкривати Бремен: ми плануємо заняття, культурну програму та проживання індивідуально для кожної групи. Ця програма для шкільних класів, університетів і організацій, які хочуть приїхати до Бремена групою."
   },
   "t.deutsch-lernen.mp3mi8": {
     "de": "Deutsch lernen",
@@ -1946,6 +1930,10 @@
   "t.die-bremer-stadtmusikanten-nach.1bbhkmz": {
     "de": "Die Bremer Stadtmusikanten, nach denen unsere vier Gruppenpakete heißen: der Esel unten, darauf Hund, Katze und Hahn.",
     "text": "Бременські музиканти, на честь яких названо наші чотири групові пакети: унизу Осел, на ньому Пес, Кіт і Півень."
+  },
+  "t.die-c1-pruefung-bestanden.1ectagp": {
+    "de": "Die C1-Prüfung bestanden",
+    "text": "Іспит C1 складено"
   },
   "t.die-casa-wg.dy7gt2": {
     "de": "Die CASA-WG",
@@ -2111,10 +2099,6 @@
     "de": "Die Unterrichtssprache berücksichtigen",
     "text": "Урахування мови викладання"
   },
-  "t.die-vorbereitung-auf-eine.12de6ul": {
-    "de": "Die Vorbereitung auf eine telc-Prüfung ist nicht im Intensivkurs enthalten. Wenn du ein Zertifikat brauchst, kannst du zusätzlich einen Vorbereitungskurs buchen.",
-    "text": "Підготовка до іспиту telc не входить до інтенсивного курсу. Якщо вам потрібен сертифікат, ви можете додатково забронювати підготовчий курс."
-  },
   "t.die-vorbereitung-auf-eine.1h64ja4": {
     "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
     "text": "Підготовка до іспиту не входить до інтенсивних курсів. Якщо вам потрібен сертифікат telc, ви можете додатково забронювати підготовчий курс."
@@ -2206,10 +2190,6 @@
   "t.drei-weitere-wgs-liegen.1xw82rr": {
     "de": "Drei weitere WGs liegen woanders in Bremen. Alle sind mit Bus und Straßenbahn zu erreichen.",
     "text": "Ще три спільні квартири розташовані в інших районах Бремена. До всіх можна дістатися автобусом і трамваєм."
-  },
-  "t.drei.10ztcd4": {
-    "de": "Drei",
-    "text": "Три"
   },
   "t.du-arbeitest-eng-mit.o0mxmo": {
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
@@ -2350,6 +2330,10 @@
   "t.du-moechtest-studieren-beruflich.pkvtd4": {
     "de": "Du möchtest studieren, beruflich weiterkommen oder dich im Alltag sicherer fühlen? Finde einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.",
     "text": "Хочете вступити до університету, зробити крок у кар’єрі чи впевненіше почуватися в повсякденні? Знайдіть першу точку опори. Усе інше ми обговоримо особисто."
+  },
+  "t.du-profitierst-von-unserer.1p4ywyf": {
+    "de": "Du profitierst von unserer Erfahrung und Kooperationspartnern.",
+    "text": "Ви можете спиратися на наш досвід і наших партнерів."
   },
   "t.du-schickst-uns-deinen.1xfrvv1": {
     "de": "Du schickst uns deinen Lebenslauf und schreibst uns, warum du bei CASA arbeiten möchtest.",
@@ -2614,10 +2598,6 @@
   "t.ein-zuhause-fuer-deine.rqa4yz": {
     "de": "Ein Zuhause für deine Zeit in Bremen",
     "text": "Дім на час вашого перебування в Бремені"
-  },
-  "t.ein.byvoo2": {
-    "de": "Ein",
-    "text": "Один"
   },
   "t.einblicke-in-das-lernen.1c3kto6": {
     "de": "Einblicke in das Lernen und Leben an unserer internationalen Sprachschule.",
@@ -3023,6 +3003,10 @@
     "de": "Fragen? Wir helfen dir gern.",
     "text": "Запитання? Ми охоче допоможемо."
   },
+  "t.fragen-zum-visum.1nj4wpt": {
+    "de": "Fragen zum Visum",
+    "text": "Запитання щодо візи"
+  },
   "t.fragen-zur-anmeldung.1ox4z9g": {
     "de": "Fragen zur Anmeldung?",
     "text": "Запитання щодо реєстрації?"
@@ -3075,14 +3059,6 @@
     "de": "Führung über Marktplatz, Böttcherstraße und durch den Schnoor.",
     "text": "Екскурсія Ринковою площею, вулицею Böttcherstraße і кварталом Шнор."
   },
-  "t.fuenf.1u9cc2a": {
-    "de": "Fünf",
-    "text": "П’ять"
-  },
-  "t.fuer-4-wochen-danach.519euc": {
-    "de": "{base} für 4 Wochen, danach {week} pro Woche",
-    "text": "{base} за 4 тижні, далі {week} на тиждень"
-  },
   "t.fuer-aerztinnen-aerzte-und.19b1qfj": {
     "de": "Für Ärztinnen, Ärzte und medizinische Fachkräfte, die sich sprachlich auf die Arbeit in Deutschland vorbereiten.",
     "text": "Для лікарів і медичних фахівців, які мовно готуються до роботи в Німеччині."
@@ -3106,6 +3082,10 @@
   "t.fuer-beruf-und-weiterbildung.1929v1": {
     "de": "Für Beruf und Weiterbildung",
     "text": "Для роботи та професійного розвитку"
+  },
+  "t.fuer-berufstaetige-auszubildende.914hw4": {
+    "de": "Für Berufstätige, Auszubildende und alle mit begrenzter Zeit.",
+    "text": "Для тих, хто працює чи здобуває професію, і для всіх, у кого обмаль часу."
   },
   "t.fuer-besondere-ziele.570052": {
     "de": "Für besondere Ziele",
@@ -3147,9 +3127,9 @@
     "de": "Für die Vermittlung deiner Unterkunft.",
     "text": "За підбір вашого житла."
   },
-  "t.fuer-die-zeit-deines.pw4d6i": {
-    "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
-    "text": "На час вашого інтенсивного курсу ми підберемо вам кімнату в спільній квартирі CASA або в господарів у Бремені та околицях. Разом ми з’ясуємо, який формат проживання вам підходить і чи є вільні місця."
+  "t.fuer-die-zeit-deines.1l7yuxq": {
+    "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir ein Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
+    "text": "Поки ви навчаєтеся в нас на інтенсивному курсі, ми підберемо вам кімнату в спільній квартирі CASA або в господарів у Бремені та околицях. Разом ми з’ясуємо, який формат проживання вам підходить і чи є вільні місця."
   },
   "t.fuer-diese-auswahl-gibt.1icl1we": {
     "de": "Für diese Auswahl gibt es kein Modul. Setz die Filter zurück, dann siehst du wieder alle.",
@@ -3467,6 +3447,10 @@
     "de": "Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.",
     "text": "Введіть пошуковий запит, і тут з’являться результати."
   },
+  "t.google-bewertung.epszq": {
+    "de": "Google-Bewertung",
+    "text": "Відгук у Google"
+  },
   "t.grammatik-kompakt-erfolgreich-au.1nskmx7": {
     "de": "Grammatik kompakt – Erfolgreich auf B1/B2",
     "text": "Граматика компактно – успішно на рівні B1/B2"
@@ -3643,13 +3627,13 @@
     "de": "Hier erfährst du, was Deutschland dir im Studium und im Alltag bietet und wobei dir Deutsch hilft.",
     "text": "Тут ви дізнаєтеся, що Німеччина пропонує вам у навчанні та повсякденні і в чому вам допоможе німецька."
   },
+  "t.hier-findest-du-antworten.13679b3": {
+    "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo, zur Prüfungsvorbereitung und zur Anmeldung mit Visum.",
+    "text": "Тут ви знайдете відповіді щодо визначення рівня, темпу навчання, підготовки до іспитів і реєстрації, якщо вам потрібна віза."
+  },
   "t.hier-findest-du-antworten.15kvgk9": {
     "de": "Hier findest du Antworten rund um Kurse, Prüfungen, die Anmeldung und das Leben in Bremen.",
     "text": "Тут ви знайдете відповіді щодо курсів, іспитів, реєстрації та життя в Бремені."
-  },
-  "t.hier-findest-du-antworten.1b042mw": {
-    "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo und zur Prüfungsvorbereitung.",
-    "text": "Тут ви знайдете відповіді щодо визначення рівня, темпу навчання та підготовки до іспитів."
   },
   "t.hier-findest-du-die.zvxec9": {
     "de": "Hier findest du die Termine, die Voraussetzungen und die Unterlagen, die du brauchst. So kommst du gut vorbereitet zur Prüfung.",
@@ -3763,9 +3747,9 @@
     "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
     "text": "На інтенсивному курсі у вас {course.intensive-german.lessons} академічних годин по 45 хвилин на тиждень. Повний рівень там триває 8 тижнів, B1+ — стільки ж. На вечірньому курсі половина рівня триває приблизно один триместр."
   },
-  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
-    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-    "text": "На інтенсивному курсі з {course.intensive-german.lessons} академічними годинами на тиждень повний рівень триває 8 тижнів. На вечірньому курсі ви проходите половину рівня приблизно за 3,5 місяця, тобто близько 1,5 рівня на рік."
+  "t.im-intensivkurs-mit-unterrichtse.ff14c0": {
+    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs mit {course.evening-german.lessons} Unterrichtseinheiten pro Woche schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+    "text": "На інтенсивному курсі з {course.intensive-german.lessons} академічними годинами на тиждень повний рівень триває 8 тижнів. На вечірньому курсі з {course.evening-german.lessons} академічними годинами на тиждень ви проходите половину рівня приблизно за 3,5 місяця, тобто близько 1,5 рівня на рік."
   },
   "t.im-intensivkurs.136g3x5": {
     "de": "Im Intensivkurs",
@@ -3806,6 +3790,10 @@
   "t.im-unesco-welterbe-rathaus.12lxurr": {
     "de": "Im UNESCO-Welterbe-Rathaus und seiner Oberen Rathaushalle.",
     "text": "У ратуші — об’єкті Світової спадщини ЮНЕСКО — та в її Верхньому залі."
+  },
+  "t.im-vorbereitungskurs-b2-lernst.1jh53bl": {
+    "de": "Im Vorbereitungskurs B2 lernst du das Prüfungsformat kennen und trainierst alle vier Fertigkeiten: Lesen, Hören, Schreiben und Sprechen.",
+    "text": "На підготовчому курсі B2 ви знайомитеся з форматом іспиту й тренуєте всі чотири навички: читання, аудіювання, письмо та говоріння."
   },
   "t.im-vorstellungsgespraech-lernen-.1ylcxwl": {
     "de": "Im Vorstellungsgespräch lernen wir uns kennen und besprechen die nächsten Schritte.",
@@ -3999,6 +3987,10 @@
     "de": "Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu deinen Vorkenntnissen und deinem Alltag passt.",
     "text": "Інтенсивно навчатися, регулярно займатися вечорами чи цілеспрямовано тренуватися: разом ми знайдемо курс, який відповідає вашим знанням і повсякденню."
   },
+  "t.intensiv-und-abendkurse-b1.gpmpwk": {
+    "de": "Intensiv- und Abendkurse B1 und B2",
+    "text": "Інтенсивні й вечірні курси B1 і B2"
+  },
   "t.intensiver-rhythmus.hl2l1s": {
     "de": "Intensiver Rhythmus",
     "text": "Інтенсивний ритм"
@@ -4163,9 +4155,9 @@
     "de": "Jeden Monat Neues aus der Schule im NewsFlash.",
     "text": "Щомісяця новини зі школи в NewsFlash."
   },
-  "t.jeder-mensch-bringt-andere.15decv": {
-    "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
-    "text": "Кожна людина має свій досвід і свої побажання. Ми знаходимо час для особистої розмови й разом з вами думаємо, що допоможе вам зараз — у вивченні німецької та в наступних кроках."
+  "t.jeder-mensch-bringt-andere.gfucsy": {
+    "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
+    "text": "Кожна людина має свій досвід і свої побажання. Ми знаходимо час для особистої розмови й разом з вами думаємо, що допоможе вам у довгостроковій перспективі — у вивченні німецької та в наступних кроках."
   },
   "t.jeder-studiengang-legt-seine.1embgu8": {
     "de": "Jeder Studiengang legt seine Voraussetzungen selbst fest. Dazu gehören zum Beispiel Schulzeugnisse, Noten, ein Sprachzertifikat und manchmal eine Eignungsprüfung. Auch zwei Studiengänge an derselben Hochschule können Unterschiedliches verlangen.",
@@ -4547,9 +4539,17 @@
     "de": "Kursberatung",
     "text": "Консультації щодо курсів"
   },
+  "t.kurse-a1-bis-c1.1ue2h4o": {
+    "de": "Kurse A1 bis C1 und die C1-Prüfung",
+    "text": "Курси від A1 до C1 та іспит C1"
+  },
   "t.kurse-ansehen.ym8ym5": {
     "de": "Kurse ansehen",
     "text": "Переглянути курси"
+  },
+  "t.kurse-b1-bis-c1.s4cd63": {
+    "de": "Kurse B1 bis C1",
+    "text": "Курси від B1 до C1"
   },
   "t.kurse-beratung.1yqjvaw": {
     "de": "Kurse & Beratung",
@@ -4582,6 +4582,10 @@
   "t.kursformate-werden-greifbarer-we.jei1bk": {
     "de": "Kursformate werden greifbarer, wenn der Lernraum sichtbar bleibt.",
     "text": "Формати курсів стають зрозумілішими, коли видно навчальний простір."
+  },
+  "t.kursformate.o4o5ui": {
+    "de": "Kursformate",
+    "text": "Формати курсів"
   },
   "t.kursgebuehr-10-termine-40.wpo63y": {
     "de": "Kursgebühr, 10 Termine (40 UE)",
@@ -4734,6 +4738,10 @@
   "t.lerne-deutsch-oder-englisch.g0xdu6": {
     "de": "Lerne Deutsch oder Englisch in deiner Bildungszeit.",
     "text": "Вивчайте німецьку чи англійську під час Bildungszeit."
+  },
+  "t.lerne-dich-sicherer-auf.zeguny": {
+    "de": "Lerne, dich sicherer auf Deutsch auszudrücken – mündlich und schriftlich",
+    "text": "Навчіться впевненіше висловлюватися німецькою — усно й письмово"
   },
   "t.lerne-die-aufgaben-kennen.c97w4a": {
     "de": "Lerne die Aufgaben kennen, übe unter Prüfungsbedingungen und erhalte persönliches Feedback.",
@@ -4890,10 +4898,6 @@
   "t.mehr-sprachpraxis.1gj1f42": {
     "de": "Mehr Sprachpraxis",
     "text": "Більше мовної практики"
-  },
-  "t.mehr-sprechsicherheit.ijgf9p": {
-    "de": "Mehr Sprechsicherheit",
-    "text": "Більше впевненості в розмові"
   },
   "t.mehr-zu-den-niveaustufen.1wk02ex": {
     "de": "Mehr zu den Niveaustufen",
@@ -5323,13 +5327,13 @@
     "de": "Neu beginnen",
     "text": "Почати спочатку"
   },
+  "t.neue-kurse-beginnen-jeden.19bgyiy": {
+    "de": "Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag",
+    "text": "Нові курси починаються щомісяця; перша частина рівня стартує по черзі зранку або після обіду"
+  },
   "t.neue-kurse-beginnen-jeden.nkdyw1": {
     "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
     "text": "Нові курси починаються щомісяця, а визначення рівня покаже, з якого рівня ви почнете."
-  },
-  "t.neue-kurse-jeden-monat.u56xun": {
-    "de": "Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag",
-    "text": "Нові курси щомісяця, по черзі зранку та після обіду"
   },
   "t.neue-menschen-kennenlernen.vttdpm": {
     "de": "Neue Menschen kennenlernen",
@@ -5419,9 +5423,9 @@
     "de": "Nur ",
     "text": "Лише "
   },
-  "t.nutze-deine-bildungszeit-um.1detqax": {
-    "de": "Nutze deine Bildungszeit, um dich auf Deutsch und Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
-    "text": "Використайте свою Bildungszeit, щоб зосередитися на німецькій та англійській. Ми проконсультуємо вас щодо курсу й потрібних документів."
+  "t.nutze-deine-bildungszeit-um.ybj78y": {
+    "de": "Nutze deine Bildungszeit, um dich auf Deutsch oder Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
+    "text": "Використайте свою Bildungszeit, щоб зосередитися на німецькій або англійській. Ми проконсультуємо вас щодо курсу й потрібних документів."
   },
   "t.nutze-die-aktuelle-checkliste.1cqnigo": {
     "de": "Nutze die aktuelle Checkliste der deutschen Botschaft oder des Konsulats, das für deinen Antrag zuständig ist.",
@@ -5430,10 +5434,6 @@
   "t.ob-du-kueche-bad.1j4ds90": {
     "de": "Ob du Küche, Bad, Waschmaschine und WLAN mitbenutzen darfst",
     "text": "Чи можете ви користуватися кухнею, ванною кімнатою, пральною машиною та Wi-Fi"
-  },
-  "t.ob-du-neu-anfaengst.p8gmm5": {
-    "de": "Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.",
-    "text": "Чи ви тільки починаєте, чи вчитеся паралельно з роботою, чи готуєтеся до конкретної мети — ми допоможемо вам знайти відповідний курс німецької."
   },
   "t.ob-ein-zimmer-frei.p0ytcz": {
     "de": "Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.",
@@ -5511,9 +5511,9 @@
     "de": "Organisiere möglichst eine Unterkunft, in der du dich anmelden darfst, und bring deine Unterlagen im Original und als beglaubigte Kopie mit.",
     "text": "Якщо можливо, знайдіть житло, де вам дозволять зареєструвати місце проживання, і візьміть із собою документи в оригіналі та у вигляді засвідчених копій."
   },
-  "t.orientierung-wenn-du-studieren.77ppc0": {
-    "de": "Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest",
-    "text": "Орієнтири, якщо ви хочете навчатися у виші, шукати роботу чи здобути професію"
+  "t.orientierung-wenn-du-studieren.oiz4ky": {
+    "de": "Orientierung, wenn du studieren möchtest, eine Arbeit oder eine Ausbildung suchst",
+    "text": "Орієнтири, якщо ви хочете навчатися у виші, шукаєте роботу чи місце для професійного навчання"
   },
   "t.ort-und-unterrichtsform-nach.1sxrpnw": {
     "de": "Ort und Unterrichtsform nach Vereinbarung",
@@ -5623,9 +5623,9 @@
     "de": "Plane genug Zeit ein und bereite dich in einem unserer Vorbereitungskurse oder allein auf die Aufgaben vor.",
     "text": "Заплануйте достатньо часу й підготуйтеся до завдань на одному з наших підготовчих курсів або самостійно."
   },
-  "t.plane-kursstart-unterkunft-und.p43mfz": {
-    "de": "Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.",
-    "text": "Сплануйте початок курсу, проживання й перші практичні кроки з нашою підтримкою."
+  "t.plane-kursstart-unterkunft-und.1phog46": {
+    "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
+    "text": "Сплануйте початок курсу, проживання й перші конкретні кроки з нашою підтримкою."
   },
   "t.plane-mindestens-eine-stunde.veokh6": {
     "de": "Plane mindestens eine Stunde ein.",
@@ -5763,6 +5763,10 @@
     "de": "Prüfung ansehen",
     "text": "Переглянути іспит"
   },
+  "t.pruefung-und-pruefungsvorbereitu.gkzxtl": {
+    "de": "Prüfung und Prüfungsvorbereitung",
+    "text": "Іспити й підготовка до них"
+  },
   "t.pruefung-und-termin-waehlen.d2sqhy": {
     "de": "Prüfung und Termin wählen",
     "text": "Вибрати іспит і дату"
@@ -5834,10 +5838,6 @@
   "t.pruefungsvorbereitung-erkunden.z50a5g": {
     "de": "Prüfungsvorbereitung erkunden",
     "text": "Детальніше про підготовку до іспиту"
-  },
-  "t.pruefungsvorbereitung-ist-ein-ei.1iqk0cu": {
-    "de": "Prüfungsvorbereitung ist ein eigener Kurs",
-    "text": "Підготовка до іспиту — це окремий курс"
   },
   "t.pruefungsvorbereitung.3qw9vr": {
     "de": "Prüfungsvorbereitung",
@@ -6115,9 +6115,9 @@
     "de": "Schriftlich",
     "text": "Письмова частина"
   },
-  "t.schritt-fuer-schritt-sicherer.116lp48": {
-    "de": "Schritt für Schritt sicherer auf Deutsch: mit regelmäßiger Übung und einer Gruppe, die gemeinsam lernt.",
-    "text": "Крок за кроком упевненіше німецькою: з регулярною практикою та групою, яка навчається разом."
+  "t.schritt-fuer-schritt-sicherer.yzv4f6": {
+    "de": "Schritt für Schritt sicherer auf Deutsch – mit regelmäßigen Übungen in einer angenehmen Gruppenatmosphäre.",
+    "text": "Крок за кроком упевненіше німецькою — з регулярними вправами в приємній атмосфері групи."
   },
   "t.schule.1g9n9ou": {
     "de": "Schule",
@@ -6142,10 +6142,6 @@
   "t.sechs-stufen-in-drei.1buauf": {
     "de": "Sechs Stufen in drei Bereichen",
     "text": "Шість рівнів у трьох групах"
-  },
-  "t.sechs.1eiph2a": {
-    "de": "Sechs",
-    "text": "Шість"
   },
   "t.sehr-gut.u12mtf": {
     "de": "sehr gut",
@@ -6227,9 +6223,9 @@
     "de": "Sichere Aufgabenstrategie",
     "text": "Упевнена стратегія виконання завдань"
   },
-  "t.sicherere-kommunikation-im-beruf.cx8gji": {
-    "de": "Sicherere Kommunikation im Beruf",
-    "text": "Упевненіше спілкування на роботі"
+  "t.sichere-kommunikation-im-beruf.xjsqyn": {
+    "de": "Sichere Kommunikation im Beruf und Studium",
+    "text": "Упевнене спілкування на роботі та в навчанні"
   },
   "t.sicheres-auftreten-in-der.11uan87": {
     "de": "Sicheres Auftreten in der Teamkommunikation",
@@ -6242,10 +6238,6 @@
   "t.sicherheit.18ppyic": {
     "de": "Sicherheit",
     "text": "Безпека"
-  },
-  "t.sieben.1a0fez1": {
-    "de": "Sieben",
-    "text": "Сім"
   },
   "t.so-entsteht-ein-firmenkurs.18nwhhl": {
     "de": "So entsteht ein Firmenkurs bei CASA.",
@@ -6322,6 +6314,10 @@
   "t.sobald-wir-die-gebuehr.1ffq0ip": {
     "de": "Sobald wir die Gebühr für mindestens den ersten Kurs von dir erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Wenn du im Ausland wohnst, sind mit der Anmeldung die gesamten Kursgebühren für den ersten Kurs fällig und, falls du eine Unterkunft buchst, auch die Unterkunftskosten. Auf Anfrage schicken wir dir den Brief auch per Post oder gegen Aufpreis per DHL-Express.",
     "text": "Щойно ми отримаємо від вас оплату принаймні за перший курс, ми надішлемо вам лист для оформлення візи електронною поштою. Якщо ви живете за кордоном, під час реєстрації потрібно сплатити повну вартість першого курсу, а якщо ви бронюєте житло — то й вартість проживання. На запит ми також можемо надіслати лист звичайною поштою або за доплату через DHL Express."
+  },
+  "t.sobald-wir-die-gebuehr.1oe3inl": {
+    "de": "Sobald wir die Gebühr für mindestens den ersten Kurs erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Verzögert sich dein Visum, kannst du deinen Kurs bis 21 Tage vor Beginn einmal kostenfrei verschieben.",
+    "text": "Щойно ми отримаємо оплату щонайменше за перший курс, ми надішлемо вам лист для оформлення візи електронною поштою. Якщо оформлення візи затримується, ви можете один раз безкоштовно перенести курс, але не пізніше ніж за 21 день до його початку."
   },
   "t.sobald-wir-jemanden-gefunden.16n3kk5": {
     "de": "Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule.",
@@ -6447,6 +6443,10 @@
     "de": "Steuerliche Einordnung",
     "text": "Податковий статус"
   },
+  "t.stimme-von.17t1nzy": {
+    "de": "Stimme {n} von {total}",
+    "text": "Відгук {n} з {total}"
+  },
   "t.stimme.1lt7d5u": {
     "de": "Stimme",
     "text": "Відгук"
@@ -6454,6 +6454,10 @@
   "t.stimme.1nqyr3a": {
     "de": "Stimme",
     "text": "Відгук"
+  },
+  "t.stimmen-auswaehlen.1ls7gzd": {
+    "de": "Stimmen auswählen",
+    "text": "Виберіть відгук"
   },
   "t.story-bilder-nutzen-jetzt.1tfz8f3": {
     "de": "Story-Bilder nutzen jetzt Unterrichtsmomente statt unpassender Porträts.",
@@ -6611,10 +6615,6 @@
     "de": "Team",
     "text": "Команда"
   },
-  "t.teams-die-deutsch-direkt.12bi0g5": {
-    "de": "Teams, die Deutsch direkt im Arbeitsalltag brauchen.",
-    "text": "Команди, яким німецька потрібна безпосередньо в щоденній роботі."
-  },
   "t.teilnehmende-schreiben-die-lehre.qosbc9": {
     "de": "Teilnehmende schreiben, die Lehrerin schreibt Grammatik an die Tafel",
     "text": "Учасники пишуть, а викладачка записує граматику на дошці"
@@ -6667,6 +6667,10 @@
     "de": "telc Deutsch B2 für Arbeit, Ausbildung und Alltag",
     "text": "telc Deutsch B2 для роботи, професійного навчання та повсякденного життя"
   },
+  "t.telc-deutsch-b2-pruefung.jo3lot": {
+    "de": "telc Deutsch B2 Prüfung",
+    "text": "Іспит telc Deutsch B2"
+  },
   "t.telc-deutsch-b2.ba09li": {
     "de": "telc Deutsch B2",
     "text": "telc Deutsch B2"
@@ -6678,6 +6682,10 @@
   "t.telc-deutsch-c1-hochschule.skmhxj": {
     "de": "telc Deutsch C1 Hochschule prüft Deutschkenntnisse für die Hochschule auf weit fortgeschrittenem Niveau. Die Prüfung ist für dich, wenn du an einer deutschsprachigen Hochschule studieren möchtest, schon studierst oder in einem akademischen Beruf arbeitest und deine Deutschkenntnisse nachweisen möchtest.",
     "text": "telc Deutsch C1 Hochschule перевіряє знання німецької для навчання у виші на дуже високому рівні. Іспит підійде вам, якщо ви хочете навчатися в німецькомовному виші, уже навчаєтеся або працюєте в академічній сфері й хочете підтвердити свої знання німецької."
+  },
+  "t.telc-deutsch-c1-hochschulpruefun.1ojoaqw": {
+    "de": "telc Deutsch C1 Hochschulprüfung",
+    "text": "Іспит telc Deutsch C1 Hochschule"
   },
   "t.telc-pruefungen-termine-und.tiqx5r": {
     "de": "telc-Prüfungen, Termine und Anmeldung.",
@@ -6775,6 +6783,10 @@
     "de": "Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.",
     "text": "Укажіть у тестовій формі своє ім’я та електронну адресу, щоб ми знали, чий це результат."
   },
+  "t.trainiere-patientengespraeche-di.2petua": {
+    "de": "Trainiere Patientengespräche, die schriftliche Dokumentation und den fachlichen Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
+    "text": "Практикуйте розмови з пацієнтами, письмову документацію та фахове спілкування в команді, орієнтуючись на щоденну роботу в клініці й на Fachsprachprüfung (іспит із фахової мови)."
+  },
   "t.treffer-fuer-in.1b4yuwc": {
     "de": "{totalResults} Treffer für „{q}“ in „{scopeLabel}“",
     "text": "Результати пошуку «{q}» у розділі «{scopeLabel}»: {totalResults}"
@@ -6803,10 +6815,6 @@
     "de": "Übe mit den typischen Aufgaben der Prüfung.",
     "text": "Тренуйтеся на типових завданнях іспиту."
   },
-  "t.uebe-patientengespraeche-arztbri.19vntbz": {
-    "de": "Übe Patientengespräche, Arztbriefe und den Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
-    "text": "Практикуйте розмови з пацієнтами, медичні виписки та спілкування в команді з орієнтацією на щоденну роботу в клініці й Fachsprachprüfung (іспит із фахової мови)."
-  },
   "t.ueben-mit-den-zeitvorgaben.61x1kr": {
     "de": "Üben mit den Zeitvorgaben der Prüfung",
     "text": "Тренування з дотриманням часових обмежень іспиту"
@@ -6826,6 +6834,10 @@
   "t.ueber-uns.94acrg": {
     "de": "Über uns",
     "text": "Про нас"
+  },
+  "t.ueber-unterricht-und-team.lihdwl": {
+    "de": "Über Unterricht und Team",
+    "text": "Про заняття й команду"
   },
   "t.uebergebene-schluessel-anzahl.wew9u9": {
     "de": "Übergebene Schlüssel (Anzahl)",
@@ -6891,10 +6903,6 @@
     "de": "Unabhängige Sprachschule in Bremen",
     "text": "Незалежна мовна школа в Бремені"
   },
-  "t.und-so-laeuft-jedes.15oxmf9": {
-    "de": "Und so läuft jedes Format konkret ab",
-    "text": "А ось як конкретно проходить кожен формат"
-  },
   "t.und.cbu5qy": {
     "de": " und ",
     "text": " та "
@@ -6942,10 +6950,6 @@
   "t.unser-vorbereitungskurs-fuer-tel.k1vuoh": {
     "de": "Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.",
     "text": "Наш підготовчий курс до telc Deutsch B2 триває один місяць, по два вечори на тиждень."
-  },
-  "t.unsere-erfahrung-und-partnerscha.o89bok": {
-    "de": "Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.",
-    "text": "Наш досвід і партнерства зміцнюють нашу роботу для вас."
   },
   "t.unsere-intensivkurse-finden-in.1myxstb": {
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
@@ -7143,17 +7147,17 @@
     "de": "Unterrichtseinheiten",
     "text": "Академічні години"
   },
-  "t.unterrichtsinhalte-passend-zu-de.pa3yf1": {
-    "de": "Unterrichtsinhalte passend zu deiner Gruppe und ihren Zielen",
-    "text": "Зміст занять відповідно до вашої групи та її цілей"
+  "t.unterrichtsinhalte-passend-zur-g.w4qxb6": {
+    "de": "Unterrichtsinhalte passend zur Gruppe und ihren Zielen",
+    "text": "Зміст занять відповідно до групи та її цілей"
   },
   "t.unterschriften.13lxp37": {
     "de": "Unterschriften",
     "text": "Підписи"
   },
-  "t.unterstuetzung-bei-der-unterkunf.9oowkq": {
-    "de": "Unterstützung bei der Unterkunft und beim Ankommen in Bremen",
-    "text": "Допомога з житлом і облаштуванням у Бремені"
+  "t.unterstuetzung-bei-der-suche.pa8tno": {
+    "de": "Unterstützung bei der Suche nach einer Unterkunft und beim Ankommen in Bremen",
+    "text": "Допомога в пошуку житла та облаштуванні в Бремені"
   },
   "t.unverbindliches-angebot.1mf8xlj": {
     "de": "Unverbindliches Angebot",
@@ -7239,6 +7243,10 @@
     "de": "Verschiedene Abschlüsse kennenlernen",
     "text": "Дізнатися про різні види дипломів"
   },
+  "t.verschiedene-wege-zum-gleichen.zr2nzg": {
+    "de": "Verschiedene Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht in der Qualität.",
+    "text": "Різні шляхи до однієї мети. Відрізняється ритм, а не якість."
+  },
   "t.versicherung-und-aufenthalt-klae.d9okz5": {
     "de": "Versicherung und Aufenthalt klären",
     "text": "З’ясувати питання страхування та дозволу на проживання"
@@ -7303,10 +7311,6 @@
     "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
     "text": "Можливо, ви хочете навчатися у виші, розвиватися професійно, покращити свою німецьку або знайти нове місце для життя. Ваші бажання — гарна відправна точка, щоб дослідити можливості."
   },
-  "t.vier-dinge-die-du.zm22mf": {
-    "de": "Vier Dinge, die du vorher wissen solltest",
-    "text": "Чотири речі, які варто знати заздалегідь"
-  },
   "t.vier-lernende-ueben-das.bb4dtf": {
     "de": "Vier Lernende üben das Schreiben im Kurs",
     "text": "Четверо слухачів практикують письмо на занятті"
@@ -7314,10 +7318,6 @@
   "t.vier-teilnehmende-schreiben-am.5qc4zl": {
     "de": "Vier Teilnehmende schreiben am langen Kurstisch",
     "text": "Четверо учасників пишуть за довгим навчальним столом"
-  },
-  "t.vier.irklvm": {
-    "de": "Vier",
-    "text": "Чотири"
   },
   "t.visa-orientiert.1pn4lzs": {
     "de": "Visa-orientiert",
@@ -7359,6 +7359,10 @@
     "de": "Vollverpflegung",
     "text": "Повний пансіон"
   },
+  "t.von-5-sternen.1hmfo2i": {
+    "de": "{n} von 5 Sternen",
+    "text": "{n} з 5 зірок"
+  },
   "t.von-a1-bis-c1.1lsfam3": {
     "de": "Von A1 bis C1, Stufe für Stufe",
     "text": "Від A1 до C1, рівень за рівнем"
@@ -7366,6 +7370,10 @@
   "t.von-a1-bis-c1.1yk6pdi": {
     "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
     "text": "Від A1 до C1: на сторінці «Рівні» ви побачите, що можете зрозуміти й сказати на кожному рівні."
+  },
+  "t.von-anfang-an-bis.g28svc": {
+    "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
+    "text": "З нуля до C1, сьогодні — з дипломами бакалавра й магістра"
   },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
@@ -7515,9 +7523,9 @@
     "de": "Wähle deinen Prüfungstermin und entscheide, ob du die ganze Prüfung oder nur den schriftlichen oder den mündlichen Teil ablegst.",
     "text": "Виберіть дату іспиту й вирішіть, чи складатимете ви весь іспит, чи лише письмову або усну частину."
   },
-  "t.waehle-ein-format-und.kven06": {
-    "de": "Wähle ein Format und sieh dir Rhythmus, Lernumfang und typische Ergebnisse an.",
-    "text": "Виберіть формат і перегляньте ритм, навчальне навантаження й типові результати."
+  "t.waehle-ein-format-und.wz02zz": {
+    "de": "Wähle ein Format und sieh dir den Lernrhythmus, den Lernumfang und die vorgesehene Lernprogression an.",
+    "text": "Виберіть формат і перегляньте ритм навчання, навчальне навантаження й запланований прогрес."
   },
   "t.waehle-ein-lernpensum-das.1q7g4yl": {
     "de": "Wähle ein Lernpensum, das zu deinem Alltag passt. Ein Intensivkurs bietet mehr Unterrichtszeit, und ein Abendkurs lässt sich gut mit anderen Verpflichtungen verbinden.",
@@ -7571,9 +7579,9 @@
     "de": "Warum Bremen?",
     "text": "Чому Бремен?"
   },
-  "t.warum-casa.k0zncy": {
-    "de": "Warum CASA",
-    "text": "Чому CASA"
+  "t.warum-casa.1g3oan0": {
+    "de": "Warum CASA?",
+    "text": "Чому CASA?"
   },
   "t.warum-deutschland.1ea16ck": {
     "de": "Warum Deutschland",
@@ -7747,10 +7755,6 @@
     "de": "Weg",
     "text": "Шлях"
   },
-  "t.wege-zum-gleichen-ziel.r69yk3": {
-    "de": "{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.",
-    "text": "{de} шляхів до однієї мети. Різниця — у ритмі, а не в рівні вимог."
-  },
   "t.weihnachten.p6cuzg": {
     "de": "Weihnachten",
     "text": "Різдво"
@@ -7867,9 +7871,9 @@
     "de": "Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.",
     "text": "Якщо ви ще зовсім не знаєте німецької (A1.1), починати потрібно завжди з початку курсу."
   },
-  "t.wenn-du-schon-deutsch.1sgmbp6": {
-    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Mach einen kostenlosen Online-Test und schick uns dein Ergebnis, oder komm persönlich bei uns vorbei.",
-    "text": "Якщо ви вже розмовляєте німецькою, визначення рівня допоможе нам вибрати курс. Пройдіть безкоштовний онлайн-тест і надішліть нам результат або приходьте до нас особисто."
+  "t.wenn-du-schon-deutsch.f8eac6": {
+    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
+    "text": "Якщо ви вже розмовляєте німецькою, визначення рівня допоможе нам вибрати курс. Приходьте до нас особисто або пройдіть безкоштовний онлайн-тест і надішліть нам результат. На місці ми придивимося уважніше й так знайдемо відповідний курс."
   },
   "t.wenn-du-ueber-weihnachten.1o3kyam": {
     "de": "Wenn du über Weihnachten oder Ostern bleibst, zahlst du für die Wochen, in denen die Schule geschlossen ist, eine zusätzliche Unterkunftsgebühr von {amount} pro Woche.",
@@ -7946,6 +7950,10 @@
   "t.wgs.jm5adq": {
     "de": "WGs",
     "text": "Спільні квартири"
+  },
+  "t.wichtige-punkte-fuer-die.mledvf": {
+    "de": "Wichtige Punkte für die Kursanmeldung",
+    "text": "Що важливо знати про реєстрацію на курс"
   },
   "t.wichtige-unterlagen-griffbereit-.rmu5zf": {
     "de": "Wichtige Unterlagen griffbereit halten",
@@ -8075,9 +8083,17 @@
     "de": "Wir drücken allen …",
     "text": "Тримаємо кулаки за всіх …"
   },
+  "t.wir-empfehlen-einen-pruefungsvor.1r8igsg": {
+    "de": "Wir empfehlen einen Prüfungsvorbereitungskurs, in dem gezielt alle Fertigkeiten und Prüfungsformate trainiert werden.",
+    "text": "Ми радимо підготовчий курс, на якому цілеспрямовано тренують усі навички та всі формати завдань іспиту."
+  },
   "t.wir-finanzieren-uns-zum.j9qrnk": {
     "de": "Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.",
     "text": "Ми фінансуємося здебільшого за рахунок плати за курси. Ці кошти покривають поточну роботу школи й забезпечують програми, особливо важливі для іноземних слухачів і вразливих груп."
+  },
+  "t.wir-finden-dein-passendes.vo8o0d": {
+    "de": "Wir finden dein passendes Kursniveau",
+    "text": "Ми підберемо вам відповідний рівень курсу"
   },
   "t.wir-freuen-uns-ueber.1st9sm3": {
     "de": "Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.",
@@ -8091,6 +8107,10 @@
     "de": "Wir helfen dir bei Fragen zu Kursen, Prüfungen und Unterkunft.",
     "text": "Ми допоможемо вам із запитаннями про курси, іспити та проживання."
   },
+  "t.wir-helfen-dir-den.12yq55c": {
+    "de": "Wir helfen dir, den passenden Deutschkurs zu finden – egal, ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest.",
+    "text": "Ми допоможемо вам знайти відповідний курс німецької — незалежно від того, чи ви тільки починаєте, вчитеся паралельно з роботою чи готуєтеся до конкретної мети."
+  },
   "t.wir-helfen-dir-gern.m3cxpx": {
     "de": "Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.",
     "text": "Ми охоче допоможемо вам вибрати курс, рівень і дату."
@@ -8103,9 +8123,9 @@
     "de": "Wir hinterfragen unser Angebot und unsere Arbeit regelmäßig und selbstkritisch.",
     "text": "Ми регулярно й самокритично аналізуємо наші курси та свою роботу."
   },
-  "t.wir-hoeren-zu-und.1ln291b": {
-    "de": "Wir hören zu. Und begleiten dich.",
-    "text": "Ми слухаємо. І супроводжуємо вас."
+  "t.wir-hoeren-zu-und.tjx3wb": {
+    "de": "Wir hören zu und begleiten dich.",
+    "text": "Ми вислухаємо й підтримаємо вас."
   },
   "t.wir-kalkulieren-fuer-jede.1483jah": {
     "de": "Wir kalkulieren für jede Gruppe einzeln. Nenn uns Gruppengröße, das ungefähre Sprachniveau, Alter, Zeitraum und eure Schwerpunkte, dann erstellen wir dir gern ein individuelles und unverbindliches Angebot.",
@@ -8363,10 +8383,6 @@
     "de": "Zentrale Suche",
     "text": "Пошук на всьому сайті"
   },
-  "t.zertifikat-geplant.kos0di": {
-    "de": "Zertifikat geplant?",
-    "text": "Плануєте отримати сертифікат?"
-  },
   "t.zertifikate.1j19zem": {
     "de": "Zertifikate",
     "text": "Сертифікати"
@@ -8523,10 +8539,6 @@
     "de": "Zustand",
     "text": "Стан"
   },
-  "t.zwei-formate-ohne-listenpreis.1rg8o7v": {
-    "de": "Zwei Formate ohne Listenpreis",
-    "text": "Два формати без фіксованої ціни"
-  },
   "t.zwei-lernende-besprechen-gemeins.jdbxdr": {
     "de": "Zwei Lernende besprechen gemeinsam ein Dokument",
     "text": "Двоє слухачів разом обговорюють документ"
@@ -8566,10 +8578,6 @@
   "t.zwei-wochen-in-bremen.t2itg8": {
     "de": "Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
     "text": "Два тижні в Бремені — це вже справжнє перебування. Ваша група має сорок академічних годин і вісім післяобідніх програм, а в приймальних сім’ях живе достатньо довго, щоб німецька за вечерею з’являлася сама собою. Як і кіт, група з цікавістю досліджує місто — від оранжерей Botanika до прогулянки з нічним сторожем."
-  },
-  "t.zwei.njwzo3": {
-    "de": "Zwei",
-    "text": "Два"
   },
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",

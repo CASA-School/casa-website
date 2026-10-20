@@ -292,6 +292,14 @@
    "/courses/[slug]"
   ]
  },
+ "t.a1-bis-c1-in.151ni4p": {
+  "de": "A1 bis C1 in drei Jahren",
+  "en": "A1 to C1 in three years",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.ab-einem-niveau-von.82hvcg": {
   "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
   "en": "You can join from level B1 upwards.",
@@ -456,39 +464,6 @@
    "/registration/exam"
   ]
  },
- "t.abspielen.1ijv4zn": {
-  "de": "Abspielen",
-  "en": "Play",
-  "files": [
-   "src/components/sections/testimonial-grid.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
- "t.acht.15lnpkj": {
-  "de": "Acht",
-  "en": "Eight",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.achte-darauf-dass-dein.1xdf53u": {
   "de": "Achte darauf, dass dein Name am Briefkasten steht und dass du Anrufe und Nachrichten empfangen kannst.",
   "en": "Make sure your name appears on your letterbox and that you can receive calls and messages.",
@@ -636,9 +611,9 @@
    "*"
   ]
  },
- "t.alle-die-fuer-studium.x24oyo": {
-  "de": "Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.",
-  "en": "Anyone who wants to make quick progress for study, work or a visa.",
+ "t.alle-die-gezielt-an.y1tpsn": {
+  "de": "Alle, die gezielt an Schreiben, Sprechen oder Grammatik arbeiten möchten.",
+  "en": "Anyone who wants to focus on their writing, speaking or grammar.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -646,9 +621,9 @@
    "/courses"
   ]
  },
- "t.alle-die-gezielt-an.y1tpsn": {
-  "de": "Alle, die gezielt an Schreiben, Sprechen oder Grammatik arbeiten möchten.",
-  "en": "Anyone who wants to focus on their writing, speaking or grammar.",
+ "t.alle-die-mit-ihrem.qlxac0": {
+  "de": "Alle, die mit ihrem Studium, Beruf oder dem Visumsantrag schnell vorankommen möchten.",
+  "en": "Anyone who wants to make quick progress with their studies, their work or a visa application.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -1126,11 +1101,9 @@
   "de": "Angebot anfragen",
   "en": "Request a quote",
   "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx",
-   "src/app/(site)/[locale]/courses/page.tsx"
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
   "pages": [
-   "/courses",
    "/courses/[slug]"
   ]
  },
@@ -1378,6 +1351,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.anmeldung-mit-visum.42top8": {
+  "de": "Anmeldung mit Visum",
+  "en": "Registering with a visa",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
   ]
  },
  "t.anmeldung.cdp46": {
@@ -1854,52 +1837,6 @@
    "src/config/content/course-narratives.ts"
   ],
   "pages": []
- },
- "t.automatischen-wechsel-pausieren.a6vgwj": {
-  "de": "Automatischen Wechsel pausieren",
-  "en": "Pause automatic rotation",
-  "files": [
-   "src/components/sections/testimonial-grid.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
- "t.automatischen-wechsel-starten.ilzeaq": {
-  "de": "Automatischen Wechsel starten",
-  "en": "Start automatic rotation",
-  "files": [
-   "src/components/sections/testimonial-grid.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
  },
  "t.b-schreiben-b1-b2.e4s6l2": {
   "de": "B – Schreiben (B1/B2)",
@@ -2430,9 +2367,9 @@
    "/ueber-uns/gemeinnuetzigkeit"
   ]
  },
- "t.beratung-zum-weiterlernen.1vzyhg9": {
-  "de": "Beratung zum Weiterlernen",
-  "en": "Advice on how to continue learning",
+ "t.beratung-zu-autonomen-lernoption.y3ul57": {
+  "de": "Beratung zu autonomen Lernoptionen",
+  "en": "Advice on independent learning options",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -2558,14 +2495,6 @@
   "pages": [
    "/courses"
   ]
- },
- "t.berufstaetige-und-auszubildende-.1neidt": {
-  "de": "Berufstätige und Auszubildende mit begrenzter Zeit am Tag.",
-  "en": "Working professionals and trainees balancing work with language learning.",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
  },
  "t.beschaedigt.jvuh5c": {
   "de": "beschädigt",
@@ -4278,16 +4207,6 @@
    "/contact"
   ]
  },
- "t.dein-niveau-steht-am.1lfh2x1": {
-  "de": "Dein Niveau steht am Anfang",
-  "en": "Your level comes first",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.dein-niveau-und-deine.1t3mt4i": {
   "de": "Dein Niveau und deine Zeiten",
   "en": "Your level and your times",
@@ -4577,16 +4496,6 @@
   "pages": [
    "/courses",
    "/courses/[slug]"
-  ]
- },
- "t.den-unterricht-fuer-gruppen.10xdr5e": {
-  "de": "Den Unterricht für Gruppen und den Firmenunterricht stellen wir nach Bedarf zusammen und machen dafür ein eigenes Angebot. Beim Gruppenkurs gehören Unterkunft, Kulturprogramm und ein Nahverkehrsticket dazu.",
-  "en": "We plan classes for groups and in-company teaching around what you need and send you an individual quote. For groups, accommodation, a culture programme and a public transport ticket are part of the package.",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.den-weg-zur-schule.leezgc": {
@@ -4913,6 +4822,14 @@
    "/"
   ]
  },
+ "t.deutsch-fuer-deinen-arbeitsallta.k6e83g": {
+  "de": "Deutsch für deinen Arbeitsalltag in deinem Team",
+  "en": "German for your working day, in your team.",
+  "files": [
+   "src/config/content/course-narratives.ts"
+  ],
+  "pages": []
+ },
  "t.deutsch-fuer-deinen-naechsten.1xw3ik": {
   "de": "Deutsch für deinen nächsten Schritt",
   "en": "German for your next step",
@@ -5032,9 +4949,9 @@
    "/courses/[slug]"
   ]
  },
- "t.deutsch-lernen-und-bremen.38p4ja": {
-  "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu deiner Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.",
-  "en": "Learn German and experience Bremen together: we plan the lessons, the culture programme and the accommodation around your group. The programme is for school classes, universities and organisations coming to Bremen as a group, and every participant receives a certificate of attendance.",
+ "t.deutsch-lernen-und-bremen.5q5wxi": {
+  "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
+  "en": "Learn German and experience Bremen together: we plan the lessons, the culture programme and the accommodation around each group. The programme is for school classes, universities and organisations coming to Bremen as a group.",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -5221,6 +5138,14 @@
   "pages": [
    "/courses/[slug]"
   ]
+ },
+ "t.die-c1-pruefung-bestanden.1ectagp": {
+  "de": "Die C1-Prüfung bestanden",
+  "en": "Passed the C1 exam",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
  },
  "t.die-casa-wg.dy7gt2": {
   "de": "Die CASA-WG",
@@ -5748,16 +5673,6 @@
    "/resources/why-germany"
   ]
  },
- "t.die-vorbereitung-auf-eine.12de6ul": {
-  "de": "Die Vorbereitung auf eine telc-Prüfung ist nicht im Intensivkurs enthalten. Wenn du ein Zertifikat brauchst, kannst du zusätzlich einen Vorbereitungskurs buchen.",
-  "en": "Preparation for a telc exam is not part of the intensive course. If you need a certificate, you can book a preparation course as well.",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.die-vorbereitung-auf-eine.1h64ja4": {
   "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
   "en": "Exam preparation is not part of the intensive courses. If you need a telc certificate, you can book a preparation course as well.",
@@ -6057,16 +5972,6 @@
    "src/config/content/accommodation-narratives.ts"
   ],
   "pages": []
- },
- "t.drei.10ztcd4": {
-  "de": "Drei",
-  "en": "Three",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
  },
  "t.du-arbeitest-eng-mit.o0mxmo": {
   "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
@@ -6446,6 +6351,29 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.du-profitierst-von-unserer.1p4ywyf": {
+  "de": "Du profitierst von unserer Erfahrung und Kooperationspartnern.",
+  "en": "You benefit from our experience and our cooperation partners.",
+  "files": [
+   "src/components/sections/proof-band.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
   ]
  },
  "t.du-schickst-uns-deinen.1xfrvv1": {
@@ -7346,16 +7274,6 @@
   ],
   "pages": [
    "/accommodation"
-  ]
- },
- "t.ein.byvoo2": {
-  "de": "Ein",
-  "en": "One",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.einblicke-in-das-lernen.1c3kto6": {
@@ -8594,6 +8512,16 @@
    "*"
   ]
  },
+ "t.fragen-zum-visum.1nj4wpt": {
+  "de": "Fragen zum Visum",
+  "en": "Questions about visas",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.fragen-zur-anmeldung.1ox4z9g": {
   "de": "Fragen zur Anmeldung?",
   "en": "Questions about registering?",
@@ -8725,16 +8653,6 @@
    "/courses/[slug]"
   ]
  },
- "t.fuenf.1u9cc2a": {
-  "de": "Fünf",
-  "en": "Five",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.fuer-aerztinnen-aerzte-und.19b1qfj": {
   "de": "Für Ärztinnen, Ärzte und medizinische Fachkräfte, die sich sprachlich auf die Arbeit in Deutschland vorbereiten.",
   "en": "For doctors and healthcare professionals preparing their German for work in Germany.",
@@ -8789,6 +8707,14 @@
   "pages": [
    "/"
   ]
+ },
+ "t.fuer-berufstaetige-auszubildende.914hw4": {
+  "de": "Für Berufstätige, Auszubildende und alle mit begrenzter Zeit.",
+  "en": "For working professionals, trainees and anyone short on time.",
+  "files": [
+   "src/config/content/course-narratives.ts"
+  ],
+  "pages": []
  },
  "t.fuer-besondere-ziele.570052": {
   "de": "Für besondere Ziele",
@@ -8892,8 +8818,8 @@
    "/accommodation/[type]"
   ]
  },
- "t.fuer-die-zeit-deines.pw4d6i": {
-  "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
+ "t.fuer-die-zeit-deines.1l7yuxq": {
+  "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir ein Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
   "en": "While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
@@ -9766,6 +9692,29 @@
    "/search"
   ]
  },
+ "t.google-bewertung.epszq": {
+  "de": "Google-Bewertung",
+  "en": "Google review",
+  "files": [
+   "src/components/sections/testimonial-grid.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.grammatik-kompakt-erfolgreich-au.1nskmx7": {
   "de": "Grammatik kompakt – Erfolgreich auf B1/B2",
   "en": "Compact grammar: success at B1/B2",
@@ -10255,6 +10204,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.hier-findest-du-antworten.13679b3": {
+  "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo, zur Prüfungsvorbereitung und zur Anmeldung mit Visum.",
+  "en": "Here you’ll find answers about placement, the pace of learning, exam preparation and registering with a visa.",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.hier-findest-du-antworten.15kvgk9": {
   "de": "Hier findest du Antworten rund um Kurse, Prüfungen, die Anmeldung und das Leben in Bremen.",
   "en": "Here you’ll find answers about courses, exams, registration and life in Bremen.",
@@ -10262,16 +10221,6 @@
    "src/config/content/heroes.ts"
   ],
   "pages": []
- },
- "t.hier-findest-du-antworten.1b042mw": {
-  "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo und zur Prüfungsvorbereitung.",
-  "en": "Here you’ll find answers about placement, the pace of learning and exam preparation.",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
  },
  "t.hier-findest-du-die.zvxec9": {
   "de": "Hier findest du die Termine, die Voraussetzungen und die Unterlagen, die du brauchst. So kommst du gut vorbereitet zur Prüfung.",
@@ -10583,9 +10532,9 @@
    "/courses/levels"
   ]
  },
- "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
-  "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-  "en": "In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes 8 weeks. In the evening course, you complete half a level in around 3.5 months, which is about 1.5 levels a year.",
+ "t.im-intensivkurs-mit-unterrichtse.ff14c0": {
+  "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs mit {course.evening-german.lessons} Unterrichtseinheiten pro Woche schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+  "en": "In the intensive course, with {course.intensive-german.lessons} lessons a week, a complete level takes 8 weeks. In the evening course, with {course.evening-german.lessons} lessons a week, you complete half a level in around 3.5 months, which is about 1.5 levels a year.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -10715,6 +10664,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.im-vorbereitungskurs-b2-lernst.1jh53bl": {
+  "de": "Im Vorbereitungskurs B2 lernst du das Prüfungsformat kennen und trainierst alle vier Fertigkeiten: Lesen, Hören, Schreiben und Sprechen.",
+  "en": "In the B2 preparation course you get to know the exam format and train all four skills: reading, listening, writing and speaking.",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
   ]
  },
  "t.im-vorstellungsgespraech-lernen-.1ylcxwl": {
@@ -11201,6 +11160,14 @@
    "/"
   ]
  },
+ "t.intensiv-und-abendkurse-b1.gpmpwk": {
+  "de": "Intensiv- und Abendkurse B1 und B2",
+  "en": "Intensive and evening courses, B1 and B2",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.intensiver-rhythmus.hl2l1s": {
   "de": "Intensiver Rhythmus",
   "en": "Intensive rhythm",
@@ -11661,8 +11628,8 @@
    "/news"
   ]
  },
- "t.jeder-mensch-bringt-andere.15decv": {
-  "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
+ "t.jeder-mensch-bringt-andere.gfucsy": {
+  "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
   "en": "Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
@@ -12817,6 +12784,14 @@
    "/exams/[code]"
   ]
  },
+ "t.kurse-a1-bis-c1.1ue2h4o": {
+  "de": "Kurse A1 bis C1 und die C1-Prüfung",
+  "en": "Courses A1 to C1 and the C1 exam",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.kurse-ansehen.ym8ym5": {
   "de": "Kurse ansehen",
   "en": "See our courses",
@@ -12828,6 +12803,14 @@
    "/resources/study-in-germany",
    "/resources/why-germany"
   ]
+ },
+ "t.kurse-b1-bis-c1.s4cd63": {
+  "de": "Kurse B1 bis C1",
+  "en": "Courses B1 to C1",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
  },
  "t.kurse-beratung.1yqjvaw": {
   "de": "Kurse & Beratung",
@@ -12944,6 +12927,16 @@
    "/exams/[code]",
    "/faq",
    "/team"
+  ]
+ },
+ "t.kursformate.o4o5ui": {
+  "de": "Kursformate",
+  "en": "Course formats",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
   ]
  },
  "t.kursgebuehr-10-termine-40.wpo63y": {
@@ -13386,6 +13379,14 @@
   ],
   "pages": []
  },
+ "t.lerne-dich-sicherer-auf.zeguny": {
+  "de": "Lerne, dich sicherer auf Deutsch auszudrücken – mündlich und schriftlich",
+  "en": "Learn to express yourself more confidently in German, in speech and in writing",
+  "files": [
+   "src/config/content/course-narratives.ts"
+  ],
+  "pages": []
+ },
  "t.lerne-die-aufgaben-kennen.c97w4a": {
   "de": "Lerne die Aufgaben kennen, übe unter Prüfungsbedingungen und erhalte persönliches Feedback.",
   "en": "Get to know the tasks, practise under exam conditions and learn from personal feedback.",
@@ -13780,14 +13781,6 @@
  "t.mehr-sprachpraxis.1gj1f42": {
   "de": "Mehr Sprachpraxis",
   "en": "More language practice",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
- },
- "t.mehr-sprechsicherheit.ijgf9p": {
-  "de": "Mehr Sprechsicherheit",
-  "en": "Improved speaking confidence",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -14920,6 +14913,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.neue-kurse-beginnen-jeden.19bgyiy": {
+  "de": "Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag",
+  "en": "New courses start every month; the first part of each level starts alternately in the morning or the afternoon",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.neue-kurse-beginnen-jeden.nkdyw1": {
   "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
   "en": "New courses begin every month, and the placement test shows which level you start at.",
@@ -14928,16 +14931,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.neue-kurse-jeden-monat.u56xun": {
-  "de": "Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag",
-  "en": "New courses every month, alternating between mornings and afternoons",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.neue-menschen-kennenlernen.vttdpm": {
@@ -15149,9 +15142,9 @@
    "/registration/course"
   ]
  },
- "t.nutze-deine-bildungszeit-um.1detqax": {
-  "de": "Nutze deine Bildungszeit, um dich auf Deutsch und Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
-  "en": "Use your Bildungszeit, Bremen’s paid leave for further training, to focus on German and English. We’ll advise you on the right course and the paperwork you need.",
+ "t.nutze-deine-bildungszeit-um.ybj78y": {
+  "de": "Nutze deine Bildungszeit, um dich auf Deutsch oder Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
+  "en": "Use your Bildungszeit, Bremen’s paid leave for further training, to focus on German or English. We’ll advise you on the right course and the paperwork you need.",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -15177,16 +15170,6 @@
   ],
   "pages": [
    "/accommodation/[type]"
-  ]
- },
- "t.ob-du-neu-anfaengst.p8gmm5": {
-  "de": "Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.",
-  "en": "Whether you are starting out, learning alongside work or working towards a specific goal, we can help you find the right German course.",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.ob-ein-zimmer-frei.p0ytcz": {
@@ -15375,9 +15358,9 @@
    "/resources/why-germany"
   ]
  },
- "t.orientierung-wenn-du-studieren.77ppc0": {
-  "de": "Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest",
-  "en": "Guidance if you’re planning to study, looking for work or hoping to start vocational training",
+ "t.orientierung-wenn-du-studieren.oiz4ky": {
+  "de": "Orientierung, wenn du studieren möchtest, eine Arbeit oder eine Ausbildung suchst",
+  "en": "Guidance if you’re planning to study or looking for work or vocational training",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
   ],
@@ -15675,9 +15658,9 @@
    "/exams"
   ]
  },
- "t.plane-kursstart-unterkunft-und.p43mfz": {
-  "de": "Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.",
-  "en": "Plan your course start, accommodation and first practical steps, with our support.",
+ "t.plane-kursstart-unterkunft-und.1phog46": {
+  "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
+  "en": "Plan your course start, accommodation and first concrete steps, with our support.",
   "files": [
    "src/components/sections/persona-pathways.tsx"
   ],
@@ -16056,6 +16039,16 @@
    "/search"
   ]
  },
+ "t.pruefung-und-pruefungsvorbereitu.gkzxtl": {
+  "de": "Prüfung und Prüfungsvorbereitung",
+  "en": "Exams and exam preparation",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
+  ]
+ },
  "t.pruefung-und-termin-waehlen.d2sqhy": {
   "de": "Prüfung und Termin wählen",
   "en": "Choose an exam and date",
@@ -16251,20 +16244,11 @@
    "/"
   ]
  },
- "t.pruefungsvorbereitung-ist-ein-ei.1iqk0cu": {
-  "de": "Prüfungsvorbereitung ist ein eigener Kurs",
-  "en": "Exam preparation is a separate course",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.pruefungsvorbereitung.3qw9vr": {
   "de": "Prüfungsvorbereitung",
   "en": "Exam preparation",
   "files": [
+   "src/app/(site)/[locale]/courses/page.tsx",
    "src/components/calculator/casa-cost-pathway-calculator.tsx",
    "src/config/courses/special-course-modules.ts",
    "src/config/forms/organiser-brief-copy.ts"
@@ -16272,6 +16256,7 @@
   "pages": [
    "/calculator",
    "/contact",
+   "/courses",
    "/courses/[slug]"
   ]
  },
@@ -16994,9 +16979,9 @@
    "/exams"
   ]
  },
- "t.schritt-fuer-schritt-sicherer.116lp48": {
-  "de": "Schritt für Schritt sicherer auf Deutsch: mit regelmäßiger Übung und einer Gruppe, die gemeinsam lernt.",
-  "en": "Build your German step by step, with regular practice and a group to learn alongside.",
+ "t.schritt-fuer-schritt-sicherer.yzv4f6": {
+  "de": "Schritt für Schritt sicherer auf Deutsch – mit regelmäßigen Übungen in einer angenehmen Gruppenatmosphäre.",
+  "en": "Build your German step by step, with regular practice in a friendly group atmosphere.",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -17048,16 +17033,6 @@
   ],
   "pages": [
    "/courses/levels"
-  ]
- },
- "t.sechs.1eiph2a": {
-  "de": "Sechs",
-  "en": "Six",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.sehr-gut.u12mtf": {
@@ -17269,9 +17244,9 @@
   ],
   "pages": []
  },
- "t.sicherere-kommunikation-im-beruf.cx8gji": {
-  "de": "Sicherere Kommunikation im Beruf",
-  "en": "Improved workplace communication",
+ "t.sichere-kommunikation-im-beruf.xjsqyn": {
+  "de": "Sichere Kommunikation im Beruf und Studium",
+  "en": "Confident communication at work and in your studies",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -17312,16 +17287,6 @@
    "src/config/content/heroes.ts"
   ],
   "pages": []
- },
- "t.sieben.1a0fez1": {
-  "de": "Sieben",
-  "en": "Seven",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
  },
  "t.so-entsteht-ein-firmenkurs.18nwhhl": {
   "de": "So entsteht ein Firmenkurs bei CASA.",
@@ -17514,6 +17479,16 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.sobald-wir-die-gebuehr.1oe3inl": {
+  "de": "Sobald wir die Gebühr für mindestens den ersten Kurs erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Verzögert sich dein Visum, kannst du deinen Kurs bis 21 Tage vor Beginn einmal kostenfrei verschieben.",
+  "en": "As soon as we have received the fee for at least your first course, we email you your visa letter. If your visa is delayed, you can move your course once, free of charge, up to 21 days before it starts.",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
   ]
  },
  "t.sobald-wir-jemanden-gefunden.16n3kk5": {
@@ -17928,6 +17903,29 @@
    "/ueber-uns/gemeinnuetzigkeit"
   ]
  },
+ "t.stimme-von.17t1nzy": {
+  "de": "Stimme {n} von {total}",
+  "en": "Story {n} of {total}",
+  "files": [
+   "src/components/sections/testimonial-grid.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.stimme.1lt7d5u": {
   "de": "Stimme",
   "en": "slide",
@@ -17954,6 +17952,29 @@
  "t.stimme.1nqyr3a": {
   "de": "Stimme",
   "en": "Story",
+  "files": [
+   "src/components/sections/testimonial-grid.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
+ "t.stimmen-auswaehlen.1ls7gzd": {
+  "de": "Stimmen auswählen",
+  "en": "Choose a story",
   "files": [
    "src/components/sections/testimonial-grid.tsx"
   ],
@@ -18453,14 +18474,6 @@
    "/team"
   ]
  },
- "t.teams-die-deutsch-direkt.12bi0g5": {
-  "de": "Teams, die Deutsch direkt im Arbeitsalltag brauchen.",
-  "en": "Teams that need German for internal and client communication.",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
- },
  "t.teilnehmende-schreiben-die-lehre.qosbc9": {
   "de": "Teilnehmende schreiben, die Lehrerin schreibt Grammatik an die Tafel",
   "en": "Learners writing while the teacher writes grammar on the board",
@@ -18628,6 +18641,16 @@
   ],
   "pages": []
  },
+ "t.telc-deutsch-b2-pruefung.jo3lot": {
+  "de": "telc Deutsch B2 Prüfung",
+  "en": "telc Deutsch B2 exam",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
+  ]
+ },
  "t.telc-deutsch-c1-hochschule.skmhxj": {
   "de": "telc Deutsch C1 Hochschule prüft Deutschkenntnisse für die Hochschule auf weit fortgeschrittenem Niveau. Die Prüfung ist für dich, wenn du an einer deutschsprachigen Hochschule studieren möchtest, schon studierst oder in einem akademischen Beruf arbeitest und deine Deutschkenntnisse nachweisen möchtest.",
   "en": "telc Deutsch C1 Hochschule tests your German at a very advanced level, as you need it for university. The exam is for you if you want to prove your German because you plan to study at a German-speaking university, are already a student or work in an academic profession.",
@@ -18635,6 +18658,16 @@
    "src/config/content/exam-narratives.ts"
   ],
   "pages": []
+ },
+ "t.telc-deutsch-c1-hochschulpruefun.1ojoaqw": {
+  "de": "telc Deutsch C1 Hochschulprüfung",
+  "en": "telc Deutsch C1 Hochschule exam",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
+  ]
  },
  "t.telc-pruefungen.14zd129": {
   "de": "telc Prüfungen",
@@ -18933,6 +18966,14 @@
    "/placement-test"
   ]
  },
+ "t.trainiere-patientengespraeche-di.2petua": {
+  "de": "Trainiere Patientengespräche, die schriftliche Dokumentation und den fachlichen Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
+  "en": "Train patient consultations, written documentation and professional exchange with your team, with clinical work and the Fachsprachprüfung in mind.",
+  "files": [
+   "src/config/content/course-narratives.ts"
+  ],
+  "pages": []
+ },
  "t.treffer-fuer-in.1b4yuwc": {
   "de": "{totalResults} Treffer für „{q}“ in „{scopeLabel}“",
   "en": "{totalResults} {value} for “{q}” in “{scopeLabel}”",
@@ -19005,14 +19046,6 @@
    "/exams/[code]"
   ]
  },
- "t.uebe-patientengespraeche-arztbri.19vntbz": {
-  "de": "Übe Patientengespräche, Arztbriefe und den Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
-  "en": "Practise patient consultations, medical reports and conversations with colleagues as you prepare for clinical work and the Fachsprachprüfung.",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
- },
  "t.ueben-mit-den-zeitvorgaben.61x1kr": {
   "de": "Üben mit den Zeitvorgaben der Prüfung",
   "en": "Practice with the exam time limits",
@@ -19042,6 +19075,14 @@
    "/resources/study-in-germany",
    "/resources/why-germany"
   ]
+ },
+ "t.ueber-unterricht-und-team.lihdwl": {
+  "de": "Über Unterricht und Team",
+  "en": "On the lessons and the team",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
  },
  "t.uebergebene-schluessel-anzahl.wew9u9": {
   "de": "Übergebene Schlüssel (Anzahl)",
@@ -19215,16 +19256,6 @@
   ],
   "pages": []
  },
- "t.und-so-laeuft-jedes.15oxmf9": {
-  "de": "Und so läuft jedes Format konkret ab",
-  "en": "And here is how each format actually runs",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.und.cbu5qy": {
   "de": " und ",
   "en": " and ",
@@ -19337,29 +19368,6 @@
   ],
   "pages": [
    "/exams/[code]"
-  ]
- },
- "t.unsere-erfahrung-und-partnerscha.o89bok": {
-  "de": "Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.",
-  "en": "Our experience and our partnerships strengthen the work we do for you.",
-  "files": [
-   "src/components/sections/proof-band.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
   ]
  },
  "t.unsere-intensivkurse-finden-in.1myxstb": {
@@ -19903,9 +19911,9 @@
    "/courses/[slug]"
   ]
  },
- "t.unterrichtsinhalte-passend-zu-de.pa3yf1": {
-  "de": "Unterrichtsinhalte passend zu deiner Gruppe und ihren Zielen",
-  "en": "Lesson content shaped around your group and its goals",
+ "t.unterrichtsinhalte-passend-zur-g.w4qxb6": {
+  "de": "Unterrichtsinhalte passend zur Gruppe und ihren Zielen",
+  "en": "Lesson content shaped around the group and its goals",
   "files": [
    "src/config/content/course-narratives.ts"
   ],
@@ -19921,9 +19929,9 @@
    "/accommodation/[type]"
   ]
  },
- "t.unterstuetzung-bei-der-unterkunf.9oowkq": {
-  "de": "Unterstützung bei der Unterkunft und beim Ankommen in Bremen",
-  "en": "Help with accommodation and settling into life in Bremen",
+ "t.unterstuetzung-bei-der-suche.pa8tno": {
+  "de": "Unterstützung bei der Suche nach einer Unterkunft und beim Ankommen in Bremen",
+  "en": "Help finding accommodation and settling into life in Bremen",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
   ],
@@ -20170,6 +20178,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.verschiedene-wege-zum-gleichen.zr2nzg": {
+  "de": "Verschiedene Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht in der Qualität.",
+  "en": "Different ways to reach the same goal. What changes is the rhythm, not the quality.",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.versicherung-und-aufenthalt-klae.d9okz5": {
   "de": "Versicherung und Aufenthalt klären",
   "en": "Sort out insurance and your residence permit",
@@ -20370,16 +20388,6 @@
    "/resources/why-germany"
   ]
  },
- "t.vier-dinge-die-du.zm22mf": {
-  "de": "Vier Dinge, die du vorher wissen solltest",
-  "en": "Four things worth knowing first",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.vier-lernende-ueben-das.bb4dtf": {
   "de": "Vier Lernende üben das Schreiben im Kurs",
   "en": "Four learners practising writing in class",
@@ -20418,16 +20426,6 @@
    "/exams/[code]",
    "/faq",
    "/team"
-  ]
- },
- "t.vier.irklvm": {
-  "de": "Vier",
-  "en": "Four",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.visa-orientiert.1pn4lzs": {
@@ -20531,6 +20529,29 @@
    "/courses/[slug]"
   ]
  },
+ "t.von-5-sternen.1hmfo2i": {
+  "de": "{n} von 5 Sternen",
+  "en": "{n} out of 5 stars",
+  "files": [
+   "src/components/sections/testimonial-grid.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/search",
+   "/team"
+  ]
+ },
  "t.von-a1-bis-c1.1lsfam3": {
   "de": "Von A1 bis C1, Stufe für Stufe",
   "en": "From A1 to C1, step by step",
@@ -20550,6 +20571,14 @@
   "pages": [
    "/placement-test"
   ]
+ },
+ "t.von-anfang-an-bis.g28svc": {
+  "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
+  "en": "From the start to C1, now with a bachelor’s and a master’s degree",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
  },
  "t.von-der-anfrage-bis.10fxaxv": {
   "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
@@ -20996,9 +21025,9 @@
    "/exams/[code]"
   ]
  },
- "t.waehle-ein-format-und.kven06": {
-  "de": "Wähle ein Format und sieh dir Rhythmus, Lernumfang und typische Ergebnisse an.",
-  "en": "Choose a format and see its rhythm, workload and typical results.",
+ "t.waehle-ein-format-und.wz02zz": {
+  "de": "Wähle ein Format und sieh dir den Lernrhythmus, den Lernumfang und die vorgesehene Lernprogression an.",
+  "en": "Choose a format and see its rhythm, its workload and how you are expected to progress.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -21149,9 +21178,9 @@
    "/resources/why-germany"
   ]
  },
- "t.warum-casa.k0zncy": {
-  "de": "Warum CASA",
-  "en": "Why CASA",
+ "t.warum-casa.1g3oan0": {
+  "de": "Warum CASA?",
+  "en": "Why CASA?",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
   ],
@@ -21611,16 +21640,6 @@
    "/calculator"
   ]
  },
- "t.wege-zum-gleichen-ziel.r69yk3": {
-  "de": "{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.",
-  "en": "{en} ways to reach the same goal. What changes is the rhythm; the standard stays the same.",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.weihnachten.p6cuzg": {
   "de": "Weihnachten",
   "en": "Christmas",
@@ -21955,9 +21974,9 @@
    "/courses/[slug]"
   ]
  },
- "t.wenn-du-schon-deutsch.1sgmbp6": {
-  "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Mach einen kostenlosen Online-Test und schick uns dein Ergebnis, oder komm persönlich bei uns vorbei.",
-  "en": "If you already speak some German, a placement test helps us choose the right course for you. Take a free online test and send us your result, or come and see us in person.",
+ "t.wenn-du-schon-deutsch.f8eac6": {
+  "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
+  "en": "If you already speak some German, a placement test helps us choose the right course for you. Come and see us in person, or take a free online test and send us your result. Here at the school we take a closer look and find the right course together.",
   "files": [
    "src/app/(site)/[locale]/courses/page.tsx"
   ],
@@ -22147,6 +22166,16 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.wichtige-punkte-fuer-die.mledvf": {
+  "de": "Wichtige Punkte für die Kursanmeldung",
+  "en": "Good to know before you register",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
   ]
  },
  "t.wichtige-unterlagen-griffbereit-.rmu5zf": {
@@ -22494,6 +22523,16 @@
    "/news"
   ]
  },
+ "t.wir-empfehlen-einen-pruefungsvor.1r8igsg": {
+  "de": "Wir empfehlen einen Prüfungsvorbereitungskurs, in dem gezielt alle Fertigkeiten und Prüfungsformate trainiert werden.",
+  "en": "We recommend a preparation course that trains every skill and exam format in a targeted way.",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.wir-finanzieren-uns-zum.j9qrnk": {
   "de": "Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.",
   "en": "We are funded largely through course fees. This income pays for the day-to-day running of the school and secures services that are especially important to international learners and vulnerable groups.",
@@ -22502,6 +22541,16 @@
   ],
   "pages": [
    "/ueber-uns/gemeinnuetzigkeit"
+  ]
+ },
+ "t.wir-finden-dein-passendes.vo8o0d": {
+  "de": "Wir finden dein passendes Kursniveau",
+  "en": "We find the right level for you",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
   ]
  },
  "t.wir-freuen-uns-ueber.1st9sm3": {
@@ -22534,6 +22583,16 @@
    "/faq"
   ]
  },
+ "t.wir-helfen-dir-den.12yq55c": {
+  "de": "Wir helfen dir, den passenden Deutschkurs zu finden – egal, ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest.",
+  "en": "We help you find the right German course – whether you are starting out, learning alongside work or working towards a specific goal.",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.wir-helfen-dir-gern.m3cxpx": {
   "de": "Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.",
   "en": "We’re happy to help you choose a course, a level and a date.",
@@ -22564,8 +22623,8 @@
    "/about"
   ]
  },
- "t.wir-hoeren-zu-und.1ln291b": {
-  "de": "Wir hören zu. Und begleiten dich.",
+ "t.wir-hoeren-zu-und.tjx3wb": {
+  "de": "Wir hören zu und begleiten dich.",
   "en": "Your plans start with a conversation",
   "files": [
    "src/app/(site)/[locale]/page.tsx"
@@ -23289,16 +23348,6 @@
    "/search"
   ]
  },
- "t.zertifikat-geplant.kos0di": {
-  "de": "Zertifikat geplant?",
-  "en": "Need a certificate?",
-  "files": [
-   "src/app/(site)/[locale]/page.tsx"
-  ],
-  "pages": [
-   "/"
-  ]
- },
  "t.zielniveau.ymnzql": {
   "de": "Zielniveau",
   "en": "Target level",
@@ -23707,16 +23756,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.zwei-formate-ohne-listenpreis.1rg8o7v": {
-  "de": "Zwei Formate ohne Listenpreis",
-  "en": "Two formats with no fixed price",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
-  ]
- },
  "t.zwei-lernende-besprechen-gemeins.jdbxdr": {
   "de": "Zwei Lernende besprechen gemeinsam ein Dokument",
   "en": "Two learners going through a document together",
@@ -23885,16 +23924,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.zwei.njwzo3": {
-  "de": "Zwei",
-  "en": "Two",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.zweite-julihaelfte.vu788r": {

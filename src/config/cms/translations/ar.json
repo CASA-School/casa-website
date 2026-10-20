@@ -235,6 +235,10 @@
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 أسابيع (مستوى كامل)"
   },
+  "t.a1-bis-c1-in.151ni4p": {
+    "de": "A1 bis C1 in drei Jahren",
+    "text": "من A1 إلى C1 في ثلاث سنوات"
+  },
   "t.ab-einem-niveau-von.82hvcg": {
     "de": "Ab einem Niveau von B1 kannst du teilnehmen.",
     "text": "يمكنك المشاركة بدءًا من المستوى B1."
@@ -286,14 +290,6 @@
   "t.absenden.8od49g": {
     "de": "Absenden",
     "text": "إرسال"
-  },
-  "t.abspielen.1ijv4zn": {
-    "de": "Abspielen",
-    "text": "تشغيل"
-  },
-  "t.acht.15lnpkj": {
-    "de": "Acht",
-    "text": "ثمانية"
   },
   "t.achte-darauf-dass-dein.1xdf53u": {
     "de": "Achte darauf, dass dein Name am Briefkasten steht und dass du Anrufe und Nachrichten empfangen kannst.",
@@ -355,13 +351,13 @@
     "de": "Aktuelles",
     "text": "الأخبار"
   },
-  "t.alle-die-fuer-studium.x24oyo": {
-    "de": "Alle, die für Studium, Beruf oder Visum schnell vorankommen möchten.",
-    "text": "كل من يريد التقدّم بسرعة من أجل الدراسة أو العمل أو التأشيرة."
-  },
   "t.alle-die-gezielt-an.y1tpsn": {
     "de": "Alle, die gezielt an Schreiben, Sprechen oder Grammatik arbeiten möchten.",
     "text": "كل من يريد العمل بتركيز على الكتابة أو المحادثة أو القواعد."
+  },
+  "t.alle-die-mit-ihrem.qlxac0": {
+    "de": "Alle, die mit ihrem Studium, Beruf oder dem Visumsantrag schnell vorankommen möchten.",
+    "text": "كل من يريد التقدّم بسرعة في دراسته أو عمله أو في طلب التأشيرة."
   },
   "t.alle-ergebnisse-ansehen.11k5ct3": {
     "de": "Alle Ergebnisse ansehen",
@@ -615,6 +611,10 @@
     "de": "Anmeldung geschlossen",
     "text": "التسجيل مغلق"
   },
+  "t.anmeldung-mit-visum.42top8": {
+    "de": "Anmeldung mit Visum",
+    "text": "التسجيل مع التأشيرة"
+  },
   "t.anmeldung.cdp46": {
     "de": "Anmeldung",
     "text": "التسجيل"
@@ -782,14 +782,6 @@
   "t.auswertung-und-besprechung-deine.1m72i7f": {
     "de": "Auswertung und Besprechung deiner Fehler",
     "text": "تحليل أخطائك ومناقشتها"
-  },
-  "t.automatischen-wechsel-pausieren.a6vgwj": {
-    "de": "Automatischen Wechsel pausieren",
-    "text": "إيقاف التبديل التلقائي مؤقتًا"
-  },
-  "t.automatischen-wechsel-starten.ilzeaq": {
-    "de": "Automatischen Wechsel starten",
-    "text": "تشغيل التبديل التلقائي"
   },
   "t.b-schreiben-b1-b2.e4s6l2": {
     "de": "B – Schreiben (B1/B2)",
@@ -971,9 +963,9 @@
     "de": "Beratung und Förderung",
     "text": "الاستشارة والتمويل"
   },
-  "t.beratung-zum-weiterlernen.1vzyhg9": {
-    "de": "Beratung zum Weiterlernen",
-    "text": "استشارة لمواصلة التعلّم"
+  "t.beratung-zu-autonomen-lernoption.y3ul57": {
+    "de": "Beratung zu autonomen Lernoptionen",
+    "text": "استشارة حول خيارات التعلّم الذاتي"
   },
   "t.bereit-fuer-deutsch-in.23kshr": {
     "de": "Bereit für Deutsch in Bremen?",
@@ -1026,10 +1018,6 @@
   "t.berufstaetige-und-auszubildende-.12vrmtv": {
     "de": "Berufstätige und Auszubildende, die nach der Arbeit strukturiert lernen möchten.",
     "text": "العاملون والمتدرّبون مهنيًا الذين يريدون التعلّم بشكل منظّم بعد العمل."
-  },
-  "t.berufstaetige-und-auszubildende-.1neidt": {
-    "de": "Berufstätige und Auszubildende mit begrenzter Zeit am Tag.",
-    "text": "عاملون ومتدرّبون مهنيًا وقتهم محدود خلال اليوم."
   },
   "t.beschaedigt.jvuh5c": {
     "de": "beschädigt",
@@ -1615,10 +1603,6 @@
     "de": "Dein Niveau online herausfinden",
     "text": "اعرف مستواك عبر الإنترنت"
   },
-  "t.dein-niveau-steht-am.1lfh2x1": {
-    "de": "Dein Niveau steht am Anfang",
-    "text": "مستواك هو نقطة البداية"
-  },
   "t.dein-niveau-und-deine.1t3mt4i": {
     "de": "Dein Niveau und deine Zeiten",
     "text": "مستواك والأوقات المناسبة لك"
@@ -1714,10 +1698,6 @@
   "t.den-preis-kalkulieren-wir.131dy5f": {
     "de": "Den Preis kalkulieren wir für jede Firma einzeln. Die Studienberatung und das Angebot sind stets unverbindlich.",
     "text": "نحسب السعر لكل شركة على حدة. والاستشارة والعرض غير ملزمين في كل الأحوال."
-  },
-  "t.den-unterricht-fuer-gruppen.10xdr5e": {
-    "de": "Den Unterricht für Gruppen und den Firmenunterricht stellen wir nach Bedarf zusammen und machen dafür ein eigenes Angebot. Beim Gruppenkurs gehören Unterkunft, Kulturprogramm und ein Nahverkehrsticket dazu.",
-    "text": "نُعدّ الدروس للمجموعات والدروس داخل الشركات حسب الحاجة، ونقدّم لها عرضًا خاصًا. وتشمل دورة المجموعات السكن والبرنامج الثقافي وتذكرة للمواصلات العامة."
   },
   "t.den-weg-zur-schule.leezgc": {
     "de": "Den Weg zur Schule vorher einmal ausprobieren",
@@ -1843,6 +1823,10 @@
     "de": "Deutsch für besondere Ziele",
     "text": "الألمانية لأهداف خاصة"
   },
+  "t.deutsch-fuer-deinen-arbeitsallta.k6e83g": {
+    "de": "Deutsch für deinen Arbeitsalltag in deinem Team",
+    "text": "الألمانية لعملك اليومي مع فريقك"
+  },
   "t.deutsch-fuer-deinen-naechsten.1xw3ik": {
     "de": "Deutsch für deinen nächsten Schritt",
     "text": "الألمانية لخطوتك التالية"
@@ -1883,9 +1867,9 @@
     "de": "Deutsch lernen neben dem Beruf",
     "text": "تعلّم الألمانية إلى جانب عملك"
   },
-  "t.deutsch-lernen-und-bremen.38p4ja": {
-    "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu deiner Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten. Alle Teilnehmenden erhalten eine Teilnahmebescheinigung.",
-    "text": "تعلّم الألمانية وعِش بريمن مع مجموعتك: نخطّط للدروس والبرنامج الثقافي والسكن بما يناسبها. وهذا البرنامج مخصص للصفوف المدرسية والجامعات والمؤسسات التي تريد القدوم إلى بريمن مع مجموعة. ويحصل جميع المشاركين على شهادة حضور."
+  "t.deutsch-lernen-und-bremen.5q5wxi": {
+    "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
+    "text": "تعلّم الألمانية وعِش بريمن مع مجموعتك: نخطّط للدروس والبرنامج الثقافي والسكن بما يناسب كل مجموعة. وهذا البرنامج مخصص للصفوف المدرسية والجامعات والمؤسسات التي تريد القدوم إلى بريمن مع مجموعة."
   },
   "t.deutsch-lernen.mp3mi8": {
     "de": "Deutsch lernen",
@@ -1946,6 +1930,10 @@
   "t.die-bremer-stadtmusikanten-nach.1bbhkmz": {
     "de": "Die Bremer Stadtmusikanten, nach denen unsere vier Gruppenpakete heißen: der Esel unten, darauf Hund, Katze und Hahn.",
     "text": "موسيقيو بريمن، الذين سُمّيت باقاتنا الأربع للمجموعات بأسمائهم: الحمار في الأسفل، وفوقه الكلب ثم القطة ثم الديك."
+  },
+  "t.die-c1-pruefung-bestanden.1ectagp": {
+    "de": "Die C1-Prüfung bestanden",
+    "text": "اجتياز امتحان C1"
   },
   "t.die-casa-wg.dy7gt2": {
     "de": "Die CASA-WG",
@@ -2111,10 +2099,6 @@
     "de": "Die Unterrichtssprache berücksichtigen",
     "text": "مراعاة لغة التدريس"
   },
-  "t.die-vorbereitung-auf-eine.12de6ul": {
-    "de": "Die Vorbereitung auf eine telc-Prüfung ist nicht im Intensivkurs enthalten. Wenn du ein Zertifikat brauchst, kannst du zusätzlich einen Vorbereitungskurs buchen.",
-    "text": "التحضير لامتحان telc غير مشمول في الدورة المكثفة. وإذا كنت تحتاج إلى شهادة، يمكنك حجز دورة تحضيرية إضافية."
-  },
   "t.die-vorbereitung-auf-eine.1h64ja4": {
     "de": "Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.",
     "text": "التحضير للامتحان ليس جزءًا من الدورات المكثفة. وإذا كنت تحتاج إلى شهادة telc، يمكنك حجز دورة تحضيرية إضافية."
@@ -2206,10 +2190,6 @@
   "t.drei-weitere-wgs-liegen.1xw82rr": {
     "de": "Drei weitere WGs liegen woanders in Bremen. Alle sind mit Bus und Straßenbahn zu erreichen.",
     "text": "وتقع ثلاثة مساكن مشتركة أخرى في أماكن مختلفة من بريمن، ويمكن الوصول إليها جميعًا بالحافلة والترام."
-  },
-  "t.drei.10ztcd4": {
-    "de": "Drei",
-    "text": "ثلاثة"
   },
   "t.du-arbeitest-eng-mit.o0mxmo": {
     "de": "Du arbeitest eng mit den Lehrkräften und der Koordination zusammen.",
@@ -2350,6 +2330,10 @@
   "t.du-moechtest-studieren-beruflich.pkvtd4": {
     "de": "Du möchtest studieren, beruflich weiterkommen oder dich im Alltag sicherer fühlen? Finde einen ersten Anhaltspunkt. Alles Weitere besprechen wir persönlich.",
     "text": "هل تريد الدراسة، أو التقدّم في عملك، أو الشعور بثقة أكبر في حياتك اليومية؟ ابحث عن نقطة انطلاق أولى، وكل ما بعد ذلك نناقشه معك شخصيًا."
+  },
+  "t.du-profitierst-von-unserer.1p4ywyf": {
+    "de": "Du profitierst von unserer Erfahrung und Kooperationspartnern.",
+    "text": "تستفيد من خبرتنا ومن شركائنا في التعاون."
   },
   "t.du-schickst-uns-deinen.1xfrvv1": {
     "de": "Du schickst uns deinen Lebenslauf und schreibst uns, warum du bei CASA arbeiten möchtest.",
@@ -2614,10 +2598,6 @@
   "t.ein-zuhause-fuer-deine.rqa4yz": {
     "de": "Ein Zuhause für deine Zeit in Bremen",
     "text": "بيت لك خلال فترتك في بريمن"
-  },
-  "t.ein.byvoo2": {
-    "de": "Ein",
-    "text": "واحد"
   },
   "t.einblicke-in-das-lernen.1c3kto6": {
     "de": "Einblicke in das Lernen und Leben an unserer internationalen Sprachschule.",
@@ -3023,6 +3003,10 @@
     "de": "Fragen? Wir helfen dir gern.",
     "text": "لديك أسئلة؟ يسعدنا أن نساعدك."
   },
+  "t.fragen-zum-visum.1nj4wpt": {
+    "de": "Fragen zum Visum",
+    "text": "أسئلة عن التأشيرة"
+  },
   "t.fragen-zur-anmeldung.1ox4z9g": {
     "de": "Fragen zur Anmeldung?",
     "text": "لديك أسئلة عن التسجيل؟"
@@ -3075,14 +3059,6 @@
     "de": "Führung über Marktplatz, Böttcherstraße und durch den Schnoor.",
     "text": "جولة مع مرشد في ساحة السوق وشارع Böttcherstraße وحي Schnoor."
   },
-  "t.fuenf.1u9cc2a": {
-    "de": "Fünf",
-    "text": "خمسة"
-  },
-  "t.fuer-4-wochen-danach.519euc": {
-    "de": "{base} für 4 Wochen, danach {week} pro Woche",
-    "text": "{base} لمدة 4 أسابيع، ثم {week} في الأسبوع"
-  },
   "t.fuer-aerztinnen-aerzte-und.19b1qfj": {
     "de": "Für Ärztinnen, Ärzte und medizinische Fachkräfte, die sich sprachlich auf die Arbeit in Deutschland vorbereiten.",
     "text": "للأطباء والطبيبات والكوادر الطبية الذين يستعدون لغويًا للعمل في ألمانيا."
@@ -3106,6 +3082,10 @@
   "t.fuer-beruf-und-weiterbildung.1929v1": {
     "de": "Für Beruf und Weiterbildung",
     "text": "للعمل والتطوير المهني"
+  },
+  "t.fuer-berufstaetige-auszubildende.914hw4": {
+    "de": "Für Berufstätige, Auszubildende und alle mit begrenzter Zeit.",
+    "text": "للعاملين والمتدرّبين مهنيًا ولكل من لديه وقت محدود."
   },
   "t.fuer-besondere-ziele.570052": {
     "de": "Für besondere Ziele",
@@ -3147,9 +3127,9 @@
     "de": "Für die Vermittlung deiner Unterkunft.",
     "text": "مقابل ترتيب سكنك."
   },
-  "t.fuer-die-zeit-deines.pw4d6i": {
-    "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
-    "text": "طوال مدة دورتك المكثفة لدينا، نوفّر لك غرفة في أحد مساكن CASA المشتركة أو لدى مضيفين في بريمن وضواحيها. ونحدّد معًا نوع السكن الذي يناسبك والمتاح حاليًا."
+  "t.fuer-die-zeit-deines.1l7yuxq": {
+    "de": "Für die Zeit deines Intensivkurses bei uns vermitteln wir dir ein Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.",
+    "text": "طوال مدة دورتك المكثفة لدينا، نجد لك غرفة في أحد مساكن CASA المشتركة أو لدى مضيفين في بريمن وضواحيها. ونحدّد معًا نوع السكن الذي يناسبك والمتاح حاليًا."
   },
   "t.fuer-diese-auswahl-gibt.1icl1we": {
     "de": "Für diese Auswahl gibt es kein Modul. Setz die Filter zurück, dann siehst du wieder alle.",
@@ -3467,6 +3447,10 @@
     "de": "Gib einen Suchbegriff ein, dann siehst du hier die Ergebnisse.",
     "text": "أدخل كلمة بحث، وستظهر النتائج هنا."
   },
+  "t.google-bewertung.epszq": {
+    "de": "Google-Bewertung",
+    "text": "تقييم على Google"
+  },
   "t.grammatik-kompakt-erfolgreich-au.1nskmx7": {
     "de": "Grammatik kompakt – Erfolgreich auf B1/B2",
     "text": "القواعد باختصار – النجاح في B1/B2"
@@ -3643,13 +3627,13 @@
     "de": "Hier erfährst du, was Deutschland dir im Studium und im Alltag bietet und wobei dir Deutsch hilft.",
     "text": "هنا تعرف ما تقدّمه لك ألمانيا في الدراسة والحياة اليومية، وفيمَ تساعدك الألمانية."
   },
+  "t.hier-findest-du-antworten.13679b3": {
+    "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo, zur Prüfungsvorbereitung und zur Anmeldung mit Visum.",
+    "text": "هنا تجد إجابات عن تحديد المستوى وإيقاع التعلّم والتحضير للامتحان والتسجيل مع التأشيرة."
+  },
   "t.hier-findest-du-antworten.15kvgk9": {
     "de": "Hier findest du Antworten rund um Kurse, Prüfungen, die Anmeldung und das Leben in Bremen.",
     "text": "هنا تجد إجابات عن الدورات والامتحانات والتسجيل والحياة في بريمن."
-  },
-  "t.hier-findest-du-antworten.1b042mw": {
-    "de": "Hier findest du Antworten zur Einstufung, zum Lerntempo und zur Prüfungsvorbereitung.",
-    "text": "هنا تجد إجابات عن تحديد المستوى وإيقاع التعلّم والتحضير للامتحان."
   },
   "t.hier-findest-du-die.zvxec9": {
     "de": "Hier findest du die Termine, die Voraussetzungen und die Unterlagen, die du brauchst. So kommst du gut vorbereitet zur Prüfung.",
@@ -3763,9 +3747,9 @@
     "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
     "text": "في الدورة المكثفة لديك {course.intensive-german.lessons} حصة دراسية في الأسبوع، مدة كل منها 45 دقيقة. ويستغرق المستوى الكامل فيها 8 أسابيع، والمستوى B1+ المدة نفسها. أما في الدورة المسائية فيستغرق نصف المستوى نحو فصل دراسي واحد."
   },
-  "t.im-intensivkurs-mit-unterrichtse.w90dcd": {
-    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
-    "text": "في الدورة المكثفة، بواقع {course.intensive-german.lessons} حصة دراسية في الأسبوع، يستغرق المستوى الكامل 8 أسابيع. وفي الدورة المسائية تُنجز نصف مستوى في نحو 3,5 أشهر، أي قرابة 1,5 مستوى في السنة."
+  "t.im-intensivkurs-mit-unterrichtse.ff14c0": {
+    "de": "Im Intensivkurs mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche dauert eine komplette Niveaustufe 8 Wochen. Im Abendkurs mit {course.evening-german.lessons} Unterrichtseinheiten pro Woche schaffst du in rund 3,5 Monaten ein halbes Niveau, also etwa 1,5 Stufen im Jahr.",
+    "text": "في الدورة المكثفة، بواقع {course.intensive-german.lessons} حصة دراسية في الأسبوع، يستغرق المستوى الكامل 8 أسابيع. وفي الدورة المسائية، بواقع {course.evening-german.lessons} حصة دراسية في الأسبوع، تُنجز نصف مستوى في نحو 3,5 أشهر، أي قرابة 1,5 مستوى في السنة."
   },
   "t.im-intensivkurs.136g3x5": {
     "de": "Im Intensivkurs",
@@ -3806,6 +3790,10 @@
   "t.im-unesco-welterbe-rathaus.12lxurr": {
     "de": "Im UNESCO-Welterbe-Rathaus und seiner Oberen Rathaushalle.",
     "text": "داخل مبنى البلدية المُدرج في قائمة التراث العالمي لليونسكو وقاعته العليا."
+  },
+  "t.im-vorbereitungskurs-b2-lernst.1jh53bl": {
+    "de": "Im Vorbereitungskurs B2 lernst du das Prüfungsformat kennen und trainierst alle vier Fertigkeiten: Lesen, Hören, Schreiben und Sprechen.",
+    "text": "في الدورة التحضيرية B2 تتعرّف على شكل الامتحان وتتدرّب على المهارات الأربع كلها: القراءة والاستماع والكتابة والمحادثة."
   },
   "t.im-vorstellungsgespraech-lernen-.1ylcxwl": {
     "de": "Im Vorstellungsgespräch lernen wir uns kennen und besprechen die nächsten Schritte.",
@@ -3999,6 +3987,10 @@
     "de": "Intensiv lernen, abends am Ball bleiben oder gezielt üben: Gemeinsam finden wir einen Kurs, der zu deinen Vorkenntnissen und deinem Alltag passt.",
     "text": "تعلّم بشكل مكثف، أو واصل التعلّم في المساء، أو تدرّب بتركيز: معًا نجد دورة تناسب معرفتك السابقة وحياتك اليومية."
   },
+  "t.intensiv-und-abendkurse-b1.gpmpwk": {
+    "de": "Intensiv- und Abendkurse B1 und B2",
+    "text": "دورات مكثفة ومسائية B1 و B2"
+  },
   "t.intensiver-rhythmus.hl2l1s": {
     "de": "Intensiver Rhythmus",
     "text": "الدراسة المكثفة"
@@ -4163,9 +4155,9 @@
     "de": "Jeden Monat Neues aus der Schule im NewsFlash.",
     "text": "جديد المدرسة كل شهر في نشرة NewsFlash."
   },
-  "t.jeder-mensch-bringt-andere.15decv": {
-    "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
-    "text": "لكل إنسان تجاربه ورغباته المختلفة. ونحن نخصّص وقتًا لحديث شخصي، ونفكّر معك فيما يساعدك الآن، في تعلّم الألمانية وفي خطواتك التالية."
+  "t.jeder-mensch-bringt-andere.gfucsy": {
+    "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
+    "text": "لكل إنسان تجاربه ورغباته المختلفة. ونحن نخصّص وقتًا لحديث شخصي، ونفكّر معك فيما يساعدك على المدى الطويل، في تعلّم الألمانية وفي خطواتك التالية."
   },
   "t.jeder-studiengang-legt-seine.1embgu8": {
     "de": "Jeder Studiengang legt seine Voraussetzungen selbst fest. Dazu gehören zum Beispiel Schulzeugnisse, Noten, ein Sprachzertifikat und manchmal eine Eignungsprüfung. Auch zwei Studiengänge an derselben Hochschule können Unterschiedliches verlangen.",
@@ -4547,9 +4539,17 @@
     "de": "Kursberatung",
     "text": "الاستشارة بشأن الدورات"
   },
+  "t.kurse-a1-bis-c1.1ue2h4o": {
+    "de": "Kurse A1 bis C1 und die C1-Prüfung",
+    "text": "دورات من A1 إلى C1 وامتحان C1"
+  },
   "t.kurse-ansehen.ym8ym5": {
     "de": "Kurse ansehen",
     "text": "تصفّح الدورات"
+  },
+  "t.kurse-b1-bis-c1.s4cd63": {
+    "de": "Kurse B1 bis C1",
+    "text": "دورات من B1 إلى C1"
   },
   "t.kurse-beratung.1yqjvaw": {
     "de": "Kurse & Beratung",
@@ -4582,6 +4582,10 @@
   "t.kursformate-werden-greifbarer-we.jei1bk": {
     "de": "Kursformate werden greifbarer, wenn der Lernraum sichtbar bleibt.",
     "text": "تتضح أشكال الدورات أكثر حين يبقى مكان التعلّم ظاهرًا للعين."
+  },
+  "t.kursformate.o4o5ui": {
+    "de": "Kursformate",
+    "text": "أشكال الدورات"
   },
   "t.kursgebuehr-10-termine-40.wpo63y": {
     "de": "Kursgebühr, 10 Termine (40 UE)",
@@ -4734,6 +4738,10 @@
   "t.lerne-deutsch-oder-englisch.g0xdu6": {
     "de": "Lerne Deutsch oder Englisch in deiner Bildungszeit.",
     "text": "تعلّم الألمانية أو الإنجليزية خلال إجازة Bildungszeit."
+  },
+  "t.lerne-dich-sicherer-auf.zeguny": {
+    "de": "Lerne, dich sicherer auf Deutsch auszudrücken – mündlich und schriftlich",
+    "text": "تعلّم التعبير عن نفسك بالألمانية بثقة أكبر، شفهيًا وكتابيًا"
   },
   "t.lerne-die-aufgaben-kennen.c97w4a": {
     "de": "Lerne die Aufgaben kennen, übe unter Prüfungsbedingungen und erhalte persönliches Feedback.",
@@ -4890,10 +4898,6 @@
   "t.mehr-sprachpraxis.1gj1f42": {
     "de": "Mehr Sprachpraxis",
     "text": "ممارسة لغوية أكثر"
-  },
-  "t.mehr-sprechsicherheit.ijgf9p": {
-    "de": "Mehr Sprechsicherheit",
-    "text": "ثقة أكبر عند الكلام"
   },
   "t.mehr-zu-den-niveaustufen.1wk02ex": {
     "de": "Mehr zu den Niveaustufen",
@@ -5323,13 +5327,13 @@
     "de": "Neu beginnen",
     "text": "البدء من جديد"
   },
+  "t.neue-kurse-beginnen-jeden.19bgyiy": {
+    "de": "Neue Kurse beginnen jeden Monat, der erste Teil einer Niveaustufe startet abwechselnd am Vormittag oder am Nachmittag",
+    "text": "تبدأ دورات جديدة كل شهر، ويبدأ الجزء الأول من كل مستوى بالتناوب صباحًا أو بعد الظهر"
+  },
   "t.neue-kurse-beginnen-jeden.nkdyw1": {
     "de": "Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.",
     "text": "تبدأ دورات جديدة كل شهر، ويُبيّن تحديد المستوى من أي مستوى تبدأ."
-  },
-  "t.neue-kurse-jeden-monat.u56xun": {
-    "de": "Neue Kurse jeden Monat, abwechselnd am Vormittag und am Nachmittag",
-    "text": "دورات جديدة كل شهر، بالتناوب بين الفترة الصباحية وفترة بعد الظهر"
   },
   "t.neue-menschen-kennenlernen.vttdpm": {
     "de": "Neue Menschen kennenlernen",
@@ -5419,9 +5423,9 @@
     "de": "Nur ",
     "text": "فقط "
   },
-  "t.nutze-deine-bildungszeit-um.1detqax": {
-    "de": "Nutze deine Bildungszeit, um dich auf Deutsch und Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
-    "text": "استفد من Bildungszeit لتتفرّغ للألمانية والإنجليزية. نقدّم لك الاستشارة بشأن الدورة والمستندات المطلوبة."
+  "t.nutze-deine-bildungszeit-um.ybj78y": {
+    "de": "Nutze deine Bildungszeit, um dich auf Deutsch oder Englisch zu konzentrieren. Wir beraten dich zum Kurs und zu den benötigten Unterlagen.",
+    "text": "استفد من Bildungszeit لتتفرّغ للألمانية أو الإنجليزية. نقدّم لك الاستشارة بشأن الدورة والمستندات المطلوبة."
   },
   "t.nutze-die-aktuelle-checkliste.1cqnigo": {
     "de": "Nutze die aktuelle Checkliste der deutschen Botschaft oder des Konsulats, das für deinen Antrag zuständig ist.",
@@ -5430,10 +5434,6 @@
   "t.ob-du-kueche-bad.1j4ds90": {
     "de": "Ob du Küche, Bad, Waschmaschine und WLAN mitbenutzen darfst",
     "text": "هل يحق لك استخدام المطبخ والحمّام والغسالة والواي فاي"
-  },
-  "t.ob-du-neu-anfaengst.p8gmm5": {
-    "de": "Ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest, wir helfen dir, den passenden Deutschkurs zu finden.",
-    "text": "سواء كنت تبدأ من الصفر، أو تتعلّم إلى جانب عملك، أو تستعد لهدف محدد، نساعدك في العثور على دورة الألمانية المناسبة."
   },
   "t.ob-ein-zimmer-frei.p0ytcz": {
     "de": "Ob ein Zimmer frei ist, bestätigen wir dir nach deiner Anfrage.",
@@ -5511,9 +5511,9 @@
     "de": "Organisiere möglichst eine Unterkunft, in der du dich anmelden darfst, und bring deine Unterlagen im Original und als beglaubigte Kopie mit.",
     "text": "حاول قدر الإمكان أن تجد سكنًا يُسمح لك بتسجيل محل إقامتك فيه، وأحضر مستنداتك بنسخها الأصلية ومعها نسخ مصدّقة."
   },
-  "t.orientierung-wenn-du-studieren.77ppc0": {
-    "de": "Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest",
-    "text": "إرشاد إن كنت تريد الدراسة أو البحث عن عمل أو الالتحاق بتدريب مهني"
+  "t.orientierung-wenn-du-studieren.oiz4ky": {
+    "de": "Orientierung, wenn du studieren möchtest, eine Arbeit oder eine Ausbildung suchst",
+    "text": "إرشاد إن كنت تريد الدراسة أو تبحث عن عمل أو عن تدريب مهني"
   },
   "t.ort-und-unterrichtsform-nach.1sxrpnw": {
     "de": "Ort und Unterrichtsform nach Vereinbarung",
@@ -5623,9 +5623,9 @@
     "de": "Plane genug Zeit ein und bereite dich in einem unserer Vorbereitungskurse oder allein auf die Aufgaben vor.",
     "text": "خصّص وقتًا كافيًا، واستعد لمهام الامتحان في إحدى دوراتنا التحضيرية أو بمفردك."
   },
-  "t.plane-kursstart-unterkunft-und.p43mfz": {
-    "de": "Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.",
-    "text": "خطّط لبدء دورتك وسكنك وخطواتك العملية الأولى بمساعدتنا."
+  "t.plane-kursstart-unterkunft-und.1phog46": {
+    "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
+    "text": "خطّط لبدء دورتك وسكنك وخطواتك الملموسة الأولى بمساعدتنا."
   },
   "t.plane-mindestens-eine-stunde.veokh6": {
     "de": "Plane mindestens eine Stunde ein.",
@@ -5763,6 +5763,10 @@
     "de": "Prüfung ansehen",
     "text": "عرض الامتحان"
   },
+  "t.pruefung-und-pruefungsvorbereitu.gkzxtl": {
+    "de": "Prüfung und Prüfungsvorbereitung",
+    "text": "الامتحان والتحضير له"
+  },
   "t.pruefung-und-termin-waehlen.d2sqhy": {
     "de": "Prüfung und Termin wählen",
     "text": "اختر الامتحان والموعد"
@@ -5834,10 +5838,6 @@
   "t.pruefungsvorbereitung-erkunden.z50a5g": {
     "de": "Prüfungsvorbereitung erkunden",
     "text": "اكتشف التحضير للامتحان"
-  },
-  "t.pruefungsvorbereitung-ist-ein-ei.1iqk0cu": {
-    "de": "Prüfungsvorbereitung ist ein eigener Kurs",
-    "text": "التحضير للامتحان دورة مستقلة"
   },
   "t.pruefungsvorbereitung.3qw9vr": {
     "de": "Prüfungsvorbereitung",
@@ -6115,9 +6115,9 @@
     "de": "Schriftlich",
     "text": "كتابي"
   },
-  "t.schritt-fuer-schritt-sicherer.116lp48": {
-    "de": "Schritt für Schritt sicherer auf Deutsch: mit regelmäßiger Übung und einer Gruppe, die gemeinsam lernt.",
-    "text": "ثقة متزايدة بالألمانية خطوة بخطوة، بالتدرّب المنتظم ومع مجموعة تتعلّم معًا."
+  "t.schritt-fuer-schritt-sicherer.yzv4f6": {
+    "de": "Schritt für Schritt sicherer auf Deutsch – mit regelmäßigen Übungen in einer angenehmen Gruppenatmosphäre.",
+    "text": "ثقة متزايدة بالألمانية خطوة بخطوة، بتمارين منتظمة في أجواء جماعية مريحة."
   },
   "t.schule.1g9n9ou": {
     "de": "Schule",
@@ -6142,10 +6142,6 @@
   "t.sechs-stufen-in-drei.1buauf": {
     "de": "Sechs Stufen in drei Bereichen",
     "text": "ستة مستويات في ثلاث فئات"
-  },
-  "t.sechs.1eiph2a": {
-    "de": "Sechs",
-    "text": "ستة"
   },
   "t.sehr-gut.u12mtf": {
     "de": "sehr gut",
@@ -6227,9 +6223,9 @@
     "de": "Sichere Aufgabenstrategie",
     "text": "إتقان استراتيجيات حل المهام"
   },
-  "t.sicherere-kommunikation-im-beruf.cx8gji": {
-    "de": "Sicherere Kommunikation im Beruf",
-    "text": "تواصل أكثر ثقة في العمل"
+  "t.sichere-kommunikation-im-beruf.xjsqyn": {
+    "de": "Sichere Kommunikation im Beruf und Studium",
+    "text": "تواصل واثق في العمل والدراسة"
   },
   "t.sicheres-auftreten-in-der.11uan87": {
     "de": "Sicheres Auftreten in der Teamkommunikation",
@@ -6242,10 +6238,6 @@
   "t.sicherheit.18ppyic": {
     "de": "Sicherheit",
     "text": "الأمان"
-  },
-  "t.sieben.1a0fez1": {
-    "de": "Sieben",
-    "text": "سبعة"
   },
   "t.so-entsteht-ein-firmenkurs.18nwhhl": {
     "de": "So entsteht ein Firmenkurs bei CASA.",
@@ -6322,6 +6314,10 @@
   "t.sobald-wir-die-gebuehr.1ffq0ip": {
     "de": "Sobald wir die Gebühr für mindestens den ersten Kurs von dir erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Wenn du im Ausland wohnst, sind mit der Anmeldung die gesamten Kursgebühren für den ersten Kurs fällig und, falls du eine Unterkunft buchst, auch die Unterkunftskosten. Auf Anfrage schicken wir dir den Brief auch per Post oder gegen Aufpreis per DHL-Express.",
     "text": "حالما تصلنا منك رسوم الدورة الأولى على الأقل، نرسل إليك خطاب التأشيرة بالبريد الإلكتروني. وإذا كنت تقيم خارج ألمانيا، تُستحق عند التسجيل رسوم الدورة الأولى كاملة، وكذلك تكاليف السكن إن حجزت سكنًا. ويمكننا عند الطلب إرسال الخطاب أيضًا بالبريد العادي، أو عبر DHL Express مقابل رسوم إضافية."
+  },
+  "t.sobald-wir-die-gebuehr.1oe3inl": {
+    "de": "Sobald wir die Gebühr für mindestens den ersten Kurs erhalten haben, schicken wir dir den Visumsbrief per E-Mail. Verzögert sich dein Visum, kannst du deinen Kurs bis 21 Tage vor Beginn einmal kostenfrei verschieben.",
+    "text": "بمجرد أن نستلم رسوم الدورة الأولى على الأقل، نرسل إليك خطاب التأشيرة بالبريد الإلكتروني. وإذا تأخرت تأشيرتك، يمكنك تأجيل دورتك مرة واحدة مجانًا حتى 21 يومًا قبل بدايتها."
   },
   "t.sobald-wir-jemanden-gefunden.16n3kk5": {
     "de": "Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule.",
@@ -6447,6 +6443,10 @@
     "de": "Steuerliche Einordnung",
     "text": "الوضع الضريبي"
   },
+  "t.stimme-von.17t1nzy": {
+    "de": "Stimme {n} von {total}",
+    "text": "التجربة {n} من {total}"
+  },
   "t.stimme.1lt7d5u": {
     "de": "Stimme",
     "text": "تجربة"
@@ -6454,6 +6454,10 @@
   "t.stimme.1nqyr3a": {
     "de": "Stimme",
     "text": "تجربة"
+  },
+  "t.stimmen-auswaehlen.1ls7gzd": {
+    "de": "Stimmen auswählen",
+    "text": "اختر تجربة"
   },
   "t.story-bilder-nutzen-jetzt.1tfz8f3": {
     "de": "Story-Bilder nutzen jetzt Unterrichtsmomente statt unpassender Porträts.",
@@ -6611,10 +6615,6 @@
     "de": "Team",
     "text": "الفريق"
   },
-  "t.teams-die-deutsch-direkt.12bi0g5": {
-    "de": "Teams, die Deutsch direkt im Arbeitsalltag brauchen.",
-    "text": "فرق عمل تحتاج إلى الألمانية مباشرة في عملها اليومي."
-  },
   "t.teilnehmende-schreiben-die-lehre.qosbc9": {
     "de": "Teilnehmende schreiben, die Lehrerin schreibt Grammatik an die Tafel",
     "text": "المشاركون يكتبون، والمعلمة تكتب القواعد على السبورة"
@@ -6667,6 +6667,10 @@
     "de": "telc Deutsch B2 für Arbeit, Ausbildung und Alltag",
     "text": "telc Deutsch B2 للعمل والتدريب المهني والحياة اليومية"
   },
+  "t.telc-deutsch-b2-pruefung.jo3lot": {
+    "de": "telc Deutsch B2 Prüfung",
+    "text": "امتحان telc Deutsch B2"
+  },
   "t.telc-deutsch-b2.ba09li": {
     "de": "telc Deutsch B2",
     "text": "telc Deutsch B2"
@@ -6678,6 +6682,10 @@
   "t.telc-deutsch-c1-hochschule.skmhxj": {
     "de": "telc Deutsch C1 Hochschule prüft Deutschkenntnisse für die Hochschule auf weit fortgeschrittenem Niveau. Die Prüfung ist für dich, wenn du an einer deutschsprachigen Hochschule studieren möchtest, schon studierst oder in einem akademischen Beruf arbeitest und deine Deutschkenntnisse nachweisen möchtest.",
     "text": "يختبر امتحان telc Deutsch C1 Hochschule معرفتك بالألمانية للدراسة الجامعية على مستوى متقدم جدًا. وهو مناسب لك إن كنت تريد الدراسة في جامعة ناطقة بالألمانية، أو تدرس فيها بالفعل، أو تعمل في مهنة أكاديمية، وتريد إثبات معرفتك بالألمانية."
+  },
+  "t.telc-deutsch-c1-hochschulpruefun.1ojoaqw": {
+    "de": "telc Deutsch C1 Hochschulprüfung",
+    "text": "امتحان telc Deutsch C1 Hochschule"
   },
   "t.telc-pruefungen-termine-und.tiqx5r": {
     "de": "telc-Prüfungen, Termine und Anmeldung.",
@@ -6775,6 +6783,10 @@
     "de": "Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.",
     "text": "أدخل اسمك وبريدك الإلكتروني في نموذج الاختبار، حتى نتمكن من ربط النتيجة بك."
   },
+  "t.trainiere-patientengespraeche-di.2petua": {
+    "de": "Trainiere Patientengespräche, die schriftliche Dokumentation und den fachlichen Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
+    "text": "تدرّب على الحديث مع المرضى والتوثيق الكتابي والتواصل المهني داخل الفريق، مع التركيز على العمل اليومي في المستشفى وعلى Fachsprachprüfung (امتحان اللغة الطبية المتخصصة)."
+  },
   "t.treffer-fuer-in.1b4yuwc": {
     "de": "{totalResults} Treffer für „{q}“ in „{scopeLabel}“",
     "text": "نتائج البحث عن «{q}» في «{scopeLabel}»: {totalResults}"
@@ -6803,10 +6815,6 @@
     "de": "Übe mit den typischen Aufgaben der Prüfung.",
     "text": "تدرّب على المهام المعتادة في الامتحان."
   },
-  "t.uebe-patientengespraeche-arztbri.19vntbz": {
-    "de": "Übe Patientengespräche, Arztbriefe und den Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
-    "text": "تدرّب على الحديث مع المرضى وكتابة التقارير الطبية والتواصل داخل الفريق، مع التركيز على العمل اليومي في المستشفى وعلى Fachsprachprüfung (امتحان اللغة الطبية المتخصصة)."
-  },
   "t.ueben-mit-den-zeitvorgaben.61x1kr": {
     "de": "Üben mit den Zeitvorgaben der Prüfung",
     "text": "التدرّب ضمن الوقت المحدد للامتحان"
@@ -6826,6 +6834,10 @@
   "t.ueber-uns.94acrg": {
     "de": "Über uns",
     "text": "من نحن"
+  },
+  "t.ueber-unterricht-und-team.lihdwl": {
+    "de": "Über Unterricht und Team",
+    "text": "عن الدروس والفريق"
   },
   "t.uebergebene-schluessel-anzahl.wew9u9": {
     "de": "Übergebene Schlüssel (Anzahl)",
@@ -6891,10 +6903,6 @@
     "de": "Unabhängige Sprachschule in Bremen",
     "text": "مدرسة لغات مستقلة في بريمن"
   },
-  "t.und-so-laeuft-jedes.15oxmf9": {
-    "de": "Und so läuft jedes Format konkret ab",
-    "text": "وهكذا يسير كل شكل من أشكال الدورات عمليًا"
-  },
   "t.und.cbu5qy": {
     "de": " und ",
     "text": " و"
@@ -6942,10 +6950,6 @@
   "t.unser-vorbereitungskurs-fuer-tel.k1vuoh": {
     "de": "Unser Vorbereitungskurs für telc Deutsch B2 läuft einen Monat lang an zwei Abenden pro Woche.",
     "text": "تمتد دورتنا التحضيرية لامتحان telc Deutsch B2 شهرًا واحدًا، بواقع أمسيتين في الأسبوع."
-  },
-  "t.unsere-erfahrung-und-partnerscha.o89bok": {
-    "de": "Unsere Erfahrung und Partnerschaften stärken unsere Arbeit für dich.",
-    "text": "خبرتنا وشراكاتنا تعزّز عملنا من أجلك."
   },
   "t.unsere-intensivkurse-finden-in.1myxstb": {
     "de": "Unsere Intensivkurse finden in kleinen, internationalen Lerngruppen von 10 bis 15 Teilnehmenden statt. Auch die Abend- und Spezialkurse sind Kleingruppen. So bleibt mehr Zeit zum Sprechen, und die Lehrkräfte können dir persönliche Rückmeldungen geben und deine schriftlichen Arbeiten korrigieren.",
@@ -7143,17 +7147,17 @@
     "de": "Unterrichtseinheiten",
     "text": "الحصص الدراسية"
   },
-  "t.unterrichtsinhalte-passend-zu-de.pa3yf1": {
-    "de": "Unterrichtsinhalte passend zu deiner Gruppe und ihren Zielen",
-    "text": "محتوى دروس يناسب مجموعتك وأهدافها"
+  "t.unterrichtsinhalte-passend-zur-g.w4qxb6": {
+    "de": "Unterrichtsinhalte passend zur Gruppe und ihren Zielen",
+    "text": "محتوى دروس يناسب المجموعة وأهدافها"
   },
   "t.unterschriften.13lxp37": {
     "de": "Unterschriften",
     "text": "التوقيعات"
   },
-  "t.unterstuetzung-bei-der-unterkunf.9oowkq": {
-    "de": "Unterstützung bei der Unterkunft und beim Ankommen in Bremen",
-    "text": "مساعدة في السكن وفي الاستقرار في بريمن"
+  "t.unterstuetzung-bei-der-suche.pa8tno": {
+    "de": "Unterstützung bei der Suche nach einer Unterkunft und beim Ankommen in Bremen",
+    "text": "مساعدة في البحث عن سكن وفي الاستقرار في بريمن"
   },
   "t.unverbindliches-angebot.1mf8xlj": {
     "de": "Unverbindliches Angebot",
@@ -7239,6 +7243,10 @@
     "de": "Verschiedene Abschlüsse kennenlernen",
     "text": "تعرّف على الشهادات المختلفة"
   },
+  "t.verschiedene-wege-zum-gleichen.zr2nzg": {
+    "de": "Verschiedene Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht in der Qualität.",
+    "text": "طرق مختلفة إلى الهدف نفسه. الفرق في الإيقاع، لا في الجودة."
+  },
   "t.versicherung-und-aufenthalt-klae.d9okz5": {
     "de": "Versicherung und Aufenthalt klären",
     "text": "رتّب أمور التأمين والإقامة"
@@ -7303,10 +7311,6 @@
     "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
     "text": "ربما تريد أن تدرس، أو تتقدم في مسيرتك المهنية، أو تحسّن لغتك الألمانية، أو تجد مكانًا جديدًا تستقر فيه. ورغباتك نقطة انطلاق جيدة لاستكشاف الإمكانات."
   },
-  "t.vier-dinge-die-du.zm22mf": {
-    "de": "Vier Dinge, die du vorher wissen solltest",
-    "text": "أربعة أمور ينبغي أن تعرفها مسبقًا"
-  },
   "t.vier-lernende-ueben-das.bb4dtf": {
     "de": "Vier Lernende üben das Schreiben im Kurs",
     "text": "أربعة متعلمين يتدرّبون على الكتابة في الدورة"
@@ -7314,10 +7318,6 @@
   "t.vier-teilnehmende-schreiben-am.5qc4zl": {
     "de": "Vier Teilnehmende schreiben am langen Kurstisch",
     "text": "أربعة مشاركين يكتبون حول طاولة الصف الطويلة"
-  },
-  "t.vier.irklvm": {
-    "de": "Vier",
-    "text": "أربعة"
   },
   "t.visa-orientiert.1pn4lzs": {
     "de": "Visa-orientiert",
@@ -7359,6 +7359,10 @@
     "de": "Vollverpflegung",
     "text": "جميع الوجبات"
   },
+  "t.von-5-sternen.1hmfo2i": {
+    "de": "{n} von 5 Sternen",
+    "text": "{n} من 5 نجوم"
+  },
   "t.von-a1-bis-c1.1lsfam3": {
     "de": "Von A1 bis C1, Stufe für Stufe",
     "text": "من A1 إلى C1، مستوى بعد مستوى"
@@ -7366,6 +7370,10 @@
   "t.von-a1-bis-c1.1yk6pdi": {
     "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
     "text": "من A1 إلى C1: في صفحة «المستويات» ترى ما يمكنك فهمه وقوله في كل مستوى."
+  },
+  "t.von-anfang-an-bis.g28svc": {
+    "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
+    "text": "من الصفر حتى C1، واليوم بشهادتي البكالوريوس والماجستير"
   },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
@@ -7515,9 +7523,9 @@
     "de": "Wähle deinen Prüfungstermin und entscheide, ob du die ganze Prüfung oder nur den schriftlichen oder den mündlichen Teil ablegst.",
     "text": "اختر موعد امتحانك، وقرّر إن كنت ستؤدي الامتحان كاملًا أو الجزء الكتابي أو الشفهي فقط."
   },
-  "t.waehle-ein-format-und.kven06": {
-    "de": "Wähle ein Format und sieh dir Rhythmus, Lernumfang und typische Ergebnisse an.",
-    "text": "اختر شكلًا من أشكال الدورات، واطّلع على نظامه وحجم الدراسة فيه ونتائجه المعتادة."
+  "t.waehle-ein-format-und.wz02zz": {
+    "de": "Wähle ein Format und sieh dir den Lernrhythmus, den Lernumfang und die vorgesehene Lernprogression an.",
+    "text": "اختر شكلًا من أشكال الدورات، واطّلع على إيقاع التعلّم فيه وحجم الدراسة ومسار التقدّم المقرّر."
   },
   "t.waehle-ein-lernpensum-das.1q7g4yl": {
     "de": "Wähle ein Lernpensum, das zu deinem Alltag passt. Ein Intensivkurs bietet mehr Unterrichtszeit, und ein Abendkurs lässt sich gut mit anderen Verpflichtungen verbinden.",
@@ -7571,9 +7579,9 @@
     "de": "Warum Bremen?",
     "text": "لماذا بريمن؟"
   },
-  "t.warum-casa.k0zncy": {
-    "de": "Warum CASA",
-    "text": "لماذا CASA"
+  "t.warum-casa.1g3oan0": {
+    "de": "Warum CASA?",
+    "text": "لماذا CASA؟"
   },
   "t.warum-deutschland.1ea16ck": {
     "de": "Warum Deutschland",
@@ -7747,10 +7755,6 @@
     "de": "Weg",
     "text": "المسار"
   },
-  "t.wege-zum-gleichen-ziel.r69yk3": {
-    "de": "{de} Wege zum gleichen Ziel. Der Unterschied liegt im Rhythmus, nicht im Anspruch.",
-    "text": "مسارات إلى الهدف نفسه، عددها {de}. الفرق بينها في الإيقاع، لا في المستوى المطلوب."
-  },
   "t.weihnachten.p6cuzg": {
     "de": "Weihnachten",
     "text": "عيد الميلاد"
@@ -7867,9 +7871,9 @@
     "de": "Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.",
     "text": "إذا لم تكن لديك أي معرفة بالألمانية بعد (A1.1)، فعليك دائمًا أن تبدأ مع بداية الدورة."
   },
-  "t.wenn-du-schon-deutsch.1sgmbp6": {
-    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Mach einen kostenlosen Online-Test und schick uns dein Ergebnis, oder komm persönlich bei uns vorbei.",
-    "text": "إذا كنت تتحدث الألمانية بالفعل، يساعدنا تحديد المستوى في اختيار الدورة. أجرِ اختبارًا مجانيًا عبر الإنترنت وأرسل إلينا نتيجتك، أو تعال إلينا شخصيًا."
+  "t.wenn-du-schon-deutsch.f8eac6": {
+    "de": "Wenn du schon Deutsch sprichst, hilft uns die Einstufung bei der Kurswahl. Komm persönlich bei uns vorbei oder mach einen kostenlosen Online-Test und schick uns dein Ergebnis. Vor Ort schauen wir noch genauer hin und finden so den passenden Kurs.",
+    "text": "إذا كنت تتحدث الألمانية بالفعل، يساعدنا تحديد المستوى في اختيار الدورة. تعال إلينا شخصيًا، أو أجرِ اختبارًا مجانيًا عبر الإنترنت وأرسل إلينا نتيجتك. وفي المدرسة نلقي نظرة أدق، فنجد الدورة المناسبة لك."
   },
   "t.wenn-du-ueber-weihnachten.1o3kyam": {
     "de": "Wenn du über Weihnachten oder Ostern bleibst, zahlst du für die Wochen, in denen die Schule geschlossen ist, eine zusätzliche Unterkunftsgebühr von {amount} pro Woche.",
@@ -7946,6 +7950,10 @@
   "t.wgs.jm5adq": {
     "de": "WGs",
     "text": "السكن المشترك"
+  },
+  "t.wichtige-punkte-fuer-die.mledvf": {
+    "de": "Wichtige Punkte für die Kursanmeldung",
+    "text": "نقاط مهمة للتسجيل في الدورة"
   },
   "t.wichtige-unterlagen-griffbereit-.rmu5zf": {
     "de": "Wichtige Unterlagen griffbereit halten",
@@ -8075,9 +8083,17 @@
     "de": "Wir drücken allen …",
     "text": "نتمنى التوفيق لجميع …"
   },
+  "t.wir-empfehlen-einen-pruefungsvor.1r8igsg": {
+    "de": "Wir empfehlen einen Prüfungsvorbereitungskurs, in dem gezielt alle Fertigkeiten und Prüfungsformate trainiert werden.",
+    "text": "ننصح بدورة تحضيرية للامتحان تتدرّب فيها بشكل موجّه على جميع المهارات وأشكال الامتحان."
+  },
   "t.wir-finanzieren-uns-zum.j9qrnk": {
     "de": "Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.",
     "text": "يأتي الجزء الأكبر من تمويلنا من رسوم الدورات. وبهذه الإيرادات نغطي تكاليف تشغيل المدرسة اليومية، ونضمن استمرار خدمات بالغة الأهمية للمتعلمين الدوليين وللفئات الأكثر هشاشة."
+  },
+  "t.wir-finden-dein-passendes.vo8o0d": {
+    "de": "Wir finden dein passendes Kursniveau",
+    "text": "نجد لك مستوى الدورة المناسب"
   },
   "t.wir-freuen-uns-ueber.1st9sm3": {
     "de": "Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.",
@@ -8091,6 +8107,10 @@
     "de": "Wir helfen dir bei Fragen zu Kursen, Prüfungen und Unterkunft.",
     "text": "نساعدك في أسئلتك عن الدورات والامتحانات والسكن."
   },
+  "t.wir-helfen-dir-den.12yq55c": {
+    "de": "Wir helfen dir, den passenden Deutschkurs zu finden – egal, ob du neu anfängst, neben der Arbeit lernst oder dich auf ein bestimmtes Ziel vorbereitest.",
+    "text": "نساعدك في العثور على دورة الألمانية المناسبة، سواء كنت تبدأ من الصفر، أو تتعلّم إلى جانب عملك، أو تستعد لهدف محدد."
+  },
   "t.wir-helfen-dir-gern.m3cxpx": {
     "de": "Wir helfen dir gern bei der Wahl von Kurs, Niveau und Termin.",
     "text": "يسعدنا أن نساعدك في اختيار الدورة والمستوى والموعد."
@@ -8103,9 +8123,9 @@
     "de": "Wir hinterfragen unser Angebot und unsere Arbeit regelmäßig und selbstkritisch.",
     "text": "نراجع دوراتنا وعملنا بانتظام وبعين ناقدة."
   },
-  "t.wir-hoeren-zu-und.1ln291b": {
-    "de": "Wir hören zu. Und begleiten dich.",
-    "text": "نصغي إليك. ونرافقك."
+  "t.wir-hoeren-zu-und.tjx3wb": {
+    "de": "Wir hören zu und begleiten dich.",
+    "text": "نصغي إليك ونرافقك."
   },
   "t.wir-kalkulieren-fuer-jede.1483jah": {
     "de": "Wir kalkulieren für jede Gruppe einzeln. Nenn uns Gruppengröße, das ungefähre Sprachniveau, Alter, Zeitraum und eure Schwerpunkte, dann erstellen wir dir gern ein individuelles und unverbindliches Angebot.",
@@ -8363,10 +8383,6 @@
     "de": "Zentrale Suche",
     "text": "البحث في الموقع كله"
   },
-  "t.zertifikat-geplant.kos0di": {
-    "de": "Zertifikat geplant?",
-    "text": "تخطط للحصول على شهادة؟"
-  },
   "t.zertifikate.1j19zem": {
     "de": "Zertifikate",
     "text": "الشهادات"
@@ -8523,10 +8539,6 @@
     "de": "Zustand",
     "text": "الحالة"
   },
-  "t.zwei-formate-ohne-listenpreis.1rg8o7v": {
-    "de": "Zwei Formate ohne Listenpreis",
-    "text": "شكلان بلا سعر ثابت"
-  },
   "t.zwei-lernende-besprechen-gemeins.jdbxdr": {
     "de": "Zwei Lernende besprechen gemeinsam ein Dokument",
     "text": "متعلمان يناقشان مستندًا معًا"
@@ -8566,10 +8578,6 @@
   "t.zwei-wochen-in-bremen.t2itg8": {
     "de": "Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
     "text": "أسبوعان في بريمن إقامة حقيقية بالفعل. تحظى مجموعتك بأربعين حصة دراسية وبرنامج في ثماني فترات بعد الظهر، وتعيش لدى العائلات المضيفة مدة كافية لتأتي الألمانية على مائدة العشاء من تلقاء نفسها. ومثل القطة، تستكشف المجموعة المدينة بفضول، من البيوت الزجاجية في Botanika إلى الجولة مع الحارس الليلي."
-  },
-  "t.zwei.njwzo3": {
-    "de": "Zwei",
-    "text": "اثنان"
   },
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",

@@ -65,7 +65,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'housing-onboarding',
           icon: 'accommodation',
           title: 'In Bremen ankommen',
-          description: 'Plane Kursstart, Unterkunft und die ersten praktischen Schritte mit unserer Unterstützung.',
+          description: 'Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.',
           primaryAction: { href: '#accommodation-support' },
         },
       ], en: [
@@ -94,7 +94,7 @@ function getPersonaData(locale: ContentLocale): PersonaPathway[] {
           key: 'housing-onboarding',
           icon: 'accommodation',
           title: 'Arrive in Bremen',
-          description: 'Plan your course start, accommodation and first practical steps, with our support.',
+          description: 'Plan your course start, accommodation and first concrete steps, with our support.',
           primaryAction: { href: '#accommodation-support' },
         },
       ] });

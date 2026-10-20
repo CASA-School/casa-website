@@ -26,7 +26,7 @@ import {
   getCulturalPrograms,
   getCourseNarrative,
   getExamCatalog,
-  getSocialProof,
+  getGoogleReviews,
 } from '@/lib/content/repository';
 import type { ContentLocale, CourseNarrative, CourseTypeRow } from '@/lib/content/types';
 import { createPublicMetadata } from '@/lib/seo';
@@ -193,7 +193,7 @@ export default async function HomePage() {
   const [finderData, examCatalog, stories] = await Promise.all([
     getCourseFinderData(locale),
     getExamCatalog(locale),
-    Promise.resolve(getSocialProof(locale)),
+    Promise.resolve(getGoogleReviews(locale)),
   ]);
 
   const coursesBySlug = new Map(finderData.courses.map((course) => [course.slug, course]));
@@ -316,14 +316,23 @@ export default async function HomePage() {
     .map((item) => {
       const nextSession = item.sessions[0];
 
+      // The homepage names the exam as an exam, and the B2 card is about its preparation course
+      // (CASA's content review, 2026-10-20); the exam pages keep the catalogue's names and summaries.
       return {
-        title: item.examType.name,
+        title:
+          item.examType.code === 'telc_b2'
+            ? say(locale, 'telc Deutsch B2 Prüfung', 'telc Deutsch B2 exam')
+            : item.examType.code === 'telc_c1_hochschule'
+              ? say(locale, 'telc Deutsch C1 Hochschulprüfung', 'telc Deutsch C1 Hochschule exam')
+              : item.examType.name,
         prepTitle:
           item.examType.code === 'telc_b2'
             ? say(locale, 'Vorbereitungskurs B2', 'B2 preparation course')
             : say(locale, 'Vorbereitungskurs C1 Hochschule', 'C1 Hochschule preparation course'),
         description:
-          item.narrative?.summary ||
+          (item.examType.code === 'telc_b2'
+            ? say(locale, 'Im Vorbereitungskurs B2 lernst du das Prüfungsformat kennen und trainierst alle vier Fertigkeiten: Lesen, Hören, Schreiben und Sprechen.', 'In the B2 preparation course you get to know the exam format and train all four skills: reading, listening, writing and speaking.')
+            : item.narrative?.summary) ||
           (say(locale, 'Gezielte Vorbereitung mit Prüfungsstrategie, Simulation und Feedback.', 'Focused preparation with exam strategies, mock exams and feedback.')),
         level: item.examType.level || '',
         href: examDetailHref(item.examType.code),
@@ -331,35 +340,16 @@ export default async function HomePage() {
       };
     });
 
-  const featuredSource = stories[1] ?? stories[0];
-  const featuredStoryId = featuredSource?.id;
-  const nonFeaturedStories = stories.filter((story) => story.id !== featuredStoryId);
-  const storiesForCards = nonFeaturedStories.length >= 2 ? nonFeaturedStories : stories;
-
-
-  // No portraits. These are CASA's real published testimonials with real first
-  // names, and the three testimonial images are synthetic — cycling them by
-  // index put a generated face on a named learner. CLAUDE.md hard rule 2.
-  /*
-   * Four cards behind a featured tile: two visible per page beside it, so exactly
-   * two pages. The pool is seven, which paged three deep and buried the last
-   * three quotes where nobody would reach them.
-   */
-  const testimonialCards = storiesForCards.slice(0, 4).map((story) => ({
+  // No portraits: real names, and the only portrait files on hand are synthetic (CLAUDE.md hard
+  // rule 2). Google reviews with their stars since CASA's content review (2026-10-20); the carousel
+  // moves through all of them by itself.
+  const testimonialCards = stories.map((story) => ({
     id: story.id,
     person: story.personDisplay,
     country: story.country,
     quote: story.quote,
+    rating: story.rating,
   }));
-
-
-  const featuredQuote = featuredSource
-    ? {
-        quote: featuredSource.quote,
-        person: featuredSource.personDisplay,
-        role: featuredSource.country,
-      }
-    : undefined;
 
   return (
     <main
@@ -582,17 +572,17 @@ export default async function HomePage() {
         <Container>
           <div className="mx-auto">
             <EditorialSplit
-              eyebrow={say(locale, 'Warum CASA', 'Why CASA')}
+              eyebrow={say(locale, 'Warum CASA?', 'Why CASA?')}
               title={
-                say(locale, 'Wir hören zu. Und begleiten dich.', 'Your plans start with a conversation')
+                say(locale, 'Wir hören zu und begleiten dich.', 'Your plans start with a conversation')
               }
               description={
-                say(locale, 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir jetzt weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.', 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.')
+                say(locale, 'Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.', 'Everyone arrives with a different story. We listen, take your questions seriously and help you work out what comes next, whether you have a clear goal or are still finding your direction.')
               }
               bullets={[
                 say(locale, 'Persönliche Beratung bezüglich Kurswahl, Sprachniveau und Prüfungen', 'One-to-one advice on choosing a course, your language level and exams'),
-                say(locale, 'Orientierung, wenn du studieren, Arbeit suchen oder eine Ausbildung machen möchtest', 'Guidance if you’re planning to study, looking for work or hoping to start vocational training'),
-                say(locale, 'Unterstützung bei der Unterkunft und beim Ankommen in Bremen', 'Help with accommodation and settling into life in Bremen'),
+                say(locale, 'Orientierung, wenn du studieren möchtest, eine Arbeit oder eine Ausbildung suchst', 'Guidance if you’re planning to study or looking for work or vocational training'),
+                say(locale, 'Unterstützung bei der Suche nach einer Unterkunft und beim Ankommen in Bremen', 'Help finding accommodation and settling into life in Bremen'),
               ]}
               photo={pageConfig.photos.story}
             />
@@ -718,7 +708,7 @@ export default async function HomePage() {
             <div className="mx-auto grid gap-8 lg:grid-cols-[0.78fr_minmax(0,1.22fr)] lg:items-end">
               <div className="max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-sun)]">
-                  {say(locale, 'Zertifikat geplant?', 'Need a certificate?')}
+                  {say(locale, 'Prüfung und Prüfungsvorbereitung', 'Exams and exam preparation')}
                 </p>
                 <h2 className="mt-3 text-3xl font-bold md:text-4xl">
                   {say(locale, 'Gut vorbereitet in deine telc-Prüfung', 'Prepare for your telc exam with us')}
@@ -812,7 +802,7 @@ export default async function HomePage() {
                 {say(locale, 'Ein Zuhause für deine Zeit in Bremen', 'A place to call home in Bremen')}
               </h2>
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
-                {say(locale, 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.', 'While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.')}
+                {say(locale, 'Für die Zeit deines Intensivkurses bei uns vermitteln wir dir ein Zimmer in einer CASA-WG oder bei Gastgebern in Bremen und Umgebung. Gemeinsam klären wir, welche Wohnform zu dir passt und verfügbar ist.', 'While you’re on an intensive course with us, we can find you a room in a CASA shared flat or with hosts in and around Bremen. Together we work out which kind of home suits you and what’s available.')}
               </p>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -909,7 +899,6 @@ export default async function HomePage() {
               say(locale, 'Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.', 'Learners share stories about progress, confidence and life in Bremen.')
             }
             cards={testimonialCards}
-            featuredQuote={featuredQuote}
             locale={locale}
           />
           </div>
