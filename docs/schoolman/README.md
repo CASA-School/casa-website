@@ -214,3 +214,5 @@ Left as they are for now (Rahman, 2026-10-16): the passwords stored in SchoolMan
 nobody else has access to them.
 
 **Learners brought across (2026-10-17):** what of a learner comes into the workspace, and what has no place there yet — `learner-transfer.md`.
+
+**What the bridge still leaves behind (2026-10-20):** per entity, after the first live run — fields in use that no reader reads, rows the sample and the skip rules leave out, a top 10 for the office and the decisions only Rahman can make — `bridge-gaps.md`.
