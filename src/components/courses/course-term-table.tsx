@@ -62,6 +62,8 @@ export function CourseTermTable({
   const date = dates.find((candidate) => candidate.id === dateId) ?? dates[0];
   const href = level ? `${date.href}${date.href.includes('?') ? '&' : '?'}level=${encodeURIComponent(level)}` : date.href;
   const levelLabel = levels.find((candidate) => candidate.value === level)?.label;
+  // Starts that carry their days (the evening course) need two columns on a phone, plain dates three.
+  const withDays = dates.some((candidate) => candidate.days);
   const years = [...new Set(dates.map((candidate) => (candidate.joinable ? 'now' : candidate.start.slice(0, 4))))];
   const dayMonth = (value: string) =>
     new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
@@ -70,7 +72,7 @@ export function CourseTermTable({
     <section>
       <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{say(locale, 'Kurstermine', 'Course dates')}</h2>
 
-      <div className="mt-7 rounded-2xl bg-white p-6 shadow-[var(--shadow-card)] sm:p-8">
+      <div className="mt-7 rounded-2xl bg-white p-5 shadow-[var(--shadow-card)] sm:p-8">
         {levels.length > 0 ? (
           <fieldset>
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -79,7 +81,8 @@ export function CourseTermTable({
                 {say(locale, 'Kostenloser Einstufungstest', 'Free placement test')}
               </Link>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            {/* On a phone the pills keep invisible columns (Rahman, 2026-10-21); from `sm` they run in a row. */}
+            <div className="mt-3 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
               {levels.map((candidate) => (
                 <Pill
                   key={candidate.value}
@@ -87,7 +90,7 @@ export function CourseTermTable({
                   value={candidate.value}
                   checked={candidate.value === level}
                   onChange={() => setLevel(candidate.value === level ? '' : candidate.value)}
-                  className="min-w-14 justify-center font-bold"
+                  className="font-bold sm:min-w-14"
                 >
                   {candidate.label}
                 </Pill>
@@ -104,7 +107,7 @@ export function CourseTermTable({
                 <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-[var(--casa-muted)]">
                   {year === 'now' ? say(locale, 'Läuft', 'Running') : year}
                 </span>
-                <div className="flex flex-wrap gap-2">
+                <div className={cn('grid gap-2 sm:flex sm:flex-wrap', withDays ? 'grid-cols-2' : 'grid-cols-3')}>
                   {dates
                     .filter((candidate) => (candidate.joinable ? 'now' : candidate.start.slice(0, 4)) === year)
                     .map((candidate) => (
@@ -116,7 +119,7 @@ export function CourseTermTable({
                         onChange={() => setDateId(candidate.id)}
                         label={formatStart(candidate.start, locale)}
                       >
-                        <span className="tabular-nums">
+                        <span className="whitespace-nowrap tabular-nums">
                           {candidate.joinable ? say(locale, 'Jetzt einsteigen', 'Join now') : dayMonth(candidate.start)}
                         </span>
                         {candidate.days ? <span className="font-normal opacity-70">{candidate.days}</span> : null}
@@ -172,7 +175,7 @@ function Pill({
   return (
     <label
       className={cn(
-        'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--casa-blue)]/40 has-[:focus-visible]:ring-offset-2',
+        'inline-flex min-h-10 cursor-pointer flex-wrap items-center justify-center gap-x-1.5 rounded-full px-2 py-1.5 text-center text-sm font-semibold sm:px-4 leading-tight transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--casa-blue)]/40 has-[:focus-visible]:ring-offset-2',
         checked
           ? 'bg-[var(--casa-ink-deep)] text-white'
           : 'bg-white text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)] hover:ring-[color:var(--casa-field-edge-hover)]',
