@@ -20,6 +20,7 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
+import type { ContentLocale } from '@/lib/content/types';
 import { redirectLocalized } from '@/i18n/redirect';
 import { getCanonicalCourseRouteSlug, getCourseContentSlug, getCoursePath } from '@/lib/content/course-routes';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
@@ -195,7 +196,7 @@ export default async function CourseDetailPage({
       const key = `${daytime}|${scheduleText}`;
 
       if (!groups.has(key)) {
-        groups.set(key, { key, daytime, schedule: scheduleText, days: schedule?.days ?? '', time: schedule?.time ?? '', terms: [] });
+        groups.set(key, { key, daytime, schedule: scheduleText, days: slotDays(courseInstance.schedule, schedule?.days ?? '', locale), time: schedule?.time ?? '', terms: [] });
       }
 
       groups.get(key)!.terms.push({
@@ -559,7 +560,6 @@ export default async function CourseDetailPage({
                     key={sectionKey}
                     groups={termGroups}
                     locale={locale}
-                    courseName={detail.course.name}
                     note={
                       detail.course.slug === 'bildungszeit'
                         ? say(locale, 'In der Bildungszeit besuchst du zwei Intensivkurse gleichzeitig, vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, und nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr. Einsteigen kannst du an jedem Montag.', 'During Bildungszeit you attend two intensive courses at the same time, in the morning from Monday to Friday, 09:00–12:30, and in the afternoon from Monday to Thursday, 13:00–17:30. You can join on any Monday.')
@@ -894,4 +894,16 @@ export default async function CourseDetailPage({
       {interestCourse ? <InterestDialog course={interestCourse} locale={locale} /> : null}
     </main>
   );
+}
+
+/** A slot's days for a card title: two or so days by name („Montag und Mittwoch"), a run as it is („Mo–Fr"). */
+function slotDays(schedule: unknown, compact: string, locale: ContentLocale): string {
+  const days = (schedule as { days?: unknown } | null)?.days;
+  if (!Array.isArray(days) || days.length === 0 || days.length > 2) return compact;
+  const names: Record<string, [string, string]> = {
+    Mon: ['Montag', 'Monday'], Tue: ['Dienstag', 'Tuesday'], Wed: ['Mittwoch', 'Wednesday'], Thu: ['Donnerstag', 'Thursday'],
+    Fri: ['Freitag', 'Friday'], Sat: ['Samstag', 'Saturday'], Sun: ['Sonntag', 'Sunday'],
+  };
+  const named = days.map((day) => names[String(day)]?.[locale === 'de' ? 0 : 1] ?? String(day));
+  return named.join(locale === 'de' ? ' und ' : ' and ');
 }

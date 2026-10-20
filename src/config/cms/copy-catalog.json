@@ -1235,6 +1235,7 @@
   "en": "Register",
   "files": [
    "src/app/(site)/[locale]/exams/[code]/page.tsx",
+   "src/components/courses/course-term-table.tsx",
    "src/components/layout/navbar.tsx"
   ],
   "pages": [
@@ -1936,6 +1937,17 @@
    "src/config/content/course-narratives.ts"
   ],
   "pages": []
+ },
+ "t.beginn-auswaehlen.32dagy": {
+  "de": "Beginn auswählen…",
+  "en": "Choose a start…",
+  "files": [
+   "src/components/registration/choice-controls.tsx"
+  ],
+  "pages": [
+   "/registration/course",
+   "/registration/exam"
+  ]
  },
  "t.beginne-immer-mit-dem.pbpzom": {
   "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
@@ -2778,16 +2790,6 @@
   ],
   "pages": [
    "/registration/course"
-  ]
- },
- "t.bis.1pubo9t": {
-  "de": "bis {date}",
-  "en": "to {date}",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.bisher-findet-der-kurs.1yi9mgk": {
@@ -4246,16 +4248,6 @@
    "/courses/[slug]"
   ]
  },
- "t.dein-niveau-waehlst-du.17ko9f3": {
-  "de": "Dein Niveau wählst du in der Anmeldung. Du bist unsicher?",
-  "en": "You choose your level when you register. Not sure?",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
   "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
   "en": "Your level of German decides which programmes are open to you and how much of everyday life you can manage without help.",
@@ -4357,16 +4349,6 @@
   "en": "Your details could not be sent. Please try again.",
   "files": [
    "src/components/courses/interest-dialog.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.deine-auswahl.ouc0m0": {
-  "de": "Deine Auswahl",
-  "en": "Your choice",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/courses/[slug]"
@@ -12450,16 +12432,6 @@
    "/placement-test"
   ]
  },
- "t.kostenloser-einstufungstest.1snfv6v": {
-  "de": "Kostenloser Einstufungstest",
-  "en": "Free placement test",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.kostenrechner.ikj22o": {
   "de": "Kostenrechner",
   "en": "Cost calculator",
@@ -17946,6 +17918,16 @@
    "/team"
   ]
  },
+ "t.starttermin.z3r3u1": {
+  "de": "Starttermin",
+  "en": "Start date",
+  "files": [
+   "src/components/courses/course-term-table.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.steuerliche-einordnung.6qpeg3": {
   "de": "Steuerliche Einordnung",
   "en": "Tax status",
@@ -21209,26 +21191,6 @@
    "/resources/why-germany"
   ]
  },
- "t.wann-moechtest-du-lernen.k35wy3": {
-  "de": "Wann möchtest du lernen?",
-  "en": "When would you like to learn?",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.wann-moechtest-du-starten.136ogm8": {
-  "de": "Wann möchtest du starten?",
-  "en": "When would you like to start?",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.warmes-mittagessen-an-jedem.18txuzw": {
   "de": "Warmes Mittagessen an jedem Schultag, zwischen Unterricht und Nachmittagsprogramm.",
   "en": "A hot lunch on every school day, between class and the afternoon programme.",
@@ -21728,16 +21690,6 @@
   "en": "Not sure",
   "files": [
    "src/config/courses/interest-list.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.weiter-zur-anmeldung.19kcd7f": {
-  "de": "Weiter zur Anmeldung",
-  "en": "Continue to registration",
-  "files": [
-   "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
    "/courses/[slug]"

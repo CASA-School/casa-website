@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { ChoiceChip, DateTiles, PillChoices, REGISTRATION_TYPES, registrationTypeLabels, sittingFacts } from '@/components/registration/choice-controls';
+import { ChoiceChip, PillChoices, TermField, REGISTRATION_TYPES, registrationTypeLabels, sittingFacts } from '@/components/registration/choice-controls';
 import { RegistrationStepper, RegistrationTabs } from '@/components/registration/registration-chrome';
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
@@ -327,7 +327,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
             </fieldset>
 
             <div className="space-y-2">
-              <DateTiles
+              <TermField
                 id="exam-session"
                 name="exam-session"
                 legend={t('Exam date', 'Prüfungstermin')}

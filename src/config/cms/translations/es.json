@@ -819,6 +819,10 @@
     "de": "Bedarfsanalyse",
     "text": "Análisis de necesidades"
   },
+  "t.beginn-auswaehlen.32dagy": {
+    "de": "Beginn auswählen…",
+    "text": "Elige el inicio…"
+  },
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Empieza siempre por la prueba A1. Busca un momento tranquilo, tómate tu tiempo y haz la prueba sin ayuda de nadie ni recursos como diccionarios."
@@ -1130,10 +1134,6 @@
   "t.bis.1ate970": {
     "de": "bis ",
     "text": "hasta "
-  },
-  "t.bis.1pubo9t": {
-    "de": "bis {date}",
-    "text": "hasta el {date}"
   },
   "t.bisher-findet-der-kurs.1yi9mgk": {
     "de": "Bisher findet der Kurs freitags von 13 bis 16:30 Uhr statt. Wenn wir wissen, wann du kannst, planen wir die Gruppe danach.",
@@ -1619,10 +1619,6 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Tu nivel y tus horarios"
   },
-  "t.dein-niveau-waehlst-du.17ko9f3": {
-    "de": "Dein Niveau wählst du in der Anmeldung. Du bist unsicher?",
-    "text": "Eliges tu nivel en la inscripción. ¿No estás seguro?"
-  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Tu nivel de idioma determina a qué programas de estudio puedes acceder y cuántas cosas del día a día puedes resolver sin ayuda."
@@ -1654,10 +1650,6 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "No se pudieron enviar tus datos. Inténtalo de nuevo, por favor."
-  },
-  "t.deine-auswahl.ouc0m0": {
-    "de": "Deine Auswahl",
-    "text": "Tu elección"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -4427,10 +4419,6 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "Gratis, del A1 al C1"
   },
-  "t.kostenloser-einstufungstest.1snfv6v": {
-    "de": "Kostenloser Einstufungstest",
-    "text": "Prueba de nivel gratuita"
-  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "Calculadora de precios"
@@ -6447,6 +6435,10 @@
     "de": "Startpunkt wählen",
     "text": "Elige tu punto de partida"
   },
+  "t.starttermin.z3r3u1": {
+    "de": "Starttermin",
+    "text": "Fecha de inicio"
+  },
   "t.steuerliche-einordnung.6qpeg3": {
     "de": "Steuerliche Einordnung",
     "text": "Régimen fiscal"
@@ -7579,14 +7571,6 @@
     "de": "Wann möchtest du anfangen, und was heißt das für heute?",
     "text": "¿Cuándo quieres empezar y qué significa eso para hoy?"
   },
-  "t.wann-moechtest-du-lernen.k35wy3": {
-    "de": "Wann möchtest du lernen?",
-    "text": "¿Cuándo quieres aprender?"
-  },
-  "t.wann-moechtest-du-starten.136ogm8": {
-    "de": "Wann möchtest du starten?",
-    "text": "¿Cuándo quieres empezar?"
-  },
   "t.warmes-mittagessen-an-jedem.18txuzw": {
     "de": "Warmes Mittagessen an jedem Schultag, zwischen Unterricht und Nachmittagsprogramm.",
     "text": "Almuerzo caliente cada día lectivo, entre las clases y el programa de tarde."
@@ -7778,10 +7762,6 @@
   "t.weiss-ich-nicht.1ppcj8w": {
     "de": "Weiß ich nicht",
     "text": "No lo sé"
-  },
-  "t.weiter-zur-anmeldung.19kcd7f": {
-    "de": "Weiter zur Anmeldung",
-    "text": "Continuar con la inscripción"
   },
   "t.weiter.1tg7ggn": {
     "de": "Weiter",

@@ -28,7 +28,7 @@ import {
 import {
   ChoiceChip,
   choiceLook,
-  DateTiles,
+  TermField,
   PillChoices,
   REGISTRATION_TYPES,
   registrationTypeLabels,
@@ -447,7 +447,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
       ) : null}
 
       {courseType ? (
-        <DateTiles
+        <TermField
           id={`course-${index}-option`}
           name={`course-${index}-option`}
           legend={termIsLevel ? t('Start', 'Beginn') : t('Dates', 'Termin')}
@@ -551,7 +551,7 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
           </fieldset>
 
           <div className="space-y-2">
-            <DateTiles
+            <TermField
               id="exam-session"
               name="exam-session"
               legend={t('Exam date', 'Prüfungstermin')}

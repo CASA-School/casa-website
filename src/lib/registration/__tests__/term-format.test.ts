@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { compactDays, dateTileParts, daytimeOf, parseSchedule, scheduleLine, termRange } from '../term-format';
+import { compactDays, daytimeOf, formatStart, parseSchedule, scheduleLine, termRange } from '../term-format';
 
 describe('a term in as few words as it takes', () => {
   it('runs days in a row as a range and lists the rest, in the page language', () => {
@@ -26,13 +26,13 @@ describe('a term in as few words as it takes', () => {
     expect(scheduleLine(null, 'en')).toBe('Schedule to be confirmed');
   });
 
-  it('says a range with its year once, and a tile as a day over its month', () => {
+  it('says a range with its year once, and a start with its weekday', () => {
     // ICU sets the dash between thin spaces.
     const plain = (text: string) => text.replace(/\s/g, ' ');
     expect(plain(termRange('2026-10-26', '2026-12-18', 'de'))).toBe('26. Okt. – 18. Dez. 2026');
     expect(plain(termRange('2026-11-23', '2027-01-28', 'de'))).toBe('23. Nov. 2026 – 28. Jan. 2027');
-    expect(dateTileParts('2027-03-01', 'de')).toEqual({ day: '1', monthYear: 'März 2027', full: '1. März 2027' });
+    expect(formatStart('2027-03-01', 'de')).toBe('Mo., 1. März 2027');
     // A sitting's timestamp is read on Bremen's calendar.
-    expect(dateTileParts('2026-11-13T23:30:00Z', 'en').day).toBe('14');
+    expect(formatStart('2026-11-13T23:30:00Z', 'en')).toContain('14');
   });
 });

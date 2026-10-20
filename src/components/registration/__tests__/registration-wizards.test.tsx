@@ -239,23 +239,20 @@ describe('course registration wizard, several courses and an exam (2026-10-05)',
     await act(async () => root.render(<CourseWizard catalog={catalog} examCatalog={examCatalog} />));
     await click(container.querySelector<HTMLButtonElement>('#exam-enabled')!);
     expect(container.querySelectorAll('input[name="exam-type"]')).toHaveLength(1);
-    expect(container.querySelector<HTMLInputElement>('input[name="exam-session"]')?.checked).toBe(true);
+    expect(container.querySelector('#exam-session-select')?.textContent).toMatch(/\d{4}/);
     expect(container.querySelector<HTMLInputElement>('input[name="exam-registration-type"][value="full"]')?.checked).toBe(true);
 
     await click(button('Weiter'));
     expect(container.querySelector('h2')?.textContent).toBe('Persönliche Angaben');
   });
 
-  it('shows the start dates under the schedule they share, each schedule once', async () => {
+  it('asks the schedule as a switch and the start as one field, each schedule once', async () => {
     await act(async () => root.render(<CourseWizard catalog={{ ...catalog, defaultCourseTypeId: INTENSIVE_ID, defaultOptionId: INTENSIVE_OPTION_ID }} />));
-    const groups = [...container.querySelectorAll('#course-0-option [role="group"]')];
-    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
-      'Vormittags · Mo–Fr · 09:00–12:30',
-      'Nachmittags · Mo–Do · 13:00–17:30',
-    ]);
-    expect(container.querySelector<HTMLInputElement>('input[name="course-0-option"]:checked')?.value).toBe(INTENSIVE_OPTION_ID);
-    expect(groups[0].textContent).toContain('26. Oktober 2026');
-    // Said once, over its dates: no summary card repeats it.
+    const slots = [...container.querySelectorAll('#course-0-option label')];
+    expect(slots.map((slot) => slot.textContent)).toEqual(['VormittagsMo–Fr · 09:00–12:30', 'NachmittagsMo–Do · 13:00–17:30']);
+    expect(container.querySelector<HTMLInputElement>('input[name="course-0-option-slot"]:checked')?.value).toBe('Mo–Fr|09:00–12:30');
+    expect(container.querySelector('#course-0-option-select')?.textContent).toContain('26. Oktober 2026');
+    // Said once, in the switch: no summary card repeats it.
     expect(container.textContent?.split('Mo–Fr · 09:00–12:30')).toHaveLength(2);
     expect(container.textContent).not.toMatch(/(Ihre|Deine) Auswahl/);
   });

@@ -819,6 +819,10 @@
     "de": "Bedarfsanalyse",
     "text": "İhtiyaç analizi"
   },
+  "t.beginn-auswaehlen.32dagy": {
+    "de": "Beginn auswählen…",
+    "text": "Başlangıç seç…"
+  },
   "t.beginne-immer-mit-dem.pbpzom": {
     "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
     "text": "Her zaman A1 testiyle başlayın. Sakin bir an seçin ve kendinize zaman tanıyın; testi tek başınıza ve sözlük gibi yardımcı araçlar olmadan çözün."
@@ -1130,10 +1134,6 @@
   "t.bis.1ate970": {
     "de": "bis ",
     "text": "şu seviyeye kadar: "
-  },
-  "t.bis.1pubo9t": {
-    "de": "bis {date}",
-    "text": "{date} tarihine kadar"
   },
   "t.bisher-findet-der-kurs.1yi9mgk": {
     "de": "Bisher findet der Kurs freitags von 13 bis 16:30 Uhr statt. Wenn wir wissen, wann du kannst, planen wir die Gruppe danach.",
@@ -1619,10 +1619,6 @@
     "de": "Dein Niveau und deine Zeiten",
     "text": "Seviyeniz ve uygun zamanlarınız"
   },
-  "t.dein-niveau-waehlst-du.17ko9f3": {
-    "de": "Dein Niveau wählst du in der Anmeldung. Du bist unsicher?",
-    "text": "Seviyeni kayıt sırasında seçersin. Emin değil misin?"
-  },
   "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Dil seviyeniz, hangi bölümlerin size açık olduğunu ve günlük hayatta ne kadarını yardımsız halledebileceğinizi belirler."
@@ -1654,10 +1650,6 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Bilgileriniz gönderilemedi. Lütfen tekrar deneyin."
-  },
-  "t.deine-auswahl.ouc0m0": {
-    "de": "Deine Auswahl",
-    "text": "Seçimin"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -4427,10 +4419,6 @@
     "de": "Kostenlos, von A1 bis C1",
     "text": "Ücretsiz, A1'den C1'e"
   },
-  "t.kostenloser-einstufungstest.1snfv6v": {
-    "de": "Kostenloser Einstufungstest",
-    "text": "Ücretsiz seviye testi"
-  },
   "t.kostenrechner.ikj22o": {
     "de": "Kostenrechner",
     "text": "Ücret hesaplayıcı"
@@ -6447,6 +6435,10 @@
     "de": "Startpunkt wählen",
     "text": "Başlangıç noktanızı seçin"
   },
+  "t.starttermin.z3r3u1": {
+    "de": "Starttermin",
+    "text": "Başlangıç tarihi"
+  },
   "t.steuerliche-einordnung.6qpeg3": {
     "de": "Steuerliche Einordnung",
     "text": "Vergi durumu"
@@ -7579,14 +7571,6 @@
     "de": "Wann möchtest du anfangen, und was heißt das für heute?",
     "text": "Ne zaman başlamak istiyorsunuz ve bu bugün için ne anlama geliyor?"
   },
-  "t.wann-moechtest-du-lernen.k35wy3": {
-    "de": "Wann möchtest du lernen?",
-    "text": "Ne zaman öğrenmek istersin?"
-  },
-  "t.wann-moechtest-du-starten.136ogm8": {
-    "de": "Wann möchtest du starten?",
-    "text": "Ne zaman başlamak istersin?"
-  },
   "t.warmes-mittagessen-an-jedem.18txuzw": {
     "de": "Warmes Mittagessen an jedem Schultag, zwischen Unterricht und Nachmittagsprogramm.",
     "text": "Her okul günü, ders ile öğleden sonra programı arasında sıcak öğle yemeği."
@@ -7778,10 +7762,6 @@
   "t.weiss-ich-nicht.1ppcj8w": {
     "de": "Weiß ich nicht",
     "text": "Bilmiyorum"
-  },
-  "t.weiter-zur-anmeldung.19kcd7f": {
-    "de": "Weiter zur Anmeldung",
-    "text": "Kayda devam et"
   },
   "t.weiter.1tg7ggn": {
     "de": "Weiter",

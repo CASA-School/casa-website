@@ -91,14 +91,9 @@ const instant = (value: string) => (/^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date
 const format = (value: string, locale: ContentLocale, options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat(localeTag(locale), { ...options, timeZone: TIME_ZONE }).format(instant(value));
 
-/** A date tile: "26" over "Okt. 2026", and the whole date for a screen reader. */
-export function dateTileParts(value: string, locale: ContentLocale) {
-  return {
-    day: format(value, locale, { day: 'numeric' }),
-    monthYear: format(value, locale, { month: 'short', year: 'numeric' }),
-    full: format(value, locale, { day: 'numeric', month: 'long', year: 'numeric' }),
-  };
-}
+/** "Mo., 26. Oktober 2026": a start in a list, the weekday with it. */
+export const formatStart = (value: string, locale: ContentLocale) =>
+  format(value, locale, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
 
 /** "26. Okt. 2026". */
 export const formatDay = (value: string, locale: ContentLocale) => format(value, locale, { day: 'numeric', month: 'short', year: 'numeric' });

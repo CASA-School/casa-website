@@ -2,10 +2,12 @@
 
 import { CheckCircle2, type LucideIcon } from 'lucide-react';
 
-import { formErrorClassName, formFieldGroupClassName, formHintClassName, formLabelClassName, RequiredMark } from '@/components/forms/form-styles';
+import { formControlClassName, formErrorClassName, formFieldGroupClassName, formHintClassName, formLabelClassName, RequiredMark } from '@/components/forms/form-styles';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Meaning } from '@/config/brand/meaning';
 import type { ContentLocale } from '@/lib/content/types';
-import { clockRange, dateTileParts } from '@/lib/registration/term-format';
+import { clockRange, formatStart } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { IconBadge } from '@/components/ui/icon-badge';
 
@@ -57,7 +59,7 @@ export function ChoiceChip({ name, value, checked, icon: Icon, meaning, title, m
 export type DateTile = { id: string; date: string; note?: string };
 export type DateTileGroup = { key: string; title?: string; meta?: string; tiles: DateTile[] };
 
-type DateTilesProps = {
+type TermFieldProps = {
   /** The group's id, which a failed step focuses. */
   id: string;
   name: string;
@@ -73,19 +75,23 @@ type DateTilesProps = {
 };
 
 /**
- * Dates as tiles, a large day over its month, under the schedule they share,
- * said once ("Vormittags · Mo–Fr · 09:00–12:30"). Native radios, one group.
+ * WHEN A COURSE STARTS, AS ONE FIELD (Rahman, 2026-10-20: the date tiles were „not elegant like our
+ * website or dashboard"). They were a grid of boxed tiles per schedule, two rows of six on the
+ * intensive course. Now the schedule is a switch in the look of the form's own Kursanmeldung |
+ * Prüfungsanmeldung tabs („Vormittags · Mo–Fr · 09:00–12:30" | „Nachmittags …"), shown only where
+ * there is more than one, and the start is a dropdown like the level's above it. Switching the
+ * schedule chooses its first start. The fieldset keeps the id a failed step focuses.
  */
-export function DateTiles({ id, name, legend, groups, value, onChange, locale, error, errorId, emptyText }: DateTilesProps) {
+export function TermField({ id, name, legend, groups, value, onChange, locale, error, errorId, emptyText }: TermFieldProps) {
+  const { say } = useSiteCopy();
   const legendId = `${id}-legend`;
+  const group = groups.find((candidate) => candidate.tiles.some((tile) => tile.id === value)) ?? groups[0];
 
   return (
     <fieldset
       id={id}
       tabIndex={-1}
-      role="radiogroup"
       aria-labelledby={legendId}
-      aria-required
       aria-invalid={Boolean(error)}
       aria-describedby={error ? errorId : undefined}
       className={cn(formFieldGroupClassName, 'outline-none')}
@@ -95,52 +101,62 @@ export function DateTiles({ id, name, legend, groups, value, onChange, locale, e
         <RequiredMark />
       </legend>
       {groups.length === 0 && emptyText ? <p className={formHintClassName}>{emptyText}</p> : null}
-      <div className="space-y-4">
-        {groups.map((group) => {
-          const heading = [group.title, group.meta].filter(Boolean).join(' · ');
-          return (
-            <div key={group.key} role={heading ? 'group' : undefined} aria-label={heading || undefined}>
-              {heading ? (
-                <p aria-hidden="true" className="mb-2 text-sm leading-snug">
-                  {group.title ? <span className="font-semibold text-[var(--casa-ink)]">{group.title}</span> : null}
-                  {group.title && group.meta ? <span className="text-[var(--casa-muted)]"> · </span> : null}
-                  {group.meta ? <span className="text-[var(--casa-muted)]">{group.meta}</span> : null}
-                </p>
-              ) : null}
-              {/* Tiles stretch to fill the row instead of leaving a ragged gap on the right. */}
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-2">
-                {group.tiles.map((tile) => {
-                  const parts = dateTileParts(tile.date, locale);
-                  const checked = tile.id === value;
-                  return (
-                    <label
-                      key={tile.id}
-                      className={cn(
-                        'flex min-w-[5.5rem] cursor-pointer flex-col items-center rounded-xl border px-3 pb-2.5 pt-2 text-center transition-[border-color,background-color,box-shadow] duration-150',
-                        choiceLook.focus,
-                        checked ? choiceLook.checked : choiceLook.idle
-                      )}
-                    >
-                      <input type="radio" name={name} value={tile.id} checked={checked} onChange={() => onChange(tile.id)} className="sr-only" />
-                      <span className="sr-only">{tile.note ? `${parts.full}, ${tile.note}` : parts.full}</span>
-                      <span
-                        aria-hidden="true"
-                        className={cn('text-2xl font-bold leading-tight tabular-nums', checked ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]')}
-                      >
-                        {parts.day}
-                      </span>
-                      <span aria-hidden="true" className="text-xs font-medium text-[var(--casa-muted)]">{parts.monthYear}</span>
-                      {tile.note ? (
-                        <span aria-hidden="true" className="mt-1 text-xs font-semibold leading-none text-[var(--casa-accent-text)]">{tile.note}</span>
-                      ) : null}
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+
+      {groups.length > 1 ? (
+        <div role="radiogroup" aria-label={legend} className="mb-3 grid grid-cols-2 gap-1 rounded-xl bg-[var(--casa-surface-subtle)] p-1">
+          {groups.map((candidate) => {
+            const checked = candidate.key === group?.key;
+            return (
+              <label
+                key={candidate.key}
+                className={cn(
+                  'flex min-w-0 cursor-pointer flex-col rounded-lg px-3 py-2 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--casa-blue)]/40 sm:px-4',
+                  checked ? 'bg-white shadow-[var(--shadow-soft)]' : 'hover:bg-white/60'
+                )}
+              >
+                <input
+                  type="radio"
+                  name={`${name}-slot`}
+                  value={candidate.key}
+                  checked={checked}
+                  onChange={() => candidate.tiles[0] && onChange(candidate.tiles[0].id)}
+                  className="sr-only"
+                />
+                <span className={cn('text-sm font-semibold', checked ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
+                  {candidate.title ?? candidate.meta}
+                </span>
+                {candidate.title && candidate.meta ? (
+                  <span className="text-xs tabular-nums text-[var(--casa-muted)]">{candidate.meta}</span>
+                ) : null}
+              </label>
+            );
+          })}
+        </div>
+      ) : group && (group.title || group.meta) ? (
+        <p className="mb-2 text-sm text-[var(--casa-muted)]">{[group.title, group.meta].filter(Boolean).join(' · ')}</p>
+      ) : null}
+
+      {group ? (
+        <Select value={value || ''} onValueChange={onChange}>
+          <SelectTrigger
+            id={`${id}-select`}
+            aria-labelledby={legendId}
+            aria-required
+            aria-invalid={Boolean(error)}
+            className={formControlClassName}
+          >
+            <SelectValue placeholder={say(locale, 'Beginn auswählen…', 'Choose a start…')} />
+          </SelectTrigger>
+          <SelectContent>
+            {group.tiles.map((tile) => (
+              <SelectItem key={tile.id} value={tile.id}>
+                <span>{formatStart(tile.date, locale)}</span>
+                {tile.note ? <span className="text-[var(--casa-muted)]"> · {tile.note}</span> : null}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : null}
       {error ? <p id={errorId} className={formErrorClassName}>{error}</p> : null}
     </fieldset>
   );
