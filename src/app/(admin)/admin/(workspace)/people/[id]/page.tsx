@@ -47,7 +47,7 @@ import { normaliseStatus } from '@/lib/admin/queues';
 import { personEntries, WAITLIST_STATUS_LABELS } from '@/lib/admin/waitlist';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { personExamEntries } from '@/lib/admin/exams';
-import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
+import { LetterList } from '@/components/admin/letters/letter-list';
 import { staffIdForPerson } from '@/lib/admin/staff-members';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForPerson } from '@/lib/admin/letters/repo';
@@ -726,25 +726,18 @@ export default async function PersonPage({
             }
           >
             {letters.length ? (
-              <ul className="py-1.5">
-                {letters.map((l) => (
-                  <li key={l.id}>
-                    <Link href={`/admin/letters/${l.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
-                      <LetterKindIcon kind={l.kind} size="md" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{l.subject}</span>
-                        <span className="mt-0.5 block text-[0.78rem] text-[var(--casa-muted)]">
-                          {pick(lang, LETTER_KIND_LABELS[l.kind])}
-                          {l.sentByName ? ` · ${l.sentByName}` : ''}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
-                        <DateText value={l.sentAt} compact />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <LetterList
+                variant="tab"
+                title={t('Briefe', 'Letters')}
+                rows={letters.map((l) => ({
+                  id: l.id,
+                  kind: l.kind,
+                  kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
+                  subject: l.subject,
+                  by: l.sentByName,
+                  sentAt: new Date(l.sentAt).toISOString(),
+                }))}
+              />
             ) : (
               <p className="px-4 py-4 text-sm text-[var(--casa-muted)]">{t('Noch kein Brief an diese Person.', 'No letter to this person yet.')}</p>
             )}

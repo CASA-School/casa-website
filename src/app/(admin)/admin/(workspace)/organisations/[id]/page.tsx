@@ -9,7 +9,7 @@ import { CommissionForm, ContactForm, EditOrganisationForm } from '../organisati
 import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
+import { LetterList } from '@/components/admin/letters/letter-list';
 import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
@@ -429,23 +429,19 @@ export default async function OrganisationPage({
       {seenLetters.length ? (
         <RecordTabPanel id="letters">
           <Card bleed>
-            <Rows>
-              {seenLetters.map((l) => (
-                <Row
-                  key={l.id}
-                  href={`/admin/letters/${l.id}`}
-                  icon={<LetterKindIcon kind={l.kind} size="md" />}
-                  title={l.subject}
-                  detail={[pick(lang, LETTER_KIND_LABELS[l.kind]), l.sentByName].filter(Boolean).join(' · ')}
-                  end={<DateText value={l.sentAt} compact />}
-                />
-              ))}
-            </Rows>
-            {letters.total > letters.items.length ? (
-              <p className="border-t border-ws-line-soft px-4 py-3 text-[0.8rem] text-[var(--casa-muted)]">
-                {t(`Die letzten ${num(lang, letters.items.length)} von ${num(lang, letters.total)}`, `The latest ${num(lang, letters.items.length)} of ${num(lang, letters.total)}`)}
-              </p>
-            ) : null}
+            <LetterList
+              variant="tab"
+              title={t('Briefe', 'Letters')}
+              total={letterCount}
+              rows={seenLetters.map((l) => ({
+                id: l.id,
+                kind: l.kind,
+                kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
+                subject: l.subject,
+                by: l.sentByName,
+                sentAt: new Date(l.sentAt).toISOString(),
+              }))}
+            />
           </Card>
         </RecordTabPanel>
       ) : null}

@@ -48,6 +48,7 @@ import { levelCodes } from '@/lib/admin/waitlist';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { toDateInputValue, todayInputValue } from '@/lib/dates';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
+import { LetterList } from '@/components/admin/letters/letter-list';
 import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
 import { BOOKING_LETTER_KEYS, LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
@@ -1014,22 +1015,18 @@ export default async function BookingPage({
               </Link>
             ) : null}
             {letters.length ? (
-              <ul className="-my-1 space-y-0.5">
-                {letters.map((l) => (
-                  <li key={l.id}>
-                    <Link href={`/admin/letters/${l.id}`} className="-mx-2 flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-ws-sunk">
-                      <LetterKindIcon kind={l.kind} />
-                      <span className="min-w-0 flex-1 truncate font-semibold">
-                        {pick(lang, LETTER_KIND_LABELS[l.kind])}
-                        {l.version > 1 ? <span className="font-medium text-[var(--casa-muted)]"> · {t(`Fassung ${l.version}`, `version ${l.version}`)}</span> : null}
-                      </span>
-                      <span className="shrink-0 text-xs text-[var(--casa-muted)]">
-                        <DateText value={l.sentAt} compact />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <LetterList
+                variant="side"
+                title={t('Briefe', 'Letters')}
+                rows={letters.map((l) => ({
+                  id: l.id,
+                  kind: l.kind,
+                  kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
+                  subject: l.subject,
+                  note: l.version > 1 ? t(`Fassung ${l.version}`, `version ${l.version}`) : null,
+                  sentAt: new Date(l.sentAt).toISOString(),
+                }))}
+              />
             ) : dueLetter ? null : (
               <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
             )}

@@ -12,6 +12,7 @@ import { dayRange, euros } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader } from '@/components/admin/ui';
+import { LetterList } from '@/components/admin/letters/letter-list';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import {
@@ -33,6 +34,7 @@ import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { lettersForPlace } from '@/lib/admin/letters/repo';
 import { listNotes } from '@/lib/admin/notes';
+import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { cn } from '@/lib/utils';
 
 const yesNo = (v: boolean | null, t: T) => (v === true ? t('Ja', 'Yes') : v === false ? t('Nein', 'No') : null);
@@ -378,19 +380,18 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
       {letters.length ? (
         <RecordTabPanel id="letters">
           <Card bleed>
-            <ul className="py-1.5">
-              {letters.map((l) => (
-                <li key={l.id}>
-                  <Link href={`/admin/letters/${l.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
-                    <IconChip icon={Icon.mail} tint="blue" />
-                    <span className="min-w-0 flex-1 truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{l.subject}</span>
-                    <span className="shrink-0 text-[0.76rem] text-[var(--casa-muted)] tabular-nums">
-                      <DateText value={l.sentAt} compact />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <LetterList
+              variant="tab"
+              title={t('Briefe', 'Letters')}
+              rows={letters.map((l) => ({
+                id: l.id,
+                kind: l.kind,
+                kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
+                subject: l.subject,
+                by: l.sentByName,
+                sentAt: new Date(l.sentAt).toISOString(),
+              }))}
+            />
           </Card>
         </RecordTabPanel>
       ) : null}

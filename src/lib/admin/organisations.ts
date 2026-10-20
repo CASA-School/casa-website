@@ -433,8 +433,11 @@ export async function organisationOffers(organisationId: string): Promise<Organi
 
 export type OrganisationLetter = { id: string; kind: LetterKind; subject: string; sentAt: Date; sentByName: string | null };
 
-/** How many letters the tab lists, the latest first. */
-export const LETTERS_SHOWN = 50;
+/**
+ * How many letters are loaded, the latest first: the tab shows a few and the side panel all of these, so
+ * an agency's hundreds can be searched (2026-10-20; the most today is 864).
+ */
+export const LETTERS_SHOWN = 1000;
 
 /** The letters sent to it, the latest first, with how many there are in all. */
 export async function organisationLetters(organisationId: string): Promise<{ items: OrganisationLetter[]; total: number }> {
