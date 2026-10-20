@@ -37,6 +37,8 @@ import { say } from '@/lib/cms/copy';
 
 export type CourseAudienceContent = {
   title: string;
+  /** In place of the course's audience line, where the section needs its own. */
+  description?: string;
   bullets: string[];
 };
 
@@ -53,7 +55,8 @@ export type CourseNextSteps = {
 };
 
 type LocalisedCourseContent = {
-  audience?: CourseAudienceContent;
+  /** `false`: the page has no audience section. */
+  audience?: CourseAudienceContent | false;
   nextSteps?: CourseNextSteps;
 };
 
@@ -64,28 +67,20 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
     'intensive-german': {
       audience: {
         title: say(locale, 'In einem Jahr von A1 bis C1', 'From A1 to C1 in a year'),
+        // Its own lead: the course's audience line also shows on the homepage card, where „Das ist
+        // möglich" would point at nothing.
+        description: say(locale, 'Das ist möglich für alle, die sich intensiv mit Deutsch beschäftigen möchten – für dein Studium, deinen Beruf und deinen Alltag.', 'It is possible for anyone who wants to work intensively on their German – for your studies, your job and your everyday life.'),
         bullets: [
-          say(locale, 'Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche schaffst du eine ganze Niveaustufe in 8 Wochen.', 'With {course.intensive-german.lessons} lessons a week, you complete a whole level in 8 weeks.'),
-          // The afternoon course is four days, not five. The facts doc calls this
-          // "the single easiest fact on this page to mis-copy".
-          say(locale, 'Du lernst vormittags oder nachmittags. Der Nachmittagskurs läuft von Montag bis Donnerstag.', 'You study in the morning or in the afternoon. The afternoon course runs from Monday to Thursday.'),
-          say(locale, 'Neue Kurse beginnen jeden Monat, und die Einstufung zeigt, auf welchem Niveau du einsteigst.', 'New courses begin every month, and the placement test shows which level you start at.'),
+          say(locale, 'Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.', 'With {course.intensive-german.lessons} lessons a week, you can reach the next level in 8 weeks.'),
+          say(locale, 'Du lernst vormittags oder nachmittags, je nach Kursstart.', 'You study in the morning or in the afternoon, depending on when your course starts.'),
         ],
       },
     },
 
     /* ------------------------------------------------------------------ */
     'evening-german': {
-      audience: {
-        title: say(locale, 'Deutsch lernen neben dem Beruf', 'Learning German alongside your job'),
-        bullets: [
-          say(locale, 'Du lernst an zwei Abenden pro Woche von 18:30 bis 20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.', 'You study on two evenings a week from 18:30 to 20:00, on Mondays and Wednesdays or on Tuesdays and Thursdays.'),
-          say(locale, 'In einem Trimester schließt du eine halbe Niveaustufe ab, im Jahr also etwa 1½ Niveaustufen.', 'In one trimester you complete half a level, so about one and a half levels a year.'),
-          // The fee is per trimester and depends on its length, so the course
-          // shows "from 378 EUR" (pricing_mode 'from', migration 0018).
-          say(locale, 'Du buchst und bezahlst immer ein Trimester.', 'You always book and pay for one trimester at a time.'),
-        ],
-      },
+      // „Deutsch lernen neben dem Beruf" left the page in CASA's content review (2026-10-20).
+      audience: false,
       nextSteps: {
         description: say(locale, 'Der Abendkurs läuft das ganze Jahr über in Trimestern.', 'The evening course runs all year round in trimesters.'),
         steps: [
@@ -242,10 +237,11 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
   };
 }
 
+/** The page's audience section: its own content, `false` for none, undefined for the archetype's default. */
 export function getCourseAudienceContent(
   slug: string,
   locale: ContentLocale
-): CourseAudienceContent | undefined {
+): CourseAudienceContent | false | undefined {
   return content(locale)[slug]?.audience;
 }
 

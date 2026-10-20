@@ -13,6 +13,7 @@ import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { BremenMusiciansHero } from '@/components/sections/bremen-musicians-hero';
 import nightHero from '@/components/sections/night-hero.module.css';
 import { DecisionRail, EditorialSplit, HumanStoryBlock, ProcessSteps, TestimonialGrid } from '@/components/sections';
+import { schoolFeatures } from '@/config/content/school-features';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { CourseLevelGoals } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
@@ -438,7 +439,8 @@ export default async function CourseDetailPage({
    * config/courses/course-page-content.ts.
    */
   const courseNextSteps = getCourseNextSteps(detail.course.slug, locale);
-  const courseAudience = getCourseAudienceContent(detail.course.slug, locale);
+  const audienceContent = getCourseAudienceContent(detail.course.slug, locale);
+  const courseAudience = audienceContent || undefined;
   const processDescription = courseNextSteps?.description ?? (isOrganisationQuote
     ? say(locale, 'So entsteht ein Firmenkurs bei CASA.', 'This is how we put together a course for your company.')
     : archetype.cta === 'request-quote'
@@ -596,24 +598,20 @@ export default async function CourseDetailPage({
                     title={courseLevelGoals.title}
                     description={courseLevelGoals.description}
                     levels={courseLevelGoals.levels}
-                    practices={
-                      narrative?.outcomes || [
-                        say(locale, 'Aktive Kommunikation in Alltagssituationen', 'Active communication in everyday situations'),
-                        say(locale, 'Präziser Einsatz zentraler Grammatikstrukturen', 'More precise grammar usage in context'),
-                        say(locale, 'Flüssigeres Verstehen und Sprechen', 'Stronger listening and speaking fluency'),
-                      ]
-                    }
-                    practiceTitle={t('coursePage.goals.practiceTitle')}
+                    features={schoolFeatures(locale)}
+                    featuresTitle={t('coursePage.goals.practiceTitle')}
                     locale={locale}
                   />
                   );
 
                 case 'audience':
+                  if (audienceContent === false) return null;
                   return (
                   <EditorialSplit
                     key={sectionKey}
                     title={audienceTitle}
                     description={
+                      courseAudience?.description ||
                       narrative?.audience ||
                       (say(locale, 'Geeignet für Lernende, die klare Ziele mit persönlicher Begleitung verbinden möchten.', 'Ideal for learners who want clear outcomes with personal teaching support.'))
                     }

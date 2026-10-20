@@ -99,32 +99,32 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     ],
     conditions: [
       {
-        en: 'Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 weeks, so in a year you work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
-        de: 'Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So durchläufst du in einem Jahr die Niveaustufen A1 bis C1 und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
+        en: 'Our intensive courses have {course.intensive-german.lessons} lessons of 45 minutes a week. A complete level takes 8 weeks, so in a year you can work through levels A1 to C1 and build a solid foundation for university study or a skilled job in Germany.',
+        de: 'Unsere Intensivkurse umfassen {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine komplette Niveaustufe dauert 8 Wochen. So kannst du in einem Jahr die Niveaustufen A1 bis C1 durchlaufen und legst eine solide Grundlage für ein Studium oder eine qualifizierte Arbeit in Deutschland.',
       },
       {
-        en: 'Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30. So the afternoon course has four days of lessons a week.',
-        de: 'Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt. Der Nachmittagskurs hat also vier Unterrichtstage in der Woche.',
+        en: 'Courses run in the morning from Monday to Friday, 09:00–12:30, or in the afternoon from Monday to Thursday, 13:00–17:30.',
+        de: 'Die Kurse finden vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, oder nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr, statt.',
       },
       {
         // The four skills, speaking above all, are the old casa-bremen.de wording.
-        en: 'You learn all year round in international groups of 10 to 15 people. Teaching keeps strictly to the Common European Framework of Reference and works on listening, reading, writing and, above all, speaking.',
-        de: 'Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 15 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Hörverstehen, Lesen, Schreiben und besonders das Sprechen.',
+        en: 'You learn all year round in international groups of 10 to 16 people. Teaching keeps strictly to the Common European Framework of Reference and works on reading, listening, writing and, above all, speaking.',
+        de: 'Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.',
       },
       {
-        // CASA states this in bold on its own page. Withholding it sets a
-        // learner up to arrive expecting telc training they have not booked.
-        en: 'Exam preparation is not part of the intensive courses. If you need a telc certificate, you can book a preparation course as well.',
-        de: 'Die Vorbereitung auf eine Prüfung ist nicht Bestandteil der Intensivkurse. Wenn du ein telc-Zertifikat brauchst, kannst du einen Vorbereitungskurs zusätzlich buchen.',
+        // CASA says it plainly, so nobody arrives expecting telc training they have not booked;
+        // since its content review (2026-10-20) as a recommendation.
+        en: 'For thorough exam preparation, we recommend booking a preparation course after the intensive course.',
+        de: 'Zur intensiven Vorbereitung auf eine Prüfung empfehlen wir, im Anschluss an den Intensivkurs einen Vorbereitungskurs zu buchen.',
       },
       {
-        en: 'To make good progress, you need to be in a course at the right level. That is why we assess you here at the school and may adjust your course level, even if you already have a certificate.',
-        de: 'Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.',
+        en: 'To make good progress, you need to be in a course at the right level. That is why we assess you here at the school and may adjust your course level.',
+        de: 'Damit du gut vorankommst, ist die passende Niveaustufe wichtig. Deshalb stufen wir dich vor Ort ein und behalten uns vor, dein Kursniveau anzupassen.',
       },
       {
         // Personal guidance is the old casa-bremen.de wording, lost in the move.
-        en: 'Your teachers add their own materials to the textbook to keep lessons up to date, stimulating and enjoyable. They also correct your written work regularly and give you personal guidance, because we want to respond to what each person needs.',
-        de: 'Deine Lehrkräfte ergänzen das Lehrwerk mit eigenen Materialien, die den Unterricht aktuell, anregend und unterhaltsam machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir möchten auf die Bedürfnisse jeder und jedes Einzelnen eingehen.',
+        en: 'Your teachers add CASA’s own materials to the textbook to keep lessons up to date, stimulating and interesting. They also correct your written work regularly and give you personal guidance, because we respond to your individual needs.',
+        de: 'Deine Lehrkräfte ergänzen das Lehrwerk mit CASA-eigenen Materialien, die den Unterricht aktuell, anregend und interessant machen. Außerdem korrigieren sie regelmäßig deine schriftlichen Arbeiten und beraten dich persönlich, denn wir gehen auf deine individuellen Bedürfnisse ein.',
       },
     ],
   },
@@ -146,20 +146,20 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
         de: 'Die Kurse finden das ganze Jahr über in der Regel zweimal pro Woche von 18:30 bis 20:00 Uhr statt, entweder montags und mittwochs oder dienstags und donnerstags.',
       },
       {
-        en: 'An evening course lasts about three and a half months. In that time you complete half a level, for example A1.2 or B2.1, so in a year you can manage about one and a half levels.',
-        de: 'Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit schließt du eine halbe Niveaustufe ab, zum Beispiel A1.2 oder B2.1. Im Jahr schaffst du so etwa 1½ Niveaustufen.',
+        en: 'An evening course lasts about three and a half months. In that time you can complete half a level.',
+        de: 'Ein Abendkurs dauert etwa 3½ Monate. In dieser Zeit kannst du eine halbe Niveaustufe abschließen.',
       },
       {
-        en: 'If you have no German yet (A1.1), you always need to start at the beginning of a course.',
-        de: 'Wenn du noch keine Deutschkenntnisse hast (A1.1), musst du immer am Kursstart beginnen.',
+        en: 'With no knowledge of German, you start with A1.1, always at the beginning of a course.',
+        de: 'Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.',
       },
       {
         en: 'If you already speak some German, you can join a course that is under way at any time, as long as there are places free. If a course is full, we are happy to put you on the waiting list.',
         de: 'Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.',
       },
       {
-        en: 'Lessons focus on everyday communication and take place in small international groups. Now and then we also organise leisure and cultural activities for the groups.',
-        de: 'Der Unterricht orientiert sich an der Alltagskommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.',
+        en: 'These lessons also follow the CEFR, focus on communication in everyday life and at work, and take place in small international groups. Now and then we also organise leisure and cultural activities for the groups.',
+        de: 'Auch dieser Unterricht orientiert sich am GER und an der alltäglichen und beruflichen Kommunikation und findet in kleinen internationalen Gruppen statt. Für die Gruppen organisieren wir gelegentlich auch Freizeit- und Kulturaktivitäten.',
       },
     ],
   },
