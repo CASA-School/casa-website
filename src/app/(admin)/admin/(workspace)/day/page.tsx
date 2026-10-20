@@ -30,12 +30,11 @@ import {
 } from '@/lib/admin/day-plan';
 import { DESK_LABELS, SESSION_LABELS, SESSIONS, TASK_STATUS_DOTS, TASK_STATUS_LABELS, TASK_STATUSES } from '@/lib/admin/day-plan-labels';
 import { berlinDay } from '@/lib/admin/days';
-import { archivePastSittings, entryTestViews } from '@/lib/admin/entry-tests';
+import { archivePastSittings, entryTestOrigin, entryTestViews } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ABSENCE_LABELS, type AbsenceReason } from '@/lib/admin/kursplanung/types';
-import { publicSiteAddress } from '@/lib/cms/origins';
 import { cn } from '@/lib/utils';
 
 /**
@@ -65,7 +64,7 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
     birthdaysSoon(day),
     canEdit ? taskColleagues() : Promise.resolve([]),
     canEdit ? registerColleagues() : Promise.resolve([]),
-    archivePastSittings().then(async () => entryTestViews(day, await publicSiteAddress())),
+    archivePastSittings().then(async () => entryTestViews(day, await entryTestOrigin())),
   ]);
   const isToday = day === today;
   const dayName = isToday ? t('heute', 'today') : dayLabel(day, lang, { weekday: 'long', day: 'numeric', month: 'long' });

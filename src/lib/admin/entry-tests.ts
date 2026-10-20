@@ -12,6 +12,8 @@ import { finalizeOverdue, finalizeWith } from '@/lib/entry-test/attempts.server'
 import { KEYS } from '@/lib/entry-test/keys.server';
 import { DEFAULT_MINUTES, ENTRY_TESTS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
 import type { Answer, AttemptStatus, EntryTestId, EntryTestVersion } from '@/lib/entry-test/types';
+import { publicSiteAddress } from '@/lib/cms/origins';
+import { lanAddresses } from '@/lib/dev/lan';
 import { qrPath } from '@/lib/qr';
 
 /**
@@ -79,6 +81,21 @@ export async function archivePastSittings(): Promise<void> {
 export async function entryTestDays(): Promise<string[]> {
   const rows = await query<{ day: string }>(`SELECT DISTINCT to_char(on_date, 'YYYY-MM-DD') AS day FROM entry_test_sittings ORDER BY day DESC`);
   return rows.map((r) => r.day);
+}
+
+/**
+ * Where the phones open the test: the public site's address (neu.casa-bremen.de until the switch,
+ * casa-bremen.de after). On a laptop running `next dev` that is localhost, which a phone cannot open, so
+ * there it is the laptop's address in the local network instead.
+ */
+export async function entryTestOrigin(): Promise<string> {
+  const address = await publicSiteAddress();
+  if (process.env.NODE_ENV === 'production') return address;
+  const url = new URL(address);
+  if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(url.hostname)) return address;
+  const [lan] = lanAddresses();
+  if (lan) url.hostname = lan;
+  return url.origin;
 }
 
 /** The address a course's QR code opens: the phone page with that course's test chosen. */

@@ -4,10 +4,9 @@ import { Icon } from '@/components/admin/icons';
 import { ButtonLink, Card, EmptyState, PageHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { berlinDay } from '@/lib/admin/days';
-import { archivePastSittings, entryTestDays, entryTestViews } from '@/lib/admin/entry-tests';
+import { archivePastSittings, entryTestDays, entryTestOrigin, entryTestViews } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { publicSiteAddress } from '@/lib/cms/origins';
 import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
 
 /**
@@ -19,7 +18,7 @@ import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
 export default async function EntryTestArchivePage() {
   const [user, { t, lang }] = await Promise.all([requireModule('day'), getI18n()]);
   await archivePastSittings();
-  const [days, origin] = await Promise.all([entryTestDays(), publicSiteAddress()]);
+  const [days, origin] = await Promise.all([entryTestDays(), entryTestOrigin()]);
   const today = berlinDay(new Date());
   const archive = await Promise.all(days.map(async (day) => ({ day, tests: (await entryTestViews(day, origin)).filter((test) => test.sitting) })));
 

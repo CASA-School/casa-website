@@ -1,6 +1,7 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
 
+import { lanAddresses } from './src/lib/dev/lan';
 import { legacyRedirectRules } from './src/i18n/legacy-redirects';
 
 /**
@@ -90,8 +91,10 @@ const nextConfig: NextConfig = {
   // Next 16.3 blocks cross-origin requests to dev-server resources by default.
   // Playwright drives the dev server over 127.0.0.1:3001, which the dev server
   // treats as a different origin to localhost, so its own JS chunks get blocked
-  // and every interactive test fails. Loopback only; has no effect on a build.
-  allowedDevOrigins: ['127.0.0.1'],
+  // and every interactive test fails. This machine's own LAN addresses too
+  // (2026-10-20): a phone in the same Wi-Fi opens the day-one test from its QR
+  // code, and without them the page never starts. No effect on a build.
+  allowedDevOrigins: ['127.0.0.1', ...lanAddresses()],
   images: {
     /*
      * WebP only (2026-10-09). AVIF came first in this list, so every browser got

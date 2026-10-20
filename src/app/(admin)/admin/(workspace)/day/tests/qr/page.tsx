@@ -3,10 +3,9 @@ import { notFound } from 'next/navigation';
 import { PrintSheet } from '../print-sheet';
 import { QrPicture, shortLink } from '@/components/admin/qr-code';
 import { PageHeader } from '@/components/admin/ui';
-import { entryTestLink } from '@/lib/admin/entry-tests';
+import { entryTestLink, entryTestOrigin } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { publicSiteAddress } from '@/lib/cms/origins';
 import { ENTRY_TESTS, isEntryTestId } from '@/lib/entry-test/tests';
 import { qrPath } from '@/lib/qr';
 
@@ -19,7 +18,7 @@ export default async function EntryTestQrPage({ searchParams }: { searchParams: 
   const [{ kurs }] = await Promise.all([searchParams, requireModule('day')]);
   if (!isEntryTestId(kurs)) notFound();
   const { t } = await getI18n();
-  const link = entryTestLink(await publicSiteAddress(), kurs);
+  const link = entryTestLink(await entryTestOrigin(), kurs);
   const test = ENTRY_TESTS[kurs];
   return (
     <>
