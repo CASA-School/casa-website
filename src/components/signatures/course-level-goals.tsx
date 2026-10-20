@@ -1,10 +1,12 @@
 import { Compass, GraduationCap, HeartHandshake, LaptopMinimalCheck, MessageCircle, NotebookPen, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
 
+import { CasaImage } from '@/components/ui/casa-image';
 import { TextCta } from '@/components/ui/text-cta';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { LEVELS_PATH } from '@/config/content/cefr-levels';
-import type { SchoolFeatureIcon } from '@/config/content/school-features';
+import type { SchoolFeature, SchoolFeatureIcon } from '@/config/content/school-features';
 import { say } from '@/lib/cms/copy';
+import { cn } from '@/lib/utils';
 
 type LevelGoalItem = {
   level: string;
@@ -35,7 +37,7 @@ type CourseLevelGoalsProps = {
   description: string;
   levels: LevelGoalItem[];
   /** „Unsere Merkmale“, the same eight on every course page (config/content/school-features). */
-  features: { icon: SchoolFeatureIcon; label: string }[];
+  features: SchoolFeature[];
   featuresTitle: string;
   locale: 'en' | 'de';
 };
@@ -189,43 +191,56 @@ export function CourseLevelGoals({
       </div>
 
       {/*
-        „Unsere Merkmale“, at the end and at full width (CASA's content review, 2026-10-20; Rahman:
-        „more premium … something that stands out“). The one dark block on the section, ink as the
-        emphasis it is elsewhere on the site, with eight frosted cards on it: a golden icon tile in the
-        logo's sun, the card's number, the feature. One column of rows on a phone, so no word breaks;
-        two, then four cards across from a tablet up. A slight lift on hover, none for reduced motion.
+        „Unsere Merkmale“, at the end and at full width (CASA's content review, 2026-10-20). Rahman
+        turned down a grid of icon cards twice („basic“, then a dark panel of numbered golden tiles:
+        „not premium, the numbers are redundant“). It is a bento now, carried by CASA's own
+        photographs: the class with its teacher large, the shared breakfast wide, the walk through
+        Bremen in the corner, and the other five as calm white tiles, a fine line icon and the
+        feature in the display serif. Four across from `lg` (three rows), two from `sm`; on a phone one
+        column, the five as rows with the icon beside the feature, since the serif in half a phone's
+        width broke „Zusatzmaterial“ mid-word. Nothing moves on hover: the tiles are not links.
       */}
       {features.length ? (
-        <div className="relative mt-10 overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] px-5 py-8 text-white md:px-10 md:py-11">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(255,213,0,0.16),transparent_68%)]"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(0,159,227,0.14),transparent_70%)]"
-          />
-          <h3 className="relative text-2xl font-bold leading-tight text-white md:text-3xl">{featuresTitle}</h3>
-          <ul className="relative mt-6 grid gap-3 sm:grid-cols-2 md:mt-8 lg:grid-cols-4">
-            {features.map((feature, index) => {
+        <div className="mt-12">
+          <h3 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] md:text-3xl">{featuresTitle}</h3>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:mt-8 lg:auto-rows-[12.5rem] lg:grid-cols-4">
+            {features.map((feature) => {
               const FeatureIcon = FEATURE_ICONS[feature.icon];
+              if (feature.photo) {
+                return (
+                  <li
+                    key={feature.icon}
+                    className={cn(
+                      'relative isolate flex items-end overflow-hidden rounded-2xl bg-[var(--casa-ink-deep)] p-5 shadow-[var(--shadow-card)] lg:p-6',
+                      PHOTO_TILE[feature.icon] ?? 'h-48 sm:h-auto sm:min-h-[9.5rem]'
+                    )}
+                  >
+                    <CasaImage
+                      src={feature.photo}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 600px, 100vw"
+                      className="-z-10 object-cover"
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 -z-10 bg-gradient-to-t from-[rgba(15,23,42,0.82)] via-[rgba(15,23,42,0.28)] via-55% to-transparent"
+                    />
+                    <h4 className="max-w-[18rem] text-xl font-semibold leading-snug text-white [font-family:var(--font-display),Georgia,serif] [text-shadow:0_1px_12px_rgba(15,23,42,0.35)] lg:text-2xl">
+                      {feature.label}
+                    </h4>
+                  </li>
+                );
+              }
               return (
                 <li
                   key={feature.icon}
-                  className="group flex items-center gap-4 rounded-xl bg-white/[0.05] p-4 ring-1 ring-white/10 transition duration-300 hover:bg-white/[0.09] hover:ring-white/25 motion-safe:hover:-translate-y-0.5 sm:min-h-[9.5rem] sm:flex-col sm:items-start sm:gap-0 sm:p-5"
+                  className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-[var(--shadow-soft)] sm:min-h-[9.5rem] sm:flex-col sm:items-start sm:justify-between sm:gap-5 sm:p-5 lg:p-6"
                 >
-                  <div className="flex shrink-0 items-center justify-between sm:w-full">
-                    <span
-                      aria-hidden
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffe27a] via-[#ffd500] to-[#f0a500] text-[var(--casa-ink-deep)] shadow-[0_8px_18px_-8px_rgba(255,190,0,0.65)] transition-transform duration-300 motion-safe:group-hover:scale-105"
-                    >
-                      <FeatureIcon className="h-5 w-5" />
-                    </span>
-                    <span aria-hidden className="hidden text-xs font-semibold tabular-nums tracking-wide text-white/35 sm:inline">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <p className="min-w-0 text-[1rem] font-semibold leading-snug text-white sm:mt-auto sm:pt-5">{feature.label}</p>
+                  <FeatureIcon aria-hidden className="h-7 w-7 shrink-0 text-[var(--casa-ink)]" strokeWidth={1.4} />
+                  <h4 className="text-lg font-semibold leading-snug text-[var(--casa-ink)] [font-family:var(--font-display),Georgia,serif]">
+                    {feature.label}
+                  </h4>
                 </li>
               );
             })}
@@ -235,6 +250,12 @@ export function CourseLevelGoals({
     </section>
   );
 }
+
+/** The photographed tiles' place in the bento: the class large, the breakfast wide; the walk is one tile. */
+const PHOTO_TILE: Partial<Record<SchoolFeatureIcon, string>> = {
+  teachers: 'h-64 sm:col-span-2 sm:h-80 lg:row-span-2 lg:h-auto',
+  atmosphere: 'h-52 sm:col-span-2 sm:h-60 lg:h-auto',
+};
 
 const FEATURE_ICONS: Record<SchoolFeatureIcon, LucideIcon> = {
   teachers: GraduationCap,
