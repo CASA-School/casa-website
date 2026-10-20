@@ -60,7 +60,9 @@ export function RoomPlan({
   const hit = (l: DayLesson) =>
     !needle || [l.label, l.typeName, l.number, l.roomName, l.teacherName, l.replacedTeacherName, ...l.learners.map((p) => p.name)].some((v) => v?.toLowerCase().includes(needle));
   const floors = [...new Set(rooms.map((r) => r.floor))];
-  const used = new Set(lessons.filter((l) => !l.cancelled).map((l) => l.roomId));
+  // The plan's rooms with a class that takes place: a class without a room, or in a room off the plan,
+  // has its own row below and is no room in use (it read „15 von 14", 2026-10-20).
+  const used = rooms.filter((r) => lessons.some((l) => !l.cancelled && l.roomId === r.id)).length;
   const homeless = lessons.filter((l) => !l.roomId || !rooms.some((r) => r.id === l.roomId));
   const hours = Array.from({ length: LAST - FIRST + 1 }, (_, i) => FIRST + i);
   const showNow = now && minutes(now) >= FIRST * 60 && minutes(now) <= LAST * 60;
@@ -121,7 +123,7 @@ export function RoomPlan({
           <Legend swatch="border-l-4 border-[#d99a00] bg-[#ffeec2]">{t('Vertretung', 'Cover')}</Legend>
           <Legend swatch="border-l-4 border-[#d14343] bg-[#fde3e3]">{t('Lehrkraft fehlt', 'Teacher away')}</Legend>
           <Legend swatch="border-l-4 border-[#b8c0cc] bg-[repeating-linear-gradient(135deg,#f3f5f8_0_3px,#e8ecf1_3px_6px)]">{t('Fällt aus', 'Cancelled')}</Legend>
-          <li className="text-[var(--casa-ink)]">{t(`${used.size} von ${rooms.length} Räumen belegt`, `${used.size} of ${rooms.length} rooms in use`)}</li>
+          <li className="text-[var(--casa-ink)]">{t(`${used} von ${rooms.length} Räumen belegt`, `${used} of ${rooms.length} rooms in use`)}</li>
         </ul>
         <Search value={q} onChange={setQ} placeholder={t('Name oder Kurs', 'Name or course')} label={t('Im Raumplan suchen', 'Search the room plan')} />
       </div>
