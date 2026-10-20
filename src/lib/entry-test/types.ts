@@ -49,7 +49,7 @@ export type AttemptState = StatusReply & {
 };
 
 /** A test that is open right now, as the start screen lists it (never its code). */
-export type OpenSitting = { id: string; title: string; course: string; session: 'morning' | 'afternoon'; minutes: number; tasks: number };
+export type OpenSitting = { id: string; test: EntryTestId; title: string; course: string; session: 'morning' | 'afternoon'; minutes: number; tasks: number };
 
 /**
  * POST /api/entry-test, one body per action. Replies use the API envelope ({ data, error }).

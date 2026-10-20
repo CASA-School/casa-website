@@ -11,6 +11,12 @@ download, and are no longer mailed. The Google project's handover is
 This is not CASA's own adaptive placement test (`src/lib/placement`, `/placement-test`, closed in
 production). The two share nothing but the rule that answer keys never reach a browser.
 
+**Not a website feature (Rahman, 2026-10-20).** The test belongs to the first course day in class, so it
+stays closed: the phone page is reachable only by its address (no link on the site, noindex, not in the
+sitemap, llms.txt or the knowledge index), and a learner can start only while the office has opened a
+sitting that day. For that reason it needs no section in the website's privacy policy. Once the
+dashboard version is live, the Google project is switched off (see Open).
+
 ## Which class writes which test
 
 Each test checks the level below the course it opens, and is named after the course, as the corrected
@@ -34,8 +40,9 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    course day), one line per test and session. The line opens a side panel: the classes, „Test
    öffnen" (on the day itself; minutes default 40), then the sitting's 4-digit code for the teachers.
 2. **Learners write on their phone** at `casa-bremen.de/test` (public site, no site chrome, noindex,
-   German only, „Sie" as in the booklets). Name, e-mail, the course when more than one test is open,
-   then one task per page, an overview, hand in. The version alternates A/B per start in a sitting;
+   German only, „Sie" as in the booklets), usually by a course's QR code (below). Name, e-mail, the
+   course when more than one test is open (the QR code's `?kurs=` chooses it), then one task per page,
+   an overview, hand in. The version alternates A/B per start in a sitting;
    the options of every multiple-choice task are shuffled per attempt.
 3. **Leaving the page pauses the attempt** — the page hidden for 2 s or more, or closed. Never blur or
    focus: on a phone focus goes by itself (keyboard, banners). The teacher's code lets it go on; three
@@ -43,8 +50,10 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    (reload, other phone) continues the attempt, paused. Time keeps running while paused.
 4. **Time is the server's.** At 0:00 the phone hands in; saves are still taken 90 s past the deadline;
    an attempt whose time is up is handed in by the next read (the phone's poll, the panel).
-5. **Paper** for a learner without a working phone: the printed booklet, typed in from the panel
-   („Papierbogen eintragen": name, e-mail, version, each answer), marked at once.
+5. **Paper** for a learner without a working phone: the booklet printed from the dashboard
+   (Einstufungstests → „Testheft A/B", from the same questions the phones show, so paper and phone never
+   differ), typed in from the panel („Papierbogen eintragen": name, e-mail, version, each answer),
+   marked at once. The teachers' PDFs of September are no longer the booklet: four items differ (below).
 6. **Results.** Each attempt is marked when handed in: 2 points per right answer, no minus points, 80
    in all, split into the multiple-choice part and reading (as the Google test and its printed teacher
    key; the booklets count 1 per answer). The panel lists every learner with status, points, the
@@ -52,7 +61,28 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    exactly one person) is written to the learner's record (`person_tests`, tab „Tests"). „Excel" in the
    panel downloads „Auswertung" and „Antworten" (`src/lib/xlsx.ts`, no library).
 
+7. **The archive.** Once its day is over, a test is archived (`archivePastSittings()`, run before the
+   Tagesplan and the archive are read): the sitting is closed at the end of its day and a phone still
+   writing or paused is handed in with what it saved. „Einstufungstests" beside the day's views in the
+   Tagesplan opens the archive (`/admin/day/tests`): every test day, the latest first, each test opening
+   the same panel — results, answers, log, the Excel of the sitting or the day, a paper booklet typed in
+   late. A deletion period comes later; days are the unit it will drop.
+
 No pass/fail and no level verdict: the points go to the teachers, who place the learner.
+
+## QR codes and print
+
+Above the archive, per test: „Testheft A", „Testheft B" and „QR-Code" (`/admin/day/tests/booklet`,
+`/admin/day/tests/qr`, A4 through `@page entry-test`). A course's QR code opens
+`<public site>/test?kurs=b1` (`entryTestLink()`); while a test is open its panel shows the code beside
+the 4-digit code, for a projector. The code is drawn on the server (`src/lib/qr.ts`, `uqr`, no
+dependencies of its own) and was checked with an independent decoder (OpenCV) on screen and from the
+printed PDF. On paper it is a background picture: Chrome starts a new page before an `<svg>` or `<img>`
+inside a named page.
+
+The address is the public site's of the day (`publicSiteAddress()`): `neu.casa-bremen.de` until the
+switch to casa-bremen.de (`CMS_PUBLIC_ORIGIN`), `casa-bremen.de` after. Posters printed before the
+switch carry `neu.casa-bremen.de`: keep that hostname on the app after the switch, or reprint them.
 
 ## Where it lives
 
@@ -65,28 +95,37 @@ No pass/fail and no level verdict: the points go to the teachers, who place the 
 | Phone flow | `src/lib/entry-test/attempts.server.ts`, `src/app/api/entry-test/route.ts` (one POST, one body per action, `src/lib/entry-test/types.ts`) |
 | Phone page | `src/app/(site)/[locale]/test`, `src/components/entry-test/` |
 | Workspace | `src/lib/admin/entry-tests.ts`, `day/entry-test-panel.tsx`, actions in `day/actions.ts`, Excel at `day/entry-test/export/route.ts` (checks the session and module `day` itself) |
+| Archive, print | `day/tests/page.tsx` (archive), `day/tests/booklet`, `day/tests/qr`, `day/tests/print-sheet.tsx`; `src/components/admin/qr-code.tsx` |
 
 Access: module `day` — `view` sees the card, the results and the Excel; `edit` opens, closes, releases,
 hands in and types in paper; `full` deletes an attempt (with its result on the learner's record).
 
-## Content notes for the teachers' next review
+## Content changes against the teachers' PDFs
 
 Ported 2026-10-20 from the corrected PDFs; the A2 test matches the Google version byte for byte. Two
-kinds of change: „uebt" → „übt" (b1 A 36), and the b1plus options printed „entweder ... oder" written
-„entweder / oder" so the phone fills both gaps. Doubtful, left unchanged:
+kinds of change in the port: „uebt" → „übt" (b1 A 36), and the b1plus options printed „entweder ... oder"
+written „entweder / oder" so the phone fills both gaps.
 
-- b1 B 22 „Weißt du, ___ der Supermarkt am Feiertag geöffnet ist? – Nein, leider nicht.": key ob, but
-  wann / wo / wie lange fit the reply too (Version A's item rules them out, B's does not).
-- b1 A 17, statement 3: „bis Donnerstagabend" keyed richtig; the text says „bis 18 Uhr".
-- b1 A 25, B 9: key Wenn; Weil also gives a grammatical sentence.
-- b1plus B 21: key darüber; daran is borderline.
+Four items let a second answer fit; fixed the same day at Rahman's request, each keeping its keyed
+letter, so the key and every result stay valid:
+
+| Item | Was | Now | Key |
+| --- | --- | --- | --- |
+| b1 B 22 | „Weißt du, ___ der Supermarkt am Feiertag geöffnet ist? – Nein, leider nicht." (wann, wo, wie lange fit too) | „Weißt du, ___ der Supermarkt am Feiertag überhaupt geöffnet ist? – Nein, am Feiertag ist er geschlossen." (a yes/no reply: only ob), as Version A's item 9 | B ob |
+| b1 A 17, statement 3 | „Wer nicht mitfahren kann, soll sich bis Donnerstagabend melden." (the text says „bis 18 Uhr") | „… soll sich spätestens am Donnerstag im Kursbüro melden." | richtig |
+| b1 A 25 (C), B 9 (D) | distractor „Weil" (a grammatical sentence) | „Denn" (cannot open a clause with the verb at the end) | Wenn |
+| b1plus B 21 (C) | distractor „daran" („sich an etwas freuen", borderline) | „davon" | A darüber |
+
+The printed PDFs still carry the old wording; print the booklet from the dashboard instead.
 
 ## Open
 
-- **Switch-over from Google.** Close the Google groups, point the Google web app's link and the QR
-  posters to `casa-bremen.de/test`, archive October's sheet. The September 2026 results (24 paper
-  results) stay in the Google archive unless CASA wants them imported.
-- **QR code** for the board: none yet (no library); the address is short enough to type.
-- **Retention.** Results are personal data; no deletion period is set (the same open item as
-  enquiries and CVs, CLAUDE.md).
-- **Privacy text.** The privacy policy has no section for this test yet (docs/PRIVACY_POLICY.md).
+- **Switching Google off** (Rahman: once the dashboard version is live, Google is not needed). Untick
+  every group in the Google sheet, wait for `finalizeExpired`, run the month's archive (`rollover_`),
+  remove the triggers, and change the web app's `doGet` to a short „Der Test ist umgezogen" page linking
+  to the new address, so an old Google poster still leads somewhere; then replace the posters with the
+  dashboard's QR codes. The September 2026 results (24 paper results) stay in the Google archive unless
+  CASA wants them imported.
+- **Deletion period.** Results are personal data; the archive keeps them until a period is set (Rahman,
+  2026-10-20: later).
+- **A real phone run** before the first class writes it.

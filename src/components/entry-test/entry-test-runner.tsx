@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
+import type { EntryTestId } from '@/lib/entry-test/types';
 import { cn } from '@/lib/utils';
 
 import { EntryTestController, INITIAL_SNAPSHOT, answeredCount, formatClock, slotsOf, type EntryTestSnapshot } from './controller';
@@ -14,8 +15,8 @@ import { column, ghostButton, primaryButton } from './ui';
  * the clock from the server, paused when the page is left, released with the teacher's code.
  * The rules live in `controller.ts`; this draws them. German only, and in „Sie", like the booklet.
  */
-export function EntryTestRunner() {
-  const [controller] = useState(() => new EntryTestController());
+export function EntryTestRunner({ preferred = null }: { preferred?: EntryTestId | null }) {
+  const [controller] = useState(() => new EntryTestController(preferred));
   const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot, () => INITIAL_SNAPSHOT);
 
   useEffect(() => {

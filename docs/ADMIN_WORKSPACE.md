@@ -1307,6 +1307,8 @@ day as one moves between them.
     A2, B1 or B1+ course a card above the tasks, one line per test and session; the line opens the test
     at the side: open it, its code for the teachers, the phones as they write, release a paused one,
     hand one in, type in a paper booklet, the Excel download. Learners write at `casa-bremen.de/test`.
+    „Einstufungstests" beside the day's views opens the archive (a test is archived when its day is
+    over), with the booklets and QR codes to print.
 - **Raumplan** (`/admin/day/rooms`). SchoolMan's ClassroomToday drawn: a row per room, floor by
   floor, alternating shades, hours and half hours across, each class a block in its part of the
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class

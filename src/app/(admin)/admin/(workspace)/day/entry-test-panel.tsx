@@ -7,10 +7,11 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { closeEntryTestAction, deleteAttemptAction, enterPaperAction, handInAttemptAction, openEntryTestAction, releaseAttemptAction } from './actions';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { QrCode, shortLink } from '@/components/admin/qr-code';
 import { useWsLang } from '@/components/admin/lang';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button, ButtonLink, Field, IconChip, Input } from '@/components/admin/ui';
-import type { DayEntryTest, EntryTestAttempt, SittingDetail } from '@/lib/admin/entry-tests';
+import type { EntryTestAttempt, EntryTestView, SittingDetail } from '@/lib/admin/entry-tests';
 import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
 import { pick, type T } from '@/lib/admin/i18n';
 import { DEFAULT_MINUTES } from '@/lib/entry-test/tests';
@@ -23,22 +24,51 @@ import { cn } from '@/lib/utils';
  * go on, type in a paper booklet, download the results.
  */
 
-export type EntryTestView = DayEntryTest & { detail: SittingDetail | null; paper: { n: number; kind: 'mc' | 'rf'; statements: number }[] };
-
-export function EntryTestCard({ tests, day, isToday, canEdit, canDelete }: { tests: EntryTestView[]; day: string; isToday: boolean; canEdit: boolean; canDelete: boolean }) {
+/** A day's tests: on the Tagesplan of a test day, and per day in the archive (`heading` names the day there). */
+export function EntryTestCard({
+  tests,
+  day,
+  isToday,
+  canEdit,
+  canDelete,
+  heading,
+  archived = false,
+}: {
+  tests: EntryTestView[];
+  day: string;
+  isToday: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  heading?: string;
+  /** A day that is over: its tests are closed and in the archive. */
+  archived?: boolean;
+}) {
   const { t, lang } = useWsLang();
   return (
     <section className="mb-6 overflow-hidden rounded-2xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
       <header className="flex items-center gap-2.5 border-b border-ws-line-soft px-5 py-3.5">
         <IconChip icon={Icon.placement} tint="blue" />
-        <h2 className="text-[0.95rem] font-extrabold text-[var(--casa-ink)]">{t('Einstufungstest', 'Placement test')}</h2>
+        <h2 className="text-[0.95rem] font-extrabold text-[var(--casa-ink)]">{heading ?? t('Einstufungstest', 'Placement test')}</h2>
+        <span className="ml-auto flex items-center gap-2">
+          {tests.some((x) => x.detail?.attempts.length) ? (
+            <ButtonLink href={`/admin/day/entry-test/export?date=${day}`} plain variant="ghost" size="sm">
+              {Icon.download}
+              {t('Excel des Tages', 'The day’s Excel')}
+            </ButtonLink>
+          ) : null}
+          {heading ? null : (
+            <ButtonLink href="/admin/day/tests" variant="ghost" size="sm">
+              {t('Archiv', 'Archive')}
+            </ButtonLink>
+          )}
+        </span>
       </header>
       <ul className="divide-y divide-ws-line-soft">
         {tests.map((test) => (
           <li key={`${test.session}-${test.test}`}>
             <SidePanel
               triggerClassName="block w-full text-left outline-none transition-colors hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]"
-              trigger={<TestLine test={test} t={t} lang={lang} />}
+              trigger={<TestLine test={test} archived={archived} t={t} lang={lang} />}
               title={test.title}
               subtitle={`${pick(lang, SESSION_LABELS[test.session])} · ${t(`Kurs ${test.course} · prüft ${test.checks}`, `${test.course} course · checks ${test.checks}`)}`}
               icon={Icon.placement}
@@ -46,7 +76,7 @@ export function EntryTestCard({ tests, day, isToday, canEdit, canDelete }: { tes
               width="lg"
               footer={<PanelFoot test={test} day={day} canEdit={canEdit} />}
             >
-              <TestPanel test={test} day={day} isToday={isToday} canEdit={canEdit} canDelete={canDelete} />
+              <TestPanel test={test} day={day} isToday={isToday} archived={archived} canEdit={canEdit} canDelete={canDelete} />
             </SidePanel>
           </li>
         ))}
@@ -55,7 +85,7 @@ export function EntryTestCard({ tests, day, isToday, canEdit, canDelete }: { tes
   );
 }
 
-function TestLine({ test, t, lang }: { test: EntryTestView; t: T; lang: 'de' | 'en' }) {
+function TestLine({ test, archived, t, lang }: { test: EntryTestView; archived: boolean; t: T; lang: 'de' | 'en' }) {
   const s = test.sitting;
   const groups = test.classes.length;
   return (
@@ -85,7 +115,7 @@ function TestLine({ test, t, lang }: { test: EntryTestView; t: T; lang: 'de' | '
               .join(' · ')}
           </span>
         ) : null}
-        <StatePill test={test} t={t} />
+        <StatePill test={test} archived={archived} t={t} />
         <span aria-hidden="true" className="text-[var(--casa-text-subtle)] [&_svg]:size-4">
           {Icon.chevronRight}
         </span>
@@ -94,7 +124,7 @@ function TestLine({ test, t, lang }: { test: EntryTestView; t: T; lang: 'de' | '
   );
 }
 
-function StatePill({ test, t }: { test: EntryTestView; t: T }) {
+function StatePill({ test, archived, t }: { test: EntryTestView; archived: boolean; t: T }) {
   const s = test.sitting;
   const open = s?.state === 'open';
   return (
@@ -105,7 +135,7 @@ function StatePill({ test, t }: { test: EntryTestView; t: T }) {
       )}
     >
       <span aria-hidden="true" className={cn('size-1.5 rounded-full', open ? 'bg-[#2e9e4f]' : 'bg-[var(--casa-text-subtle)]')} />
-      {open ? t(`Offen · Code ${s.code}`, `Open · code ${s.code}`) : s ? t('Geschlossen', 'Closed') : t('Nicht geöffnet', 'Not opened')}
+      {open ? t(`Offen · Code ${s.code}`, `Open · code ${s.code}`) : archived && s ? t('Archiviert', 'Archived') : s ? t('Geschlossen', 'Closed') : t('Nicht geöffnet', 'Not opened')}
     </span>
   );
 }
@@ -121,7 +151,7 @@ function LiveRefresh({ active }: { active: boolean }) {
   return null;
 }
 
-function TestPanel({ test, day, isToday, canEdit, canDelete }: { test: EntryTestView; day: string; isToday: boolean; canEdit: boolean; canDelete: boolean }) {
+function TestPanel({ test, day, isToday, archived, canEdit, canDelete }: { test: EntryTestView; day: string; isToday: boolean; archived: boolean; canEdit: boolean; canDelete: boolean }) {
   const { t } = useWsLang();
   const detail = test.detail;
   const live = !!detail && (detail.state === 'open' || detail.attempts.some((a) => a.status === 'running' || a.status === 'paused'));
@@ -133,13 +163,14 @@ function TestPanel({ test, day, isToday, canEdit, canDelete }: { test: EntryTest
       <Section title={t('Test', 'Test')}>
         {detail?.state === 'open' ? (
           <div className="flex flex-wrap items-end justify-between gap-4 px-6 py-2">
-            <div>
+            <QrCode qr={test.qr} label={test.link} className="size-28 shrink-0" />
+            <div className="mr-auto">
               <p className="text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Code für die Lehrkräfte', 'Code for the teachers')}</p>
               <p className="text-[2rem] leading-tight font-extrabold tracking-[0.18em] text-[var(--casa-ink)] tabular-nums" data-testid="entry-test-code">
                 {detail.code}
               </p>
               <p className="text-[0.84rem] text-[var(--casa-muted)]">
-                casa-bremen.de/test · {t(`${detail.minutes} Minuten`, `${detail.minutes} minutes`)}
+                {shortLink(test.link)} · {t(`${detail.minutes} Minuten`, `${detail.minutes} minutes`)}
               </p>
             </div>
             {canEdit ? (
@@ -165,8 +196,21 @@ function TestPanel({ test, day, isToday, canEdit, canDelete }: { test: EntryTest
             </Button>
           </form>
         ) : (
-          <Quiet>{detail ? t('Geschlossen.', 'Closed.') : t('Nicht geöffnet.', 'Not opened.')}</Quiet>
+          <Quiet>{detail ? (archived ? t('Archiviert.', 'Archived.') : t('Geschlossen.', 'Closed.')) : t('Nicht geöffnet.', 'Not opened.')}</Quiet>
         )}
+      </Section>
+
+      <Section title={t('Drucken', 'Print')}>
+        <div className="flex flex-wrap gap-2 px-6 py-1">
+          {(['A', 'B'] as const).map((v) => (
+            <ButtonLink key={v} href={`/admin/day/tests/booklet?kurs=${test.test}&version=${v}`} variant="secondary" size="sm">
+              {t(`Testheft ${v}`, `Booklet ${v}`)}
+            </ButtonLink>
+          ))}
+          <ButtonLink href={`/admin/day/tests/qr?kurs=${test.test}`} variant="secondary" size="sm">
+            {t('QR-Code', 'QR code')}
+          </ButtonLink>
+        </div>
       </Section>
 
       <Section title={t('Klassen', 'Classes')}>

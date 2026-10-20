@@ -124,7 +124,7 @@ export function DayHeader({
         })}
       </ol>
 
-      {/* The three views of the day: a segmented control, the day kept; and the flats, beside it. */}
+      {/* The three views of the day: a segmented control, the day kept; the tests' archive and the flats beside it. */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
       <nav aria-label={t('Ansichten des Tages', 'Views of the day')} className="inline-flex rounded-full bg-white p-1 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line">
         {views.map((v) => {
@@ -146,19 +146,26 @@ export function DayHeader({
           );
         })}
       </nav>
-      {flats ? (
-        <Link
-          href={`/admin/accommodation/occupancy?date=${day}`}
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.84rem] font-semibold text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]"
-        >
-          {Icon.home}
-          {t('WG-Belegung', 'Flat occupancy')}
+      <span className="flex flex-wrap gap-2">
+        <Link href="/admin/day/tests" className={pill}>
+          {Icon.placement}
+          {t('Einstufungstests', 'Placement tests')}
         </Link>
-      ) : null}
+        {flats ? (
+          <Link href={`/admin/accommodation/occupancy?date=${day}`} className={pill}>
+            {Icon.home}
+            {t('WG-Belegung', 'Flat occupancy')}
+          </Link>
+        ) : null}
+      </span>
       </div>
     </header>
   );
 }
+
+/** A place beside the day's views: the day-one tests' archive, the flats. */
+const pill =
+  'inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.84rem] font-semibold text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-ws-line transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]';
 
 function StepLink({ href, label, back = false }: { href: string; label: string; back?: boolean }) {
   return (

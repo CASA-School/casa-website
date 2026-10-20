@@ -18,6 +18,7 @@ import type { Metadata, Viewport } from 'next';
 
 import { EntryTestRunner } from '@/components/entry-test/entry-test-runner';
 import { getContentLocale } from '@/lib/content/locale.server';
+import { isEntryTestId } from '@/lib/entry-test/tests';
 import { createPublicMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -37,6 +38,8 @@ export async function generateMetadata(): Promise<Metadata> {
 /** The page reaches under the notch and the home indicator; the runner pads by the safe-area insets. */
 export const viewport: Viewport = { viewportFit: 'cover' };
 
-export default function EntryTestPage() {
-  return <EntryTestRunner />;
+/** `?kurs=b1` comes from the course's QR code in the Tagesplan: that course's test is chosen for the learner. */
+export default async function EntryTestPage({ searchParams }: { searchParams: Promise<{ kurs?: string }> }) {
+  const { kurs } = await searchParams;
+  return <EntryTestRunner preferred={isEntryTestId(kurs) ? kurs : null} />;
 }

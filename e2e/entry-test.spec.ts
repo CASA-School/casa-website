@@ -148,4 +148,41 @@ test.describe('day-one placement test', () => {
     await expect.poll(async () => (await client.query(`SELECT 1 FROM entry_test_attempts WHERE sitting_id = $1 AND source = 'paper' AND status = 'submitted'`, [sitting])).rows.length).toBe(1);
     await client.query(`DELETE FROM entry_test_attempts WHERE sitting_id = $1 AND source = 'paper'`, [sitting]);
   });
+
+  test('a past day is archived: closed, its unfinished phone handed in, in the archive with its booklets', async ({ page }) => {
+    const yesterday = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date(Date.now() - 36 * 3600_000));
+    const made = await client.query<{ id: string }>(
+      `INSERT INTO entry_test_sittings (on_date, session, test, code, minutes, opened_at) VALUES ($1::date, 'afternoon', 'b1plus', '4711', 40, now() - interval '30 hours')
+       ON CONFLICT DO NOTHING RETURNING id`,
+      [yesterday]
+    );
+    test.skip(made.rows.length === 0, 'a real B1+ test sitting exists on that day');
+    const sittingId = made.rows[0].id;
+    try {
+      await client.query(
+        `INSERT INTO entry_test_attempts (sitting_id, name, email, version, status, answers, deadline)
+         VALUES ($1, 'Archiv Probe', $2, 'A', 'running', '["A"]'::jsonb, now() - interval '29 hours')`,
+        [sittingId, `archive-${EMAIL}`]
+      );
+      await page.goto('/admin/day');
+      await page.getByRole('link', { name: 'Einstufungstests' }).click();
+      await expect(page).toHaveURL(/\/admin\/day\/tests$/);
+      const line = page.getByRole('button', { name: /Einstufungstest B1\+ Tag 1/ });
+      await expect(line).toContainText('Archiviert');
+      await expect(line).toContainText('1 abgegeben');
+      const row = await client.query<{ closed: boolean; status: string; max_score: number }>(
+        `SELECT s.closed_at IS NOT NULL AS closed, a.status, a.max_score FROM entry_test_sittings s JOIN entry_test_attempts a ON a.sitting_id = s.id WHERE s.id = $1`,
+        [sittingId]
+      );
+      expect(row.rows[0]).toMatchObject({ closed: true, status: 'expired', max_score: 80 });
+
+      // The booklets come from the same questions as the phones: the reviewed wording is on paper too.
+      await page.goto('/admin/day/tests/booklet?kurs=b1&version=A');
+      await expect(page.getByText('soll sich spätestens am Donnerstag im Kursbüro melden').first()).toBeVisible();
+      await page.goto('/admin/day/tests/qr?kurs=b1');
+      await expect(page.getByRole('img', { name: /\/test\?kurs=b1$/ }).first()).toBeVisible();
+    } finally {
+      await client.query(`DELETE FROM entry_test_sittings WHERE id = $1`, [sittingId]);
+    }
+  });
 });

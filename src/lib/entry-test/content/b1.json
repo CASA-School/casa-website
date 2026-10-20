@@ -235,7 +235,7 @@
       "statements": [
         "Die Gruppe trifft sich um 8:15 Uhr am Bremer Hauptbahnhof.",
         "Die Teilnehmer:innen müssen die Zugfahrkarte noch selbst bezahlen.",
-        "Wer nicht mitfahren kann, soll sich bis Donnerstagabend melden."
+        "Wer nicht mitfahren kann, soll sich spätestens am Donnerstag im Kursbüro melden."
       ]
     },
     {
@@ -346,7 +346,7 @@
       "options": {
         "A": "Als",
         "B": "Dass",
-        "C": "Weil",
+        "C": "Denn",
         "D": "Wenn"
       }
     },
@@ -631,7 +631,7 @@
         "A": "Als",
         "B": "Dass",
         "C": "Wenn",
-        "D": "Weil"
+        "D": "Denn"
       }
     },
     {
@@ -806,8 +806,8 @@
       "type": "mc",
       "n": 22,
       "prompt": [
-        "Weißt du, ________ der Supermarkt am Feiertag geöffnet ist?",
-        "Nein, leider nicht."
+        "Weißt du, ________ der Supermarkt am Feiertag überhaupt geöffnet ist?",
+        "Nein, am Feiertag ist er geschlossen."
       ],
       "options": {
         "A": "wann",

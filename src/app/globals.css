@@ -2446,6 +2446,19 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
     page: contacts;
   }
 }
+/* The day-one test's booklets and QR posters (2026-10-20): A4 upright, through `[data-letter-print]`. */
+@page entry-test {
+  size: A4;
+  margin: 12mm 12mm 14mm;
+}
+@media print {
+  .ws-entry-test-print {
+    display: block !important;
+    page: entry-test;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
 @media print {
   .ws-attendance-print {
     display: block !important;

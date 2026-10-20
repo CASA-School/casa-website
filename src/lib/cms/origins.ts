@@ -27,6 +27,14 @@ export async function publicSiteOrigin(): Promise<string> {
   return host.startsWith('admin.') ? `${proto}://${host.slice('admin.'.length)}` : '';
 }
 
+/** The public site's address in full, this server's own when it is the same one (a QR code needs a host). */
+export async function publicSiteAddress(): Promise<string> {
+  const site = await publicSiteOrigin();
+  if (site) return site;
+  const { proto, host } = await requestOrigin();
+  return `${proto}://${host}`;
+}
+
 /** The origins a page in draft mode accepts editor messages from, space-separated. */
 export async function editorOrigins(): Promise<string> {
   const { proto, host } = await requestOrigin();

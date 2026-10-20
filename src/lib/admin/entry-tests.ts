@@ -4,6 +4,7 @@ import { randomInt } from 'node:crypto';
 
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
+import { berlinDay } from './days';
 import { query, queryFirst, withTransaction } from './db';
 import type { Bilingual } from './i18n';
 import { CONTENT } from '@/lib/entry-test/content';
@@ -11,6 +12,7 @@ import { finalizeOverdue, finalizeWith } from '@/lib/entry-test/attempts.server'
 import { KEYS } from '@/lib/entry-test/keys.server';
 import { DEFAULT_MINUTES, ENTRY_TESTS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
 import type { Answer, AttemptStatus, EntryTestId, EntryTestVersion } from '@/lib/entry-test/types';
+import { qrPath } from '@/lib/qr';
 
 /**
  * The day-one test in the Tagesplan (docs/ENTRY_TEST.md): on the first day of an intensive course, the
@@ -49,6 +51,57 @@ export type DayEntryTest = {
 };
 
 const SESSION_ORDER: EntryTestSession[] = ['morning', 'afternoon'];
+
+/** Open for the phones: opened, not closed, and on its own day — a day that is over is in the archive. */
+const isOpen = (s: { opened_at: Date | null; closed_at: Date | null }, day: string) => !!s.opened_at && !s.closed_at && day === berlinDay(new Date());
+
+/**
+ * The archive (Rahman, 2026-10-20: once the day is over, its tests are archived): a sitting of a past day
+ * is closed at the end of its day, and a phone still writing or paused is handed in with what it saved.
+ * Run before the Tagesplan and the archive are read; a deletion period can later drop old days here.
+ */
+export async function archivePastSittings(): Promise<void> {
+  const today = berlinDay(new Date());
+  await query(
+    `UPDATE entry_test_sittings SET closed_at = ((on_date + 1)::timestamp AT TIME ZONE 'Europe/Berlin')
+      WHERE on_date < $1::date AND closed_at IS NULL`,
+    [today]
+  );
+  const left = await query<{ id: string }>(
+    `SELECT a.id FROM entry_test_attempts a JOIN entry_test_sittings s ON s.id = a.sitting_id
+      WHERE s.on_date < $1::date AND a.status IN ('running', 'paused')`,
+    [today]
+  );
+  for (const a of left) await withTransaction((client) => finalizeWith(client, a.id, 'expired'));
+}
+
+/** The days that had a test, the latest first: the archive's list. */
+export async function entryTestDays(): Promise<string[]> {
+  const rows = await query<{ day: string }>(`SELECT DISTINCT to_char(on_date, 'YYYY-MM-DD') AS day FROM entry_test_sittings ORDER BY day DESC`);
+  return rows.map((r) => r.day);
+}
+
+/** The address a course's QR code opens: the phone page with that course's test chosen. */
+export const entryTestLink = (origin: string, test: EntryTestId) => `${origin}/test?kurs=${test}`;
+
+export type PaperTask = { n: number; kind: 'mc' | 'rf'; statements: number };
+
+/** A day's tests as the Tagesplan and the archive show them: each with its attempts and its QR code. */
+export type EntryTestView = DayEntryTest & { detail: SittingDetail | null; paper: PaperTask[]; link: string; qr: { size: number; path: string } };
+
+export async function entryTestViews(day: string, origin: string): Promise<EntryTestView[]> {
+  const tests = await dayEntryTests(day);
+  return Promise.all(
+    tests.map(async (test) => {
+      // Read after the attempts whose time is up were handed in, so the line's counts agree with the panel.
+      const detail = test.sitting ? await sittingDetail(test.sitting.id) : null;
+      const count = (...statuses: string[]) => detail?.attempts.filter((a) => statuses.includes(a.status)).length ?? 0;
+      const sitting = test.sitting && { ...test.sitting, running: count('running'), paused: count('paused'), handedIn: count('submitted', 'expired') };
+      const link = entryTestLink(origin, test.test);
+      return { ...test, sitting, detail, paper: paperLayout(test.test), link, qr: qrPath(link) };
+    })
+  );
+}
 const NAME = (alias: string) => `concat_ws(' ', ${alias}.first_name, ${alias}.last_name)`;
 
 /** The tests of a day: the A2, B1 and B1+ intensive classes whose first lesson it is, by session and test. */
@@ -115,7 +168,7 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
       id: s.id,
       code: s.code,
       minutes: s.minutes,
-      state: s.opened_at && !s.closed_at ? 'open' : 'closed',
+      state: isOpen(s, day) ? 'open' : 'closed',
       openedAt: s.opened_at,
       running: s.running,
       paused: s.paused,
@@ -225,7 +278,7 @@ export async function sittingDetail(sittingId: string): Promise<SittingDetail | 
     title: ENTRY_TESTS[sitting.test].title,
     code: sitting.code,
     minutes: sitting.minutes,
-    state: sitting.opened_at && !sitting.closed_at ? 'open' : 'closed',
+    state: isOpen(sitting, sitting.on_date) ? 'open' : 'closed',
     attempts: rows.map((r) => {
       const key = KEYS[sitting.test][r.version];
       const labels = slotLabels(CONTENT[sitting.test][r.version]);
@@ -263,7 +316,7 @@ export async function sittingDetail(sittingId: string): Promise<SittingDetail | 
 }
 
 /** Answer slots of a test's version, for the paper form: per task its number and its slot kinds. */
-export function paperLayout(test: EntryTestId): { n: number; kind: 'mc' | 'rf'; statements: number }[] {
+export function paperLayout(test: EntryTestId): PaperTask[] {
   return CONTENT[test].A.map((task) => (task.type === 'mc' ? { n: task.n, kind: 'mc', statements: 1 } : { n: task.n, kind: 'rf', statements: task.statements.length }));
 }
 

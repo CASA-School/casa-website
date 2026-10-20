@@ -116,6 +116,7 @@ export async function openSittings(): Promise<OpenSitting[]> {
   );
   return rows.map((r) => ({
     id: r.id,
+    test: r.test,
     title: ENTRY_TESTS[r.test].title,
     course: `Kurs ${ENTRY_TESTS[r.test].course}`,
     session: r.session,

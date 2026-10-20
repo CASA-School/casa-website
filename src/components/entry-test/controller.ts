@@ -1,4 +1,5 @@
 import type {
+  EntryTestId,
   Answer,
   AttemptState,
   AttemptStatus,
@@ -144,6 +145,9 @@ export function formatClock(ms: number): string {
 }
 
 export class EntryTestController {
+  /** The course a QR code named (`/test?kurs=b1`): its sitting is chosen when it is the only one of that test. */
+  constructor(private readonly preferred: EntryTestId | null = null) {}
+
   private snapshot: EntryTestSnapshot = INITIAL_SNAPSHOT;
   private listeners = new Set<() => void>();
 
@@ -266,7 +270,9 @@ export class EntryTestController {
         }
         const sittings = reply.data.sittings ?? [];
         const keep = this.snapshot.sittingId;
-        const sittingId = sittings.length === 1 ? sittings[0].id : sittings.some((sitting) => sitting.id === keep) ? keep : '';
+        const named = this.preferred ? sittings.filter((sitting) => sitting.test === this.preferred) : [];
+        const sittingId =
+          sittings.length === 1 ? sittings[0].id : sittings.some((sitting) => sitting.id === keep) ? keep : named.length === 1 ? named[0].id : '';
         this.set({ sittings, sittingId, infoLoaded: true });
       })
       .catch(() => this.set({ infoLoaded: true }));
