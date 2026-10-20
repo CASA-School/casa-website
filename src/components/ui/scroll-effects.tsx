@@ -45,9 +45,16 @@ export function ScrollEffects() {
           observer.unobserve(element);
         });
       },
+      /*
+       * A pixel line, not a share of the section: the line is 8% above the viewport's foot and
+       * a section reveals once its top crosses it. It was `threshold: 0.08`, 8% of the section
+       * in view, which a section taller than about twelve viewports never reaches: a course
+       * page on a phone is one 9,700px section, and 8% of it is more than a 812px screen holds,
+       * so the whole page stayed blank (2026-10-20).
+       */
       {
-        threshold: 0.08,
-        rootMargin: '0px 0px -4% 0px',
+        threshold: 0,
+        rootMargin: '0px 0px -8% 0px',
       }
     );
 
