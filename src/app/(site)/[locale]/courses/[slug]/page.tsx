@@ -36,10 +36,11 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { bremenToday, isCourseTermBookable, nextCourseStartDate } from '@/lib/content/bookability';
+import { daytimeLabel, parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { getCourseDetail, getCourses, getSocialProofForCourse } from '@/lib/content/repository';
 import { getPageContent } from '@/lib/cms/content.server';
 import { createPublicMetadata } from '@/lib/seo';
-import { intl, pick, pickTree, say } from '@/lib/cms/copy';
+import { intl, pick, say } from '@/lib/cms/copy';
 
 /* What each of the Bremen Town Musicians says in the group page's hero. */
 const MUSICIAN_VOICES = {
@@ -171,54 +172,40 @@ export default async function CourseDetailPage({
   };
 
   /*
-   * Group the published terms by weekly slot.
+   * Group the published terms by weekly slot, named as the registration form names it
+   * ("Vormittags · Mo–Fr · 09:00–12:30", lib/registration/term-format).
    *
    * The group label has to carry the days as well as the time. The intensive
    * course's two cohorts are not "the same course at two times of day": mornings
    * run Mon-Fri and afternoons Mon-Thu, so choosing the afternoon is choosing a
    * four-day week. That difference belongs in the label a reader compares on,
    * not in a footnote.
+   *
+   * A term opens the registration form with itself chosen (2026-10-20); a format that is not
+   * registered online keeps its terms on this page.
    */
   const termGroups: CourseTermGroup[] = (() => {
-    const dayNames = pickTree(locale, {
-      en: { Mon: 'Mon', Tue: 'Tue', Wed: 'Wed', Thu: 'Thu', Fri: 'Fri', Sat: 'Sat', Sun: 'Sun' },
-      de: { Mon: 'Mo', Tue: 'Di', Wed: 'Mi', Thu: 'Do', Fri: 'Fr', Sat: 'Sa', Sun: 'So' },
-    });
-
     const groups = new Map<string, CourseTermGroup>();
-    const bookableIds = new Set(bookableInstances.map((courseInstance) => courseInstance.id));
 
-    for (const courseInstance of detail.instances) {
-      const schedule = courseInstance.schedule as { days?: string[]; time?: string } | null;
-      const days = Array.isArray(schedule?.days) ? schedule.days : [];
-      const time = typeof schedule?.time === 'string' ? schedule.time : '';
+    // Only what a learner can still book: the section is a choice now, not the year's table.
+    for (const courseInstance of bookableInstances) {
+      const schedule = parseSchedule(courseInstance.schedule, locale);
+      const daytime = schedule?.daytime ? daytimeLabel(schedule.daytime, locale) : '';
+      const scheduleText = schedule ? scheduleLine(schedule, locale) : '';
+      const key = `${daytime}|${scheduleText}`;
 
-      // Contiguous weekday runs read as a range; anything else as a list.
-      const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const indices = days.map((day) => order.indexOf(day)).filter((index) => index >= 0);
-      const isRun =
-        indices.length > 2 && indices.every((index, position) => position === 0 || index === indices[position - 1] + 1);
-      const dayLabel = isRun
-        ? `${dayNames[days[0] as keyof typeof dayNames]}–${dayNames[days[days.length - 1] as keyof typeof dayNames]}`
-        : days.map((day) => dayNames[day as keyof typeof dayNames] ?? day).join('/');
-
-      const slotLabel = [dayLabel, time.replace('-', '–')].filter(Boolean).join(', ');
-
-      if (!groups.has(slotLabel)) {
-        groups.set(slotLabel, { slotLabel, terms: [] });
+      if (!groups.has(key)) {
+        groups.set(key, { key, daytime, schedule: scheduleText, days: schedule?.days ?? '', time: schedule?.time ?? '', terms: [] });
       }
 
-      groups.get(slotLabel)?.terms.push({
+      groups.get(key)!.terms.push({
         id: courseInstance.id,
-        rangeLabel: `${formatDate(courseInstance.start_date, locale)} – ${formatDate(courseInstance.end_date, locale)}`,
-        href: `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`,
-        isSelected: courseInstance.id === selectedInstance?.id,
-        // A term that has begun and cannot be joined is not a link either.
-        state: bookableIds.has(courseInstance.id)
-          ? 'bookable'
-          : courseInstance.end_date < today
-            ? 'finished'
-            : 'under-way',
+        start: courseInstance.start_date,
+        end: courseInstance.end_date,
+        href: isQuoteOnly(detail.course)
+          ? `${getCoursePath(detail.course.slug)}?instance=${encodeURIComponent(courseInstance.id)}`
+          : `/registration/course?courseId=${encodeURIComponent(courseInstance.id)}`,
+        joinable: !nextCourseStartDate(courseInstance, detail.course.slug, today),
       });
     }
 
@@ -572,6 +559,7 @@ export default async function CourseDetailPage({
                     key={sectionKey}
                     groups={termGroups}
                     locale={locale}
+                    courseName={detail.course.name}
                     note={
                       detail.course.slug === 'bildungszeit'
                         ? say(locale, 'In der Bildungszeit besuchst du zwei Intensivkurse gleichzeitig, vormittags von Montag bis Freitag, 9 bis 12:30 Uhr, und nachmittags von Montag bis Donnerstag, 13 bis 17:30 Uhr. Einsteigen kannst du an jedem Montag.', 'During Bildungszeit you attend two intensive courses at the same time, in the morning from Monday to Friday, 09:00–12:30, and in the afternoon from Monday to Thursday, 13:00–17:30. You can join on any Monday.')

@@ -222,6 +222,17 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
     invalidFieldId.current = null;
   }, [stepFailures]);
 
+  /*
+   * Arrived from a course page's term table (`?courseId=`, 2026-10-20): the course and the term are
+   * chosen, so the chosen date is brought into view, the level above it the one choice left.
+   */
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('courseId')) return;
+    const chosen = document.querySelector<HTMLInputElement>('input[name="course-0-option"]:checked');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    chosen?.closest('label')?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+  }, []);
+
   const onSubmit = async (data: FormSubmissionData) => {
     setSubmitting(true);
     setSubmissionError(null);
