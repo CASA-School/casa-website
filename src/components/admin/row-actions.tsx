@@ -22,12 +22,13 @@ export type RowAction = {
  * amazing"): the step the list is for as a small button — „Folgekurs buchen" where nothing is booked
  * after, „Erinnern" where money is open — and the rest behind „…", in CASA's menu. Every action is a
  * page (a booking wizard, a letter, a payment) or an e-mail; nothing happens from the list itself.
- * It sits above the row's link (z-20), as the booking colour does.
+ * It sits above the row's link (z-20), as the booking colour does, and replaces the row's arrow: „…" says
+ * there is more, the rest of the row still opens the record (globals.css, `.ws-row-arrow`).
  */
 export function RowActions({ label, primary, actions }: { label: string; primary?: RowAction | null; actions: readonly RowAction[] }) {
   if (!primary && !actions.length) return null;
   return (
-    <span className="relative z-20 inline-flex items-center justify-end gap-1">
+    <span data-row-actions="" className="relative z-20 inline-flex items-center justify-end gap-1">
       {primary ? (
         <ActionLink
           action={primary}

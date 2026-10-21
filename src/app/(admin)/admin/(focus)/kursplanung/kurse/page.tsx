@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { canAccess } from '@/lib/admin/access';
+import { SESSION_COLOURS } from '@/lib/admin/day-plan-labels';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -90,6 +91,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
         return (
           <section key={shift} className={ui.section}>
             <div className={ui.shiftHead}>
+              <span aria-hidden="true" className={ui.shiftDot} style={{ background: SESSION_COLOURS[shift].hex }} />
               <h2>{shiftLabel}</h2>
               <span className={ui.sub}>· {phaseLabel(phase)} (.{phase}) · {SHIFT_INFO[shift].time}</span>
               <span className={ui.spacer} />

@@ -33,6 +33,8 @@ import { listBookableRooms } from '@/lib/admin/rooms';
 import { SCHOOL_CLOSURES } from '@/config/school-closures';
 import { todayInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
+import { SessionMark } from '@/components/admin/session-mark';
+import { sessionAt } from '@/lib/admin/day-plan-labels';
 
 /**
  * One course number's page (2026-10-17, migrations 0041, 0045, 0050; docs/ADMIN_WORKSPACE.md §Lesson
@@ -64,6 +66,8 @@ export async function CoursePage({
   const course = await courseInfo(id);
   if (!course) notFound();
   const { t, lang } = await getI18n();
+  // Its part of the day: stored, or read from its lesson time — an intensive half keeps none of its own.
+  const session = course.session ?? sessionAt(course.time);
   const today = todayInputValue();
 
   const mayTeach = canAccess(user, 'kursplanung', 'edit');
@@ -156,9 +160,10 @@ export async function CoursePage({
                 </Link>
                 {where ? <b className="font-semibold text-[var(--casa-ink)]"> · {where}</b> : null}
               </MetaItem>
-              {course.session || course.time ? (
+              {session || course.time ? (
                 <MetaItem icon={Icon.clock}>
-                  {[course.session ? pick(lang, SESSION_LABELS[course.session]) : null, dayList(course.days, lang), course.time?.replace('-', '–')].filter(Boolean).join(' · ')}
+                  {session ? <SessionMark session={session} lang={lang} className="mr-1.5" /> : null}
+                  {[session ? pick(lang, SESSION_LABELS[session]) : null, dayList(course.days, lang), course.time?.replace('-', '–')].filter(Boolean).join(' · ')}
                 </MetaItem>
               ) : null}
             </MetaLine>

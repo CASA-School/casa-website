@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react';
 
 import { useWsLang } from '@/components/admin/lang';
+import { SESSION_COLOURS } from '@/lib/admin/day-plan-labels';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
 import { absenceOn, assignmentKey, courseDays, fit, remainingDays, shiftDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
@@ -630,7 +631,8 @@ export function Board({
         {notice?.error ? <span className={`${ui.status} ${ui.statusBad}`}>{notice.error}</span> : notice?.ok ? <span className={`${ui.status} ${ui.statusOk}`}>{notice.ok}</span> : null}
       </div>
       <div className={styles.bar}>
-        <div className={styles.seg}>{SHIFTS.map((s) => <button key={s} type="button" aria-pressed={s === shift} onClick={(e) => { e.stopPropagation(); setShift(s); setHand(null); }}>{pick(lang, SHIFT_INFO[s].label)}</button>)}</div>
+        {/* Each shift's colour, as on the Tagesplan (2026-10-21): an identifier on the switch only — the sockets keep the level's colour. */}
+        <div className={styles.seg}>{SHIFTS.map((s) => <button key={s} type="button" aria-pressed={s === shift} onClick={(e) => { e.stopPropagation(); setShift(s); setHand(null); }}><span aria-hidden="true" className={styles.shiftDot} style={{ background: SESSION_COLOURS[s].hex }} />{pick(lang, SHIFT_INFO[s].label)}</button>)}</div>
         <div className={`${styles.seg} ${styles.segSoft}`}>
           <button type="button" aria-pressed={view === 'week'} onClick={(e) => { e.stopPropagation(); setView('week'); }}>{t('Woche', 'Week')}</button>
           <button type="button" aria-pressed={view === 'month'} onClick={(e) => { e.stopPropagation(); setView('month'); }}>{t('Monat', 'Month')}</button>

@@ -154,7 +154,7 @@ export default async function GroupsPage({ searchParams }: { searchParams: Promi
                     ) : null}
                     {g.booked ? <span className="block text-[0.72rem] text-[var(--casa-muted)]">{t(`${num(lang, g.booked)} gebucht`, `${num(lang, g.booked)} booked`)}</span> : null}
                   </Cell>
-                  <Cell align="right" className="!pr-7">
+                  <Cell align="right">
                     <RowActions label={t(`Aktionen: ${g.name}`, `Actions: ${g.name}`)} {...actionsOf(g)} />
                   </Cell>
                 </TableRow>
