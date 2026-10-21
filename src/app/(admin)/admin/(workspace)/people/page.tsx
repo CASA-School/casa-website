@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -17,6 +18,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { LEARNER_STAGE_LABELS, listCountries, listDeletedPeople, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
 import { restorePersonAction } from './actions';
 import { PersonForm } from './person-form';
+import { SessionMark } from '@/components/admin/session-mark';
 
 /**
  * The person register.
@@ -142,6 +144,26 @@ export default async function PeoplePage({
     return { primary, actions };
   };
   const wideActions = canBook && (view === 'last' || view === 'owing');
+  // Under the name: where they stand (unless the view says it), then their course — after its colour, the
+  // part of the day it is taught in (2026-10-21) — or, for someone who has only enquired, their address.
+  const aboutOf = (person: Row): ReactNode => {
+    const stage = person.stage && view !== person.stage ? pick(lang, LEARNER_STAGE_LABELS[person.stage]) : null;
+    const course = person.course
+      ? person.course.current
+        ? person.course.name
+        : [person.course.name, `${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`].filter(Boolean).join(' · ')
+      : null;
+    const rest = course ?? (person.stage ? null : person.primaryEmail);
+    if (!stage && !rest) return undefined;
+    return (
+      <>
+        {stage}
+        {stage && rest ? ' · ' : null}
+        {course && person.course?.session ? <SessionMark session={person.course.session} lang={lang} className="mr-1.5" /> : null}
+        {rest}
+      </>
+    );
+  };
 
   return (
     <>
@@ -250,24 +272,7 @@ export default async function PeoplePage({
               ...group.rows.map((person) => (
               <TableRow key={person.id} interactive>
                 <Cell href={`/admin/people/${person.id}`} className="max-w-0">
-                  <RecordName
-                    name={person.displayName}
-                    about={
-                      [
-                        // Where they stand, unless the view already says it.
-                        person.stage && view !== person.stage ? pick(lang, LEARNER_STAGE_LABELS[person.stage]) : null,
-                        person.course
-                          ? person.course.current
-                            ? person.course.name
-                            : [person.course.name, `${t('ab', 'from')} ${shortDay(new Date(person.course.start), lang)}`].filter(Boolean).join(' · ')
-                          : person.stage
-                            ? null
-                            : person.primaryEmail,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ') || undefined
-                    }
-                  />
+                  <RecordName name={person.displayName} about={aboutOf(person)} />
                 </Cell>
                 <Cell className={hide}>
                   {person.level ? (
@@ -293,7 +298,7 @@ export default async function PeoplePage({
                 <Cell className={`text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)] ${hideLg}`}>
                   {capitalise(relativeDays(person.createdAt, lang))}
                 </Cell>
-                <Cell align="right" className="!pr-7">
+                <Cell align="right">
                   <RowActions label={t(`Aktionen: ${person.displayName}`, `Actions: ${person.displayName}`)} {...actionsOf(person)} />
                 </Cell>
               </TableRow>

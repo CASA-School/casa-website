@@ -812,6 +812,34 @@ The rules, each of which came from a real defect on a real screen.
    an input's format. The letter to a learner still states hours and dates in
    full — that is for the learner, not the team.
 
+### The colours of the day (2026-10-21)
+
+Rahman: „green for Vormittag, blue-ish for afternoon and purple-ish for Abend … a bit of an identifier …
+done very intelligently and elegantly", and the yellow for a teacher standing in, „very well done". One
+set, `SESSION_COLOURS` in `src/lib/admin/day-plan-labels.ts`, used by everything that shows a part of
+the day:
+
+| Colour | Means | Where |
+| --- | --- | --- |
+| green `#0f8a7a` | Vormittag | Tagesplan (Kurse: the session's band and edge; Raumplan: the block), Kursplanung's shift switch and Kurse headings, a course's mark in a list and on its page |
+| blue `#2f6fd6` | Nachmittag | the same |
+| purple `#6d4ed6` | Abend | the same |
+| amber `#d99a00` (`COVER_COLOUR`) | Vertretung: a teacher standing in | Raumplan, Kurse, Kursplanung's pieces |
+| red `#d14343` (`AWAY_COLOUR`) | a teacher away with nobody standing in | Raumplan, Kurse |
+| grey stripes | the lesson is cancelled | Raumplan, Kurse |
+
+How it is used:
+- **A part of the day is an edge, never a dot.** In a list, a dot is a state (the booking's colour, a
+  task's status), so a course's part of the day is a short upright stroke before its name
+  (`SessionMark`): Teilnehmende and Buchungen under the name, the course list's starts, the course page's
+  time. The Tagesplan uses the edge too: a band's left bar, a block's left border.
+- **An identifier, not decoration.** Never a filled row, never on a card's chip, never in Kursplanung's
+  sockets (they keep the level's colour; docs/KURSPLANUNG.md rule 2).
+- **Where it is read from.** A course's part of the day is when its first lesson begins (before 12,
+  before 17, after), else what the course or its start stores, else an evening course type
+  (`courseSessionSql`, `sessionAt`). An intensive start stores none: CASA decides each half's time.
+- **For the help page** (not built yet): these colours are explained there, in this table's words.
+
 ### FileMaker's navy (2026-10-13)
 
 Rahman asked for the colours to lean "a little towards filemaker so staff don't
@@ -967,7 +995,8 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     small button — „Folgekurs buchen" on Ohne Folgekurs, „Erinnern" where money is the question, „Angebot
     erstellen" on a group asked for — and the rest behind „…": a booking, a payment (`?pay=1` opens the
     booking's „Zahlung erfassen"), a reminder or confirmation letter, an e-mail, the record's tabs. Every
-    action is a page or an e-mail; nothing changes from the list itself. Below 1024px the columns that
+    action is a page or an e-mail; nothing changes from the list itself. A row with „…" has no arrow at
+    its end (2026-10-21: the menu says there is more); the rest of the row still opens the record. Below 1024px the columns that
     say least give way (Offen and Angelegt on Teilnehmende, Gesamt on Buchungen), never the amount in a
     money view.
 11. **A column holds one kind of thing.** The record — its initials, its name,

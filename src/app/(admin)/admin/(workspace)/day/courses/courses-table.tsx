@@ -6,15 +6,15 @@ import { floorName, groupName, LessonPanel, shortName, type LessonEditing } from
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson } from '@/lib/admin/day-plan';
-import { MERGE_REASON_LABELS, SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
+import { MERGE_REASON_LABELS, SESSION_COLOURS, SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
 import { pick } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
 /** Each part of the day keeps its colour, here and on the room plan; amber is kept for cover, red for a missing teacher. */
 const SESSION_TONE: Record<Session, { band: string; bar: string; dot: string }> = {
-  morning: { band: 'bg-[#eef8f6]', bar: 'bg-[#0f8a7a]', dot: 'bg-[#0f8a7a]' },
-  afternoon: { band: 'bg-[#eef5ff]', bar: 'bg-[#2f6fd6]', dot: 'bg-[#2f6fd6]' },
-  evening: { band: 'bg-[#f3f0fd]', bar: 'bg-[#6d4ed6]', dot: 'bg-[#6d4ed6]' },
+  morning: { band: SESSION_COLOURS.morning.band, bar: SESSION_COLOURS.morning.dot, dot: SESSION_COLOURS.morning.dot },
+  afternoon: { band: SESSION_COLOURS.afternoon.band, bar: SESSION_COLOURS.afternoon.dot, dot: SESSION_COLOURS.afternoon.dot },
+  evening: { band: SESSION_COLOURS.evening.band, bar: SESSION_COLOURS.evening.dot, dot: SESSION_COLOURS.evening.dot },
 };
 
 /**

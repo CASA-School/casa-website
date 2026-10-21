@@ -10,6 +10,7 @@ import type { CourseGroupRow, CourseListRow, CoursePhase } from '@/lib/admin/cou
 import { num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
 import { cn } from '@/lib/utils';
+import { SessionMark } from '@/components/admin/session-mark';
 
 /**
  * The courses of one kind of work (2026-10-17; docs/ADMIN_WORKSPACE.md §Courses), Rahman: the
@@ -162,6 +163,7 @@ function StartRow({ row, name, span, showPhase, t, lang }: { row: CourseListRow;
       <td colSpan={span} className="border-t border-ws-line bg-ws-sunk/45 px-5 py-2">
         <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[0.82rem]">
+            {row.session ? <SessionMark session={row.session} lang={lang} /> : null}
             <Link href={`/admin/catalogue/${row.courseInstanceId}`} className="font-bold text-[var(--casa-ink)] hover:underline">
               {/* The type, and the name when it does not already say the type („… – Prüfungsvorbereitung"). */}
               {name && name.toLowerCase().includes(row.typeName.toLowerCase())

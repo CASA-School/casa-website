@@ -25,6 +25,7 @@ import { isUuid } from '@/lib/admin/ids';
 import { organisationName } from '@/lib/admin/organisations';
 import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { SessionMark } from '@/components/admin/session-mark';
 
 /**
  * Bookings.
@@ -242,7 +243,14 @@ export default async function BookingsPage({
               ...group.rows.map((b) => {
                 const light = bookingLight(b);
                 const lightLabel = pick(lang, bookingLightLabel(b));
-                const about = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
+                const aboutText = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
+                // The course's part of the day as its colour, before its name (2026-10-21).
+                const about = aboutText ? (
+                  <>
+                    {b.session && b.courseTypeName ? <SessionMark session={b.session} lang={lang} className="mr-1.5" /> : null}
+                    {aboutText}
+                  </>
+                ) : null;
                 return (
                 <TableRow key={b.id} interactive>
                   <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
@@ -261,7 +269,7 @@ export default async function BookingsPage({
                   <Cell align="right" className="whitespace-nowrap tabular-nums">
                     <Balance b={b} t={t} />
                   </Cell>
-                  <Cell align="right" className="!pr-7">
+                  <Cell align="right">
                     <RowActions label={t(`Aktionen: ${b.personName}, ${b.number}`, `Actions: ${b.personName}, ${b.number}`)} {...actionsOf(b)} />
                   </Cell>
                 </TableRow>

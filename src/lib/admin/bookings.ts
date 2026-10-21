@@ -11,6 +11,8 @@ import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './wa
 import { bookedLevelLabel, PAYMENT_SUBJECTS } from './booking-levels';
 import { pick, type Bilingual, type WsLang } from './i18n';
 import { isUuid } from './ids';
+import { courseSessionSql } from './course-session';
+import { isSession, type Session } from './day-plan-labels';
 
 /**
  * Bookings — a person's confirmed place on a course, with dates, cost lines
@@ -162,6 +164,8 @@ export type BookingListItem = {
   /** Their address, for „E-Mail an …" from the list. */
   personEmail: string | null;
   courseTypeName: string | null;
+  /** The part of the day of its course running now or next, for its colour in a list (2026-10-21). */
+  session: Session | null;
   status: BookingStatus;
   startDate: Date | null;
   endDate: Date | null;
@@ -284,7 +288,9 @@ const LIST = `
          (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS start_date,
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
-         coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid
+         coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid,
+         (SELECT ${courseSessionSql('bp.course_id', 'bp.course_instance_id', 'b.course_type_id')} FROM booking_periods bp
+           WHERE bp.booking_id = b.id ORDER BY (bp.end_date < current_date), bp.start_date LIMIT 1) AS session
     FROM bookings b
     JOIN people p ON p.id = b.person_id
     LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -299,6 +305,7 @@ type ListRow = {
   person_name: string;
   person_email: string | null;
   course_type_name: string | null;
+  session: string | null;
   status: BookingStatus;
   currency: string;
   created_at: Date;
@@ -325,6 +332,7 @@ const toItem = (r: ListRow): BookingListItem => ({
   personName: r.person_name,
   personEmail: r.person_email,
   courseTypeName: r.course_type_name,
+  session: isSession(r.session) ? r.session : null,
   status: r.status,
   startDate: r.start_date,
   endDate: r.end_date,

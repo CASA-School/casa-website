@@ -603,7 +603,7 @@ export function Cell({
           {/* The row opens something: a quiet arrow at its end, on hover or focus. */}
           <span
             aria-hidden="true"
-            className="absolute top-1/2 right-[5px] hidden -translate-y-1/2 text-[var(--casa-text-subtle)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:block"
+            className="ws-row-arrow absolute top-1/2 right-[5px] hidden -translate-y-1/2 text-[var(--casa-text-subtle)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:block"
           >
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
               <path d="m6 3.5 4.5 4.5L6 12.5" />

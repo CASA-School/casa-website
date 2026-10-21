@@ -149,3 +149,6 @@
 .mr:hover { background: #f2f4f7; }
 .mrOn { background: #fff6bf; color: var(--pz-yellow-ink); }
 .mrDel { color: var(--pz-red); }
+/* A shift's colour (Tagesplan's green Vormittag, blue Nachmittag): a short upright stroke beside its name, as the
+   Tagesplan marks a part of the day, nowhere else. */
+.shiftDot { display: inline-block; width: 3px; height: 0.9em; border-radius: 999px; flex: none; }

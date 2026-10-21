@@ -32,7 +32,9 @@ the rules the planners kept in their heads.
 2. **Colour has meaning only.** Level colour on sockets and placed pieces · **yellow = Vertretung**
    (someone from the other shift, or marked by hand) · red ring + reason on the piece = conflict · orange
    dashed = level not listed but allowed · dashed socket = open · italic with `?` = not yet confirmed.
-   **Never a colour per person.**
+   **Never a colour per person.** The shift's own colour (green Vormittag, blue Nachmittag, the
+   workspace's colours of the day, 2026-10-21; docs/ADMIN_WORKSPACE.md) is only a stroke beside the
+   shift's name — on the switch and the Kurse headings — never on a socket or a piece.
 3. **Little on screen; explanation where the action is.** A dark strip explains pick-up mode ("Alina in
    der Hand · noch 3 Tage · passt in B1+.2, B2.2 · Fach anklicken"). The piece menu is one line per
    action and nothing under it — the rows with a consequence sentence each were rejected on 2026-09-16

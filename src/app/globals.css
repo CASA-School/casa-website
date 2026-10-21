@@ -1093,6 +1093,11 @@ h3 {
 .casa-workspace .ws-table > tbody > tr[data-interactive]:hover {
   background-color: var(--ws-row-hover);
 }
+/* A row with its actions („…", `RowActions`) needs no arrow at its end: the menu says there is more
+   (Rahman, 2026-10-21). Unlayered, so it outranks the arrow's `sm:block`. */
+.casa-workspace .ws-table > tbody > tr:has([data-row-actions]) .ws-row-arrow {
+  display: none;
+}
 /* `OpenTable`'s card does not clip, so its last row takes the card's corners. */
 .casa-workspace .ws-table-open > tbody > tr:last-child > :first-child {
   border-bottom-left-radius: calc(1.5rem - 1px);

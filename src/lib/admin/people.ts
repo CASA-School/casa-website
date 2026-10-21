@@ -5,6 +5,8 @@ import { countryCodeFromName, normalizeEmail, normalizePhone, parseIsoDate } fro
 import { displayName } from './normalize';
 import type { Bilingual, WsLang } from './i18n';
 import { isUuid } from './ids';
+import { courseSessionSql } from './course-session';
+import { isSession, type Session } from './day-plan-labels';
 
 /**
  * People — one row per human, from first contact.
@@ -384,7 +386,7 @@ export async function listPeople({
   items: (PersonSummary & {
     primaryEmail: string | null;
     /** The booking running now or starting next, for the register's line under a name and its dates. */
-    course: { name: string | null; start: Date; end: Date; current: boolean } | null;
+    course: { name: string | null; start: Date; end: Date; current: boolean; session: Session | null } | null;
     /** The level a teacher confirmed last. */
     level: string | null;
     /** Enquiries, registrations and offers still in play. */
@@ -421,6 +423,7 @@ export async function listPeople({
       course_name: string | null;
       course_start: Date | null;
       course_end: Date | null;
+      course_session: string | null;
       level: string | null;
       open_cases: string;
       owed: string;
@@ -431,7 +434,7 @@ export async function listPeople({
     `${SELECT.replace(
       'FROM people p',
       `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
-         nb.course_name, nb.course_start, nb.course_end,
+         nb.course_name, nb.course_start, nb.course_end, nb.course_session,
          -- The level a teacher confirmed last, else the one of the course they sit in (or start next).
          coalesce((SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
                     WHERE rv.person_id IS NOT NULL AND rv.person_id = ANY(${FAMILY}) ORDER BY rv.decided_at DESC LIMIT 1),
@@ -451,7 +454,10 @@ export async function listPeople({
       SELECT coalesce(nullif(trim(t.name_de), ''), t.name) AS course_name, min(bp.start_date) AS course_start, max(bp.end_date) AS course_end,
              -- The step of the period running now, else of the first one ahead.
              coalesce((array_agg(bp.level_code ORDER BY bp.start_date DESC) FILTER (WHERE bp.level_code IS NOT NULL AND bp.start_date <= current_date))[1],
-                      (array_agg(bp.level_code ORDER BY bp.start_date) FILTER (WHERE bp.level_code IS NOT NULL))[1]) AS course_level
+                      (array_agg(bp.level_code ORDER BY bp.start_date) FILTER (WHERE bp.level_code IS NOT NULL))[1]) AS course_level,
+             -- The part of the day of the period running now, else of the first one ahead (2026-10-21).
+             coalesce((array_agg(${courseSessionSql('bp.course_id', 'bp.course_instance_id', 'b.course_type_id')} ORDER BY bp.start_date DESC) FILTER (WHERE bp.start_date <= current_date))[1],
+                      (array_agg(${courseSessionSql('bp.course_id', 'bp.course_instance_id', 'b.course_type_id')} ORDER BY bp.start_date))[1]) AS course_session
         FROM bookings b
         JOIN booking_periods bp ON bp.booking_id = b.id
         LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -486,6 +492,7 @@ export async function listPeople({
               start: r.course_start,
               end: r.course_end,
               current: new Date(r.course_start).setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0),
+              session: isSession(r.course_session) ? r.course_session : null,
             }
           : null,
     })),

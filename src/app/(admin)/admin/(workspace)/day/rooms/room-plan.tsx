@@ -7,7 +7,7 @@ import { floorName, groupName, LessonPanel, shortName, together, type LessonEdit
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson, PlanRoom } from '@/lib/admin/day-plan';
-import { SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
+import { AWAY_COLOUR, COVER_COLOUR, SESSION_COLOURS, SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
 import { pick } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
 
@@ -17,11 +17,11 @@ const SPAN = (LAST - FIRST) * 60;
 const minutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 const at = (hhmm: string) => Math.min(100, Math.max(0, ((minutes(hhmm) - FIRST * 60) / SPAN) * 100));
 
-/** A lesson's block, by the part of the day — and by what needs a look, before that. */
+/** A lesson's block, by the part of the day (`SESSION_COLOURS`) — and by what needs a look, before that. */
 const BLOCK: Record<Session, string> = {
-  morning: 'border-[#0f8a7a] bg-[#e1f4f0] text-[#0b4a41]',
-  afternoon: 'border-[#2f6fd6] bg-[#e4eefc] text-[#12305f]',
-  evening: 'border-[#6d4ed6] bg-[#ece7fb] text-[#2e1f63]',
+  morning: SESSION_COLOURS.morning.block,
+  afternoon: SESSION_COLOURS.afternoon.block,
+  evening: SESSION_COLOURS.evening.block,
 };
 
 /**
@@ -130,9 +130,9 @@ export function RoomPlan({
                 l.cancelled
                   ? 'border-[#b8c0cc] bg-[repeating-linear-gradient(135deg,#f3f5f8_0_6px,#e8ecf1_6px_12px)] text-[var(--casa-muted)]'
                   : l.teacherAway
-                    ? 'border-[#d14343] bg-[#fde3e3] text-[#7f1d1d]'
+                    ? AWAY_COLOUR.block
                     : l.substitute
-                      ? 'border-[#d99a00] bg-[#ffeec2] text-[#4a3500] ring-1 ring-[#d99a00]/40 ring-inset'
+                      ? cn(COVER_COLOUR.block, 'ring-1 ring-[#d99a00]/40 ring-inset')
                       : l.session
                         ? BLOCK[l.session]
                         : 'border-[var(--fm-navy)] bg-[#e9effa] text-[#1d2f52]',
