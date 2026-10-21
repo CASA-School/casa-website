@@ -40,6 +40,7 @@ import { OfferToolbarActions } from './offer-actions';
 import ui from './offers.module.css';
 import { ClickPanel } from './panel';
 import { saveLabel, useOfferDraft } from './use-offer-draft';
+import { Select } from '../menu-select';
 
 const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
 
@@ -589,14 +590,14 @@ export function RecipientFields({ draft, update, countries }: { draft: OfferDraf
       </div>
       <div className={ui.fld}>
         <label htmlFor="r-country">{t('Land', 'Country')}</label>
-        <select id="r-country" className={ui.fi} value={draft.countryCode ?? ''} onChange={(e) => update({ countryCode: e.target.value || null })}>
+        <Select bare id="r-country" className={ui.fi} value={draft.countryCode ?? ''} onChange={(e) => update({ countryCode: e.target.value || null })}>
           <option value="">—</option>
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
               {c[lang]}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
     </>
   );
@@ -1324,7 +1325,8 @@ function TypedRow({
           </div>
           <div className={ui.fld}>
             <label htmlFor={`k-${line.key}`}>{t('Kostenart', 'Kind of cost')}</label>
-            <select
+            <Select
+              bare
               id={`k-${line.key}`}
               className={ui.fi}
               value={line.chargeType}
@@ -1335,7 +1337,7 @@ function TypedRow({
                   {type[lang]}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           {escortCol ? (
             <div className={ui.fld}>
@@ -1415,7 +1417,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
         {group ? t('+ Extra hinzufügen', '+ Add an extra') : t('+ Zeile hinzufügen', '+ Add a line')}
       </button>
       {open ? (
-        <div className={ui.menu} role="menu" style={{ left: 0, right: 'auto', top: 'auto', bottom: 'calc(100% + 6px)', width: 330 }}>
+        <div className={ui.menu} role="menu" data-menu-host="" style={{ left: 0, right: 'auto', top: 'auto', bottom: 'calc(100% + 6px)', width: 330 }}>
           {group ? (
             <>
               <div className={ui.menuHead}>{t('Oft gefragt', 'Often asked for')}</div>
@@ -1428,7 +1430,8 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
             </>
           ) : null}
           <div style={{ padding: '4px 4px 6px' }}>
-            <select
+            <Select
+              bare
               aria-label={t('Aus der Preisliste', 'From the price list')}
               className={ui.fi}
               value=""
@@ -1450,7 +1453,7 @@ function AddMenu({ priceList, update, group }: { priceList: PriceListItem[]; upd
                   ))}
                 </optgroup>
               ))}
-            </select>
+            </Select>
           </div>
           <button type="button" role="menuitem" className={ui.menuItem} onClick={() => addPreset(REDUCTION)}>
             {t('Eine Ermäßigung', 'A reduction')}

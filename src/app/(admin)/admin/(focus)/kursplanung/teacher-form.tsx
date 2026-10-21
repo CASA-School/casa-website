@@ -7,6 +7,7 @@ import { monthLabel, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanun
 
 import { saveTeacherAction } from './actions';
 import ui from './ui.module.css';
+import { Select } from '@/components/admin/menu-select';
 
 /**
  * The teacher dialog: the rules that shape a piece, and the month's absences.
@@ -90,11 +91,11 @@ export async function TeacherForm({
               <div className={ui.dd}>
                 {WEEKDAYS.map((d) => <Opt key={d} type="checkbox" name={`abs_${w.start}`} value={d} checked={checked.includes(d)} label={pick(lang, WEEKDAY_LABELS[d])} />)}
               </div>
-              <select name={`reason_${w.start}`} defaultValue={reason} className={ui.sel} aria-label={t(`Grund KW ${w.kw}`, `Reason KW ${w.kw}`)}>
+              <Select bare name={`reason_${w.start}`} defaultValue={reason} className={ui.sel} aria-label={t(`Grund KW ${w.kw}`, `Reason KW ${w.kw}`)}>
                 {ABSENCE_REASONS.map((r) => (
                   <option key={r} value={r}>{pick(lang, ABSENCE_LABELS[r])}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           );
         })}

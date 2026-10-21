@@ -16,6 +16,7 @@ import { addGroupAction, createMonthAction, fillFromPairsAction, removeGroupActi
 import { AutoSaveRow } from '../auto-save-row';
 import { Header } from '../header';
 import ui from '../ui.module.css';
+import { Select } from '@/components/admin/menu-select';
 
 /**
  * Kurse — the month's groups per shift, with the pair that holds each one.
@@ -104,11 +105,11 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                     {hidden({ month, shift, phase, returnTo })}
                     <div className={ui.sec}>
                       <label className={ui.lbl} htmlFor={`lvl-${shift}`}>{t('Niveau', 'Level')}</label>
-                      <select id={`lvl-${shift}`} name="level" defaultValue="A1" className={`${ui.sel} ${ui.selLg}`}>
+                      <Select bare id={`lvl-${shift}`} name="level" defaultValue="A1" className={`${ui.sel} ${ui.selLg}`}>
                         {LEVELS.map((l) => (
                           <option key={l} value={l}>{l}.{phase}</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     <DialogFooter><button type="submit" className={ui.primary}>{t('Anlegen', 'Add')}</button></DialogFooter>
                   </form>
@@ -194,8 +195,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                   <span className={ui.num}>{g.registrations}</span>
                                 )}
                               </td>
-                              <td>{canWrite ? <select form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g)}</select> : name(g.teacherFirst)}</td>
-                              <td>{canWrite ? <select form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g)}</select> : name(g.teacherSecond)}</td>
+                              <td>{canWrite ? <Select bare form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g)}</Select> : name(g.teacherFirst)}</td>
+                              <td>{canWrite ? <Select bare form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g)}</Select> : name(g.teacherSecond)}</td>
                               <td>
                                 <span className={ui.prog}>
                                   <span className={ui.track}><i className={p.have === p.need ? 'done' : ''} style={{ width: `${pct}%` }} /></span>

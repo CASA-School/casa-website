@@ -179,8 +179,6 @@ export type DayLesson = {
   roomId: string | null;
   roomName: string | null;
   floor: number | null;
-  /** Taught online (0077): its room is „Online", which holds any number of classes at once. */
-  online: boolean;
   teacherId: string | null;
   teacherName: string | null;
   substitute: boolean;
@@ -230,7 +228,6 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
     room_id: string | null;
     room_name: string | null;
     floor: number | null;
-    online: boolean;
     teacher_id: string | null;
     teacher_name: string | null;
     is_substitute: boolean;
@@ -247,7 +244,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
     `SELECT d.id, d.course_id, d.group_index, to_char(t.starts_at, 'HH24:MI') AS starts_at, to_char(t.ends_at, 'HH24:MI') AS ends_at,
             coalesce(c.session, i.session) AS session, c.level_code, c.title, coalesce(ty.name_de, ty.name) AS type_name,
             coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
-            d.room_id, coalesce(r.nickname, r.name) AS room_name, r.floor, coalesce(lo.kind = 'online', false) AS online,
+            d.room_id, coalesce(r.nickname, r.name) AS room_name, r.floor,
             d.teacher_id, ${NAME('tp')} AS teacher_name, d.is_substitute, ${NAME('rp')} AS replaced_teacher_name,
             CASE WHEN d.is_substitute THEN NULL
                  ELSE (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) END AS teacher_away,
@@ -260,7 +257,6 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
        JOIN course_instances i ON i.id = c.course_instance_id
        JOIN course_types ty ON ty.id = i.course_type_id
        LEFT JOIN rooms r ON r.id = d.room_id
-       LEFT JOIN locations lo ON lo.id = r.location_id
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
        LEFT JOIN staff_members rm ON rm.id = d.replaced_teacher_id LEFT JOIN people rp ON rp.id = rm.person_id
       WHERE d.on_date = $1::date
@@ -304,7 +300,6 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       roomId: r.room_id,
       roomName: r.room_name,
       floor: r.floor,
-      online: r.online,
       teacherId: r.teacher_id,
       teacherName: r.teacher_name,
       substitute: r.is_substitute,
@@ -339,7 +334,7 @@ export type PlanRoom = { id: string; name: string; floor: number | null; capacit
 
 /**
  * The rooms that can hold a lesson, floor by floor as in the building — the top floor first, the Keller at
- * the foot (Rahman, 2026-10-21) — and „Online" after them (0077), for the room plan's rows.
+ * the foot (Rahman, 2026-10-21) — and the online rooms after them (0077), for the room plan's rows.
  */
 export async function planRooms(): Promise<PlanRoom[]> {
   return query<PlanRoom>(
@@ -685,8 +680,8 @@ export async function saveStaffDesk(staffId: string, input: StaffDesk, actor: St
 
 export type LessonChoices = {
   teachers: { id: string; name: string }[];
-  /** The classrooms, „Online" last (0077). */
-  rooms: { id: string; name: string; capacity: number | null; capacityMax: number | null; online: boolean }[];
+  /** The classrooms as in the building, the online rooms last (0077). */
+  rooms: { id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null; online: boolean }[];
   /** The teachers away on the day, with why. */
   away: Record<string, string>;
   /** The last day of each absence that runs through the day (a weekend in between does not end it). */
@@ -701,10 +696,10 @@ export async function lessonChoices(day: string): Promise<LessonChoices> {
         WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
         ORDER BY p.first_name, p.last_name`
     ),
-    query<{ id: string; name: string; capacity: number | null; capacityMax: number | null; online: boolean }>(
-      `SELECT r.id, coalesce(r.nickname, r.name) AS name, r.capacity, r.capacity_max AS "capacityMax", l.kind = 'online' AS online
+    query<{ id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null; online: boolean }>(
+      `SELECT r.id, coalesce(r.nickname, r.name) AS name, r.floor, r.capacity, r.capacity_max AS "capacityMax", l.kind = 'online' AS online
          FROM rooms r JOIN locations l ON l.id = r.location_id
-        WHERE r.is_active AND r.is_bookable AND r.kind = 'classroom' ORDER BY l.kind = 'online', r.name`
+        WHERE r.is_active AND r.is_bookable AND r.kind = 'classroom' ORDER BY l.kind = 'online', r.floor DESC NULLS LAST, coalesce(r.nickname, r.name)`
     ),
     query<{ staff_member_id: string; reason: string; on_date: string }>(
       `SELECT staff_member_id, reason, to_char(on_date, 'YYYY-MM-DD') AS on_date FROM staff_absences

@@ -8,8 +8,9 @@ import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import { Avatar } from '@/components/admin/list';
+import { MenuSelect, type MenuOption } from '@/components/admin/menu-select';
 import { SidePanel } from '@/components/admin/side-panel';
-import { Button, Select } from '@/components/admin/ui';
+import { Button } from '@/components/admin/ui';
 import type { DayLesson, LessonChoices } from '@/lib/admin/day-plan';
 import { MERGE_REASONS, MERGE_REASON_LABELS, SESSION_LABELS, type MergeReason } from '@/lib/admin/day-plan-labels';
 import { pick, type T } from '@/lib/admin/i18n';
@@ -85,7 +86,7 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
     >
       {l ? (
         <>
-          {!l.cancelled && l.roomId && !l.online && editing?.lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && overlapping(l, o)) ? (
+          {!l.cancelled && l.roomId && editing?.lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && overlapping(l, o)) ? (
             // Two classes in one room at the same time: said, so it is fixed — by a room, or by merging them.
             <div className="px-6 pt-4">
               <p className="rounded-xl bg-[#fdecec] px-3.5 py-2.5 text-[0.84rem] font-semibold text-[#9b1c1c]">
@@ -192,9 +193,10 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 /**
  * A lesson's teacher or room, changed from here: the choices say who is away that day and what else is
  * taught by them or in it at that time; on this day only, or from it to the end of the course; and the
- * change is said once more, with what it means, before it is made (`changeLessonAction`). A room comes
- * with the free ones that seat the group, smallest first, and „Online" (0077), one click each; online
- * holds any number of classes at once, so it is never busy.
+ * change is said once more, with what it means, before it is made (`changeLessonAction`). The list is
+ * CASA's own menu (`MenuSelect`): rooms under their floor as in the building, the online rooms last
+ * (0077), each with its seats or what is in it at that time. The free rooms that seat the group,
+ * smallest first, and the first free online room are one click each beside it.
  */
 function ChangeForm({ lesson: l, day, what, editing }: { lesson: DayLesson; day: string; what: 'teacher' | 'room'; editing: LessonEditing }) {
   const { t, lang } = useWsLang();
@@ -202,33 +204,57 @@ function ChangeForm({ lesson: l, day, what, editing }: { lesson: DayLesson; day:
   const [value, setValue] = useState(current ?? '');
   const [scope, setScope] = useState<'day' | 'rest'>(what === 'teacher' ? 'day' : 'rest');
   const overlaps = (o: DayLesson) => o.id !== l.id && !o.cancelled && (!l.startsAt || !o.startsAt || !l.endsAt || !o.endsAt || (o.startsAt < l.endsAt && o.endsAt > l.startsAt));
-  const isOnline = (id: string) => what === 'room' && editing.choices.rooms.some((r) => r.id === id && r.online);
-  const busy = (id: string) => (isOnline(id) ? undefined : editing.lessons.find((o) => overlaps(o) && (what === 'teacher' ? o.teacherId === id : o.roomId === id)));
+  const busy = (id: string) => editing.lessons.find((o) => overlaps(o) && (what === 'teacher' ? o.teacherId === id : o.roomId === id));
   const options = what === 'teacher' ? editing.choices.teachers : editing.choices.rooms;
   const seats = (r: { capacity: number | null; capacityMax: number | null }) => r.capacity ?? r.capacityMax ?? 0;
+  const free = editing.choices.rooms.filter((r) => r.id !== current && !busy(r.id));
   const fitting =
     what === 'room'
       ? [
-          ...editing.choices.rooms
-            .filter((r) => !r.online && r.id !== current && !busy(r.id) && (r.capacityMax ?? r.capacity ?? 0) >= Math.max(1, l.headcount))
+          ...free
+            .filter((r) => !r.online && (r.capacityMax ?? r.capacity ?? 0) >= Math.max(1, l.headcount))
             .sort((a, b) => seats(a) - seats(b))
             .slice(0, 3),
-          ...editing.choices.rooms.filter((r) => r.online && r.id !== current),
+          ...free.filter((r) => r.online).slice(0, 1),
         ]
       : [];
+  const choices: MenuOption[] = [
+    ...(what === 'teacher' && !current ? [{ value: '', label: t('Keine Lehrkraft', 'No teacher') }] : []),
+    ...(current && !options.some((o) => o.id === current) ? [{ value: current, label: (what === 'teacher' ? l.teacherName : l.roomName) ?? '—', detail: t('jetzt', 'now') }] : []),
+    ...(what === 'teacher'
+      ? editing.choices.teachers.map((o): MenuOption => {
+          const away = editing.choices.away[o.id];
+          const clash = busy(o.id);
+          return o.id === current
+            ? { value: o.id, label: o.name, detail: t('jetzt', 'now') }
+            : away
+              ? { value: o.id, label: o.name, detail: t(`fehlt · ${away}`, `away · ${away}`), tone: 'warn' }
+              : clash
+                ? { value: o.id, label: o.name, detail: t(`${clash.label} zur gleichen Zeit`, `${clash.label} at that time`), tone: 'warn' }
+                : { value: o.id, label: o.name };
+        })
+      : editing.choices.rooms.map((r): MenuOption => {
+          const clash = busy(r.id);
+          const group = r.online ? t('Online', 'Online') : floorName(r.floor, t);
+          return r.id === current
+            ? { value: r.id, label: r.name, detail: t('jetzt', 'now'), group }
+            : clash
+              ? { value: r.id, label: r.name, detail: t(`belegt · ${clash.label}`, `taken · ${clash.label}`), tone: 'warn', group }
+              : { value: r.id, label: r.name, detail: !r.online && seats(r) ? t(`${seats(r)} Plätze`, `${seats(r)} seats`) : undefined, group };
+        })),
+  ];
   const name = (id: string) => options.find((o) => o.id === id)?.name ?? (what === 'teacher' ? l.teacherName : l.roomName) ?? '—';
   const dayName = new Date(`${day}T12:00:00Z`).toLocaleDateString(lang === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
   const label = what === 'teacher' ? t('Lehrkraft', 'Teacher') : t('Raum', 'Room');
   const changed = value !== (current ?? '');
   const now = current ? name(current) : t('niemand', 'nobody');
   const next = value ? name(value) : t('niemand', 'nobody');
-  // A first room is assigned, not changed; online is said as such.
+  // A first room is assigned, not changed.
   const assign = what === 'room' && !current;
-  const place = value && isOnline(value) ? t('online', 'online') : t(`in ${next}`, `in ${next}`);
   const description = assign
     ? scope === 'day'
-      ? t(`Am ${dayName} ist ${l.label} ${place}. Das gilt überall: Tagesplan, Raumplan, Kursplanung, Kurs und Anwesenheitsliste.`, `On ${dayName}, ${l.label} is ${place}. It holds everywhere: day plan, room plan, Kursplanung, course and attendance sheet.`)
-      : t(`Ab ${dayName} bis zum Kursende ist ${l.label} ${place}, auch im Wochenplan des Kurses.`, `From ${dayName} to the end of the course, ${l.label} is ${place}, in the course's weekly plan too.`)
+      ? t(`Am ${dayName} ist ${l.label} in ${next}. Das gilt überall: Tagesplan, Raumplan, Kursplanung, Kurs und Anwesenheitsliste.`, `On ${dayName}, ${l.label} is in ${next}. It holds everywhere: day plan, room plan, Kursplanung, course and attendance sheet.`)
+      : t(`Ab ${dayName} bis zum Kursende ist ${l.label} in ${next}, auch im Wochenplan des Kurses.`, `From ${dayName} to the end of the course, ${l.label} is in ${next}, in the course's weekly plan too.`)
     : scope === 'day'
       ? what === 'teacher'
         ? t(`Am ${dayName} unterrichtet ${next} statt ${now}, als Vertretung. Das gilt überall: Tagesplan, Raumplan, Kursplanung, Kurs und Anwesenheitsliste.`, `On ${dayName}, ${next} teaches instead of ${now}, as cover. It holds everywhere: day plan, room plan, Kursplanung, course and attendance sheet.`)
@@ -241,31 +267,10 @@ function ChangeForm({ lesson: l, day, what, editing }: { lesson: DayLesson; day:
       <input type="hidden" name="dayId" value={l.id} />
       <input type="hidden" name="what" value={what} />
       <input type="hidden" name="back" value={editing.back} />
-      <label className="block">
+      <div>
         <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{label}</span>
-        <Select name="value" value={value} onChange={(e) => setValue(e.target.value)}>
-          {what === 'teacher' && !current ? <option value="">{t('Keine Lehrkraft', 'No teacher')}</option> : null}
-          {assign ? (
-            <option value="" disabled>
-              {t('Raum wählen …', 'Choose a room …')}
-            </option>
-          ) : null}
-          {current && !options.some((o) => o.id === current) ? <option value={current}>{name(current)}</option> : null}
-          {options.map((o) => {
-            const away = what === 'teacher' ? editing.choices.away[o.id] : undefined;
-            const clash = busy(o.id);
-            const room = what === 'room' ? editing.choices.rooms.find((r) => r.id === o.id) : undefined;
-            const size = room && !room.online && seats(room) ? t(` · ${seats(room)} Plätze`, ` · ${seats(room)} seats`) : '';
-            const note = size + (away ? t(` — fehlt · ${away}`, ` — away · ${away}`) : clash ? t(` — ${clash.label} zur gleichen Zeit`, ` — ${clash.label} at that time`) : '');
-            return (
-              <option key={o.id} value={o.id}>
-                {o.name}
-                {o.id === current ? t(' (jetzt)', ' (now)') : note}
-              </option>
-            );
-          })}
-        </Select>
-      </label>
+        <MenuSelect name="value" value={value} onChange={setValue} options={choices} placeholder={t('Raum wählen …', 'Choose a room …')} label={label} />
+      </div>
       {fitting.length ? (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <span className="text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Frei und passend:', 'Free and fitting:')}</span>
@@ -455,19 +460,17 @@ function MergeForm({ lesson: l, day, editing }: { lesson: DayLesson; day: string
               />
             </label>
           </fieldset>
-          <label className="block">
+          <div>
             <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Grund', 'Reason')}</span>
-            <Select name="reason" required value={reason} onChange={(e) => setReason(e.target.value as MergeReason)}>
-              <option value="" disabled>
-                {t('Grund wählen', 'Choose a reason')}
-              </option>
-              {MERGE_REASONS.map((r) => (
-                <option key={r} value={r}>
-                  {pick(lang, MERGE_REASON_LABELS[r])}
-                </option>
-              ))}
-            </Select>
-          </label>
+            <MenuSelect
+              name="reason"
+              value={reason}
+              onChange={(v) => setReason(v as MergeReason)}
+              options={MERGE_REASONS.map((r) => ({ value: r, label: pick(lang, MERGE_REASON_LABELS[r]) }))}
+              placeholder={t('Grund wählen', 'Choose a reason')}
+              label={t('Grund', 'Reason')}
+            />
+          </div>
           <input
             name="note"
             maxLength={300}
@@ -476,6 +479,12 @@ function MergeForm({ lesson: l, day, editing }: { lesson: DayLesson; day: string
             className="h-9 w-full rounded-lg border border-ws-line bg-white px-2.5 text-[0.84rem] outline-none placeholder:text-[var(--casa-text-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
           />
           <div className="flex justify-end">
+            {/* The reason is required: until it is chosen, there is nothing to confirm. */}
+            {!reason ? (
+              <Button type="button" variant="secondary" size="sm" disabled>
+                {t('Zusammenlegen', 'Merge')}
+              </Button>
+            ) : (
             <ConfirmSubmit
               variant="secondary"
               title={t('Zusammenlegen?', 'Merge?')}
@@ -487,6 +496,7 @@ function MergeForm({ lesson: l, day, editing }: { lesson: DayLesson; day: string
             >
               {t('Zusammenlegen', 'Merge')}
             </ConfirmSubmit>
+            )}
           </div>
         </div>
       ) : null}
