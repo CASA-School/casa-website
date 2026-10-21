@@ -11,9 +11,10 @@ const subscribeNothing = () => () => {};
 
 /**
  * A day-one test's paper (a booklet, a QR poster): shown on screen as an A4 sheet, and rendered a second
- * time on <body> for paper (globals.css, `@page entry-test`), as the class list is.
+ * time on <body> for paper (globals.css, `@page entry-test`), as the class list is. A `poster` is one
+ * sheet without page margins (`@page entry-test-poster`), centred, so the browser prints nothing of its own.
  */
-export function PrintSheet({ name, children }: { name: string; children: ReactNode }) {
+export function PrintSheet({ name, poster = false, children }: { name: string; poster?: boolean; children: ReactNode }) {
   const { t } = useWsLang();
   const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
   return (
@@ -26,7 +27,7 @@ export function PrintSheet({ name, children }: { name: string; children: ReactNo
       <div className="mx-auto max-w-[800px] rounded-2xl border border-ws-line bg-white px-10 py-9 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_18px_40px_-28px_rgba(15,23,42,0.35)]">
         {children}
       </div>
-      {mounted ? createPortal(<div data-letter-print className="ws-entry-test-print hidden bg-white">{children}</div>, document.body) : null}
+      {mounted ? createPortal(<div data-letter-print className={`ws-entry-test-print hidden bg-white${poster ? ' ws-entry-test-poster' : ''}`}>{children}</div>, document.body) : null}
     </>
   );
 }

@@ -2467,12 +2467,28 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   size: A4;
   margin: 12mm 12mm 14mm;
 }
+/* A QR poster is one sheet without page margins (2026-10-21): with none, the browser has nowhere to print
+   its own address, date and title, so the poster carries only the logo, the test and the code. */
+@page entry-test-poster {
+  size: A4;
+  margin: 0;
+}
 @media print {
   .ws-entry-test-print {
     display: block !important;
     page: entry-test;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  .ws-entry-test-print.ws-entry-test-poster {
+    page: entry-test-poster;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 297mm;
+    padding: 18mm 20mm;
+    overflow: hidden;
   }
 }
 @media print {

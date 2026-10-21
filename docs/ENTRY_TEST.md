@@ -87,9 +87,18 @@ dependencies of its own) and was checked with an independent decoder (OpenCV) on
 printed PDF. On paper it is a background picture: Chrome starts a new page before an `<svg>` or `<img>`
 inside a named page.
 
-The address is the public site's of the day (`publicSiteAddress()`): `neu.casa-bremen.de` until the
-switch to casa-bremen.de (`CMS_PUBLIC_ORIGIN`), `casa-bremen.de` after. Posters printed before the
-switch carry `neu.casa-bremen.de`: keep that hostname on the app after the switch, or reprint them.
+The poster (2026-10-21, Rahman: „remove the links, use the real CASA logo … prepared for print") is
+CASA's logo (`public/brand/casa-logo.png`, as a background picture), the test, the course and the code —
+no address in letters — on one A4 sheet without page margins (`@page entry-test-poster`), so the
+browser has nowhere to print its own URL, date and title. Checked from the printed PDF: one page, and
+the code decodes to the phone page.
+
+**One poster per course, for good.** The code holds no date, start or class: the day's 4-digit code
+comes from the teacher. It holds the address, though — the public site's of the day
+(`publicSiteAddress()`): `neu.casa-bremen.de` until the switch to casa-bremen.de (`CMS_PUBLIC_ORIGIN`),
+`casa-bremen.de` after. Posters printed before the switch carry `neu.casa-bremen.de`, so that hostname
+stays bound to the app after the switch (its DNS record and the Container App hostname), or every
+poster is reprinted.
 
 ## Where it lives
 

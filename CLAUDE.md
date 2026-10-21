@@ -485,7 +485,8 @@ is still valid.
   the public host (`CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset). Until the site moves to
   casa-bremen.de, the app carries `CMS_PUBLIC_ORIGIN=https://neu.casa-bremen.de` and
   `CMS_EDITOR_ORIGIN=https://admin.casa-bremen.de`, so the website editor frames the
-  new site and not the old one; **remove both at cutover**. Rahman's owner account
+  new site and not the old one; **remove both at cutover**, but **keep `neu.casa-bremen.de` bound to the
+  app**: the day-one test's printed QR posters open `neu.casa-bremen.de/test` (docs/ENTRY_TEST.md). Rahman's owner account
   exists on the Azure database (`db-job.sh owner`); everyone else is added from the
   Team screen.
 - **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
