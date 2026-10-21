@@ -209,7 +209,8 @@ test.describe('day-one placement test', () => {
         [sittingId, `archive-${EMAIL}`]
       );
       await page.goto('/admin/day');
-      await page.getByRole('link', { name: 'Einstufungstests' }).click();
+      // The Tagesplan's link: where CASA's own online test is switched on (development), the rail has one too.
+      await page.getByRole('main').getByRole('link', { name: 'Einstufungstests' }).click();
       await expect(page).toHaveURL(/\/admin\/day\/tests$/);
       const line = page.getByRole('button', { name: /Einstufungstest B1\+ Tag 1/ });
       await expect(line).toContainText('Archiviert');
