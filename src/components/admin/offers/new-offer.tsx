@@ -33,6 +33,7 @@ import { Seg, Stepper } from './fields';
 import { OfferFrame } from './frame';
 import { ICONS, type Tint } from './icons';
 import ui from './offers.module.css';
+import { Select } from '../menu-select';
 
 const eur = (n: number | null) => (n == null ? '—' : formatMoney(n, 'de'));
 
@@ -470,13 +471,13 @@ export function NewOffer({
                     </div>
                     <div className={ui.fld}>
                       <label htmlFor="wz-owner">{t('Unterschrift', 'Signed by')}</label>
-                      <select id="wz-owner" className={ui.fi} value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
+                      <Select bare id="wz-owner" className={ui.fi} value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
                         {staff.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                   </div>
                   <dl className={ui.summary}>
@@ -917,14 +918,14 @@ function NewRecipientForm({
   };
 
   const countrySelect = (value: string | null, onChange: (v: string | null) => void) => (
-    <select id="nr-country" className={ui.fi} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
+    <Select bare id="nr-country" className={ui.fi} value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
       <option value="">—</option>
       {countries.map((c) => (
         <option key={c.code} value={c.code}>
           {c[lang]}
         </option>
       ))}
-    </select>
+    </Select>
   );
   const guessedCountry = email ? countryFromEmail(email) : null;
 

@@ -85,7 +85,7 @@ export function Floating({
 
   if (!placed) return null;
   return createPortal(
-    <div ref={panel} role={role} aria-label={label} className={className} style={placed.style}>
+    <div ref={panel} role={role} aria-label={label} className={className} style={placed.style} data-menu-host="">
       {children}
     </div>,
     placed.host

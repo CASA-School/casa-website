@@ -3,7 +3,6 @@ import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
 
@@ -64,23 +63,10 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   );
 }
 
-export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      className={cn(
-        controlBase,
-        focusRing,
-        // A native select, on purpose. It is keyboard-accessible, it works on a
-        // phone, and it needs no client bundle — three things a custom listbox
-        // has to re-earn for a control staff use forty times a day.
-        'h-10 appearance-none bg-[position:right_0.6rem_center] bg-no-repeat pr-9',
-        "bg-[image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5' stroke='%235b697e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")]",
-        className
-      )}
-      {...props}
-    />
-  );
-}
+// The dropdown: CASA's own menu over a real `<select>` (Rahman, 2026-10-21: „properly branded"). It
+// replaced a native select kept for its keyboard, phone and bundle reasons; the real select underneath
+// keeps the form's post, `required` and every `onChange` (menu-select.tsx).
+export { Select } from './menu-select';
 
 export function Field({
   label,

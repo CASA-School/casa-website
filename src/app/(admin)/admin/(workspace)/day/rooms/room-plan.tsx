@@ -30,8 +30,8 @@ const BLOCK: Record<Session, string> = {
  * floor, the hours across with the half hours faint, each class a block in its part of the day's colour
  * with its course and teacher; cover in amber, a missing teacher in red, a cancelled class striped. A
  * free room is plain to see. The search lights up what it finds; a click opens the class at the side.
- * Below the building: „Online" (0077), as many classes at once as there are, and each class without a
- * room on a row of its own with „Raum zuweisen" (Rahman, 2026-10-21).
+ * Below the building: the online rooms, „Online 1" and on (0077), and each class without a room on a row
+ * of its own with „Raum zuweisen" (Rahman, 2026-10-21).
  */
 export function RoomPlan({
   day,
@@ -63,10 +63,10 @@ export function RoomPlan({
   const hit = (l: DayLesson) =>
     !needle || [l.label, l.typeName, l.number, l.roomName, l.teacherName, l.replacedTeacherName, ...l.learners.map((p) => p.name)].some((v) => v?.toLowerCase().includes(needle));
   const building = rooms.filter((r) => !r.online);
-  const online = rooms.filter((r) => r.online && lessons.some((l) => l.roomId === r.id));
+  const online = rooms.filter((r) => r.online);
   const floors = [...new Set(building.map((r) => r.floor))];
   // The plan's rooms with a class that takes place: a class without a room, or in a room off the plan,
-  // has its own row below and is no room in use (it read „15 von 14", 2026-10-20). Online is no room.
+  // has its own row below and is no room in use (it read „15 von 14", 2026-10-20). Online is not the building.
   const used = building.filter((r) => lessons.some((l) => !l.cancelled && l.roomId === r.id)).length;
   // A group taught with others that day sits in their room: it is not without one.
   const homeless = lessons.filter((l) => !l.joins.length && (!l.roomId || !rooms.some((r) => r.id === l.roomId)));
@@ -74,7 +74,7 @@ export function RoomPlan({
   const showNow = now && minutes(now) >= FIRST * 60 && minutes(now) <= LAST * 60;
   const sessions = SESSIONS.filter((s) => lessons.some((l) => l.session === s));
   const doubled = lessons.some(
-    (l) => l.roomId && !l.online && !l.cancelled && lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && l.startsAt && l.endsAt && o.startsAt && o.endsAt && o.startsAt < l.endsAt && o.endsAt > l.startsAt)
+    (l) => l.roomId && !l.cancelled && lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && l.startsAt && l.endsAt && o.startsAt && o.endsAt && o.startsAt < l.endsAt && o.endsAt > l.startsAt)
   );
 
   const row = (key: string, name: ReactNode, own: DayLesson[], zebra: boolean, room = true) => {
@@ -221,7 +221,7 @@ export function RoomPlan({
             {online.length ? (
               <div>
                 <p className="sticky left-0 border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{t('Online', 'Online')}</p>
-                {online.map((r) => row(r.id, r.name, lessons.filter((l) => l.roomId === r.id), false, false))}
+                {online.map((r, i) => row(r.id, r.name, lessons.filter((l) => l.roomId === r.id), i % 2 === 1))}
               </div>
             ) : null}
             {homeless.length ? (

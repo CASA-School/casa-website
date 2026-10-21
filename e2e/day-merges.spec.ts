@@ -110,7 +110,8 @@ test.describe('merging parallel groups', () => {
     await form.getByRole('checkbox').check();
     await form.getByRole('radio', { name: /^Bis/ }).check();
     await form.locator('input[type="date"]').fill(DAYS[2]);
-    await form.getByRole('combobox').selectOption('sick');
+    await form.getByRole('button', { name: 'Grund', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Krankheit' }).click();
     await form.getByRole('button', { name: 'Zusammenlegen' }).click();
     const confirm = page.getByRole('dialog', { name: 'Zusammenlegen?' });
     await expect(confirm).toContainText(`bei B2.1 (${rooms[0].name})`);

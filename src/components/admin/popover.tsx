@@ -77,6 +77,7 @@ export function Popover({
         <div
           role="dialog"
           aria-label={label}
+          data-menu-host=""
           style={{ width }}
           onSubmitCapture={() => setTimeout(() => setOpen(false), 0)}
           className={cn(

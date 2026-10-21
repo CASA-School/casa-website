@@ -10,6 +10,7 @@ import { Floating } from './floating';
 import { useWsLang } from './lang';
 
 import s from './date-picker.module.css';
+import { Select } from './menu-select';
 
 /**
  * The workspace's date picker, in place of the browser's own.
@@ -238,20 +239,20 @@ export function Calendar({
           <div key={`${y}-${m}`} className={s.month}>
             {months === 1 ? (
               <div className={s.title}>
-                <select className={s.jump} aria-label={t('Monat', 'Month')} value={m} onChange={(e) => setView({ y, m: Number(e.target.value) })}>
+                <Select bare className={s.jump} aria-label={t('Monat', 'Month')} value={m} onChange={(e) => setView({ y, m: Number(e.target.value) })}>
                   {MONTHS[lang].map((name, i) => (
                     <option key={name} value={i + 1}>
                       {name}
                     </option>
                   ))}
-                </select>
-                <select className={s.jump} aria-label={t('Jahr', 'Year')} value={y} onChange={(e) => setView({ y: Number(e.target.value), m })}>
+                </Select>
+                <Select bare className={s.jump} aria-label={t('Jahr', 'Year')} value={y} onChange={(e) => setView({ y: Number(e.target.value), m })}>
                   {Array.from({ length: Math.max(lastYear, y) - Math.min(firstYear, y) + 1 }, (_, i) => Math.max(lastYear, y) - i).map((year) => (
                     <option key={year} value={year}>
                       {year}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             ) : (
               <div className={s.title}>{monthTitle(y, m, lang)}</div>

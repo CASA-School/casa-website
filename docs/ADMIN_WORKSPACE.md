@@ -1314,18 +1314,31 @@ day as one moves between them.
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class
   striped, a free room „frei"; a legend, how many rooms are in use, a line at now. The search lights
   up what it finds; a block opens the same side panel. Floors run as in the building, the top floor
-  first and the Keller at the foot (2026-10-21). Below them „Online", when a class is taught online
-  that day, and „Ohne Raum": each class without a room on a row of its own with „Raum zuweisen"
-  (in „Kurse" too, in the room column).
-- **Assigning a room, and Online (0077, 2026-10-21).** Rahman: a course without a room needs an
-  action, „and there might be online courses". The class panel puts the room first when there is
-  none, with the free rooms that seat the group (smallest first, three) and „Online" as one-click
-  choices, from that day to the end of the course by default. SchoolMan keeps online teaching as a
-  place (`LocationReference` OnlineGroup/OnlineOne), not a room; the workspace gives OnlineGroup one
-  room, „Online", so a class's place stays its room. The plans know it by its location's kind:
-  never taken or double-booked (Tagesplan, Raumplan, the course page), no floor, not among the rooms
-  in use. SchoolMan's own online courses do not arrive as Online yet: the bridge reads rooms, not a
-  course's `_ID_Location`.
+  first and the Keller at the foot (2026-10-21). Below them „Online" with the online rooms, and
+  „Ohne Raum": each class without a room on a row of its own with „Raum zuweisen" (in „Kurse" too, in
+  the room column).
+- **Assigning a room, and online rooms (0077, 2026-10-21).** Rahman: a course without a room needs an
+  action, „and there might be online courses … a numbering for online courses too". The class panel
+  puts the room first when there is none, with the free rooms that seat the group (smallest first,
+  three) and the first free online room as one-click choices, from that day to the end of the course
+  by default. SchoolMan keeps online teaching as a place (`LocationReference` OnlineGroup/OnlineOne),
+  not a room; the workspace gives OnlineGroup numbered rooms — „Online 1", more added under Settings →
+  Räume — so a class's place stays its room. An online room is a room like the others (one class at a
+  time, taken and double-booked alike) with no floor, not among the building's rooms in use. SchoolMan's
+  own online courses do not arrive in one yet: the bridge reads rooms, not a course's `_ID_Location`.
+- **Every dropdown is CASA's menu** (2026-10-21, Rahman: „check all the dropdowns in the dashboard and
+  make sure they open properly and properly branded"). `Select` (`ui.tsx`, from
+  `src/components/admin/menu-select.tsx`) opens the panel of „Weiter mit …" and Zuständig instead of the
+  browser's list: options under their `<optgroup>` headings, the chosen one ticked, the list opening at
+  it, a letter typed jumping to it; a disabled empty option („Auswählen") is the field's empty state,
+  not a choice. A real `<select>` stays under the field and keeps the value, the form's post,
+  `required`, `onChange`, a reset and `selectOption` in e2e; a choice sets it and announces a change.
+  `bare` keeps a module's own field look (Kursplanung's `.sel`, the offers' `.fi`, the calendar's month
+  and year). `MenuSelect` is the same menu for a value a client component holds, with a detail per
+  option — the class panel's rooms under their floor with seats or what is in them, its teachers with
+  who is away. The menu is drawn inside the dialog, side panel, calendar or popover it is opened from
+  (`data-menu-host`, or the dialog's content), or a dialog's scroll lock stops the wheel and a
+  popover's outside click closes it under the pointer.
 - **Anwesenheitsliste** (`/admin/day/attendance?course=&group=&from=`). For the class, not the day
   (Rahman: „not daily, it is for the course … Querformat"), as SchoolMan makes it
   (`MakeCoursePlan.DateBooking_Course` and `FillRowCalendar.AllWeekDay.Presence.Loop_DateBooking`

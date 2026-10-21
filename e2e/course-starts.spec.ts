@@ -153,7 +153,7 @@ test.describe('course starts', () => {
 
     // March 2030 opens on Monday 25 February; the start is Monday 4 March.
     await page.goto('/admin/kursplanung?month=2030-03');
-    await page.getByRole('button', { name: 'Monat' }).click();
+    await page.getByRole('button', { name: 'Monat', exact: true }).click();
     await expect(page.locator(`button[data-group="${group}"][data-date="2030-03-04"]`)).toHaveCount(1);
     expect(await page.locator(`button[data-group="${group}"]`).evaluateAll((els) => els.filter((e) => (e as HTMLElement).dataset.date! < '2030-03-04').length)).toBe(0);
 

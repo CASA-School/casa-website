@@ -92,6 +92,8 @@ test.describe('a class from the Tagesplan', () => {
     ]);
   });
 
+  const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   const openClass = async (page: import('@playwright/test').Page) => {
     await page.goto(`/admin/day/courses?date=${DAYS[0]}`);
     await page.getByRole('row').filter({ hasText: 'B1.1' }).first().click();
@@ -109,7 +111,8 @@ test.describe('a class from the Tagesplan', () => {
   test('the room on one day, then the teacher from that day on — each after saying what changes', async ({ page }) => {
     let panel = await openClass(page);
     const roomForm = panel.locator('form').filter({ hasText: 'Raum ändern' });
-    await roomForm.getByRole('combobox').selectOption(rooms[1].id);
+    await roomForm.getByRole('button', { name: 'Raum', exact: true }).click();
+    await page.getByRole('menuitem', { name: new RegExp(`^${escape(rooms[1].name)}`) }).click();
     await roomForm.getByRole('radio', { name: /^Nur am/ }).check();
     await roomForm.getByRole('button', { name: 'Raum ändern' }).click();
     const confirm = page.getByRole('dialog', { name: 'Raum ändern?' });
@@ -121,7 +124,8 @@ test.describe('a class from the Tagesplan', () => {
 
     panel = await openClass(page);
     const teacherForm = panel.locator('form').filter({ hasText: 'Lehrkraft ändern' });
-    await teacherForm.getByRole('combobox').selectOption(teachers[1].id);
+    await teacherForm.getByRole('button', { name: 'Lehrkraft', exact: true }).click();
+    await page.getByRole('menuitem', { name: new RegExp(`^${escape(teachers[1].name)}`) }).click();
     await teacherForm.getByRole('radio', { name: /bis Kursende$/ }).check();
     await teacherForm.getByRole('button', { name: 'Lehrkraft ändern' }).click();
     const sure = page.getByRole('dialog', { name: 'Lehrkraft ändern?' });
@@ -142,19 +146,19 @@ test.describe('a class from the Tagesplan', () => {
   test('a class without a room gets one from the Raumplan — here Online, to the end of the course', async ({ page }) => {
     await client.query(`UPDATE course_days SET room_id = NULL, replaced_room_id = NULL WHERE course_id = $1`, [courseId]);
     await client.query(`UPDATE course_week_plans SET room_id = NULL WHERE course_id = $1`, [courseId]);
-    const online = (await client.query<{ id: string }>(`SELECT r.id FROM rooms r JOIN locations l ON l.id = r.location_id WHERE l.kind = 'online' AND r.name = 'Online'`)).rows[0];
-    test.skip(!online, 'needs the Online room (0077)');
+    const online = (await client.query<{ id: string }>(`SELECT r.id FROM rooms r JOIN locations l ON l.id = r.location_id WHERE l.kind = 'online' AND r.name = 'Online 1'`)).rows[0];
+    test.skip(!online, 'needs the room Online 1 (0077)');
 
     await page.goto(`/admin/day/rooms?date=${DAYS[0]}`);
     await page.getByRole('button', { name: 'Raum zuweisen' }).click();
     const panel = page.getByRole('dialog', { name: /^B1\.1/ });
     await expect(panel).toContainText('Diese Gruppe hat noch keinen Raum.');
     const roomForm = panel.locator('form').filter({ hasText: 'Frei und passend' });
-    await roomForm.getByRole('button', { name: 'Online', exact: true }).click();
+    await roomForm.getByRole('button', { name: 'Online 1', exact: true }).click();
     await expect(roomForm.getByRole('radio', { name: /bis Kursende$/ })).toBeChecked();
     await roomForm.getByRole('button', { name: 'Raum zuweisen' }).click();
     const confirm = page.getByRole('dialog', { name: 'Raum zuweisen?' });
-    await expect(confirm).toContainText('ist B1.1 online');
+    await expect(confirm).toContainText('ist B1.1 in Online 1');
     await confirm.getByRole('button', { name: 'Ja, zuweisen' }).click();
     await expect
       .poll(async () => (await client.query<{ room_id: string }>(`SELECT room_id FROM course_days WHERE course_id = $1 ORDER BY on_date`, [courseId])).rows.map((r) => r.room_id))
@@ -162,6 +166,6 @@ test.describe('a class from the Tagesplan', () => {
 
     await page.goto(`/admin/day/rooms?date=${DAYS[1]}`);
     await expect(page.getByRole('button', { name: 'Raum zuweisen' })).toHaveCount(0);
-    await expect(page.getByText('Online', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Online 1', { exact: true })).toBeVisible();
   });
 });
