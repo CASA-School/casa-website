@@ -133,4 +133,35 @@ test.describe('a class from the Tagesplan', () => {
     const plan = await client.query<{ teacher_id: string }>(`SELECT DISTINCT teacher_id FROM course_week_plans WHERE course_id = $1`, [courseId]);
     expect(plan.rows).toEqual([{ teacher_id: teachers[1].id }]);
   });
+
+  /*
+   * A class without a room (Rahman, 2026-10-21): „Raum zuweisen" where its room would be, the free rooms
+   * that seat it and „Online" (0077) one click each, from that day to the end of the course; the Raumplan
+   * then shows it under „Online", below the building.
+   */
+  test('a class without a room gets one from the Raumplan — here Online, to the end of the course', async ({ page }) => {
+    await client.query(`UPDATE course_days SET room_id = NULL, replaced_room_id = NULL WHERE course_id = $1`, [courseId]);
+    await client.query(`UPDATE course_week_plans SET room_id = NULL WHERE course_id = $1`, [courseId]);
+    const online = (await client.query<{ id: string }>(`SELECT r.id FROM rooms r JOIN locations l ON l.id = r.location_id WHERE l.kind = 'online' AND r.name = 'Online'`)).rows[0];
+    test.skip(!online, 'needs the Online room (0077)');
+
+    await page.goto(`/admin/day/rooms?date=${DAYS[0]}`);
+    await page.getByRole('button', { name: 'Raum zuweisen' }).click();
+    const panel = page.getByRole('dialog', { name: /^B1\.1/ });
+    await expect(panel).toContainText('Diese Gruppe hat noch keinen Raum.');
+    const roomForm = panel.locator('form').filter({ hasText: 'Frei und passend' });
+    await roomForm.getByRole('button', { name: 'Online', exact: true }).click();
+    await expect(roomForm.getByRole('radio', { name: /bis Kursende$/ })).toBeChecked();
+    await roomForm.getByRole('button', { name: 'Raum zuweisen' }).click();
+    const confirm = page.getByRole('dialog', { name: 'Raum zuweisen?' });
+    await expect(confirm).toContainText('ist B1.1 online');
+    await confirm.getByRole('button', { name: 'Ja, zuweisen' }).click();
+    await expect
+      .poll(async () => (await client.query<{ room_id: string }>(`SELECT room_id FROM course_days WHERE course_id = $1 ORDER BY on_date`, [courseId])).rows.map((r) => r.room_id))
+      .toEqual(DAYS.map(() => online.id));
+
+    await page.goto(`/admin/day/rooms?date=${DAYS[1]}`);
+    await expect(page.getByRole('button', { name: 'Raum zuweisen' })).toHaveCount(0);
+    await expect(page.getByText('Online', { exact: true }).first()).toBeVisible();
+  });
 });

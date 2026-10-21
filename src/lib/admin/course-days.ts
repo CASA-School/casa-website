@@ -439,10 +439,14 @@ export async function courseDayChoices(courseId: string): Promise<DayChoices> {
         ORDER BY p.first_name, p.last_name`
     ),
     query<{ id: string; name: string }>(
-      `SELECT id, coalesce(nickname, name) AS name FROM rooms WHERE is_active AND is_bookable AND kind = 'classroom' ORDER BY name`
+      `SELECT r.id, coalesce(r.nickname, r.name) AS name FROM rooms r JOIN locations l ON l.id = r.location_id
+        WHERE r.is_active AND r.is_bookable AND r.kind = 'classroom' ORDER BY l.kind = 'online', r.name`
     ),
+    // „Online" (0077) holds any number of classes at once: it is never taken.
     query<{ day_id: string; teacher_id: string | null; room_id: string | null; label: string | null }>(
-      `SELECT d.id AS day_id, o.teacher_id, o.room_id, coalesce(c.title, c.level_code, g.level || '.' || g.phase) AS label
+      `SELECT d.id AS day_id, o.teacher_id,
+              CASE WHEN EXISTS (SELECT 1 FROM rooms r JOIN locations l ON l.id = r.location_id WHERE r.id = o.room_id AND l.kind = 'online') THEN NULL ELSE o.room_id END AS room_id,
+              coalesce(c.title, c.level_code, g.level || '.' || g.phase) AS label
          FROM course_day_times d
          JOIN course_day_times o ON o.on_date = d.on_date AND o.id <> d.id AND NOT o.cancelled
               AND (d.starts_at IS NULL OR o.starts_at IS NULL OR (o.starts_at < d.ends_at AND o.ends_at > d.starts_at))

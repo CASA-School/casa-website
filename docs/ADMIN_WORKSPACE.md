@@ -1313,7 +1313,19 @@ day as one moves between them.
   floor, alternating shades, hours and half hours across, each class a block in its part of the
   day's colour with course, number and teacher; cover amber, a missing teacher red, a cancelled class
   striped, a free room „frei"; a legend, how many rooms are in use, a line at now. The search lights
-  up what it finds; a block opens the same side panel.
+  up what it finds; a block opens the same side panel. Floors run as in the building, the top floor
+  first and the Keller at the foot (2026-10-21). Below them „Online", when a class is taught online
+  that day, and „Ohne Raum": each class without a room on a row of its own with „Raum zuweisen"
+  (in „Kurse" too, in the room column).
+- **Assigning a room, and Online (0077, 2026-10-21).** Rahman: a course without a room needs an
+  action, „and there might be online courses". The class panel puts the room first when there is
+  none, with the free rooms that seat the group (smallest first, three) and „Online" as one-click
+  choices, from that day to the end of the course by default. SchoolMan keeps online teaching as a
+  place (`LocationReference` OnlineGroup/OnlineOne), not a room; the workspace gives OnlineGroup one
+  room, „Online", so a class's place stays its room. The plans know it by its location's kind:
+  never taken or double-booked (Tagesplan, Raumplan, the course page), no floor, not among the rooms
+  in use. SchoolMan's own online courses do not arrive as Online yet: the bridge reads rooms, not a
+  course's `_ID_Location`.
 - **Anwesenheitsliste** (`/admin/day/attendance?course=&group=&from=`). For the class, not the day
   (Rahman: „not daily, it is for the course … Querformat"), as SchoolMan makes it
   (`MakeCoursePlan.DateBooking_Course` and `FillRowCalendar.AllWeekDay.Presence.Loop_DateBooking`
