@@ -154,7 +154,7 @@ export function CourseLevelGoals({
               {group.items.map((item) => (
                 <li
                   key={item.level}
-                  className="flex items-start gap-4 border-b border-[color:var(--casa-sand)]/50 py-3.5 first:pt-0 last:border-b-0 last:pb-0"
+                  className="flex items-center gap-4 border-b border-[color:var(--casa-sand)]/50 py-3 first:pt-0 last:border-b-0 last:pb-0"
                 >
                   {/*
                     A larger chip than before — 2.75rem wide, its own line-height
@@ -167,13 +167,10 @@ export function CourseLevelGoals({
                   >
                     {item.level}
                   </span>
-                  {/* Body copy at body size. This was `text-sm` — 14px, a step
-                      below the 17px every lead paragraph on the page uses, which
-                      is what made the section read small. */}
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[var(--casa-muted)]">{levelBand(item.level, locale)}</p>
-                    <p className="mt-0.5 text-base leading-relaxed text-[var(--casa-ink)]">{item.focus}</p>
-                  </div>
+                  {/* The level's keywords, not a description (CASA's content review, 2026-10-21: the
+                      long sentence replaced by „a couple of keywords"). The full description is on the
+                      levels page, one link below. */}
+                  <p className="min-w-0 self-center text-base font-semibold leading-snug text-[var(--casa-ink)]">{levelBand(item.level, locale)}</p>
                 </li>
               ))}
             </ul>
