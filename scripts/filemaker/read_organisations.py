@@ -50,7 +50,8 @@ def stamp(value):
 
 
 today = date.today()
-bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_EnrolmentDone', '_ID_Agency', '_ID_Corporate', '_ID_Group') if b['__ID_Booking'].strip()}
+bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_EnrolmentDone', '_ID_Agency', '_ID_Corporate', '_ID_Group',
+                                                         '_ID_PaymentThird') if b['__ID_Booking'].strip()}
 periods = table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate')
 chosen = sample_persons(bookings, periods, today)
 theirs = [b for b in bookings.values() if first(b['_ID_Person']) in chosen]
@@ -224,7 +225,10 @@ for p in parties:
                 'contacts': contacts[id(p)],
                 'commissions': commissions[id(p)],
                 # The sample's bookings it is named on, and its company courses (another party has neither).
-                'bookings': [] if p.get('relation') else sorted(b['__ID_Booking'].strip() for b in theirs if first(b['_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate']) == p['id']),
+                # The bookings it pays — a company not where „Zahlung durch Dritte" says Nein (2026-10-21).
+                'bookings': [] if p.get('relation') else sorted(
+                    b['__ID_Booking'].strip() for b in theirs
+                    if first(b['_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate']) == p['id'] and (p['kind'] == 'agency' or first(b['_ID_PaymentThird']) != '2')),
                 'courses': sorted(c for c, corp in course_corporates.items() if p['kind'] == 'company' and not p.get('relation') and corp == p['id']),
                 'letters': letters_of[id(p)]})
 

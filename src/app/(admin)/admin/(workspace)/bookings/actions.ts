@@ -29,6 +29,8 @@ import {
   type ChargeKind,
   type PaymentMethod,
   type Payer,
+  bookingYears,
+  type BookingYear,
 } from '@/lib/admin/bookings';
 import { bildungszeitClasses, bildungszeitTypeId } from '@/lib/admin/bildungszeit';
 import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
@@ -44,6 +46,8 @@ import { readChoices } from '@/lib/admin/letters/choices';
 import { saveStandardText } from '@/lib/admin/letters/repo';
 import { BOOKING_LETTER_KINDS, REGISTRATION_LETTER_KINDS, WAITLIST_LETTER_KINDS, type BookingLetterKind, type LetterLanguage } from '@/lib/admin/letters/types';
 import { requireModule } from '@/lib/admin/guard';
+import { canAccess } from '@/lib/admin/access';
+import { isUuid } from '@/lib/admin/ids';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
@@ -702,4 +706,18 @@ export async function saveLetterStandardAction(input: { kind: string; language: 
   if (!STANDARD_SLOTS[kind].includes(input.part) || !body) return { ok: false };
   await saveStandardText(kind, input.language, input.part, body, actor);
   return { ok: true };
+}
+
+/**
+ * What is still owed, year by year — worked out only when asked (Rahman, 2026-10-21: „the amount shouldn't be
+ * just written there but calculated only if requested"), from the bookings filter panel. The totals are
+ * finance's and management's: whoever holds the price list (`prices`).
+ */
+export async function bookingTotalsAction(input: { payer?: string; typeId?: string; payerId?: string }): Promise<BookingYear[]> {
+  const user = await requireModule('bookings');
+  if (!canAccess(user, 'prices', 'view')) throw new Error('Not allowed');
+  const payer = (['self', 'agency', 'company'] as const).find((p) => p === input.payer);
+  const typeId = input.typeId === 'exam' || isUuid(input.typeId ?? '') ? input.typeId : undefined;
+  const payerId = isUuid(input.payerId ?? '') ? input.payerId : undefined;
+  return bookingYears({ payer, typeId, payerId });
 }

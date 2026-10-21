@@ -47,6 +47,7 @@ import {
 } from '@/lib/admin/organisations';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
+import { owesMoney } from '@/lib/admin/open-money';
 
 const GROUP_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
 
@@ -642,7 +643,7 @@ function BookingRows({ bookings, lang, t, quiet = false }: { bookings: readonly 
             }
             detail={[b.courseTypeName, b.number, range(b.startDate, b.endDate, lang) ?? t('Keine Daten', 'No dates')].filter(Boolean).join(' · ')}
             end={
-              b.status !== 'cancelled' && open > 0.005 ? (
+              b.status !== 'cancelled' && owesMoney(open) ? (
                 <>
                   <span className="block text-[0.86rem] font-bold text-[#9a5b00]">{euros(open)}</span>
                   <span className="block text-[0.72rem]">{t('offen', 'open')}</span>

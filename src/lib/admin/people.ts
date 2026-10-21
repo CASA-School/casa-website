@@ -7,6 +7,7 @@ import type { Bilingual, WsLang } from './i18n';
 import { isUuid } from './ids';
 import { courseSessionSql } from './course-session';
 import { isSession, type Session } from './day-plan-labels';
+import { OPEN_FROM, owesSql } from './open-money';
 
 /**
  * People — one row per human, from first contact.
@@ -275,53 +276,51 @@ const OPEN_CASES = `(
   + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND o.person_id = ANY(${FAMILY}) AND o.status IN ('draft', 'sent'))
 )`;
 
-/** What a person still owes across their bookings that are not cancelled. */
-const OWED = `(
-  SELECT coalesce(sum(greatest(0,
-           coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
-         - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0))), 0)
-    FROM bookings b
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
-)`;
+/**
+ * What their bookings still owe, read once per person (2026-10-21, the register at ~3,000 people): each
+ * booking's balance, summed where it owes by the rule (under 5 € is paid, `open-money.ts`). Joined as
+ * `ow`; `ow.owed` is the figure.
+ */
+const OWED_JOIN = `LEFT JOIN LATERAL (
+  SELECT coalesce(sum(o.balance) FILTER (WHERE ${owesSql('o.balance')}), 0) AS owed FROM (
+    SELECT coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
+         - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS balance
+      FROM bookings b
+     WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
+  ) o
+) ow ON true`;
 
-/** In a course today: a booking that is not cancelled with a period running now. */
-const IN_COURSE = `EXISTS (
-  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND b.person_id = ANY(${FAMILY})
-     AND bp.start_date <= current_date AND bp.end_date >= current_date
-)`;
+/**
+ * Where a person stands, from their bookings read once (2026-10-21; it was six sub-queries a person, and the
+ * register's counts took a second once 2024 and 2025 came across). Joined as `cf`:
+ * - `in_course`: a booking that is not cancelled with a period running now;
+ * - `later`: a period of an open booking that starts after today — something still to come;
+ * - `first_start`: the first day of their first course that was not cancelled;
+ * - `had_course`: a period that has ended, of a booking that was not cancelled.
+ */
+const COURSE_FLAGS = `LEFT JOIN LATERAL (
+  SELECT bool_or(b.status IN ('reserved', 'confirmed') AND bp.start_date <= current_date AND bp.end_date >= current_date) AS in_course,
+         bool_or(b.status IN ('reserved', 'confirmed') AND bp.start_date > current_date) AS later,
+         min(bp.start_date) FILTER (WHERE b.status <> 'cancelled') AS first_start,
+         bool_or(b.status <> 'cancelled' AND bp.end_date < current_date) AS had_course
+    FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
+   WHERE b.deleted_at IS NULL AND b.person_id = ANY(${FAMILY})
+) cf ON true`;
 
-/** A period of an open booking that starts after today — something still to come. */
-const LATER = `EXISTS (
-  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed') AND b.person_id = ANY(${FAMILY})
-     AND bp.start_date > current_date
-)`;
-
-/** The first day of their first course that was not cancelled. */
-const FIRST_START = `(
-  SELECT min(bp.start_date) FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
-)`;
-
-/** A period that has ended, of a booking that was not cancelled. */
-const HAD_COURSE = `EXISTS (
-  SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
-   WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND b.person_id = ANY(${FAMILY})
-     AND bp.end_date < current_date
-)`;
+const IN_COURSE = `coalesce(cf.in_course, false)`;
+const LATER = `coalesce(cf.later, false)`;
 
 const STAGE = `(CASE
-  WHEN ${IN_COURSE} AND ${FIRST_START} >= current_date - ${NEW_FOR_DAYS} THEN 'new'
+  WHEN ${IN_COURSE} AND cf.first_start >= current_date - ${NEW_FOR_DAYS} THEN 'new'
   WHEN ${IN_COURSE} AND NOT ${LATER} THEN 'last'
   WHEN ${IN_COURSE} THEN 'in_course'
   WHEN ${LATER} THEN 'coming'
-  WHEN ${HAD_COURSE} THEN 'finished'
+  WHEN coalesce(cf.had_course, false) THEN 'finished'
 END)`;
 
 /** Where one person stands, for the head of their page. */
 export async function learnerStage(personId: string): Promise<LearnerStage | null> {
-  const row = await queryFirst<{ stage: LearnerStage | null }>(`SELECT ${STAGE} AS stage FROM people p WHERE p.id = $1`, [personId]);
+  const row = await queryFirst<{ stage: LearnerStage | null }>(`SELECT ${STAGE} AS stage FROM people p ${COURSE_FLAGS} WHERE p.id = $1`, [personId]);
   return row?.stage ?? null;
 }
 
@@ -335,7 +334,17 @@ const VIEW_CONDITION: Record<PeopleView, string | null> = {
   last: `${IN_COURSE} AND NOT ${LATER}`,
   coming: `${STAGE} = 'coming'`,
   finished: `${STAGE} = 'finished'`,
-  owing: `${OWED} > 0.005`,
+  owing: `ow.owed > 0`,
+};
+
+/** What a view's condition reads: the stage's bookings, the money, or nothing. */
+const VIEW_JOINS: Record<PeopleView, string> = {
+  all: '',
+  in_course: COURSE_FLAGS,
+  last: COURSE_FLAGS,
+  coming: COURSE_FLAGS,
+  finished: COURSE_FLAGS,
+  owing: OWED_JOIN,
 };
 
 /** Each view in the order its question asks: who arrives first, who leaves first, who owes most; else the newest. */
@@ -356,10 +365,10 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
             count(*) FILTER (WHERE stage IN ('new', 'in_course', 'last') AND NOT later) AS last,
             count(*) FILTER (WHERE stage = 'coming') AS coming,
             count(*) FILTER (WHERE stage = 'finished') AS finished,
-            count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
-       -- OFFSET 0: the stage once per person — folded into the query, Postgres would repeat its six
-       -- sub-queries in each count below.
-       FROM (SELECT p.*, ${STAGE} AS stage, ${LATER} AS later FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND p.listed AND ${NOT_STAFF} OFFSET 0) p`
+            count(*) FILTER (WHERE owed > 0) AS owing
+       -- OFFSET 0: the stage and the money once per person, not again in each count below.
+       FROM (SELECT ${STAGE} AS stage, ${LATER} AS later, ow.owed FROM people p ${COURSE_FLAGS} ${OWED_JOIN}
+              WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND p.listed AND ${NOT_STAFF} OFFSET 0) p`
   );
   const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
@@ -412,7 +421,7 @@ export async function listPeople({
   const condition = VIEW_CONDITION[view];
   if (condition) where += ` AND ${condition}`;
   const total = await queryFirst<{ n: string }>(
-    `SELECT count(*) AS n FROM people p ${where}`,
+    `SELECT count(*) AS n FROM people p ${VIEW_JOINS[view]} ${where}`,
     params
   );
   // The course under a name: the earliest open booking that has not ended, so
@@ -440,11 +449,11 @@ export async function listPeople({
                     WHERE rv.person_id IS NOT NULL AND rv.person_id = ANY(${FAMILY}) ORDER BY rv.decided_at DESC LIMIT 1),
                   nb.course_level) AS level,
          ${OPEN_CASES} AS open_cases,
-         ${OWED} AS owed,
+         ow.owed AS owed,
          (SELECT b.id FROM bookings b
            WHERE b.person_id = ANY(${FAMILY}) AND b.deleted_at IS NULL AND b.status <> 'cancelled'
              AND coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
-               - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) > 0.005
+               - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) >= ${OPEN_FROM}
            ORDER BY coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
                   - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) DESC
            LIMIT 1) AS owed_booking_id,
@@ -468,7 +477,9 @@ export async function listPeople({
       HAVING max(bp.end_date) >= current_date
        ORDER BY min(bp.start_date)
        LIMIT 1
-    ) nb ON true`
+    ) nb ON true
+    ${COURSE_FLAGS}
+    ${OWED_JOIN}`
     )}
      ${where}
      ORDER BY ${VIEW_ORDER[view]}

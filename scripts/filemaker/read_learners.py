@@ -64,7 +64,8 @@ def stamp(value):
 today = date.today()
 
 bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_Student', '_ID_EnrolmentDone', '_ID_VisaRequired', '_ID_Agency',
-                                                         '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', '_ID_Group', 'TimeStampOfCreation', 'DateOfCreation') if b['__ID_Booking'].strip()}
+                                                         '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', '_ID_Group', 'TimeStampOfCreation', 'DateOfCreation',
+                                                         '_ID_PaymentThird') if b['__ID_Booking'].strip()}
 periods = table('DateBooking', '__ID_DateBooking', '_ID_Booking', '_ID_Course', 'ZStartDate', 'ZEndDate')
 
 
@@ -297,7 +298,9 @@ for pid, p in persons.items():
             'created': stamp(b['TimeStampOfCreation']) or stamp(b['DateOfCreation']),
             'enrolment': first(b['_ID_EnrolmentDone']) or None,
             'visa': first(b['_ID_VisaRequired']) == '1',
-            'payer': 'agency' if first(b['_ID_Agency']) else 'company' if first(b['_ID_Corporate']) else 'self',
+            # A company pays unless SchoolMan's „Zahlung durch Dritte" (`_ID_PaymentThird`, shown only with a
+            # company) says Nein (2): then the learner owes, the company is only theirs (2026-10-21).
+            'payer': 'agency' if first(b['_ID_Agency']) else 'company' if first(b['_ID_Corporate']) and first(b['_ID_PaymentThird']) != '2' else 'self',
             'exam': {'id': first(b['_ID_Exam']), 'ref': first(exams.get(first(b['_ID_Exam']), {}).get('_ID_ExamReference')) or None,
                      'day': short_day(exams.get(first(b['_ID_Exam']), {}).get('Exam.ZSingleDate_OneLine')),
                      'places': exams.get(first(b['_ID_Exam']), {}).get('NumberPlace', '').strip() or None} if first(b['_ID_Exam']) else None,

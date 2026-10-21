@@ -8,10 +8,13 @@ import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import {
   BOOKING_STATUS_LABELS,
+  bookingTypeChoices,
+  bookingYearList,
+  PAYER_LABELS,
+  type Payer,
   bookingCounts,
   bookingLight,
   bookingLightLabel,
-  bookingsOwed,
   listBookings,
   type BookingFilter,
   type BookingListItem,
@@ -23,9 +26,11 @@ import { todayInputValue, toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { isUuid } from '@/lib/admin/ids';
 import { organisationName } from '@/lib/admin/organisations';
-import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
+import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { SessionMark } from '@/components/admin/session-mark';
+import { BookingFilters } from './booking-filters';
+import { owesMoney } from '@/lib/admin/open-money';
 
 /**
  * Bookings.
@@ -68,7 +73,7 @@ const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
 const SOON_DAYS = 14;
 
 /** Still owed: a booking that is not cancelled with more charged than paid. */
-const owes = (b: BookingListItem) => b.status !== 'cancelled' && b.charged - b.paid > 0.005;
+const owes = (b: BookingListItem) => b.status !== 'cancelled' && owesMoney(b.charged - b.paid);
 
 const money = (n: number, currency: string) =>
   currency === 'EUR'
@@ -81,13 +86,33 @@ function when(b: BookingListItem, lang: WsLang): string {
   return from && to ? dayRange(from, to, lang) : '';
 }
 
-function Balance({ b, t }: { b: BookingListItem; t: T }) {
+/** When a reminder went out: „erinnert 12.3.2025", under what is still open. */
+const remindedOn = (b: BookingListItem, lang: WsLang) =>
+  b.remindedAt ? new Date(b.remindedAt).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'Europe/Berlin' }) : null;
+
+function Balance({ b, t, lang }: { b: BookingListItem; t: T; lang: WsLang }) {
   if (b.charged === 0 && b.paid === 0) return null;
   const open = b.charged - b.paid;
   if (Math.abs(open) < 0.005) return <span className="text-[0.8rem] text-[var(--casa-text-subtle)]">{t('Bezahlt', 'Paid')}</span>;
+  // A leftover under 5 € counts as paid (`owesMoney`): said, quietly, not chased.
+  if (open > 0 && !owesMoney(open)) {
+    return (
+      <span className="text-[0.8rem] text-[var(--casa-text-subtle)]">
+        {t('Bezahlt', 'Paid')} <span className="text-[0.72rem]">· {t(`Rest ${money(open, b.currency)}`, `${money(open, b.currency)} left`)}</span>
+      </span>
+    );
+  }
   // A cancelled booking owes nothing more; only a credit — a refund due — is still news.
   if (open > 0 && b.status === 'cancelled') return null;
-  if (open > 0) return <span className="font-semibold text-[#9a5b00]">{money(open, b.currency)}</span>;
+  if (open > 0) {
+    const reminded = remindedOn(b, lang);
+    return (
+      <>
+        <span className="font-semibold text-[#9a5b00]">{money(open, b.currency)}</span>
+        {reminded ? <span className="block text-[0.72rem] font-normal text-[var(--casa-muted)]">{t(`erinnert ${reminded}`, `reminded ${reminded}`)}</span> : null}
+      </>
+    );
+  }
   return (
     <>
       <span className="font-semibold">{money(-open, b.currency)}</span>
@@ -109,16 +134,26 @@ export default async function BookingsPage({
   // From an organisation's page: only the bookings it pays (2026-10-20).
   const rawPayer = firstParam(params.org);
   const payerId = rawPayer && isUuid(rawPayer) ? rawPayer : undefined;
+  // The filters at the side (2026-10-21): the year (of a booking's first day), who pays, the course type.
+  const rawYear = firstParam(params.year);
+  const year = rawYear && /^\d{4}$/.test(rawYear) ? Number(rawYear) : undefined;
+  const rawPayerKind = firstParam(params.payer);
+  const payer = (['self', 'agency', 'company'] as const).find((p) => p === rawPayerKind) as Payer | undefined;
+  const rawType = firstParam(params.type);
+  const typeId = rawType === 'exam' || (rawType && isUuid(rawType)) ? rawType : undefined;
+  const narrow = { payerId, year, payer, typeId };
 
-  const [{ items, total }, counts, owed, payerName, { t, lang }, user] = await Promise.all([
-    listBookings({ filter, search, payerId, limit: PAGE_SIZE, offset: offsetFor(page) }),
-    bookingCounts(payerId),
-    bookingsOwed(payerId),
+  const [{ items, total }, counts, payerName, { t, lang }, user, years, types] = await Promise.all([
+    listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page), ...narrow }),
+    bookingCounts(narrow),
     payerId ? organisationName(payerId) : Promise.resolve(null),
     getI18n(),
     requireModule('bookings'),
+    bookingYearList(narrow),
+    bookingTypeChoices(),
   ]);
   const canEdit = canAccess(user, 'bookings', 'edit');
+  const typeName = typeId === 'exam' ? t('Prüfungen', 'Exams') : types.find((ty) => ty.id === typeId)?.name;
 
   // Running ones split by whether they end within two weeks; coming ones start with the next two weeks,
   // then go by month; the past starts with what is still owed. A view about money or follow-ups is one list.
@@ -181,37 +216,49 @@ export default async function BookingsPage({
   const hide = 'hidden md:table-cell';
   // The total gives way first on a narrower screen: the balance is the figure the team acts on.
   const hideLg = 'hidden lg:table-cell';
-  const href = (key: BookingFilter) => {
-    const query = new URLSearchParams({ ...(key === 'current' ? {} : { filter: key }), ...(payerId ? { org: payerId } : {}) }).toString();
-    return `/admin/bookings${query ? `?${query}` : ''}`;
+  // A view's address keeps the filters; `without` drops one of them, for its label's ×.
+  const query = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org') =>
+    new URLSearchParams(
+      Object.entries({
+        filter: key === 'current' ? undefined : key,
+        org: without === 'org' ? undefined : payerId,
+        year: without === 'year' || !year ? undefined : String(year),
+        payer: without === 'payer' ? undefined : payer,
+        type: without === 'type' ? undefined : typeId,
+      }).filter((e): e is [string, string] => Boolean(e[1]))
+    ).toString();
+  const href = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org') => {
+    const q = query(key, without);
+    return `/admin/bookings${q ? `?${q}` : ''}`;
   };
+  const chips = [
+    payerId ? { key: 'org' as const, label: t(`Bezahlt von ${payerName ?? '…'}`, `Paid by ${payerName ?? '…'}`) } : null,
+    year ? { key: 'year' as const, label: String(year) } : null,
+    payer ? { key: 'payer' as const, label: pick(lang, PAYER_LABELS[payer]) } : null,
+    typeName ? { key: 'type' as const, label: typeName } : null,
+  ].filter((c): c is { key: 'org' | 'year' | 'payer' | 'type'; label: string } => c !== null);
 
   return (
     <>
       <PageHeader title={t('Buchungen', 'Bookings')} />
 
-      {/* What is still owed across all bookings: the one figure the tabs do not carry. */}
-      <p className="-mt-3 mb-6 flex min-h-5 flex-wrap items-center gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        {payerId ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
-            {t(`Bezahlt von ${payerName ?? '…'}`, `Paid by ${payerName ?? '…'}`)}
-            <Link
-              href={`/admin/bookings${filter === 'current' ? '' : `?filter=${filter}`}`}
-              aria-label={t('Alle Buchungen zeigen', 'Show all bookings')}
-              className="grid size-5 place-items-center rounded-full text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)] [&_svg]:size-3"
-            >
-              {Icon.close}
-            </Link>
-          </span>
-        ) : null}
-        {owed.amount > 0.005 ? (
-          <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="size-2 rounded-full bg-[#e0a100]" />
-            <b className="font-semibold text-[#9a5b00] tabular-nums">{euros(owed.amount)}</b>
-            {t('offen', 'owed')}
-          </span>
-        ) : null}
-      </p>
+      {/* The filters in force, each with its ×: the list says what it is narrowed to, the panel changes it. */}
+      {chips.length ? (
+        <p className="-mt-3 mb-5 flex flex-wrap items-center gap-1.5">
+          {chips.map((chip) => (
+            <span key={chip.key} className="inline-flex items-center gap-1.5 rounded-full bg-white py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
+              {chip.label}
+              <Link
+                href={href(filter, chip.key)}
+                aria-label={t(`Filter „${chip.label}" entfernen`, `Remove the filter “${chip.label}”`)}
+                className="grid size-5 place-items-center rounded-full text-[var(--casa-muted)] hover:bg-ws-sunk hover:text-[var(--casa-ink)] [&_svg]:size-3"
+              >
+                {Icon.close}
+              </Link>
+            </span>
+          ))}
+        </p>
+      ) : null}
 
       <Card bleed>
         <ListBar
@@ -220,9 +267,21 @@ export default async function BookingsPage({
           search={{
             action: '/admin/bookings',
             value: search,
-            placeholder: t('Name, Buchungsnummer oder Kurs', 'Name, booking number or course'),
-            keep: { filter: filter === 'current' ? undefined : filter, org: payerId },
+            placeholder: t('Name, Buchungsnummer (auch SchoolMan) oder Kurs', 'Name, booking number (SchoolMan too) or course'),
+            keep: { filter: filter === 'current' ? undefined : filter, org: payerId, year: year ? String(year) : undefined, payer, type: typeId },
           }}
+          end={
+            <BookingFilters
+              base={{ filter: filter === 'current' ? undefined : filter, org: payerId, q: search || undefined }}
+              year={year}
+              payer={payer}
+              typeId={typeId}
+              years={years}
+              types={types}
+              payers={(['self', 'agency', 'company'] as const).map((value) => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
+              canTotals={canAccess(user, 'prices', 'view')}
+            />
+          }
         />
         {items.length === 0 ? (
           <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Hier gibt es keine Buchungen', 'No bookings here')}>
@@ -243,7 +302,13 @@ export default async function BookingsPage({
               ...group.rows.map((b) => {
                 const light = bookingLight(b);
                 const lightLabel = pick(lang, bookingLightLabel(b));
-                const aboutText = [b.courseTypeName, b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null].filter(Boolean).join(' · ');
+                const aboutText = [
+                  b.courseTypeName,
+                  b.groupName ? t(`Gruppe ${b.groupName}`, `Group ${b.groupName}`) : null,
+                  b.status === 'reserved' ? pick(lang, BOOKING_STATUS_LABELS.reserved) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
                 // The course's part of the day as its colour, before its name (2026-10-21).
                 const about = aboutText ? (
                   <>
@@ -267,7 +332,7 @@ export default async function BookingsPage({
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>
                   <Cell align="right" className="whitespace-nowrap tabular-nums">
-                    <Balance b={b} t={t} />
+                    <Balance b={b} t={t} lang={lang} />
                   </Cell>
                   <Cell align="right">
                     <RowActions label={t(`Aktionen: ${b.personName}, ${b.number}`, `Actions: ${b.personName}, ${b.number}`)} {...actionsOf(b)} />

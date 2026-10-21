@@ -70,6 +70,9 @@ export function getPool(): Pool {
     // A stuck connect must fail the request, not hang the render.
     connectionTimeoutMillis: 8_000,
     idleTimeoutMillis: 30_000,
+    // No JIT (2026-10-21): it compiled each register query for ~190 ms once 2024 and 2025 came across —
+    // nine tenths of the time, for queries that run in 30 ms. It pays off on long reports, not on a page.
+    options: '-c jit=off',
     // `sslmode` in the URL is honoured by pg-connection-string, which is how
     // the managed servers are reached. The local container has no TLS and its
     // URL says nothing, which is right for a loopback socket.

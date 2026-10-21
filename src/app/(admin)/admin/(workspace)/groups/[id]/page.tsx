@@ -27,6 +27,7 @@ import { listNotes } from '@/lib/admin/notes';
 import { OFFER_STATUS_LABELS, type OfferStatus } from '@/lib/admin/offers/types';
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
+import { owesMoney } from '@/lib/admin/open-money';
 
 const STATUS_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
 
@@ -153,7 +154,7 @@ export default async function GroupPage({
             <Stat label={t('Zeitraum', 'Dates')}>
               {range(group.arrival, group.departure, lang) ?? range(group.courseFrom, group.courseTo, lang) ?? muted(t('offen', 'not set'))}
             </Stat>
-            {figures && figures.booked ? <Stat label={t('Offen', 'Owing')}>{open > 0.005 ? euros(open) : muted(t('nichts', 'nothing'))}</Stat> : null}
+            {figures && figures.booked ? <Stat label={t('Offen', 'Owing')}>{owesMoney(open) ? euros(open) : muted(t('nichts', 'nothing'))}</Stat> : null}
           </StatBar>
         }
         tabs={<RecordTabList label={t(`${group.name}: Bereiche`, `${group.name}: sections`)} />}
@@ -479,7 +480,7 @@ function ParticipantLine({ participant: p, lang, t }: { participant: GroupPartic
       <span className="min-w-0 flex-1 truncate text-[0.8rem] text-[var(--casa-muted)]">
         {[p.number, range(p.startDate, p.endDate, lang) ?? t('Keine Daten', 'No dates'), p.stay].filter(Boolean).join(' · ')}
       </span>
-      {!cancelled && open > 0.005 ? (
+      {!cancelled && owesMoney(open) ? (
         <span className="shrink-0 text-[0.82rem] font-bold text-[#9a5b00] tabular-nums">
           {euros(open)} <span className="font-medium">{t('offen', 'open')}</span>
         </span>

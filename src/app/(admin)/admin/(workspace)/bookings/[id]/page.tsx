@@ -60,6 +60,7 @@ import { suggestBookingLetters } from '@/lib/admin/letters/suggest';
 import { num, pick, wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
+import { owesMoney } from '@/lib/admin/open-money';
 
 const money = (n: number, currency: string) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(
@@ -488,6 +489,12 @@ export default async function BookingPage({
               {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
               {/* The number a learner writes on a transfer and finance matches payments by. */}
               <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)] tabular-nums">{booking.number}</span>
+              {/* SchoolMan's own number (0052): on its receipts, so finance and learners still quote it (2026-10-21). */}
+              {booking.schoolmanNumber ? (
+                <span className="ml-2 text-[0.78rem] font-medium text-[var(--casa-text-subtle)] tabular-nums" title={t('Nummer in SchoolMan', 'Number in SchoolMan')}>
+                  SchoolMan {booking.schoolmanNumber}
+                </span>
+              ) : null}
             </span>
             <MetaLine>
               {exam ? (
@@ -586,7 +593,7 @@ export default async function BookingPage({
               <span className="text-[#17693a]">{money(booking.paid, booking.currency)}</span>
             </Stat>
             <Stat label={booking.balance < 0 ? t('Überzahlt', 'Paid over') : t('Offen', 'Balance')}>
-              <span className={booking.balance > 0.005 ? 'text-[#9a5b00]' : booking.balance < -0.005 ? 'text-[var(--casa-danger-text)]' : 'text-[#17693a]'}>
+              <span className={owesMoney(booking.balance) ? 'text-[#9a5b00]' : booking.balance < -0.005 ? 'text-[var(--casa-danger-text)]' : 'text-[#17693a]'}>
                 {Math.abs(booking.balance) < 0.005 ? t('Alles bezahlt', 'Paid in full') : money(Math.abs(booking.balance), booking.currency)}
               </span>
             </Stat>

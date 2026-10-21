@@ -13,6 +13,7 @@ import { pick, type Bilingual, type WsLang } from './i18n';
 import { isUuid } from './ids';
 import { courseSessionSql } from './course-session';
 import { isSession, type Session } from './day-plan-labels';
+import { owesMoney, owesSql } from './open-money';
 
 /**
  * Bookings — a person's confirmed place on a course, with dates, cost lines
@@ -122,8 +123,8 @@ export function bookingLightLabel(b: Parameters<typeof bookingLight>[0]): Biling
   return BOOKING_LIGHT_LABELS.unclear;
 }
 
-/** Paid in full means something was charged and nothing of it is open. */
-export const paidInFull = (charged: number, paid: number) => charged > 0.005 && paid >= charged - 0.005;
+/** Paid in full means something was charged and nothing of it is open — under 5 € counts as paid (`owesMoney`). */
+export const paidInFull = (charged: number, paid: number) => charged > 0.005 && !owesMoney(charged - paid);
 
 export function bookingLight(b: {
   status: BookingStatus;
@@ -166,6 +167,12 @@ export type BookingListItem = {
   courseTypeName: string | null;
   /** The part of the day of its course running now or next, for its colour in a list (2026-10-21). */
   session: Session | null;
+  /** When the last payment reminder went out, SchoolMan's among them: what a follow-up needs to know. */
+  remindedAt: Date | null;
+  /** SchoolMan's own number for it (0052), which receipts carry and finance quotes. */
+  schoolmanNumber: string | null;
+  /** The group visit it belongs to: a group is often paid as a whole, so its members' balances read differently. */
+  groupName: string | null;
   status: BookingStatus;
   startDate: Date | null;
   endDate: Date | null;
@@ -290,7 +297,10 @@ const LIST = `
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
          coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid,
          (SELECT ${courseSessionSql('bp.course_id', 'bp.course_instance_id', 'b.course_type_id')} FROM booking_periods bp
-           WHERE bp.booking_id = b.id ORDER BY (bp.end_date < current_date), bp.start_date LIMIT 1) AS session
+           WHERE bp.booking_id = b.id ORDER BY (bp.end_date < current_date), bp.start_date LIMIT 1) AS session,
+         (SELECT max(l.sent_at) FROM letters l WHERE l.booking_id = b.id AND l.kind = 'payment_reminder') AS reminded_at,
+         b.filemaker_booking_id,
+         (SELECT gv.name FROM group_visits gv WHERE gv.id = b.group_visit_id) AS group_name
     FROM bookings b
     JOIN people p ON p.id = b.person_id
     LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -306,6 +316,9 @@ type ListRow = {
   person_email: string | null;
   course_type_name: string | null;
   session: string | null;
+  reminded_at: Date | null;
+  filemaker_booking_id: string | null;
+  group_name: string | null;
   status: BookingStatus;
   currency: string;
   created_at: Date;
@@ -333,6 +346,9 @@ const toItem = (r: ListRow): BookingListItem => ({
   personEmail: r.person_email,
   courseTypeName: r.course_type_name,
   session: isSession(r.session) ? r.session : null,
+  remindedAt: r.reminded_at,
+  schoolmanNumber: r.filemaker_booking_id,
+  groupName: r.group_name,
   status: r.status,
   startDate: r.start_date,
   endDate: r.end_date,
@@ -417,11 +433,13 @@ export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'followup' | 'p
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
+/** A booking's year: the year of its first day — its course or its exam — else the year it was made. */
+const BOOKING_YEAR = `extract(year FROM coalesce((SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id), (b.created_at AT TIME ZONE 'Europe/Berlin')::date))::int`;
 
 const FILTERS: Record<BookingFilter, string> = {
   // „Zahlung offen": something is still owed — the same rule as the learners' view and the figure above the
   // list (2026-10-18). A booking with nothing charged owes nothing; one under observation still owes.
-  unclear: `b.status <> 'cancelled' AND ${CHARGED} - ${PAID} > 0.005`,
+  unclear: `b.status <> 'cancelled' AND ${owesSql(`${CHARGED} - ${PAID}`)}`,
   // A follow-up due today or before that nobody has looked at yet (0062).
   followup: `EXISTS (SELECT 1 FROM booking_follow_ups f WHERE f.booking_id = b.id AND f.done_at IS NULL AND f.due_on <= current_date)`,
   current: `b.status IN ('reserved','confirmed') AND EXISTS (SELECT 1 FROM booking_days bd WHERE bd.booking_id = b.id AND bd.start_date <= current_date AND bd.end_date >= current_date)`,
@@ -438,7 +456,7 @@ const ORDER: Record<BookingFilter, string> = {
   followup: 'start_date DESC NULLS LAST',
   current: 'start_date DESC NULLS LAST',
   upcoming: 'start_date ASC NULLS LAST',
-  past: `(b.status <> 'cancelled' AND ${CHARGED} - ${PAID} > 0.005) DESC, end_date DESC NULLS LAST`,
+  past: `(b.status <> 'cancelled' AND ${owesSql(`${CHARGED} - ${PAID}`)}) DESC, end_date DESC NULLS LAST`,
   cancelled: 'start_date DESC NULLS LAST',
   all: 'start_date DESC NULLS LAST',
 };
@@ -446,27 +464,21 @@ const ORDER: Record<BookingFilter, string> = {
 export async function listBookings({
   filter = 'current',
   search,
-  payerId,
   limit = 40,
   offset = 0,
+  ...narrow
 }: {
   filter?: BookingFilter;
   search?: string;
-  /** Only the bookings this organisation pays, as its page lists them (2026-10-20). */
-  payerId?: string;
   limit?: number;
   offset?: number;
-}): Promise<{ items: BookingListItem[]; total: number }> {
+} & BookingNarrow): Promise<{ items: BookingListItem[]; total: number }> {
   const params: unknown[] = [];
-  let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})`;
-  if (payerId) {
-    params.push(payerId);
-    where += ` AND b.payer_organisation_id = $${params.length}`;
-  }
+  let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})${narrowed(narrow, params)}`;
   if (search) {
     params.push(`%${search}%`);
     const n = `$${params.length}`;
-    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE ${n} OR concat_ws(' ', p.last_name, p.first_name) ILIKE ${n} OR t.name ILIKE ${n} OR t.name_de ILIKE ${n} OR et.name ILIKE ${n} OR b.number ILIKE ${n})`;
+    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE ${n} OR concat_ws(' ', p.last_name, p.first_name) ILIKE ${n} OR t.name ILIKE ${n} OR t.name_de ILIKE ${n} OR et.name ILIKE ${n} OR b.number ILIKE ${n} OR b.filemaker_booking_id = trim(both '%' from ${n}))`;
   }
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
@@ -480,30 +492,89 @@ export async function listBookings({
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
 }
 
-export async function bookingCounts(payerId?: string): Promise<Record<BookingFilter, number>> {
+/**
+ * What the bookings list is narrowed to (2026-10-21, the filter panel): the organisation that pays (from
+ * its page), the year (`BOOKING_YEAR`), who pays, and the course type — `exam` for the exam bookings.
+ */
+export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string };
+
+/** The narrowing as SQL on `b`, its values pushed onto `params`. */
+function narrowed({ payerId, year, payer, typeId }: BookingNarrow, params: unknown[]): string {
+  let sql = '';
+  if (payerId) {
+    params.push(payerId);
+    sql += ` AND b.payer_organisation_id = $${params.length}`;
+  }
+  if (year) {
+    params.push(year);
+    sql += ` AND ${BOOKING_YEAR} = $${params.length}`;
+  }
+  if (payer) {
+    params.push(payer);
+    sql += ` AND b.payer = $${params.length}`;
+  }
+  if (typeId === 'exam') sql += ` AND b.exam_session_id IS NOT NULL`;
+  else if (typeId) {
+    params.push(typeId);
+    sql += ` AND b.course_type_id = $${params.length} AND b.exam_session_id IS NULL`;
+  }
+  return sql;
+}
+
+export async function bookingCounts(narrow: BookingNarrow = {}): Promise<Record<BookingFilter, number>> {
   const out = {} as Record<BookingFilter, number>;
+  const params: unknown[] = [];
+  const sql = narrowed(narrow, params);
   for (const key of Object.keys(FILTERS) as BookingFilter[]) {
     const row = await queryFirst<{ n: string }>(
-      `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[key]})${payerId ? ' AND b.payer_organisation_id = $1' : ''}`,
-      payerId ? [payerId] : []
+      `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[key]})${sql}`,
+      params
     );
     out[key] = Number(row?.n ?? 0);
   }
   return out;
 }
 
-/** What is still owed across every booking that is not cancelled: the figure finance looks at first. */
-export async function bookingsOwed(payerId?: string): Promise<{ amount: number; bookings: number }> {
-  const row = await queryFirst<{ amount: string | null; bookings: string }>(
-    `SELECT sum(owed) AS amount, count(*) AS bookings FROM (
-       SELECT coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
-            - coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS owed
-         FROM bookings b JOIN people p ON p.id = b.person_id
-        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status <> 'cancelled'${payerId ? ' AND b.payer_organisation_id = $1' : ''}
-     ) balances WHERE owed > 0.005`,
-    payerId ? [payerId] : []
+/** The years bookings are in, newest first, for the filter's choice — no money. */
+export async function bookingYearList(narrow: BookingNarrow = {}): Promise<number[]> {
+  const params: unknown[] = [];
+  const sql = narrowed({ ...narrow, year: undefined }, params);
+  const rows = await query<{ year: number }>(
+    `SELECT DISTINCT ${BOOKING_YEAR} AS year FROM bookings b JOIN people p ON p.id = b.person_id
+      WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL${sql} ORDER BY 1 DESC`,
+    params
   );
-  return { amount: Number(row?.amount ?? 0), bookings: Number(row?.bookings ?? 0) };
+  return rows.map((r) => Number(r.year)).filter((y) => Number.isFinite(y));
+}
+
+/** The course types a booking can have, for the filter: the workspace's names, in their order. */
+export async function bookingTypeChoices(): Promise<{ id: string; name: string }[]> {
+  return query<{ id: string; name: string }>(
+    `SELECT id, coalesce(nullif(trim(name_de), ''), name) AS name FROM course_types
+      WHERE id IN (SELECT DISTINCT course_type_id FROM bookings WHERE course_type_id IS NOT NULL AND deleted_at IS NULL)
+      ORDER BY position NULLS LAST, name`
+  );
+}
+
+export type BookingYear = { year: number; bookings: number; owing: number; owed: number };
+
+/**
+ * What is still owed, year by year, newest first (2026-10-21: „calculated only if requested" — the filter
+ * panel's „Berechnen", for finance and management). Under the rest of the narrowing, not its year.
+ */
+export async function bookingYears(narrow: BookingNarrow = {}): Promise<BookingYear[]> {
+  const params: unknown[] = [];
+  const sql = narrowed({ ...narrow, year: undefined }, params);
+  const rows = await query<{ year: number; bookings: string; owing: string; owed: string | null }>(
+    `SELECT year, count(*) AS bookings, count(*) FILTER (WHERE owes) AS owing, sum(balance) FILTER (WHERE owes) AS owed FROM (
+       SELECT ${BOOKING_YEAR} AS year, ${CHARGED} - ${PAID} AS balance,
+              b.status <> 'cancelled' AND ${owesSql(`${CHARGED} - ${PAID}`)} AS owes
+         FROM bookings b JOIN people p ON p.id = b.person_id
+        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL${sql}
+     ) y WHERE year IS NOT NULL GROUP BY year ORDER BY year DESC`,
+    params
+  );
+  return rows.map((r) => ({ year: Number(r.year), bookings: Number(r.bookings), owing: Number(r.owing), owed: Number(r.owed ?? 0) }));
 }
 
 export async function personBookings(canonicalPersonId: string): Promise<BookingListItem[]> {

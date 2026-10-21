@@ -943,7 +943,7 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     | Anfragen, Anmeldungen, Bewerbungen | Letzte 7 Tage · Verlauf | the inbox design (§Lists 16); search finds everything |
     | Einstufungstests | Wartet auf Lehrkraft · Test läuft noch · Bestätigt · Alle | |
     | Teilnehmende | Alle · Kommend · Im Kurs · Ohne Folgekurs · Zahlung offen · Abgeschlossen · Gelöscht | „Neu" is a word on the row |
-    | Buchungen | Laufend · Kommend · Zahlung offen · Wiedervorlage · Vergangen · Storniert · Alle | the team's colour as a dot before each name; the sum owed above; search by name, booking number or course |
+    | Buchungen | Laufend · Kommend · Zahlung offen · Wiedervorlage · Vergangen · Storniert · Alle | the team's colour as a dot before each name; the sum owed above; a „Filter" panel: year, who pays, course type, open amounts on request; search by name, booking number (SchoolMan's too) or course |
     | Angebote | Offen · Angenommen · Nicht angenommen · Alle | |
     | Gruppen | Aktuell · Angefragt · Vergangen · Abgesagt · Alle | Aktuell: here now or still to come, as on Kurse |
     | Unterkünfte | Alle · Gastfamilien · CASA-WGs · Weitere · Inaktiv | |
@@ -996,9 +996,23 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     erstellen" on a group asked for — and the rest behind „…": a booking, a payment (`?pay=1` opens the
     booking's „Zahlung erfassen"), a reminder or confirmation letter, an e-mail, the record's tabs. Every
     action is a page or an e-mail; nothing changes from the list itself. A row with „…" has no arrow at
-    its end (2026-10-21: the menu says there is more); the rest of the row still opens the record. Below 1024px the columns that
-    say least give way (Offen and Angelegt on Teilnehmende, Gesamt on Buchungen), never the amount in a
-    money view.
+    its end (2026-10-21: the menu says there is more); the rest of the row still opens the record.
+10e. **Buchungen: filters at the side, money only on request, and when money is open (Rahman, 2026-10-21:
+    „add a year row … so we can see what is open from those years", then „a cleaner button that opens the
+    sidebar … with better filters and the amount shouldn't be just written there but calculated only if
+    requested").** A „Filter" button beside the search opens the side panel (`bookings/booking-filters.tsx`):
+    the year (of a booking's first day, its course or its exam, else the year it was made), who pays
+    (Lernende(r) · Agentur · Firma) and the course type (with „Prüfungen"). They are the list's address
+    (`?year=2024&payer=agency&type=…`), so the tabs, the counts and the search keep them, and each filter in
+    force is a label above the card with its ×. The page carries no money figure; „Berechnen" in the panel
+    works out what is still owed, year by year, with a link into each year's „Zahlung offen" — for whoever
+    holds the price list (`prices`, finance and management; `bookingTotalsAction`). An open booking says
+    when it was last reminded („erinnert 12.3.2025", SchoolMan's reminders among them) and the group visit
+    it belongs to („Gruppe Mexiko 24" — a group is often paid as a whole). **Under 5 € counts as paid**
+    (`src/lib/admin/open-money.ts`, `OPEN_FROM`): a leftover of cents or a few euros, mostly SchoolMan's
+    rounding, is on no open list, in no open total, does not keep the booking grey and is not suggested
+    for a reminder; the booking and its letters still show the exact figure („Bezahlt · Rest 2 €" in the
+    list). SchoolMan's own booking number is on the booking's head and found by the search.
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about
     (`RecordName`) — then when, how much, who has it, how recent. Never a
