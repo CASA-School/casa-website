@@ -40,7 +40,8 @@ const VIEWS: Record<GroupView, string> = {
 /** The soonest first where what matters is what comes next; the latest first where it is history. */
 const ORDER: Record<GroupView, string> = {
   upcoming: `${STARTS} NULLS LAST, lower(v.name), v.id`,
-  open: `${STARTS} NULLS LAST, v.created_at DESC, v.id`,
+  // Asked for and undecided: the ones still ahead first, those whose dates have passed after them (2026-10-21).
+  open: `coalesce(${ENDS} < current_date, false), ${STARTS} NULLS LAST, v.created_at DESC, v.id`,
   past: `${STARTS} DESC NULLS LAST, v.id`,
   cancelled: `${STARTS} DESC NULLS LAST, v.created_at DESC, v.id`,
   all: `${STARTS} DESC NULLS FIRST, v.created_at DESC, v.id`,
@@ -61,6 +62,8 @@ export type GroupListItem = {
   /** The school or company, else the agency. */
   organisationName: string | null;
   agencyName: string | null;
+  /** Who an offer goes to: the agency when there is one, else the school or company (2026-10-21). */
+  offerTo: string | null;
   country: Bilingual | null;
   participants: number | null;
   escorts: number | null;
@@ -101,6 +104,7 @@ export async function listGroups({
     status: GroupStatus;
     organisation_name: string | null;
     agency_name: string | null;
+    offer_to: string | null;
     country_de: string | null;
     country_en: string | null;
     participants: number | null;
@@ -110,7 +114,8 @@ export async function listGroups({
     end_date: Date | null;
     is_over: boolean;
   }>(
-    `SELECT v.id, v.name, v.status, o.name AS organisation_name, a.name AS agency_name, c.name_de AS country_de, c.name_en AS country_en,
+    `SELECT v.id, v.name, v.status, o.name AS organisation_name, a.name AS agency_name, coalesce(v.agency_id, v.organisation_id) AS offer_to,
+            c.name_de AS country_de, c.name_en AS country_en,
             v.participants, v.escorts,
             (SELECT count(*) FROM bookings b WHERE b.group_visit_id = v.id AND ${TAKES_PART('b')}) AS booked,
             ${STARTS} AS start_date, ${ENDS} AS end_date, coalesce(${ENDS} < current_date, false) AS is_over
@@ -128,6 +133,7 @@ export async function listGroups({
       status: r.status,
       organisationName: r.organisation_name,
       agencyName: r.agency_name,
+      offerTo: r.offer_to,
       country: both(r.country_de, r.country_en),
       participants: r.participants,
       escorts: r.escorts,

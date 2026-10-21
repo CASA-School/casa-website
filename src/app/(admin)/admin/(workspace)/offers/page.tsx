@@ -5,6 +5,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { capitalise, counted, relativeDays, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listOffers, offerCounts, OFFER_FILTERS, type OfferListFilter, type OfferListItem } from '@/lib/admin/offers/repo';
+import { groupByMonth, monthHeading } from '@/lib/admin/days';
 
 /**
  * Offers — what is being written, what is out, what came back. Open first,
@@ -81,11 +82,19 @@ export default async function OffersPage({
   const href = (f: OfferListFilter) => `/admin/offers${f === 'open' ? '' : `?filter=${f}`}`;
 
   // Open and All read in groups by what to do, Not accepted by how it ended (refused or withdrawn, or never
-  // answered); Accepted is one group already, named by its tab.
+  // answered); Accepted by the month the stay or the course begins, the latest first (2026-10-21).
+  const begins = (o: OfferListItem) => o.arrival ?? o.course?.start ?? null;
+  const accepted = [...offers].sort((a, b) => (begins(b) ?? '').localeCompare(begins(a) ?? ''));
   const groups =
     filter === 'open' || filter === 'all' || filter === 'declined'
       ? stages(t).map((stage) => ({ ...stage, rows: offers.filter(stage.has) })).filter((g) => g.rows.length)
-      : [{ key: filter, label: '', rows: offers }];
+      : [
+          ...groupByMonth(
+            accepted.filter((o) => begins(o)),
+            (o) => new Date(`${begins(o)}T12:00:00Z`)
+          ).map(({ month, rows }) => ({ key: month, label: monthHeading(month, lang), rows })),
+          { key: 'undated', label: t('Daten offen', 'Dates open'), rows: accepted.filter((o) => !begins(o)) },
+        ].filter((g) => g.rows.length);
 
   // A list like the workspace's others (2026-10-17): its title, what needs doing, the table.
   return (

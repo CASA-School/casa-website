@@ -3,7 +3,9 @@ import { BookingLightDot } from '@/components/admin/booking-light';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Icon } from '@/components/admin/icons';
 import { Pagination } from '@/components/admin/pagination';
+import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import {
   BOOKING_STATUS_LABELS,
   bookingCounts,
@@ -14,6 +16,8 @@ import {
   type BookingFilter,
   type BookingListItem,
 } from '@/lib/admin/bookings';
+import { groupByMonth, monthHeading } from '@/lib/admin/days';
+import { requireModule } from '@/lib/admin/guard';
 import { addDays } from '@/lib/admin/offers/stay';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
@@ -40,6 +44,13 @@ import { getI18n } from '@/lib/admin/i18n.server';
  * one the team looks at first, in a calm amber while something is owed and a
  * quiet "Paid" once it is settled. Paid is total minus balance and needs no
  * column of its own.
+ *
+ * In months (Rahman, 2026-10-21: „add year and month … upcoming, ongoing and past, so the bookings with
+ * money from the past could be quickly followed up with … an action button"): what is coming after the
+ * next two weeks by the month it starts, the past with what is still owed first and then by the month
+ * it ended, all and cancelled by the month they start. Each row ends in its actions — a payment, a
+ * reminder, the confirmation, an e-mail, the learner — with „Erinnern" as a button where money is open
+ * and the view is about money.
  */
 
 const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
@@ -54,6 +65,9 @@ const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
 
 /** Two weeks: "soon" for a course that starts or ends — the team's NewStart and End lists. */
 const SOON_DAYS = 14;
+
+/** Still owed: a booking that is not cancelled with more charged than paid. */
+const owes = (b: BookingListItem) => b.status !== 'cancelled' && b.charged - b.paid > 0.005;
 
 const money = (n: number, currency: string) =>
   currency === 'EUR'
@@ -95,34 +109,77 @@ export default async function BookingsPage({
   const rawPayer = firstParam(params.org);
   const payerId = rawPayer && isUuid(rawPayer) ? rawPayer : undefined;
 
-  const [{ items, total }, counts, owed, payerName, { t, lang }] = await Promise.all([
+  const [{ items, total }, counts, owed, payerName, { t, lang }, user] = await Promise.all([
     listBookings({ filter, search, payerId, limit: PAGE_SIZE, offset: offsetFor(page) }),
     bookingCounts(payerId),
     bookingsOwed(payerId),
     payerId ? organisationName(payerId) : Promise.resolve(null),
     getI18n(),
+    requireModule('bookings'),
   ]);
+  const canEdit = canAccess(user, 'bookings', 'edit');
 
-  // Running ones split by whether they end within two weeks, coming ones by whether they start
-  // within two weeks; the other views are one list.
+  // Running ones split by whether they end within two weeks; coming ones start with the next two weeks,
+  // then go by month; the past starts with what is still owed. A view about money or follow-ups is one list.
   const soon = addDays(todayInputValue(), SOON_DAYS);
   const endsSoon = (b: BookingListItem) => (toDateInputValue(b.endDate) || '9999') <= soon;
   const startsSoon = (b: BookingListItem) => (toDateInputValue(b.startDate) || '9999') <= soon;
+  const months = (rows: BookingListItem[], at: (b: BookingListItem) => Date | null) => [
+    ...groupByMonth(
+      rows.filter((b) => at(b)),
+      (b) => at(b)!
+    ).map(({ month, rows: inMonth }) => ({ key: month, label: monthHeading(month, lang), rows: inMonth })),
+    { key: 'undated', label: t('Ohne Termin', 'No dates'), rows: rows.filter((b) => !at(b)) },
+  ];
   // Who needs a room is „Aufenthalte" (/admin/accommodation/stays), where a stay is also placed.
-  const groups =
+  const groups = (
     filter === 'current'
       ? [
           { key: 'ending', label: t('Enden bald', 'Ending soon'), rows: items.filter(endsSoon) },
           { key: 'running', label: t('Laufen weiter', 'Running on'), rows: items.filter((b) => !endsSoon(b)) },
-        ].filter((g) => g.rows.length)
+        ]
       : filter === 'upcoming'
         ? [
             { key: 'starting', label: t('Starten bald', 'Starting soon'), rows: items.filter(startsSoon) },
-            { key: 'later', label: t('Später', 'Later'), rows: items.filter((b) => !startsSoon(b)) },
-          ].filter((g) => g.rows.length)
-        : [{ key: filter, label: '', rows: items }];
-  const span = 4;
+            ...months(
+              items.filter((b) => !startsSoon(b)),
+              (b) => b.startDate
+            ),
+          ]
+        : filter === 'past'
+          ? [
+              { key: 'owing', label: t('Noch offen', 'Still owed'), rows: items.filter(owes) },
+              ...months(
+                items.filter((b) => !owes(b)),
+                (b) => b.endDate
+              ),
+            ]
+          : filter === 'all' || filter === 'cancelled'
+            ? months(items, (b) => b.startDate)
+            : [{ key: filter, label: '', rows: items }]
+  ).filter((g) => g.rows.length);
+  // The step the view is for, as a button: a reminder where money is the question.
+  const remindHere = filter === 'unclear' || filter === 'past';
+  const actionsOf = (b: BookingListItem): { primary: RowAction | null; actions: RowAction[] } => {
+    const remind: RowAction = { label: t('Zahlungserinnerung', 'Payment reminder'), href: `/admin/bookings/${b.id}/letter?kind=reminder`, icon: Icon.mail };
+    const primary = canEdit && remindHere && owes(b) ? { ...remind, label: t('Erinnern', 'Remind') } : null;
+    const actions: RowAction[] = [
+      ...(canEdit && b.status !== 'cancelled'
+        ? [{ label: t('Zahlung erfassen', 'Record payment'), href: `/admin/bookings/${b.id}?pay=1`, icon: Icon.money }]
+        : []),
+      ...(canEdit && owes(b) && !primary ? [remind] : []),
+      ...(canEdit ? [{ label: t('Buchungsbestätigung', 'Booking confirmation'), href: `/admin/bookings/${b.id}/letter?kind=confirmation`, icon: Icon.statement }] : []),
+      ...(b.personEmail
+        ? [{ label: t(`E-Mail an ${b.personName}`, `Email ${b.personName}`), href: `mailto:${b.personEmail}?subject=${encodeURIComponent(b.number)}`, icon: Icon.mail, divide: canEdit }]
+        : []),
+      { label: t('Zur Person', 'Open the learner'), href: `/admin/people/${b.personId}`, icon: Icon.person, divide: !b.personEmail && canEdit },
+    ];
+    return { primary, actions };
+  };
+  const span = 5;
   const hide = 'hidden md:table-cell';
+  // The total gives way first on a narrower screen: the balance is the figure the team acts on.
+  const hideLg = 'hidden lg:table-cell';
   const href = (key: BookingFilter) => {
     const query = new URLSearchParams({ ...(key === 'current' ? {} : { filter: key }), ...(payerId ? { org: payerId } : {}) }).toString();
     return `/admin/bookings${query ? `?${query}` : ''}`;
@@ -175,8 +232,9 @@ export default async function BookingsPage({
             head={[
               t('Buchung', 'Booking'),
               { label: t('Zeitraum', 'Dates'), className: `w-[13.5rem] ${hide}` },
-              { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hide}` },
+              { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hideLg}` },
               { label: t('Offen', 'Balance'), align: 'right' as const, className: 'w-[8.5rem]' },
+              { label: '', className: remindHere && canEdit ? 'w-[8rem]' : 'w-[3.5rem]' },
             ]}
           >
             {groups.map((group) => [
@@ -197,11 +255,14 @@ export default async function BookingsPage({
                     </span>
                   </Cell>
                   <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>
-                  <Cell align="right" className={`whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>
+                  <Cell align="right" className={`whitespace-nowrap text-[#2b3546] tabular-nums ${hideLg}`}>
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>
                   <Cell align="right" className="whitespace-nowrap tabular-nums">
                     <Balance b={b} t={t} />
+                  </Cell>
+                  <Cell align="right" className="!pr-7">
+                    <RowActions label={t(`Aktionen: ${b.personName}, ${b.number}`, `Actions: ${b.personName}, ${b.number}`)} {...actionsOf(b)} />
                   </Cell>
                 </TableRow>
                 );

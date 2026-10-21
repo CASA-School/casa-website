@@ -2,8 +2,9 @@ import Link from 'next/link';
 
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { dayRange, euros, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
+import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
+import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Badge, Button, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { capitalise, num, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
@@ -11,6 +12,7 @@ import { toDateInputValue } from '@/lib/dates';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
 import { canAccess } from '@/lib/admin/access';
+import { groupByMonth, monthHeading } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
 import { LEARNER_STAGE_LABELS, listCountries, listDeletedPeople, listPeople, peopleCounts, type PeopleView } from '@/lib/admin/people';
 import { restorePersonAction } from './actions';
@@ -40,6 +42,13 @@ import { PersonForm } from './person-form';
  * booked periods instead of typed (2026-10-16, docs/schoolman/bookings.md). Open flags are one quiet
  * line above the list, each a link to that work list; they are cleared on the
  * record they belong to, not here (docs/ADMIN_WORKSPACE.md §Design standards 4, §Lists).
+ *
+ * In months (Rahman, 2026-10-21: „add year and month as to know which are the newest … an action
+ * button"): by the month a person was added, the newest first; „Kommend" by the month their course
+ * begins, „Ohne Folgekurs" by the month it ends; „Zahlung offen" stays one list, most owed first. Each
+ * row ends in its actions — a booking, a reminder or a payment on the booking that owes most, an
+ * e-mail, their letters — with the step the view is for as a button: „Folgekurs buchen" where nothing
+ * is booked after, „Erinnern" where money is open.
  */
 
 /** The register's views, and „Gelöscht" for whoever may delete (and so restore) a person. */
@@ -69,6 +78,7 @@ export default async function PeoplePage({
   const user = await requireModule('people');
   const { t, lang } = await getI18n();
   const canEdit = canAccess(user, 'people', 'edit');
+  const canBook = canAccess(user, 'bookings', 'edit');
   const canRestore = canAccess(user, 'people', 'full');
   const views = canRestore ? [...VIEWS, { key: 'deleted' as const, label: { de: 'Gelöscht', en: 'Deleted' } }] : VIEWS;
   const rawView = firstParam(params.view);
@@ -86,6 +96,52 @@ export default async function PeoplePage({
 
   const flagEntries = (Object.entries(flagCounts) as [FlagCode, number][]).filter(([, n]) => n > 0);
   const hide = 'hidden md:table-cell';
+  // What is open and when they were added give way first on a narrower screen: the month heading says when.
+  const hideLg = 'hidden lg:table-cell';
+  // …except in „Zahlung offen", where the amount is what the list is about.
+  const hideOpen = view === 'owing' ? hide : hideLg;
+
+  type Row = (typeof items)[number];
+  // The month a row belongs to in this view: added, or its course's start or end; none for the money view.
+  const monthOf: ((p: Row) => Date | null) | null =
+    view === 'coming' ? (p) => p.course?.start ?? null : view === 'last' ? (p) => p.course?.end ?? null : view === 'owing' ? null : (p) => p.createdAt;
+  const heading = (month: string) => {
+    const m = monthHeading(month, lang);
+    return view === 'coming' ? t(`Beginn im ${m}`, `Starting in ${m}`) : view === 'last' ? t(`Ende im ${m}`, `Ending in ${m}`) : m;
+  };
+  const groups = monthOf
+    ? [
+        ...groupByMonth(
+          items.filter((p) => monthOf(p)),
+          (p) => monthOf(p)!
+        ).map(({ month, rows }) => ({ key: month, label: heading(month), rows })),
+        { key: 'undated', label: t('Ohne Termin', 'No dates'), rows: items.filter((p) => !monthOf(p)) },
+      ].filter((g) => g.rows.length)
+    : [{ key: view, label: '', rows: items }];
+  const actionsOf = (p: Row): { primary: RowAction | null; actions: RowAction[] } => {
+    const book: RowAction = { label: t('Buchung anlegen', 'New booking'), href: `/admin/people/${p.id}?book=1`, icon: Icon.bookings };
+    const remind: RowAction | null = p.owedBookingId
+      ? { label: t('Zahlungserinnerung', 'Payment reminder'), href: `/admin/bookings/${p.owedBookingId}/letter?kind=reminder`, icon: Icon.mail }
+      : null;
+    const primary =
+      canBook && view === 'last'
+        ? { ...book, label: t('Folgekurs buchen', 'Book the next course') }
+        : canBook && view === 'owing' && remind
+          ? { ...remind, label: t('Erinnern', 'Remind') }
+          : null;
+    const actions: RowAction[] = [
+      ...(canBook && view !== 'last' ? [book] : []),
+      ...(canBook && remind && view !== 'owing' ? [remind] : []),
+      ...(canBook && p.owedBookingId ? [{ label: t('Zahlung erfassen', 'Record payment'), href: `/admin/bookings/${p.owedBookingId}?pay=1`, icon: Icon.money }] : []),
+      ...(p.primaryEmail
+        ? [{ label: t('E-Mail schreiben', 'Write an email'), href: `mailto:${p.primaryEmail}`, icon: Icon.mail, divide: canBook }]
+        : []),
+      { label: t('Anfragen & Buchungen', 'Enquiries & bookings'), href: `/admin/people/${p.id}?tab=cases`, icon: Icon.registrations, divide: !p.primaryEmail && canBook },
+      { label: t('Briefe', 'Letters'), href: `/admin/people/${p.id}?tab=letters`, icon: Icon.statement },
+    ];
+    return { primary, actions };
+  };
+  const wideActions = canBook && (view === 'last' || view === 'owing');
 
   return (
     <>
@@ -183,12 +239,15 @@ export default async function PeoplePage({
             head={[
               t('Teilnehmende', 'Student'),
               { label: t('Niveau', 'Level'), className: `w-[6.5rem] ${hide}` },
-              { label: t('Offen', 'Open'), className: `w-[12rem] ${hide}` },
+              { label: t('Offen', 'Open'), className: `w-[12rem] ${hideOpen}` },
               { label: t('Zeitraum', 'Dates'), className: `w-[12.5rem] ${hide}` },
-              { label: t('Angelegt', 'Added'), className: 'w-[7.5rem] md:w-[8.5rem]' },
+              { label: t('Angelegt', 'Added'), className: `w-[8.5rem] ${hideLg}` },
+              { label: '', className: wideActions ? 'w-[11rem]' : 'w-[3.5rem]' },
             ]}
           >
-            {items.map((person) => (
+            {groups.map((group) => [
+              group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={6} /> : null,
+              ...group.rows.map((person) => (
               <TableRow key={person.id} interactive>
                 <Cell href={`/admin/people/${person.id}`} className="max-w-0">
                   <RecordName
@@ -217,7 +276,7 @@ export default async function PeoplePage({
                     </span>
                   ) : null}
                 </Cell>
-                <Cell className={hide}>
+                <Cell className={hideOpen}>
                   <span className="flex flex-wrap items-center gap-1.5">
                     {person.openCases > 0 ? (
                       <Badge tone="accent">
@@ -231,11 +290,15 @@ export default async function PeoplePage({
                 <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>
                   {person.course ? dayRange(toDateInputValue(person.course.start), toDateInputValue(person.course.end), lang) : null}
                 </Cell>
-                <Cell className="text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)]">
+                <Cell className={`text-[0.8rem] whitespace-nowrap text-[var(--casa-muted)] ${hideLg}`}>
                   {capitalise(relativeDays(person.createdAt, lang))}
                 </Cell>
+                <Cell align="right" className="!pr-7">
+                  <RowActions label={t(`Aktionen: ${person.displayName}`, `Actions: ${person.displayName}`)} {...actionsOf(person)} />
+                </Cell>
               </TableRow>
-            ))}
+              )),
+            ])}
           </Table>
         )}
       </Card>
