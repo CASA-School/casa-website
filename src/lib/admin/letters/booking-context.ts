@@ -483,6 +483,21 @@ export async function registrationLetterContext(registrationId: string): Promise
     // The terms' down payment (AGB §5.2) where the course type names none.
     downPayment: r.down_payment === null ? 100 : Number(r.down_payment),
     placementUrl: { de: `${site}/anmeldung/einstufungstest`, en: `${site}/en/placement-test` },
+    laterStart: await laterStartOf(registrationId),
     staff: await signers(),
   };
+}
+
+/** The next start of the registration's course after the one it chose (or after today, without one). */
+async function laterStartOf(registrationId: string): Promise<string | null> {
+  const row = await queryFirst<{ start: string | null }>(
+    `SELECT to_char(min(n.start_date), 'YYYY-MM-DD') AS start
+       FROM course_registrations r
+       LEFT JOIN course_instances i ON i.id = r.course_instance_id
+       JOIN course_instances n ON n.course_type_id = coalesce(i.course_type_id, r.course_type_id)
+      WHERE r.id = $1 AND n.status = 'scheduled'
+        AND n.start_date > greatest(coalesce(i.start_date, current_date), current_date)`,
+    [registrationId]
+  );
+  return row?.start ?? null;
 }

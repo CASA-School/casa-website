@@ -822,6 +822,8 @@ export async function createBooking(input: NewBooking, actor: StaffUser): Promis
         en: 'No place is free in this sitting any more. The person can go on the waiting list.',
       });
     }
+    // A booking puts the learner on the register (0076): a website contact becomes a learner here.
+    await client.query(`UPDATE people SET listed = true WHERE id = canonical_person_id($1) AND NOT listed`, [input.personId]);
     const { rows } = await client.query<{ id: string }>(
       `INSERT INTO bookings
          (person_id, course_type_id, status, payer, payer_name, visa_required, notes,

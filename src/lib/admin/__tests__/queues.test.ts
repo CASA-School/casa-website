@@ -62,7 +62,7 @@ describe('activity copy', () => {
   it('uses the right article for a vowel-initial noun', () => {
     // The trail is the most-read prose in the workspace; "a enquiry" in every
     // third line makes the whole screen look machine-generated.
-    expect(describeActivity(entry({}), 'en')).toBe('moved an enquiry from New to Done');
+    expect(describeActivity(entry({}), 'en')).toBe('moved an enquiry from Open to Done');
     expect(describeActivity(entry({ entity: 'course_registration' }), 'en')).toContain(
       'a course registration'
     );
@@ -70,7 +70,7 @@ describe('activity copy', () => {
   });
 
   it('reads as German with the article the noun takes', () => {
-    expect(describeActivity(entry({}), 'de')).toBe('hat eine Anfrage von Neu auf Erledigt gesetzt');
+    expect(describeActivity(entry({}), 'de')).toBe('hat eine Anfrage von Offen auf Erledigt gesetzt');
     expect(describeActivity(entry({ action: 'note_added', entity: 'placement_attempt' }), 'de')).toBe(
       'hat eine Notiz zu einem Einstufungstest hinzugefügt'
     );

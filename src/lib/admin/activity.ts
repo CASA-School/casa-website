@@ -371,6 +371,14 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       );
     case 'person_unlinked':
       return t('hat eine Personenverknüpfung aufgehoben', 'undid a person link');
+    case 'person_listed':
+      return t('hat die Person in Teilnehmende aufgenommen', 'added the person to Learners');
+    case 'organisation_assigned':
+      return t(`hat die Anfrage ${entry.detail?.name ?? 'einer Organisation'} zugeordnet`, `assigned the enquiry to ${entry.detail?.name ?? 'an organisation'}`);
+    case 'enquiry_deleted':
+      return t('hat die Anfrage gelöscht', 'deleted the enquiry');
+    case 'registration_edited':
+      return t('hat die Angaben der Anmeldung bearbeitet', 'edited the registration'); 
     case 'flag_resolved':
       return t(`hat einen Hinweis zu ${dat} erledigt`, `cleared a flag on ${subject}`);
     case 'review_attached_to_person':

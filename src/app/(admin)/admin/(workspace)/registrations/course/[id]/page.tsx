@@ -4,11 +4,13 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../../bookings/actions';
 import { BookingWizard } from '../../../bookings/booking-wizard';
 import { WaitlistForm } from '../../../catalogue/waitlist-forms';
-import { FormDialog } from '@/components/admin/dialogs';
+import { editRegistrationAction } from '../../actions';
+import { DateFormField } from '@/components/admin/date-picker';
+import { DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
-import { Badge, BirthDate, Card, DetailList, RecordHeader } from '@/components/admin/ui';
+import { Badge, BirthDate, Button, ButtonLink, Card, DetailList, Field, Input, RecordHeader, Select, Textarea } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
@@ -52,8 +54,8 @@ const ACCOMMODATION: Record<string, Bilingual> = {
  * they are; beside it the person and one line of notes and changes. „Buchung
  * anlegen" is the page's main action, so „Antworten" is a quiet one here.
  */
-export default async function CourseRegistrationPage({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, user] = await Promise.all([params, requireModule('registrations')]);
+export default async function CourseRegistrationPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+  const [{ id }, { error }, user] = await Promise.all([params, searchParams, requireModule('registrations')]);
   const [registration, { t, lang }] = await Promise.all([getCourseRegistration(id), getI18n()]);
 
   if (!registration) {
@@ -114,6 +116,22 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
       : registration.accommodationType
     : t('Nötig', 'Needed');
 
+  // The values a colleague may correct, as they stand: compared with what was sent (`original`).
+  const currentValues: Record<string, unknown> = {
+    salutation: registration.salutation,
+    first_name: registration.firstName,
+    last_name: registration.lastName,
+    email: registration.email,
+    phone: registration.phone,
+    nationality: registration.nationalityRaw,
+    birth_date: registration.birthDateRaw,
+    visa_required: registration.visaRequired,
+    accommodation_required: registration.accommodationRequired,
+    accommodation_type: registration.accommodationType,
+    allergies: registration.allergies,
+    notes: registration.notes,
+  };
+
   return (
     <>
       <RecordHeader
@@ -141,43 +159,51 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
           </>
         }
         actions={
-          canBook && offer && registration.personId ? (
-            <>
-              {queues ? (
-                <FormDialog icon={Icon.clock} tint="sun" trigger={t('Auf die Warteliste', 'Waiting list')} title={t(`${fullName} auf die Warteliste`, `${fullName} on the waiting list`)} size="sm">
-                  <WaitlistForm
+          <>
+            {/* The course chosen is full or closed: offer its next start by letter (2026-10-21), or a place in its queue. */}
+            {canEdit && registration.courseInstanceId ? (
+              <ButtonLink href={`/admin/registrations/course/${registration.id}/letter?kind=later`} variant="secondary">
+                {t('Späteren Kurs anbieten', 'Offer a later course')}
+              </ButtonLink>
+            ) : null}
+            {canBook && offer && registration.personId ? (
+              <>
+                {queues ? (
+                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Auf die Warteliste', 'Waiting list')} title={t(`${fullName} auf die Warteliste`, `${fullName} on the waiting list`)}>
+                    <WaitlistForm
+                      personId={registration.personId}
+                      courseInstanceId={registration.courseInstanceId!}
+                      levels={levels}
+                      places={groups}
+                      registrationId={registration.id}
+                      defaultLevel={registration.declaredLevelCode}
+                      returnTo={`/admin/registrations/course/${registration.id}`}
+                    />
+                  </FormDialog>
+                ) : null}
+                <FormDialog icon={Icon.bookings} tint="red" trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
+                  <BookingWizard
                     personId={registration.personId}
-                    courseInstanceId={registration.courseInstanceId!}
-                    levels={levels}
-                    places={groups}
-                    registrationId={registration.id}
-                    defaultLevel={registration.declaredLevelCode}
+                    personName={fullName}
+                    offer={offer}
+                    preselectedCohortId={registration.courseInstanceId}
+                    // What they asked for, carried into the booking: the level and how much of it, and the stay.
+                    preselectedLevelCode={registration.declaredLevelCode}
+                    preselectedLevelScope={registration.declaredLevelCode ? (wholeLevel ? 'whole' : 'half') : null}
+                    preselectedAccommodation={
+                      registration.accommodationRequired && registration.accommodationType
+                        ? (REGISTRATION_ACCOMMODATION[registration.accommodationType] ?? null)
+                        : null
+                    }
+                    sourceRegistrationId={registration.id}
                     returnTo={`/admin/registrations/course/${registration.id}`}
+                    action={createBookingFromWizardAction}
+                    waitlistAction={waitlistFromWizardAction}
                   />
                 </FormDialog>
-              ) : null}
-              <FormDialog icon={Icon.bookings} tint="red" trigger={t('Buchung anlegen', 'Create booking')} title={t(`${fullName} buchen`, `Book ${fullName}`)} triggerVariant="primary" width="lg">
-                <BookingWizard
-                  personId={registration.personId}
-                  personName={fullName}
-                  offer={offer}
-                  preselectedCohortId={registration.courseInstanceId}
-                  // What they asked for, carried into the booking: the level and how much of it, and the stay.
-                  preselectedLevelCode={registration.declaredLevelCode}
-                  preselectedLevelScope={registration.declaredLevelCode ? (wholeLevel ? 'whole' : 'half') : null}
-                  preselectedAccommodation={
-                    registration.accommodationRequired && registration.accommodationType
-                      ? (REGISTRATION_ACCOMMODATION[registration.accommodationType] ?? null)
-                      : null
-                  }
-                  sourceRegistrationId={registration.id}
-                  returnTo={`/admin/registrations/course/${registration.id}`}
-                  action={createBookingFromWizardAction}
-                  waitlistAction={waitlistFromWizardAction}
-                />
-              </FormDialog>
-            </>
-          ) : null
+              </>
+            ) : null}
+          </>
         }
         bar={
           <>
@@ -186,6 +212,12 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
           </>
         }
       />
+
+      {error ? (
+        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {error}
+        </p>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
@@ -244,7 +276,99 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
             ) : null}
           </SubmissionCard>
 
-          <Card title={t('Angaben zur Person', 'Applicant')} icon={Icon.person} tint="ink">
+          <Card
+            title={t('Angaben zur Person', 'Applicant')}
+            icon={Icon.person}
+            tint="ink"
+            description={
+              registration.editedAt
+                ? t(
+                    `Bearbeitet von ${registration.editedByName ?? 'einem Teammitglied'} am ${new Date(registration.editedAt).toLocaleDateString('de-DE')}`,
+                    `Edited by ${registration.editedByName ?? 'a colleague'} on ${new Date(registration.editedAt).toLocaleDateString('en-GB')}`
+                  )
+                : undefined
+            }
+            actions={
+              canEdit ? (
+                /* „Daten bearbeiten" (0076): complete or correct what was sent; the visitor's values stay below. */
+                <FormDialog
+                  trigger={t('Bearbeiten', 'Edit')}
+                  title={t('Angaben bearbeiten', 'Edit the details')}
+                  description={t('Was die Person geschickt hat, bleibt sichtbar.', 'What the person sent stays visible.')}
+                  icon={Icon.person}
+                  tint="ink"
+                  size="sm"
+                  triggerVariant="ghost"
+                >
+                  <form action={editRegistrationAction} className="space-y-3">
+                    <input type="hidden" name="id" value={registration.id} />
+                    <div className="grid gap-3 sm:grid-cols-[9rem_1fr_1fr]">
+                      <Field label={t('Anrede', 'Salutation')} htmlFor="edit-salutation">
+                        <Select id="edit-salutation" name="salutation" defaultValue={registration.salutation}>
+                          {Object.entries(SALUTATIONS).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {pick(lang, label)}
+                            </option>
+                          ))}
+                        </Select>
+                      </Field>
+                      <Field label={t('Vorname', 'First name')} htmlFor="edit-first">
+                        <Input id="edit-first" name="firstName" required maxLength={200} defaultValue={registration.firstName} />
+                      </Field>
+                      <Field label={t('Nachname', 'Last name')} htmlFor="edit-last">
+                        <Input id="edit-last" name="lastName" required maxLength={200} defaultValue={registration.lastName} />
+                      </Field>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label={t('E-Mail', 'Email')} htmlFor="edit-email">
+                        <Input id="edit-email" name="email" type="email" required maxLength={200} defaultValue={registration.email} />
+                      </Field>
+                      <Field label={t('Telefon', 'Phone')} htmlFor="edit-phone">
+                        <Input id="edit-phone" name="phone" maxLength={40} defaultValue={registration.phone} />
+                      </Field>
+                      <Field label={t('Nationalität', 'Nationality')} htmlFor="edit-nationality">
+                        <Input id="edit-nationality" name="nationality" maxLength={80} defaultValue={registration.nationalityRaw} />
+                      </Field>
+                      <Field label={t('Geburtsdatum', 'Date of birth')} htmlFor="edit-birth">
+                        <DateFormField id="edit-birth" name="birthDate" defaultValue={toDateInputValue(registration.birthDate)} />
+                      </Field>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="visaRequired" defaultChecked={registration.visaRequired} className="size-4" />
+                        {t('Visumshilfe nötig', 'Needs visa support')}
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="accommodationRequired" defaultChecked={registration.accommodationRequired} className="size-4" />
+                        {t('Unterkunft nötig', 'Needs accommodation')}
+                      </label>
+                    </div>
+                    <Field label={t('Unterkunft', 'Accommodation')} htmlFor="edit-accommodation">
+                      <Select id="edit-accommodation" name="accommodationType" defaultValue={registration.accommodationType ?? ''}>
+                        <option value="">{t('Keine Angabe', 'Not given')}</option>
+                        {Object.entries(ACCOMMODATION).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {pick(lang, label)}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label={t('Allergien', 'Allergies')} htmlFor="edit-allergies">
+                      <Input id="edit-allergies" name="allergies" maxLength={500} defaultValue={registration.allergies ?? ''} />
+                    </Field>
+                    <Field label={t('Anmerkungen', 'Notes')} htmlFor="edit-notes">
+                      <Textarea id="edit-notes" name="notes" rows={3} maxLength={2000} defaultValue={registration.notes ?? ''} />
+                    </Field>
+                    <DialogFooter>
+                      <Button type="submit" size="md">
+                        {t('Speichern', 'Save')}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </FormDialog>
+              ) : undefined
+            }
+          >
             <DetailList
               items={[
                 {
@@ -277,10 +401,12 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
               ]}
             />
           </Card>
+
+          {registration.original ? <OriginalValues original={registration.original} current={currentValues} lang={lang} /> : null}
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/course/${registration.id}`} />
+          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/course/${registration.id}`} canList={canAccess(user, 'people', 'edit')} />
           {/* Before there is a booking: the down payment, or the placement-test result (docs/LETTERS.md). */}
           <Card
             title={t('Briefe', 'Letters')}
@@ -322,5 +448,33 @@ export default async function CourseRegistrationPage({ params }: { params: Promi
         </div>
       </div>
     </>
+  );
+}
+
+const ORIGINAL_LABELS: Record<string, Bilingual> = {
+  salutation: { de: 'Anrede', en: 'Salutation' },
+  first_name: { de: 'Vorname', en: 'First name' },
+  last_name: { de: 'Nachname', en: 'Last name' },
+  email: { de: 'E-Mail', en: 'Email' },
+  phone: { de: 'Telefon', en: 'Phone' },
+  nationality: { de: 'Nationalität', en: 'Nationality' },
+  birth_date: { de: 'Geburtsdatum', en: 'Date of birth' },
+  visa_required: { de: 'Visumshilfe', en: 'Visa support' },
+  accommodation_required: { de: 'Unterkunft nötig', en: 'Needs accommodation' },
+  accommodation_type: { de: 'Unterkunft', en: 'Accommodation' },
+  allergies: { de: 'Allergien', en: 'Allergies' },
+  notes: { de: 'Anmerkungen', en: 'Notes' },
+};
+
+/** What the visitor sent, where a colleague changed it (0076): only the values that differ. */
+function OriginalValues({ original, current, lang }: { original: Record<string, unknown>; current: Record<string, unknown>; lang: 'de' | 'en' }) {
+  const shown = (value: unknown) =>
+    value === true ? (lang === 'de' ? 'Ja' : 'Yes') : value === false ? (lang === 'de' ? 'Nein' : 'No') : value === null || value === undefined || value === '' ? '–' : String(value);
+  const changed = Object.keys(ORIGINAL_LABELS).filter((key) => shown(original[key]) !== shown(current[key]));
+  if (changed.length === 0) return null;
+  return (
+    <Card title={lang === 'de' ? 'Ursprünglich geschickt' : 'As sent'} icon={Icon.note} tint="sun">
+      <DetailList items={changed.map((key) => ({ label: pick(lang, ORIGINAL_LABELS[key]), value: shown(original[key]) }))} />
+    </Card>
   );
 }

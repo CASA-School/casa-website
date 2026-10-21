@@ -28,9 +28,9 @@ export async function getOverviewCounts(): Promise<OverviewCounts> {
   const row = await queryFirst<Record<keyof OverviewCounts, string>>(`
     SELECT
       (SELECT count(*) FROM enquiries
-        WHERE status IN ('new', 'in_progress', 'waiting'))          AS "enquiriesOpen",
+        WHERE status IN ('new', 'in_progress', 'waiting') AND deleted_at IS NULL) AS "enquiriesOpen",
       (SELECT count(*) FROM enquiries
-        WHERE status = 'new')                                        AS "enquiriesNew",
+        WHERE status = 'new' AND deleted_at IS NULL)                 AS "enquiriesNew",
       (SELECT count(*) FROM course_registrations
         WHERE status IN ('new', 'in_progress', 'waiting'))          AS "courseRegistrationsOpen",
       (SELECT count(*) FROM exam_registrations
@@ -47,14 +47,14 @@ export async function getOverviewCounts(): Promise<OverviewCounts> {
       -- Inbound volume, this week against the one before it. Two numbers rather
       -- than one, because "9 enquiries" says nothing without "and 4 last week".
       (
-        (SELECT count(*) FROM enquiries WHERE submitted_at > now() - interval '7 days') +
+        (SELECT count(*) FROM enquiries WHERE submitted_at > now() - interval '7 days' AND deleted_at IS NULL) +
         (SELECT count(*) FROM course_registrations WHERE submitted_at > now() - interval '7 days') +
         (SELECT count(*) FROM exam_registrations WHERE submitted_at > now() - interval '7 days') +
         (SELECT count(*) FROM career_applications WHERE created_at > now() - interval '7 days')
       )                                                              AS "inboundThisWeek",
       (
         (SELECT count(*) FROM enquiries
-          WHERE submitted_at > now() - interval '14 days'
+          WHERE deleted_at IS NULL AND submitted_at > now() - interval '14 days'
             AND submitted_at <= now() - interval '7 days') +
         (SELECT count(*) FROM course_registrations
           WHERE submitted_at > now() - interval '14 days'
@@ -102,7 +102,7 @@ export async function getInboundByDay(days = 14): Promise<InboundDay[]> {
        )::date AS day
      ),
      inbound AS (
-       SELECT submitted_at::date AS day FROM enquiries
+       SELECT submitted_at::date AS day FROM enquiries WHERE deleted_at IS NULL
        UNION ALL
        SELECT submitted_at::date FROM course_registrations
        UNION ALL
@@ -158,7 +158,7 @@ export async function getRecentInbound(
               e.topic AS summary,
               e.status::text AS status,
               e.submitted_at AS at
-         FROM enquiries e
+         FROM enquiries e WHERE e.deleted_at IS NULL
        UNION ALL
        SELECT r.id,
               'course',

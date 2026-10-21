@@ -90,7 +90,7 @@ test.describe('enquiries', () => {
     expect(await tally('new')).toBe(fresh - 1);
 
     await row.getByRole('button', { name: 'Wieder öffnen' }).click();
-    await expect(row).toContainText('In Bearbeitung');
+    await expect(row).toContainText('In Arbeit');
     expect(await tally('working')).toBe(working + 1);
 
     // Today is not history; a search looks through every week and finds it.
@@ -108,15 +108,11 @@ test.describe('enquiries', () => {
     await expect(page.getByText('Zuständig: du')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
-    await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
-
-    // The rarer states and the owner are menus that float over the page.
-    await page.getByRole('button', { name: 'Weitere Status' }).click();
-    await page.getByRole('menuitem', { name: 'Abgelehnt' }).click();
-    await expect(page.locator('header').getByText('Abgelehnt', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
-    await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
+    // Three states (2026-10-21): Offen, In Arbeit, Erledigt.
+    await page.getByRole('button', { name: 'Offen' }).click();
+    await expect(page.getByRole('button', { name: 'Offen' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'In Arbeit' }).click();
+    await expect(page.getByRole('button', { name: 'In Arbeit' })).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('button', { name: 'Wer sich darum kümmert' }).click();
     await page.getByRole('menuitem', { name: 'Niemand' }).click();
@@ -136,8 +132,57 @@ test.describe('enquiries', () => {
     await client.query(`UPDATE enquiries SET person_id = $2 WHERE id = $1`, [enquiryId, personId]);
     await page.goto(`/admin/enquiries/${enquiryId}`);
     await expect(page.getByRole('link', { name: 'Angebot erstellen' })).toHaveAttribute('href', `/admin/offers/new?enquiry=${enquiryId}`);
-    await page.getByRole('link', { name: 'Buchung anlegen' }).click();
+    await page.getByRole('button', { name: 'Weiter mit …' }).click();
+    await page.getByRole('menuitem', { name: 'Zu einem Kurs anmelden' }).click();
     await expect(page).toHaveURL(new RegExp(`/admin/people/${personId}\\?book=1$`));
     await expect(page.getByRole('dialog')).toContainText(`${NAME.first} ${NAME.last} buchen`);
+  });
+
+  /*
+   * 0076 (2026-10-21): a website contact is no learner until a colleague acts. Off the register, then
+   * „Als Teilnehmende/n anlegen"; „Organisation zuordnen" adds the sender as the organisation's contact;
+   * spam leaves every list, and „Löschen" removes the enquiry.
+   */
+  test('a website contact is off Teilnehmende until a colleague acts; organisation, spam, delete', async ({ page }) => {
+    await client.query(`UPDATE people SET listed = false WHERE id = $1`, [personId]);
+    const orgName = `Prüfagentur ${randomUUID().slice(0, 6)}`;
+    const orgId = (await client.query<{ id: string }>(`INSERT INTO organisations (name, kind, language) VALUES ($1, 'agency', 'de') RETURNING id`, [orgName])).rows[0].id;
+    try {
+      await page.goto(`/admin/people?q=${encodeURIComponent(NAME.last)}`);
+      await expect(page.getByRole('link', { name: new RegExp(NAME.last) })).toHaveCount(0);
+
+      await page.goto(`/admin/enquiries/${enquiryId}`);
+      await expect(page.getByText('Noch nicht in Teilnehmende')).toBeVisible();
+      await page.getByRole('button', { name: 'Weiter mit …' }).click();
+      await page.getByRole('menuitem', { name: 'Als Teilnehmende/n anlegen' }).click();
+      await expect(page.getByText('Noch nicht in Teilnehmende')).toHaveCount(0);
+      expect((await client.query<{ listed: boolean }>(`SELECT listed FROM people WHERE id = $1`, [personId])).rows[0].listed).toBe(true);
+
+      await page.getByRole('button', { name: 'Weiter mit …' }).click();
+      await page.getByRole('menuitem', { name: 'Organisation zuordnen …' }).click();
+      await page.getByRole('textbox', { name: 'Organisation suchen' }).fill(orgName);
+      await page.getByRole('option', { name: new RegExp(orgName) }).click();
+      await page.getByRole('button', { name: 'Zuordnen' }).click();
+      await expect(page.getByRole('link', { name: orgName })).toBeVisible();
+      const contacts = await client.query(`SELECT 1 FROM organisation_contacts WHERE organisation_id = $1 AND email = 'edda.pruefanfrage@example.com'`, [orgId]);
+      expect(contacts.rowCount).toBe(1);
+
+      await page.getByRole('button', { name: 'Weiter mit …' }).click();
+      await page.getByRole('menuitem', { name: 'Als Spam markieren' }).click();
+      await expect(page.locator('header').getByText('Spam', { exact: true })).toBeVisible();
+      await expect.poll(async () => (await client.query<{ status: string }>(`SELECT status FROM enquiries WHERE id = $1`, [enquiryId])).rows[0].status).toBe('spam');
+      await page.reload();
+
+      await page.getByRole('button', { name: 'Weiter mit …' }).click();
+      await page.getByRole('menuitem', { name: 'Löschen …' }).click();
+      await page.getByRole('dialog').getByRole('button', { name: 'Löschen' }).click();
+      await expect(page).toHaveURL(/\/admin\/enquiries$/);
+      expect((await client.query<{ gone: boolean }>(`SELECT deleted_at IS NOT NULL AS gone FROM enquiries WHERE id = $1`, [enquiryId])).rows[0].gone).toBe(true);
+    } finally {
+      await client.query(`UPDATE enquiries SET organisation_id = NULL WHERE id = $1`, [enquiryId]);
+      await client.query(`DELETE FROM organisation_contacts WHERE organisation_id = $1`, [orgId]);
+      await client.query(`DELETE FROM staff_activity WHERE entity = 'organisation' AND entity_id = $1`, [orgId]);
+      await client.query(`DELETE FROM organisations WHERE id = $1`, [orgId]);
+    }
   });
 });

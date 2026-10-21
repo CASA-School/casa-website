@@ -9,7 +9,7 @@ import { resolveFlag } from '@/lib/admin/flags';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { addNote, type NoteEntity } from '@/lib/admin/notes';
-import { linkPerson, unlinkPerson } from '@/lib/admin/people';
+import { linkPerson, listPerson, unlinkPerson } from '@/lib/admin/people';
 import { attachReviewToPerson, confirmPlacement, getPlacementAttempt } from '@/lib/admin/placement';
 import {
   queuePath,
@@ -226,6 +226,15 @@ export async function linkPersonAction(formData: FormData): Promise<void> {
   const result = await linkPerson({ duplicateId, survivorId, actor });
   revalidatePath('/admin', 'layout');
   redirect(result.ok ? returnTo : `${returnTo}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+}
+
+/** „Als Teilnehmende/n anlegen": a website contact onto the register (0076). */
+export async function listPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('people', 'edit');
+  const personId = readId(formData, 'personId');
+  await listPerson({ personId, actor });
+  revalidatePath('/admin', 'layout');
+  redirect(readReturnTo(formData, `/admin/people/${personId}`));
 }
 
 export async function unlinkPersonAction(formData: FormData): Promise<void> {

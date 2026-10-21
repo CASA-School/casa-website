@@ -48,7 +48,7 @@ export async function searchWorkspace(
                 (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC LIMIT 1) AS email,
                 (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings
            FROM people p
-          WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+          WHERE p.deleted_at IS NULL AND p.merged_into IS NULL AND p.listed
             AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
             AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
                  OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = p.id AND lower(e.address) LIKE $1))
@@ -98,7 +98,7 @@ export async function searchWorkspace(
     runs.push(
       query<{ id: string; first_name: string; last_name: string | null; topic: string | null; submitted_at: Date }>(
         `SELECT id, first_name, last_name, topic, submitted_at FROM enquiries
-          WHERE status <> 'spam'
+          WHERE status <> 'spam' AND deleted_at IS NULL
             AND (lower(concat_ws(' ', first_name, last_name)) LIKE $1 OR lower(email) LIKE $1 OR lower(coalesce(topic, '')) LIKE $1)
           ORDER BY submitted_at DESC LIMIT ${LIMIT}`,
         [like]

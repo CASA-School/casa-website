@@ -2244,7 +2244,10 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
    the fan-out succeeded. Each route reports `stored: true|false` in its own
    response and the server log names the cause.
 3. **Status is staff-owned, content is visitor-owned.** Nothing in the workspace
-   rewrites what a person submitted.
+   rewrites what a person submitted — with one exception since 0076 (2026-10-21): a colleague may
+   complete or correct a course registration („Bearbeiten" on „Angaben zur Person"). The visitor's own
+   values are kept, once, in `original` and shown beside it („Ursprünglich geschickt"); the
+   registration's person follows while no colleague has acted on them yet.
 4. **Every submission creates a person, in the same transaction.** Since 0007 a
    queue row is never written without a `people` row, its email and phone as
    typed channels, and the flags for whatever intake could not settle
@@ -2253,6 +2256,19 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
    text that does not is kept verbatim and flagged, never corrected. Intake
    never decides two rows are the same human — it raises the question, a staff
    member answers it by linking (`docs/FILEMAKER_LESSONS.md` §1, §2.4, §11).
+5. **No one is a learner until a colleague says so (0076, 2026-10-21).** Rahman: „anyone can contact
+   us, but they shouldn't be directly in Teilnehmende." Intake's person is created with
+   `people.listed = false`: not in Teilnehmende, search or the pickers. It enters the register when a
+   colleague acts — a booking or a waiting-list place (`createBooking`, `addToWaitlist`), „Dieselbe
+   Person" with someone listed, or „Als Teilnehmende/n anlegen" (`listPerson`). An enquiry's
+   „Weiter mit …" (`enquiries/[id]/enquiry-actions.tsx`) offers these, „Organisation zuordnen …"
+   (an agency's, a company's or a school's: `enquiries.organisation_id`, the sender added as its
+   contact, the person left off the register), „Als Spam markieren" and „Löschen …" (`full`; the
+   enquiry's `deleted_at`, and its person when off the register with nothing else at CASA). A
+   submission that looks like spam (`src/lib/validation/spam.ts`: three links, or sent within 3 s of
+   opening the form) is stored as „Spam", sends no mail, and „Spam löschen" on the list removes them all.
+6. **Three states (2026-10-21):** Offen, In Arbeit, Erledigt in the status bar; „Wartet",
+   „Abgelehnt" and „Spam" stay for what already carries them (a pill beside the bar).
 
 | Public route | Table |
 | --- | --- |
@@ -2629,7 +2645,7 @@ CI does not have — CI does not run e2e at all.
 | **`admin.casa-bremen.de`** | DNS record not created yet. Until it is, use `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST=true` or reach it on the public host in development |
 | **Placement fee and deposit on a booking** (2026-10-17) | The offers module adds the placement fee (50 €) and the deposit (580 €) on a learner's first stay; a booking does not. Rahman to decide |
 | **Rent per type, room or meals** (2026-10-17) | The price list has one generic rent (SchoolMan prices every type alike); the Prices screen cannot enter one per type yet |
-| **Closed levels on the website** (2026-10-17) | The public form offers every level of a start, also those SchoolMan has closed; a registration for one becomes a waiting-list place. Hide them? Rahman to decide |
+| **Closed levels on the website** (decided 2026-10-21) | The website keeps offering every level of a start, also a closed one, so no learner is lost. A registration for a full or closed course is answered by a colleague: „Auf die Warteliste", or „Späteren Kurs anbieten" (letter `registration_later_course`, the next start of the course) |
 | **Where a booking came from** (2026-10-17) | A booking made from an offer or an enquiry does not record it; needs a column such as `bookings.source_offer_id` |
 | **Down payment** | 100 € (AGB) or 200 € — open since the booking letters |
 | **Placing learners in flats and host families** (2026-10-17) | Buchungen → Unterkunft lists who arrives when; assigning a flat or a family (SchoolMan's `DateAccommodation`) is not built |

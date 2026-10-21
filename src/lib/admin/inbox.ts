@@ -30,13 +30,15 @@ type Spec = {
   status: (alias: string) => string;
   /** Stored values per state; applications keep the public form's own words. */
   values: { new: string[]; inProgress: string[]; waiting: string[]; closed: string[]; hidden: string[] };
+  /** Rows a colleague deleted are in no list (an enquiry's `deleted_at`, 0076). */
+  live?: (alias: string) => string;
 };
 
 const WORK = { new: ['new'], inProgress: ['in_progress'], waiting: ['waiting'], closed: ['done', 'declined'], hidden: ['spam'] };
 
 // An allowlist, like queues.ts: a table name is interpolated, so it only ever comes from here.
 const SPECS: Record<QueueEntity, Spec> = {
-  enquiry: { table: 'enquiries', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
+  enquiry: { table: 'enquiries', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK, live: (a) => `${a}.deleted_at IS NULL` },
   course_registration: { table: 'course_registrations', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
   exam_registration: { table: 'exam_registrations', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
   career_application: {
@@ -54,7 +56,7 @@ const openValues = (spec: Spec) => [...spec.values.new, ...spec.values.inProgres
 /** The WHERE conditions for a period and a state, on the table under `alias`. */
 export function inboxConditions(entity: QueueEntity, alias: string, { period, state }: { period: InboxPeriod; state: InboxState }): string[] {
   const spec = SPECS[entity];
-  const conditions: string[] = [];
+  const conditions: string[] = spec.live ? [spec.live(alias)] : [];
   if (period === 'week') conditions.push(`${alias}.${spec.at} >= ${WEEK_START}`);
   if (period === 'history') conditions.push(`${alias}.${spec.at} < ${WEEK_START}`);
   const status = spec.status(alias);
@@ -90,7 +92,7 @@ export async function inboxCounts(entity: QueueEntity): Promise<InboxCounts> {
             count(*) FILTER (WHERE ${status} IN ${list(spec.values.new)}) AS new,
             count(*) FILTER (WHERE ${status} IN ${list(spec.values.inProgress)}) AS in_progress,
             count(*) FILTER (WHERE ${status} IN ${list(spec.values.waiting)}) AS waiting
-       FROM ${spec.table} q`
+       FROM ${spec.table} q${spec.live ? ` WHERE ${spec.live('q')}` : ''}`
   );
   return {
     week: Number(row?.week ?? 0),

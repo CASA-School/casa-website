@@ -1,6 +1,9 @@
-import { query, queryFirst } from './db';
+import { logActivity } from './activity';
+import type { StaffUser } from './auth';
+import { query, queryFirst, withTransaction } from './db';
 import { EXAM_PARTS_LABELS, isExamParts } from './exam-parts';
-import { pick, type WsLang } from './i18n';
+import { pick, type Bilingual, type WsLang } from './i18n';
+import { countryCodeFromName, normalizeEmail, normalizePhone } from './normalize';
 import { inboxConditions, type InboxPeriod, type InboxState } from './inbox';
 import { normaliseStatus, type WorkStatus } from './queues';
 
@@ -75,6 +78,10 @@ export type CourseRegistrationDetail = {
   assigneeName: string | null;
   personId: string | null;
   submittedAt: Date;
+  /** What the visitor sent, kept on a colleague's first edit (0076); null while unedited. */
+  original: Record<string, unknown> | null;
+  editedAt: Date | null;
+  editedByName: string | null;
 };
 
 export type ExamRegistrationDetail = {
@@ -320,9 +327,15 @@ export async function getCourseRegistration(id: string): Promise<CourseRegistrat
     assignee_name: string | null;
     person_id: string | null;
     submitted_at: Date;
+    original: Record<string, unknown> | null;
+    edited_at: Date | null;
+    edited_by_name: string | null;
   }>(
     `SELECT r.id,
             r.request_id,
+            r.original,
+            r.edited_at,
+            (SELECT name FROM staff_users eu WHERE eu.id = r.edited_by) AS edited_by_name,
             r.salutation::text AS salutation,
             r.first_name,
             r.last_name,
@@ -393,6 +406,9 @@ export async function getCourseRegistration(id: string): Promise<CourseRegistrat
     assigneeName: found.assignee_name,
     personId: found.person_id,
     submittedAt: found.submitted_at,
+    original: found.original,
+    editedAt: found.edited_at,
+    editedByName: found.edited_by_name,
   };
 }
 
@@ -487,4 +503,90 @@ export async function getExamRegistration(id: string): Promise<ExamRegistrationD
     personId: found.person_id,
     submittedAt: found.submitted_at,
   };
+}
+
+// ------------------------------------------------------------------ a colleague's corrections (0076)
+
+export type RegistrationEdit = {
+  salutation: 'mr' | 'ms' | 'mx' | 'neutral';
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  birthDate: string | null;
+  visaRequired: boolean;
+  accommodationRequired: boolean;
+  accommodationType: 'flat' | 'host' | null;
+  allergies: string | null;
+  notes: string | null;
+};
+
+/** The columns a colleague may correct, as they stand: what `original` keeps on the first edit. */
+const EDITABLE = `jsonb_build_object(
+  'salutation', salutation::text, 'first_name', first_name, 'last_name', last_name, 'email', email, 'phone', phone,
+  'nationality', nationality_raw, 'birth_date', birth_date_raw, 'visa_required', visa_required,
+  'accommodation_required', accommodation_required, 'accommodation_type', accommodation_type::text,
+  'allergies', allergies, 'notes', notes)`;
+
+/**
+ * „Daten bearbeiten" (Rahman, 2026-10-21: „sometimes registrations are incomplete, so the colleagues
+ * edit and improve that"). The registration takes the corrected values; what the visitor sent is kept
+ * once, on the first edit (`original`), and shown beside it. Its person follows while no colleague has
+ * acted on them yet (off the register): the booking then starts from the corrected name and address.
+ */
+export async function editCourseRegistration(id: string, input: RegistrationEdit, actor: StaffUser): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
+  const nationalityCode = countryCodeFromName(input.nationality);
+  const done = await withTransaction(async (client) => {
+    const { rows } = await client.query<{ person_id: string | null }>(
+      `UPDATE course_registrations
+          SET original = coalesce(original, ${EDITABLE}),
+              salutation = $2::salutation, first_name = $3, last_name = $4, email = $5, phone = $6,
+              nationality_raw = $7, nationality_code = $8, birth_date_raw = coalesce($9, ''), birth_date = $9::date,
+              visa_required = $10, accommodation_required = $11, accommodation_type = $12::accommodation_type,
+              allergies = $13, notes = $14, edited_at = now(), edited_by = $15
+        WHERE id = $1
+        RETURNING person_id`,
+      [
+        id,
+        input.salutation,
+        input.firstName,
+        input.lastName,
+        input.email,
+        input.phone,
+        input.nationality,
+        nationalityCode,
+        input.birthDate,
+        input.visaRequired,
+        input.accommodationRequired,
+        input.accommodationRequired ? input.accommodationType : null,
+        input.allergies,
+        input.notes,
+        actor.id,
+      ]
+    );
+    if (!rows[0]) return false;
+    const personId = rows[0].person_id;
+    if (personId) {
+      const listed = await client.query<{ listed: boolean }>(`SELECT listed FROM people WHERE id = $1`, [personId]);
+      if (listed.rows[0] && !listed.rows[0].listed) {
+        await client.query(
+          `UPDATE people SET salutation = $2::salutation, first_name = $3, last_name = $4, birth_date = $5::date, nationality_code = $6, nationality_raw = $7 WHERE id = $1`,
+          [personId, input.salutation, input.firstName, input.lastName, input.birthDate, nationalityCode, input.nationality]
+        );
+        await client.query(
+          `UPDATE emails SET address = $2, normalized = $3 WHERE id = (SELECT id FROM emails WHERE person_id = $1 ORDER BY is_primary DESC, created_at LIMIT 1)`,
+          [personId, input.email, normalizeEmail(input.email)]
+        );
+        await client.query(
+          `UPDATE phones SET number = $2, normalized = $3 WHERE id = (SELECT id FROM phones WHERE person_id = $1 ORDER BY is_primary DESC, created_at LIMIT 1)`,
+          [personId, input.phone, normalizePhone(input.phone)]
+        );
+      }
+    }
+    return true;
+  });
+  if (!done) return { ok: false, reason: { de: 'Diese Anmeldung gibt es nicht mehr.', en: 'This registration no longer exists.' } };
+  await logActivity({ actor, entity: 'course_registration', entityId: id, action: 'registration_edited' });
+  return { ok: true };
 }

@@ -5,8 +5,9 @@ import { MakeOffer } from '@/components/admin/make-offer';
 import { PersonPanel } from '@/components/admin/person-panel';
 import { MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
 import { Icon } from '@/components/admin/icons';
-import { Badge, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
+import { Badge, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
+import { query } from '@/lib/admin/db';
 import { activityFor } from '@/lib/admin/activity';
 import { ORGANISER_BRIEF_LABELS, formatBriefValue } from '@/lib/admin/brief-labels';
 import { shortDay } from '@/lib/admin/days';
@@ -21,6 +22,8 @@ import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
 import { replyHref } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
+
+import { EnquiryActions } from './enquiry-actions';
 
 /**
  * Where an enquiry came from, when that says something. The contact page is
@@ -67,11 +70,12 @@ const BRIEF_SECTIONS: readonly { title: Bilingual; keys: readonly string[] }[] =
  * language the enquiry was written in, signed by the colleague replying.
  *
  * What an enquiry leads to is in the head: „Angebot erstellen" (the offer
- * wizard, from this enquiry), and for a learner's own enquiry „Buchung anlegen"
- * — their booking wizard, on their page.
+ * wizard, from this enquiry) and „Weiter mit …" (2026-10-21, `enquiry-actions.tsx`): book onto a
+ * course, add to Teilnehmende, assign to an organisation, spam, delete. The sender is no learner until
+ * a colleague chooses one of these (0076).
  */
-export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, user] = await Promise.all([params, requireModule('enquiries')]);
+export default async function EnquiryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+  const [{ id }, { error }, user] = await Promise.all([params, searchParams, requireModule('enquiries')]);
   const [enquiry, { t, lang }] = await Promise.all([getEnquiry(id), getI18n()]);
 
   if (!enquiry) {
@@ -82,7 +86,12 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   const canOffer = canAccess(user, 'offers', 'edit');
   // A learner's own enquiry can become a booking at once: the person's wizard (`?book=1`). A group's
   // or a company's becomes an offer first.
-  const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') && enquiry.kind === 'general';
+  const canBook = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people');
+  const canList = canAccess(user, 'people', 'edit');
+  const canOrganise = canEdit && canAccess(user, 'organisations');
+  const organisations = canOrganise
+    ? await query<{ id: string; name: string; kind: string }>(`SELECT id, name, kind FROM organisations WHERE is_active ORDER BY name`)
+    : [];
   const [notes, activity, staff, flags, person, offers, earlier] = await Promise.all([
     listNotes('enquiry', enquiry.id),
     activityFor('enquiry', enquiry.id),
@@ -128,7 +137,13 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           <>
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{enquiry.topic}</span>
             <MetaLine>
-              {organisation ? (
+              {enquiry.organisation ? (
+                <MetaItem icon={Icon.people}>
+                  <Link href={`/admin/organisations/${enquiry.organisation.id}`} className="font-semibold text-[var(--casa-ink)] hover:underline">
+                    {enquiry.organisation.name}
+                  </Link>
+                </MetaItem>
+              ) : organisation ? (
                 <MetaItem icon={Icon.people}>
                   <span className="font-semibold text-[var(--casa-ink)]">{organisation}</span>
                   {groupSize ? ` · ${t(`${groupSize} Teilnehmende`, `${groupSize} participants`)}` : ''}
@@ -144,12 +159,20 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           </>
         }
         actions={
-          canOffer || (canBook && person) ? (
-            <>
-              {canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
-              {canBook && person ? <ButtonLink href={`/admin/people/${person.canonicalId}?book=1`}>{t('Buchung anlegen', 'Create booking')}</ButtonLink> : null}
-            </>
-          ) : null
+          <>
+            {canOffer ? <MakeOffer from={{ enquiryId: enquiry.id }} existing={offers} /> : null}
+            <EnquiryActions
+              id={enquiry.id}
+              status={enquiry.status}
+              bookHref={canBook && person ? `/admin/people/${person.canonicalId}?book=1` : null}
+              listPersonId={canList && person && !person.listed ? person.canonicalId : null}
+              organisations={organisations}
+              canOrganise={canOrganise}
+              canCreateOrganisation={canAccess(user, 'organisations', 'edit')}
+              canEdit={canEdit}
+              canDelete={canAccess(user, 'enquiries', 'full')}
+            />
+          </>
         }
         bar={
           <>
@@ -158,6 +181,12 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           </>
         }
       />
+
+      {error ? (
+        <p role="alert" className="mb-4 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
+          {error}
+        </p>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-4">
@@ -195,7 +224,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/enquiries/${enquiry.id}`} />
+          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/enquiries/${enquiry.id}`} canList={canList} />
 
           {earlier.length ? (
             <Card title={t('Frühere Anfragen', 'Earlier enquiries')} icon={Icon.enquiries} tint="blue">

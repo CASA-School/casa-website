@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   Building2,
@@ -256,6 +256,11 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     topic: preferredTopic,
   }));
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  // When the form was opened: a form sent faster than anyone types it is marked spam (lib/validation/spam).
+  const openedAt = useRef<number | null>(null);
+  useEffect(() => {
+    openedAt.current = Date.now();
+  }, []);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -310,6 +315,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       email: fields.email,
       message: fields.message,
       website: fields.website,
+      elapsedMs: openedAt.current ? Date.now() - openedAt.current : undefined,
       topic: activeTopicLabel,
       topicKey: activeTopicKey,
       locale,

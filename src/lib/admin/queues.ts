@@ -31,8 +31,10 @@ export type WorkStatus = (typeof WORK_STATUSES)[number];
 
 /** Read with `pick(lang, STATUS_LABELS[status])` (docs/ADMIN_I18N.md). */
 export const STATUS_LABELS: Record<WorkStatus, Bilingual> = {
-  new: { de: 'Neu', en: 'New' },
-  in_progress: { de: 'In Bearbeitung', en: 'In progress' },
+  // Three states a colleague sets (Rahman, 2026-10-21): Offen, In Arbeit, Erledigt. „Wartet",
+  // „Abgelehnt" and „Spam" stay for what already carries them; spam is set from „Weiter mit …".
+  new: { de: 'Offen', en: 'Open' },
+  in_progress: { de: 'In Arbeit', en: 'In progress' },
   waiting: { de: 'Wartet auf Antwort', en: 'Waiting on them' },
   done: { de: 'Erledigt', en: 'Done' },
   declined: { de: 'Abgelehnt', en: 'Declined' },

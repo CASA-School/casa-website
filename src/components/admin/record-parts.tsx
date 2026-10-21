@@ -32,7 +32,8 @@ const TONE: Record<WorkStatus, { pill: string; dot: string }> = {
 };
 
 /** The working states, in the order work moves through them. */
-const STEPS: readonly WorkStatus[] = ['new', 'in_progress', 'waiting', 'done'];
+// Three states (2026-10-21): Offen, In Arbeit, Erledigt. Another one a record already carries shows as a pill beside them.
+const STEPS: readonly WorkStatus[] = ['new', 'in_progress', 'done'];
 
 /** A state as a small pill with its dot. */
 export function StatePill({ status, lang }: { status: WorkStatus; lang: WsLang }) {
@@ -60,8 +61,8 @@ export async function StatusBar({
   status: WorkStatus;
   canEdit: boolean;
 }) {
-  const { t, lang } = await getI18n();
-  const rare = status === 'declined' || status === 'spam';
+  const { lang } = await getI18n();
+  const rare = !STEPS.includes(status);
 
   return (
     <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -96,29 +97,6 @@ export async function StatusBar({
         })}
       </form>
       {rare ? <StatePill status={status} lang={lang} /> : null}
-      {canEdit ? (
-        <ChoiceMenu
-          action={updateStatusAction}
-          fields={{ entity, id }}
-          name="status"
-          label={t('Weitere Status', 'Other states')}
-          choices={(['declined', 'spam'] as const).map((value) => ({
-            value,
-            label: pick(lang, STATUS_LABELS[value]),
-            current: value === status,
-            icon: <span aria-hidden="true" className={cn('ml-1 size-2 rounded-full', TONE[value].dot)} />,
-          }))}
-          triggerClassName="inline-flex h-8 items-center gap-1 rounded-full px-3 text-[0.8rem] font-semibold text-[#334155] transition-colors outline-none hover:bg-white hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#d3dbe6] data-[state=open]:ring-inset"
-          trigger={
-            <>
-              {t('Mehr', 'More')}
-              <span aria-hidden="true" className="[&_svg]:size-3.5">
-                {Icon.chevronDown}
-              </span>
-            </>
-          }
-        />
-      ) : null}
     </div>
   );
 }

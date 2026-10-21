@@ -15,7 +15,7 @@ import { sentStates } from '@/lib/admin/letters/suggest';
 import type { RegistrationLetterKind } from '@/lib/admin/letters/types';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
 
-const KINDS: Record<string, RegistrationLetterKind> = { deposit: 'registration_deposit_request', test: 'registration_test_request' };
+const KINDS: Record<string, RegistrationLetterKind> = { deposit: 'registration_deposit_request', test: 'registration_test_request', later: 'registration_later_course' };
 
 /**
  * A website registration's letters (docs/LETTERS.md, 0035), before there is a booking: please send

@@ -208,7 +208,7 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/exam/${registration.id}`} />
+          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={`/admin/registrations/exam/${registration.id}`} canList={canAccess(user, 'people', 'edit')} />
           <Timeline
             canWrite={canEdit}
             entity="exam_registration"

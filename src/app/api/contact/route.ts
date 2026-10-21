@@ -5,6 +5,7 @@ import { storeEnquiry } from '@/lib/admin/intake';
 import { rateLimit } from '@/lib/api/rate-limit';
 import { getGroupInquiryWebhookUrl } from '@/lib/db/env';
 import { contactInquirySchema, organiserBriefFields } from '@/lib/validation/contact';
+import { looksLikeSpam } from '@/lib/validation/spam';
 
 
 function successMessage(locale: 'en' | 'de') {
@@ -79,6 +80,9 @@ export async function POST(request: NextRequest) {
       )
     : null;
 
+  // Stored as „Spam", in no list and with no mail, when it looks like one (lib/validation/spam).
+  const spam = looksLikeSpam({ message: payload.message, elapsedMs: payload.elapsedMs });
+
   const webhookUrl =
     (organiserBrief ? getGroupInquiryWebhookUrl() : null) || process.env.CONTACT_WEBHOOK_URL;
   const submittedAt = new Date().toISOString();
@@ -109,6 +113,7 @@ export async function POST(request: NextRequest) {
     source: payload.source,
     organiserBrief,
     userAgent: request.headers.get('user-agent') || null,
+    spam,
   });
 
   const kind = organiserBrief ? 'groups' : 'contact';
@@ -118,6 +123,11 @@ export async function POST(request: NextRequest) {
     topic: payload.topic, topicKey: payload.topicKey || null,
     message: payload.message, source: payload.source, organiserBrief,
   };
+  // Spam that was stored goes no further: no alert, no receipt (it waits under „Spam" in the workspace).
+  if (spam && stored) {
+    return NextResponse.json({ status: 'accepted', requestId, mode: 'database', notified: false, stored, confirmationSent: false, message: successMessage(locale) });
+  }
+
   // Stored, the submission is accepted whatever the alert does, so the receipt
   // goes out alongside it. Not stored, it waits: no receipt for a 503.
   const [delivery, early] = stored
