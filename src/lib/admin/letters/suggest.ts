@@ -1,5 +1,6 @@
 import { bookingLetterBlock, missingFromRecord, type BookingLetterContext, type WaitlistLetterContext } from './booking-letters';
 import type { BookingLetterKind, WaitlistLetterKind } from './types';
+import { owesMoney } from '../open-money';
 
 /**
  * The letter a booking is due next, from what it is and what was sent (2026-10-17). SchoolMan left
@@ -50,7 +51,7 @@ export function suggestBookingLetters(ctx: BookingLetterContext, today: string, 
   const end = ctx.course?.endDate ?? null;
   if (ctx.status === 'completed' || (end && end < today)) {
     const reminded = lastSent(sent, 'payment_reminder');
-    return balance > 0.005 && (!reminded || reminded <= addDays(today, -7)) ? ['payment_reminder'] : [];
+    return owesMoney(balance) && (!reminded || reminded <= addDays(today, -7)) ? ['payment_reminder'] : [];
   }
 
   if (!confirmed) out.push(confirmation);
@@ -76,7 +77,7 @@ export function suggestBookingLetters(ctx: BookingLetterContext, today: string, 
 
   // Still open a week after the confirmation, and no reminder in the last week.
   const reminded = lastSent(sent, 'payment_reminder');
-  if (balance > 0.005 && confirmed && confirmed <= addDays(today, -7) && (!reminded || reminded <= addDays(today, -7))) out.push('payment_reminder');
+  if (owesMoney(balance) && confirmed && confirmed <= addDays(today, -7) && (!reminded || reminded <= addDays(today, -7))) out.push('payment_reminder');
 
   // What the record must have and lacks — not every field on the list, most records lack some —
   // asked for at most every two weeks, a course learner's only.

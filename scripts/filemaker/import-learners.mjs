@@ -340,7 +340,9 @@ try {
       if (existing) {
         bookingId = existing.id;
         await client.query(
+          // The learner pays (self): no organisation pays it, though one paid it on an earlier run (2026-10-21).
           `UPDATE bookings SET status = $2::booking_status, course_type_id = CASE WHEN $7::uuid IS NULL THEN coalesce($3, course_type_id) END, visa_required = $4, payer = $5,
+                  payer_organisation_id = CASE WHEN $5 = 'self' THEN NULL ELSE payer_organisation_id END,
                   observation_reason = CASE WHEN observed_by IS NOT NULL THEN observation_reason WHEN $6 THEN 'other' ELSE NULL END,
                   observed_at = CASE WHEN observed_by IS NOT NULL THEN observed_at WHEN $6 THEN coalesce(observed_at, now()) ELSE NULL END,
                   exam_session_id = $7, exam_parts = CASE WHEN $7::uuid IS NULL THEN NULL ELSE coalesce(exam_parts, 'full') END

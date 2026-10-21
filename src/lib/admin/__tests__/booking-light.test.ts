@@ -33,9 +33,11 @@ describe('bookingLight', () => {
     expect(bookingLight({ ...base, status: 'cancelled', observationReason: 'level', paid: 0 })).toBe('no');
   });
 
-  it('counts a cent of rounding as paid', () => {
+  // Under 5 € counts as paid (2026-10-21, open-money.ts): rounding and small leftovers are not chased.
+  it('counts a leftover under 5 € as paid', () => {
     expect(paidInFull(417.99, 417.985)).toBe(true);
-    expect(paidInFull(417.99, 417.9)).toBe(false);
+    expect(paidInFull(417.99, 417.9)).toBe(true);
+    expect(paidInFull(417.99, 412.99)).toBe(false);
   });
 });
 

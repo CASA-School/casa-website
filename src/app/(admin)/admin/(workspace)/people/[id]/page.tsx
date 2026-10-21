@@ -57,6 +57,7 @@ import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { toDateInputValue } from '@/lib/dates';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { cn } from '@/lib/utils';
+import { owesMoney } from '@/lib/admin/open-money';
 
 const SALUTATIONS: Record<string, Bilingual> = {
   mr: { de: 'Herr', en: 'Mr' },
@@ -1066,10 +1067,10 @@ function CourseNow({
         </div>
         {booking.status !== 'cancelled' && booking.charged > 0 ? (
           <div className="ml-auto text-right">
-            <span className={cn('block text-[1.05rem] font-extrabold tabular-nums', open > 0.005 ? 'text-[#9a5b00]' : 'text-[#17693a]')}>
-              {open > 0.005 ? euros(lang, open, booking.currency) : t('Bezahlt', 'Paid')}
+            <span className={cn('block text-[1.05rem] font-extrabold tabular-nums', owesMoney(open) ? 'text-[#9a5b00]' : 'text-[#17693a]')}>
+              {owesMoney(open) ? euros(lang, open, booking.currency) : t('Bezahlt', 'Paid')}
             </span>
-            <span className="block text-[0.72rem] text-[var(--casa-muted)]">{open > 0.005 ? t('offen', 'open') : euros(lang, booking.charged, booking.currency)}</span>
+            <span className="block text-[0.72rem] text-[var(--casa-muted)]">{owesMoney(open) ? t('offen', 'open') : euros(lang, booking.charged, booking.currency)}</span>
           </div>
         ) : null}
       </div>

@@ -347,7 +347,14 @@ Close behind: show the SchoolMan booking and learner numbers on the booking (sto
 
 1. **Whole population or a wider sample?** A middle rule could be: every booking with a period not yet
    ended or starting within 12 months, plus every exam booking on a sitting ahead. That fixes gaps
-   1, 6 and 7 and most of 10.
+   1, 6 and 7 and most of 10. *Partly decided 2026-10-21:* all of 2024 and 2025 come across (everyone with
+   a booking whose period began in those years, with their history), for what is still open from them;
+   2022–2023 and the rule ahead are still open. Measured that day, per year of a booking's first period:
+   2024 4,249 bookings (127 owing 50,240 €), 2025 3,747 (112 owing 43,794 €). The open amounts agree
+   with SchoolMan's own `cal_CostGross`/`cal_PaymentIn` (551 and 549 of 555); about 50 are an agency's
+   net payment (paid equals `cal_CostCom`), 242 are on company bookings. `Booking._ID_PaymentThird`
+   („Zahlung durch Dritte", yes/no, shown only with a company) now decides whether a company pays: Nein
+   makes the learner the payer.
 2. **Past courses.** Import the courses before the 12-month window (1,161 periods, 48 course weeks,
    700 lesson days hang on them), or keep only level and time on the course-less periods?
 3. **The 19 SchoolMan courses with no start of ours.** Make starts for them (`on_website = false`),

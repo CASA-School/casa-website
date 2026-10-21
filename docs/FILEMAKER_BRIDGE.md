@@ -522,8 +522,9 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 **What a run brings.** It brings what the local copy has, by the importers' own rules
 (`scripts/filemaker/bridge-steps.mjs` lists them in order):
 - staff, courses with their weekly counts, lesson days and absences;
-- the learner sample (a course this week or in the next four, plus this year's group participants),
-  with history, money, attendance and letters;
+- the learner sample (a course this week or in the next four, plus this year's group participants,
+  plus — since 2026-10-21, Rahman: „all of 2024 and 2025" — everyone with a booking whose period began
+  in 2024 or 2025, `HISTORY_YEARS` in `sample.py`), with history, money, attendance and letters;
 - organisations, groups, offers, accommodation, follow-ups, intake and the rest;
 - the Tagesplan's tasks.
 

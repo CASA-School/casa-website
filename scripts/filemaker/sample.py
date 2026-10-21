@@ -7,11 +7,16 @@ agencies and companies they depend on. One rule, so the two never drift apart.
 
 Since 2026-10-18 also the participants of this year's group visits (`Booking._ID_Group`, a period in
 this calendar year), so a group's page has its people: `read_groups.py` brings the groups.
+
+Since 2026-10-21 also everyone with a booking taken whose period began in 2024 or 2025 (Rahman: „all of
+2024 and 2025", for what is still open from those years — Buchungen's year row). Their other bookings
+come with them, as every chosen person's do.
 """
 import re
 from datetime import date, timedelta
 
 NOT_TAKEN = {'2', '3'}  # Booking._ID_EnrolmentDone: 2 nein, 3 storno
+HISTORY_YEARS = ('2024', '2025')  # whole years brought across (2026-10-21)
 
 
 def _first(value):
@@ -37,6 +42,6 @@ def sample_persons(bookings, periods, today=None):
         s, e = _iso(p['ZStartDate']), _iso(p['ZEndDate'])
         if not (b and s and e and _first(b['_ID_EnrolmentDone']) not in NOT_TAKEN and _first(b['_ID_Person'])):
             continue
-        if (s <= until and e >= monday) or (_first(b.get('_ID_Group')) and e >= new_year):
+        if (s <= until and e >= monday) or (_first(b.get('_ID_Group')) and e >= new_year) or s[:4] in HISTORY_YEARS:
             chosen.add(_first(b['_ID_Person']))
     return chosen
