@@ -93,10 +93,12 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'scheduled-cohort': {
     id: 'scheduled-cohort',
     buyingQuestion: 'Which start date and level, and what does it cost?',
+    // What a learner books first (Rahman, 2026-10-21): the dates, the price and „Gut zu wissen", then the
+    // level ladder with „Unsere Merkmale" at its end.
     sections: [
-      'level-goals',
       'term-table',
       'practical-details',
+      'level-goals',
       'audience',
       'next-steps',
       'testimonials',
@@ -141,8 +143,8 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     buyingQuestion: 'Does this get me to my licence or my role?',
     // No term table: CASA publishes no dates for the professional formats.
     sections: [
-      'level-goals',
       'practical-details',
+      'level-goals',
       'audience',
       'next-steps',
       'testimonials',

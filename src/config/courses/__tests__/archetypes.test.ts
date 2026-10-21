@@ -92,11 +92,12 @@ describe('course archetypes', () => {
     // Same five facts as the pre-registry page.
     expect(scheduled.facts).toEqual(['next-start', 'duration', 'lessons-per-week', 'level-range', 'price']);
     expect(scheduled.sections).toEqual([
-      'level-goals',
       // Both added 2026-08-18. CASA publishes a term table and a fee table for
-      // every dated format, and the pages carried neither.
+      // every dated format, and the pages carried neither. First since 2026-10-21:
+      // the dates, the price and „Gut zu wissen" before the level ladder (Rahman).
       'term-table',
       'practical-details',
+      'level-goals',
       'audience',
       'next-steps',
       'testimonials',
