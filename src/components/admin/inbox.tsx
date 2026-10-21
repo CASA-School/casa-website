@@ -116,9 +116,9 @@ export async function InboxScreen({
 
       {/* Where the open work stands, of any age: the same three states the rows carry. */}
       <p className="-mt-3 mb-6 flex min-h-5 flex-wrap gap-x-5 gap-y-1 text-[0.84rem] text-[var(--casa-muted)]">
-        <Tally tone="new" n={counts.new} label={t('neu', 'new')} lang={lang} />
-        <Tally tone="working" n={counts.inProgress} label={t('in Bearbeitung', 'in progress')} lang={lang} />
-        <Tally tone="waiting" n={counts.waiting} label={t('warten auf Antwort', 'waiting on them')} lang={lang} />
+        <Tally tone="new" n={counts.new} label={t('offen', 'open')} lang={lang} />
+        {/* Three states (2026-10-21): what waits on an answer is in progress. */}
+        <Tally tone="working" n={counts.inProgress + counts.waiting} label={t('in Arbeit', 'in progress')} lang={lang} />
         {counts.new + counts.inProgress + counts.waiting === 0 ? <span>{t('Alles erledigt', 'All done')}</span> : null}
       </p>
 

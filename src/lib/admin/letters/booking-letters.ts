@@ -155,6 +155,7 @@ export const LETTER_KIND_LABELS: Record<LetterKind, Record<LetterLanguage, strin
   learner_confirmation: { de: 'Bestätigung mehrerer Buchungen', en: 'Confirmation of several bookings' },
   registration_test_request: { de: 'Bitte um Testergebnis', en: 'Test result request' },
   registration_deposit_request: { de: 'Bitte um Anzahlung', en: 'Down payment request' },
+  registration_later_course: { de: 'Späterer Kurs', en: 'A later course' },
 };
 
 /** One of a learner's bookings, for the confirmation of several (0035). */
@@ -195,6 +196,8 @@ export type RegistrationLetterContext = {
   downPayment: number;
   /** Where the placement tests are on the website, per language. */
   placementUrl: Record<LetterLanguage, string>;
+  /** The next start of the same course after the one chosen (YYYY-MM-DD): what „Späterer Kurs" offers. */
+  laterStart: string | null;
   staff: { id: string; name: string }[];
 };
 
@@ -266,6 +269,7 @@ export const STANDARD_SLOTS: Record<ComposedKind, readonly string[]> = {
   learner_confirmation: ['intro', 'closing', 'ps'],
   registration_test_request: ['intro', 'closing'],
   registration_deposit_request: ['intro', 'reference', 'visa', 'closing'],
+  registration_later_course: ['intro', 'closing'],
   booking_confirmation: ['intro', 'closing', 'ps'],
   payment_receipt: ['intro', 'closing'],
   payment_reminder: ['intro', 'ways', 'closing'],
@@ -366,6 +370,16 @@ export const LETTER_STANDARD_DEFAULTS: Record<ComposedKind, Record<LetterLanguag
       reference: 'When you transfer the money, please give your full name and your date of birth as the payment reference, so that we can match the payment. Our bank details are at the foot of this letter.',
       visa: 'If you need to apply for a visa for a language course or for university: we can only confirm courses that have been paid in full in advance. Once you have entered Germany and the course has begun, a course tied to a visa can no longer be cancelled.',
       closing: 'If you have any questions, just write to us.',
+    },
+  },
+  registration_later_course: {
+    de: {
+      intro: 'vielen Dank für deine Anmeldung über unsere Website. Leider ist im Kurs, den du gewählt hast, kein Platz mehr frei:',
+      closing: 'Antworte uns einfach, wenn du den späteren Kurs nehmen möchtest, dann buchen wir dich ein. Wenn du lieber auf einen Platz im gewählten Kurs warten möchtest, setzen wir dich gern auf die Warteliste.',
+    },
+    en: {
+      intro: 'Thank you for registering on our website. Unfortunately, there is no place left in the course you chose:',
+      closing: 'Just reply if you would like to take the later course, and we will book you in. If you would rather wait for a place in the course you chose, we will gladly put you on the waiting list.',
     },
   },
   booking_confirmation: {
@@ -1347,6 +1361,9 @@ const MULTI = {
     registration: 'Deine Anmeldung',
     testLead: 'Deine Anmeldung: bitte schick uns dein Testergebnis',
     depositLead: 'Deine Anmeldung: Anzahlung',
+    laterLead: 'Deine Anmeldung: ein späterer Kurs',
+    later: (date: string) => `Wir können dir einen Platz im Kurs ab ${date} anbieten.`,
+    noLater: 'Einen späteren Termin haben wir noch nicht festgelegt. Wir melden uns, sobald es ihn gibt.',
     level: (l: string) => `angegebenes Niveau ${l}`,
     test: (url: string) => `Damit wir deine Anmeldung abschließen können, brauchen wir noch das Ergebnis deines Einstufungstests. Die Tests findest du hier: ${url}`,
     deposit: (amount: string) => `Bitte überweise eine erste Anzahlung von ${amount} für deinen Kurs. Sobald sie bei uns ist, bearbeiten wir deine Anmeldung weiter.`,
@@ -1363,6 +1380,9 @@ const MULTI = {
     registration: 'Your registration',
     testLead: 'Your registration: please send us your test result',
     depositLead: 'Your registration: down payment',
+    laterLead: 'Your registration: a later course',
+    later: (date: string) => `We can offer you a place in the course starting on ${date}.`,
+    noLater: 'We have not set a later date yet. We will let you know as soon as there is one.',
     level: (l: string) => `level given: ${l}`,
     test: (url: string) => `So that we can complete your registration, we still need the result of your placement test. You can find the tests here: ${url}`,
     deposit: (amount: string) => `Please transfer a first down payment of ${amount} for your course. As soon as it has arrived, we will continue with your registration.`,
@@ -1448,6 +1468,9 @@ export function registrationLetter(kind: RegistrationLetterKind, ctx: Registrati
   ];
   if (kind === 'registration_test_request') {
     body.push(text(choices, 'test', m.test(ctx.placementUrl[lang]), true));
+  } else if (kind === 'registration_later_course') {
+    // „Späteren Kurs anbieten" (2026-10-21): the course they chose is full or closed; the next start of it.
+    body.push(text(choices, 'later', ctx.laterStart ? m.later(formatLetterDate(ctx.laterStart, lang)) : m.noLater, true));
   } else {
     body.push(text(choices, 'deposit', m.deposit(formatMoney(ctx.downPayment, lang)), true));
     body.push(text(choices, 'reference', standard.reference));
@@ -1461,7 +1484,7 @@ export function registrationLetter(kind: RegistrationLetterKind, ctx: Registrati
     ctx.staff,
     choices,
     meta.today,
-    { lead: kind === 'registration_test_request' ? m.testLead : m.depositLead, title: ctx.course ? courseTitle(ctx.course, lang) : ctx.courseLabel, tail: null },
+    { lead: kind === 'registration_test_request' ? m.testLead : kind === 'registration_later_course' ? m.laterLead : m.depositLead, title: ctx.course ? courseTitle(ctx.course, lang) : ctx.courseLabel, tail: null },
     body
   );
 }

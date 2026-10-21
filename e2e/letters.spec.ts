@@ -165,7 +165,8 @@ test.describe('letters', () => {
       `SELECT l.kind, r.status::text AS status FROM letters l JOIN course_registrations r ON r.id = l.registration_id WHERE r.id = $1`,
       [registrationId]
     );
-    expect(rows).toEqual([{ kind: 'registration_deposit_request', status: 'waiting' }]);
+    // A letter sent is work begun: „In Arbeit" (three states since 2026-10-21).
+    expect(rows).toEqual([{ kind: 'registration_deposit_request', status: 'in_progress' }]);
 
     await page.goto(`/admin/registrations/course/${registrationId}`);
     await expect(page.getByRole('heading', { name: 'Briefe' }).locator('xpath=ancestor::section[1]')).toContainText('Bitte um Anzahlung');

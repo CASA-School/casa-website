@@ -35,7 +35,7 @@ export const BOOKING_LETTER_KINDS = [
 ] as const;
 
 /** A website registration's letters, before there is a booking (0035). */
-export const REGISTRATION_LETTER_KINDS = ['registration_test_request', 'registration_deposit_request'] as const;
+export const REGISTRATION_LETTER_KINDS = ['registration_test_request', 'registration_deposit_request', 'registration_later_course'] as const;
 export type RegistrationLetterKind = (typeof REGISTRATION_LETTER_KINDS)[number];
 
 export const LETTER_KINDS = [

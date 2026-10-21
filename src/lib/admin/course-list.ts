@@ -303,7 +303,7 @@ export async function findLearnersForCourse(courseId: string, text: string): Pro
                      WHERE b.person_id = ANY(person_family(p.id)) AND bp.course_id = $2
                        AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS booked
        FROM people p
-      WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+      WHERE p.deleted_at IS NULL AND p.merged_into IS NULL AND p.listed
         AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
         AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
              OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = ANY(person_family(p.id)) AND lower(e.address) LIKE $1))

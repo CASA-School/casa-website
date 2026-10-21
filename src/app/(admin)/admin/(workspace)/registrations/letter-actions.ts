@@ -23,7 +23,7 @@ export async function issueRegistrationLetterAction(formData: FormData): Promise
   if (!UUID.test(registrationId)) throw new Error('Invalid registrationId');
   const kind = String(formData.get('kind') ?? '');
   if (!(REGISTRATION_LETTER_KINDS as readonly string[]).includes(kind)) throw new Error('Invalid kind');
-  const back = `/admin/registrations/course/${registrationId}/letter?kind=${kind === 'registration_test_request' ? 'test' : 'deposit'}`;
+  const back = `/admin/registrations/course/${registrationId}/letter?kind=${kind === 'registration_test_request' ? 'test' : kind === 'registration_later_course' ? 'later' : 'deposit'}`;
   const choices = readChoices(formData);
   const { t, lang } = await getI18n();
   if (!choices) redirect(`${back}&error=${encodeURIComponent(t('Der Brief konnte nicht gelesen werden.', 'The letter could not be read.'))}`);

@@ -200,9 +200,11 @@ Two letters are about something other than one booking, so `letters` gains a sub
   the visa paragraph when the learner asked for a visa. `registration_test_request`
   („Bitte um Testergebnis"; `NewLetter.SendTest`, 180) asks for the placement-test result, with the
   link to the public placement page in the letter's language. The letter is in the registration's
-  language. **Sending one sets a new or in-progress registration to „Wartet auf Antwort"**: what it asks for
-  is now the learner's to answer. SchoolMan wrote these and its list never knew. Both texts are
-  standard texts, editable with `registrations` at `full`.
+  language. **Sending one sets a new registration to „In Arbeit"** (it was „Wartet auf Antwort" until
+  the three states of 2026-10-21). SchoolMan wrote these and its list never knew. Both texts are
+  standard texts, editable with `registrations` at `full`. A third, `registration_later_course`
+  („Späterer Kurs", 0076, 2026-10-21), answers a registration for a full or closed course with the
+  next start of the same course (`laterStart`), from „Späteren Kurs anbieten" on the registration.
 
 ## An exam booking's letters (2026-10-17, migration 0037)
 

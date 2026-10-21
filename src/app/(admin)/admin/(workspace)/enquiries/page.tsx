@@ -1,7 +1,10 @@
+import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { InboxScreen, inboxParams, type InboxItem } from '@/components/admin/inbox';
 import { Badge } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
-import { listEnquiries } from '@/lib/admin/enquiries';
+import { listEnquiries, spamEnquiryIds } from '@/lib/admin/enquiries';
+
+import { deleteSpamAction } from './actions';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { inboxCounts } from '@/lib/admin/inbox';
@@ -28,6 +31,8 @@ export default async function EnquiriesPage({
     inboxCounts('enquiry'),
     getI18n(),
   ]);
+  // What was marked spam, on arrival or by hand: deleted in one go (2026-10-21).
+  const spam = canAccess(user, 'enquiries', 'full') ? (await spamEnquiryIds()).length : 0;
 
   const rows: InboxItem[] = items.map((item) => ({
     id: item.id,
@@ -58,6 +63,20 @@ export default async function EnquiriesPage({
       items={rows}
       total={total}
       canClose={canAccess(user, 'enquiries', 'edit')}
+      actions={
+        spam ? (
+          <form action={deleteSpamAction}>
+            <ConfirmSubmit
+              title={t(`${spam} Spam-Anfragen löschen?`, `Delete ${spam} spam enquiries?`)}
+              description={t('Sie verschwinden aus allen Listen, mit ihren Absendern, wenn bei CASA sonst nichts von ihnen ist.', 'They leave every list, with their senders if nothing else at CASA is theirs.')}
+              confirmLabel={t('Löschen', 'Delete')}
+              variant="ghost"
+            >
+              {t(`Spam löschen (${spam})`, `Delete spam (${spam})`)}
+            </ConfirmSubmit>
+          </form>
+        ) : undefined
+      }
     />
   );
 }

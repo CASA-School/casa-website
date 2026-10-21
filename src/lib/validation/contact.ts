@@ -119,6 +119,8 @@ export const contactInquirySchema = z.object({
   locale: z.preprocess((value) => normalizeContentLocale(String(value ?? 'en')), z.enum(['en', 'de'])),
   source: z.string().trim().max(120).default('contact-page'),
   website: z.string().trim().max(200).optional().default(''),
+  /** From opening the form to sending it (lib/validation/spam). */
+  elapsedMs: z.number().int().nonnegative().max(86_400_000).optional(),
 
   // Organiser brief. Every field is optional on purpose: this is an enquiry
   // path, and a partial brief still beats the email thread it replaces.

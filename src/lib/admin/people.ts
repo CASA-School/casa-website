@@ -35,6 +35,8 @@ export type PersonSummary = {
   /** `createdBy` as a person or a place, never `staff:<uuid>`; read with `pick(lang, …)`. */
   createdByLabel: Bilingual;
   createdAt: Date;
+  /** On the register, Teilnehmende (0076): false for a website contact no colleague has acted on yet. */
+  listed: boolean;
 };
 
 /** Everything else SchoolMan knows about a learner (migration 0029); some of it telc asks for. */
@@ -86,6 +88,7 @@ type Row = {
   created_by: string;
   created_by_name: string | null;
   created_at: Date;
+  listed?: boolean | null;
 };
 
 const SELECT = `
@@ -95,6 +98,7 @@ const SELECT = `
          p.first_name, p.last_name, p.birth_date,
          p.nationality_code, coalesce(c.name_de, c.name_en) AS nationality_name, p.nationality_raw,
          p.merged_into, p.created_by, p.created_at,
+         (SELECT c2.listed FROM people c2 WHERE c2.id = canonical_person_id(p.id)) AS listed,
          cu.name AS created_by_name
     FROM people p
     LEFT JOIN countries c ON c.code = p.nationality_code
@@ -120,6 +124,7 @@ const toSummary = (r: Row): PersonSummary => ({
     ? { de: r.created_by_name, en: r.created_by_name }
     : describeOrigin(r.created_by),
   createdAt: r.created_at,
+  listed: r.listed !== false,
 });
 
 /**
@@ -262,7 +267,7 @@ const FAMILY = `(CASE WHEN EXISTS (SELECT 1 FROM people m WHERE m.merged_into = 
 
 /** Open cases under a person (theirs and the rows linked into them): enquiries, registrations, offers in play. */
 const OPEN_CASES = `(
-  (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND e.person_id = ANY(${FAMILY}) AND e.status IN ('new', 'in_progress', 'waiting'))
+  (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND e.person_id = ANY(${FAMILY}) AND e.deleted_at IS NULL AND e.status IN ('new', 'in_progress', 'waiting'))
   + (SELECT count(*) FROM course_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
   + (SELECT count(*) FROM exam_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
   + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND o.person_id = ANY(${FAMILY}) AND o.status IN ('draft', 'sent'))
@@ -352,7 +357,7 @@ export async function peopleCounts(): Promise<Record<PeopleView, number>> {
             count(*) FILTER (WHERE ${OWED} > 0.005) AS owing
        -- OFFSET 0: the stage once per person — folded into the query, Postgres would repeat its six
        -- sub-queries in each count below.
-       FROM (SELECT p.*, ${STAGE} AS stage, ${LATER} AS later FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF} OFFSET 0) p`
+       FROM (SELECT p.*, ${STAGE} AS stage, ${LATER} AS later FROM people p WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND p.listed AND ${NOT_STAFF} OFFSET 0) p`
   );
   const n = (key: PeopleView) => Number(row?.[key] ?? 0);
   return {
@@ -392,7 +397,8 @@ export async function listPeople({
   total: number;
 }> {
   const params: unknown[] = [];
-  let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND ${NOT_STAFF}`;
+  // Only those a colleague has acted on: a website contact is off the register until then (0076).
+  let where = `WHERE p.merged_into IS NULL AND p.deleted_at IS NULL AND p.listed AND ${NOT_STAFF}`;
   if (search) {
     // A whole name either way round („Vorname Nachname"), or an address of theirs or of a record linked into them.
     params.push(`%${search.trim().slice(0, 80).replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
@@ -498,7 +504,7 @@ export async function personTimeline(canonicalId: string, lang: WsLang): Promise
     `SELECT kind, id, title, detail, status, at FROM (
        SELECT 'enquiry'::text AS kind, e.id, e.topic AS title,
               left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at
-         FROM enquiries e WHERE e.person_id = ANY(person_family($1))
+         FROM enquiries e WHERE e.person_id = ANY(person_family($1)) AND e.deleted_at IS NULL
        UNION ALL
        SELECT 'course', r.id, r.course_type_label,
               r.course_instance_label, r.status::text, r.submitted_at
@@ -633,6 +639,11 @@ export async function linkPerson({
       duplicateId,
       canonical,
     ]);
+    // One of the two on the register puts the one that remains there (0076).
+    await client.query(`UPDATE people SET listed = true WHERE id = $2 AND NOT listed AND (SELECT listed FROM people WHERE id = $1)`, [
+      duplicateId,
+      canonical,
+    ]);
 
     // The flags that asked the question are answered by this action.
     await client.query(
@@ -650,6 +661,22 @@ export async function linkPerson({
       [actor.id, actor.name, duplicateId, JSON.stringify({ survivor: canonical })]
     );
     return { ok: true };
+  });
+}
+
+/**
+ * Puts a person on the register, Teilnehmende (0076): „Als Teilnehmende/n anlegen" on an enquiry or a
+ * registration, for a future learner who is not yet booked.
+ */
+export async function listPerson({ personId, actor }: { personId: string; actor: StaffUser }): Promise<void> {
+  await withTransaction(async (client) => {
+    const { rowCount } = await client.query(`UPDATE people SET listed = true WHERE id = canonical_person_id($1) AND NOT listed`, [personId]);
+    if (rowCount) {
+      await client.query(
+        `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail) VALUES ($1, $2, 'person', $3, 'person_listed', '{}')`,
+        [actor.id, actor.name, personId]
+      );
+    }
   });
 }
 

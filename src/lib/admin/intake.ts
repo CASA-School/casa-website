@@ -29,7 +29,10 @@ import {
  *
  * Every submission now creates a PERSON, with typed contact channels, in the
  * same transaction as the queue row — one human, one row, from first contact
- * (§1.1). Text that can be typed is typed; text that cannot is kept raw and
+ * (§1.1). Since 0076 (2026-10-21) that person is created OFF the register
+ * (`listed = false`): Teilnehmende holds only those a colleague has acted on —
+ * booked, put on a waiting list, linked to someone listed, or listed by hand.
+ * Text that can be typed is typed; text that cannot is kept raw and
  * FLAGGED, never corrected (§2.4, §11). And when the new person looks like one
  * we already have, that is a flag for a staff member to resolve by linking —
  * intake itself never decides two rows are the same human (§1.2).
@@ -123,8 +126,9 @@ async function createPerson(
   }
 
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO people (salutation, first_name, last_name, birth_date, nationality_code, nationality_raw, created_by, created_at)
-     VALUES ($1::salutation, $2, $3, $4::date, $5, $6, 'public-site', $7)
+    // Off the register until a colleague acts on the enquiry or registration (0076).
+    `INSERT INTO people (salutation, first_name, last_name, birth_date, nationality_code, nationality_raw, created_by, created_at, listed)
+     VALUES ($1::salutation, $2, $3, $4::date, $5, $6, 'public-site', $7, false)
      RETURNING id`,
     [
       input.salutation || null,
@@ -209,6 +213,8 @@ export type EnquiryInput = {
   source: string;
   organiserBrief: Record<string, unknown> | null;
   userAgent: string | null;
+  /** Looked like spam (lib/validation/spam): stored as „Spam", in no list. */
+  spam?: boolean;
 };
 
 /** Used by appointment intake so reservation, person and enquiry commit together. */
@@ -223,8 +229,8 @@ export async function storeEnquiryInTransaction(client: PoolClient, input: Enqui
   const { rows } = await client.query<{ id: string }>(
     `INSERT INTO enquiries
        (request_id, kind, locale, first_name, last_name, email, topic, topic_key,
-        message, source, organiser_brief, user_agent, person_id, submitted_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        message, source, organiser_brief, user_agent, person_id, submitted_at, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::work_status)
      ON CONFLICT (request_id) DO NOTHING
      RETURNING id`,
     [
@@ -242,6 +248,7 @@ export async function storeEnquiryInTransaction(client: PoolClient, input: Enqui
       input.userAgent,
       person.personId,
       now,
+      input.spam ? 'spam' : 'new',
     ]
   );
   // A retried request_id inserts nothing; the person created above must not

@@ -652,6 +652,8 @@ export async function addToWaitlist(
     [input.personId, course.courseId, input.courseInstanceId, input.levelCode]
   );
   if (already) return refuse('Diese Person steht für diesen Kurs schon auf der Warteliste.', 'This person is already on the waiting list for this course.');
+  // A place in a queue puts the learner on the register (0076).
+  await query(`UPDATE people SET listed = true WHERE id = canonical_person_id($1) AND NOT listed`, [input.personId]);
   const row = await queryFirst<{ id: string }>(
     `INSERT INTO waitlist_entries (person_id, course_instance_id, level_code, course_id, rank, source, registration_id, note, created_by)
      VALUES ($1, $2, $3, $4, extract(epoch FROM now()), $5, $6, $7, $8) RETURNING id`,

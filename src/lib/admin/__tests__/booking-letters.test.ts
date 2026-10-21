@@ -265,6 +265,7 @@ describe('several bookings, and a registration (0035)', () => {
     visaRequired: true,
     downPayment: 100,
     placementUrl: { de: 'https://casa-bremen.de/anmeldung/einstufungstest', en: 'https://casa-bremen.de/en/placement-test' },
+    laterStart: '2026-11-23',
     staff: base.staff,
   };
 
@@ -279,6 +280,13 @@ describe('several bookings, and a registration (0035)', () => {
     expect(letter.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(true);
     const noVisa = registrationLetter('registration_deposit_request', { ...registration, visaRequired: false }, de, LETTER_STANDARD_DEFAULTS.registration_deposit_request.de, meta);
     expect(noVisa.body.some((p) => p.type === 'text' && p.slot === 'visa')).toBe(false);
+  });
+
+  it('offers the next start when the course chosen is full (2026-10-21)', () => {
+    const letter = registrationLetter('registration_later_course', registration, de, LETTER_STANDARD_DEFAULTS.registration_later_course.de, meta);
+    expect(letter.body).toContainEqual(expect.objectContaining({ slot: 'later', text: expect.stringContaining('ab 23.11.2026') }));
+    const none = registrationLetter('registration_later_course', { ...registration, laterStart: null }, de, LETTER_STANDARD_DEFAULTS.registration_later_course.de, meta);
+    expect(none.body).toContainEqual(expect.objectContaining({ slot: 'later', text: expect.stringContaining('noch nicht festgelegt') }));
   });
 });
 

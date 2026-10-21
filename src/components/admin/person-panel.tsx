@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { linkPersonAction, resolveFlagAction } from '@/app/(admin)/admin/(workspace)/actions';
+import { linkPersonAction, listPersonAction, resolveFlagAction } from '@/app/(admin)/admin/(workspace)/actions';
 import { Button, Card, DateText } from './ui';
 import { Icon } from './icons';
 import { FLAG_LABELS, type RecordFlag } from '@/lib/admin/flags';
@@ -23,14 +23,20 @@ import type { PersonSummary } from '@/lib/admin/people';
  * from the open `duplicate_candidate` flag, so once someone has answered the
  * question — linked, or cleared the flag as "no, different person" — the
  * panel stops asking.
+ *
+ * A website contact is not on the register until a colleague acts (0076, 2026-10-21): the panel says so
+ * and offers „Als Teilnehmende/n anlegen" beside the matches, for a future learner not yet booked.
  */
 export async function PersonPanel({
   person,
   candidates,
   flags,
   returnTo,
+  canList = false,
 }: {
   person: PersonSummary | null;
+  /** May put the person on the register (`people` at `edit`). */
+  canList?: boolean;
   candidates: readonly (PersonSummary & {
     reason: 'email' | 'name_and_birth_date';
   })[];
@@ -77,6 +83,21 @@ export async function PersonPanel({
       ) : (
         <p className="text-sm text-[var(--casa-muted)]">{t('Noch keiner Person zugeordnet.', 'Not linked to a person yet.')}</p>
       )}
+
+      {person && !person.listed ? (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-[var(--casa-muted)]">{t('Noch nicht in Teilnehmende', 'Not in Learners yet')}</p>
+          {canList ? (
+            <form action={listPersonAction}>
+              <input type="hidden" name="personId" value={person.canonicalId} />
+              <input type="hidden" name="returnTo" value={returnTo} />
+              <Button type="submit" variant="secondary" size="sm">
+                {t('Als Teilnehmende/n anlegen', 'Add to Learners')}
+              </Button>
+            </form>
+          ) : null}
+        </div>
+      ) : null}
 
       {duplicateFlag && person && candidates.length > 0 ? (
         <div className="mt-4 rounded-lg border border-[var(--casa-warning-text)]/30 bg-[var(--casa-warning-text)]/8 p-3">

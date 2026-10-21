@@ -174,8 +174,9 @@ export async function issueRegistrationLetter(registrationId: string, kind: Regi
   });
   await logActivity({ actor, entity: 'course_registration', entityId: registrationId, action: 'letter_sent', detail: { kind, letter: result.id, subject: result.subject } });
   if (ctx.personId) await logActivity({ actor, entity: 'person', entityId: ctx.personId, action: 'letter_sent', detail: { kind, letter: result.id, subject: result.subject } });
-  if (result.status === 'new' || result.status === 'in_progress') {
-    await setQueueStatus({ entity: 'course_registration', id: registrationId, status: 'waiting', actor });
+  // A letter sent is work begun: „In Arbeit" (three states since 2026-10-21; it was „Wartet auf Antwort").
+  if (result.status === 'new') {
+    await setQueueStatus({ entity: 'course_registration', id: registrationId, status: 'in_progress', actor });
   }
   return { ok: true, letterId: result.id };
 }

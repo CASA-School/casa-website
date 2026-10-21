@@ -103,7 +103,7 @@ export async function findRecipients(q: string, filter: RecipientFilter, lang: W
                   (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings,
                   ${studiedBeforeSql('p.id')} AS studied, ${stayedBeforeSql('p.id')} AS stayed
              FROM people p
-            WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+            WHERE p.deleted_at IS NULL AND p.merged_into IS NULL AND p.listed
               AND ($1 = '' OR lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE $2
                    OR EXISTS (SELECT 1 FROM emails e WHERE e.person_id = p.id AND lower(e.address) LIKE $2))
             ORDER BY p.updated_at DESC LIMIT 8`,

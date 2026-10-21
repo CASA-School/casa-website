@@ -96,12 +96,13 @@ test.describe('inboxes', () => {
       await row.getByRole('button', { name: 'Erledigt' }).click();
       await expect(row.getByRole('button', { name: 'Wieder öffnen' })).toBeVisible();
       await row.getByRole('button', { name: 'Wieder öffnen' }).click();
-      await expect(row).toContainText('In Bearbeitung');
+      await expect(row).toContainText('In Arbeit');
 
       await page.goto(queue.record());
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(queue.name);
-      await page.getByRole('button', { name: 'Wartet auf Antwort' }).click();
-      await expect(page.getByRole('button', { name: 'Wartet auf Antwort' })).toHaveAttribute('aria-pressed', 'true');
+      // Three states (2026-10-21): Offen, In Arbeit, Erledigt.
+      await page.getByRole('button', { name: 'Offen' }).click();
+      await expect(page.getByRole('button', { name: 'Offen' })).toHaveAttribute('aria-pressed', 'true');
       await expect(page.getByRole('link', { name: 'Antworten' })).toHaveAttribute('href', /^mailto:/);
       await expect(page.getByRole('heading', { name: 'Notizen und Verlauf' })).toBeVisible();
     });

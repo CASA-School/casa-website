@@ -97,11 +97,18 @@ export function FormDialog({
       </Button>
       <DialogContent className={dialogPanel(width)} overlayClassName={DIALOG_OVERLAY} closeLabel={t('Schließen', 'Close')}>
         <DialogHead title={title} description={description} icon={icon} tint={tint} titleClassName={titleClassName} />
-        <InDialog.Provider value>
-          <div className="px-6 pt-5 pb-6">{children}</div>
-        </InDialog.Provider>
+        <DialogBody>{children}</DialogBody>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** The body of a dialog that holds its own form: its padding, and a `DialogFooter` pinned to the foot with Cancel. */
+export function DialogBody({ children }: { children: ReactNode }) {
+  return (
+    <InDialog.Provider value>
+      <div className="px-6 pt-5 pb-6">{children}</div>
+    </InDialog.Provider>
   );
 }
 

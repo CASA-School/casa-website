@@ -253,6 +253,12 @@ export const Icon = {
       <path d="m4 4 8 8M12 4l-8 8" />
     </svg>
   ),
+  /** A bin: deleting a record, after a confirmation. */
+  trash: (
+    <svg {...box}>
+      <path d="M2.8 4.3h10.4M6.3 4.3V2.9a.6.6 0 0 1 .6-.6h2.2a.6.6 0 0 1 .6.6v1.4M4.2 4.3l.6 8.6a.9.9 0 0 0 .9.8h4.6a.9.9 0 0 0 .9-.8l.6-8.6M6.8 6.8v4.4M9.2 6.8v4.4" />
+    </svg>
+  ),
   /** A handset: a phone number under a record's name. */
   phone: (
     <svg {...box}>

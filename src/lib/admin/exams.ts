@@ -172,7 +172,7 @@ export async function findCandidates(sittingId: string, text: string): Promise<C
             EXISTS (SELECT 1 FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.exam_session_id = $2
                        AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS booked
        FROM people p
-      WHERE p.deleted_at IS NULL AND p.merged_into IS NULL
+      WHERE p.deleted_at IS NULL AND p.merged_into IS NULL AND p.listed
         AND NOT EXISTS (SELECT 1 FROM staff_members sm WHERE sm.person_id = p.id)
         AND (lower(concat_ws(' ', p.first_name, p.last_name)) LIKE $1
              OR EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND lower(e.address) LIKE $1))
