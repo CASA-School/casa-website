@@ -391,6 +391,8 @@ export async function listPeople({
     openCases: number;
     /** Still owed across their bookings. */
     owed: number;
+    /** The booking that owes the most, where a reminder is written from the list (2026-10-21). */
+    owedBookingId: string | null;
     /** Where they stand as a learner; null for someone who has only enquired. */
     stage: LearnerStage | null;
   })[];
@@ -422,6 +424,7 @@ export async function listPeople({
       level: string | null;
       open_cases: string;
       owed: string;
+      owed_booking_id: string | null;
       stage: LearnerStage | null;
     }
   >(
@@ -435,6 +438,13 @@ export async function listPeople({
                   nb.course_level) AS level,
          ${OPEN_CASES} AS open_cases,
          ${OWED} AS owed,
+         (SELECT b.id FROM bookings b
+           WHERE b.person_id = ANY(${FAMILY}) AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+             AND coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
+               - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) > 0.005
+           ORDER BY coalesce((SELECT sum(c.amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)
+                  - coalesce((SELECT sum(pm.amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) DESC
+           LIMIT 1) AS owed_booking_id,
          ${STAGE} AS stage
     FROM people p
     LEFT JOIN LATERAL (
@@ -467,6 +477,7 @@ export async function listPeople({
       level: r.level,
       openCases: Number(r.open_cases ?? 0),
       owed: Number(r.owed ?? 0),
+      owedBookingId: r.owed_booking_id,
       stage: r.stage,
       course:
         r.course_start && r.course_end

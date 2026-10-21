@@ -152,9 +152,10 @@ export default async function BookingPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  /** `pay=1` opens „Zahlung erfassen" at once: the list's action for a booking with money open. */
+  searchParams: Promise<{ error?: string; pay?: string }>;
 }) {
-  const [{ id }, { error }, user] = await Promise.all([
+  const [{ id }, { error, pay }, user] = await Promise.all([
     params,
     searchParams,
     requireModule('bookings'),
@@ -755,6 +756,7 @@ export default async function BookingPage({
                       title={t('Zahlung erfassen', 'Record a payment')}
                       size="sm"
                       triggerVariant={carriesOver ? 'secondary' : 'primary'}
+                      defaultOpen={pay === '1'}
                     >
                       <PaymentForm bookingId={booking.id} balance={booking.balance} />
                     </FormDialog>

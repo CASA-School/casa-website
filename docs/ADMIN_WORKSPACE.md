@@ -953,6 +953,23 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
       learners (`SearchableRows`), an exam date's candidates, a booking's costs and payments (the total
       must visibly add up).
     - Never a "mehr anzeigen" toggle.
+10d. **Rows in months, and every row with its next step (Rahman, 2026-10-21: „add year and month as to
+    know which are the newest … upcoming, ongoing and past, so the bookings with money from the past
+    could be quickly followed up with … an action button would be amazing").** A list ordered by a date
+    is read in months under `ListGroup` headings (`groupByMonth`/`monthHeading`, `src/lib/admin/days.ts`),
+    by the date the view is about: Teilnehmende by when a person was added, „Kommend" by when the course
+    begins („Beginn im November 2026"), „Ohne Folgekurs" by when it ends; Buchungen „Kommend" after
+    „Starten bald", „Vergangen" after „Noch offen" (the past still owing, ordered first in the query so it
+    leads across pages), „Alle" and „Storniert" by start; Gruppen by arrival, with „Angefragt" requests
+    whose dates have passed last under „Termin vorbei"; Angebote „Angenommen" by arrival. A view ordered
+    by its question (Zahlung offen: most owed first, Wiedervorlage) stays one list.
+    Each row ends in `RowActions` (`src/components/admin/row-actions.tsx`): the step the view is for as a
+    small button — „Folgekurs buchen" on Ohne Folgekurs, „Erinnern" where money is the question, „Angebot
+    erstellen" on a group asked for — and the rest behind „…": a booking, a payment (`?pay=1` opens the
+    booking's „Zahlung erfassen"), a reminder or confirmation letter, an e-mail, the record's tabs. Every
+    action is a page or an e-mail; nothing changes from the list itself. Below 1024px the columns that
+    say least give way (Offen and Angelegt on Teilnehmende, Gesamt on Buchungen), never the amount in a
+    money view.
 11. **A column holds one kind of thing.** The record — its initials, its name,
     a quiet reference beside the name, and under it what it is about
     (`RecordName`) — then when, how much, who has it, how recent. Never a

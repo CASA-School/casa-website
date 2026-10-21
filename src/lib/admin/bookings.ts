@@ -159,6 +159,8 @@ export type BookingListItem = {
   number: string;
   personId: string;
   personName: string;
+  /** Their address, for „E-Mail an …" from the list. */
+  personEmail: string | null;
   courseTypeName: string | null;
   status: BookingStatus;
   startDate: Date | null;
@@ -273,6 +275,7 @@ export type BookingDetail = BookingListItem & {
 
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
+         (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS person_email,
          coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
@@ -294,6 +297,7 @@ type ListRow = {
   number: string;
   person_id: string;
   person_name: string;
+  person_email: string | null;
   course_type_name: string | null;
   status: BookingStatus;
   currency: string;
@@ -319,6 +323,7 @@ const toItem = (r: ListRow): BookingListItem => ({
   number: r.number,
   personId: r.person_id,
   personName: r.person_name,
+  personEmail: r.person_email,
   courseTypeName: r.course_type_name,
   status: r.status,
   startDate: r.start_date,
@@ -418,6 +423,18 @@ const FILTERS: Record<BookingFilter, string> = {
   all: 'true',
 };
 
+// Each view's order. „Vergangen" puts what is still owed first, so money from the past is followed up
+// before it is forgotten, then the rest by when it ended (Rahman, 2026-10-21).
+const ORDER: Record<BookingFilter, string> = {
+  unclear: `${CHARGED} - ${PAID} DESC, start_date DESC NULLS LAST`,
+  followup: 'start_date DESC NULLS LAST',
+  current: 'start_date DESC NULLS LAST',
+  upcoming: 'start_date ASC NULLS LAST',
+  past: `(b.status <> 'cancelled' AND ${CHARGED} - ${PAID} > 0.005) DESC, end_date DESC NULLS LAST`,
+  cancelled: 'start_date DESC NULLS LAST',
+  all: 'start_date DESC NULLS LAST',
+};
+
 export async function listBookings({
   filter = 'current',
   search,
@@ -449,7 +466,7 @@ export async function listBookings({
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY ${filter === 'unclear' ? `${CHARGED} - ${PAID} DESC, ` : ''}start_date ${filter === 'upcoming' ? 'ASC' : 'DESC'} NULLS LAST, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY ${ORDER[filter]}, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };

@@ -1,12 +1,14 @@
 import { NewGroupForm } from './group-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
-import { dayRange, ListBar, ListEmpty, RecordName } from '@/components/admin/list';
+import { dayRange, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
+import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
+import { groupByMonth, monthHeading } from '@/lib/admin/days';
 import { GROUP_STATUS_LABELS, GROUP_VIEW_LABELS, GROUP_VIEWS, isGroupView, type GroupView } from '@/lib/admin/group-labels';
-import { groupCounts, groupOptions, listGroups } from '@/lib/admin/groups';
+import { groupCounts, groupOptions, listGroups, type GroupListItem } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
 import { num, pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -20,6 +22,10 @@ import { cn } from '@/lib/utils';
  * them are booked. The views: confirmed visits ahead or under way (the default), those asked for and
  * not yet decided, those that are over, those called off, and all. The search finds a name, a school,
  * a company or an agency.
+ *
+ * In months by arrival (Rahman, 2026-10-21), with each row's actions: an offer to the agency (or the
+ * school or company) as the button where a visit is asked for and not yet decided; its participants,
+ * offers and programme in the menu.
  */
 export default async function GroupsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const [params, user, { t, lang }] = await Promise.all([searchParams, requireModule('groups'), getI18n()]);
@@ -38,6 +44,31 @@ export default async function GroupsPage({ searchParams }: { searchParams: Promi
   const saysStatus = view === 'all';
   const error = firstParam(params.error);
   const hide = 'hidden md:table-cell';
+  const canOffer = canAccess(user, 'offers', 'edit');
+  // Asked for, undecided and already over: their own group at the end, to be closed rather than offered.
+  const lapsed = (g: GroupListItem) => view === 'open' && g.isOver;
+  const groups = [
+    ...groupByMonth(
+      items.filter((g) => g.startDate && !lapsed(g)),
+      (g) => g.startDate!
+    ).map(({ month, rows }) => ({ key: month, label: monthHeading(month, lang), rows })),
+    { key: 'undated', label: t('Ohne Termin', 'No dates'), rows: items.filter((g) => !g.startDate) },
+    { key: 'lapsed', label: t('Termin vorbei', 'Dates passed'), rows: items.filter(lapsed) },
+  ].filter((g) => g.rows.length);
+  const actionsOf = (g: GroupListItem): { primary: RowAction | null; actions: RowAction[] } => {
+    const offer: RowAction | null =
+      canOffer && g.offerTo ? { label: t('Angebot erstellen', 'Write an offer'), href: `/admin/offers/new?organisation=${g.offerTo}`, icon: Icon.offers } : null;
+    const primary = view === 'open' && !g.isOver ? offer : null;
+    return {
+      primary,
+      actions: [
+        ...(offer && !primary ? [offer] : []),
+        { label: t('Teilnehmende', 'Students'), href: `/admin/groups/${g.id}?tab=participants`, icon: Icon.people, divide: Boolean(offer && !primary) },
+        { label: t('Angebote', 'Offers'), href: `/admin/groups/${g.id}?tab=offers`, icon: Icon.offers },
+        { label: t('Programm', 'Programme'), href: `/admin/groups/${g.id}?tab=programme`, icon: Icon.calendar },
+      ],
+    };
+  };
 
   return (
     <>
@@ -88,9 +119,12 @@ export default async function GroupsPage({ searchParams }: { searchParams: Promi
               { label: t('Land', 'Country'), className: `w-[10rem] ${hide}` },
               { label: t('Zeitraum', 'Dates'), className: `w-[12rem] ${hide}` },
               { label: t('Personen', 'People'), align: 'right', className: 'w-[7.5rem]' },
+              { label: '', className: view === 'open' && canOffer ? 'w-[12rem]' : 'w-[3.5rem]' },
             ]}
           >
-            {items.map((g) => {
+            {groups.map((group) => [
+              <ListGroup key={group.key} label={group.label} count={group.rows.length} span={5} />,
+              ...group.rows.map((g) => {
               const quiet = g.status === 'cancelled' || (g.status === 'confirmed' && g.isOver);
               return (
                 <TableRow key={g.id} interactive>
@@ -120,9 +154,13 @@ export default async function GroupsPage({ searchParams }: { searchParams: Promi
                     ) : null}
                     {g.booked ? <span className="block text-[0.72rem] text-[var(--casa-muted)]">{t(`${num(lang, g.booked)} gebucht`, `${num(lang, g.booked)} booked`)}</span> : null}
                   </Cell>
+                  <Cell align="right" className="!pr-7">
+                    <RowActions label={t(`Aktionen: ${g.name}`, `Actions: ${g.name}`)} {...actionsOf(g)} />
+                  </Cell>
                 </TableRow>
               );
-            })}
+              }),
+            ])}
           </Table>
         )}
       </Card>
