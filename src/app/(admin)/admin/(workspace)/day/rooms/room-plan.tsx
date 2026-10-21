@@ -4,8 +4,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import { Search } from '../courses/courses-table';
 import { floorName, groupName, LessonPanel, shortName, together, type LessonEditing } from '../lesson-panel';
+import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
-import type { DayLesson } from '@/lib/admin/day-plan';
+import type { DayLesson, PlanRoom } from '@/lib/admin/day-plan';
 import { SESSION_LABELS, SESSIONS, type Session } from '@/lib/admin/day-plan-labels';
 import { pick } from '@/lib/admin/i18n';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,8 @@ const BLOCK: Record<Session, string> = {
  * floor, the hours across with the half hours faint, each class a block in its part of the day's colour
  * with its course and teacher; cover in amber, a missing teacher in red, a cancelled class striped. A
  * free room is plain to see. The search lights up what it finds; a click opens the class at the side.
+ * Below the building: „Online" (0077), as many classes at once as there are, and each class without a
+ * room on a row of its own with „Raum zuweisen" (Rahman, 2026-10-21).
  */
 export function RoomPlan({
   day,
@@ -40,7 +43,7 @@ export function RoomPlan({
   day: string;
   today: string;
   lessons: DayLesson[];
-  rooms: { id: string; name: string; floor: number | null }[];
+  rooms: PlanRoom[];
   editing?: Omit<LessonEditing, 'lessons'>;
 }) {
   const { t, lang } = useWsLang();
@@ -59,17 +62,19 @@ export function RoomPlan({
 
   const hit = (l: DayLesson) =>
     !needle || [l.label, l.typeName, l.number, l.roomName, l.teacherName, l.replacedTeacherName, ...l.learners.map((p) => p.name)].some((v) => v?.toLowerCase().includes(needle));
-  const floors = [...new Set(rooms.map((r) => r.floor))];
+  const building = rooms.filter((r) => !r.online);
+  const online = rooms.filter((r) => r.online && lessons.some((l) => l.roomId === r.id));
+  const floors = [...new Set(building.map((r) => r.floor))];
   // The plan's rooms with a class that takes place: a class without a room, or in a room off the plan,
-  // has its own row below and is no room in use (it read „15 von 14", 2026-10-20).
-  const used = rooms.filter((r) => lessons.some((l) => !l.cancelled && l.roomId === r.id)).length;
+  // has its own row below and is no room in use (it read „15 von 14", 2026-10-20). Online is no room.
+  const used = building.filter((r) => lessons.some((l) => !l.cancelled && l.roomId === r.id)).length;
   // A group taught with others that day sits in their room: it is not without one.
   const homeless = lessons.filter((l) => !l.joins.length && (!l.roomId || !rooms.some((r) => r.id === l.roomId)));
   const hours = Array.from({ length: LAST - FIRST + 1 }, (_, i) => FIRST + i);
   const showNow = now && minutes(now) >= FIRST * 60 && minutes(now) <= LAST * 60;
   const sessions = SESSIONS.filter((s) => lessons.some((l) => l.session === s));
   const doubled = lessons.some(
-    (l) => l.roomId && !l.cancelled && lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && l.startsAt && l.endsAt && o.startsAt && o.endsAt && o.startsAt < l.endsAt && o.endsAt > l.startsAt)
+    (l) => l.roomId && !l.online && !l.cancelled && lessons.some((o) => o.id !== l.id && !o.cancelled && o.roomId === l.roomId && l.startsAt && l.endsAt && o.startsAt && o.endsAt && o.startsAt < l.endsAt && o.endsAt > l.startsAt)
   );
 
   const row = (key: string, name: ReactNode, own: DayLesson[], zebra: boolean, room = true) => {
@@ -169,7 +174,7 @@ export function RoomPlan({
           <Legend swatch="border-l-4 border-[#d14343] bg-[#fde3e3]">{t('Lehrkraft fehlt', 'Teacher away')}</Legend>
           <Legend swatch="border-l-4 border-[#b8c0cc] bg-[repeating-linear-gradient(135deg,#f3f5f8_0_3px,#e8ecf1_3px_6px)]">{t('Fällt aus', 'Cancelled')}</Legend>
           {doubled ? <Legend swatch="outline-2 outline-offset-1 outline-[#d14343] outline-dashed">{t('Raum doppelt belegt', 'Room double-booked')}</Legend> : null}
-          <li className="text-[var(--casa-ink)]">{t(`${used} von ${rooms.length} Räumen belegt`, `${used} of ${rooms.length} rooms in use`)}</li>
+          <li className="text-[var(--casa-ink)]">{t(`${used} von ${building.length} Räumen belegt`, `${used} of ${building.length} rooms in use`)}</li>
         </ul>
         <Search value={q} onChange={setQ} placeholder={t('Name oder Kurs', 'Name or course')} label={t('Im Raumplan suchen', 'Search the room plan')} />
       </div>
@@ -208,15 +213,41 @@ export function RoomPlan({
             {floors.map((floor) => (
               <div key={String(floor)}>
                 <p className="sticky left-0 border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{floorName(floor, t)}</p>
-                {rooms
+                {building
                   .filter((r) => r.floor === floor)
                   .map((r) => row(r.id, r.name, lessons.filter((l) => l.roomId === r.id), (order.get(r.id) ?? 0) % 2 === 1))}
               </div>
             ))}
+            {online.length ? (
+              <div>
+                <p className="sticky left-0 border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{t('Online', 'Online')}</p>
+                {online.map((r) => row(r.id, r.name, lessons.filter((l) => l.roomId === r.id), false, false))}
+              </div>
+            ) : null}
             {homeless.length ? (
               <div>
-                <p className="border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{t('Ohne Raum', 'No room')}</p>
-                {row('none', '—', homeless, false, false)}
+                <p className="sticky left-0 border-b border-ws-line bg-[#f4f6f9] px-4 py-1.5 text-[0.74rem] font-extrabold text-[var(--casa-ink)]">{t('Ohne Raum', 'No room')}</p>
+                {/* A row per class, its action where the room's name would be: one click opens it with the free rooms that fit. */}
+                {homeless.map((l) =>
+                  row(
+                    `none-${l.id}`,
+                    editing?.canRoom && !l.cancelled ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenId(l.id)}
+                        className="inline-flex h-7 items-center gap-1.5 rounded-lg bg-[#fff4d6] px-2.5 text-[0.78rem] font-semibold text-[#6b4a00] ring-1 ring-[#f0d48a] ring-inset transition-colors outline-none hover:bg-[#ffecb8] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5"
+                      >
+                        {Icon.plus}
+                        {t('Raum zuweisen', 'Assign a room')}
+                      </button>
+                    ) : (
+                      '—'
+                    ),
+                    [l],
+                    false,
+                    false
+                  )
+                )}
               </div>
             ) : null}
           </div>

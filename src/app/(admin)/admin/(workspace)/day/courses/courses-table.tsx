@@ -160,8 +160,25 @@ export function CoursesTable({ day, lessons, editing }: { day: string; lessons: 
                       ) : (
                         <>
                       <td className="py-3 pr-3 align-top">
-                        <span className="block text-[0.9rem] font-semibold text-[var(--casa-ink)]">{l.roomName ?? '—'}</span>
-                        {l.floor !== null ? <span className="block text-[0.76rem] text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
+                        {!l.roomId && !l.cancelled && editing?.canRoom ? (
+                          // No room yet: the action is where the room would be (Rahman, 2026-10-21).
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenId(l.id);
+                            }}
+                            className="inline-flex h-7 items-center gap-1.5 rounded-lg bg-[#fff4d6] px-2.5 text-[0.8rem] font-semibold text-[#6b4a00] ring-1 ring-[#f0d48a] ring-inset transition-colors outline-none hover:bg-[#ffecb8] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5"
+                          >
+                            {Icon.plus}
+                            {t('Raum zuweisen', 'Assign a room')}
+                          </button>
+                        ) : (
+                          <>
+                            <span className="block text-[0.9rem] font-semibold text-[var(--casa-ink)]">{l.roomName ?? '—'}</span>
+                            {l.floor !== null ? <span className="block text-[0.76rem] text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
+                          </>
+                        )}
                       </td>
                       <td className="py-3 pr-3 align-top">
                         <span className={cn('block text-[0.9rem] font-semibold', l.teacherAway ? 'text-[#b42318]' : 'text-[var(--casa-ink)]')}>{l.teacherName ?? t('Keine Lehrkraft', 'No teacher')}</span>
