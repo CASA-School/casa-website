@@ -330,11 +330,11 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
   return lessons;
 }
 
-/** The rooms that can hold a lesson, floor by floor, for the room plan's rows. */
+/** The rooms that can hold a lesson, floor by floor as in the building — the top floor first, the Keller at the foot (Rahman, 2026-10-21) — for the room plan's rows. */
 export async function planRooms(): Promise<{ id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null }[]> {
   return query<{ id: string; name: string; floor: number | null; capacity: number | null; capacityMax: number | null }>(
     `SELECT id, coalesce(nickname, name) AS name, floor, capacity, capacity_max AS "capacityMax" FROM rooms
-      WHERE is_active AND is_bookable ORDER BY floor NULLS LAST, coalesce(nickname, name)`
+      WHERE is_active AND is_bookable ORDER BY floor DESC NULLS LAST, coalesce(nickname, name)`
   );
 }
 
