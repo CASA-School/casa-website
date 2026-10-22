@@ -73,7 +73,8 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    day (`dayEntryTests()`: the course's first lesson day, the level's first part): all the courses whose
    test is not open yet, or the ones ticked („Ausgewählte Kurse", „Alle auswählen"), and the minutes.
    `openEntryTests()` opens one sitting per test and session; a course of the same test shares it. A
-   test already open is left as it is. The per-test „Test öffnen" in its panel stays. The old „Heute
+   test already open is left as it is. The per-test „Test öffnen" in its panel stays. The Tagesplan's link
+   „Einstufungstests" (archive, booklets, QR codes) shows only on such a day. The old „Heute
    öffnen" for a class on a later day (a late joiner) is gone.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
    per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
