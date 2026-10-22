@@ -22,12 +22,20 @@ import { useWsLang } from './lang';
  * `src/app/(admin)/layout.tsx` sets the attribute before first paint from the
  * same localStorage key, so a colleague who works collapsed does not watch the
  * rail fold itself on every navigation.
+ *
+ * In focus mode (Kursplanung) the rail starts folded and the toggle keeps its
+ * own preference (`data-focus-nav`, `casa-focus-nav`): opening it there does not
+ * open it everywhere, and folding the workspace does not fold the board's.
  */
 
-const KEY = 'casa-workspace-nav';
+const STATE = {
+  workspace: { key: 'casa-workspace-nav', attr: 'workspaceNav', folded: (v: string | undefined) => v === 'collapsed' },
+  focus: { key: 'casa-focus-nav', attr: 'focusNav', folded: (v: string | undefined) => v !== 'expanded' },
+} as const;
 const EVENT = 'casa-workspace-nav-change';
 
-export function SidebarToggle() {
+export function SidebarToggle({ focus = false }: { focus?: boolean }) {
+  const state = STATE[focus ? 'focus' : 'workspace'];
   const { t } = useWsLang();
   const subscribe = useCallback((onChange: () => void) => {
     window.addEventListener(EVENT, onChange);
@@ -40,15 +48,15 @@ export function SidebarToggle() {
 
   const collapsed = useSyncExternalStore(
     subscribe,
-    () => document.documentElement.dataset.workspaceNav === 'collapsed',
-    () => false
+    () => state.folded(document.documentElement.dataset[state.attr]),
+    () => focus
   );
 
   const toggle = () => {
     const next = collapsed ? 'expanded' : 'collapsed';
-    document.documentElement.dataset.workspaceNav = next;
+    document.documentElement.dataset[state.attr] = next;
     try {
-      window.localStorage.setItem(KEY, next);
+      window.localStorage.setItem(state.key, next);
     } catch {
       // Private window or blocked storage: it still toggles for this session.
     }

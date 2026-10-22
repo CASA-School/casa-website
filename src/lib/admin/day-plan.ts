@@ -20,6 +20,8 @@ type Result = { ok: true; id?: string } | { ok: false; reason: Bilingual };
 const refuse = (de: string, en: string): Result => ({ ok: false, reason: { de, en } });
 
 const NAME = (alias: string) => `nullif(concat_ws(' ', ${alias}.first_name, ${alias}.last_name), '')`;
+/** A teacher by the board's name, „Vorname N." (0081); the person's full name when there is none. */
+const TEACHER = (staff: string, person: string) => `coalesce(${staff}.short_name, ${NAME(person)})`;
 
 /** How far back a task written here and left open is carried onto today. SchoolMan's are not. */
 const CARRY_DAYS = 14;
@@ -200,6 +202,11 @@ export type DayLesson = {
   roomCapacity: number | null;
   roomMax: number | null;
   learners: DayLearner[];
+  /**
+   * Everyone who teaches the group in the day's week, in the order of their first day there, with their days
+   * (Rahman, 2026-10-22: the panel named only the day's teacher). By the board's name, „Vorname N.".
+   */
+  weekTeachers: { name: string; dates: string[]; substitute: boolean }[];
 };
 
 /** Another group of a merge, as the class panel and the plans name it. */
@@ -245,7 +252,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
             coalesce(c.session, i.session) AS session, c.level_code, c.title, coalesce(ty.name_de, ty.name) AS type_name,
             coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
             d.room_id, coalesce(r.nickname, r.name) AS room_name, r.floor,
-            d.teacher_id, ${NAME('tp')} AS teacher_name, d.is_substitute, ${NAME('rp')} AS replaced_teacher_name,
+            d.teacher_id, ${TEACHER('tm', 'tp')} AS teacher_name, d.is_substitute, ${TEACHER('rm', 'rp')} AS replaced_teacher_name,
             CASE WHEN d.is_substitute THEN NULL
                  ELSE (SELECT a.reason FROM staff_absences a WHERE a.staff_member_id = d.teacher_id AND a.on_date = d.on_date LIMIT 1) END AS teacher_away,
             d.cancelled, d.merged, d.merge_reason, d.merge_note, r.capacity AS room_capacity, r.capacity_max AS room_max,
@@ -275,6 +282,25 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
         [courseIds, day]
       )
     : [];
+  const week = courseIds.length
+    ? await query<{ course_id: string; group_index: number; on_date: string; name: string; is_substitute: boolean }>(
+        `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, sm.short_name AS name, d.is_substitute
+           FROM course_days d JOIN staff_members sm ON sm.id = d.teacher_id
+          WHERE d.course_id = ANY($1::uuid[]) AND NOT d.cancelled
+            AND d.on_date BETWEEN date_trunc('week', $2::date)::date AND date_trunc('week', $2::date)::date + 4
+          ORDER BY d.on_date`,
+        [courseIds, day]
+      )
+    : [];
+  const weekOf = (courseId: string, groupIndex: number) => {
+    const by = new Map<string, { name: string; dates: string[]; substitute: boolean }>();
+    for (const w of week) {
+      if (w.course_id !== courseId || w.group_index !== groupIndex) continue;
+      const seen = by.get(w.name) ?? { name: w.name, dates: [], substitute: true };
+      by.set(w.name, { ...seen, dates: [...seen.dates, w.on_date], substitute: seen.substitute && w.is_substitute });
+    }
+    return [...by.values()];
+  };
   const links = rows.length
     ? await query<{ guest: string; host: string }>(
         `SELECT m.guest_day_id AS guest, m.host_day_id AS host FROM course_day_merges m JOIN course_days g ON g.id = m.guest_day_id WHERE g.on_date = $1::date`,
@@ -316,6 +342,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       roomCapacity: r.room_capacity,
       roomMax: r.room_max,
       learners: people,
+      weekTeachers: weekOf(r.course_id, r.group_index),
     };
   });
   const byId = new Map(lessons.map((l) => [l.id, l]));
@@ -483,7 +510,7 @@ export type MissingCover = { date: string; startsAt: string | null; courseId: st
 export async function missingCover(day: string, days = 14): Promise<MissingCover[]> {
   const rows = await query<{ on_date: string; starts_at: string | null; course_id: string; group_index: number; label: string; teacher_name: string | null; reason: AbsenceReason }>(
     `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') AS starts_at, d.course_id, d.group_index,
-            coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, ${NAME('tp')} AS teacher_name, a.reason
+            coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, ${TEACHER('tm', 'tp')} AS teacher_name, a.reason
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
        JOIN courses c ON c.id = d.course_id JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
@@ -595,7 +622,7 @@ export async function attendanceSheet(courseId: string, groupIndex: number, from
 
   const [days, learners] = await Promise.all([
     query<{ on_date: string; teacher: string | null; room: string | null; hours: string | null }>(
-      `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, ${NAME('tp')} AS teacher, coalesce(r.nickname, r.name) AS room,
+      `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, ${TEACHER('tm', 'tp')} AS teacher, coalesce(r.nickname, r.name) AS room,
               to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS hours
          FROM course_days d JOIN course_day_times t ON t.id = d.id
          LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
@@ -692,7 +719,7 @@ export type LessonChoices = {
 export async function lessonChoices(day: string): Promise<LessonChoices> {
   const [teachers, rooms, away] = await Promise.all([
     query<{ id: string; name: string }>(
-      `SELECT m.id, ${NAME('p')} AS name FROM staff_members m JOIN people p ON p.id = m.person_id
+      `SELECT m.id, ${TEACHER('m', 'p')} AS name FROM staff_members m JOIN people p ON p.id = m.person_id
         WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
         ORDER BY p.first_name, p.last_name`
     ),
@@ -888,7 +915,7 @@ export async function classContacts(courseDayId: string): Promise<ClassContacts 
             to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS hours,
             coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, coalesce(ty.name_de, ty.name) AS type_name,
             coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number, coalesce(r.nickname, r.name) AS room_name,
-            ${NAME('tp')} AS teacher_name,
+            ${TEACHER('tm', 'tp')} AS teacher_name,
             (SELECT e.address FROM emails e WHERE e.person_id = tp.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS teacher_email
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id

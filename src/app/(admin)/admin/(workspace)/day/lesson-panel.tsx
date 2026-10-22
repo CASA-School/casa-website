@@ -13,7 +13,9 @@ import { SidePanel } from '@/components/admin/side-panel';
 import { Button } from '@/components/admin/ui';
 import type { DayLesson, LessonChoices } from '@/lib/admin/day-plan';
 import { MERGE_REASONS, MERGE_REASON_LABELS, SESSION_LABELS, type MergeReason } from '@/lib/admin/day-plan-labels';
-import { pick, type T } from '@/lib/admin/i18n';
+import { pick, type T, type WsLang } from '@/lib/admin/i18n';
+import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
+import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
 import { cn } from '@/lib/utils';
 
 /** A course's own page; a parallel group has its own under it. */
@@ -125,8 +127,25 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
               {l.roomName ?? (l.joins.length ? l.joins.map((h) => h.roomName ?? '—').join(', ') : '—')}
               {l.floor !== null ? <span className="block text-[0.78rem] font-medium text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
             </Fact>
-            <Fact label={t('Lehrkraft', 'Teacher')}>
-              {l.teacherName ?? (l.joins.length ? l.joins.map((h) => h.teacherName ?? '—').join(', ') : '—')}
+            <Fact label={l.weekTeachers.length > 1 ? t('Lehrkräfte', 'Teachers') : t('Lehrkraft', 'Teacher')}>
+              {l.weekTeachers.length ? (
+                // The week's teachers, each with their days; the day's in full weight.
+                l.weekTeachers.map((w) => {
+                  const today = w.dates.includes(day);
+                  return (
+                    <span key={w.name} className={cn('block', !today && 'font-semibold text-[var(--casa-ink-soft,#3d4a5c)]')}>
+                      {w.name}
+                      <span className="ml-1.5 text-[0.78rem] font-medium text-[var(--casa-muted)]">
+                        {dayRun(w.dates, lang)}
+                        {today ? t(' · heute', ' · today') : ''}
+                        {w.substitute ? t(' · Vertretung', ' · cover') : ''}
+                      </span>
+                    </span>
+                  );
+                })
+              ) : (
+                l.teacherName ?? (l.joins.length ? l.joins.map((h) => h.teacherName ?? '—').join(', ') : '—')
+              )}
               {l.substitute ? (
                 <span className="mt-0.5 block text-[0.78rem] font-semibold text-[#8a5a00]">
                   {l.replacedTeacherName ? t(`Vertretung für ${l.replacedTeacherName}`, `Covering for ${l.replacedTeacherName}`) : t('Vertretung', 'Cover')}
@@ -179,6 +198,15 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
       ) : null}
     </SidePanel>
   );
+}
+
+/** A teacher's days in a week: „Mo–Mi" when they follow each other, else „Mo, Mi". */
+function dayRun(dates: readonly string[], lang: WsLang): string {
+  const days = dates.map((d) => weekdayOf(d)).filter((d): d is NonNullable<typeof d> => d !== null);
+  const index = days.map((d) => WEEKDAYS.indexOf(d));
+  const label = (d: (typeof days)[number]) => pick(lang, WEEKDAY_LABELS[d]);
+  const consecutive = index.every((n, i) => i === 0 || n === index[i - 1] + 1);
+  return days.length > 1 && consecutive ? `${label(days[0])}–${label(days[days.length - 1])}` : days.map(label).join(', ');
 }
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {

@@ -72,6 +72,11 @@
 .handle::after { content: ''; width: 22px; height: 3px; border-radius: 2px; background: currentColor; opacity: 0.25; }
 .handle:hover::after { opacity: 0.6; }
 
+/* the week's dates above its columns */
+.wkDates { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0 2px 12px; font-size: 14px; font-weight: 700; color: var(--pz-ink); }
+.wkDates b { font-weight: 800; }
+.wkWhere { font-size: 12.5px; font-weight: 600; color: var(--pz-mute); }
+
 /* month view */
 .wkblock { margin-bottom: 22px; }
 .wkh { display: flex; align-items: center; gap: 12px; padding: 4px 6px 10px; cursor: pointer; flex-wrap: wrap; border: 0; background: none; width: 100%; text-align: left; }

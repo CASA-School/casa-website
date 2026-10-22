@@ -39,8 +39,9 @@ import { cn } from '@/lib/utils';
  * scroller; the top bar is desktop only.
  *
  * FOCUS MODE (`variant="focus"`) is the same frame at a different density, for
- * the one module that is a board rather than a queue: the sidebar is fixed at
- * icon width and the page drops the 1180px measure.
+ * the one module that is a board rather than a queue: the sidebar starts at icon
+ * width — its toggle opens it in place, with a preference of its own — and the
+ * page drops the 1180px measure.
  */
 
 export async function WorkspaceShell({
@@ -93,7 +94,7 @@ export async function WorkspaceShell({
                 signOutAction={signOutAction}
               />
             </span>
-            {focus ? null : <SidebarToggle />}
+            <SidebarToggle focus={focus} />
           </div>
 
           <nav
@@ -267,7 +268,7 @@ export async function WorkspaceShell({
                   href="/admin/kursplanung"
                   icon={Icon.kursplanung}
                   title="Kursplanung"
-                  items={[{ href: '/admin/kursplanung/kurse', label: t('Kurse', 'Courses') }]}
+                  items={[{ href: '/admin/kursplanung/kurse', label: t('Besetzung', 'Staffing') }]}
                 >
                   Kursplanung
                 </NavLink>

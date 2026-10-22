@@ -187,6 +187,24 @@ class kept by one teacher for at most three full courses.
 - **Who teaches a group.** Kurse lists under each group everyone planned on it that month, most days
   first, a cover in yellow — not only the pair.
 
+## Besetzung, names, dates, the rail (2026-10-22)
+
+- **Besetzung** (the tab was „Kurse"): the month's groups per shift — the regular pair („Stamm Mo–Mi",
+  „Stamm Do–Fr"), everyone planned on the group that month, what the board warns about (conflicts, a
+  fourth level), the SchoolMan course. A pair is chosen from the shift's teachers only: who teaches the
+  level first, then the others, employed before Honorar; the other shift covers on the board. No „?".
+- **Teachers are „Vorname N."** everywhere a teacher is named by the board's name — the board, Besetzung,
+  the Tagesplan, its class panel, the course pages (0081 rewrote every teacher's `short_name`; new ones
+  are named the same way). Office colleagues keep their full names.
+- **The week's dates** stand above the columns: „KW 43 · Montag, 19. – Freitag, 23. Oktober 2026 · Woche
+  4 von 4 · Oktober 28.09.–23.10.2026" (`rangeLabel`, built by hand: Intl's ranges differ between server
+  and browser by a space, which broke hydration).
+- **The rail opens in place.** Focus mode starts with the rail folded; its toggle opens it there, with a
+  preference of its own (`data-focus-nav`), and the columns rearrange to the width left. Before, the only
+  control left was „CASA", which went to the Overview.
+- **The Tagesplan's class panel** names everyone who teaches the group that week, with their days and
+  covers marked, not only the day's teacher.
+
 ## Course starts (2026-10-17)
 
 A course start's level group and a Kursplanung group are the same class. Nothing is stored to say

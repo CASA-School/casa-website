@@ -2301,6 +2301,20 @@ the Klassenbuch's, the rest finance's (DATEV), and SchoolMan calculates no pay
 either; the contracts' weekly hours are the base for it later. Which course
 types a teacher may teach.
 
+### Stunden — a colleague's working time (2026-10-22, migration 0082)
+
+Rahman: „a tab on the staff page with charts of their monthly hours, the annual hours, how much is
+achieved, what is overtime and what are minus hours — so management understands at one look." The tab
+„Stunden" on a colleague's page, seen with `staff_private` like the contract: four figures (the balance
+carried, the year's months added up, holidays left, teaching so far against the contract), the plus and
+minus hours by month (blue above the line, red below — a diverging pair checked for colour blindness, and
+every figure also in words and in the table), the balance over the year, and the units taught by month
+against the contract's. A year switch, and „Als Tabelle" for every number. The hours are SchoolMan's
+time sheet — finance keeps it there until working time moves — brought by the bridge step `time`
+(`read_time.py`: `SingleMonthStaff` balances, `SingleYearStaff` holidays); a month's target and worked
+hours are not stored on it and the daily calculations are too slow to read, so the chart shows the
+month's plus or minus, not the two. The units are the workspace's own lesson days (`staff-time.ts`).
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,

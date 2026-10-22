@@ -43,6 +43,8 @@ import {
   type TeachingDay,
 } from '@/lib/admin/staff-members';
 import { staffDesk } from '@/lib/admin/day-plan';
+import { staffTime } from '@/lib/admin/staff-time';
+import { StaffHours } from './hours';
 import { DESK_LABELS } from '@/lib/admin/day-plan-labels';
 
 /** How far ahead the lesson days are shown: four weeks unless a colleague asks for more (`?weeks=`). */
@@ -73,9 +75,11 @@ export default async function StaffMemberPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; error?: string; weeks?: string }>;
+  searchParams: Promise<{ tab?: string; error?: string; weeks?: string; year?: string }>;
 }) {
-  const [{ id }, { tab, error, weeks: weeksParam }, user] = await Promise.all([params, searchParams, requireModule('staff')]);
+  const [{ id }, { tab, error, weeks: weeksParam, year: yearParam }, user] = await Promise.all([params, searchParams, requireModule('staff')]);
+  const thisYear = new Date().getFullYear();
+  const year = /^\d{4}$/.test(yearParam ?? '') && Math.abs(Number(yearParam) - thisYear) <= 5 ? Number(yearParam) : thisYear;
   const weeks = spanOf(weeksParam);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const member = await getStaffMember(id);
@@ -91,7 +95,7 @@ export default async function StaffMemberPage({
   const teaches = member.roles.includes('teaching');
   const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
 
-  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk] = await Promise.all([
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk, time] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
     upcomingTeaching(id, weeks * 7),
@@ -106,6 +110,8 @@ export default async function StaffMemberPage({
     canEdit && managesAccounts ? unlinkedAccounts() : Promise.resolve([]),
     staffKeys(id),
     staffDesk(id),
+    // Working time is HR's: with `staff_private`, like the contract (Rahman, 2026-10-22).
+    seesPrivate ? staffTime(id, year) : Promise.resolve(null),
   ]);
   if (!person) notFound();
   const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
@@ -127,6 +133,7 @@ export default async function StaffMemberPage({
     ...(examines || licences.length || sittings.length ? [{ id: 'exams', label: t('Prüfungen', 'Exams'), icon: Icon.award }] : []),
     { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
     ...(keys.length ? [{ id: 'keys', label: t('Schlüssel', 'Keys'), icon: Icon.lock, count: keys.filter((k) => k.isActive).length }] : []),
+    ...(seesPrivate && (time?.hasSheet || contracts.length || teaching.length) ? [{ id: 'hours', label: t('Stunden', 'Hours'), icon: Icon.clock }] : []),
     ...(seesPrivate ? [{ id: 'contracts', label: t('Vertrag', 'Contract'), icon: Icon.registrations, count: contracts.length }] : []),
     ...(seesPrivate ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
@@ -542,6 +549,25 @@ export default async function StaffMemberPage({
           </Card>
         </div>
       </RecordTabPanel>
+
+      {seesPrivate && time ? (
+        <RecordTabPanel id="hours">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-[1.05rem] font-bold text-[var(--casa-ink)]">{t(`Arbeitszeit ${year}`, `Working time ${year}`)}</h2>
+            <span className="flex items-center gap-1">
+              <Link href={`/admin/staff/${id}?tab=hours&year=${year - 1}`} className="rounded-lg px-2.5 py-1 text-[0.84rem] font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset hover:bg-ws-sunk hover:text-[var(--casa-ink)]" aria-label={t('Jahr davor', 'Year before')}>
+                ‹ {year - 1}
+              </Link>
+              {year < thisYear ? (
+                <Link href={`/admin/staff/${id}?tab=hours&year=${year + 1}`} className="rounded-lg px-2.5 py-1 text-[0.84rem] font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset hover:bg-ws-sunk hover:text-[var(--casa-ink)]" aria-label={t('Jahr danach', 'Year after')}>
+                  {year + 1} ›
+                </Link>
+              ) : null}
+            </span>
+          </div>
+          <StaffHours data={time} />
+        </RecordTabPanel>
+      ) : null}
 
       {seesPrivate ? (
         <RecordTabPanel id="contracts">
