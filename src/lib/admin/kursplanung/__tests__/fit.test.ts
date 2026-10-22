@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { fit, remainingDays, span } from '../fit';
+import { dayStates, fit, remainingDays, span } from '../fit';
 import { assignment, context, group, KW40, teacher } from './fixtures';
 
 const anna = teacher({ id: 'anna', levels: ['A1'] });
@@ -56,6 +56,21 @@ describe('remaining days', () => {
       absences: [{ teacherId: 'anna', onDate: KW40[4], reason: 'Urlaub' }],
     });
     expect(remainingDays(ctx, anna, KW40[0])).toEqual({ rest: 2, used: 2, max: 5, awayAll: false });
+  });
+
+  it('names the days of the week: planned in either shift, away, not worked, free', () => {
+    const fourDays = teacher({ id: 'four', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
+    const pm = group({ id: 'p1', shift: 'afternoon', level: 'A2' });
+    const ctx = context({
+      teachers: [fourDays],
+      groups: [a1, pm],
+      assignments: [assignment('a1', KW40[0], 'four'), assignment('p1', KW40[1], 'four')],
+      absences: [{ teacherId: 'four', onDate: KW40[2], reason: 'Krank' }],
+    });
+    const week = ctx.weeks.find((w) => w.start === KW40[0])!;
+    expect(dayStates(ctx, fourDays, week, 'morning').map((d) => d.state)).toEqual(['planned', 'planned', 'away', 'free', 'off']);
+    // The afternoon runs Mo–Do.
+    expect(dayStates(ctx, fourDays, week, 'afternoon')).toHaveLength(4);
   });
 
   it('recognises a whole week away', () => {

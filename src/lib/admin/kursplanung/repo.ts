@@ -254,6 +254,23 @@ export async function listAbsences(month: string): Promise<Absence[]> {
   );
 }
 
+/**
+ * Who teaches in each shift's plan, this month or the month before — the tray's „Im Plan", ahead of everyone
+ * else with days free. Read once with the page, so the tray does not reshuffle while a month is planned.
+ */
+export async function planRegulars(month: string): Promise<Record<'morning' | 'afternoon', string[]>> {
+  const rows = await query<{ shift: string; teacher_id: string }>(
+    `SELECT DISTINCT g.shift, d.teacher_id
+       FROM course_days d JOIN course_groups g ON g.id = d.group_id
+      WHERE g.month IN ($1::date, ($1::date - interval '1 month')::date) AND d.teacher_id IS NOT NULL AND NOT d.cancelled`,
+    [`${month}-01`]
+  );
+  return {
+    morning: rows.filter((r) => r.shift === 'morning').map((r) => r.teacher_id),
+    afternoon: rows.filter((r) => r.shift === 'afternoon').map((r) => r.teacher_id),
+  };
+}
+
 /** Everything the board needs for one month, in one round of queries. */
 export async function loadPlan(month: string): Promise<PlanContext> {
   const [teachers, groups, assignments, absences, weeks] = await Promise.all([

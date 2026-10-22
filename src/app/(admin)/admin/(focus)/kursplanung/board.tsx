@@ -7,7 +7,7 @@ import { useWsLang } from '@/components/admin/lang';
 import { SESSION_COLOURS } from '@/lib/admin/day-plan-labels';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
-import { absenceOn, assignmentKey, courseDays, fit, remainingDays, shiftDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
+import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, shiftDays, span, type DayState, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { levelName, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
@@ -47,12 +47,14 @@ const groupLabel = (g: CourseGroup, of: number, t: T) => `${levelName(g.level, g
 /** A date's weekday as the board writes it: `Mo` / `Mon`, or the full name. */
 const shortDay = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, WEEKDAY_LABELS[d]) : ''; };
 const dayName = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, DAY_LABEL[d]) : ''; };
+const DAY_STATE: Record<DayState, Bilingual> = { free: { de: 'frei', en: 'free' }, planned: { de: 'verplant', en: 'planned' }, away: { de: 'abwesend', en: 'away' }, off: { de: 'arbeitet nicht', en: 'not working' } };
 const sig = (a: Assignment) => `${a.groupId}|${a.onDate}|${a.teacherId}|${a.isSubstitute}|${a.isTentative}`;
 
 export function Board({
   plan,
   month,
   today,
+  regulars,
   canWrite,
   canSeeStaff,
   header,
@@ -62,6 +64,8 @@ export function Board({
   month: string;
   /** Today in Bremen: the board opens on its week when the month holds it. */
   today: string;
+  /** Who teaches in each shift's plan this month or the last: the tray's „Im Plan". */
+  regulars: Record<Shift, string[]>;
   canWrite: boolean;
   /** A teacher's levels, shifts and absences are changed on their page in Mitarbeitende, not here (2026-10-22). */
   canSeeStaff: boolean;
@@ -89,7 +93,7 @@ export function Board({
   const [stale, setStale] = useState(false);
   const [showOther, setShowOther] = useState(false);
   const [showFull, setShowFull] = useState(false);
-  const [showSpare, setShowSpare] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [help, setHelp] = useState(false);
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
@@ -368,8 +372,12 @@ export function Board({
 
   useEffect(() => {
     if (!menu) return;
+    // A scroll event arrives a frame after the scroll that brought the piece into view, i.e. after the click
+    // that opened the menu: only a page that has moved since, or a list beside the board, closes it.
+    const y0 = window.scrollY;
     const close = (e: Event) => {
       if (e.target instanceof Node && menuRef.current?.contains(e.target)) return;
+      if (e.type === 'scroll' && e.target === document && Math.abs(window.scrollY - y0) < 4) return;
       setMenu(null);
     };
     window.addEventListener('scroll', close, true);
@@ -401,19 +409,29 @@ export function Board({
   const st = statsFor(shown);
 
   const tray = useMemo(() => {
-    if (!week) return { avail: [], spare: [], other: [], away: [], full: [] };
-    const rows = ctx.teachers.filter((t) => t.isActive).map((t) => ({ t, ...remainingDays(ctx, t, week.start), own: t.shifts.includes(shift) }));
+    if (!week) return { main: [], more: [], other: [], away: [], full: [], pooled: false };
+    // Who teaches in this shift's plan (this month or the last): the planners' sheet lists them and, apart,
+    // who else is „verfügbar". Everyone else with days free folds under „Weitere" (2026-10-22: the tray ran
+    // to the whole staff, SchoolMan's teachers who never teach an intensive class among them).
+    const inPlan = new Set(regulars[shift]);
+    const rows = ctx.teachers.filter((t) => t.isActive).map((t) => {
+      const left = remainingDays(ctx, t, week.start);
+      // Only this shift's days: a V+N teacher's free Friday is no afternoon.
+      const here = dayStates(ctx, t, week, shift).filter((d) => d.state === 'free').length;
+      return { t, ...left, rest: Math.min(left.rest, here), own: t.shifts.includes(shift), planned: inPlan.has(t.id) };
+    });
     const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) => b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
-    const free = rows.filter((x) => x.own && x.rest > 0 && !x.awayAll);
+    const free = rows.filter((x) => x.rest > 0 && !x.awayAll);
+    const first = (x: (typeof rows)[number]) => (inPlan.size ? x.planned : x.own);
     return {
-      avail: free.filter((x) => x.t.levels.length).sort(byRest),
-      // No level listed: SchoolMan's teachers who never teach an intensive class. Folded, like the other shift.
-      spare: free.filter((x) => !x.t.levels.length).sort(byRest),
-      other: rows.filter((x) => !x.own && x.rest > 0 && !x.awayAll).sort(byRest),
-      away: rows.filter((x) => x.own && x.awayAll),
-      full: rows.filter((x) => x.own && x.rest <= 0 && !x.awayAll),
+      main: free.filter(first).sort(byRest),
+      more: free.filter((x) => !first(x) && x.own).sort(byRest),
+      other: free.filter((x) => !first(x) && !x.own).sort(byRest),
+      away: rows.filter((x) => x.awayAll && (x.own || x.planned)),
+      full: rows.filter((x) => x.rest <= 0 && !x.awayAll && (x.own || x.planned)),
+      pooled: inPlan.size > 0,
     };
-  }, [ctx, shift, week]);
+  }, [ctx, regulars, shift, week]);
 
   const handInfo = useMemo(() => {
     if (!hand || !week) return null;
@@ -508,32 +526,49 @@ export function Board({
     );
   };
 
-  const trayPiece = (x: { t: Teacher; rest: number; used: number; max: number; awayAll: boolean }, off: boolean) => {
+  /** A teacher in the tray, on one line: the name, V+N, and the shift's days — free ones dark, as the sheet's „verfügbar". */
+  const trayPiece = (x: { t: Teacher; rest: number; awayAll: boolean }, off: boolean) => {
     const flex = x.t.shifts.length > 1, inHand = hand === x.t.id;
-    const pick = () => setHand(inHand ? null : x.t.id);
+    const toggle = () => setHand(inHand ? null : x.t.id);
+    const days = week ? dayStates(ctx, x.t, week, shift) : [];
+    const free = days.filter((d) => d.state === 'free');
     return (
       <div
         key={x.t.id}
         role={off ? undefined : 'button'}
         tabIndex={off ? undefined : 0}
         aria-pressed={off ? undefined : inHand}
-        onClick={off ? undefined : pick}
-        onKeyDown={off ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }}
+        onClick={off ? undefined : toggle}
+        onKeyDown={off ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
         draggable={!off}
         onDragStart={off ? undefined : (e) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }}
         onDragEnd={off ? undefined : () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); }}
         className={`${styles.tp} ${off ? styles.tpOff : ''} ${inHand ? styles.tpHand : ''}`}
-        title={`${x.t.fullName}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
+        title={`${x.t.fullName} · ${free.length ? t(`frei ${free.map((d) => day(d.date)).join(', ')}`, `free ${free.map((d) => day(d.date)).join(', ')}`) : t('keine Tage frei', 'no days free')}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
-        <span>{inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : null} {flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null}</span>
-        <span className={styles.bl}>
-          <span className={styles.blocks} aria-hidden="true">{Array.from({ length: x.max }, (_, i) => <i key={i} className={i < x.max - x.rest ? 'u' : ''} />)}</span>
-          <span className={styles.cnt}>{x.awayAll ? t('abwesend', 'absent') : x.rest > 0 ? t(`${x.rest} von ${x.max} Tagen frei`, `${x.rest} of ${x.max} days free`) : t(`alle ${x.max} Tage verplant`, `all ${x.max} days planned`)}</span>
+        {inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null}
+        {/* More free days than the week allows (a three-day contract, all five free): how many are left. */}
+        {x.rest < free.length ? <span className={styles.cnt}>{t(`noch ${x.rest}`, `${x.rest} left`)}</span> : null}
+        <span className={styles.wd} aria-label={days.map((d) => `${day(d.date)} ${pick(lang, DAY_STATE[d.state])}`).join(', ')}>
+          {days.map((d) => <i key={d.date} data-s={d.state}>{day(d.date)}</i>)}
         </span>
       </div>
     );
   };
+
+  /** A folded list: its names on one line until it is opened. */
+  const folded = (label: string, list: readonly { t: Teacher; rest: number; awayAll: boolean }[], open: boolean, setOpen: (v: boolean) => void, off: boolean, withRest = true) =>
+    list.length ? (
+      <>
+        <div className={styles.sect}><span className={styles.lbl}>{label}</span><span className={styles.n}>{list.length}</span></div>
+        {open ? (
+          <>{list.map((x) => trayPiece(x, off))}<button type="button" className={styles.fold} onClick={() => setOpen(false)}>{t('einklappen', 'collapse')}</button></>
+        ) : (
+          <button type="button" className={styles.fold} onClick={() => setOpen(true)}><span className={styles.clamp}>{list.map((x) => (withRest ? `${x.t.shortName} ${x.rest}` : x.t.shortName)).join(' · ')}</span></button>
+        )}
+      </>
+    ) : null;
 
   const block = (w: PlanningWeek, compact: boolean) => {
     const cd = (g: CourseGroup) => courseDays(g, w);
@@ -705,7 +740,7 @@ export function Board({
             <div className={styles.cardHead}><h2>{t('Teile', 'Pieces')}</h2><span className="sub">KW {week.kw}</span><button type="button" className={styles.qm} aria-pressed={help} aria-label={t('Erklärung', 'Explanation')} onClick={() => setHelp(!help)}>?</button></div>
             {help ? (
               <div className={styles.help}>
-                {t('Jede Lehrkraft ist ein Teil. Die Blöcke sind ihre freien Tage in dieser Woche.', 'Each teacher is a piece. The blocks are their free days this week.')}
+                {t('Jede Lehrkraft ist ein Teil. Ihre Tage dieser Woche: dunkel frei, grau verplant, rot abwesend. „Im Plan“ sind alle, die in dieser Schicht unterrichten; wer sonst Tage frei hat, steht unter „Weitere“.', 'Each teacher is a piece. Their days this week: dark free, grey planned, red away. “In the plan” is everyone teaching in this shift; anyone else with days free is under “Others”.')}
                 <br />
                 {t('Teil auf ein Fach ziehen – oder Teil antippen (es ist dann „in der Hand“) und ein Fach antippen. Es legt ab dort so viele Tage, wie es frei hat.', 'Drag a piece onto a slot – or tap the piece (it is then “in hand”) and tap a slot. It fills as many days from there as it has free.')}
                 <br />
@@ -714,11 +749,12 @@ export function Board({
                 {t('Niveaus, Schichten, Tage und Abwesenheiten einer Lehrkraft stehen auf ihrer Seite unter Mitarbeitende.', 'A teacher’s levels, shifts, days and absences are on their page under Staff.')}
               </div>
             ) : null}
-            {tray.avail.length ? tray.avail.map((x) => trayPiece(x, !canWrite)) : <div className={styles.fold}>{t(`Niemand aus dieser Schicht hat in KW ${week.kw} noch freie Tage.`, `Nobody in this shift has days free in KW ${week.kw}.`)}</div>}
-            {tray.spare.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Ohne Niveau', 'No level listed')}</span><span className={styles.n}>{tray.spare.length}</span></div>{showSpare ? <>{tray.spare.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowSpare(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowSpare(true)}>{tray.spare.map((x) => x.t.shortName).join(', ')}</button>}</> : null}
-            {tray.other.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Andere Schicht · als Vertretung', 'Other shift · as cover')}</span><span className={styles.n}>{tray.other.length}</span></div>{showOther ? <>{tray.other.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowOther(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowOther(true)}>{tray.other.map((x) => `${x.t.shortName} ${x.rest}`).join(' · ')}</button>}</> : null}
-            {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Abwesend', 'Absent')}</span></div>{tray.away.map((x) => trayPiece(x, true))}</> : null}
-            {tray.full.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Verplant', 'Fully planned')}</span><span className={styles.n}>{tray.full.length}</span></div>{showFull ? <>{tray.full.map((x) => trayPiece(x, true))}<button type="button" className={styles.fold} onClick={() => setShowFull(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowFull(true)}>{tray.full.map((x) => x.t.shortName).join(', ')}</button>}</> : null}
+            {tray.pooled ? <div className={styles.sect}><span className={styles.lbl}>{t('Im Plan', 'In the plan')}</span><span className={styles.n}>{tray.main.length}</span></div> : null}
+            {tray.main.length ? tray.main.map((x) => trayPiece(x, !canWrite)) : <div className={styles.foldText}>{tray.pooled ? t(`Im Plan hat in KW ${week.kw} niemand mehr Tage frei.`, `Nobody in the plan has days free in KW ${week.kw}.`) : t(`In KW ${week.kw} hat niemand mehr Tage frei.`, `Nobody has days free in KW ${week.kw}.`)}</div>}
+            {folded(t('Weitere', 'Others'), tray.more, showMore, setShowMore, !canWrite)}
+            {folded(t('Andere Schicht · als Vertretung', 'Other shift · as cover'), tray.other, showOther, setShowOther, !canWrite)}
+            {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Abwesend', 'Absent')}</span><span className={styles.n}>{tray.away.length}</span></div><div className={styles.foldText}>{tray.away.map((x) => x.t.shortName).join(', ')}</div></> : null}
+            {folded(t('Verplant', 'Fully planned'), tray.full, showFull, setShowFull, true, false)}
             <div className={styles.legend}><span>{t('Farbe = Niveau', 'Colour = level')}</span><span><i style={{ background: 'var(--pz-yellow)' }} />{t('Vertretung', 'Cover')}</span><span><i style={{ boxShadow: 'inset 0 0 0 2px var(--pz-red)', background: '#fff' }} />{t('Konflikt', 'Conflict')}</span><span><i style={{ border: '1.5px dashed #c5cad3', background: '#fafbfc' }} />{t('offen', 'open')}</span></div>
           </section>
         </aside>

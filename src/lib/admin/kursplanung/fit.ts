@@ -102,6 +102,22 @@ export function remainingDays(ctx: PlanContext, teacher: Teacher, weekStart: str
   };
 }
 
+export type DayState = 'free' | 'planned' | 'away' | 'off';
+
+/**
+ * A teacher's days of one week in a shift (Mo–Fr in the morning, Mo–Do in the afternoon), as the tray
+ * shows them — the planners' sheet names the days someone is „verfügbar", not how many: planned in
+ * either shift, away, not a day they work, or free.
+ */
+export function dayStates(ctx: PlanContext, teacher: Teacher, week: PlanningWeek, shift: CourseGroup['shift']): { date: string; state: DayState }[] {
+  const used = usedDays(ctx, teacher.id, week.start);
+  return shiftDays(shift, week).map((date) => {
+    const dow = weekdayOf(date);
+    const state: DayState = absenceOn(ctx, teacher.id, date) ? 'away' : used.has(date) ? 'planned' : dow && teacher.weekdays.includes(dow) ? 'free' : 'off';
+    return { date, state };
+  });
+}
+
 export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, date: string): Fit {
   if (!inCourse(group, date)) return { ok: false, reason: { de: 'außerhalb des Kurses', en: 'outside the course' } };
   const teacher = teacherById(ctx, teacherId);
