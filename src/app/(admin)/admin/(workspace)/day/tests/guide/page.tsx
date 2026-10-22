@@ -5,6 +5,7 @@ import { PrintSheet } from '../print-sheet';
 import { QrPicture } from '@/components/admin/qr-code';
 import { Icon } from '@/components/admin/icons';
 import { ButtonLink, PageHeader } from '@/components/admin/ui';
+import { canAccess } from '@/lib/admin/access';
 import { entryTestLink, entryTestOrigin, sittingGuide } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -25,7 +26,7 @@ const longDay = (day: string) =>
  * teachers as a PDF ahead of the start. German, as the booklets; one A4 page.
  */
 export default async function EntryTestGuidePage({ searchParams }: { searchParams: Promise<{ sitting?: string }> }) {
-  const [{ sitting: sittingId }] = await Promise.all([searchParams, requireModule('day')]);
+  const [{ sitting: sittingId }, user] = await Promise.all([searchParams, requireModule('day')]);
   const { t } = await getI18n();
   const focus = sittingId && UUID.test(sittingId) ? await sittingGuide(sittingId) : null;
   if (sittingId && !focus) notFound();
@@ -45,10 +46,12 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
       <PrintSheet
         name={title}
         actions={
-          <ButtonLink href={focus ? `/admin/day/tests/mail?date=${focus.day}` : '/admin/day/tests/mail'} variant="secondary">
-            {Icon.mail}
-            {t('Als E-Mail an Lehrkräfte', 'Email to the teachers')}
-          </ButtonLink>
+          canAccess(user, 'day', 'edit') ? (
+            <ButtonLink href={focus ? `/admin/day/tests/mail?date=${focus.day}` : '/admin/day/tests/mail'} variant="secondary">
+              {Icon.mail}
+              {t('Als E-Mail an Lehrkräfte', 'Email to the teachers')}
+            </ButtonLink>
+          ) : null
         }
       >
         <div className="text-[10.5pt] leading-snug text-[#111827]">

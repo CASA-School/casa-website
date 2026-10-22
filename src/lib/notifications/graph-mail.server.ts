@@ -15,6 +15,8 @@ export type GraphAttachment = { name: string; contentType: string; contentId: st
 
 export type GraphMessage = {
   to: string | string[];
+  /** Blind copies: recipients who do not see each other's addresses. */
+  bcc?: string[];
   subject: string;
   html: string;
   replyTo?: { emailAddress: { address: string; name?: string } }[];
@@ -62,6 +64,7 @@ export async function sendGraphMail(from: string, message: GraphMessage) {
           ...(message.attachments ?? []),
         ].map((a) => ({ '@odata.type': '#microsoft.graph.fileAttachment', ...a, isInline: true })),
         toRecipients: recipients.map((address) => ({ emailAddress: { address } })),
+        ...(message.bcc?.length ? { bccRecipients: message.bcc.map((address) => ({ emailAddress: { address } })) } : {}),
         ...(message.replyTo ? { replyTo: message.replyTo } : {}),
       },
       saveToSentItems: message.saveToSentItems ?? true,

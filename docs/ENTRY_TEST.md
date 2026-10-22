@@ -87,11 +87,13 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    **„E-Mail an Lehrkräfte"** (`day/tests/mail?date=`, from the tests page, the Tagesplan's card, a
    test's panel and the guide) is one mail for a start day, a few days ahead with the course start
    mails: the office's text, every test with its classes, code and QR code, then the guide. The page
-   lists the next start days; who gets it (the day's teachers of those classes, ticked, with any further
-   address; a teacher without an address on record is named); the subject and text; and on the right
+   lists the next start days; who gets it (the test day's teachers of those classes, ticked; the
+   classes' other teachers of that week, unticked; any further address; a teacher without an address
+   on record is named); the subject and text; and on the right
    the mail as it will arrive, built by the same function as the mail sent (`teacherMailHtml`),
    at computer or phone width. „Senden" asks first, opens any test not opened yet (so every code goes
-   out), and sends through Microsoft Graph from `FORM_MAIL_FROM` with the logo and each QR code as
+   out), and sends through Microsoft Graph from `FORM_MAIL_FROM` — the teachers as blind copies, since
+   their addresses are often private, the mailbox itself in „An" — with the logo and each QR code as
    inline pictures (`qrPng`, `src/lib/qr-png.ts`); answers go to the colleague who sent it. It reaches
    the teachers while the form mails are still in test mode (Rahman, 2026-10-22: an internal mail, sent
    on purpose). Each mail as sent is kept in `entry_test_mails` (0084) and listed under „Gesendet". A
