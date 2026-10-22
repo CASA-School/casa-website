@@ -113,17 +113,19 @@
 .qm { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--pz-line); background: #fff; font-weight: 800; color: var(--pz-mute); font-size: 12px; }
 .qm[aria-pressed='true'] { background: var(--pz-ink); border-color: var(--pz-ink); color: #fff; }
 .help { margin: 0 8px 10px; padding: 10px 12px; border-radius: 10px; background: #f2f4f7; font-size: 12.5px; color: var(--pz-ink2); font-weight: 600; line-height: 1.5; }
-.tp { display: grid; grid-template-columns: 1fr auto; gap: 3px 8px; align-items: center; margin: 0 8px 6px; padding: 9px 12px; border: 1px solid var(--pz-line); border-radius: 12px; background: #fff; cursor: grab; user-select: none; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; text-align: left; width: calc(100% - 16px); }
+.tp { display: flex; align-items: center; gap: 7px; margin: 0 8px 5px; padding: 6px 8px 6px 11px; border: 1px solid var(--pz-line); border-radius: 10px; background: #fff; cursor: grab; user-select: none; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; text-align: left; width: calc(100% - 16px); }
 .tp:hover { border-color: #c5cad3; box-shadow: 0 8px 20px -10px rgba(17, 24, 39, 0.3); transform: translateY(-1px); }
 .tpHand { border-color: var(--pz-ink); box-shadow: 0 0 0 2px var(--pz-ink); }
-.tpName { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sh { font-size: 10px; font-weight: 800; color: var(--pz-mute); letter-spacing: 0.04em; background: #eef0f4; border-radius: 6px; padding: 1px 6px; }
-.handlbl { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; background: var(--pz-ink); color: #fff; border-radius: 6px; padding: 1px 6px; }
-.bl { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
-.blocks { display: flex; gap: 3px; }
-.blocks i { width: 16px; height: 9px; border-radius: 3px; background: var(--pz-ink); }
-.blocks i.u { background: #e4e7ec; }
-.cnt { font-size: 11.5px; color: var(--pz-mute); font-weight: 600; white-space: nowrap; }
+.tpName { flex: 1 1 auto; min-width: 0; font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sh { flex: none; font-size: 9.5px; font-weight: 800; color: var(--pz-mute); letter-spacing: 0.04em; background: #eef0f4; border-radius: 6px; padding: 1px 5px; }
+.handlbl { flex: none; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; background: var(--pz-ink); color: #fff; border-radius: 6px; padding: 1px 5px; }
+.cnt { flex: none; font-size: 10.5px; color: var(--pz-mute); font-weight: 700; white-space: nowrap; }
+/* The shift's days: free dark, planned grey, away red, a day not worked only outlined. */
+.wd { flex: none; display: inline-flex; gap: 2px; }
+.wd i { display: grid; place-items: center; width: 21px; height: 18px; border-radius: 5px; font-style: normal; font-size: 9.5px; font-weight: 800; background: var(--pz-ink); color: #fff; }
+.wd i[data-s='planned'] { background: #e9ecf1; color: #a3abb8; }
+.wd i[data-s='away'] { background: var(--pz-red-soft); color: #b91c1c; }
+.wd i[data-s='off'] { background: transparent; color: #c5cad3; box-shadow: inset 0 0 0 1px var(--pz-line); }
 .tpOff { cursor: default; opacity: 0.6; }
 .tpOff:hover { transform: none; box-shadow: none; border-color: var(--pz-line); }
 .sect { display: flex; align-items: center; gap: 8px; padding: 10px 16px 6px; }
@@ -131,6 +133,9 @@
 .n { margin-left: auto; font-size: 11.5px; color: var(--pz-faint); font-weight: 700; }
 .fold { width: calc(100% - 16px); margin: 0 8px 8px; border: 1px dashed var(--pz-line); background: transparent; border-radius: 10px; padding: 8px 10px; text-align: left; color: var(--pz-mute); font-size: 12.5px; font-weight: 600; line-height: 1.4; }
 .fold:hover { border-color: #c5cad3; color: var(--pz-ink2); }
+/* A folded list shows two lines of its names; a click opens it. */
+.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.foldText { margin: 0 8px 8px; padding: 2px 10px 6px; color: var(--pz-mute); font-size: 12.5px; font-weight: 600; line-height: 1.4; }
 .legend { padding: 8px 16px 14px; display: flex; flex-wrap: wrap; gap: 5px 12px; font-size: 11px; color: var(--pz-mute); font-weight: 600; border-top: 1px solid var(--pz-line2); margin-top: 4px; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 

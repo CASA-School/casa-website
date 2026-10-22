@@ -2,7 +2,7 @@ import { EmptyState } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { listPlanMonths, loadPlan, planToday, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { listPlanMonths, loadPlan, planRegulars, planToday, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
 import { Board } from './board';
@@ -24,7 +24,7 @@ export default async function KursplanungPage({
 }) {
   const [params, user] = await Promise.all([searchParams, requireModule('kursplanung')]);
   const month = await resolvePlanMonth(params.month);
-  const [plan, months] = await Promise.all([loadPlan(month), listPlanMonths()]);
+  const [plan, months, regulars] = await Promise.all([loadPlan(month), listPlanMonths(), planRegulars(month)]);
   const notice = { ok: params.ok, error: params.error };
 
   if (plan.groups.length === 0) {
@@ -46,6 +46,7 @@ export default async function KursplanungPage({
       plan={plan}
       month={month}
       today={planToday()}
+      regulars={regulars}
       canWrite={canAccess(user, 'kursplanung', 'edit')}
       canSeeStaff={canAccess(user, 'staff')}
       header={<HeaderStart active="puzzle" month={month} months={months} />}

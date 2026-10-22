@@ -40,7 +40,9 @@ the rules the planners kept in their heads.
    action and nothing under it — the rows with a consequence sentence each were rejected on 2026-09-16
    ("too much information, keep only the main headings"); the header carries the state (`· Vertretung`,
    `· unbestätigt`). A menu is measured after it opens and pulled back inside the viewport; scrolling
-   closes it. No dashboards, no explanatory paragraphs.
+   the page closes it — a page that has moved since it opened, not the scroll event that arrives a frame
+   after the scroll which brought the piece into view (that one closed menus as they opened). No
+   dashboards, no explanatory paragraphs.
 4. **Real people, real problems.** No fabricated absences or conflicts about real teachers. The demo gap
    is a real one (a teacher released from duty).
 5. **Its own look, not the workspace's density — the prototype's, 1:1.** Manrope for everything
@@ -96,9 +98,19 @@ shifts, days, weekdays, levels — and their absences are changed only there** (
 Lehrkräfte, `?view=teaching`, and their page's tab Unterricht), with their name, contact and contract
 (Rahman, 2026-10-22: less on the board). Kursplanung's own Lehrkräfte tab and teacher dialog are gone;
 an old link to it lands on the register (`/admin/kursplanung/lehrkraefte` redirects). On the board,
-„Lehrkraft öffnen" in a piece's menu opens the colleague's page for those who hold `staff`, and the
-tray shows a piece's name, V+N and free days, not its levels: which columns fit shows when it is
-picked up. `scripts/kursplanung/import-bridge.mjs` writes a person,
+„Lehrkraft öffnen" in a piece's menu opens the colleague's page for those who hold `staff`.
+
+**The tray (Teile)** is one line per teacher: the name, V+N, and the shift's days — dark free, grey
+planned in either shift, red away, outlined not a day they work (`dayStates`), as the planners' sheet
+names the days someone is „verfügbar" rather than counting them; „noch 3" only when the contract allows
+fewer days than are free. Only the shift's own days count, so a V+N teacher's free Friday is no
+afternoon. „Im Plan" is who teaches in this shift this month or the last (`planRegulars`, read once with
+the page, so the list does not reshuffle while a month is planned); everyone else with days free folds
+under „Weitere", the other shift under „Andere Schicht", the fully planned under „Verplant", each two
+lines of names until opened. The tray scrolls on its own beside the board. Levels are not shown: which
+columns fit shows when a piece is picked up. What it says is as true as the rules and absences on the
+staff register: a teacher still on the default rules (five days, Mo–Fr) shows days free they may not
+work, and an absence SchoolMan does not record shows a teacher free. `scripts/kursplanung/import-bridge.mjs` writes a person,
 a staff row, the role and the contract for a teacher it does not know. SchoolMan's staff import
 (2026-10-17) brought five teachers the board had not had; they start with the default rules (morning,
 five days, no levels) until the planners set theirs.
