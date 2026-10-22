@@ -65,6 +65,12 @@ export function EntryTestCard({
               {t('Archiv', 'Archive')}
             </ButtonLink>
           )}
+          {canEdit && !archived && tests.some((x) => x.sitting && x.sitting.state !== 'closed') ? (
+            <ButtonLink href={`/admin/day/tests/mail?date=${day}`} variant="ghost" size="sm">
+              {Icon.mail}
+              {t('E-Mail an Lehrkräfte', 'Email the teachers')}
+            </ButtonLink>
+          ) : null}
           {canEdit && !archived && !heading ? <OpenTestsDialog tests={tests} day={day} from="day" /> : null}
         </span>
       </header>
@@ -188,8 +194,8 @@ function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTes
               </p>
             </div>
             <span className="flex flex-wrap gap-2">
-              {test.mail ? (
-                <ButtonLink href={test.mail} plain variant="secondary" size="sm">
+              {canEdit && !archived ? (
+                <ButtonLink href={`/admin/day/tests/mail?date=${day}`} variant="secondary" size="sm">
                   {Icon.mail}
                   {t('E-Mail an Lehrkräfte', 'Email the teachers')}
                 </ButtonLink>

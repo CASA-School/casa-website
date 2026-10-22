@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/admin/access';
 import { changeDay } from '@/lib/admin/course-days';
 import { berlinDay } from '@/lib/admin/days';
 import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, openEntryTests, releaseAttempt } from '@/lib/admin/entry-tests';
+import { sendTeacherMail } from '@/lib/admin/entry-test-mail';
 import { createTask, deleteTask, markPresence, mergeLesson, replaceFromDay, setTaskStatus, unmergeLesson, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -221,7 +222,8 @@ export async function openEntryTestAction(formData: FormData): Promise<void> {
 export async function openEntryTestsAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
   const day = dayOf(formData) ?? berlinDay(new Date());
-  const to = formData.get('from') === 'tests' ? '/admin/day/tests' : back(day);
+  const from = formData.get('from');
+  const to = from === 'tests' ? '/admin/day/tests' : from === 'mail' ? `/admin/day/tests/mail?date=${day}` : back(day);
   const chosen = formData.get('scope') === 'chosen';
   const dayIds = formData.getAll('dayId').map(String).filter((id) => UUID.test(id));
   const { lang } = await getI18n();
@@ -230,6 +232,26 @@ export async function openEntryTestsAction(formData: FormData): Promise<void> {
   if (!result.ok) fail(to, pick(lang, result.reason));
   revalidatePath('/admin/day');
   redirect(to);
+}
+
+/**
+ * The start day's mail to its teachers, as the office checked it on the preview (0084): its subject, its
+ * text, to the addresses ticked. Confirmed in a dialog; a request without the confirmation is refused.
+ */
+export async function sendTeacherMailAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const day = dayOf(formData);
+  const { lang } = await getI18n();
+  if (!day) fail('/admin/day/tests', pick(lang, { de: 'Dieser Tag ist ungültig.', en: 'This day is not valid.' }));
+  const to = `/admin/day/tests/mail?date=${day}`;
+  if (formData.get('confirmed') !== '1') fail(to, pick(lang, { de: 'Bitte bestätige den Versand.', en: 'Please confirm sending.' }));
+  const result = await sendTeacherMail(
+    { day, subject: String(formData.get('subject') ?? ''), intro: String(formData.get('intro') ?? ''), emails: formData.getAll('email').map(String) },
+    actor
+  );
+  if (!result.ok) fail(to, pick(lang, result.reason));
+  revalidatePath('/admin/day');
+  redirect(`${to}&sent=1`);
 }
 
 export async function closeEntryTestAction(formData: FormData): Promise<void> {

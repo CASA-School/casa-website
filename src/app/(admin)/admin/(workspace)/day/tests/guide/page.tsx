@@ -3,10 +3,12 @@ import type { ReactNode } from 'react';
 
 import { PrintSheet } from '../print-sheet';
 import { QrPicture } from '@/components/admin/qr-code';
-import { PageHeader } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { ButtonLink, PageHeader } from '@/components/admin/ui';
 import { entryTestLink, entryTestOrigin, sittingGuide } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { guideSteps } from '@/lib/entry-test/guide';
 import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
 import { qrPath } from '@/lib/qr';
 
@@ -40,7 +42,15 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
         backLabel={t('Einstufungstests', 'Placement tests')}
         title={focus ? t(`Leitfaden · ${focus.test.title}`, `Guide · ${focus.test.title}`) : t('Leitfaden für Lehrkräfte', 'Guide for teachers')}
       />
-      <PrintSheet name={title}>
+      <PrintSheet
+        name={title}
+        actions={
+          <ButtonLink href={focus ? `/admin/day/tests/mail?date=${focus.day}` : '/admin/day/tests/mail'} variant="secondary">
+            {Icon.mail}
+            {t('Als E-Mail an Lehrkräfte', 'Email to the teachers')}
+          </ButtonLink>
+        }
+      >
         <div className="text-[10.5pt] leading-snug text-[#111827]">
           <header className="flex items-end justify-between gap-6 border-b border-[#d9e0ea] pb-4">
             <div
@@ -112,29 +122,13 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
           )}
 
           <ol className="mt-5 grid gap-3">
-            <Step n={1} title="Vorbereiten">
-              <li>Den QR-Code an die Tafel projizieren oder ausgedruckt aufhängen.</li>
-              <li>Wer kein funktionierendes Handy hat, schreibt auf Papier: Testheft A oder B aus dem Büro, im Wechsel ausgeteilt, und einen Bleistift.</li>
-            </Step>
-            <Step n={2} title="Starten">
-              <li>Den QR-Code scannen.</li>
-              <li>Vor- und Nachnamen und die E-Mail-Adresse der Anmeldung eingeben – so kommt das Ergebnis zur richtigen Person.</li>
-              <li>Version A und B wechseln sich von selbst ab, und die Antworten stehen bei allen in anderer Reihenfolge.</li>
-            </Step>
-            <Step n={3} title={focus ? `Während des Tests · ${focus.sitting.minutes} Minuten` : `Während des Tests · ${times}`}>
-              <li>Die Zeit läuft auf dem Handy; bei 0:00 wird der Test von selbst abgegeben.</li>
-              <li>Wer die Seite verlässt (andere App, Bildschirm aus), wird pausiert. Die Lehrkraft gibt den Code ein, dann geht es weiter – die Zeit läuft dabei weiter.</li>
-              <li>Den Code nicht an die Teilnehmenden weitergeben.</li>
-            </Step>
-            <Step n={4} title="Nach dem Test">
-              <li>Die Teilnehmenden sehen kein Ergebnis.</li>
-              <li>Alle Testhefte aus Papier einsammeln und ins Büro bringen; das Büro trägt sie ein.</li>
-              <li>Das Büro sieht die Ergebnisse sofort.</li>
-            </Step>
-            <Step n={5} title="Ergebnisse besprechen">
-              <li>Die Ergebnisse mit Studienleitung, Büro und Teilnehmenden besprechen.</li>
-              <li>Zurückgestufte Teilnehmende in die Übersichtstabelle zum Kursstart eintragen.</li>
-            </Step>
+            {guideSteps(focus ? `${focus.sitting.minutes} Minuten` : times).map((step, i) => (
+              <Step key={step.title} n={i + 1} title={step.title}>
+                {step.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </Step>
+            ))}
           </ol>
 
           <footer className="mt-5 border-t border-[#d9e0ea] pt-3 text-[8.5pt] text-[#6b7a90]">CASA Internationale Sprachschule Bremen · Einstufungstest Tag 1</footer>
