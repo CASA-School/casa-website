@@ -14,12 +14,13 @@ const subscribeNothing = () => () => {};
  * time on <body> for paper (globals.css, `@page entry-test`), as the class list is. A `poster` is one
  * sheet without page margins (`@page entry-test-poster`), centred, so the browser prints nothing of its own.
  */
-export function PrintSheet({ name, poster = false, children }: { name: string; poster?: boolean; children: ReactNode }) {
+export function PrintSheet({ name, poster = false, actions, children }: { name: string; poster?: boolean; actions?: ReactNode; children: ReactNode }) {
   const { t } = useWsLang();
   const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
   return (
     <>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-wrap justify-end gap-2">
+        {actions}
         <Button type="button" onClick={() => printLetter(name)}>
           {t('Drucken / PDF', 'Print / PDF')}
         </Button>

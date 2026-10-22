@@ -37,12 +37,18 @@ export default async function EntryTestArchivePage({ searchParams }: { searchPar
         title={t('Einstufungstests', 'Placement tests')}
         actions={
           testDay && startTests.length ? (
-            <OpenTestsDialog
-              tests={startTests}
-              day={testDay}
-              when={testDay === today ? undefined : dayLabel(testDay, lang, { weekday: 'short', day: 'numeric', month: 'short' })}
-              from="tests"
-            />
+            <>
+              <ButtonLink href={`/admin/day/tests/mail?date=${testDay}`} variant="secondary">
+                {Icon.mail}
+                {t('E-Mail an Lehrkräfte', 'Email the teachers')}
+              </ButtonLink>
+              <OpenTestsDialog
+                tests={startTests}
+                day={testDay}
+                when={testDay === today ? undefined : dayLabel(testDay, lang, { weekday: 'short', day: 'numeric', month: 'short' })}
+                from="tests"
+              />
+            </>
           ) : null
         }
       />

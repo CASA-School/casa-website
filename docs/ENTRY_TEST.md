@@ -77,14 +77,25 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    courses. Opened ahead of its day a test is „Bereit" with its code, so the teachers can have it, and the
    phones see it only on that day (they read today's sittings). A test already open or ready is left as
    it is; the per-test „Test öffnen" in its panel stays. The old „Heute öffnen" for a later day is gone.
-8a. **The teachers' guide and the mail** (Rahman, 2026-10-22). „Leitfaden für Lehrkräfte" on the tests
-   page (`day/tests/guide`) is the general guide, one A4 page: each test's time, then preparing, starting,
+8a. **The teachers' guide and mail** (Rahman, 2026-10-22). „Leitfaden für Lehrkräfte" on the tests
+   page (`day/tests/guide`) is the guide, one A4 page: each test's time, then preparing, starting,
    during, after, the results — replacing the Google version's „Leitfaden zur Durchführung", whose
-   separate typing-in step the phones made unnecessary. „Leitfaden" in a test's panel, once its code
-   exists, is the same page with that test's day, classes, code and QR code (`?sitting=`), to print or
-   save as a PDF. „E-Mail an Lehrkräfte" in the panel opens a mail (`mailto:`, the workspace sends none)
-   to the teachers of its classes on that day, with the day, the code, the link and the time; the office
-   attaches the guide's PDF. Sent a few days ahead, with the course start mails.
+   separate typing-in step the phones made unnecessary, and saying only what CASA does (no address
+   beside the QR code; the office does not pass results on). The steps are one text
+   (`src/lib/entry-test/guide.ts`) for the page and the mail. With a sitting (`?sitting=`) the page
+   carries that test's day, classes, code and QR code.
+   **„E-Mail an Lehrkräfte"** (`day/tests/mail?date=`, from the tests page, the Tagesplan's card, a
+   test's panel and the guide) is one mail for a start day, a few days ahead with the course start
+   mails: the office's text, every test with its classes, code and QR code, then the guide. The page
+   lists the next start days; who gets it (the day's teachers of those classes, ticked, with any further
+   address; a teacher without an address on record is named); the subject and text; and on the right
+   the mail as it will arrive, built by the same function as the mail sent (`teacherMailHtml`),
+   at computer or phone width. „Senden" asks first, opens any test not opened yet (so every code goes
+   out), and sends through Microsoft Graph from `FORM_MAIL_FROM` with the logo and each QR code as
+   inline pictures (`qrPng`, `src/lib/qr-png.ts`); answers go to the colleague who sent it. It reaches
+   the teachers while the form mails are still in test mode (Rahman, 2026-10-22: an internal mail, sent
+   on purpose). Each mail as sent is kept in `entry_test_mails` (0084) and listed under „Gesendet". A
+   laptop without the Container App's identity cannot send.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
    per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
    notes, and the average; the Excel keeps every answer.

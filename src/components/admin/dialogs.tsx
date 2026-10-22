@@ -155,13 +155,16 @@ export function ConfirmSubmit({
   confirmLabel,
   variant = 'danger',
   size = 'sm',
+  disabled = false,
 }: {
   children: ReactNode;
   title: string;
   description: string;
   confirmLabel?: string;
-  variant?: 'danger' | 'secondary' | 'ghost';
+  /** `primary` for a confirmed action that is the screen's one (sending a mail). */
+  variant?: 'danger' | 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md';
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
@@ -186,7 +189,7 @@ export function ConfirmSubmit({
         variant={variant}
         size={size}
         onClick={() => setOpen(true)}
-        disabled={sending}
+        disabled={sending || disabled}
         aria-haspopup="dialog"
         data-dialog="confirm"
       >

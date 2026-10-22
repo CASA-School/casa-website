@@ -2,8 +2,8 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { LOGO_CONTENT_ID, LOGO_PNG_BASE64 } from './casa-logo';
 import { buildConfirmationMail, buildFormMail, type FormKind } from './form-mail';
+import { graphSender, sendGraphMail } from './graph-mail.server';
 
 export type { FormKind };
 export const TEST_FORM_RECIPIENT = 'admin@casa-bremen.de';
@@ -37,66 +37,6 @@ function replyToFor(payload: Record<string, unknown>) {
     .map((part) => part.trim())
     .join(' ');
   return [{ emailAddress: name ? { address, name } : { address } }];
-}
-
-type GraphMessage = {
-  to: string;
-  subject: string;
-  html: string;
-  replyTo?: { emailAddress: { address: string; name?: string } }[];
-  /** Keep a copy in the sender's Sent Items. Staff alerts do; a confirmation does not. */
-  saveToSentItems?: boolean;
-};
-
-/** The sender mailbox, when Microsoft Graph mail is configured at all. */
-function graphSender() {
-  const from = process.env.FORM_MAIL_FROM;
-  return from && z.email().safeParse(from).success && process.env.IDENTITY_ENDPOINT && process.env.IDENTITY_HEADER
-    ? from
-    : null;
-}
-
-/** Sends one message from `from` through Graph with the managed identity. Throws on any failure. */
-async function sendGraphMail(from: string, message: GraphMessage) {
-  const tokenUrl = new URL(process.env.IDENTITY_ENDPOINT!);
-  tokenUrl.searchParams.set('resource', 'https://graph.microsoft.com/');
-  tokenUrl.searchParams.set('api-version', '2019-08-01');
-  if (process.env.FORM_MAIL_IDENTITY_CLIENT_ID) {
-    tokenUrl.searchParams.set('client_id', process.env.FORM_MAIL_IDENTITY_CLIENT_ID);
-  }
-  const tokenResponse = await fetch(tokenUrl, {
-    headers: { 'X-IDENTITY-HEADER': process.env.IDENTITY_HEADER! },
-    signal: AbortSignal.timeout(8000), cache: 'no-store',
-  });
-  if (!tokenResponse.ok) throw new Error('Mail identity unavailable');
-  const token = await tokenResponse.json() as { access_token?: string };
-  if (!token.access_token) throw new Error('Mail identity returned no token');
-  const response = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(from)}/sendMail`, {
-    method: 'POST',
-    headers: { authorization: `Bearer ${token.access_token}`, 'content-type': 'application/json' },
-    body: JSON.stringify({
-      message: {
-        subject: message.subject,
-        body: { contentType: 'HTML', content: message.html },
-        // The logo travels with the mail and is referenced as cid:, so no
-        // client blocks it as a remote image.
-        attachments: [{
-          '@odata.type': '#microsoft.graph.fileAttachment',
-          name: 'casa-logo.png',
-          contentType: 'image/png',
-          contentId: LOGO_CONTENT_ID,
-          isInline: true,
-          contentBytes: LOGO_PNG_BASE64,
-        }],
-        toRecipients: [{ emailAddress: { address: message.to } }],
-        ...(message.replyTo ? { replyTo: message.replyTo } : {}),
-      },
-      saveToSentItems: message.saveToSentItems ?? true,
-    }),
-    signal: AbortSignal.timeout(8000),
-  });
-  // Accepted for sending by Exchange; inbox delivery must be verified separately.
-  if (response.status !== 202) throw new Error('Microsoft rejected the message');
 }
 
 /**

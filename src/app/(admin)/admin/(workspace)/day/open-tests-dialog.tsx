@@ -17,7 +17,7 @@ import { ENTRY_TESTS } from '@/lib/entry-test/tests';
  * yet — all of them at once, or the ones ticked — on the day or ahead of it (`when` names the day then). A
  * course's test is its session's sitting, so ticking one course opens it for the other courses of that test.
  */
-export function OpenTestsDialog({ tests, day, when, from }: { tests: DayEntryTest[]; day: string; when?: string; from: 'day' | 'tests' }) {
+export function OpenTestsDialog({ tests, day, when, from }: { tests: DayEntryTest[]; day: string; when?: string; from: 'day' | 'tests' | 'mail' }) {
   const { t, lang } = useWsLang();
   const waiting = tests.filter((x) => (!x.sitting || x.sitting.state === 'closed') && x.classes.length);
   const ids = waiting.flatMap((x) => x.classes.map((c) => c.dayId));
