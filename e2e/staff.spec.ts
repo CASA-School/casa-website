@@ -224,16 +224,4 @@ test.describe('staff register', () => {
     await page.goto('/admin/staff?view=former');
     await expect(page.locator('main')).toContainText('Erika Personaltest');
   });
-
-  test('Kursplanung adds a teacher and opens their rules', async ({ page }) => {
-    await page.goto('/admin/kursplanung/lehrkraefte');
-    await page.getByRole('button', { name: 'Lehrkraft anlegen' }).click();
-    const dialog = page.getByRole('dialog');
-    await dialog.getByLabel('Vorname').fill('Moritz');
-    await dialog.getByLabel('Nachname').fill('Personaltest');
-    await expect(dialog.getByLabel('Unterricht')).toBeChecked();
-    await dialog.getByRole('button', { name: 'Anlegen' }).click();
-    await expect(page).toHaveURL(/\/admin\/kursplanung\/lehrkraefte\?teacher=[0-9a-f-]{36}$/);
-    await expect(page.getByRole('dialog')).toContainText('Moritz Personaltest');
-  });
 });

@@ -156,20 +156,19 @@ test.describe('kursplanung', () => {
     }
   });
 
-  test('Kurse and Lehrkräfte render, and the teacher dialog opens from the URL', async ({ page }) => {
+  test('Kurse renders, and an old link to the teacher list lands on the staff register', async ({ page }) => {
     await page.goto(`/admin/kursplanung/kurse?month=${month}`);
     await expect(page.getByRole('heading', { name: 'Kursplanung' })).toBeVisible();
     await expect(page.getByText('Alle Gruppen aus ihren Paaren belegen').first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Lehrkräfte', exact: true })).toHaveCount(0);
 
-    const { rows } = await client.query<{ id: string; full_name: string }>(
-      `SELECT s.id, btrim(p.first_name || ' ' || coalesce(p.last_name, '')) AS full_name
-         FROM staff_members s JOIN people p ON p.id = s.person_id
+    const { rows } = await client.query<{ id: string }>(
+      `SELECT s.id FROM staff_members s
         WHERE s.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = s.id AND r.role_code = 'teaching')
         ORDER BY s.short_name LIMIT 1`
     );
     test.skip(rows.length === 0, 'no teachers');
     await page.goto(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${rows[0].id}`);
-    await expect(page.getByRole('dialog')).toContainText(rows[0].full_name);
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/admin/staff/${rows[0].id}\\?tab=teaching$`));
   });
 });

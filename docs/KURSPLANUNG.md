@@ -62,7 +62,7 @@ Interactions, all of them: drag a piece from the tray onto a socket (it lays dow
 days as it has left, `Mo–Mi` in one move); or click the piece (pick-up mode) and click a socket; click an
 open socket for a dropdown grouped by fit (Stamm/Vorschlag first, then free, other level, other shift as
 substitute, unavailable with reason); click a placed piece for its actions (Vertretung, unbestätigt,
-extend to the group's free days, details, remove, and `Ersatz finden` when the teacher has since become
+extend to the group's free days, open the teacher's page, remove, and `Ersatz finden` when the teacher has since become
 absent); drag the handle to change a piece's days; drag a piece to another column to move it; drag it
 into another week to copy it; ⌘Z / Rückgängig; "Woche übernehmen →" copies the active week forward.
 
@@ -91,11 +91,14 @@ after the morning had moved on to `.2`.
 ## The staff register (2026-10-17, migration 0039)
 
 The board's teacher list is no longer its own table: a teacher is a colleague on the staff register
-(`/admin/staff`, docs/ADMIN_WORKSPACE.md §Staff) with the role Unterricht. Their planning rules are
-edited here (Details) or on their page (Unterricht); their name, contact, contract and absences live
-on the register. „Lehrkraft anlegen" on Lehrkräfte creates the colleague with the role ticked and
-comes back with their Details open (needs `staff` at `edit` as well). A name on Lehrkräfte opens the
-colleague's page for those who hold `staff`. `scripts/kursplanung/import-bridge.mjs` writes a person,
+(`/admin/staff`, docs/ADMIN_WORKSPACE.md §Staff) with the role Unterricht. **Their planning rules —
+shifts, days, weekdays, levels — and their absences are changed only there** (the register's view
+Lehrkräfte, `?view=teaching`, and their page's tab Unterricht), with their name, contact and contract
+(Rahman, 2026-10-22: less on the board). Kursplanung's own Lehrkräfte tab and teacher dialog are gone;
+an old link to it lands on the register (`/admin/kursplanung/lehrkraefte` redirects). On the board,
+„Lehrkraft öffnen" in a piece's menu opens the colleague's page for those who hold `staff`, and the
+tray shows a piece's name, V+N and free days, not its levels: which columns fit shows when it is
+picked up. `scripts/kursplanung/import-bridge.mjs` writes a person,
 a staff row, the role and the contract for a teacher it does not know. SchoolMan's staff import
 (2026-10-17) brought five teachers the board had not had; they start with the default rules (morning,
 five days, no levels) until the planners set theirs.
@@ -191,13 +194,12 @@ src/app/(admin)/admin/(focus)/
   kursplanung/page.tsx     loads the month, renders the board
   kursplanung/actions.ts   saveWeekAction — the one write, whole shift-week at a time
   kursplanung/board.tsx    the board ('use client'), board.module.css its look; it renders the title row itself
-  kursplanung/header.tsx   the title row: Kursplanung · month dropdown (month-picker.tsx) · Puzzle / Kurse / Lehrkräfte
+  kursplanung/header.tsx   the title row: Kursplanung · month dropdown (month-picker.tsx) · Puzzle / Kurse
   kursplanung/ui.module.css   the module's chrome — title row, tabs, .sel dropdowns, pills, tables, rows, dialog form
   kursplanung/kurse/       groups per shift; the pair, TN and Kurs-ID are edited in the row and save themselves
                            (auto-save-row.tsx: a dropdown on change, a field when left; one form per row, named via form=)
-  kursplanung/lehrkraefte/ the teaching staff in rows per shift; Details opens the dialog (?teacher=<id> opens it on arrival)
-  kursplanung/teacher-form.tsx   the dialog form (pills, absence rows); parsed by lib/admin/kursplanung/forms.ts
-  lib/admin/kursplanung/colours.ts   the level tints, shared by board, Kurse, Lehrkräfte and the dialog
+  kursplanung/lehrkraefte/ an old link's redirect to the staff register (the tab was removed 2026-10-22)
+  lib/admin/kursplanung/colours.ts   the level tints, shared by board and Kurse
 scripts/kursplanung/import-bridge.mjs   loads the tables from the analytics bridge's JSON
 ```
 
@@ -228,8 +230,8 @@ into these tables; write back only after a `WebIntake` account exists.
 `scripts/admin/check-routes.mjs` does — a session row plus the cookie, no password — and drives the board and the
 two screens. Three tests: a placed piece survives a reload and is taken back through the piece menu; a save against a
 week a colleague changed meanwhile (a row inserted straight into the database after the page loaded) is refused, undone
-on the board, writes nothing, and goes through after `Neu laden`; Kurse renders and the teacher dialog opens from
-`?teacher=`. Open sockets carry `data-group`, `data-week`, `data-date` and `data-row`, pieces `data-group`, `data-week`
+on the board, writes nothing, and goes through after `Neu laden`; Kurse renders and an old link to the teacher list
+lands on the colleague's page. Open sockets carry `data-group`, `data-week`, `data-date` and `data-row`, pieces `data-group`, `data-week`
 and `data-row` — those are the test hooks, and the resize handle uses the same attributes. Every test removes what it
 wrote (anything in the touched groups newer than its start), so the plan is left as found. Run it with its own port:
 `E2E_PORT=3017 npx playwright test e2e/kursplanung.spec.ts`. `npm run admin:check` covers the three routes.

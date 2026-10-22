@@ -34,7 +34,6 @@ const GUARDED_PATHS = [
   '/admin/settings/prices',
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
-  '/admin/kursplanung/lehrkraefte',
 ];
 
 /** Text that only ever appears once a request is authenticated. */
