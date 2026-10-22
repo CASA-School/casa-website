@@ -200,7 +200,7 @@ export async function unmergeLessonAction(formData: FormData): Promise<void> {
  * goes back to the day with its message.
  */
 
-/** Opens a session's test for the phones, on the day itself (the phones see only today's). */
+/** Opens a session's test, on the day or ahead of it (the phones see only today's). */
 export async function openEntryTestAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
   const day = dayOf(formData);
@@ -208,24 +208,25 @@ export async function openEntryTestAction(formData: FormData): Promise<void> {
   const test = formData.get('test');
   if (!day || (session !== 'morning' && session !== 'afternoon') || !isEntryTestId(test)) throw new Error('Invalid test');
   const { lang } = await getI18n();
-  if (day !== berlinDay(new Date())) fail(back(day), pick(lang, { de: 'Ein Test öffnet nur an seinem Tag.', en: 'A test opens on its own day only.' }));
+  if (day < berlinDay(new Date())) fail(back(day), pick(lang, { de: 'Ein vergangener Test lässt sich nicht mehr öffnen.', en: 'A past test can no longer be opened.' }));
   const result = await openEntryTest({ day, session, test, minutes: Number(formData.get('minutes') ?? 0) }, actor);
   if (!result.ok) fail(back(day), pick(lang, result.reason));
   revalidatePath('/admin/day');
 }
 
 /**
- * „Tests öffnen" on the Tagesplan's card and the tests page: on the first day of an intensive start, every
- * course's test at once or the chosen courses' (Rahman, 2026-10-22).
+ * „Tests öffnen" on the Tagesplan's card and the tests page: an intensive start's courses, every one or
+ * the chosen ones, on the day or ahead of it (Rahman, 2026-10-22).
  */
 export async function openEntryTestsAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
-  const to = formData.get('from') === 'tests' ? '/admin/day/tests' : back(berlinDay(new Date()));
+  const day = dayOf(formData) ?? berlinDay(new Date());
+  const to = formData.get('from') === 'tests' ? '/admin/day/tests' : back(day);
   const chosen = formData.get('scope') === 'chosen';
   const dayIds = formData.getAll('dayId').map(String).filter((id) => UUID.test(id));
   const { lang } = await getI18n();
   if (chosen && !dayIds.length) fail(to, pick(lang, { de: 'Bitte wähle mindestens einen Kurs.', en: 'Please choose at least one course.' }));
-  const result = await openEntryTests(chosen ? dayIds : 'all', Number(formData.get('minutes') ?? 0), actor);
+  const result = await openEntryTests(day, chosen ? dayIds : 'all', Number(formData.get('minutes') ?? 0), actor);
   if (!result.ok) fail(to, pick(lang, result.reason));
   revalidatePath('/admin/day');
   redirect(to);

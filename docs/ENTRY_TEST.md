@@ -67,15 +67,15 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    Tagesplan opens the archive (`/admin/day/tests`): every test day, the latest first, each test opening
    the same panel — results, answers, log, the Excel and the PDF of the sitting or the day, a paper
    booklet typed in late. A deletion period comes later; days are the unit it will drop.
-8. **Tests öffnen** (Rahman, 2026-10-22). Only on the first day of an intensive start — a level begins
-   once a month in the morning and once in the afternoon, so on a morning start only the morning's A2,
-   B1 and B1+ courses write the test. The Tagesplan's card and the archive page carry „Tests öffnen" that
-   day (`dayEntryTests()`: the course's first lesson day, the level's first part): all the courses whose
-   test is not open yet, or the ones ticked („Ausgewählte Kurse", „Alle auswählen"), and the minutes.
-   `openEntryTests()` opens one sitting per test and session; a course of the same test shares it. A
-   test already open is left as it is. The per-test „Test öffnen" in its panel stays. The Tagesplan's link
-   „Einstufungstests" (archive, booklets, QR codes) shows only on such a day. The old „Heute
-   öffnen" for a class on a later day (a late joiner) is gone.
+8. **Tests öffnen** (Rahman, 2026-10-22). A level begins once a month in the morning and once in the
+   afternoon, so on a morning start only the morning's A2, B1 and B1+ courses write the test
+   (`dayEntryTests()`: the course's first lesson day, the level's first part). The tests page offers
+   „Tests öffnen · Mo., 26. Okt." for the next start (`nextEntryTestDay()`), the Tagesplan's card on that
+   day: every course whose test is not open yet, or the ones ticked („Ausgewählte Kurse", „Alle
+   auswählen"), and the minutes. `openEntryTests()` makes one sitting per test and session, shared by its
+   courses. Opened ahead of its day a test is „Bereit" with its code, so the teachers can have it, and the
+   phones see it only on that day (they read today's sittings). A test already open or ready is left as
+   it is; the per-test „Test öffnen" in its panel stays. The old „Heute öffnen" for a later day is gone.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
    per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
    notes, and the average; the Excel keeps every answer.

@@ -5,7 +5,7 @@ import { Icon } from '@/components/admin/icons';
 import { ButtonLink, Card, EmptyState, PageHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { berlinDay } from '@/lib/admin/days';
-import { archivePastSittings, dayEntryTests, entryTestDays, entryTestOrigin, entryTestViews } from '@/lib/admin/entry-tests';
+import { archivePastSittings, dayEntryTests, entryTestDays, entryTestOrigin, entryTestViews, nextEntryTestDay } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
@@ -14,8 +14,8 @@ import { ENTRY_TEST_IDS, ENTRY_TESTS } from '@/lib/entry-test/tests';
  * The day-one tests' archive (Rahman, 2026-10-20: once the day is over, its tests are archived): every
  * test day, the latest first, each test opening the same panel as on its day — results, answers, the
  * Excel, a paper booklet typed in late. Above them, per test, the booklets and QR codes to print ahead of a
- * start; and on the first day of an intensive start „Tests öffnen": every A2, B1 and B1+ course's test, or
- * the chosen ones' (Rahman, 2026-10-22).
+ * start; and „Tests öffnen" for the next intensive start, on its day or ahead of it: every A2, B1 and B1+
+ * course's test, or the chosen ones' (Rahman, 2026-10-22).
  * A deletion period comes later (docs/ENTRY_TEST.md).
  */
 export default async function EntryTestArchivePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -25,8 +25,9 @@ export default async function EntryTestArchivePage({ searchParams }: { searchPar
   const today = berlinDay(new Date());
   const archive = await Promise.all(days.map(async (day) => ({ day, tests: (await entryTestViews(day, origin)).filter((test) => test.sitting) })));
   const canEdit = canAccess(user, 'day', 'edit');
-  // „Tests öffnen" only on the first day of an intensive start: the day's tests, when it has any.
-  const todayTests = canEdit ? await dayEntryTests(today) : [];
+  // „Tests öffnen" for the next intensive start, today or ahead of it, so the codes are ready.
+  const testDay = canEdit ? await nextEntryTestDay(today) : null;
+  const startTests = testDay ? await dayEntryTests(testDay) : [];
 
   return (
     <>
@@ -34,7 +35,16 @@ export default async function EntryTestArchivePage({ searchParams }: { searchPar
         backHref="/admin/day"
         backLabel={t('Tagesplan', 'Day plan')}
         title={t('Einstufungstests', 'Placement tests')}
-        actions={todayTests.length ? <OpenTestsDialog tests={todayTests} from="tests" /> : null}
+        actions={
+          testDay && startTests.length ? (
+            <OpenTestsDialog
+              tests={startTests}
+              day={testDay}
+              when={testDay === today ? undefined : dayLabel(testDay, lang, { weekday: 'short', day: 'numeric', month: 'short' })}
+              from="tests"
+            />
+          ) : null
+        }
       />
 
       {params.error ? (
@@ -76,7 +86,6 @@ export default async function EntryTestArchivePage({ searchParams }: { searchPar
               heading={dayLabel(day, lang, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               tests={tests}
               day={day}
-              isToday={day === today}
               archived={day < today}
               canEdit={canEdit}
               canDelete={canAccess(user, 'day', 'full')}

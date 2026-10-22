@@ -13,13 +13,13 @@ import { pick } from '@/lib/admin/i18n';
 import { DEFAULT_MINUTES } from '@/lib/entry-test/tests';
 
 /**
- * „Tests öffnen" (Rahman, 2026-10-22): on the first day of an intensive start, the day's A2, B1 and B1+
- * courses whose test is not open yet — all of them at once, or the ones ticked. A course's test is its
- * session's sitting, so ticking one course opens it for the other courses of that test too.
+ * „Tests öffnen" (Rahman, 2026-10-22): an intensive start's A2, B1 and B1+ courses whose test is not open
+ * yet — all of them at once, or the ones ticked — on the day or ahead of it (`when` names the day then). A
+ * course's test is its session's sitting, so ticking one course opens it for the other courses of that test.
  */
-export function OpenTestsDialog({ tests, from }: { tests: DayEntryTest[]; from: 'day' | 'tests' }) {
+export function OpenTestsDialog({ tests, day, when, from }: { tests: DayEntryTest[]; day: string; when?: string; from: 'day' | 'tests' }) {
   const { t, lang } = useWsLang();
-  const waiting = tests.filter((x) => x.sitting?.state !== 'open' && x.classes.length);
+  const waiting = tests.filter((x) => (!x.sitting || x.sitting.state === 'closed') && x.classes.length);
   const ids = waiting.flatMap((x) => x.classes.map((c) => c.dayId));
   const [scope, setScope] = useState<'all' | 'chosen'>('all');
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
@@ -52,9 +52,17 @@ export function OpenTestsDialog({ tests, from }: { tests: DayEntryTest[]; from: 
   const box = 'size-4 shrink-0 rounded border-ws-line-firm accent-[var(--casa-accent-surface)]';
 
   return (
-    <FormDialog trigger={t('Tests öffnen', 'Open tests')} triggerVariant="primary" title={t('Tests öffnen', 'Open tests')} icon={Icon.placement} tint="blue" width="md">
+    <FormDialog
+      trigger={when ? t(`Tests öffnen · ${when}`, `Open tests · ${when}`) : t('Tests öffnen', 'Open tests')}
+      triggerVariant="primary"
+      title={when ? t(`Tests öffnen · ${when}`, `Open tests · ${when}`) : t('Tests öffnen', 'Open tests')}
+      icon={Icon.placement}
+      tint="blue"
+      width="md"
+    >
       <form action={openEntryTestsAction} className="grid gap-4">
         <input type="hidden" name="from" value={from} />
+        <input type="hidden" name="day" value={day} />
         <div role="radiogroup" aria-label={t('Kurse', 'Courses')} className="grid grid-cols-2 gap-0.5 rounded-xl bg-ws-sunk p-0.5">
           <label className={option}>
             <input type="radio" name="scope" value="all" checked={scope === 'all'} onChange={() => setScope('all')} className="sr-only" />

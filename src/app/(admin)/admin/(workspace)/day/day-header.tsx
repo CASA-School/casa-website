@@ -47,7 +47,6 @@ export function DayHeader({
   openByDay,
   lessons,
   flats,
-  tests,
   t,
   lang,
 }: {
@@ -58,8 +57,6 @@ export function DayHeader({
   lessons: number;
   /** Who lives in which room of the CASA flats, for whoever works the accommodation. */
   flats?: boolean;
-  /** The day-one tests, only on the first day of an intensive start (Rahman, 2026-10-22). */
-  tests?: boolean;
   t: T;
   lang: WsLang;
 }) {
@@ -150,12 +147,10 @@ export function DayHeader({
         })}
       </nav>
       <span className="flex flex-wrap gap-2">
-        {tests ? (
-          <Link href="/admin/day/tests" className={pill}>
-            {Icon.placement}
-            {t('Einstufungstests', 'Placement tests')}
-          </Link>
-        ) : null}
+        <Link href="/admin/day/tests" className={pill}>
+          {Icon.placement}
+          {t('Einstufungstests', 'Placement tests')}
+        </Link>
         {flats ? (
           <Link href={`/admin/accommodation/occupancy?date=${day}`} className={pill}>
             {Icon.home}
