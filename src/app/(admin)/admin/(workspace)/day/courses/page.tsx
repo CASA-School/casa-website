@@ -2,6 +2,7 @@ import { DayHeader, pickDay, weekOf } from '../day-header';
 import { CoursesTable } from './courses-table';
 import { dayLessons, lessonChoices, openTasksByDay } from '@/lib/admin/day-plan';
 import { canAccess } from '@/lib/admin/access';
+import { hasEntryTests } from '@/lib/admin/entry-tests';
 import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -17,15 +18,16 @@ export default async function DayCoursesPage({ searchParams }: { searchParams: P
   const week = weekOf(day);
   const canTeacher = canAccess(user, 'kursplanung', 'edit');
   const canRoom = canAccess(user, 'rooms', 'edit');
-  const [lessons, openByDay, choices] = await Promise.all([
+  const [lessons, openByDay, choices, tests] = await Promise.all([
     dayLessons(day),
     openTasksByDay(week[0], week[6]),
     canTeacher || canRoom ? lessonChoices(day) : Promise.resolve(null),
+    hasEntryTests(day),
   ]);
   const back = day === today ? '/admin/day/courses' : `/admin/day/courses?date=${day}`;
   return (
     <>
-      <DayHeader view="courses" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} t={t} lang={lang} />
+      <DayHeader view="courses" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={tests} t={t} lang={lang} />
       <CoursesTable day={day} lessons={lessons} editing={choices ? { choices, canTeacher, canRoom, back } : undefined} />
     </>
   );

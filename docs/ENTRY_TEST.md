@@ -77,6 +77,8 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    courses. Opened ahead of its day a test is „Bereit" with its code, so the teachers can have it, and the
    phones see it only on that day (they read today's sittings). A test already open or ready is left as
    it is; the per-test „Test öffnen" in its panel stays. The old „Heute öffnen" for a later day is gone.
+   The Tagesplan's link „Einstufungstests" (archive, booklets, QR codes, guide, mail) shows only on a
+   start day, as its card does (Rahman, 2026-10-22); to prepare ahead, choose the start day there.
 8a. **The teachers' guide and mail** (Rahman, 2026-10-22). „Leitfaden für Lehrkräfte" on the tests
    page (`day/tests/guide`) is the guide, one A4 page: each test's time, then preparing, starting,
    during, after, the results — replacing the Google version's „Leitfaden zur Durchführung", whose
