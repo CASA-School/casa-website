@@ -47,6 +47,7 @@ export default async function KursplanungPage({
       month={month}
       today={planToday()}
       canWrite={canAccess(user, 'kursplanung', 'edit')}
+      canSeeStaff={canAccess(user, 'staff')}
       header={<HeaderStart active="puzzle" month={month} months={months} />}
       notice={notice}
     />

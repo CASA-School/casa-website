@@ -8,16 +8,16 @@ import { MonthPicker } from './month-picker';
 import ui from './ui.module.css';
 
 /**
- * The module's top row: the title, the month, the three tabs — then whatever
+ * The module's top row: the title, the month, the two tabs — then whatever
  * the screen puts at the right (the board its undo and copy buttons, Kurse the
  * next-month button) and the outcome of the last form.
  *
  * Split in two so the board, a client component, can lay its own buttons in
  * the same row: it receives `HeaderStart` as a node and renders the row itself.
- * The tabs are one job seen from three sides, and the month travels with them
+ * The tabs are one job seen from two sides, and the month travels with them
  * so nobody lands on a different month than the one they were planning.
  */
-type Active = 'puzzle' | 'kurse' | 'lehrkraefte';
+type Active = 'puzzle' | 'kurse';
 type Notice = { ok?: string; error?: string };
 
 export async function HeaderStart({ active, month, months }: { active: Active; month: string; months: readonly string[] }) {
@@ -27,7 +27,6 @@ export async function HeaderStart({ active, month, months }: { active: Active; m
   const tabs = [
     { key: 'puzzle' as const, label: 'Puzzle', href: `/admin/kursplanung${q}` },
     { key: 'kurse' as const, label: t('Kurse', 'Courses'), href: `/admin/kursplanung/kurse${q}` },
-    { key: 'lehrkraefte' as const, label: t('Lehrkräfte', 'Teachers'), href: `/admin/kursplanung/lehrkraefte${q}` },
   ];
   return (
     <>

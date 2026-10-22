@@ -9,7 +9,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
-import { fromFormData, parseGroupForm, parseTeacherForm } from '@/lib/admin/kursplanung/forms';
+import { fromFormData, parseGroupForm } from '@/lib/admin/kursplanung/forms';
 import { assignmentsFromPairs } from '@/lib/admin/kursplanung/pairs';
 import {
   addGroup,
@@ -22,14 +22,12 @@ import {
   loadPlan,
   planWeeks,
   removeGroupIfEmpty,
-  replaceTeacherAbsences,
   replaceWeekAssignments,
   updateGroup,
-  updateTeacherRules,
 } from '@/lib/admin/kursplanung/repo';
 import { SHIFTS, isLevel, isShift, levelName } from '@/lib/admin/kursplanung/types';
 import { validateWeekAssignments } from '@/lib/admin/kursplanung/week';
-import { addDays, nextMonth } from '@/lib/admin/kursplanung/weeks';
+import { nextMonth } from '@/lib/admin/kursplanung/weeks';
 
 /**
  * The board's one write.
@@ -146,25 +144,7 @@ function back(formData: FormData, message: string, kind: 'error' | 'ok'): never 
   redirect(`${path}?${params}`);
 }
 
-const revalidateAll = () => ['/admin/kursplanung', '/admin/kursplanung/kurse', '/admin/kursplanung/lehrkraefte'].forEach((p) => revalidatePath(p));
-
-export async function saveTeacherAction(formData: FormData): Promise<void> {
-  const user = await requireModule('kursplanung', 'edit');
-  const { t, lang } = await getI18n();
-  const teacherId = String(formData.get('teacherId') ?? '');
-  const month = String(formData.get('month') ?? '');
-  if (!UUID.test(teacherId) || !MONTH.test(month)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
-
-  const weeks = await planWeeks(month);
-  const parsed = parseTeacherForm(fromFormData(formData), teacherId, weeks);
-  if (!parsed.ok) back(formData, pick(lang, parsed.error), 'error');
-
-  await updateTeacherRules(teacherId, parsed.rules);
-  await replaceTeacherAbsences(teacherId, weeks[0].start, addDays(weeks[weeks.length - 1].start, 7), parsed.absences, user.id);
-  await logActivity({ actor: user, entity: 'kursplanung.teacher', entityId: teacherId, action: 'rules.saved', detail: { month, absences: parsed.absences.length, daysPerWeek: parsed.rules.daysPerWeek } });
-  revalidateAll();
-  back(formData, t(`${parsed.rules.shortName} gespeichert.`, `${parsed.rules.shortName} saved.`), 'ok');
-}
+const revalidateAll = () => ['/admin/kursplanung', '/admin/kursplanung/kurse'].forEach((p) => revalidatePath(p));
 
 export async function saveGroupAction(formData: FormData): Promise<void> {
   const user = await requireModule('kursplanung', 'edit');

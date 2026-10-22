@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react';
 
@@ -55,6 +54,7 @@ export function Board({
   month,
   today,
   canWrite,
+  canSeeStaff,
   header,
   notice,
 }: {
@@ -63,6 +63,8 @@ export function Board({
   /** Today in Bremen: the board opens on its week when the month holds it. */
   today: string;
   canWrite: boolean;
+  /** A teacher's levels, shifts and absences are changed on their page in Mitarbeitende, not here (2026-10-22). */
+  canSeeStaff: boolean;
   /** The module's title, month and tabs — the board lays its own buttons beside them. */
   header: ReactNode;
   notice?: { ok?: string; error?: string };
@@ -87,6 +89,7 @@ export function Board({
   const [stale, setStale] = useState(false);
   const [showOther, setShowOther] = useState(false);
   const [showFull, setShowFull] = useState(false);
+  const [showSpare, setShowSpare] = useState(false);
   const [help, setHelp] = useState(false);
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
@@ -398,14 +401,14 @@ export function Board({
   const st = statsFor(shown);
 
   const tray = useMemo(() => {
-    if (!week) return { avail: [], other: [], away: [], full: [] };
+    if (!week) return { avail: [], spare: [], other: [], away: [], full: [] };
     const rows = ctx.teachers.filter((t) => t.isActive).map((t) => ({ t, ...remainingDays(ctx, t, week.start), own: t.shifts.includes(shift) }));
-    // Most days left first; a colleague with no level listed (SchoolMan's teachers who never teach an
-    // intensive class) after everyone who has one.
-    const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) =>
-      Number(!a.t.levels.length) - Number(!b.t.levels.length) || b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
+    const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) => b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
+    const free = rows.filter((x) => x.own && x.rest > 0 && !x.awayAll);
     return {
-      avail: rows.filter((x) => x.own && x.rest > 0 && !x.awayAll).sort(byRest),
+      avail: free.filter((x) => x.t.levels.length).sort(byRest),
+      // No level listed: SchoolMan's teachers who never teach an intensive class. Folded, like the other shift.
+      spare: free.filter((x) => !x.t.levels.length).sort(byRest),
       other: rows.filter((x) => !x.own && x.rest > 0 && !x.awayAll).sort(byRest),
       away: rows.filter((x) => x.own && x.awayAll),
       full: rows.filter((x) => x.own && x.rest <= 0 && !x.awayAll),
@@ -498,7 +501,7 @@ export function Board({
             ? row(t('Bestätigen', 'Confirm'), () => toggleFlag(g.id, m.dates, 'isTentative'))
             : row(t('Als unbestätigt markieren', 'Mark as unconfirmed'), () => toggleFlag(g.id, m.dates, 'isTentative'))}
           {free.length ? row(t(`Auf ${free.map(day).join(', ')} ausdehnen`, `Extend to ${free.map(day).join(', ')}`), () => extendRun(g, a, wk)) : null}
-          {row(t('Lehrkraft-Details', 'Teacher details'), () => router.push(`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${a.teacherId}`))}
+          {canSeeStaff ? row(t('Lehrkraft öffnen', 'Open teacher'), () => router.push(`/admin/staff/${a.teacherId}?tab=teaching`)) : null}
           {row(t(`Aus KW ${wk.kw} entfernen`, `Remove from KW ${wk.kw}`), () => removeDates(g.id, m.dates), styles.mrDel)}
         </div>
       </div>
@@ -506,7 +509,7 @@ export function Board({
   };
 
   const trayPiece = (x: { t: Teacher; rest: number; used: number; max: number; awayAll: boolean }, off: boolean) => {
-    const flex = x.t.shifts.length > 1, hon = x.t.contract === 'freelance', inHand = hand === x.t.id;
+    const flex = x.t.shifts.length > 1, inHand = hand === x.t.id;
     const pick = () => setHand(inHand ? null : x.t.id);
     return (
       <div
@@ -523,12 +526,11 @@ export function Board({
         title={`${x.t.fullName}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
-        <span>{inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : null} {flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null} {hon ? <span className={styles.sh}>{t('HON', 'FL')}</span> : null} <Link href={`/admin/kursplanung/lehrkraefte?month=${month}&teacher=${x.t.id}`} className={styles.more} title={t('Details: Schicht, Tage, Niveaus, Abwesenheiten', 'Details: shift, days, levels, absences')} aria-label={t(`Details zu ${x.t.shortName}`, `Details for ${x.t.shortName}`)} onClick={(e) => e.stopPropagation()} draggable={false}>···</Link></span>
+        <span>{inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : null} {flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null}</span>
         <span className={styles.bl}>
           <span className={styles.blocks} aria-hidden="true">{Array.from({ length: x.max }, (_, i) => <i key={i} className={i < x.max - x.rest ? 'u' : ''} />)}</span>
           <span className={styles.cnt}>{x.awayAll ? t('abwesend', 'absent') : x.rest > 0 ? t(`${x.rest} von ${x.max} Tagen frei`, `${x.rest} of ${x.max} days free`) : t(`alle ${x.max} Tage verplant`, `all ${x.max} days planned`)}</span>
         </span>
-        <span className={styles.lvs}>{x.t.levels.map((L) => <i key={L} className={styles.lvChip} style={lvStyle(L)}>{L}</i>)}</span>
       </div>
     );
   };
@@ -700,17 +702,20 @@ export function Board({
 
         <aside className={styles.tray} onClick={(e) => e.stopPropagation()}>
           <section className={styles.card}>
-            <div className={styles.cardHead}><h2>{t('Teile', 'Pieces')}</h2><span className="sub">{t(`wer in KW ${week.kw} noch Tage frei hat`, `who still has days free in KW ${week.kw}`)}</span><button type="button" className={styles.qm} aria-pressed={help} aria-label={t('Erklärung', 'Explanation')} onClick={() => setHelp(!help)}>?</button></div>
+            <div className={styles.cardHead}><h2>{t('Teile', 'Pieces')}</h2><span className="sub">KW {week.kw}</span><button type="button" className={styles.qm} aria-pressed={help} aria-label={t('Erklärung', 'Explanation')} onClick={() => setHelp(!help)}>?</button></div>
             {help ? (
               <div className={styles.help}>
-                {t('Jede Lehrkraft ist ein Teil. Die Blöcke sind ihre freien Tage in dieser Woche, die Chips die Niveaus, in denen sie unterrichtet.', 'Each teacher is a piece. The blocks are their free days this week, the chips the levels they teach.')}
+                {t('Jede Lehrkraft ist ein Teil. Die Blöcke sind ihre freien Tage in dieser Woche.', 'Each teacher is a piece. The blocks are their free days this week.')}
                 <br />
                 {t('Teil auf ein Fach ziehen – oder Teil antippen (es ist dann „in der Hand“) und ein Fach antippen. Es legt ab dort so viele Tage, wie es frei hat.', 'Drag a piece onto a slot – or tap the piece (it is then “in hand”) and tap a slot. It fills as many days from there as it has free.')}
                 <br />
                 {t('Spalten mit passendem Niveau leuchten auf, unpassende werden blass. Nochmal antippen oder Esc lässt das Teil wieder los.', 'Columns with a matching level light up, the others fade. Tap again or press Esc to let the piece go.')}
+                <br />
+                {t('Niveaus, Schichten, Tage und Abwesenheiten einer Lehrkraft stehen auf ihrer Seite unter Mitarbeitende.', 'A teacher’s levels, shifts, days and absences are on their page under Staff.')}
               </div>
             ) : null}
             {tray.avail.length ? tray.avail.map((x) => trayPiece(x, !canWrite)) : <div className={styles.fold}>{t(`Niemand aus dieser Schicht hat in KW ${week.kw} noch freie Tage.`, `Nobody in this shift has days free in KW ${week.kw}.`)}</div>}
+            {tray.spare.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Ohne Niveau', 'No level listed')}</span><span className={styles.n}>{tray.spare.length}</span></div>{showSpare ? <>{tray.spare.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowSpare(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowSpare(true)}>{tray.spare.map((x) => x.t.shortName).join(', ')}</button>}</> : null}
             {tray.other.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Andere Schicht · als Vertretung', 'Other shift · as cover')}</span><span className={styles.n}>{tray.other.length}</span></div>{showOther ? <>{tray.other.map((x) => trayPiece(x, !canWrite))}<button type="button" className={styles.fold} onClick={() => setShowOther(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowOther(true)}>{tray.other.map((x) => `${x.t.shortName} ${x.rest}`).join(' · ')}</button>}</> : null}
             {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Abwesend', 'Absent')}</span></div>{tray.away.map((x) => trayPiece(x, true))}</> : null}
             {tray.full.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Verplant', 'Fully planned')}</span><span className={styles.n}>{tray.full.length}</span></div>{showFull ? <>{tray.full.map((x) => trayPiece(x, true))}<button type="button" className={styles.fold} onClick={() => setShowFull(false)}>{t('einklappen', 'collapse')}</button></> : <button type="button" className={styles.fold} onClick={() => setShowFull(true)}>{tray.full.map((x) => x.t.shortName).join(', ')}</button>}</> : null}

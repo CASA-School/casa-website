@@ -267,10 +267,7 @@ export async function WorkspaceShell({
                   href="/admin/kursplanung"
                   icon={Icon.kursplanung}
                   title="Kursplanung"
-                  items={[
-                    { href: '/admin/kursplanung/kurse', label: t('Kurse', 'Courses') },
-                    { href: '/admin/kursplanung/lehrkraefte', label: t('Lehrkräfte', 'Teachers') },
-                  ]}
+                  items={[{ href: '/admin/kursplanung/kurse', label: t('Kurse', 'Courses') }]}
                 >
                   Kursplanung
                 </NavLink>

@@ -58,8 +58,6 @@ const number = (formData: FormData, field: string) => {
   return Number.isFinite(n) && n >= 0 && n <= 60 ? Math.round(n * 10) / 10 : null;
 };
 
-const KURSPLANUNG_TEACHERS = '/admin/kursplanung/lehrkraefte';
-
 const page = (staffId: string, tab?: string) => `/admin/staff/${staffId}${tab ? `?tab=${tab}` : ''}`;
 
 function fail(path: string, message: string): never {
@@ -112,8 +110,6 @@ export async function createStaffAction(formData: FormData): Promise<void> {
     actor
   );
   if (!result.ok) fail(back, pick(lang, result.reason));
-  // From Kursplanung's teacher list: back there, with the new teacher's rules open.
-  if (formData.get('returnTo') === KURSPLANUNG_TEACHERS) done(`${KURSPLANUNG_TEACHERS}?teacher=${result.id}`);
   done(page(result.id!));
 }
 

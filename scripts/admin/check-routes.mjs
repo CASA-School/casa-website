@@ -115,7 +115,6 @@ const routes = [
   lessonDay && `/admin/day/contacts?lesson=${lessonDay}`,
   '/admin/kursplanung',
   '/admin/kursplanung/kurse',
-  '/admin/kursplanung/lehrkraefte',
   '/admin?date=2026-01-05',
   '/admin/enquiries',
   enquiry && `/admin/enquiries/${enquiry}`,

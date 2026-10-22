@@ -319,50 +319,6 @@ async function setDayTeacher(client: PoolClient, a: Assignment, changedBy: strin
   return r.rowCount ?? 0;
 }
 
-/* ------------------------------------------------------------- teachers */
-
-export type { TeacherRules } from './repo-types';
-import type { TeacherRules } from './repo-types';
-
-export async function updateTeacherRules(id: string, rules: TeacherRules): Promise<void> {
-  await query(
-    `UPDATE staff_members
-        SET short_name = $2, shifts = $3, days_per_week = $4, weekdays = $5, levels = $6,
-            note = $7, updated_at = timezone('utc', now())
-      WHERE id = $1`,
-    [id, rules.shortName, [...rules.shifts], rules.daysPerWeek, [...rules.weekdays], [...rules.levels], rules.note]
-  );
-}
-
-/**
- * Replaces a teacher's absences inside a date range: the teacher dialog edits
- * a whole month at once, so the month's rows are rewritten in one transaction.
- * Rows carrying a `filemaker_ref` are kept — those came from FileMaker and are
- * the bridge's to change.
- */
-export async function replaceTeacherAbsences(
-  teacherId: string,
-  from: string,
-  to: string,
-  absences: readonly Absence[],
-  createdBy: string
-): Promise<void> {
-  await withTransaction(async (client) => {
-    await client.query(
-      `DELETE FROM staff_absences
-        WHERE staff_member_id = $1 AND on_date >= $2::date AND on_date < $3::date AND filemaker_ref IS NULL`,
-      [teacherId, from, to]
-    );
-    for (const a of absences) {
-      await client.query(
-        `INSERT INTO staff_absences (staff_member_id, on_date, reason, created_by)
-         VALUES ($1, $2::date, $3, $4)
-         ON CONFLICT (staff_member_id, on_date) DO UPDATE SET reason = EXCLUDED.reason`,
-        [teacherId, a.onDate, a.reason, createdBy]
-      );
-    }
-  });
-}
 
 /* --------------------------------------------------------------- groups */
 
