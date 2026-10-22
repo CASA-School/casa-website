@@ -5,9 +5,9 @@ import type { StaffUser } from '../auth';
 import { query, queryFirst } from '../db';
 import { sessionOf } from '../waitlist';
 import { levelCodeOf, levelPlace, planMonthOfStart } from './course-link';
-import { addGroup } from './repo';
+import { addGroup, planRange } from './repo';
 import { isLevel, isShift, type Level, type Shift } from './types';
-import { monthStart, nextMonth } from './weeks';
+import { nextMonth } from './weeks';
 
 /**
  * Course starts and Kursplanung, joined (2026-10-17; docs/KURSPLANUNG.md §Course starts). Nothing is
@@ -115,6 +115,7 @@ export type MonthBookings = { startOf: (phase: '1' | '2', shift: Shift) => Month
 export async function monthBookings(month: string): Promise<MonthBookings> {
   const [y, m] = month.split('-').map(Number);
   const previous = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+  const [from, to] = await planRange(month);
   const [starts, rows] = await Promise.all([
     query<{ id: string; start_date: string; month: string; session: string | null; schedule: { time?: string } | null }>(
       `SELECT id, to_char(start_date, 'YYYY-MM-DD') AS start_date, month, session, schedule FROM (${INTENSIVE}) s WHERE month IN ($1, $2) ORDER BY start_date`,
@@ -133,7 +134,7 @@ export async function monthBookings(month: string): Promise<MonthBookings> {
               AND b.filemaker_booking_id IS NULL
         WHERE c.level_code IS NOT NULL
         GROUP BY c.level_code, s.month = $2`,
-      [month, previous, monthStart(month), monthStart(nextMonth(month))]
+      [month, previous, from, to]
     ),
   ]);
   const booked = new Map<string, number>();

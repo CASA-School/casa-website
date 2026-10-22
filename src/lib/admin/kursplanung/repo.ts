@@ -14,7 +14,7 @@ import {
   type CourseGroup,
   type Teacher,
 } from './types';
-import { monthStart, nextMonth, planningMonthOf, planningWeeks } from './weeks';
+import { addDays, planningWeeks, weekdayOf, weeksBetween, weekStartOf, type PlanningWeek } from './weeks';
 
 /**
  * Reads for the course-planning board.
@@ -31,20 +31,47 @@ export const planToday = (): string =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 /**
- * The month the screen shows: the requested one when valid, else the planning month today falls in
- * (2026-10-22: it opened on the last month with groups, November 2027, once lesson days were made a
- * year ahead). Without groups that month gives way to the next one that has them, else the last.
+ * The month the screen shows: the requested one when valid, else the planning month today falls in —
+ * its course block (0079); a weekend looks ahead to the coming week. Without groups that month gives
+ * way to the next one that has them, else the last. (Until 2026-10-22 it opened on the last month with
+ * groups, November 2027, once lesson days were made a year ahead.)
  */
 export async function resolvePlanMonth(requested?: string): Promise<string> {
   if (requested && MONTH.test(requested)) return requested;
-  const now = planningMonthOf(planToday());
-  const row = await queryFirst<{ month: string | null }>(
-    `SELECT coalesce(
-              (SELECT to_char(min(month), 'YYYY-MM') FROM course_groups WHERE month >= $1::date),
-              (SELECT to_char(max(month), 'YYYY-MM') FROM course_groups)) AS month`,
-    [`${now}-01`]
+  const today = planToday();
+  const monday = weekdayOf(today) ? weekStartOf(today) : addDays(weekStartOf(today), 7);
+  const row = await queryFirst<{ now: string; month: string | null }>(
+    `WITH now AS (SELECT planning_month_of($1::date) AS m)
+     SELECT to_char(now.m, 'YYYY-MM') AS now,
+            coalesce((SELECT to_char(min(month), 'YYYY-MM') FROM course_groups WHERE month >= now.m),
+                     (SELECT to_char(max(month), 'YYYY-MM') FROM course_groups)) AS month
+       FROM now`,
+    [monday]
   );
-  return row?.month ?? now;
+  return row?.month ?? row?.now ?? today.slice(0, 7);
+}
+
+/**
+ * A planning month's weeks: CASA's course block, from the intensive start that opens it to the next
+ * one (`planning_month_start`, 0079) — 26 October to 20 November for November 2026, as the planners'
+ * sheet runs it. Weeks after the fourth in which none of the month's groups is taught (the Christmas
+ * break at the end of December's block) are left off.
+ */
+export async function planWeeks(month: string): Promise<PlanningWeek[]> {
+  const row = await queryFirst<{ start: string; next: string; last: string | null }>(
+    `WITH w AS (SELECT planning_month_start($1::date) AS start, planning_month_start(($1::date + interval '1 month')::date) AS next)
+     SELECT to_char(w.start, 'YYYY-MM-DD') AS start, to_char(w.next, 'YYYY-MM-DD') AS next,
+            (SELECT to_char(max(d.on_date), 'YYYY-MM-DD')
+               FROM course_days d JOIN course_groups g ON g.id = d.group_id
+              WHERE g.month = $1::date AND NOT d.cancelled AND d.on_date >= w.start AND d.on_date < w.next) AS last
+       FROM w`,
+    [`${month}-01`]
+  );
+  if (!row) return planningWeeks(month);
+  const next = row.next > row.start ? row.next : addDays(row.start, 28);
+  const taught = row.last ? addDays(weekStartOf(row.last), 7) : next;
+  const end = [next, taught > addDays(row.start, 28) ? taught : addDays(row.start, 28)].sort()[0];
+  return weeksBetween(row.start, end);
 }
 
 type TeacherRow = {
@@ -177,13 +204,14 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
   );
 }
 
-/** The planning month's date range, half-open: [start, next start). */
-function monthRange(month: string): [string, string] {
-  return [monthStart(month), monthStart(nextMonth(month))];
+/** The planning month's date range, half-open: [first Monday, the Monday after its last week). */
+export async function planRange(month: string): Promise<[string, string]> {
+  const weeks = await planWeeks(month);
+  return [weeks[0].start, addDays(weeks[weeks.length - 1].start, 7)];
 }
 
 export async function listAssignments(month: string): Promise<Assignment[]> {
-  const [from, to] = monthRange(month);
+  const [from, to] = await planRange(month);
   const rows = await query<{
     group_id: string;
     on_date: string;
@@ -212,7 +240,7 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
 }
 
 export async function listAbsences(month: string): Promise<Absence[]> {
-  const [from, to] = monthRange(month);
+  const [from, to] = await planRange(month);
   const rows = await query<{ teacher_id: string; on_date: string; reason: string }>(
     `SELECT staff_member_id AS teacher_id, to_char(on_date, 'YYYY-MM-DD') AS on_date, reason
        FROM staff_absences
@@ -228,13 +256,14 @@ export async function listAbsences(month: string): Promise<Absence[]> {
 
 /** Everything the board needs for one month, in one round of queries. */
 export async function loadPlan(month: string): Promise<PlanContext> {
-  const [teachers, groups, assignments, absences] = await Promise.all([
+  const [teachers, groups, assignments, absences, weeks] = await Promise.all([
     listTeachers(),
     listGroups(month),
     listAssignments(month),
     listAbsences(month),
+    planWeeks(month),
   ]);
-  return { teachers, groups, assignments, absences, weeks: planningWeeks(month) };
+  return { teachers, groups, assignments, absences, weeks };
 }
 
 /**

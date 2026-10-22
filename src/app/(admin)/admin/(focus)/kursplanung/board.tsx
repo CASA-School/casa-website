@@ -10,7 +10,7 @@ import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
 import { absenceOn, assignmentKey, courseDays, fit, remainingDays, shiftDays, span, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
-import { SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
+import { levelName, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
 import { addDays, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
@@ -44,7 +44,7 @@ type Menu =
 type Preview = { keys: Set<string>; cls: string } | null;
 type Touched = { shift: Shift; weekStart: string };
 
-const groupLabel = (g: CourseGroup, of: number, t: T) => `${g.level}.${g.phase}${of > 1 ? ` · ${t('Gruppe', 'Group')} ${g.groupIndex}` : ''}`;
+const groupLabel = (g: CourseGroup, of: number, t: T) => `${levelName(g.level, g.phase)}${of > 1 ? ` · ${t('Gruppe', 'Group')} ${g.groupIndex}` : ''}`;
 /** A date's weekday as the board writes it: `Mo` / `Mon`, or the full name. */
 const shortDay = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, WEEKDAY_LABELS[d]) : ''; };
 const dayName = (date: string, lang: WsLang) => { const d = weekdayOf(date); return d ? pick(lang, DAY_LABEL[d]) : ''; };
@@ -74,7 +74,7 @@ export function Board({
   const [shift, setShift] = useState<Shift>(() => (plan.groups.some((g) => g.shift === 'morning') ? 'morning' : 'afternoon'));
   const [view, setView] = useState<'week' | 'month'>('week');
   const [weekStart, setWeekStart] = useState(() => {
-    // A weekend looks ahead to the coming week, as the month does (planningMonthOf).
+    // A weekend looks ahead to the coming week, as the month does (resolvePlanMonth).
     const ahead = weekdayOf(today) ? today : addDays(today, 2);
     return (plan.weeks.find((w) => w.days[0] <= ahead && ahead <= w.days[4]) ?? plan.weeks.find((w) => w.start > today) ?? plan.weeks[0])?.start ?? '';
   });
@@ -418,8 +418,8 @@ export function Board({
     if (!t) return null;
     const rest = remainingDays(ctx, t, week.start).rest;
     const fits = groups.filter((g) => days.some((d) => !assignments.some((a) => a.groupId === g.id && a.onDate === d) && fit(ctx, hand, g, d).ok));
-    const good = [...new Set(fits.filter((g) => t.levels.includes(g.level)).map((g) => `${g.level}.${g.phase}`))];
-    const maybe = [...new Set(fits.filter((g) => !t.levels.includes(g.level)).map((g) => `${g.level}.${g.phase}`))];
+    const good = [...new Set(fits.filter((g) => t.levels.includes(g.level)).map((g) => levelName(g.level, g.phase)))];
+    const maybe = [...new Set(fits.filter((g) => !t.levels.includes(g.level)).map((g) => levelName(g.level, g.phase)))];
     return { t, rest, good, maybe };
   }, [assignments, ctx, days, groups, hand, teacher, week]);
 
@@ -561,7 +561,7 @@ export function Board({
             return (
               <section key={g.id} className={`${styles.col} ${mark === 'can' ? styles.colCan : mark === 'maybe' ? styles.colMaybe : mark === 'no' ? styles.colNo : ''}`} style={lvStyle(g.level)}>
                 <header className={styles.colHead}>
-                  <span className={styles.lv}>{g.level}.{g.phase}</span>
+                  <span className={styles.lv}>{levelName(g.level, g.phase)}</span>
                   <span className={styles.grp} title={`${g.phase === '1' ? t('Vorschlag', 'Suggested') : t('Stamm', 'Regular')}: ${pair || '–'}`}>{of > 1 ? `${t('Gruppe', 'Group')} ${g.groupIndex} · ` : ''}{g.registrations} {t('TN', 'students')}</span>
                 </header>
                 <div className={styles.sockets} style={{ '--rows': rows.length } as React.CSSProperties}>

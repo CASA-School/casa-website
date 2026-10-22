@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isoWeek, monthLabel, monthStart, planningMonthOf, planningWeeks, weekStartOf, weekdayOf } from '../weeks';
+import { isoWeek, monthLabel, monthStart, planningWeeks, weekStartOf, weekdayOf, weeksBetween } from '../weeks';
 
 describe('planning weeks', () => {
   it('starts a month on the Monday the sheet uses', () => {
@@ -38,17 +38,10 @@ describe('planning weeks', () => {
     expect(isoWeek('2026-01-01')).toBe(1);
   });
 
-  it('finds the planning month a day belongs to — the board opens on it', () => {
-    expect(planningMonthOf('2026-10-22')).toBe('2026-10');
-    // October keeps the week of the 26th; 1 November is a Sunday, so its Saturday looks ahead to November.
-    expect(planningMonthOf('2026-10-30')).toBe('2026-10');
-    expect(planningMonthOf('2026-10-31')).toBe('2026-11');
-    expect(planningMonthOf('2026-11-01')).toBe('2026-11');
-    // 1 October 2026 is a Thursday: the 28th of September is already October's.
-    expect(planningMonthOf('2026-09-28')).toBe('2026-10');
-    // 1 January 2027 is a Friday: the week of 28 December is January's.
-    expect(planningMonthOf('2026-12-25')).toBe('2026-12');
-    expect(planningMonthOf('2026-12-31')).toBe('2027-01');
+  it('lays out the weeks of a course block', () => {
+    // November 2026 as the planners run it: the start of 26 October to 20 November.
+    expect(weeksBetween('2026-10-26', '2026-11-23').map((w) => w.kw)).toEqual([44, 45, 46, 47]);
+    expect(weeksBetween('2026-10-26', '2026-11-23')[0].label).toBe('26.10.–30.10.');
   });
 
   it('knows weekdays and week starts', () => {

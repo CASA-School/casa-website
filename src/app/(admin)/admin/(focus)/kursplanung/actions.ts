@@ -20,15 +20,16 @@ import {
   listPlanMonths,
   listTeachers,
   loadPlan,
+  planWeeks,
   removeGroupIfEmpty,
   replaceTeacherAbsences,
   replaceWeekAssignments,
   updateGroup,
   updateTeacherRules,
 } from '@/lib/admin/kursplanung/repo';
-import { SHIFTS, isLevel, isShift } from '@/lib/admin/kursplanung/types';
+import { SHIFTS, isLevel, isShift, levelName } from '@/lib/admin/kursplanung/types';
 import { validateWeekAssignments } from '@/lib/admin/kursplanung/week';
-import { monthStart, nextMonth, planningWeeks } from '@/lib/admin/kursplanung/weeks';
+import { addDays, nextMonth } from '@/lib/admin/kursplanung/weeks';
 
 /**
  * The board's one write.
@@ -83,8 +84,7 @@ export async function saveWeekAction(input: unknown): Promise<SaveWeekResult> {
   if (!parsed.success) return { ok: false, error: t('Ungültige Daten.', 'Invalid data.') };
   const payload = parsed.data;
 
-  const [groups, teachers] = await Promise.all([listGroups(payload.month), listTeachers()]);
-  const weeks = planningWeeks(payload.month);
+  const [groups, teachers, weeks] = await Promise.all([listGroups(payload.month), listTeachers(), planWeeks(payload.month)]);
   const errors = validateWeekAssignments(payload, groups, teachers, weeks);
   if (errors.length > 0) {
     if (errors[0].startsWith('outside the course')) return { ok: false, error: t('Dieser Tag liegt außerhalb des Kurses.', 'That day is outside the course.') };
@@ -155,12 +155,12 @@ export async function saveTeacherAction(formData: FormData): Promise<void> {
   const month = String(formData.get('month') ?? '');
   if (!UUID.test(teacherId) || !MONTH.test(month)) back(formData, t('Ungültige Anfrage.', 'Invalid request.'), 'error');
 
-  const weeks = planningWeeks(month);
+  const weeks = await planWeeks(month);
   const parsed = parseTeacherForm(fromFormData(formData), teacherId, weeks);
   if (!parsed.ok) back(formData, pick(lang, parsed.error), 'error');
 
   await updateTeacherRules(teacherId, parsed.rules);
-  await replaceTeacherAbsences(teacherId, monthStart(month), monthStart(nextMonth(month)), parsed.absences, user.id);
+  await replaceTeacherAbsences(teacherId, weeks[0].start, addDays(weeks[weeks.length - 1].start, 7), parsed.absences, user.id);
   await logActivity({ actor: user, entity: 'kursplanung.teacher', entityId: teacherId, action: 'rules.saved', detail: { month, absences: parsed.absences.length, daysPerWeek: parsed.rules.daysPerWeek } });
   revalidateAll();
   back(formData, t(`${parsed.rules.shortName} gespeichert.`, `${parsed.rules.shortName} saved.`), 'ok');
@@ -188,7 +188,7 @@ export async function addGroupAction(formData: FormData): Promise<void> {
   await addGroup(month, shift, level, phase);
   await logActivity({ actor: user, entity: 'kursplanung.group', entityId: null, action: 'group.added', detail: { month, shift, level, phase } });
   revalidateAll();
-  back(formData, t(`${level}.${phase}: weitere Gruppe angelegt.`, `${level}.${phase}: another group added.`), 'ok');
+  back(formData, t(`${levelName(level, phase)}: weitere Gruppe angelegt.`, `${levelName(level, phase)}: another group added.`), 'ok');
 }
 
 export async function removeGroupAction(formData: FormData): Promise<void> {
