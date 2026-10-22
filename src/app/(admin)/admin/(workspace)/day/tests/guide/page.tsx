@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { PrintSheet } from '../print-sheet';
-import { QrPicture, shortLink } from '@/components/admin/qr-code';
+import { QrPicture } from '@/components/admin/qr-code';
 import { PageHeader } from '@/components/admin/ui';
 import { entryTestLink, entryTestOrigin, sittingGuide } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
@@ -93,7 +93,6 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
               </div>
               <div className="shrink-0 text-center">
                 <QrPicture qr={qrPath(link)} label={link} className="mx-auto aspect-square w-[36mm] rounded-lg" />
-                <p className="mt-1.5 text-[8.5pt] text-[#4b5563]">{shortLink(link)}</p>
               </div>
             </section>
           ) : (
@@ -115,13 +114,10 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
           <ol className="mt-5 grid gap-3">
             <Step n={1} title="Vorbereiten">
               <li>Den QR-Code an die Tafel projizieren oder ausgedruckt aufhängen.</li>
-              <li>Tablets, Laptops und Bücher wegpacken: Auf dem Tisch liegt nur das Handy.</li>
               <li>Wer kein funktionierendes Handy hat, schreibt auf Papier: Testheft A oder B aus dem Büro, im Wechsel ausgeteilt, und einen Bleistift.</li>
             </Step>
             <Step n={2} title="Starten">
-              <li>
-                Den QR-Code scannen oder <b>{shortLink(link)}</b> öffnen.
-              </li>
+              <li>Den QR-Code scannen.</li>
               <li>Vor- und Nachnamen und die E-Mail-Adresse der Anmeldung eingeben – so kommt das Ergebnis zur richtigen Person.</li>
               <li>Version A und B wechseln sich von selbst ab, und die Antworten stehen bei allen in anderer Reihenfolge.</li>
             </Step>
@@ -133,12 +129,11 @@ export default async function EntryTestGuidePage({ searchParams }: { searchParam
             <Step n={4} title="Nach dem Test">
               <li>Die Teilnehmenden sehen kein Ergebnis.</li>
               <li>Alle Testhefte aus Papier einsammeln und ins Büro bringen; das Büro trägt sie ein.</li>
-              <li>Das Büro sieht die Ergebnisse sofort und gibt sie an die Lehrkräfte weiter.</li>
+              <li>Das Büro sieht die Ergebnisse sofort.</li>
             </Step>
             <Step n={5} title="Ergebnisse besprechen">
               <li>Die Ergebnisse mit Studienleitung, Büro und Teilnehmenden besprechen.</li>
               <li>Zurückgestufte Teilnehmende in die Übersichtstabelle zum Kursstart eintragen.</li>
-              <li>Die Punkte sind ein Hinweis, kein Urteil: Die Lehrkraft stuft ein.</li>
             </Step>
           </ol>
 
