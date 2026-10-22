@@ -7,7 +7,7 @@ import { useWsLang } from '@/components/admin/lang';
 import { SESSION_COLOURS } from '@/lib/admin/day-plan-labels';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
-import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, shiftDays, span, type DayState, type PlanContext } from '@/lib/admin/kursplanung/fit';
+import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, shiftDays, span, unitsUsed, type DayState, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { levelName, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
@@ -418,9 +418,16 @@ export function Board({
       const left = remainingDays(ctx, t, week.start);
       // Only this shift's days: a V+N teacher's free Friday is no afternoon.
       const here = dayStates(ctx, t, week, shift).filter((d) => d.state === 'free').length;
-      return { t, ...left, rest: Math.min(left.rest, here), own: t.shifts.includes(shift), planned: inPlan.has(t.id) };
+      const units = unitsUsed(ctx, t.id, week.start);
+      return { t, ...left, rest: Math.min(left.rest, here), units, open: t.weeklyUnits === null ? null : t.weeklyUnits - units, own: t.shifts.includes(shift), planned: inPlan.has(t.id) };
     });
-    const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) => b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
+    // Employed before freelance (Rahman, 2026-10-22); among the employed, whoever has most contract units still
+    // to plan first — CASA pays for them either way — then the most days free.
+    const byRest = (a: (typeof rows)[number], b: (typeof rows)[number]) =>
+      Number(a.t.contract === 'freelance') - Number(b.t.contract === 'freelance') ||
+      (b.open ?? -99) - (a.open ?? -99) ||
+      b.rest - a.rest ||
+      a.t.shortName.localeCompare(b.t.shortName, 'de');
     const free = rows.filter((x) => x.rest > 0 && !x.awayAll);
     const first = (x: (typeof rows)[number]) => (inPlan.size ? x.planned : x.own);
     return {
@@ -526,12 +533,19 @@ export function Board({
     );
   };
 
-  /** A teacher in the tray, on one line: the name, V+N, and the shift's days — free ones dark, as the sheet's „verfügbar". */
+  /**
+   * A teacher in the tray, on one line: the name, Honorar or V+N, the week's teaching units against the contract,
+   * and the shift's days — free ones dark, as the sheet's „verfügbar".
+   */
   const trayPiece = (x: { t: Teacher; rest: number; awayAll: boolean }, off: boolean) => {
-    const flex = x.t.shifts.length > 1, inHand = hand === x.t.id;
+    const flex = x.t.shifts.length > 1, inHand = hand === x.t.id, freelance = x.t.contract === 'freelance';
     const toggle = () => setHand(inHand ? null : x.t.id);
     const days = week ? dayStates(ctx, x.t, week, shift) : [];
     const free = days.filter((d) => d.state === 'free');
+    const units = week ? unitsUsed(ctx, x.t.id, week.start) : 0;
+    const monthUnits = plan.weeks.reduce((n, w) => n + unitsUsed(ctx, x.t.id, w.start), 0);
+    const contract = x.t.weeklyUnits;
+    const hours = contract === null ? '' : t(` · Woche ${units} von ${contract} UE · Monat ${monthUnits} von ${contract * plan.weeks.length} UE`, ` · week ${units} of ${contract} units · month ${monthUnits} of ${contract * plan.weeks.length} units`);
     return (
       <div
         key={x.t.id}
@@ -544,10 +558,12 @@ export function Board({
         onDragStart={off ? undefined : (e) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }}
         onDragEnd={off ? undefined : () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); }}
         className={`${styles.tp} ${off ? styles.tpOff : ''} ${inHand ? styles.tpHand : ''}`}
-        title={`${x.t.fullName} · ${free.length ? t(`frei ${free.map((d) => day(d.date)).join(', ')}`, `free ${free.map((d) => day(d.date)).join(', ')}`) : t('keine Tage frei', 'no days free')}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
+        title={`${x.t.fullName}${freelance ? t(' · Honorar', ' · freelance') : ''}${hours} · ${free.length ? t(`frei ${free.map((d) => day(d.date)).join(', ')}`, `free ${free.map((d) => day(d.date)).join(', ')}`) : t('keine Tage frei', 'no days free')}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
+        {freelance ? <span className={styles.hon}>{t('Honorar', 'Freelance')}</span> : null}
         {inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null}
+        {contract !== null ? <span className={`${styles.ue} ${units > contract ? styles.ueOver : ''}`}>{units}/{contract}</span> : null}
         {/* More free days than the week allows (a three-day contract, all five free): how many are left. */}
         {x.rest < free.length ? <span className={styles.cnt}>{t(`noch ${x.rest}`, `${x.rest} left`)}</span> : null}
         <span className={styles.wd} aria-label={days.map((d) => `${day(d.date)} ${pick(lang, DAY_STATE[d.state])}`).join(', ')}>
@@ -647,7 +663,7 @@ export function Board({
                         data-row={rowOf(dates[0])}
                         data-group={g.id}
                         data-week={w.start}
-                        title={`${who?.fullName ?? ''}${issues.length ? `\n${issues.map((i) => `• ${pick(lang, i.text)}`).join('\n')}` : ''}`}
+                        title={`${who?.fullName ?? ''}${issues.length ? `\n${[...new Set(issues.map((i) => `• ${pick(lang, i.text)}${i.detail ? ` – ${pick(lang, i.detail)}` : ''}`))].join('\n')}` : ''}`}
                         onClick={(e) => { e.stopPropagation(); if ((e.target as HTMLElement).closest(`.${styles.handle}`)) return; setWeekStart(w.start); setMenu({ kind: 'piece', groupId: g.id, dates, x: e.clientX, y: e.clientY }); }}
                         onKeyDown={(e) => { if (e.key === 'Enter') { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); setWeekStart(w.start); setMenu({ kind: 'piece', groupId: g.id, dates, x: r.left, y: r.bottom }); } }}
                         onDragStart={(e) => { dragRef.current = { teacherId: a.teacherId, from: 'board', groupId: g.id, dates, weekStart: w.start }; e.dataTransfer.effectAllowed = 'move'; markFor(a.teacherId, without(assignments, g.id, dates)); (e.currentTarget as HTMLElement).classList.add(styles.pieceDrag); }}

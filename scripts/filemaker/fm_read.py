@@ -10,9 +10,10 @@ import time
 
 DOCUMENT = 'SchoolMan.fmp12'
 _RS = chr(30)  # record separator: field values may hold line breaks
-# FileMaker answers „object not found" (-1728), a timeout (-1712) or a lost connection (-609) now and
-# then while it is busy or in use; the same read a few seconds later works (2026-10-20, first bridge run).
-_PASSING = ('-1728', '-1712', '-609')
+# FileMaker answers „object not found" (-1728), a timeout (-1712), a lost connection (-609) or „data is being
+# accessed by another user" (-10011) now and then while it is busy or in use; the same read a few seconds
+# later works (2026-10-20, first bridge run; -10011 on 2026-10-22 while a colleague worked in SchoolMan).
+_PASSING = ('-1728', '-1712', '-609', '-10011')
 
 
 def _run(script: str) -> str:

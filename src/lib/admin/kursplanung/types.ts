@@ -34,6 +34,7 @@ export const ABSENCE_REASONS = [
   'Fortbildung',
   'Freistellung',
   'Elternzeit',
+  'Überstunden',
   'Sonstiges',
 ] as const;
 export type AbsenceReason = (typeof ABSENCE_REASONS)[number];
@@ -45,6 +46,7 @@ export const ABSENCE_LABELS: Record<AbsenceReason, Bilingual> = {
   Fortbildung: { de: 'Fortbildung', en: 'Training' },
   Freistellung: { de: 'Freistellung', en: 'Released from duty' },
   Elternzeit: { de: 'Elternzeit', en: 'Parental leave' },
+  Überstunden: { de: 'Überstundenabbau', en: 'Time off in lieu' },
   Sonstiges: { de: 'Sonstiges', en: 'Other' },
 };
 
@@ -54,16 +56,18 @@ export type Contract = 'employed' | 'freelance';
  * How a shift is taught. The morning runs five days, the afternoon four; each
  * is split into two halves that a course's two regular teachers hold (Mo–Mi /
  * Do–Fr in the morning, Mo–Di / Mi–Do in the afternoon). `half` is the index
- * of the first day of the second half.
+ * of the first day of the second half. `units` are a day's teaching units (UE, 45 minutes) when the day
+ * itself does not say: four in the morning, five in the afternoon, as SchoolMan's lesson days have them.
  */
 export const SHIFT_INFO: Record<
   Shift,
-  { label: Bilingual; days: number; half: number; time: string; halves: [Bilingual, Bilingual] }
+  { label: Bilingual; days: number; half: number; units: number; time: string; halves: [Bilingual, Bilingual] }
 > = {
   morning: {
     label: { de: 'Vormittag', en: 'Morning' },
     days: 5,
     half: 3,
+    units: 4,
     time: '09:00–12:30',
     halves: [{ de: 'Mo–Mi', en: 'Mon–Wed' }, { de: 'Do–Fr', en: 'Thu–Fri' }],
   },
@@ -71,6 +75,7 @@ export const SHIFT_INFO: Record<
     label: { de: 'Nachmittag', en: 'Afternoon' },
     days: 4,
     half: 2,
+    units: 5,
     time: '13:00–17:30',
     halves: [{ de: 'Mo–Di', en: 'Mon–Tue' }, { de: 'Mi–Do', en: 'Wed–Thu' }],
   },
@@ -82,6 +87,8 @@ export type Teacher = {
   shortName: string;
   fullName: string;
   contract: Contract;
+  /** Teaching units a week in the contract that runs today (SchoolMan's `DateTargetWorkTime`); none for most freelancers. */
+  weeklyUnits: number | null;
   shifts: readonly Shift[];
   daysPerWeek: number;
   weekdays: readonly Weekday[];
@@ -130,6 +137,8 @@ export type Assignment = {
   isTentative: boolean;
   /** A day of a „Zusammenlegung" (0074): the class is taught together with a parallel group, by one teacher. Read only. */
   merged?: boolean;
+  /** Its teaching units, as the day or its course's plan says; a day placed on the board counts its shift's. */
+  lessons?: number;
 };
 
 export type Absence = {

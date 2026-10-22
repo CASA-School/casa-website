@@ -1,4 +1,4 @@
-"""Read SchoolMan's courses still running or ahead, for the workspace's courses — read-only (AppleScript).
+"""Read SchoolMan's courses still running or ahead, and those of the last eight months, for the workspace's courses — read-only (AppleScript).
 
     python3 -I scripts/filemaker/read_courses.py --stats    # counts only
     python3 -I scripts/filemaker/read_courses.py | node scripts/filemaker/import-courses.mjs [--dry-run]
@@ -6,9 +6,13 @@
 Rahman, 2026-10-17: the courses SchoolMan has planned come across, read-only. A `Course` is one level
 of a start (or one module, one exam preparation, one company's course): its type, dates, shift, level,
 title, places, price, whether it is offered, and its hours (`DayTime`). Nothing about people.
+
+The last eight months come along too (2026-10-22): Kursplanung follows a class through its levels by its
+learners and warns when a teacher would take it for a fourth level running, which needs the levels before.
+The public site shows only starts that have not ended.
 """
 import collections, json, os, re, sys
-from datetime import date
+from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fm_read import column  # noqa: E402
@@ -34,8 +38,8 @@ def hhmm(value):
 F = ['__ID_Course', '_ID_CourseTypeReference', 'ZStartDate', 'ZEndDate', '_ID_DayTimeReference', 'LevelShown', 'LevelShort',
      'CourseTitle', 'CapStudent', 'CoursePrice', '_ID_Bookable', '_ID_Active']
 rows = [dict(zip(F, r)) for r in zip(*[column('Course', f) for f in F])]
-today = date.today().isoformat()
-live = [r for r in rows if iso(r['ZEndDate']) and iso(r['ZEndDate']) >= today]
+since = (date.today() - timedelta(days=240)).isoformat()
+live = [r for r in rows if iso(r['ZEndDate']) and iso(r['ZEndDate']) >= since]
 
 hours = {}
 for course, start, end in zip(column('DayTime', '_ID_Course'), column('DayTime', 'HourStart'), column('DayTime', 'HourEnd')):

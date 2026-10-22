@@ -84,6 +84,30 @@ describe('analysePlan', () => {
     expect(codes(ctx)).toContain('wechsel');
   });
 
+  it('warns when a teacher would keep a class for a fourth level running', () => {
+    const anna = teacher({ id: 'anna', levels: ['A1', 'A2', 'B1', 'B1+', 'B2'] });
+    const b2 = group({ id: 'b2', level: 'B2' });
+    const history = { b2: [{ level: 'B1+', teachers: ['anna'] }, { level: 'B1', teachers: ['anna', 'ben'] }, { level: 'A2', teachers: ['anna'] }] };
+    const ctx = context({ teachers: [anna], groups: [b2], assignments: [assignment('b2', KW40[0], 'anna')], history });
+    const serie = analysePlan(ctx).issues.find((i) => i.code === 'serie');
+    expect(serie?.text.de).toBe('4. Niveau in Folge');
+    expect(serie?.detail?.de).toBe('dieselbe Gruppe schon in A2 · B1 · B1+');
+
+    // A break in the run — someone else had the class in B1 — and it is no fourth level.
+    const broken = context({ ...ctx, history: { b2: [history.b2[0], { level: 'B1', teachers: ['ben'] }, history.b2[2]] } });
+    expect(codes(broken)).not.toContain('serie');
+  });
+
+  it('warns about more teaching units in a week than the contract holds', () => {
+    const part = teacher({ id: 'part', weeklyUnits: 8 });
+    const ctx = context({ teachers: [part], groups: [group({ id: 'a1' })], assignments: KW40.slice(0, 2).map((d) => assignment('a1', d, 'part')) });
+    // Two mornings are 8 units: within the contract.
+    expect(codes(ctx)).not.toContain('stunden');
+    // An evening course outside the board adds to them.
+    const evening = context({ ...ctx, otherUnits: { part: { [KW40[0]]: 2 } } });
+    expect(analysePlan(evening).issues.find((i) => i.code === 'stunden')?.text.de).toBe('10 von 8 UE');
+  });
+
   it('records who is used on which days per week', () => {
     const anna = teacher({ id: 'anna' });
     const ctx = context({ teachers: [anna], groups: [group({ id: 'a1' })], assignments: [assignment('a1', KW40[0], 'anna')] });

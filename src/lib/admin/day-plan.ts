@@ -260,7 +260,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
        LEFT JOIN staff_members rm ON rm.id = d.replaced_teacher_id LEFT JOIN people rp ON rp.id = rm.person_id
       WHERE d.on_date = $1::date
-      ORDER BY t.starts_at NULLS LAST, c.level_code NULLS LAST, d.group_index`,
+      ORDER BY t.starts_at NULLS LAST, level_rank(c.level_code), c.level_code NULLS LAST, d.group_index`,
     [day]
   );
   const courseIds = [...new Set(rows.map((r) => r.course_id))];
@@ -490,7 +490,7 @@ export async function missingCover(day: string, days = 14): Promise<MissingCover
        JOIN staff_absences a ON a.staff_member_id = d.teacher_id AND a.on_date = d.on_date
        LEFT JOIN staff_members tm ON tm.id = d.teacher_id LEFT JOIN people tp ON tp.id = tm.person_id
       WHERE d.on_date BETWEEN $1::date AND $1::date + $2::int AND NOT d.cancelled AND NOT d.is_substitute AND NOT d.merged
-      ORDER BY d.on_date, t.starts_at NULLS LAST, c.level_code`,
+      ORDER BY d.on_date, t.starts_at NULLS LAST, level_rank(c.level_code), c.level_code`,
     [day, days]
   );
   return rows.map((r) => ({ date: r.on_date, startsAt: r.starts_at, courseId: r.course_id, groupIndex: r.group_index, label: r.label, teacherName: r.teacher_name, reason: r.reason }));

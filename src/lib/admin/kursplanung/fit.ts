@@ -21,6 +21,13 @@ export type PlanContext = {
   assignments: readonly Assignment[];
   absences: readonly Absence[];
   weeks: readonly PlanningWeek[];
+  /** Units a teacher teaches outside the board — evening, special and company courses — per week: teacherId → Monday → UE. */
+  otherUnits?: Readonly<Record<string, Readonly<Record<string, number>>>>;
+  /**
+   * Each group's class in the levels before this one, most recent first (up to three): its level and its
+   * main teachers. The class is followed by its learners (`classHistory`, repo.ts).
+   */
+  history?: Readonly<Record<string, readonly { level: string; teachers: readonly string[] }[]>>;
 };
 
 export type Fit =
@@ -73,6 +80,20 @@ export function usedDays(ctx: PlanContext, teacherId: string, weekStart: string)
     if (a.teacherId === teacherId && weekStartOf(a.onDate) === weekStart) used.add(a.onDate);
   }
   return used;
+}
+
+/**
+ * The teaching units (UE) a teacher has in a week: the board's days — each its own units, else its shift's —
+ * and what they teach outside the board (evening, special and company courses).
+ */
+export function unitsUsed(ctx: PlanContext, teacherId: string, weekStart: string): number {
+  let units = ctx.otherUnits?.[teacherId]?.[weekStart] ?? 0;
+  for (const a of ctx.assignments) {
+    if (a.teacherId !== teacherId || weekStartOf(a.onDate) !== weekStart) continue;
+    const group = ctx.groups.find((g) => g.id === a.groupId);
+    units += a.lessons ?? (group ? SHIFT_INFO[group.shift].units : 0);
+  }
+  return units;
 }
 
 export type Remaining = {

@@ -79,6 +79,7 @@ type TeacherRow = {
   short_name: string;
   full_name: string;
   contract: 'employed' | 'freelance';
+  weekly_units: string | null;
   shifts: string[];
   days_per_week: number;
   weekdays: string[];
@@ -93,6 +94,7 @@ const toTeacher = (r: TeacherRow): Teacher => ({
   shortName: r.short_name,
   fullName: r.full_name,
   contract: r.contract,
+  weeklyUnits: r.weekly_units === null ? null : Number(r.weekly_units),
   shifts: r.shifts.filter(isShift),
   daysPerWeek: r.days_per_week,
   weekdays: r.weekdays.filter(isWeekday),
@@ -113,6 +115,10 @@ export async function listTeachers(): Promise<Teacher[]> {
                         WHERE c.staff_member_id = s.id AND (c.valid_from IS NULL OR c.valid_from <= current_date)
                           AND (c.valid_to IS NULL OR c.valid_to >= current_date)
                         ORDER BY c.valid_from DESC NULLS LAST LIMIT 1) = 'freelance' THEN 'freelance' ELSE 'employed' END AS contract,
+            (SELECT c.weekly_units FROM staff_contracts c
+              WHERE c.staff_member_id = s.id AND (c.valid_from IS NULL OR c.valid_from <= current_date)
+                AND (c.valid_to IS NULL OR c.valid_to >= current_date)
+              ORDER BY c.valid_from DESC NULLS LAST LIMIT 1) AS weekly_units,
             s.shifts, s.days_per_week, s.weekdays, s.levels, s.note, s.filemaker_staff_id, s.is_active
        FROM staff_members s
        JOIN people p ON p.id = s.person_id
@@ -174,7 +180,7 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
           WHERE c.id IS NOT NULL
        ) live ON true
       WHERE g.month = $1::date
-      ORDER BY g.shift, g.level, g.phase, g.group_index`,
+      ORDER BY g.shift, level_rank(g.level), g.phase, g.group_index`,
     [`${month}-01`]
   );
   return rows.flatMap((r) =>
@@ -219,11 +225,14 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
     is_substitute: boolean;
     is_tentative: boolean;
     merged: boolean;
+    lessons: string | null;
   }>(
-    // An assignment is a lesson day of a board group with a teacher (0045), not called off.
+    // An assignment is a lesson day of a board group with a teacher (0045), not called off; its units as
+    // the day or its course's weekly plan says (course_day_times).
     `SELECT a.group_id, to_char(a.on_date, 'YYYY-MM-DD') AS on_date, a.teacher_id,
-            a.is_substitute, a.is_tentative, a.merged
+            a.is_substitute, a.is_tentative, a.merged, t.lessons
        FROM course_days a
+       LEFT JOIN course_day_times t ON t.id = a.id
        JOIN course_groups g ON g.id = a.group_id
       WHERE g.month = $1::date AND a.on_date >= $2::date AND a.on_date < $3::date
         AND a.teacher_id IS NOT NULL AND NOT a.cancelled`,
@@ -236,6 +245,7 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
     isSubstitute: r.is_substitute,
     isTentative: r.is_tentative,
     merged: r.merged,
+    ...(r.lessons === null ? {} : { lessons: Number(r.lessons) }),
   }));
 }
 
@@ -271,16 +281,98 @@ export async function planRegulars(month: string): Promise<Record<'morning' | 'a
   };
 }
 
+/** What teachers teach outside the board in the month's weeks — evening, special and company courses — in units a week. */
+export async function listOtherUnits(month: string): Promise<Record<string, Record<string, number>>> {
+  const [from, to] = await planRange(month);
+  const rows = await query<{ teacher_id: string; monday: string; units: string }>(
+    `SELECT d.teacher_id, to_char(date_trunc('week', d.on_date), 'YYYY-MM-DD') AS monday, sum(coalesce(t.lessons, 0)) AS units
+       FROM course_days d JOIN course_day_times t ON t.id = d.id
+      WHERE d.group_id IS NULL AND d.teacher_id IS NOT NULL AND NOT d.cancelled AND d.on_date >= $1::date AND d.on_date < $2::date
+      GROUP BY 1, 2`,
+    [from, to]
+  );
+  const out: Record<string, Record<string, number>> = {};
+  for (const r of rows) (out[r.teacher_id] ??= {})[r.monday] = Number(r.units);
+  return out;
+}
+
+/**
+ * Each of the month's groups' class in the levels before, most recent first, up to three: its level and
+ * its main teachers (a quarter of its days or more, covers left out). A class is followed by its learners:
+ * the class before is the one most of them came from — three at least — that ended within three weeks of
+ * this one's start (Rahman, 2026-10-22: a teacher keeps a class for at most three full courses).
+ */
+export async function classHistory(month: string): Promise<Record<string, { level: string; teachers: string[] }[]>> {
+  const rows = await query<{ group_id: string; depth: number; level: string; teachers: string[] }>(
+    `WITH RECURSIVE
+     cls AS (
+       SELECT c.id AS course_id, gi AS group_index, c.level_code, i.start_date, i.end_date
+         FROM courses c
+         JOIN course_instances i ON i.id = c.course_instance_id
+         JOIN course_types t ON t.id = i.course_type_id
+         CROSS JOIN generate_series(1, greatest(c.groups, 1)) AS gi
+        WHERE (t.format = 'intensive' OR is_c1h_course(c.id)) AND i.status <> 'cancelled' AND c.status <> 'cancelled'
+          AND i.end_date >= $1::date - 420 AND i.start_date <= $1::date + 62
+     ),
+     learners AS (
+       SELECT DISTINCT bp.course_id, coalesce(bp.group_index, 1) AS group_index, b.person_id
+         FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id
+        WHERE b.deleted_at IS NULL AND b.status <> 'cancelled' AND bp.course_id IN (SELECT course_id FROM cls)
+     ),
+     link AS (
+       SELECT DISTINCT ON (k.course_id, k.group_index) k.course_id, k.group_index, p.course_id AS p_course, p.group_index AS p_group
+         FROM cls k
+         JOIN cls p ON p.course_id <> k.course_id AND p.end_date BETWEEN k.start_date - 21 AND k.start_date - 1
+         JOIN learners lk ON lk.course_id = k.course_id AND lk.group_index = k.group_index
+         JOIN learners lp ON lp.course_id = p.course_id AND lp.group_index = p.group_index AND lp.person_id = lk.person_id
+        GROUP BY k.course_id, k.group_index, p.course_id, p.group_index
+       HAVING count(*) >= 3
+        ORDER BY k.course_id, k.group_index, count(*) DESC
+     ),
+     chain AS (
+       SELECT g.id AS group_id, 1 AS depth, l.p_course, l.p_group
+         FROM course_groups g JOIN link l ON l.course_id = g.course_id AND l.group_index = g.group_index
+        WHERE g.month = $1::date
+       UNION ALL
+       SELECT ch.group_id, ch.depth + 1, l.p_course, l.p_group
+         FROM chain ch JOIN link l ON l.course_id = ch.p_course AND l.group_index = ch.p_group
+        WHERE ch.depth < 3
+     ),
+     taught AS (
+       SELECT d.course_id, d.group_index, d.teacher_id
+         FROM course_days d
+        WHERE (d.course_id, d.group_index) IN (SELECT p_course, p_group FROM chain) AND NOT d.cancelled
+        GROUP BY d.course_id, d.group_index, d.teacher_id
+       HAVING d.teacher_id IS NOT NULL
+          AND count(*) FILTER (WHERE NOT d.is_substitute) * 4 >=
+              (SELECT count(*) FROM course_days x WHERE x.course_id = d.course_id AND x.group_index = d.group_index AND NOT x.cancelled)
+     )
+     SELECT ch.group_id, ch.depth, coalesce(split_part(c.level_code, '.', 1), 'C1H') AS level,
+            coalesce(array_agg(t.teacher_id) FILTER (WHERE t.teacher_id IS NOT NULL), '{}') AS teachers
+       FROM chain ch
+       JOIN courses c ON c.id = ch.p_course
+       LEFT JOIN taught t ON t.course_id = ch.p_course AND t.group_index = ch.p_group
+      GROUP BY ch.group_id, ch.depth, c.level_code
+      ORDER BY ch.group_id, ch.depth`,
+    [`${month}-01`]
+  );
+  const out: Record<string, { level: string; teachers: string[] }[]> = {};
+  for (const r of rows) (out[r.group_id] ??= []).push({ level: r.level, teachers: r.teachers });
+  return out;
+}
+
 /** Everything the board needs for one month, in one round of queries. */
 export async function loadPlan(month: string): Promise<PlanContext> {
-  const [teachers, groups, assignments, absences, weeks] = await Promise.all([
+  const [teachers, groups, assignments, absences, weeks, otherUnits, history] = await Promise.all([
     listTeachers(),
     listGroups(month),
     listAssignments(month),
     listAbsences(month),
     planWeeks(month),
+    listOtherUnits(month),
+    classHistory(month),
   ]);
-  return { teachers, groups, assignments, absences, weeks };
+  return { teachers, groups, assignments, absences, weeks, otherUnits, history };
 }
 
 /**

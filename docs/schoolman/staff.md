@@ -44,7 +44,9 @@ The active staff come across by hand, read-only (2026-10-17): `scripts/filemaker
 into `import-staff.mjs` — person, contact, address, HR numbers, bank accounts, `Purview` roles,
 `DateTargetWorkTime` contract periods and `DateValidity` licences (docs/ADMIN_WORKSPACE.md §Staff).
 Working time is one of the later modules, and the Klassenbuch already reads and writes the teachers'
-side of it.
+side of it. Days off come across for Kursplanung (`read_absences.py`): ill, holiday, and since 2026-10-22
+the days marked absent with their kind (`_ID_Absence`, `_ID_AbsenceDetail` — 1 Tarifurlaub, 2 unbezahlter
+Urlaub, 3 Abbau Überstunden, 4 Sonderurlaub, 5 Krank, 6 Anderes, 7 off sick; 1,777 days in 2026).
 
 ## Open questions
 

@@ -33,7 +33,7 @@ export async function courseCatalogue(): Promise<CourseCatalogue> {
     ),
     query<{ id: string; title: string; level_code: string; part: number | null }>(
       `SELECT m.id, m.title, m.level_code, m.part
-         FROM materials m WHERE m.is_active AND m.level_code IS NOT NULL ORDER BY m.level_code, m.part NULLS LAST`
+         FROM materials m WHERE m.is_active AND m.level_code IS NOT NULL ORDER BY level_rank(m.level_code), m.level_code, m.part NULLS LAST`
     ),
     // The full exam (both parts) at the rate for its date; a session's own fee wins.
     query<{ code: string; name: string; level: string; day: string; fee: string | null }>(

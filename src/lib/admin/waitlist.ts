@@ -410,7 +410,7 @@ export async function startEntries(courseInstanceId: string): Promise<WaitlistEn
   const rows = await query<EntryRow>(
     `SELECT * FROM (${ENTRIES} WHERE w.course_id IN (SELECT id FROM courses WHERE course_instance_id = $1)
                                 OR w.course_instance_id = $1) x
-      ORDER BY (status IN ('waiting', 'offered')) DESC, level_code, position NULLS LAST, closed_at DESC`,
+      ORDER BY (status IN ('waiting', 'offered')) DESC, level_rank(level_code), level_code, position NULLS LAST, closed_at DESC`,
     [courseInstanceId]
   );
   return rows.map(toEntry);

@@ -12,6 +12,8 @@
  *   level SchoolMan has twice on one start is one course with two groups.
  * - An exam preparation, a special module or a company's course is its own start, made here and not
  *   on the website (`on_website`), with its course: the title, the places, the price.
+ * - An intensive course that has ended, of a start the website never had (before August 2026), gets that
+ *   start here, off the website (2026-10-22): Kursplanung follows a class through its earlier levels.
  */
 import { connect } from '../db/client.mjs';
 
@@ -63,7 +65,8 @@ async function readStdin() {
 
 const courses = await readStdin();
 const client = await connect();
-const count = { read: courses.length, matched: 0, created: 0, groups: 0, starts: 0, noStart: 0, noLevel: 0, otherType: 0 };
+const count = { read: courses.length, matched: 0, created: 0, groups: 0, starts: 0, pastStarts: 0, noStart: 0, noLevel: 0, otherType: 0 }
+const today = new Date().toISOString().slice(0, 10);;
 
 try {
   await client.query('BEGIN');
@@ -89,12 +92,25 @@ try {
         count.noLevel++;
         continue;
       }
-      const start = (
+      let start = (
         await client.query(
           `SELECT id FROM course_instances WHERE course_type_id = $1 AND start_date = $2::date AND status <> 'cancelled' ORDER BY created_at LIMIT 1`,
           [type.id, c.start]
         )
       ).rows[0];
+      // A past start's classes keep their own shift on the course (below), as a start of ours leaves to CASA.
+      const past = type.slug === 'intensive-german' && c.end < today;
+      if (!start && past) {
+        const session = SESSION[c.daytime] ?? 'morning';
+        start = (
+          await client.query(
+            `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, status, on_website)
+             VALUES ($1, $2::date, $3::date, 0, $4::jsonb, 'scheduled', false) RETURNING id`,
+            [type.id, c.start, c.end, JSON.stringify({ days: days(type.slug, session, c.start), time: c.hours ? `${c.hours[0]}-${c.hours[1]}` : '09:00-12:30' })]
+          )
+        ).rows[0];
+        count.pastStarts++;
+      }
       if (!start) {
         count.noStart++;
         continue;
@@ -116,9 +132,10 @@ try {
         if (r.rowCount && groups > 1) count.groups++;
       } else {
         await client.query(
-          `INSERT INTO courses (course_instance_id, level_code, groups, places_per_group, bookable, price, filemaker_course_id, filemaker_group_ids)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text[]) ON CONFLICT DO NOTHING`,
-          [start.id, level, groups, places(c.places), c.bookable && c.active, type.slug === 'evening-german' ? money(c.price) : null, c.id, ids]
+          `INSERT INTO courses (course_instance_id, level_code, groups, places_per_group, bookable, price, filemaker_course_id, filemaker_group_ids, session)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text[], $9) ON CONFLICT DO NOTHING`,
+          [start.id, level, groups, places(c.places), c.bookable && c.active, type.slug === 'evening-german' ? money(c.price) : null, c.id, ids,
+           past ? (SESSION[c.daytime] ?? null) : null]
         );
         count.created++;
         if (groups > 1) count.groups++;
@@ -163,6 +180,6 @@ try {
 }
 
 console.log(
-  `${count.read} courses read: ${count.created} new, ${count.matched} already here · ${count.groups} with parallel groups · ${count.starts} own starts made · ` +
+  `${count.read} courses read: ${count.created} new, ${count.matched} already here · ${count.groups} with parallel groups · ${count.starts} own starts made · ${count.pastStarts} past intensive starts made · ` +
     `skipped: ${count.noStart} without a start of ours, ${count.noLevel} without a level, ${count.otherType} of a type we do not have`
 );
