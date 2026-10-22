@@ -9,7 +9,8 @@ import type { PlanningWeek } from './weeks';
  * write"), so the check is about the set, not a single cell: every group is one
  * of this month's groups in this shift, every date is a course day of this
  * week for that shift and inside the group's course, every teacher exists and
- * is active, and no group has two teachers on one date. Fit (absence, quota, level) is NOT enforced here —
+ * is on the board — or already held that day as the week was read (`base`: a day of SchoolMan's, or one
+ * planned before the teacher left the board, 0083) — and no group has two teachers on one date. Fit (absence, quota, level) is NOT enforced here —
  * a planner may knowingly save a conflict and fix it next; the board shows it.
  * Enforcing it server-side would make "save with a red ring" impossible, and
  * that is a state the planners live in for hours on a bad Monday.
@@ -19,6 +20,8 @@ export type WeekPayload = {
   shift: Shift;
   weekStart: string;
   assignments: readonly Assignment[];
+  /** The week as the board read it; the save is refused unless the database still holds it. */
+  base?: readonly Assignment[];
 };
 
 export function validateWeekAssignments(
@@ -36,7 +39,9 @@ export function validateWeekAssignments(
   const shiftGroups = new Map(
     groups.filter((g) => g.shift === payload.shift && g.month.slice(0, 7) === payload.month).map((g) => [g.id, g])
   );
+  const known = new Set(teachers.map((t) => t.id));
   const active = new Set(teachers.filter((t) => t.isActive).map((t) => t.id));
+  const held = new Set((payload.base ?? []).map((a) => `${a.groupId}|${a.onDate}|${a.teacherId}`));
   const seen = new Set<string>();
 
   for (const a of payload.assignments) {
@@ -51,7 +56,9 @@ export function validateWeekAssignments(
     } else if (!courseDays(group, week).includes(a.onDate)) {
       errors.push(`${a.onDate} is not a course day of the week ${payload.weekStart}`);
     }
-    if (!active.has(a.teacherId)) errors.push(`teacher ${a.teacherId} is unknown or inactive`);
+    if (!known.has(a.teacherId) || (!active.has(a.teacherId) && !held.has(`${a.groupId}|${a.onDate}|${a.teacherId}`))) {
+      errors.push(`teacher ${a.teacherId} is unknown or inactive`);
+    }
     const key = `${a.groupId}|${a.onDate}`;
     if (seen.has(key)) errors.push(`two teachers on ${key}`);
     seen.add(key);

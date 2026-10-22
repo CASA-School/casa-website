@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import pg from 'pg';
 
 /**
@@ -12,6 +12,16 @@ import pg from 'pg';
  * The one write it makes (placing a piece) is undone at the end, so the plan
  * is left as it was found.
  */
+/** A free piece in the tray: „Im Plan" first, else from „Weitere" opened (a month nobody has taught yet). */
+async function freePiece(page: Page) {
+  const pieces = page.locator('[role="button"][aria-pressed="false"][draggable="true"]');
+  if ((await pieces.count()) === 0) {
+    const more = page.locator('span', { hasText: /^Weitere$/ }).locator('xpath=../following-sibling::button[1]');
+    if (await more.count()) await more.click();
+  }
+  return pieces.first();
+}
+
 const DATABASE_URL = process.env.DATABASE_URL;
 
 test.describe('kursplanung', () => {
@@ -72,7 +82,7 @@ test.describe('kursplanung', () => {
     await expect(page.getByRole('heading', { name: 'Kursplanung' })).toBeVisible();
 
     const socket = page.locator('button[aria-label$=" offen"]').first();
-    const piece = page.locator('[role="button"][aria-pressed="false"][draggable="true"]').first();
+    const piece = await freePiece(page);
     test.skip((await socket.count()) === 0 || (await piece.count()) === 0, 'nothing open or nobody free in this month');
 
     const socketLabel = (await socket.getAttribute('aria-label'))!;
@@ -104,7 +114,7 @@ test.describe('kursplanung', () => {
     await expect(page.getByRole('heading', { name: 'Kursplanung' })).toBeVisible();
 
     const sockets = page.locator('button[aria-label$=" offen"]');
-    const piece = page.locator('[role="button"][aria-pressed="false"][draggable="true"]').first();
+    const piece = await freePiece(page);
     test.skip((await sockets.count()) < 2 || (await piece.count()) === 0, 'fewer than two open days, or nobody free, in this month');
 
     const mine = sockets.first();
@@ -144,7 +154,7 @@ test.describe('kursplanung', () => {
       await page.getByRole('button', { name: 'Neu laden' }).click();
       await expect(page.locator(`button[aria-label="${theirsLabel}"]`)).toHaveCount(0, { timeout: 10_000 });
       await page.keyboard.press('Escape');
-      await page.locator('[role="button"][aria-pressed="false"][draggable="true"]').first().click();
+      await (await freePiece(page)).click();
       await page.locator(`button[aria-label="${mineLabel}"]`).click();
       await expect(page.getByText(/Gespeichert \d\d:\d\d/)).toBeVisible({ timeout: 10_000 });
 

@@ -110,10 +110,9 @@ under „Weitere", the other shift under „Andere Schicht", the fully planned u
 lines of names until opened. The tray scrolls on its own beside the board. Levels are not shown: which
 columns fit shows when a piece is picked up. What it says is as true as the rules and absences on the
 staff register: a teacher still on the default rules (five days, Mo–Fr) shows days free they may not
-work, and an absence SchoolMan does not record shows a teacher free. `scripts/kursplanung/import-bridge.mjs` writes a person,
-a staff row, the role and the contract for a teacher it does not know. SchoolMan's staff import
-(2026-10-17) brought five teachers the board had not had; they start with the default rules (morning,
-five days, no levels) until the planners set theirs.
+work, and an absence SchoolMan does not record shows a teacher free. SchoolMan's staff import brings a
+teacher the register does not know, with the weekdays and times of day of SchoolMan's internal section
+(§A teacher's planning).
 
 ## Lesson days (2026-10-17, migrations 0045–0046)
 
@@ -135,8 +134,8 @@ The teachers' rules were derived from the September sheet; SchoolMan's lesson da
 warnings about classes CASA had long decided, and 107 of 117 groups had no pair. `learn_kursplanung()`
 closes both and **only ever adds**:
 
-- a teacher's levels gain every level SchoolMan has them teaching (cover days too), their weekdays every
-  weekday, their shifts every shift taught as the class's own teacher;
+- a teacher's levels gain every level SchoolMan has them teaching (cover days too) — until 0083 their
+  weekdays and shifts too, which the planners now set (§A teacher's planning);
 - a group without a pair gets the teacher who holds most of each half of its weeks that month, two
   different people (Kurse refuses one person in both halves).
 
@@ -205,6 +204,37 @@ class kept by one teacher for at most three full courses.
 - **The Tagesplan's class panel** names everyone who teaches the group that week, with their days and
   covers marked, not only the day's teacher.
 
+## A teacher's planning (2026-10-22, migration 0083)
+
+Rahman named who is on the board and when: „Ayse is planned Monday and Tuesday in the morning and
+Wednesday and Thursday in the afternoon; Bettina W. and Connie teach evenings; Fatma, Kathrin and Ulrich
+are inactive; Julia teaches online courses; Martin only examines; Meike and Milena are substitutes;
+Claudia F. Monday to Wednesday mornings, Helga Thursday and Friday mornings, Helmut Wednesday and Thursday
+afternoons; Nilar is employed but not active until February 2027." One list of weekdays for every shift
+could not say Ayse's week, and nothing said who belongs on the board at all.
+
+- **Weekdays per time of day.** `morning_days`, `afternoon_days` (no Friday), `evening_days` replace
+  `shifts` and `weekdays`; a shift is taught where its days are not empty (`worksOn(teacher, dow, shift)`).
+  A day in the other shift is a cover, as before; a day in neither is „arbeitet nicht am …".
+- **What a colleague teaches.** `course_kinds`, SchoolMan's course types (Intensivkurs, Abendkurs, Online
+  Kurs, …). The board plans who teaches intensive courses, or whose kinds nobody has set yet.
+- **Active, and from when.** `teaching_active` takes someone off the board while they stay on the staff
+  register; `teaching_from` keeps an employed colleague off it until a date (Nilar: 1 February 2027), shown
+  absent („Freistellung") before it.
+- **Cover only.** `cover_only`: in the tray under „Vertretungskräfte", never in a group's pair and never
+  learnt into one.
+- **Who sets them.** The colleague's tab Unterricht (Mitarbeitende) has every field. A rule set there, or
+  by this migration, records `planning_set_at`, and the bridge leaves that colleague's rules alone from
+  then on. For the others SchoolMan's internal section („Intern" on the staff record: `_ID_ActiveTeacher`,
+  `_ID_CourseTypeReference`, `_ID_WeekDay`, `_ID_DayTimeReference`) brings the course kinds, active and
+  the evening days on every bridge run, and the morning and afternoon days only for someone new — the
+  planners' days are not overwritten by SchoolMan's coarser list. Martin is an examiner, not a teacher.
+- **The tray.** „Abwesend" and „Verplant" list only the shift's own teachers; someone who covered the
+  shift last month and does not teach it is not listed there.
+- **Days already held stay.** A day held by someone now off the board (SchoolMan's, or planned before
+  they left it) is kept when the week is saved; placing them anew is refused (`validateWeekAssignments`
+  with the week as read). Before, such a day made the whole week unsaveable.
+
 ## Course starts (2026-10-17)
 
 A course start's level group and a Kursplanung group are the same class. Nothing is stored to say
@@ -265,7 +295,6 @@ src/app/(admin)/admin/(focus)/
                            (auto-save-row.tsx: a dropdown on change, a field when left; one form per row, named via form=)
   kursplanung/lehrkraefte/ an old link's redirect to the staff register (the tab was removed 2026-10-22)
   lib/admin/kursplanung/colours.ts   the level tints, shared by board and Kurse
-scripts/kursplanung/import-bridge.mjs   loads the tables from the analytics bridge's JSON
 ```
 
 **One write.** Every board mutation (place, remove, move, resize, flags, copy week, undo) is computed

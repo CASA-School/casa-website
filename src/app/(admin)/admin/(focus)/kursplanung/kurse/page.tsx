@@ -65,7 +65,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   // ran to the whole staff, a level not listed marked with „?").
   const pairOptions = (g: CourseGroup, current: string | null) => {
     const order = (a: Teacher, b: Teacher) => Number(a.contract === 'freelance') - Number(b.contract === 'freelance') || a.shortName.localeCompare(b.shortName, 'de');
-    const shift = plan.teachers.filter((x) => x.isActive && x.shifts.includes(g.shift)).sort(order);
+    // Cover-only colleagues are no one's regular teacher.
+    const shift = plan.teachers.filter((x) => x.isActive && !x.coverOnly && x.shifts.includes(g.shift)).sort(order);
     const fits = shift.filter((x) => x.levels.includes(g.level));
     const others = shift.filter((x) => !x.levels.includes(g.level));
     const outside = current && !shift.some((x) => x.id === current) ? plan.teachers.find((x) => x.id === current) : undefined;

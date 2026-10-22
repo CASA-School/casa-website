@@ -2244,7 +2244,9 @@ short name and roles, the contract for those who see it, and „Neu" (name and
 roles; contact, short name and the first contract open once a first name is
 in). A colleague's page in tabs: **Übersicht** (the next four weeks on the
 board, days away, roles, workspace account); **Unterricht** (the board's days,
-absences to add or take back, the rules); **Prüfungen** (sittings and
+absences to add or take back, the rules: teaching at present and again from when, the course kinds,
+the weekdays per morning, afternoon and evening, cover only, levels — docs/KURSPLANUNG.md §A teacher's
+planning); **Stunden** (the time sheet, `staff_private`); **Prüfungen** (sittings and
 licences); **Persönliche Daten**; **Vertrag** (contracts, tax and insurance);
 **Bankverbindung**. The foot: „Ausgeschieden" / „Wieder aktiv", and „Löschen"
 for an entry made by mistake — refused once Kursplanung or an exam names them.

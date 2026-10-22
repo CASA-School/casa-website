@@ -5,8 +5,8 @@ import type { StaffUser } from './auth';
 import { query, queryFirst, withTransaction } from './db';
 import { normalizeEmail, normalizePhone } from './normalize';
 import type { Bilingual } from './i18n';
-import { ABSENCE_REASONS, LEVELS, SHIFTS, WEEKDAYS, type AbsenceReason, type Level, type Shift, type Weekday } from './kursplanung/types';
-import type { ContractKind, StaffView } from './staff-labels';
+import { ABSENCE_REASONS, LEVELS, WEEKDAYS, type AbsenceReason, type Level, type Shift, type Weekday } from './kursplanung/types';
+import { COURSE_KINDS, type ContractKind, type CourseKind, type StaffView } from './staff-labels';
 
 /**
  * The staff register (2026-10-17, migration 0039; docs/ADMIN_WORKSPACE.md §Staff): everyone who works
@@ -124,10 +124,23 @@ export type StaffContract = {
   current: boolean;
 };
 
+/** What Kursplanung plans a teacher by (0083): the weekdays per time of day, the course types, cover-only, active and from when. */
+export type TeachingRules = {
+  days: { morning: Weekday[]; afternoon: Weekday[]; evening: Weekday[] };
+  daysPerWeek: number;
+  levels: Level[];
+  courseKinds: CourseKind[];
+  coverOnly: boolean;
+  active: boolean;
+  /** `yyyy-mm-dd`: not planned before. */
+  from: string | null;
+  note: string | null;
+};
+
 export type StaffDetail = StaffListItem & {
   filemakerStaffId: string | null;
   createdAt: Date;
-  teaching: { shifts: Shift[]; daysPerWeek: number; weekdays: Weekday[]; levels: Level[]; note: string | null };
+  teaching: TeachingRules;
   account: { id: string; name: string; email: string; role: string; lastSeenAt: Date | null } | null;
 };
 
@@ -136,10 +149,15 @@ export async function getStaffMember(id: string): Promise<StaffDetail | null> {
     ListRow & {
       filemaker_staff_id: string | null;
       created_at: Date;
-      shifts: string[];
+      morning_days: string[];
+      afternoon_days: string[];
+      evening_days: string[];
       days_per_week: number;
-      weekdays: string[];
       levels: string[];
+      course_kinds: string[];
+      cover_only: boolean;
+      teaching_active: boolean;
+      teaching_from: string | null;
       note: string | null;
       account_id: string | null;
       account_name: string | null;
@@ -150,7 +168,8 @@ export async function getStaffMember(id: string): Promise<StaffDetail | null> {
   >(
     `${LIST.replace(
       'FROM staff_members s',
-      `, s.filemaker_staff_id, s.created_at, s.shifts, s.days_per_week, s.weekdays, s.levels, s.note,
+      `, s.filemaker_staff_id, s.created_at, s.morning_days, s.afternoon_days, s.evening_days, s.days_per_week, s.levels, s.course_kinds,
+         s.cover_only, s.teaching_active, to_char(s.teaching_from, 'YYYY-MM-DD') AS teaching_from, s.note,
          u.id AS account_id, u.name AS account_name, u.email AS account_email, u.role::text AS account_role, u.last_seen_at AS account_seen
     FROM staff_members s
     LEFT JOIN staff_users u ON u.id = s.staff_user_id`
@@ -163,10 +182,17 @@ export async function getStaffMember(id: string): Promise<StaffDetail | null> {
     filemakerStaffId: row.filemaker_staff_id,
     createdAt: row.created_at,
     teaching: {
-      shifts: SHIFTS.filter((x) => row.shifts.includes(x)),
+      days: {
+        morning: WEEKDAYS.filter((x) => row.morning_days.includes(x)),
+        afternoon: WEEKDAYS.filter((x) => row.afternoon_days.includes(x)),
+        evening: WEEKDAYS.filter((x) => row.evening_days.includes(x)),
+      },
       daysPerWeek: row.days_per_week,
-      weekdays: WEEKDAYS.filter((x) => row.weekdays.includes(x)),
       levels: LEVELS.filter((x) => row.levels.includes(x)),
+      courseKinds: COURSE_KINDS.filter((x) => row.course_kinds.includes(x)),
+      coverOnly: row.cover_only,
+      active: row.teaching_active,
+      from: row.teaching_from,
       note: row.note,
     },
     account: row.account_id
@@ -371,17 +397,31 @@ export async function setStaffRoles(id: string, roles: readonly string[], actor:
 }
 
 /** The board's rules: the short name, the shifts, days a week, weekdays and levels Kursplanung fits a piece by. */
-export async function setTeachingRules(
-  id: string,
-  rules: { shortName: string; shifts: Shift[]; daysPerWeek: number; weekdays: Weekday[]; levels: Level[]; note: string | null },
-  actor: StaffUser
-): Promise<Result> {
+/** The planners' word: set by hand, so the bridge leaves these rules alone from now on (`planning_set_at`). */
+export async function setTeachingRules(id: string, rules: TeachingRules & { shortName: string }, actor: StaffUser): Promise<Result> {
   const taken = await queryFirst<{ id: string }>(`SELECT id FROM staff_members WHERE lower(short_name) = lower($1) AND id <> $2`, [rules.shortName, id]);
   if (taken) return refuse('Dieses Kürzel gibt es schon.', 'That short name is taken.');
   await query(
-    `UPDATE staff_members SET short_name = $2, shifts = $3, days_per_week = $4, weekdays = $5, levels = $6, note = $7, updated_at = timezone('utc', now())
+    `UPDATE staff_members
+        SET short_name = $2, morning_days = $3, afternoon_days = $4, evening_days = $5, days_per_week = $6, levels = $7, course_kinds = $8,
+            cover_only = $9, teaching_active = $10, teaching_from = $11::date, note = $12,
+            planning_set_at = timezone('utc', now()), planning_set_by = $13, updated_at = timezone('utc', now())
       WHERE id = $1`,
-    [id, rules.shortName, rules.shifts, rules.daysPerWeek, rules.weekdays, rules.levels, rules.note]
+    [
+      id,
+      rules.shortName,
+      rules.days.morning,
+      rules.days.afternoon.filter((d) => d !== 'Fr'),
+      rules.days.evening,
+      rules.daysPerWeek,
+      rules.levels,
+      rules.courseKinds,
+      rules.coverOnly,
+      rules.active,
+      rules.from,
+      rules.note,
+      actor.id,
+    ]
   );
   await logActivity({ actor, entity: 'staff_member', entityId: id, action: 'staff_teaching_set' });
   return { ok: true };

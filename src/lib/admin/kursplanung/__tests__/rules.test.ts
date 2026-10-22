@@ -43,7 +43,7 @@ describe('analysePlan', () => {
   });
 
   it('flags an assignment on an absent day and on a weekday not worked', () => {
-    const anna = teacher({ id: 'anna', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
+    const anna = teacher({ id: 'anna', days: { morning: ['Mo', 'Di', 'Mi', 'Do'], afternoon: [] } });
     const ctx = context({
       teachers: [anna],
       groups: [group({ id: 'a1' })],
@@ -66,7 +66,7 @@ describe('analysePlan', () => {
   });
 
   it('warns about the other shift without the substitute mark, and about a missing level', () => {
-    const pm = teacher({ id: 'pm', shifts: ['afternoon'], levels: ['B1'] });
+    const pm = teacher({ id: 'pm', days: { morning: [], afternoon: ['Mo', 'Di', 'Mi', 'Do'] }, shifts: ['afternoon'], levels: ['B1'] });
     const ctx = context({ teachers: [pm], groups: [group({ id: 'a1' })], assignments: [assignment('a1', KW40[0], 'pm')] });
     expect(analysePlan(ctx).byKey.get(`a1|${KW40[0]}`)?.map((i) => i.code).sort()).toEqual(['niveau', 'schicht']);
 

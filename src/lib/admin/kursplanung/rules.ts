@@ -1,6 +1,6 @@
 import type { Bilingual } from '../i18n';
 
-import { absenceOn, assignmentKey, courseDays, teacherById, unitsUsed, type PlanContext } from './fit';
+import { absenceOn, assignmentKey, courseDays, teacherById, unitsUsed, worksOn, type PlanContext } from './fit';
 import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Shift, type Weekday } from './types';
 import { weekdayOf } from './weeks';
 
@@ -107,10 +107,11 @@ export function analysePlan(ctx: PlanContext): Analysis {
           push({ ...base, severity: 'hard', code: 'abwesend', onDate: date, teacherId: assignment.teacherId, text: { de: `${absence.reason} · ${weekdayOf(date) ?? ''}`, en: `${ABSENCE_LABELS[absence.reason].en} · ${dayEn(weekdayOf(date))}` } });
         }
         const dow = weekdayOf(date);
-        if (teacher && dow && !teacher.weekdays.includes(dow)) {
+        if (teacher && dow && !worksOn(teacher, dow)) {
           push({ ...base, severity: 'hard', code: 'wochentag', onDate: date, teacherId: assignment.teacherId, text: { de: `arbeitet nicht am ${dow}`, en: `does not work on ${dayEn(dow)}` } });
         }
-        if (teacher && !teacher.shifts.includes(group.shift) && !assignment.isSubstitute) {
+        // There that day, but in the other shift: a cover from there, unless marked as one.
+        if (teacher && dow && worksOn(teacher, dow) && !worksOn(teacher, dow, group.shift) && !assignment.isSubstitute) {
           push({ ...base, severity: 'warn', code: 'schicht', onDate: date, teacherId: assignment.teacherId, text: { de: `sonst ${teacher.shifts.map((s) => SHIFT_INFO[s].label.de).join('/')}`, en: `usually ${teacher.shifts.map((s) => SHIFT_INFO[s].label.en.toLowerCase()).join('/')}` } });
         }
         if (teacher && !teacher.levels.includes(group.level)) {

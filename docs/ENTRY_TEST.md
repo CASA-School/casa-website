@@ -67,10 +67,14 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    Tagesplan opens the archive (`/admin/day/tests`): every test day, the latest first, each test opening
    the same panel — results, answers, log, the Excel and the PDF of the sitting or the day, a paper
    booklet typed in late. A deletion period comes later; days are the unit it will drop.
-8. **Heute öffnen.** On the archive page, for a day that is not a class's first lesson: a late joiner, a
-   make-up, a trial run. Tied to the classes (Rahman, 2026-10-20): the list holds only today's intensive
-   A2, B1 and B1+ classes, either part of the level (A2.1, A2.2 — `entryTestForClass()`), and the class
-   chosen gives the test and the morning or afternoon; it opens that sitting as the Tagesplan's card would.
+8. **Tests öffnen** (Rahman, 2026-10-22). Only on the first day of an intensive start — a level begins
+   once a month in the morning and once in the afternoon, so on a morning start only the morning's A2,
+   B1 and B1+ courses write the test. The Tagesplan's card and the archive page carry „Tests öffnen" that
+   day (`dayEntryTests()`: the course's first lesson day, the level's first part): all the courses whose
+   test is not open yet, or the ones ticked („Ausgewählte Kurse", „Alle auswählen"), and the minutes.
+   `openEntryTests()` opens one sitting per test and session; a course of the same test shares it. A
+   test already open is left as it is. The per-test „Test öffnen" in its panel stays. The old „Heute
+   öffnen" for a class on a later day (a late joiner) is gone.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
    per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
    notes, and the average; the Excel keeps every answer.
@@ -111,7 +115,7 @@ poster is reprinted.
 | Phone flow | `src/lib/entry-test/attempts.server.ts`, `src/app/api/entry-test/route.ts` (one POST, one body per action, `src/lib/entry-test/types.ts`) |
 | Phone page | `src/app/(site)/[locale]/test`, `src/components/entry-test/` |
 | Workspace | `src/lib/admin/entry-tests.ts`, `day/entry-test-panel.tsx`, actions in `day/actions.ts`, Excel at `day/entry-test/export/route.ts` (checks the session and module `day` itself) |
-| Archive, print | `day/tests/page.tsx` (archive, „Heute öffnen"), `day/tests/results` (PDF), `day/tests/booklet`, `day/tests/qr`, `day/tests/print-sheet.tsx`; `src/components/admin/qr-code.tsx` |
+| Archive, print | `day/tests/page.tsx` (archive), `day/open-tests-dialog.tsx` („Tests öffnen"), `day/tests/results` (PDF), `day/tests/booklet`, `day/tests/qr`, `day/tests/print-sheet.tsx`; `src/components/admin/qr-code.tsx` |
 
 Access: module `day` — `view` sees the card, the results and the Excel; `edit` opens, closes, releases,
 hands in and types in paper; `full` deletes an attempt (with its result on the learner's record).

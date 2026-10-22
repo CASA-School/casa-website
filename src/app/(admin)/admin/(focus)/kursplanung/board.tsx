@@ -7,7 +7,7 @@ import { useWsLang } from '@/components/admin/lang';
 import { SESSION_COLOURS } from '@/lib/admin/day-plan-labels';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { levelStyle as lvStyle } from '@/lib/admin/kursplanung/colours';
-import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, shiftDays, span, unitsUsed, type DayState, type PlanContext } from '@/lib/admin/kursplanung/fit';
+import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, shiftDays, span, unitsUsed, worksOn, type DayState, type PlanContext } from '@/lib/admin/kursplanung/fit';
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { levelName, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
@@ -94,6 +94,7 @@ export function Board({
   const [showOther, setShowOther] = useState(false);
   const [showFull, setShowFull] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showCover, setShowCover] = useState(false);
   const [help, setHelp] = useState(false);
   const [query, setQuery] = useState('');
   const [, startTransition] = useTransition();
@@ -196,9 +197,9 @@ export function Board({
     const dates = span(local, teacherId, group, fromDate, limit);
     if (dates.length === 0) return null;
     const t = teacher(teacherId);
-    const substitute = !!t && !t.shifts.includes(group.shift);
     const next = without(base, group.id, dates);
-    dates.forEach((d) => next.push({ groupId: group.id, onDate: d, teacherId, isSubstitute: substitute, isTentative: false }));
+    // A day in a shift they do not teach that weekday is a cover: Ayse on a Monday afternoon.
+    dates.forEach((d) => next.push({ groupId: group.id, onDate: d, teacherId, isSubstitute: !!t && !worksOn(t, weekdayOf(d)!, group.shift), isTentative: false }));
     return next;
   };
 
@@ -409,7 +410,7 @@ export function Board({
   const st = statsFor(shown);
 
   const tray = useMemo(() => {
-    if (!week) return { main: [], more: [], other: [], away: [], full: [], pooled: false };
+    if (!week) return { main: [], cover: [], more: [], other: [], away: [], full: [], pooled: false };
     // Who teaches in this shift's plan (this month or the last): the planners' sheet lists them and, apart,
     // who else is „verfügbar". Everyone else with days free folds under „Weitere" (2026-10-22: the tray ran
     // to the whole staff, SchoolMan's teachers who never teach an intensive class among them).
@@ -428,14 +429,17 @@ export function Board({
       (b.open ?? -99) - (a.open ?? -99) ||
       b.rest - a.rest ||
       a.t.shortName.localeCompare(b.t.shortName, 'de');
-    const free = rows.filter((x) => x.rest > 0 && !x.awayAll);
+    // Cover-only colleagues (Meike, Milena) are a list of their own: never anyone's regular piece.
+    const free = rows.filter((x) => x.rest > 0 && !x.awayAll && !x.t.coverOnly);
     const first = (x: (typeof rows)[number]) => (inPlan.size ? x.planned : x.own);
     return {
       main: free.filter(first).sort(byRest),
+      cover: rows.filter((x) => x.rest > 0 && !x.awayAll && x.t.coverOnly).sort(byRest),
       more: free.filter((x) => !first(x) && x.own).sort(byRest),
       other: free.filter((x) => !first(x) && !x.own).sort(byRest),
-      away: rows.filter((x) => x.awayAll && (x.own || x.planned)),
-      full: rows.filter((x) => x.rest <= 0 && !x.awayAll && (x.own || x.planned)),
+      away: rows.filter((x) => x.awayAll && x.own),
+      // Fully planned in this shift: someone who teaches it; last month's teacher who no longer does is not listed.
+      full: rows.filter((x) => x.rest <= 0 && !x.awayAll && x.own),
       pooled: inPlan.size > 0,
     };
   }, [ctx, regulars, shift, week]);
@@ -510,7 +514,7 @@ export function Board({
     const wk = weekOf(m.dates[0]);
     const range = `${day(m.dates[0])}${m.dates.length > 1 ? `–${day(m.dates[m.dates.length - 1])}` : ''}`;
     const free = courseDays(g, wk).filter((d) => !assignments.some((x) => x.groupId === g.id && x.onDate === d) && fit(ctx, a.teacherId, g, d).ok);
-    const absent = m.dates.filter((d) => absenceOn(ctx, a.teacherId, d) || (who && !who.weekdays.includes(weekdayOf(d)!)));
+    const absent = m.dates.filter((d) => absenceOn(ctx, a.teacherId, d) || (who && !worksOn(who, weekdayOf(d)!)));
     const row = (title: string, onClick: () => void, cls?: string) => (
       <button key={title} type="button" className={`${styles.mr} ${cls ?? ''}`} onClick={onClick}>{title}</button>
     );
@@ -783,6 +787,7 @@ export function Board({
             ) : null}
             {tray.pooled ? <div className={styles.sect}><span className={styles.lbl}>{t('Im Plan', 'In the plan')}</span><span className={styles.n}>{tray.main.length}</span></div> : null}
             {tray.main.length ? tray.main.map((x) => trayPiece(x, !canWrite)) : <div className={styles.foldText}>{tray.pooled ? t(`Im Plan hat in KW ${week.kw} niemand mehr Tage frei.`, `Nobody in the plan has days free in KW ${week.kw}.`) : t(`In KW ${week.kw} hat niemand mehr Tage frei.`, `Nobody has days free in KW ${week.kw}.`)}</div>}
+            {folded(t('Vertretungskräfte', 'Cover teachers'), tray.cover, showCover, setShowCover, !canWrite)}
             {folded(t('Weitere', 'Others'), tray.more, showMore, setShowMore, !canWrite)}
             {folded(t('Andere Schicht · als Vertretung', 'Other shift · as cover'), tray.other, showOther, setShowOther, !canWrite)}
             {tray.away.length ? <><div className={styles.sect}><span className={styles.lbl}>{t('Abwesend', 'Absent')}</span><span className={styles.n}>{tray.away.length}</span></div><div className={styles.foldText}>{tray.away.map((x) => x.t.shortName).join(', ')}</div></> : null}

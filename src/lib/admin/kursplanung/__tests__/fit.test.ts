@@ -19,7 +19,7 @@ describe('fit', () => {
   });
 
   it('blocks a weekday the person does not work', () => {
-    const noFriday = teacher({ id: 'nf', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
+    const noFriday = teacher({ id: 'nf', days: { morning: ['Mo', 'Di', 'Mi', 'Do'], afternoon: [] } });
     const ctx = context({ teachers: [noFriday], groups: [a1] });
     expect(fit(ctx, 'nf', a1, KW40[4])).toEqual({ ok: false, reason: { de: 'nicht am Fr', en: 'not on Fri' } });
   });
@@ -41,7 +41,7 @@ describe('fit', () => {
   });
 
   it('marks the other shift as a substitution and a missing level as a warning', () => {
-    const pm = teacher({ id: 'pm', shifts: ['afternoon'], levels: ['B1'] });
+    const pm = teacher({ id: 'pm', days: { morning: [], afternoon: ['Mo', 'Di', 'Mi', 'Do'] }, shifts: ['afternoon'], levels: ['B1'] });
     const ctx = context({ teachers: [pm], groups: [a1] });
     expect(fit(ctx, 'pm', a1, KW40[0])).toEqual({ ok: true, substitute: true, levelMatch: false });
   });
@@ -59,7 +59,7 @@ describe('remaining days', () => {
   });
 
   it('names the days of the week: planned in either shift, away, not worked, free', () => {
-    const fourDays = teacher({ id: 'four', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
+    const fourDays = teacher({ id: 'four', days: { morning: ['Mo', 'Di', 'Mi', 'Do'], afternoon: [] } });
     const pm = group({ id: 'p1', shift: 'afternoon', level: 'A2' });
     const ctx = context({
       teachers: [fourDays],

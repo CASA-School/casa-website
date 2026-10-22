@@ -104,7 +104,7 @@ test.describe('staff register', () => {
       `SELECT s.short_name, array_agg(r.role_code ORDER BY r.role_code) AS roles FROM staff_members s JOIN staff_member_roles r ON r.staff_member_id = s.id WHERE s.id = $1 GROUP BY s.short_name`,
       [staffId]
     );
-    expect(rows).toEqual([{ short_name: 'Erika P', roles: ['examiner'] }]);
+    expect(rows).toEqual([{ short_name: 'Erika P.', roles: ['examiner'] }]);
   });
 
   test('their person is not a learner', async ({ page }) => {

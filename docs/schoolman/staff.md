@@ -48,6 +48,18 @@ side of it. Days off come across for Kursplanung (`read_absences.py`): ill, holi
 the days marked absent with their kind (`_ID_Absence`, `_ID_AbsenceDetail` — 1 Tarifurlaub, 2 unbezahlter
 Urlaub, 3 Abbau Überstunden, 4 Sonderurlaub, 5 Krank, 6 Anderes, 7 off sick; 1,777 days in 2026).
 
+The staff record's internal section („Intern", 2026-10-22, 0083) comes across with the staff import:
+active as a teacher (`_ID_ActiveTeacher`, 1 yes, 2 no), the course types taught
+(`_ID_CourseTypeReference`: 1 Intensivkurs, 2 Abendkurs, 3 Sommerkurs, 4 Einzelunterricht, 5 Geschlossene
+Gruppe, 7 Prüfungsvorbereitung, 9 Juniorkurs, 10 Firmenunterricht, 11 Spezialkurs, 12 Superintensivkurs,
+15 Online Kurs, 16 Zusatzkurs), the weekdays (`_ID_WeekDay`, 2 Monday … 6 Friday) and times of day
+(`_ID_DayTimeReference`, 2 vormittags, 4 nachmittags, 5 abends), the levels (`_ID_Level`), employed or
+freelance (`_ID_StatusEmployee`). SchoolMan keeps one list of weekdays for all times of day, so it gives
+the evening days and a new teacher's first rule; a rule the planners set on the colleague's page is
+kept (docs/KURSPLANUNG.md §A teacher's planning). `CommentsOnTeacher` is not read into the workspace. The
+time sheet's balances come across since 0082 (`read_time.py`: `SingleMonthStaff`, `SingleYearStaff`);
+never read `SingleDayStaff`'s `cal_*` fields, which are calculated and held FileMaker for 45 minutes.
+
 ## Open questions
 
 1. When working time moves, does the Klassenbuch keep the teachers' side and the workspace finance's?

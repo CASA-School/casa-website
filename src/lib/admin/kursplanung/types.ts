@@ -89,9 +89,17 @@ export type Teacher = {
   contract: Contract;
   /** Teaching units a week in the contract that runs today (SchoolMan's `DateTargetWorkTime`); none for most freelancers. */
   weeklyUnits: number | null;
+  /**
+   * The weekdays they teach in each shift (0083): Ayse Mo–Di in the morning and Mi–Do in the afternoon.
+   * A shift is theirs where its days are not empty (`shifts`, derived).
+   */
+  days: Readonly<Record<Shift, readonly Weekday[]>>;
   shifts: readonly Shift[];
   daysPerWeek: number;
-  weekdays: readonly Weekday[];
+  /** On the board as a cover only, never in a group's regular pair (Meike, Milena). */
+  coverOnly: boolean;
+  /** Not planned before this day, `yyyy-mm-dd`: still employed, not yet active again (Nilar, February 2027). */
+  from: string | null;
   levels: readonly Level[];
   note: string | null;
   filemakerStaffId: string | null;

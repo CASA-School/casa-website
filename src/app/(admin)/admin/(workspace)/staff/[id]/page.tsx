@@ -30,7 +30,7 @@ import { counted, num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ABSENCE_LABELS, WEEKDAY_LABELS } from '@/lib/admin/kursplanung/types';
 import { getPerson, listBankAccounts, listCountries } from '@/lib/admin/people';
-import { CONTRACT_KIND_LABELS } from '@/lib/admin/staff-labels';
+import { CONTRACT_KIND_LABELS, COURSE_KIND_LABELS } from '@/lib/admin/staff-labels';
 import {
   getStaffMember,
   staffContracts,
@@ -383,11 +383,22 @@ export default async function StaffMemberPage({
                 items={[
                   { label: t('Kürzel', 'Short name'), value: member.shortName },
                   {
-                    label: t('Schichten', 'Shifts'),
-                    value: member.teaching.shifts.map((s) => (s === 'morning' ? t('Vormittag', 'Morning') : t('Nachmittag', 'Afternoon'))).join(' · '),
+                    label: t('Unterrichtet', 'Teaches'),
+                    value: !member.teaching.active
+                      ? t('Zurzeit nicht', 'Not at present')
+                      : [
+                          member.teaching.courseKinds.map((k) => pick(lang, COURSE_KIND_LABELS[k])).join(' · ') || null,
+                          member.teaching.from ? t(`wieder ab ${full(member.teaching.from)}`, `again from ${full(member.teaching.from)}`) : null,
+                          member.teaching.coverOnly ? t('nur als Vertretung', 'cover only') : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || null,
                   },
+                  ...(['morning', 'afternoon', 'evening'] as const).map((s) => ({
+                    label: { morning: t('Vormittag', 'Morning'), afternoon: t('Nachmittag', 'Afternoon'), evening: t('Abend', 'Evening') }[s],
+                    value: member.teaching.days[s].map((d) => pick(lang, WEEKDAY_LABELS[d])).join(' · ') || null,
+                  })),
                   { label: t('Tage pro Woche', 'Days per week'), value: String(member.teaching.daysPerWeek) },
-                  { label: t('Wochentage', 'Weekdays'), value: member.teaching.weekdays.map((d) => pick(lang, WEEKDAY_LABELS[d])).join(' · ') },
                   { label: t('Niveaus', 'Levels'), value: member.teaching.levels.join(' · ') || null },
                   ...(member.teaching.note ? [{ label: t('Notiz', 'Note'), value: member.teaching.note, wide: true }] : []),
                 ]}
