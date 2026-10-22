@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { berlinDay } from './days';
 import { query, queryFirst } from './db';
 
 /**
@@ -14,12 +15,18 @@ export type TimeMonth = {
   month: string;
   target: number | null;
   worked: number | null;
-  /** The month's plus or minus hours. */
+  /**
+   * The month's plus or minus hours — only once the month is over: SchoolMan makes the year's time sheets
+   * ahead, and a month not yet over carries its whole target as minus hours (Rahman, 2026-10-22: „it shows
+   * minus while I should have plus").
+   */
   balance: number | null;
   /** The balance carried to the month's end. */
   running: number | null;
   holidayLeft: number | null;
   approved: boolean;
+  /** The month is not over yet: the current one or one ahead; its sheet's figures are left out. */
+  open: boolean;
   /**
    * Teaching units held that month (lesson days, not called off), and what the contract holds for it; none
    * for a month before the lesson days the workspace has (SchoolMan's from eight months back).
@@ -33,8 +40,6 @@ export type StaffTime = {
   months: TimeMonth[];
   holidays: number | null;
   holidaysLeft: number | null;
-  /** The year's balance as SchoolMan carries it. */
-  running: number | null;
   weeklyHours: number | null;
   weeklyUnits: number | null;
   /** Whether SchoolMan's time sheet has anything for the year. */
@@ -52,8 +57,8 @@ export async function staffTime(staffId: string, year: number): Promise<StaffTim
          FROM staff_time_months WHERE staff_member_id = $1 AND extract(year FROM month) = $2 ORDER BY month`,
       [staffId, year]
     ),
-    queryFirst<{ holiday_days: string | null; holiday_days_left: string | null; running_hours: string | null }>(
-      `SELECT holiday_days, holiday_days_left, running_hours FROM staff_time_years WHERE staff_member_id = $1 AND year = $2`,
+    queryFirst<{ holiday_days: string | null; holiday_days_left: string | null }>(
+      `SELECT holiday_days, holiday_days_left FROM staff_time_years WHERE staff_member_id = $1 AND year = $2`,
       [staffId, year]
     ),
     query<{ month: string; units: string }>(
@@ -90,8 +95,10 @@ export async function staffTime(staffId: string, year: number): Promise<StaffTim
   const sheet = new Map(months.map((m) => [m.month, m]));
   const taught = new Map(units.map((u) => [u.month, Number(u.units)]));
   const known = (month: string) => since?.month != null && month >= since.month;
+  const current = berlinDay(new Date()).slice(0, 7);
   const list: TimeMonth[] = contract.map((c) => {
-    const m = sheet.get(c.month);
+    const open = c.month >= current;
+    const m = open ? undefined : sheet.get(c.month);
     const held = known(c.month);
     return {
       month: c.month,
@@ -101,6 +108,7 @@ export async function staffTime(staffId: string, year: number): Promise<StaffTim
       running: m ? n(m.running_hours) : null,
       holidayLeft: m ? n(m.holiday_days_left) : null,
       approved: m?.approved ?? false,
+      open,
       units: held ? (taught.get(c.month) ?? 0) : null,
       contractUnits: !held || c.weekly_units === null ? null : Math.round((Number(c.weekly_units) * c.weekdays) / 5),
     };
@@ -111,7 +119,6 @@ export async function staffTime(staffId: string, year: number): Promise<StaffTim
     months: list,
     holidays: n(yearRow?.holiday_days ?? null),
     holidaysLeft: n(yearRow?.holiday_days_left ?? null),
-    running: n(yearRow?.running_hours ?? null),
     weeklyHours: latest?.weekly_hours ? Number(latest.weekly_hours) : null,
     weeklyUnits: latest?.weekly_units ? Number(latest.weekly_units) : null,
     hasSheet: months.length > 0 || Boolean(yearRow),
