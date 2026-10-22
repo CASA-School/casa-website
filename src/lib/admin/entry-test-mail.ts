@@ -73,6 +73,7 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
     const open = x.sitting && x.sitting.state !== 'closed' ? x.sitting : null;
     return {
       key: `${x.session}-${x.test}`,
+      test: x.test,
       sittingId: open?.id ?? null,
       session: x.session,
       title: x.title,

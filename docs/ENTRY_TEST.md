@@ -84,11 +84,14 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    during, after, the results — replacing the Google version's „Leitfaden zur Durchführung", whose
    separate typing-in step the phones made unnecessary, and saying only what CASA does (no address
    beside the QR code; the office does not pass results on). The steps are one text
-   (`src/lib/entry-test/guide.ts`) for the page and the mail. With a sitting (`?sitting=`) the page
-   carries that test's day, classes, code and QR code.
+   (`src/lib/entry-test/guide.ts`) for the page and the mail. **Three pages, kept apart** (Rahman,
+   2026-10-22: so the teachers are not confused): the guide alone; the QR code per test (`/qr`, for the
+   board); the teachers' codes as cards to cut out, one per class with its teacher (`/codes?date=`,
+   „Code-Karten" in a test's panel and on the mail page).
    **„E-Mail an Lehrkräfte"** (`day/tests/mail?date=`, from the tests page, the Tagesplan's card, a
    test's panel and the guide) is one mail for a start day, a few days ahead with the course start
-   mails: the office's text, every test with its classes, code and QR code, then the guide. The page
+   mails: the office's text, then three parts kept apart — 1 the teachers' codes per test and class,
+   2 the QR codes for the board, 3 the guide. The page
    lists the next start days; who gets it (the test day's teachers of those classes, ticked; the
    classes' other teachers of that week, unticked; any further address; a teacher without an address
    on record is named); the subject and text; and on the right
