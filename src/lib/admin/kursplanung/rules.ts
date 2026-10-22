@@ -8,7 +8,8 @@ import { weekdayOf } from './weeks';
  * Everything the plan currently violates.
  *
  * `hard` must be cleared before a week is complete: nobody planned on a day,
- * one person in two courses of the same shift on the same day, somebody
+ * one person in two courses of the same shift on the same day (unless the
+ * two are taught together that day, a „Zusammenlegung"), somebody
  * planned while absent or on a weekday they do not work, more days than the
  * contract allows. `warn` is a planner's judgement call: the other shift
  * without the substitution mark, a level the person is not listed for, a
@@ -69,6 +70,8 @@ export function analysePlan(ctx: PlanContext): Analysis {
     usage.set(week.start, weekUsage);
     /** `${shift}|${date}|${teacherId}` → groups, to find double bookings. */
     const perDay = new Map<string, string[]>();
+    /** The same, for days of a „Zusammenlegung": one teacher for two groups on purpose. */
+    const mergedDay = new Map<string, number>();
 
     for (const group of ctx.groups) {
       const faces = new Set<string>();
@@ -91,6 +94,7 @@ export function analysePlan(ctx: PlanContext): Analysis {
 
         const dayKey = `${group.shift}|${date}|${assignment.teacherId}`;
         perDay.set(dayKey, [...(perDay.get(dayKey) ?? []), group.id]);
+        if (assignment.merged) mergedDay.set(dayKey, (mergedDay.get(dayKey) ?? 0) + 1);
 
         const absence = absenceOn(ctx, assignment.teacherId, date);
         if (absence) {
@@ -115,7 +119,8 @@ export function analysePlan(ctx: PlanContext): Analysis {
     }
 
     for (const [dayKey, groupIds] of perDay) {
-      if (groupIds.length < 2) continue;
+      // Groups taught together are one class that day: a double booking needs two that are not.
+      if (groupIds.length - Math.max(0, (mergedDay.get(dayKey) ?? 0) - 1) < 2) continue;
       const [shift, date, teacherId] = dayKey.split('|');
       const name = teacherById(ctx, teacherId)?.shortName ?? '?';
       for (const groupId of groupIds) {

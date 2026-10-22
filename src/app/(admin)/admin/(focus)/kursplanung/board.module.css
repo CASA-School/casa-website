@@ -49,7 +49,13 @@
 .sockSub { border-style: solid !important; border-color: #e6c200 !important; background: #fff6bf !important; color: var(--pz-yellow-ink) !important; }
 .sockWarn { border-style: solid !important; border-color: var(--pz-orange) !important; background: #fff1dc !important; color: #9a4a00 !important; }
 .sockNo { border-color: #f0b4b4 !important; background: #fff5f5 !important; color: #b91c1c !important; cursor: not-allowed; }
-.piece { position: relative; border-radius: 10px; background: var(--lt); color: var(--li); padding: 8px 10px 14px; display: flex; flex-direction: column; gap: 2px; cursor: grab; user-select: none; border: 1.5px solid transparent; transition: box-shadow 0.15s, transform 0.15s; min-width: 0; text-align: left; }
+.piece { position: relative; border-radius: 10px; background: var(--lt); color: var(--li); padding: 8px 10px 14px; display: flex; flex-direction: column; gap: 2px; cursor: grab; user-select: none; border: 1.5px solid transparent; transition: box-shadow 0.15s, transform 0.15s; min-width: 0; text-align: left; overflow: hidden; }
+.piece > span { flex-shrink: 0; min-width: 0; }
+.pieceOne { padding: 6px 7px 10px; gap: 1px; }
+.pieceOne .tag { margin-top: 0; letter-spacing: 0; padding: 1px 5px; }
+.pieceTop { display: flex; align-items: baseline; gap: 6px; }
+.pieceTop .pieceName { min-width: 0; }
+.pieceTop .pieceCap { flex-shrink: 0; }
 .piece:hover { box-shadow: 0 6px 18px -8px rgba(17, 24, 39, 0.35); transform: translateY(-1px); }
 .piece:active { cursor: grabbing; }
 .pieceName { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

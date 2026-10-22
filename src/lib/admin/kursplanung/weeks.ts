@@ -55,6 +55,23 @@ export function nextMonth(month: string): string {
   return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`;
 }
 
+export function prevMonth(month: string): string {
+  const [y, m] = month.split('-').map(Number);
+  return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+}
+
+/**
+ * The planning month a date belongs to, `yyyy-mm`: the one its week runs in. A Saturday or Sunday
+ * looks ahead to the coming week, which is the one a planner is preparing then.
+ */
+export function planningMonthOf(date: string): string {
+  const monday = weekdayOf(date) ? weekStartOf(date) : addDays(weekStartOf(date), 7);
+  const month = monday.slice(0, 7);
+  if (monday >= monthStart(nextMonth(month))) return nextMonth(month);
+  if (monday < monthStart(month)) return prevMonth(month);
+  return month;
+}
+
 export function isoWeek(date: string): number {
   const d = parseIso(date);
   const day = d.getUTCDay() || 7;

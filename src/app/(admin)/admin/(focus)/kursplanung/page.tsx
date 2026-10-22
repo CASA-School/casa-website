@@ -2,7 +2,7 @@ import { EmptyState } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
+import { listPlanMonths, loadPlan, planToday, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
 import { monthLabel } from '@/lib/admin/kursplanung/weeks';
 
 import { Board } from './board';
@@ -12,10 +12,10 @@ import ui from './ui.module.css';
 /**
  * Kursplanung — the board. docs/KURSPLANUNG.md explains the rules.
  *
- * `?month=2026-10` picks a month; the default is the latest month that has
- * course groups, and the current month when there is none. Everything the
- * board needs is loaded here in one round; the board keeps a local copy and
- * saves whole shift-weeks through `saveWeekAction`.
+ * `?month=2026-10` picks a month; the default is the planning month today
+ * falls in, and the board opens on today's week. Everything the board needs is
+ * loaded here in one round; the board keeps a local copy and saves whole
+ * shift-weeks through `saveWeekAction`.
  */
 export default async function KursplanungPage({
   searchParams,
@@ -45,6 +45,7 @@ export default async function KursplanungPage({
     <Board
       plan={plan}
       month={month}
+      today={planToday()}
       canWrite={canAccess(user, 'kursplanung', 'edit')}
       header={<HeaderStart active="puzzle" month={month} months={months} />}
       notice={notice}

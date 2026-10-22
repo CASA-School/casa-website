@@ -86,7 +86,7 @@ export default async function LehrkraeftePage({ searchParams }: { searchParams: 
                       <span className={ui.days}>{t.daysPerWeek} {t.daysPerWeek === 1 ? tr('Tag', 'day') : tr('Tage', 'days')}{t.weekdays.length < 5 ? ` · ${t.weekdays.map((d) => pick(lang, WEEKDAY_LABELS[d])).join(' ')}` : ''}</span>
                       {t.levels.map((L) => <i key={L} className={ui.lvChip} style={levelStyle(L)}>{L}</i>)}
                     </div>
-                    <div>{text ? <span className={ui.abs}>{text}</span> : <span className={ui.absNone}>{tr('keine Abwesenheit', 'no absence')}</span>}</div>
+                    <div>{text ? <span className={ui.abs}>{text}</span> : null}</div>
                     <div>
                       {canWrite ? (
                         <FormDialog trigger="Details" size="sm" width="lg" title={t.fullName} description={tr(`Im Puzzle: ${t.shortName} · ${contractLabel(t, tr)}`, `In the puzzle: ${t.shortName} · ${contractLabel(t, tr)}`)} defaultOpen={params.teacher === t.id} titleClassName={ui.dlgTitle}>

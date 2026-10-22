@@ -131,7 +131,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                       <th>{halves[0]}</th>
                       <th>{halves[1]}</th>
                       <th>{t('Geplant im Monat', 'Planned this month')}</th>
-                      <th>FileMaker</th>
+                      <th>{t('Kurs', 'Course')}</th>
                       <th />
                     </tr>
                   </thead>
@@ -205,7 +205,25 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                   <b>{p.have} <small>/ {p.need}</small></b>
                                 </span>
                               </td>
-                              <td>{canWrite ? <input form={fid} name="filemakerCourseId" defaultValue={g.filemakerCourseId ?? ''} placeholder={t('Kurs-ID', 'Course ID')} maxLength={40} className={ui.dashed} aria-label={t('FileMaker Kurs-ID', 'FileMaker course ID')} /> : <span className={ui.num}>{g.filemakerCourseId ?? '—'}</span>}</td>
+                              <td>
+                                {/* A group of a course opens its course, by SchoolMan's number; only one of no course has a number typed. */}
+                                {g.courseId ? (
+                                  <>
+                                    {canWrite ? <input form={fid} type="hidden" name="filemakerCourseId" value={g.filemakerCourseId ?? ''} /> : null}
+                                    {seesStarts ? (
+                                      <Link href={`/admin/catalogue/courses/${g.courseId}`} className={ui.link}>
+                                        {g.schoolmanNumber ? `SchoolMan ${g.schoolmanNumber}` : t('Kurs öffnen', 'Open course')}
+                                      </Link>
+                                    ) : (
+                                      <span className={ui.num}>{g.schoolmanNumber ?? '—'}</span>
+                                    )}
+                                  </>
+                                ) : canWrite ? (
+                                  <input form={fid} name="filemakerCourseId" defaultValue={g.filemakerCourseId ?? ''} placeholder={t('Kurs-ID', 'Course ID')} maxLength={40} className={ui.dashed} aria-label={t('SchoolMan Kurs-ID', 'SchoolMan course ID')} />
+                                ) : (
+                                  <span className={ui.num}>{g.filemakerCourseId ?? '—'}</span>
+                                )}
+                              </td>
                               <td className={ui.right}>
                                 <span className={ui.acts}>
                                   {canWrite && p.have < p.need ? (

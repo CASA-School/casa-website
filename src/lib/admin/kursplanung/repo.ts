@@ -14,7 +14,7 @@ import {
   type CourseGroup,
   type Teacher,
 } from './types';
-import { monthStart, nextMonth, planningWeeks } from './weeks';
+import { monthStart, nextMonth, planningMonthOf, planningWeeks } from './weeks';
 
 /**
  * Reads for the course-planning board.
@@ -26,21 +26,25 @@ import { monthStart, nextMonth, planningWeeks } from './weeks';
 
 const MONTH = /^\d{4}-\d{2}$/;
 
-/** `yyyy-mm` for the current month, in UTC. */
-function currentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
-}
+/** Today in Bremen, `yyyy-mm-dd`. */
+export const planToday = (): string =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 /**
- * The month the screen shows: the requested one when valid, else the latest
- * month that has course groups, else this month.
+ * The month the screen shows: the requested one when valid, else the planning month today falls in
+ * (2026-10-22: it opened on the last month with groups, November 2027, once lesson days were made a
+ * year ahead). Without groups that month gives way to the next one that has them, else the last.
  */
 export async function resolvePlanMonth(requested?: string): Promise<string> {
   if (requested && MONTH.test(requested)) return requested;
-  const row = await queryFirst<{ month: string }>(
-    `SELECT to_char(max(month), 'YYYY-MM') AS month FROM course_groups`
+  const now = planningMonthOf(planToday());
+  const row = await queryFirst<{ month: string | null }>(
+    `SELECT coalesce(
+              (SELECT to_char(min(month), 'YYYY-MM') FROM course_groups WHERE month >= $1::date),
+              (SELECT to_char(max(month), 'YYYY-MM') FROM course_groups)) AS month`,
+    [`${now}-01`]
   );
-  return row?.month ?? currentMonth();
+  return row?.month ?? now;
 }
 
 type TeacherRow = {
@@ -107,6 +111,8 @@ type GroupRow = {
   filemaker_course_id: string | null;
   course_start: string | null;
   course_end: string | null;
+  course_id: string | null;
+  schoolman_number: string | null;
 };
 
 export async function listGroups(month: string): Promise<CourseGroup[]> {
@@ -118,7 +124,8 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
     // number typed for it.
     `SELECT g.id, to_char(g.month, 'YYYY-MM-DD') AS month, g.shift, g.level, g.phase, g.group_index,
             g.registrations, live.n AS live, g.teacher_first, g.teacher_second, g.room_id, g.filemaker_course_id,
-            to_char(i.start_date, 'YYYY-MM-DD') AS course_start, to_char(i.end_date, 'YYYY-MM-DD') AS course_end
+            to_char(i.start_date, 'YYYY-MM-DD') AS course_start, to_char(i.end_date, 'YYYY-MM-DD') AS course_end,
+            g.course_id, coalesce(c.filemaker_group_ids[g.group_index], c.filemaker_course_id) AS schoolman_number
        FROM course_groups g
        LEFT JOIN courses c ON c.id = g.course_id
        LEFT JOIN course_instances i ON i.id = c.course_instance_id
@@ -162,6 +169,8 @@ export async function listGroups(month: string): Promise<CourseGroup[]> {
             filemakerCourseId: r.filemaker_course_id,
             courseStart: r.course_start,
             courseEnd: r.course_end,
+            courseId: r.course_id,
+            schoolmanNumber: r.schoolman_number,
           },
         ]
       : []
@@ -181,10 +190,11 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
     teacher_id: string;
     is_substitute: boolean;
     is_tentative: boolean;
+    merged: boolean;
   }>(
     // An assignment is a lesson day of a board group with a teacher (0045), not called off.
     `SELECT a.group_id, to_char(a.on_date, 'YYYY-MM-DD') AS on_date, a.teacher_id,
-            a.is_substitute, a.is_tentative
+            a.is_substitute, a.is_tentative, a.merged
        FROM course_days a
        JOIN course_groups g ON g.id = a.group_id
       WHERE g.month = $1::date AND a.on_date >= $2::date AND a.on_date < $3::date
@@ -197,6 +207,7 @@ export async function listAssignments(month: string): Promise<Assignment[]> {
     teacherId: r.teacher_id,
     isSubstitute: r.is_substitute,
     isTentative: r.is_tentative,
+    merged: r.merged,
   }));
 }
 
