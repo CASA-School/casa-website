@@ -10,7 +10,7 @@ import { levelStyle } from '@/lib/admin/kursplanung/colours';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
 import { monthBookings } from '@/lib/admin/kursplanung/link';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
-import { LEVELS, SHIFT_INFO, SHIFTS, type CourseGroup } from '@/lib/admin/kursplanung/types';
+import { LEVELS, levelName, SHIFT_INFO, SHIFTS, type CourseGroup } from '@/lib/admin/kursplanung/types';
 import { monthLabel, nextMonth } from '@/lib/admin/kursplanung/weeks';
 
 import { addGroupAction, createMonthAction, fillFromPairsAction, removeGroupAction, saveGroupAction } from '../actions';
@@ -109,7 +109,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                       <label className={ui.lbl} htmlFor={`lvl-${shift}`}>{t('Niveau', 'Level')}</label>
                       <Select bare id={`lvl-${shift}`} name="level" defaultValue="A1" className={`${ui.sel} ${ui.selLg}`}>
                         {LEVELS.map((l) => (
-                          <option key={l} value={l}>{l}.{phase}</option>
+                          <option key={l} value={l}>{levelName(l, phase)}</option>
                         ))}
                       </Select>
                     </div>
@@ -147,7 +147,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                       return [
                         <tr key={`${level}-h`} className={ui.lvlRow}>
                           <td colSpan={6}>
-                            <span className={ui.lv} style={levelStyle(level)}>{level}.{phase}</span>
+                            <span className={ui.lv} style={levelStyle(level)}>{levelName(level, phase)}</span>
                             <span className={ui.meta}>
                               <span>{lg.every((g) => g.live) ? t('Teilnehmende', 'Learners') : t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
                               {booked ? <span>{t('Gebucht', 'Booked')} <b>{booked}</b></span> : null}
@@ -182,7 +182,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                     <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
                                   </form>
                                 ) : null}
-                                <span className={ui.name}>{g.level}.{g.phase}{lg.length > 1 ? <small>{t('Gruppe', 'Group')} {g.groupIndex}</small> : null}</span>
+                                <span className={ui.name}>{levelName(g.level, g.phase)}{lg.length > 1 ? <small>{t('Gruppe', 'Group')} {g.groupIndex}</small> : null}</span>
                               </td>
                               <td className={ui.right}>
                                 {/* A group of a course reads its learners live; only one of no course has a number typed. */}
@@ -238,8 +238,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                       <ConfirmSubmit
                                         title={t('Gruppe entfernen?', 'Remove group?')}
                                         description={t(
-                                          `${g.level}.${g.phase} Gruppe ${g.groupIndex} ist leer und wird aus ${thisLabel} entfernt.`,
-                                          `${g.level}.${g.phase} group ${g.groupIndex} is empty and will be removed from ${thisLabel}.`
+                                          `${levelName(g.level, g.phase)} Gruppe ${g.groupIndex} ist leer und wird aus ${thisLabel} entfernt.`,
+                                          `${levelName(g.level, g.phase)} group ${g.groupIndex} is empty and will be removed from ${thisLabel}.`
                                         )}
                                         confirmLabel={t('Entfernen', 'Remove')}
                                       >

@@ -140,6 +140,9 @@ export type Absence = {
 
 export const isShift = (value: string): value is Shift => (SHIFTS as readonly string[]).includes(value);
 export const isLevel = (value: string): value is Level => (LEVELS as readonly string[]).includes(value);
+
+/** A board level as the sheet names it: `B1.2`, and C1H — one block, no halves — as it is. */
+export const levelName = (level: Level, phase: '1' | '2'): string => (level === 'C1H' ? level : `${level}.${phase}`);
 export const isWeekday = (value: string): value is Weekday =>
   (WEEKDAYS as readonly string[]).includes(value);
 export const isAbsenceReason = (value: string): value is AbsenceReason =>

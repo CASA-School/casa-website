@@ -54,8 +54,8 @@ the rules the planners kept in their heads.
    is `ui.module.css`. Served in the shell's focus mode — icon rail, no 1180px measure — because thirteen
    columns plus the tray need the width. Same gate, same tokens, same way back.
 
-The board opens on the planning month today falls in and on today's week (a weekend looks ahead to
-the coming one); `?month=` picks another. Until 2026-10-22 it opened on the last month with groups, which
+The board opens on the planning month today falls in — its course block — and on today's week (a
+weekend looks ahead to the coming one); `?month=` picks another. Until 2026-10-22 it opened on the last month with groups, which
 became November 2027 once lesson days were made a year ahead.
 
 Interactions, all of them: drag a piece from the tray onto a socket (it lays down as many consecutive
@@ -77,9 +77,16 @@ into another week to copy it; ⌘Z / Rückgängig; "Woche übernehmen →" copie
 
 Audit: `staff_activity` via `logActivity`, entity `kursplanung`.
 
-A planning month starts on the Monday of the week the 1st falls in, or the following Monday when the
-1st is a weekend day, and runs until the next month starts — four weeks, sometimes five (July 2026;
-October 2026, because 1 November is a Sunday). `src/lib/admin/kursplanung/weeks.ts`, tested.
+**A planning month is CASA's course block (2026-10-22, migration 0079).** It starts with the intensive
+start that opens it — the start whose third week falls in the month, 26 October for November 2026 — and
+runs to the next start: four weeks, five at Easter (March 2027) and in summer, with weeks after the
+fourth in which nothing is taught (the Christmas break at the end of December's block) left off. That is
+how the planners' sheets run it („Vormittag November", „Nachmittag November 2026": 26.10.–20.11.).
+`planning_month_start()` and `planning_month_of()` in SQL, `planWeeks()` in `repo.ts`. For a month no
+intensive start opens yet, the old calendar rule stands in: the Monday of the week the 1st falls in, or
+the following Monday when the 1st is a weekend day (`weeks.ts`, tested). The calendar rule had put
+26–30 October into October, where no group of the new start existed, and 23–27 November into November,
+after the morning had moved on to `.2`.
 
 ## The staff register (2026-10-17, migration 0039)
 
@@ -101,12 +108,10 @@ are that course's `course_days`. Placing a piece writes a day (upsert on group a
 page (`/admin/catalogue/courses/[id]`) shows the same days with their room, hours and any day called
 off, changes one day, or generates the days ahead from the course's weekly plan. Generating an intensive
 course's days makes its two groups here, so the board shows them. `linkGroupsAndDays()` runs after
-`addGroup` and `createContinuationMonth`; `removeGroupIfEmpty` deletes only days of no course. A start
-on a month's last Monday has its first week in the previous planning month, where no group of it exists:
-that week is on the course page only. The board offers no slot outside a group's course (0049): its
-groups carry the course's first and last day, `validateWeekAssignments` and `setDayTeacher` refuse a
-date outside it, and `link_course_days()` joins a board day to its course only inside it — so the
-October board's KW 44 is empty for the groups whose course ended on 23 October.
+`addGroup` and `createContinuationMonth`; `removeGroupIfEmpty` deletes only days of no course. The board
+offers no slot outside a group's course (0049): its groups carry the course's first and last day,
+`validateWeekAssignments` and `setDayTeacher` refuse a date outside it, and `link_course_days()` joins a
+board day to its course only inside it.
 
 ## What SchoolMan's days teach (2026-10-22, migration 0078)
 
@@ -138,9 +143,13 @@ A course start's level group and a Kursplanung group are the same class. Nothing
 so; the rule (`course-link.ts`, tested) is:
 
 - An **intensive** start (course type format `intensive`) opens the planning month two weeks after its
-  first day — 31 Aug → September, 26 Oct → November (October runs five weeks), 4 Jan → January.
-- A level code names the board's level and phase: `B1.1` → B1 phase 1, `B1+.2` → B1+ phase 2. C1H has
-  no level code and is not linked.
+  first day — 31 Aug → September, 26 Oct → November, 4 Jan → January — and that month's block starts
+  on its first day.
+- A level code names the board's level and phase: `B1.1` → B1 phase 1, `B1+.2` → B1+ phase 2.
+- **C1H** is SchoolMan's „telc Deutsch C1 Hochschule – Prüfungsvorbereitung" (format `exam preparation`,
+  no level code, `is_c1h_course()`): one block long, one group, in the course's shift and the phase that
+  shift has that month. The sheet plans it beside the intensive classes, so the board does too (0079);
+  it is named „C1H", without a half (`levelName`).
 - A `.1` level is the start's own class: phase 1 in its first month, in the start's shift (its session,
   or its hours), and the same group (shift, level, index) as phase 2 in the next month. A `.2` level
   on a start is a joiner: they sit in that month's phase-2 class, the previous start's.
@@ -166,13 +175,14 @@ What follows from it (`link.ts`):
 ```
 src/lib/admin/kursplanung/
   types.ts    vocabulary: shifts, levels, weekdays, reasons, Teacher / CourseGroup / Assignment / Absence
-  weeks.ts    planning weeks, ISO week, weekday helpers, German month label
+  weeks.ts    weeks between two Mondays, the calendar fallback, ISO week, weekday helpers, month label
   fit.ts      remainingDays · fit (may this piece land here?) · span (how many days from here)
   rules.ts    analysePlan → every violation, per tile and per week
   pairs.ts    assignmentsFromPairs → fill a month from the groups' pairs
   week.ts     validateWeekAssignments → what the server accepts for one shift-week
   forms.ts    parseTeacherForm / parseGroupForm → what the dialogs may write (tested)
-  repo.ts     reads (server-only) and replaceWeekAssignments
+  repo.ts     reads (server-only): the month's weeks from its course block (planWeeks), the plan;
+              replaceWeekAssignments
   course-link.ts  a course start's planning month, a level code's board level and phase (pure, tested)
   link.ts     startClasses (a start's teachers) · monthBookings (Gebucht per level) · openPlanGroups
 src/app/(admin)/admin/(focus)/
@@ -235,7 +245,6 @@ now carry `null` there and the identifiers in `detail`; a save that throws is tr
 - Is a teacher's weekly quota in **days** (as built) or in Unterrichtseinheiten?
 - Does a Doppelschicht (morning and afternoon on one day) count as one day or two?
 - At which registration count is a level split into two groups? (The board suggests one group per 16.)
-- Does October 2026 really run five weeks (to 30.10.), with November starting on the 2nd?
 - The derived rule table per teacher (shift, days, weekdays, levels) needs their confirmation; it is
   editable in the tool. FileMaker's `sessions`/`levels` fields were not used because they contradict the sheet.
   Since 2026-10-22 it also holds what SchoolMan's lesson days show each person teaching (0078); days per
