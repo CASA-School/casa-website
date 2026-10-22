@@ -1,6 +1,6 @@
 import type { Bilingual } from '../i18n';
 
-import { absenceOn, assignmentKey, courseDays, teacherById, type PlanContext } from './fit';
+import { absenceOn, assignmentKey, courseDays, teacherById, unitsUsed, type PlanContext } from './fit';
 import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Shift, type Weekday } from './types';
 import { weekdayOf } from './weeks';
 
@@ -13,8 +13,10 @@ import { weekdayOf } from './weeks';
  * planned while absent or on a weekday they do not work, more days than the
  * contract allows. `warn` is a planner's judgement call: the other shift
  * without the substitution mark, a level the person is not listed for, a
- * course that sees more than two faces in one week. The board shows each on
- * the tile it concerns and nowhere else.
+ * course that sees more than two faces in one week, more teaching units in a
+ * week than the contract holds, and a teacher on the same class for a fourth
+ * level running (Rahman, 2026-10-22: a class keeps a teacher for at most three
+ * full courses). The board shows each on the tile it concerns and nowhere else.
  */
 
 export type IssueSeverity = 'hard' | 'warn' | 'open';
@@ -27,7 +29,9 @@ export type IssueCode =
   | 'kontingent'
   | 'schicht'
   | 'niveau'
-  | 'wechsel';
+  | 'wechsel'
+  | 'stunden'
+  | 'serie';
 
 export type Issue = {
   severity: IssueSeverity;
@@ -39,6 +43,8 @@ export type Issue = {
   shift: Shift;
   teacherId: string | null;
   text: Bilingual;
+  /** More than fits on a tile: shown where the issue is read in full (the piece's hover). */
+  detail?: Bilingual;
 };
 
 export type Analysis = {
@@ -110,6 +116,14 @@ export function analysePlan(ctx: PlanContext): Analysis {
         if (teacher && !teacher.levels.includes(group.level)) {
           push({ ...base, severity: 'warn', code: 'niveau', onDate: date, teacherId: assignment.teacherId, text: { de: `${group.level} nicht hinterlegt`, en: `${group.level} not listed` } });
         }
+        // The class's levels before this one, most recent first: three running with this teacher make a fourth too many.
+        const before = ctx.history?.[group.id] ?? [];
+        let run = 0;
+        while (run < before.length && before[run].teachers.includes(assignment.teacherId)) run++;
+        if (run >= 3) {
+          const levels = before.slice(0, run).map((c) => c.level).reverse().join(' · ');
+          push({ ...base, severity: 'warn', code: 'serie', onDate: date, teacherId: assignment.teacherId, text: { de: `${run + 1}. Niveau in Folge`, en: `${run + 1}th level running` }, detail: { de: `dieselbe Gruppe schon in ${levels}`, en: `the same class in ${levels} already` } });
+        }
         void name;
       }
 
@@ -125,6 +139,19 @@ export function analysePlan(ctx: PlanContext): Analysis {
       const name = teacherById(ctx, teacherId)?.shortName ?? '?';
       for (const groupId of groupIds) {
         push({ severity: 'hard', code: 'doppelt', groupId, onDate: date, weekStart: week.start, shift: shift as Shift, teacherId, text: { de: `${name} doppelt am ${weekdayOf(date) ?? ''}`, en: `${name} double-booked on ${dayEn(weekdayOf(date))}` } });
+      }
+    }
+
+    // More teaching units than the contract holds: a warning, since a colleague may agree to more.
+    for (const teacherId of weekUsage.keys()) {
+      const units = teacherById(ctx, teacherId)?.weeklyUnits;
+      const used = unitsUsed(ctx, teacherId, week.start);
+      if (!units || used <= units) continue;
+      for (const a of ctx.assignments) {
+        if (a.teacherId !== teacherId || !weekUsage.get(teacherId)?.has(a.onDate)) continue;
+        const group = ctx.groups.find((g) => g.id === a.groupId);
+        if (!group) continue;
+        push({ severity: 'warn', code: 'stunden', groupId: group.id, onDate: a.onDate, weekStart: week.start, shift: group.shift, teacherId, text: { de: `${used} von ${units} UE`, en: `${used} of ${units} units` } });
       }
     }
 

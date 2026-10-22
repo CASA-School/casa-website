@@ -117,7 +117,7 @@ export async function bookingOffer(): Promise<BookingOffer> {
                    NULL, NULL, NULL, NULL, NULL, NULL)) AS price
            FROM materials m
           WHERE m.is_active AND m.level_code IS NOT NULL
-          ORDER BY m.level_code, m.part NULLS LAST, m.title`
+          ORDER BY level_rank(m.level_code), m.level_code, m.part NULLS LAST, m.title`
       ),
       query<{ code: string; name_en: string; name_de: string | null; is_casa_managed: boolean }>(
         `SELECT code, name_en, name_de, is_casa_managed FROM accommodation_types
@@ -554,7 +554,7 @@ export async function priceSelection(selection: BookingSelection): Promise<Price
            'material'::rate_scope, $2::date, NULL, NULL, m.id, NULL, NULL,
            NULL, NULL, NULL, NULL, NULL, NULL)
         WHERE m.id = ANY($1::uuid[]) AND m.is_active
-        ORDER BY m.level_code, m.part NULLS LAST`,
+        ORDER BY level_rank(m.level_code), m.level_code, m.part NULLS LAST`,
       [selection.materialIds, on]
     );
     for (const book of books) {

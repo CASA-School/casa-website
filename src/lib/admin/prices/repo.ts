@@ -67,7 +67,7 @@ export async function priceListSubjects() {
         ORDER BY position, name`
     ),
     query<{ id: string; title: string; level_code: string | null; part: number | null }>(
-      `SELECT id, title, level_code, part FROM materials WHERE is_active ORDER BY level_code NULLS LAST, part NULLS LAST, title`
+      `SELECT id, title, level_code, part FROM materials WHERE is_active ORDER BY level_rank(level_code), level_code NULLS LAST, part NULLS LAST, title`
     ),
     query<{ code: string; name: string }>(`SELECT code, name FROM exam_types WHERE is_active ORDER BY level NULLS LAST, name`),
   ]);

@@ -32,7 +32,7 @@
 .pillOk { background: var(--pz-green-soft); color: #166534; }
 
 /* layout */
-.wrap { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 14px; align-items: start; }
+.wrap { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 14px; align-items: start; }
 @media (max-width: 1020px) { .wrap { grid-template-columns: minmax(0, 1fr); } .tray { position: static; } .tray .card { max-height: none; overflow: visible; } }
 /* The columns share the width beside the tray instead of leaving a band of it empty. */
 .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; align-content: flex-start; }
@@ -119,6 +119,11 @@
 .tpName { flex: 1 1 auto; min-width: 0; font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sh { flex: none; font-size: 9.5px; font-weight: 800; color: var(--pz-mute); letter-spacing: 0.04em; background: #eef0f4; border-radius: 6px; padding: 1px 5px; }
 .handlbl { flex: none; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; background: var(--pz-ink); color: #fff; border-radius: 6px; padding: 1px 5px; }
+/* A freelance teacher (Honorar): a colour of its own, apart from the levels', the shifts' and the cover's yellow. */
+.hon { flex: none; font-size: 9.5px; font-weight: 800; letter-spacing: 0.02em; background: #fbe6fb; color: #9d1a8c; border-radius: 6px; padding: 1px 5px; }
+/* The week's teaching units against the contract's. */
+.ue { flex: none; font-size: 10.5px; font-weight: 700; color: var(--pz-mute); font-variant-numeric: tabular-nums; }
+.ueOver { color: #b91c1c; }
 .cnt { flex: none; font-size: 10.5px; color: var(--pz-mute); font-weight: 700; white-space: nowrap; }
 /* The shift's days: free dark, planned grey, away red, a day not worked only outlined. */
 .wd { flex: none; display: inline-flex; gap: 2px; }

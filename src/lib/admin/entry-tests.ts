@@ -141,7 +141,7 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
         WHERE d.on_date = $1::date AND NOT d.cancelled AND ty.slug = 'intensive-german'
           AND c.level_code = ANY($2::text[])
           AND d.on_date = (SELECT min(x.on_date) FROM course_days x WHERE x.course_id = c.id AND NOT x.cancelled)
-        ORDER BY t.starts_at NULLS LAST, c.level_code, d.group_index`,
+        ORDER BY t.starts_at NULLS LAST, level_rank(c.level_code), c.level_code, d.group_index`,
       [day, ['A2', 'A2.1', 'B1', 'B1.1', 'B1+', 'B1+.1']]
     ),
     query<{ id: string; session: EntryTestSession; test: EntryTestId; code: string; minutes: number; opened_at: Date | null; closed_at: Date | null; running: number; paused: number; handed_in: number }>(
@@ -389,7 +389,7 @@ function openable(r: ClassDayRow): OpenableClass | null {
 
 /** Today's A2, B1 and B1+ intensive classes, for „Heute öffnen" (a late joiner, a make-up, a trial). */
 export async function openableClasses(day: string): Promise<OpenableClass[]> {
-  const rows = await query<ClassDayRow>(`${CLASS_DAY} AND d.on_date = $1::date ORDER BY t.starts_at NULLS LAST, c.level_code, d.group_index`, [day]);
+  const rows = await query<ClassDayRow>(`${CLASS_DAY} AND d.on_date = $1::date ORDER BY t.starts_at NULLS LAST, level_rank(c.level_code), c.level_code, d.group_index`, [day]);
   return rows.map(openable).filter((c): c is OpenableClass => c !== null);
 }
 

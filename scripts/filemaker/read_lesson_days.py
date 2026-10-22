@@ -1,4 +1,4 @@
-"""Read SchoolMan's weekly plans and lesson days of the courses still running or ahead — read-only (AppleScript).
+"""Read SchoolMan's weekly plans and lesson days of the courses still running or ahead, and of the last eight months — read-only (AppleScript).
 
     python3 -I scripts/filemaker/read_lesson_days.py --stats    # counts only
     python3 -I scripts/filemaker/read_lesson_days.py | node scripts/filemaker/import-lesson-days.mjs [--dry-run]
@@ -15,9 +15,12 @@ Read facts (2026-10-17): weekdays are numbered 1 Sunday … 7 Saturday (`DayName
 (`SelectionDetail`); `_ID_Holiday` marks a day inside a closure (Easter 2027), which is not a lesson;
 `_ID_PersonSubstituted` and `_ID_StaffMember` are staff numbers. A day's room is on the day or, more
 often, only on its room-calendar row.
+
+The last eight months come along too (2026-10-22), the same window as the course import: who taught a
+class in its earlier levels is what Kursplanung's three-levels rule reads.
 """
 import collections, json, os, re, sys
-from datetime import date
+from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fm_read import column  # noqa: E402
@@ -53,9 +56,9 @@ def weekday(ref):
 
 
 MARK = {'20': 'cover', '21': 'merged', '22': 'moved', '23': 'off'}
-today = date.today().isoformat()
+since = (date.today() - timedelta(days=240)).isoformat()
 ends = dict(zip(column('Course', '__ID_Course'), column('Course', 'ZEndDate')))
-live = {c for c, end in ends.items() if iso(end) and iso(end) >= today}
+live = {c for c, end in ends.items() if iso(end) and iso(end) >= since}
 
 classrooms = [{'id': i, 'city': c.strip() or None, 'number': n.strip() or None}
               for i, c, n in zip(column('Classroom', '__ID_Classroom'), column('Classroom', 'CityClassRoom'), column('Classroom', 'NumberRoom.Text'))]

@@ -869,7 +869,7 @@ export async function priceListOptions(lang: WsLang): Promise<PriceListItem[]> {
     ),
     query<{ title: string; price: string | null }>(
       `SELECT m.title, (SELECT amount FROM rates WHERE id = applicable_rate('material', current_date, p_material_id => m.id)) AS price
-         FROM materials m WHERE m.is_active ORDER BY m.level_code NULLS LAST, m.part NULLS LAST, m.title`
+         FROM materials m WHERE m.is_active ORDER BY level_rank(m.level_code), m.level_code NULLS LAST, m.part NULLS LAST, m.title`
     ),
     query<{ name: string; both: string | null; one: string | null }>(
       `SELECT e.name,

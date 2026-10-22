@@ -6,6 +6,7 @@ export const teacher = (over: Partial<Teacher> & Pick<Teacher, 'id'>): Teacher =
   shortName: over.id,
   fullName: over.id,
   contract: 'employed',
+  weeklyUnits: null,
   shifts: ['morning'],
   daysPerWeek: 5,
   weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr'],

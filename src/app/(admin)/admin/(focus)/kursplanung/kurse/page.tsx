@@ -41,6 +41,17 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
   const canRemove = canAccess(user, 'kursplanung', 'full');
   const returnTo = '/admin/kursplanung/kurse';
   const name = (id: string | null) => (id ? plan.teachers.find((t) => t.id === id)?.shortName ?? '?' : '—');
+  // Everyone planned on a group this month, most days first, covers marked (Rahman, 2026-10-22: the pair alone
+  // hid who else teaches it).
+  const taughtBy = (g: CourseGroup) => {
+    const by = new Map<string, { days: number; cover: boolean }>();
+    for (const a of plan.assignments) {
+      if (a.groupId !== g.id) continue;
+      const seen = by.get(a.teacherId) ?? { days: 0, cover: true };
+      by.set(a.teacherId, { days: seen.days + 1, cover: seen.cover && a.isSubstitute });
+    }
+    return [...by.entries()].sort((a, b) => b[1].days - a[1].days).map(([id, v]) => ({ name: name(id), ...v }));
+  };
   const planned = (g: CourseGroup) => {
     // The group's days inside its course: a week before the start or after the end has none.
     const need = plan.weeks.reduce((n, w) => n + courseDays(g, w).length, 0);
@@ -204,6 +215,15 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                   <span className={ui.track}><i className={p.have === p.need ? 'done' : ''} style={{ width: `${pct}%` }} /></span>
                                   <b>{p.have} <small>/ {p.need}</small></b>
                                 </span>
+                                {taughtBy(g).length ? (
+                                  <span className={ui.who}>
+                                    {taughtBy(g).map((x) => (
+                                      <span key={x.name} className={x.cover ? ui.whoCover : undefined}>
+                                        {x.name} <small>{x.days}</small>
+                                      </span>
+                                    ))}
+                                  </span>
+                                ) : null}
                               </td>
                               <td>
                                 {/* A group of a course opens its course, by SchoolMan's number; only one of no course has a number typed. */}

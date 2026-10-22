@@ -152,6 +152,41 @@ On Kurse a group of a course shows SchoolMan's number for it and opens the cours
 „Kurs-ID" remains only for a group of no course. A colleague with no level listed (SchoolMan lists some
 teachers who never teach an intensive class) comes last in the tray.
 
+## Contract hours, the class's earlier levels, every day off (2026-10-22, migration 0080)
+
+Rahman: „make the system more intelligent" — the hours each teacher is contracted for, the holidays, a
+class kept by one teacher for at most three full courses.
+
+- **Contract units.** SchoolMan's `DateTargetWorkTime` came across with the staff register (0039):
+  `staff_contracts.weekly_units`, the teaching units (UE, 45 minutes) a week, for every employed teacher.
+  A day counts its own units, else its shift's (morning 4, afternoon 5, `SHIFT_INFO.units`), and what a
+  teacher teaches outside the board — evening, special and company courses — counts too (`listOtherUnits`,
+  `unitsUsed`). The tray shows the week's units against the contract („12/20", red when over), the hover
+  the week's and the month's; more than the contract in a week is a warning on the tiles („22 von 21 UE").
+  It never hides a teacher: Claudia G's contract holds 12 units and the sheet still lists her as
+  „verfügbar" beyond them.
+- **Employed before Honorar.** In every list of the tray the employed come first, those with most units
+  still to plan at the top (CASA pays for them either way), then the freelancers, marked „Honorar" in a
+  colour of their own.
+- **Three levels with one class at most.** A class is followed by its learners: the class before is the
+  one most of its learners came from (three at least), ended within three weeks of its start
+  (`classHistory`, recursive, three levels back). A teacher who held a quarter of a class's days or more,
+  covers left out, taught it. Placing someone on the class they taught in the three levels before is a
+  warning on the tile, „4. Niveau in Folge", and the hover names the levels. For this the bridge reads
+  courses and lesson days of the last eight months too (`read_courses.py`, `read_lesson_days.py`); an
+  intensive course that ended before the website's starts (August 2026) gets its start made, off the
+  website, and keeps its own shift.
+- **Every day off.** SchoolMan marks a day ill, on holiday, or absent with a kind (`_ID_Absence`,
+  `_ID_AbsenceDetail`: Tarifurlaub, unbezahlter Urlaub, Sonderurlaub → Urlaub; Abbau Überstunden →
+  Überstunden, a reason of its own; Krank, off sick → Krank; Anderes → Sonstiges). The absent days were
+  not read, so Jana Öz and Claus Schmidt showed free on 26–30 October and Christian Hetzner on 19–20
+  November, which the planners' sheet had right.
+- **Levels in their order.** Lists sorted by the level code's text put „B1+.1" before „B1.1"; every
+  list now sorts by `level_rank()` (A1, A2, B1, B1+, B2, C1, C1H) — the board, the Tagesplan, the entry
+  tests, the waiting lists, the materials.
+- **Who teaches a group.** Kurse lists under each group everyone planned on it that month, most days
+  first, a cover in yellow — not only the pair.
+
 ## Course starts (2026-10-17)
 
 A course start's level group and a Kursplanung group are the same class. Nothing is stored to say

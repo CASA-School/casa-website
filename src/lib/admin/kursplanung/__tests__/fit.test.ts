@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dayStates, fit, remainingDays, span } from '../fit';
+import { dayStates, fit, remainingDays, span, unitsUsed } from '../fit';
 import { assignment, context, group, KW40, teacher } from './fixtures';
 
 const anna = teacher({ id: 'anna', levels: ['A1'] });
@@ -71,6 +71,18 @@ describe('remaining days', () => {
     expect(dayStates(ctx, fourDays, week, 'morning').map((d) => d.state)).toEqual(['planned', 'planned', 'away', 'free', 'off']);
     // The afternoon runs Mo–Do.
     expect(dayStates(ctx, fourDays, week, 'afternoon')).toHaveLength(4);
+  });
+
+  it('counts a week’s teaching units: the day’s own, else its shift’s, and those outside the board', () => {
+    const pm = group({ id: 'p1', shift: 'afternoon', level: 'A2' });
+    const ctx = context({
+      teachers: [anna],
+      groups: [a1, pm],
+      assignments: [assignment('a1', KW40[0], 'anna'), assignment('p1', KW40[1], 'anna'), assignment('a1', KW40[2], 'anna', { lessons: 3 })],
+      otherUnits: { anna: { [KW40[0]]: 2 } },
+    });
+    // 4 (a morning) + 5 (an afternoon) + 3 (the day's own) + 2 (an evening course).
+    expect(unitsUsed(ctx, 'anna', KW40[0])).toBe(14);
   });
 
   it('recognises a whole week away', () => {
