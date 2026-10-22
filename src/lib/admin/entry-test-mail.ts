@@ -26,7 +26,8 @@ import { qrPng } from '@/lib/qr-png';
 type Result = { ok: true } | { ok: false; reason: Bilingual };
 const refuse = (de: string, en: string): Result => ({ ok: false, reason: { de, en } });
 
-export type MailRecipient = { email: string; name: string; classes: string };
+/** Who gets the mail: the teachers of the start day's classes, and — unticked at first — the classes' other teachers of that week. */
+export type MailRecipient = { email: string; name: string; classes: string; optional: boolean };
 
 export type SentTeacherMail = { id: string; when: string; by: string | null; subject: string; recipients: { email: string; name: string | null }[] };
 
@@ -92,19 +93,38 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
 
   const recipients = new Map<string, MailRecipient>();
   const missing = new Set<string>();
+  const labels = new Map<string, string>();
+  const add = (email: string | null, name: string | null, label: string, optional: boolean) => {
+    if (!email) {
+      if (name && !optional) missing.add(name);
+      return;
+    }
+    const key = email.toLowerCase();
+    const found = recipients.get(key);
+    if (!found) recipients.set(key, { email, name: name ?? email, classes: label, optional });
+    else if (found.optional === optional && !found.classes.split(', ').includes(label)) found.classes = `${found.classes}, ${label}`;
+  };
   for (const x of ready) {
     for (const c of x.classes) {
       const label = [c.label, x.classes.filter((o) => o.label === c.label).length > 1 ? `Gruppe ${c.groupIndex}` : null].filter(Boolean).join(' ');
-      if (!c.teacherEmail) {
-        if (c.teacherName) missing.add(c.teacherName);
-        continue;
-      }
-      const key = c.teacherEmail.toLowerCase();
-      const found = recipients.get(key);
-      if (found) found.classes = `${found.classes}, ${label}`;
-      else recipients.set(key, { email: c.teacherEmail, name: c.teacherName ?? c.teacherEmail, classes: label });
+      labels.set(`${c.courseId}:${c.groupIndex}`, label);
+      add(c.teacherEmail, c.teacherName, label, false);
     }
   }
+  // The classes' other teachers in the start week (the pair's second half, a cover), offered unticked.
+  const classes = ready.flatMap((x) => x.classes);
+  const others = classes.length
+    ? await query<{ course_id: string; group_index: number; name: string | null; email: string | null }>(
+        `SELECT DISTINCT d.course_id, d.group_index, coalesce(nullif(trim(sm.short_name), ''), concat_ws(' ', p.first_name, p.last_name)) AS name,
+                (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+           FROM course_days d JOIN staff_members sm ON sm.id = d.teacher_id JOIN people p ON p.id = sm.person_id
+          WHERE NOT d.cancelled AND d.on_date BETWEEN $1::date AND $1::date + 6
+            AND (d.course_id, d.group_index) IN (SELECT * FROM unnest($2::uuid[], $3::int[]))
+          ORDER BY name`,
+        [day, classes.map((c) => c.courseId), classes.map((c) => c.groupIndex)]
+      )
+    : [];
+  for (const o of others) add(o.email, o.name, labels.get(`${o.course_id}:${o.group_index}`) ?? '', true);
 
   const dayLong = dayLongOf(day);
   const levels = [...new Set(ready.flatMap((x) => x.classes.map((c) => c.label)))].join(', ');
@@ -166,8 +186,10 @@ export async function sendTeacherMail(input: { day: string; subject: string; int
   });
   const names = new Map(draft.recipients.map((r) => [r.email.toLowerCase(), r.name]));
   try {
+    // The teachers' addresses are their own (often private): they go as blind copies, the mailbox itself in „An".
     await sendGraphMail(from, {
-      to: emails,
+      to: from,
+      bcc: emails,
       subject,
       html,
       replyTo: actor.email ? [{ emailAddress: { address: actor.email, name: actor.name } }] : undefined,

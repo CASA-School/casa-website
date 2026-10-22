@@ -45,7 +45,9 @@ export function TeacherMailComposer({
   const { t, lang } = useWsLang();
   const [subject, setSubject] = useState(draft.subject);
   const [intro, setIntro] = useState(draft.intro);
-  const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(draft.recipients.map((r) => r.email)));
+  const main = draft.recipients.filter((r) => !r.optional);
+  const others = draft.recipients.filter((r) => r.optional);
+  const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(main.map((r) => r.email)));
   const [extra, setExtra] = useState('');
   const [width, setWidth] = useState<'desktop' | 'phone'>('desktop');
   const frame = useRef<HTMLIFrameElement>(null);
@@ -55,7 +57,7 @@ export function TeacherMailComposer({
   const wrong = extras.filter((e) => !EMAIL.test(e));
   const people = draft.recipients.filter((r) => chosen.has(r.email));
   const to = [...people.map((r) => r.email), ...extras.filter((e) => EMAIL.test(e))];
-  const allChosen = chosen.size === draft.recipients.length;
+  const allChosen = main.every((r) => chosen.has(r.email));
   const html = useMemo(
     () => teacherMailHtml({ subject, heading: draft.heading, intro, tests: draft.tests, logoSrc: '/brand/casa-logo.png' }),
     [subject, intro, draft.heading, draft.tests]
@@ -143,35 +145,33 @@ export function TeacherMailComposer({
             bleed
             actions={<span className="text-[0.8rem] font-semibold text-[var(--casa-muted)] tabular-nums">{to.length}</span>}
           >
-            {draft.recipients.length ? (
+            {main.length ? (
               <>
                 <label className="flex cursor-pointer items-center gap-3 border-b border-ws-line-soft bg-ws-sunk/50 px-4 py-2.5 text-[0.84rem] font-semibold text-[var(--casa-ink)]">
                   <input
                     type="checkbox"
                     checked={allChosen}
-                    onChange={() => setChosen(allChosen ? new Set() : new Set(draft.recipients.map((r) => r.email)))}
+                    onChange={() => {
+                      const next = new Set(chosen);
+                      for (const r of main) {
+                        if (allChosen) next.delete(r.email);
+                        else next.add(r.email);
+                      }
+                      setChosen(next);
+                    }}
                     className={box}
                   />
-                  {t('Alle Lehrkräfte', 'All teachers')}
+                  {t('Lehrkräfte am Testtag', 'Teachers on the test day')}
                 </label>
-                <ul className="divide-y divide-ws-line-soft">
-                  {draft.recipients.map((r) => (
-                    <li key={r.email}>
-                      <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
-                        <input type="checkbox" name="email" value={r.email} checked={chosen.has(r.email)} onChange={() => toggle(r.email)} className={box} />
-                        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e8eef7] text-[0.7rem] font-bold text-[var(--casa-ink)]">
-                          {initials(r.name)}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[0.86rem] font-semibold text-[var(--casa-ink)]">{r.name}</span>
-                          <span className="block truncate text-[0.76rem] text-[var(--casa-muted)]">
-                            {r.classes} · {r.email}
-                          </span>
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
+                <RecipientList list={main} chosen={chosen} toggle={toggle} />
+              </>
+            ) : null}
+            {others.length ? (
+              <>
+                <p className="border-y border-ws-line-soft bg-ws-sunk/50 px-4 py-2.5 text-[0.84rem] font-semibold text-[var(--casa-ink)]">
+                  {t('Weitere Lehrkräfte dieser Kurse', 'Other teachers of these courses')}
+                </p>
+                <RecipientList list={others} chosen={chosen} toggle={toggle} />
               </>
             ) : null}
             {draft.missing.length ? (
@@ -271,6 +271,8 @@ export function TeacherMailComposer({
           <dt className="text-[var(--casa-muted)]">{t('Von', 'From')}</dt>
           <dd className="truncate text-[var(--casa-ink)]">{from ?? '—'}</dd>
           <dt className="text-[var(--casa-muted)]">{t('An', 'To')}</dt>
+          <dd className="truncate text-[var(--casa-ink)]">{from ?? '—'}</dd>
+          <dt className="text-[var(--casa-muted)]">Bcc</dt>
           <dd className="text-[var(--casa-ink)]">{toLine.length ? toLine.join(', ') : '—'}</dd>
           <dt className="text-[var(--casa-muted)]">{t('Betreff', 'Subject')}</dt>
           <dd className="font-semibold text-[var(--casa-ink)]">{subject.trim() || '—'}</dd>
@@ -291,5 +293,28 @@ export function TeacherMailComposer({
         </div>
       </section>
     </div>
+  );
+}
+
+function RecipientList({ list, chosen, toggle }: { list: TeacherMailDraft['recipients']; chosen: ReadonlySet<string>; toggle: (email: string) => void }) {
+  return (
+    <ul className="divide-y divide-ws-line-soft">
+      {list.map((r) => (
+        <li key={r.email}>
+          <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ws-row-hover)]">
+            <input type="checkbox" name="email" value={r.email} checked={chosen.has(r.email)} onChange={() => toggle(r.email)} className={box} />
+            <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e8eef7] text-[0.7rem] font-bold text-[var(--casa-ink)]">
+              {initials(r.name)}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[0.86rem] font-semibold text-[var(--casa-ink)]">{r.name}</span>
+              <span className="block truncate text-[0.76rem] text-[var(--casa-muted)]">
+                {[r.classes, r.email].filter(Boolean).join(' · ')}
+              </span>
+            </span>
+          </label>
+        </li>
+      ))}
+    </ul>
   );
 }
