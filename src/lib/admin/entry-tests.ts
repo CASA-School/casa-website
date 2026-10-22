@@ -198,6 +198,11 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
   );
 }
 
+/** Whether a day has its tests — an intensive start's first day, or a sitting: the Tagesplan's link to them. */
+export async function hasEntryTests(day: string): Promise<boolean> {
+  return (await dayEntryTests(day)).length > 0;
+}
+
 function sessionOf(session: string | null, startsAt: string | null): EntryTestSession | null {
   if (session === 'morning' || session === 'afternoon') return session;
   if (session === 'evening') return null;
