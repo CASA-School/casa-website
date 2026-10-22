@@ -11,7 +11,7 @@ import { absenceOn, assignmentKey, courseDays, dayStates, fit, remainingDays, sh
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { levelName, SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
-import { addDays, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
+import { addDays, monthLabel, rangeLabel, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
 import { saveWeekAction, type SaveWeekResult } from './actions';
 import styles from './board.module.css';
@@ -558,14 +558,14 @@ export function Board({
         onDragStart={off ? undefined : (e) => { dragRef.current = { teacherId: x.t.id, from: 'tray' }; e.dataTransfer.effectAllowed = 'move'; markFor(x.t.id); }}
         onDragEnd={off ? undefined : () => { dragRef.current = null; setPreview(null); if (!hand) setMarks(new Map()); }}
         className={`${styles.tp} ${off ? styles.tpOff : ''} ${inHand ? styles.tpHand : ''}`}
-        title={`${x.t.fullName}${freelance ? t(' · Honorar', ' · freelance') : ''}${hours} · ${free.length ? t(`frei ${free.map((d) => day(d.date)).join(', ')}`, `free ${free.map((d) => day(d.date)).join(', ')}`) : t('keine Tage frei', 'no days free')}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
+        title={`${x.t.fullName}${freelance ? t(' · Honorar', ' · freelance') : ''}${flex ? t(' · Vormittag und Nachmittag', ' · morning and afternoon') : ''}${hours} · ${free.length ? t(`frei ${free.map((d) => day(d.date)).join(', ')}`, `free ${free.map((d) => day(d.date)).join(', ')}`) : t('keine Tage frei', 'no days free')}${off ? '' : t(' – anklicken oder ziehen', ' – click or drag')}`}
       >
         <span className={styles.tpName}>{x.t.shortName}</span>
         {freelance ? <span className={styles.hon}>{t('Honorar', 'Freelance')}</span> : null}
-        {inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : flex ? <span className={styles.sh}>{t('V+N', 'AM+PM')}</span> : null}
+        {inHand ? <span className={styles.handlbl}>{t('in der Hand', 'in hand')}</span> : null}
         {contract !== null ? <span className={`${styles.ue} ${units > contract ? styles.ueOver : ''}`}>{units}/{contract}</span> : null}
-        {/* More free days than the week allows (a three-day contract, all five free): how many are left. */}
-        {x.rest < free.length ? <span className={styles.cnt}>{t(`noch ${x.rest}`, `${x.rest} left`)}</span> : null}
+        {/* Without contract units: fewer days left than are free (a three-day week, all five free) says how many. */}
+        {contract === null && x.rest < free.length ? <span className={styles.cnt}>{t(`noch ${x.rest}`, `${x.rest} left`)}</span> : null}
         <span className={styles.wd} aria-label={days.map((d) => `${day(d.date)} ${pick(lang, DAY_STATE[d.state])}`).join(', ')}>
           {days.map((d) => <i key={d.date} data-s={d.state}>{day(d.date)}</i>)}
         </span>
@@ -586,14 +586,23 @@ export function Board({
       </>
     ) : null;
 
+  const monthName = monthLabel(month, lang).split(' ')[0];
+  /** A week's days in this shift as one range, with the year: „Montag, 19. – Freitag, 23. Oktober 2026". */
+  const weekRange = (w: PlanningWeek, style: 'long' | 'short') => {
+    const days = shiftDays(shift, w);
+    return rangeLabel(days[0], days[days.length - 1], lang, style);
+  };
+  const monthSpan = () => rangeLabel(plan.weeks[0].start, plan.weeks[plan.weeks.length - 1].days[4], lang, 'short');
+
   const block = (w: PlanningWeek, compact: boolean) => {
     const cd = (g: CourseGroup) => courseDays(g, w);
     const wst = statsFor([w]);
+    const nth = plan.weeks.findIndex((x) => x.start === w.start) + 1;
     return (
       <section key={w.start} className={`${styles.wkblock} ${w.start === week.start ? styles.wkActive : ''}`} data-week={w.start}>
         {compact ? (
           <button type="button" className={styles.wkh} onClick={(e) => { e.stopPropagation(); setWeekStart(w.start); }}>
-            <h2>KW {w.kw} <span style={{ color: 'var(--pz-mute)', fontWeight: 600 }}>· {w.label}</span></h2>
+            <h2>KW {w.kw} <span style={{ color: 'var(--pz-mute)', fontWeight: 600 }}>· {weekRange(w, 'short')}</span></h2>
             <span className="txt"><b>{wst.filled}</b> / {wst.total}</span>
             <span className={styles.pills}>
               {wst.done ? <span className={`${styles.pill} ${styles.pillOk}`}>{t('✓ vollständig', '✓ complete')}</span> : null}
@@ -601,7 +610,14 @@ export function Board({
               {wst.subs ? <span className={`${styles.pill} ${styles.pillSub}`}>{covers(wst.subs)}</span> : null}
             </span>
           </button>
-        ) : null}
+        ) : (
+          // Which days the week covers, with the year, and where it sits in the course month (Rahman, 2026-10-22).
+          <div className={styles.wkDates}>
+            <b>KW {w.kw}</b>
+            <span>{weekRange(w, 'long')}</span>
+            <span className={styles.wkWhere}>{t(`Woche ${nth} von ${plan.weeks.length} · ${monthName} ${monthSpan()}`, `Week ${nth} of ${plan.weeks.length} · ${monthName} ${monthSpan()}`)}</span>
+          </div>
+        )}
         <div className={`${styles.board} ${compact ? styles.compact : ''}`}>
           {groups.map((g) => {
             const of = groupsOfLevel(g);

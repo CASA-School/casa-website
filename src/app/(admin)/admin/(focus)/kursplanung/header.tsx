@@ -26,7 +26,7 @@ export async function HeaderStart({ active, month, months }: { active: Active; m
   const q = `?month=${month}`;
   const tabs = [
     { key: 'puzzle' as const, label: 'Puzzle', href: `/admin/kursplanung${q}` },
-    { key: 'kurse' as const, label: t('Kurse', 'Courses'), href: `/admin/kursplanung/kurse${q}` },
+    { key: 'kurse' as const, label: t('Besetzung', 'Staffing'), href: `/admin/kursplanung/kurse${q}` },
   ];
   return (
     <>

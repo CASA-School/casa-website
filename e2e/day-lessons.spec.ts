@@ -41,7 +41,8 @@ test.describe('a class from the Tagesplan', () => {
     );
     teachers = (
       await client.query<{ id: string; name: string }>(
-        `SELECT m.id, concat_ws(' ', p.first_name, p.last_name) AS name FROM staff_members m JOIN people p ON p.id = m.person_id
+        // By the board's name, „Vorname N." (0081), as the Tagesplan shows a teacher.
+        `SELECT m.id, coalesce(m.short_name, concat_ws(' ', p.first_name, p.last_name)) AS name FROM staff_members m JOIN people p ON p.id = m.person_id
           WHERE m.is_active AND EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = m.id AND r.role_code = 'teaching')
           ORDER BY p.first_name, p.last_name LIMIT 2`
       )
@@ -105,7 +106,7 @@ test.describe('a class from the Tagesplan', () => {
     await panel.getByRole('link', { name: 'Liste für die Lehrkraft' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Teilnehmerliste B1.1');
     await expect(page.getByRole('row').filter({ hasText: 'Listentest, Lena' })).toContainText(`lena.${stamp}@example.org`);
-    await expect(page.getByRole('link', { name: new RegExp(`^E-Mail an ${teachers[0].name}`) })).toHaveAttribute('href', /^mailto:/);
+    await expect(page.getByRole('link', { name: new RegExp(`^E-Mail an ${escape(teachers[0].name)}`) })).toHaveAttribute('href', /^mailto:/);
   });
 
   test('the room on one day, then the teacher from that day on — each after saying what changes', async ({ page }) => {

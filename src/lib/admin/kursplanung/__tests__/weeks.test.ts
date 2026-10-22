@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isoWeek, monthLabel, monthStart, planningWeeks, weekStartOf, weekdayOf, weeksBetween } from '../weeks';
+import { isoWeek, monthLabel, monthStart, planningWeeks, rangeLabel, weekStartOf, weekdayOf, weeksBetween } from '../weeks';
 
 describe('planning weeks', () => {
   it('starts a month on the Monday the sheet uses', () => {
@@ -42,6 +42,13 @@ describe('planning weeks', () => {
     // November 2026 as the planners run it: the start of 26 October to 20 November.
     expect(weeksBetween('2026-10-26', '2026-11-23').map((w) => w.kw)).toEqual([44, 45, 46, 47]);
     expect(weeksBetween('2026-10-26', '2026-11-23')[0].label).toBe('26.10.–30.10.');
+  });
+
+  it('writes a week as one range, the year once', () => {
+    expect(rangeLabel('2026-10-19', '2026-10-23', 'de')).toBe('Montag, 19. – Freitag, 23. Oktober 2026');
+    expect(rangeLabel('2026-11-30', '2026-12-04', 'de')).toBe('Montag, 30. November – Freitag, 4. Dezember 2026');
+    expect(rangeLabel('2026-12-28', '2027-01-01', 'en')).toBe('Monday 28 December 2026 – Friday 1 January 2027');
+    expect(rangeLabel('2026-10-26', '2026-10-30', 'de', 'short')).toBe('26.10.–30.10.2026');
   });
 
   it('knows weekdays and week starts', () => {

@@ -194,7 +194,8 @@ try {
 
     // ---------------------------------------------------------- the register
     if (!staff) {
-      const base = c.teacher && c.shortName ? c.shortName : [c.firstName.split(/\s+/)[0], c.lastName ? c.lastName[0] : null].filter(Boolean).join(' ');
+      // „Vorname N." for everyone (0081), not SchoolMan's abbreviation („Ma.B").
+      const base = [c.firstName.split(/\s+/)[0], c.lastName ? `${c.lastName[0]}.` : null].filter(Boolean).join(' ');
       let short = base;
       for (let n = 2; shortNames.has(short); n++) short = `${base} ${n}`;
       shortNames.add(short);

@@ -106,6 +106,33 @@ const MONTHS: Record<WsLang, readonly string[]> = {
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 };
 
+const WEEKDAY_NAMES: Record<WsLang, readonly string[]> = {
+  de: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+};
+
+/**
+ * Two days as one range, the year once: „Montag, 19. – Freitag, 23. Oktober 2026", „Monday 30 November –
+ * Friday 4 December 2026"; `short`: „19.10.–23.10.2026". Built by hand: Intl's ranges differ between the
+ * server's ICU and the browser's by a space, which broke the board's hydration (2026-10-22).
+ */
+export function rangeLabel(from: string, to: string, lang: WsLang, style: 'long' | 'short' = 'long'): string {
+  const [fy, fm, fd] = from.split('-').map(Number), [ty, tm, td] = to.split('-').map(Number);
+  const sameYear = fy === ty, sameMonth = sameYear && fm === tm;
+  if (style === 'short') {
+    const p = (d: number, m: number) => (lang === 'de' ? `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.` : `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`);
+    const year = (y: number) => (lang === 'de' ? `${y}` : `/${y}`);
+    return `${p(fd, fm)}${sameYear ? '' : year(fy)}–${p(td, tm)}${year(ty)}`;
+  }
+  const part = (iso: string, d: number, m: number, y: number, month: boolean, year: boolean) => {
+    const wd = WEEKDAY_NAMES[lang][parseIso(iso).getUTCDay()];
+    return lang === 'de'
+      ? `${wd}, ${d}.${month ? ` ${MONTHS.de[m - 1]}` : ''}${year ? ` ${y}` : ''}`
+      : `${wd} ${d}${month ? ` ${MONTHS.en[m - 1]}` : ''}${year ? ` ${y}` : ''}`;
+  };
+  return `${part(from, fd, fm, fy, !sameMonth, !sameYear)} – ${part(to, td, tm, ty, true, true)}`;
+}
+
 /** `2026-10` or `2026-10-01` → `Oktober 2026` / `October 2026`. */
 export function monthLabel(month: string, lang: WsLang): string {
   const [y, m] = month.split('-').map(Number);

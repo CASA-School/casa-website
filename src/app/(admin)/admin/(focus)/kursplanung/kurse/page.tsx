@@ -10,7 +10,8 @@ import { levelStyle } from '@/lib/admin/kursplanung/colours';
 import { courseDays } from '@/lib/admin/kursplanung/fit';
 import { monthBookings } from '@/lib/admin/kursplanung/link';
 import { listPlanMonths, loadPlan, resolvePlanMonth } from '@/lib/admin/kursplanung/repo';
-import { LEVELS, levelName, SHIFT_INFO, SHIFTS, type CourseGroup } from '@/lib/admin/kursplanung/types';
+import { analysePlan } from '@/lib/admin/kursplanung/rules';
+import { LEVELS, levelName, SHIFT_INFO, SHIFTS, type CourseGroup, type Teacher } from '@/lib/admin/kursplanung/types';
 import { monthLabel, nextMonth } from '@/lib/admin/kursplanung/weeks';
 
 import { addGroupAction, createMonthAction, fillFromPairsAction, removeGroupAction, saveGroupAction } from '../actions';
@@ -20,7 +21,8 @@ import ui from '../ui.module.css';
 import { Select } from '@/components/admin/menu-select';
 
 /**
- * Kurse — the month's groups per shift, with the pair that holds each one.
+ * Besetzung (the tab was „Kurse" until 2026-10-22) — the month's groups per shift: who holds each one
+ * regularly (the pair, „Stamm"), everyone planned on it that month, what the board warns about.
  *
  * The pair is what the board calls Stamm (or Vorschlag on a course start) and
  * what "Alle Gruppen aus ihren Paaren belegen" lays down. Everything on a row
@@ -58,24 +60,42 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
     const have = plan.weeks.reduce((n, w) => n + courseDays(g, w).filter((d) => plan.assignments.some((a) => a.groupId === g.id && a.onDate === d)).length, 0);
     return { have, need };
   };
-  const pairOptions = (g: CourseGroup) => {
-    const own = plan.teachers.filter((t) => t.isActive && t.shifts.includes(g.shift));
-    const other = plan.teachers.filter((t) => t.isActive && !t.shifts.includes(g.shift));
+  // A group's regular teachers come from its shift: who teaches the level first, then the shift's others —
+  // employed before Honorar. The other shift covers on the board, not here (Rahman, 2026-10-22: the list
+  // ran to the whole staff, a level not listed marked with „?").
+  const pairOptions = (g: CourseGroup, current: string | null) => {
+    const order = (a: Teacher, b: Teacher) => Number(a.contract === 'freelance') - Number(b.contract === 'freelance') || a.shortName.localeCompare(b.shortName, 'de');
+    const shift = plan.teachers.filter((x) => x.isActive && x.shifts.includes(g.shift)).sort(order);
+    const fits = shift.filter((x) => x.levels.includes(g.level));
+    const others = shift.filter((x) => !x.levels.includes(g.level));
+    const outside = current && !shift.some((x) => x.id === current) ? plan.teachers.find((x) => x.id === current) : undefined;
+    const label = (x: Teacher) => `${x.shortName}${x.contract === 'freelance' ? t(' · Honorar', ' · freelance') : ''}`;
     return (
       <>
         <option value="">—</option>
-        <optgroup label={pick(lang, SHIFT_INFO[g.shift].label)}>
-          {own.map((t) => (
-            <option key={t.id} value={t.id}>{t.shortName}{t.levels.includes(g.level) ? '' : ` · ${g.level}?`}</option>
+        {outside ? <option value={outside.id}>{label(outside)}</option> : null}
+        <optgroup label={t(`Unterrichtet ${levelName(g.level, g.phase).split('.')[0]}`, `Teaches ${levelName(g.level, g.phase).split('.')[0]}`)}>
+          {fits.map((x) => (
+            <option key={x.id} value={x.id}>{label(x)}</option>
           ))}
         </optgroup>
-        <optgroup label={t('Andere Schicht (Vertretung)', 'Other shift (cover)')}>
-          {other.map((t) => (
-            <option key={t.id} value={t.id}>{t.shortName}</option>
-          ))}
-        </optgroup>
+        {others.length ? (
+          <optgroup label={t(`Weitere am ${pick(lang, SHIFT_INFO[g.shift].label)}`, `Others in the ${pick(lang, SHIFT_INFO[g.shift].label).toLowerCase()}`)}>
+            {others.map((x) => (
+              <option key={x.id} value={x.id}>{label(x)}</option>
+            ))}
+          </optgroup>
+        ) : null}
       </>
     );
+  };
+  // What the board warns about on a group this month: conflicts and a fourth level running, by name.
+  const analysis = analysePlan(plan);
+  const notesOf = (g: CourseGroup) => {
+    const issues = analysis.issues.filter((i) => i.groupId === g.id);
+    const hard = new Set(issues.filter((i) => i.severity === 'hard').map((i) => `${i.onDate}|${i.code}`)).size;
+    const serie = [...new Set(issues.filter((i) => i.code === 'serie').map((i) => name(i.teacherId)))];
+    return { hard, serie };
   };
   const hidden = (fields: Record<string, string>) => Object.entries(fields).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />);
   const next = nextMonth(month);
@@ -139,9 +159,10 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                     <tr>
                       <th>{t('Gruppe', 'Group')}</th>
                       <th className={ui.right}>{t('TN', 'Students')}</th>
-                      <th>{halves[0]}</th>
-                      <th>{halves[1]}</th>
-                      <th>{t('Geplant im Monat', 'Planned this month')}</th>
+                      <th>{t(`Stamm ${halves[0]}`, `Regular ${halves[0]}`)}</th>
+                      <th>{t(`Stamm ${halves[1]}`, `Regular ${halves[1]}`)}</th>
+                      <th>{t('Im Monat', 'This month')}</th>
+                      <th>{t('Hinweise', 'Notes')}</th>
                       <th>{t('Kurs', 'Course')}</th>
                       <th />
                     </tr>
@@ -157,7 +178,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                       const start = level === 'C1H' ? null : linked.startOf(phase, shift);
                       return [
                         <tr key={`${level}-h`} className={ui.lvlRow}>
-                          <td colSpan={6}>
+                          <td colSpan={7}>
                             <span className={ui.lv} style={levelStyle(level)}>{levelName(level, phase)}</span>
                             <span className={ui.meta}>
                               <span>{lg.every((g) => g.live) ? t('Teilnehmende', 'Learners') : t('Anmeldungen', 'Registrations')} <b>{total}</b></span>
@@ -208,8 +229,8 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                   <span className={ui.num}>{g.registrations}</span>
                                 )}
                               </td>
-                              <td>{canWrite ? <Select bare form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g)}</Select> : name(g.teacherFirst)}</td>
-                              <td>{canWrite ? <Select bare form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g)}</Select> : name(g.teacherSecond)}</td>
+                              <td>{canWrite ? <Select bare form={fid} name="teacherFirst" defaultValue={g.teacherFirst ?? ''} className={ui.sel} aria-label={halves[0]}>{pairOptions(g, g.teacherFirst)}</Select> : name(g.teacherFirst)}</td>
+                              <td>{canWrite ? <Select bare form={fid} name="teacherSecond" defaultValue={g.teacherSecond ?? ''} className={ui.sel} aria-label={halves[1]}>{pairOptions(g, g.teacherSecond)}</Select> : name(g.teacherSecond)}</td>
                               <td>
                                 <span className={ui.prog}>
                                   <span className={ui.track}><i className={p.have === p.need ? 'done' : ''} style={{ width: `${pct}%` }} /></span>
@@ -224,6 +245,21 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                                     ))}
                                   </span>
                                 ) : null}
+                              </td>
+                              <td>
+                                {(() => {
+                                  const n = notesOf(g);
+                                  return n.hard || n.serie.length ? (
+                                    <span className={ui.notes}>
+                                      {n.hard ? <span className={ui.noteBad}>{n.hard === 1 ? t('1 Konflikt', '1 conflict') : t(`${n.hard} Konflikte`, `${n.hard} conflicts`)}</span> : null}
+                                      {n.serie.map((who) => (
+                                        <span key={who} className={ui.noteWarn} title={t('Hatte diese Gruppe schon die drei Niveaus davor', 'Had this class for the three levels before')}>
+                                          {t(`${who}: 4. Niveau`, `${who}: 4th level`)}
+                                        </span>
+                                      ))}
+                                    </span>
+                                  ) : null;
+                                })()}
                               </td>
                               <td>
                                 {/* A group of a course opens its course, by SchoolMan's number; only one of no course has a number typed. */}

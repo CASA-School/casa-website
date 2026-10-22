@@ -28,5 +28,6 @@ export const STAFF_VIEW_LABELS: Record<StaffView, Bilingual> = {
 };
 
 /** "Claudia G": first name and the surname's initial, the board's way, when nothing else is given. */
+/** „Vorname N.": the first first name, the last name's initial and a dot (Rahman, 2026-10-22; migration 0081). */
 export const suggestShortName = (firstName: string, lastName: string | null) =>
-  [firstName.trim().split(/\s+/)[0], lastName?.trim() ? lastName.trim()[0] : null].filter(Boolean).join(' ');
+  [firstName.trim().split(/\s+/)[0], lastName?.trim() ? `${lastName.trim()[0]}.` : null].filter(Boolean).join(' ');

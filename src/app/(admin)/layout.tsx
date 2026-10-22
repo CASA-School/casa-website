@@ -73,7 +73,7 @@ export default async function WorkspaceRootLayout({ children }: { children: Reac
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var v=localStorage.getItem('casa-workspace-nav');if(v)document.documentElement.dataset.workspaceNav=v}catch(e){}",
+              "try{var v=localStorage.getItem('casa-workspace-nav');if(v)document.documentElement.dataset.workspaceNav=v;var f=localStorage.getItem('casa-focus-nav');if(f)document.documentElement.dataset.focusNav=f}catch(e){}",
           }}
         />
         <WsLangProvider lang={lang}>{children}</WsLangProvider>

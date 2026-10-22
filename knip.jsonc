@@ -77,6 +77,9 @@
     //
     // Removal condition: delete when absences are entered in the workspace alone.
     "scripts/filemaker/import-absences.mjs",
+    // SchoolMan's working-time balances into `staff_time_months` and `staff_time_years`, from
+    // scripts/filemaker/read_time.py through a pipe (the bridge step `time`, 2026-10-22).
+    "scripts/filemaker/import-time.mjs",
 
     // Writes some of SchoolMan's learners (people, contact, bookings and
     // periods) into the workspace, from scripts/filemaker/read_learners.py
