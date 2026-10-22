@@ -80,13 +80,15 @@ type TeacherRow = {
   full_name: string;
   contract: 'employed' | 'freelance';
   weekly_units: string | null;
-  shifts: string[];
+  morning_days: string[];
+  afternoon_days: string[];
   days_per_week: number;
-  weekdays: string[];
   levels: string[];
   note: string | null;
   filemaker_staff_id: string | null;
-  is_active: boolean;
+  cover_only: boolean;
+  teaching_from: string | null;
+  on_board: boolean;
 };
 
 const toTeacher = (r: TeacherRow): Teacher => ({
@@ -95,18 +97,23 @@ const toTeacher = (r: TeacherRow): Teacher => ({
   fullName: r.full_name,
   contract: r.contract,
   weeklyUnits: r.weekly_units === null ? null : Number(r.weekly_units),
-  shifts: r.shifts.filter(isShift),
+  days: { morning: r.morning_days.filter(isWeekday), afternoon: r.afternoon_days.filter(isWeekday) },
+  shifts: [...(r.morning_days.length ? ['morning' as const] : []), ...(r.afternoon_days.length ? ['afternoon' as const] : [])],
   daysPerWeek: r.days_per_week,
-  weekdays: r.weekdays.filter(isWeekday),
+  coverOnly: r.cover_only,
+  from: r.teaching_from,
   levels: r.levels.filter(isLevel),
   note: r.note,
   filemakerStaffId: r.filemaker_staff_id,
-  isActive: r.is_active,
+  isActive: r.on_board,
 });
 
 /**
  * The teaching staff: the staff register's members with the role Unterricht (0039), or anyone the plan
- * still names. The name is the person's; employed or freelance is the contract that runs today.
+ * still names. The name is the person's; employed or freelance is the contract that runs today. On the
+ * board (`isActive`) is who is on the register, active as a teacher, teaches in a morning or an afternoon,
+ * and teaches intensive courses — or has no course types set yet (0083: Bettina W. and Connie teach
+ * evenings, Julia online courses; Fatma, Kathrin and Ulrich are not teaching).
  */
 export async function listTeachers(): Promise<Teacher[]> {
   const rows = await query<TeacherRow>(
@@ -119,7 +126,10 @@ export async function listTeachers(): Promise<Teacher[]> {
               WHERE c.staff_member_id = s.id AND (c.valid_from IS NULL OR c.valid_from <= current_date)
                 AND (c.valid_to IS NULL OR c.valid_to >= current_date)
               ORDER BY c.valid_from DESC NULLS LAST LIMIT 1) AS weekly_units,
-            s.shifts, s.days_per_week, s.weekdays, s.levels, s.note, s.filemaker_staff_id, s.is_active
+            s.morning_days, s.afternoon_days, s.days_per_week, s.levels, s.note, s.filemaker_staff_id, s.cover_only,
+            to_char(s.teaching_from, 'YYYY-MM-DD') AS teaching_from,
+            (s.is_active AND s.teaching_active AND cardinality(s.morning_days) + cardinality(s.afternoon_days) > 0
+              AND (cardinality(s.course_kinds) = 0 OR 'intensive' = ANY (s.course_kinds))) AS on_board
        FROM staff_members s
        JOIN people p ON p.id = s.person_id
       WHERE EXISTS (SELECT 1 FROM staff_member_roles r WHERE r.staff_member_id = s.id AND r.role_code = 'teaching')

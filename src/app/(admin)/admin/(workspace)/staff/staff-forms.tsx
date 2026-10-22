@@ -18,8 +18,8 @@ import { DESK_LABELS, DESKS } from '@/lib/admin/day-plan-labels';
 import type { StaffLicence } from '@/lib/admin/examiners';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { ABSENCE_LABELS, ABSENCE_REASONS, LEVELS, SHIFTS, WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
-import { CONTRACT_KIND_LABELS, CONTRACT_KINDS } from '@/lib/admin/staff-labels';
+import { ABSENCE_LABELS, ABSENCE_REASONS, LEVELS, WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
+import { CONTRACT_KIND_LABELS, CONTRACT_KINDS, COURSE_KIND_LABELS, COURSE_KINDS } from '@/lib/admin/staff-labels';
 import type { StaffContract, StaffDetail, StaffHrNumbers, StaffRole } from '@/lib/admin/staff-members';
 
 /**
@@ -110,10 +110,15 @@ export async function RolesForm({ staffId, roles, checked }: { staffId: string; 
   );
 }
 
-/** What Kursplanung fits a teacher's piece by: the short name on the board, shifts, days, weekdays, levels. */
+/**
+ * What Kursplanung plans a teacher by (0083): the short name on the board, whether and from when they teach,
+ * the course types, the weekdays per time of day, cover only, the levels. Saved by hand, it stays: the bridge
+ * no longer touches it.
+ */
 export async function TeachingForm({ member }: { member: StaffDetail }) {
   const { t, lang } = await getI18n();
-  const shiftLabel = { morning: t('Vormittag', 'Morning'), afternoon: t('Nachmittag', 'Afternoon') };
+  const day = (d: (typeof WEEKDAYS)[number]) => ({ value: d, label: pick(lang, WEEKDAY_LABELS[d]) });
+  const r = member.teaching;
   return (
     <form action={saveTeachingAction} className="space-y-4">
       <input type="hidden" name="staffId" value={member.id} />
@@ -131,12 +136,31 @@ export async function TeachingForm({ member }: { member: StaffDetail }) {
           </Select>
         </Field>
       </div>
-      <Field label={t('Schichten', 'Shifts')}>
-        <Ticks name="shifts" options={SHIFTS.map((s) => ({ value: s, label: shiftLabel[s] }))} checked={member.teaching.shifts} />
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-end">
+        <label className="flex cursor-pointer items-center gap-2 text-[0.88rem] font-semibold text-[var(--casa-ink)]">
+          <input type="checkbox" name="active" value="1" defaultChecked={r.active} className={box} />
+          {t('Unterrichtet zurzeit', 'Teaching at present')}
+        </label>
+        <Field label={t('Wieder ab', 'Again from')} htmlFor="teach-from">
+          <DateFormField id="teach-from" name="from" defaultValue={r.from ?? undefined} />
+        </Field>
+      </div>
+      <Field label={t('Unterrichtet', 'Teaches')}>
+        <Ticks name="kinds" options={COURSE_KINDS.map((k) => ({ value: k, label: pick(lang, COURSE_KIND_LABELS[k]) }))} checked={r.courseKinds} columns={3} />
       </Field>
-      <Field label={t('Mögliche Wochentage', 'Possible weekdays')}>
-        <Ticks name="weekdays" options={WEEKDAYS.map((d) => ({ value: d, label: pick(lang, WEEKDAY_LABELS[d]) }))} checked={member.teaching.weekdays} columns={5} />
+      <Field label={t('Vormittag', 'Morning')}>
+        <Ticks name="morning" options={WEEKDAYS.map(day)} checked={r.days.morning} columns={5} />
       </Field>
+      <Field label={t('Nachmittag', 'Afternoon')}>
+        <Ticks name="afternoon" options={WEEKDAYS.filter((d) => d !== 'Fr').map(day)} checked={r.days.afternoon} columns={5} />
+      </Field>
+      <Field label={t('Abend', 'Evening')}>
+        <Ticks name="evening" options={WEEKDAYS.map(day)} checked={r.days.evening} columns={5} />
+      </Field>
+      <label className="flex cursor-pointer items-center gap-2 text-[0.88rem] font-semibold text-[var(--casa-ink)]">
+        <input type="checkbox" name="coverOnly" value="1" defaultChecked={r.coverOnly} className={box} />
+        {t('Nur als Vertretung', 'Cover only')}
+      </label>
       <Field label={t('Niveaus', 'Levels')}>
         <Ticks name="levels" options={LEVELS.map((l) => ({ value: l, label: l }))} checked={member.teaching.levels} columns={7} />
       </Field>

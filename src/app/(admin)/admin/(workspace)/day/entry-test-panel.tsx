@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { closeEntryTestAction, deleteAttemptAction, enterPaperAction, handInAttemptAction, openEntryTestAction, releaseAttemptAction } from './actions';
+import { OpenTestsDialog } from './open-tests-dialog';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { QrCode, shortLink } from '@/components/admin/qr-code';
@@ -66,6 +67,7 @@ export function EntryTestCard({
               {t('Archiv', 'Archive')}
             </ButtonLink>
           )}
+          {canEdit && isToday && !heading ? <OpenTestsDialog tests={tests} from="day" /> : null}
         </span>
       </header>
       <ul className="divide-y divide-ws-line-soft">

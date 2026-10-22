@@ -7,7 +7,7 @@ import { isMergeReason, isTaskStatus } from '@/lib/admin/day-plan-labels';
 import { canAccess } from '@/lib/admin/access';
 import { changeDay } from '@/lib/admin/course-days';
 import { berlinDay } from '@/lib/admin/days';
-import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, openEntryTestForClass, releaseAttempt } from '@/lib/admin/entry-tests';
+import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, openEntryTests, releaseAttempt } from '@/lib/admin/entry-tests';
 import { createTask, deleteTask, markPresence, mergeLesson, replaceFromDay, setTaskStatus, unmergeLesson, updateTask, type TaskInput } from '@/lib/admin/day-plan';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -214,15 +214,21 @@ export async function openEntryTestAction(formData: FormData): Promise<void> {
   revalidatePath('/admin/day');
 }
 
-/** „Heute öffnen" on the tests page: the chosen class's test, today, for its morning or afternoon. */
-export async function openEntryTestForClassAction(formData: FormData): Promise<void> {
+/**
+ * „Tests öffnen" on the Tagesplan's card and the tests page: on the first day of an intensive start, every
+ * course's test at once or the chosen courses' (Rahman, 2026-10-22).
+ */
+export async function openEntryTestsAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
-  const dayId = String(formData.get('dayId') ?? '');
-  if (!UUID.test(dayId)) throw new Error('Invalid class');
-  const result = await openEntryTestForClass(dayId, Number(formData.get('minutes') ?? 0), actor);
-  if (!result.ok) fail('/admin/day/tests', pick((await getI18n()).lang, result.reason));
+  const to = formData.get('from') === 'tests' ? '/admin/day/tests' : back(berlinDay(new Date()));
+  const chosen = formData.get('scope') === 'chosen';
+  const dayIds = formData.getAll('dayId').map(String).filter((id) => UUID.test(id));
+  const { lang } = await getI18n();
+  if (chosen && !dayIds.length) fail(to, pick(lang, { de: 'Bitte wähle mindestens einen Kurs.', en: 'Please choose at least one course.' }));
+  const result = await openEntryTests(chosen ? dayIds : 'all', Number(formData.get('minutes') ?? 0), actor);
+  if (!result.ok) fail(to, pick(lang, result.reason));
   revalidatePath('/admin/day');
-  redirect('/admin/day/tests');
+  redirect(to);
 }
 
 export async function closeEntryTestAction(formData: FormData): Promise<void> {

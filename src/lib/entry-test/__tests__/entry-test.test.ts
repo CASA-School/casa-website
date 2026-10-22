@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CONTENT } from '@/lib/entry-test/content';
 import { KEYS } from '@/lib/entry-test/keys.server';
-import { ENTRY_TEST_IDS, cleanAnswers, entryTestFor, entryTestForClass, scoreAnswers, slotKinds, slotLabels } from '@/lib/entry-test/tests';
+import { ENTRY_TEST_IDS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels } from '@/lib/entry-test/tests';
 import type { Answer } from '@/lib/entry-test/types';
 import { buildXlsx, crc32 } from '@/lib/xlsx';
 
@@ -21,14 +21,6 @@ describe('entry test', () => {
     expect(entryTestFor('A1.1')).toBeNull();
     expect(entryTestFor('B2.1')).toBeNull();
     expect(entryTestFor(null)).toBeNull();
-  });
-
-  it('opens a class test on a later day by the level family, either part', () => {
-    expect(entryTestForClass('A2.2')).toBe('a2');
-    expect(entryTestForClass('B1.2')).toBe('b1');
-    expect(entryTestForClass('B1+.2')).toBe('b1plus');
-    expect(entryTestForClass('B2.1')).toBeNull();
-    expect(entryTestForClass('A1.2')).toBeNull();
   });
 
   for (const test of ENTRY_TEST_IDS) {

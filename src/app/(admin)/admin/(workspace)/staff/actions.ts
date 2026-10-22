@@ -11,9 +11,9 @@ import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { removeLicence, saveLicence } from '@/lib/admin/examiners';
-import { isAbsenceReason, isLevel, isShift, isWeekday, LEVELS, SHIFTS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
+import { isAbsenceReason, isLevel, LEVELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
 import { addBankAccount, removeBankAccount, saveAddress, updateBankAccount, updatePerson, type AddressKind } from '@/lib/admin/people';
-import { isContractKind, suggestShortName } from '@/lib/admin/staff-labels';
+import { COURSE_KINDS, isContractKind, suggestShortName } from '@/lib/admin/staff-labels';
 import {
   addAbsence,
   createStaffMember,
@@ -128,14 +128,25 @@ export async function saveTeachingAction(formData: FormData): Promise<void> {
   const { t, lang } = await getI18n();
   const shortName = text(formData, 'shortName', 40);
   if (!shortName) fail(back, t('Ein Kürzel ist nötig.', 'A short name is required.'));
-  const shifts = SHIFTS.filter((s) => formData.getAll('shifts').includes(s));
-  if (!shifts.length || !shifts.every(isShift)) fail(back, t('Mindestens eine Schicht.', 'At least one shift.'));
-  const weekdays = WEEKDAYS.filter((d) => formData.getAll('weekdays').includes(d));
-  if (!weekdays.length || !weekdays.every(isWeekday)) fail(back, t('Mindestens ein Wochentag.', 'At least one weekday.'));
+  const days = (name: string) => WEEKDAYS.filter((d) => formData.getAll(name).includes(d));
   const daysPerWeek = Number(formData.get('daysPerWeek'));
   if (!Number.isInteger(daysPerWeek) || daysPerWeek < 1 || daysPerWeek > 5) fail(back, t('Tage pro Woche: 1 bis 5.', 'Days per week: 1 to 5.'));
   const levels = LEVELS.filter((l) => formData.getAll('levels').includes(l)).filter(isLevel);
-  const result = await setTeachingRules(staffId, { shortName, shifts, daysPerWeek, weekdays, levels, note: text(formData, 'note', 200) }, actor);
+  const result = await setTeachingRules(
+    staffId,
+    {
+      shortName,
+      days: { morning: days('morning'), afternoon: days('afternoon'), evening: days('evening') },
+      daysPerWeek,
+      levels,
+      courseKinds: COURSE_KINDS.filter((k) => formData.getAll('kinds').includes(k)),
+      coverOnly: formData.get('coverOnly') === '1',
+      active: formData.get('active') === '1',
+      from: date(formData, 'from'),
+      note: text(formData, 'note', 200),
+    },
+    actor
+  );
   if (!result.ok) fail(back, pick(lang, result.reason));
   done(back);
 }

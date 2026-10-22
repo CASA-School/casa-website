@@ -1,6 +1,6 @@
 import type { Bilingual } from '../i18n';
 
-import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Absence, type Assignment, type CourseGroup, type Teacher } from './types';
+import { ABSENCE_LABELS, SHIFT_INFO, WEEKDAY_LABELS, type Absence, type Assignment, type CourseGroup, type Teacher, type Weekday } from './types';
 import { weekStartOf, weekdayOf, type PlanningWeek } from './weeks';
 
 /**
@@ -66,8 +66,16 @@ export function halfOf(group: Pick<CourseGroup, 'shift'>, date: string): 0 | 1 {
 }
 
 export function absenceOn(ctx: PlanContext, teacherId: string, date: string): Absence | undefined {
-  return ctx.absences.find((a) => a.teacherId === teacherId && a.onDate === date);
+  const absence = ctx.absences.find((a) => a.teacherId === teacherId && a.onDate === date);
+  if (absence) return absence;
+  // Not active yet (0083): away, as a day off is, until the day they start again.
+  const from = ctx.teachers.find((t) => t.id === teacherId)?.from;
+  return from && date < from ? { teacherId, onDate: date, reason: 'Freistellung' } : undefined;
 }
+
+/** Whether a teacher teaches on a weekday in a shift — or, without a shift, in either. */
+export const worksOn = (teacher: Teacher, dow: Weekday, shift?: CourseGroup['shift']): boolean =>
+  shift ? teacher.days[shift].includes(dow) : teacher.days.morning.includes(dow) || teacher.days.afternoon.includes(dow);
 
 export function assignmentAt(ctx: PlanContext, groupId: string, date: string): Assignment | undefined {
   return ctx.assignments.find((a) => a.groupId === groupId && a.onDate === date);
@@ -107,10 +115,9 @@ export type Remaining = {
 /** How many days a teacher still has in a week: the length of their piece. */
 export function remainingDays(ctx: PlanContext, teacher: Teacher, weekStart: string): Remaining {
   const week = ctx.weeks.find((w) => w.start === weekStart);
-  const span = Math.max(...teacher.shifts.map((s) => SHIFT_INFO[s].days));
-  const possible = (week?.days ?? []).slice(0, span).filter((d) => {
+  const possible = (week?.days ?? []).filter((d) => {
     const dow = weekdayOf(d);
-    return dow !== null && teacher.weekdays.includes(dow);
+    return dow !== null && worksOn(teacher, dow);
   });
   const absent = possible.filter((d) => absenceOn(ctx, teacher.id, d)).length;
   const used = usedDays(ctx, teacher.id, weekStart).size;
@@ -134,7 +141,7 @@ export function dayStates(ctx: PlanContext, teacher: Teacher, week: PlanningWeek
   const used = usedDays(ctx, teacher.id, week.start);
   return shiftDays(shift, week).map((date) => {
     const dow = weekdayOf(date);
-    const state: DayState = absenceOn(ctx, teacher.id, date) ? 'away' : used.has(date) ? 'planned' : dow && teacher.weekdays.includes(dow) ? 'free' : 'off';
+    const state: DayState = absenceOn(ctx, teacher.id, date) ? 'away' : used.has(date) ? 'planned' : dow && worksOn(teacher, dow, shift) ? 'free' : 'off';
     return { date, state };
   });
 }
@@ -149,7 +156,8 @@ export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, dat
 
   const dow = weekdayOf(date);
   if (!dow) return { ok: false, reason: { de: 'Wochenende', en: 'weekend' } };
-  if (!teacher.weekdays.includes(dow)) return { ok: false, reason: { de: `nicht am ${dow}`, en: `not on ${WEEKDAY_LABELS[dow].en}` } };
+  // Not that weekday in any shift: not there. In the other shift only: a cover from there (a double shift).
+  if (!worksOn(teacher, dow)) return { ok: false, reason: { de: `nicht am ${dow}`, en: `not on ${WEEKDAY_LABELS[dow].en}` } };
 
   const current = assignmentAt(ctx, group.id, date);
   const here = current?.teacherId === teacherId;
@@ -169,7 +177,7 @@ export function fit(ctx: PlanContext, teacherId: string, group: CourseGroup, dat
 
   return {
     ok: true,
-    substitute: !teacher.shifts.includes(group.shift),
+    substitute: !worksOn(teacher, dow, group.shift),
     levelMatch: teacher.levels.includes(group.level),
   };
 }

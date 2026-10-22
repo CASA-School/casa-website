@@ -39,6 +39,13 @@ describe('validateWeekAssignments', () => {
     expect(errors.join(' ')).toContain('two teachers');
   });
 
+  it('keeps a day someone off the board already holds, and refuses placing them anew', () => {
+    const away = { ...anna, id: 'ulrich', isActive: false };
+    const held = assignment('a1', KW40[0], 'ulrich');
+    expect(validateWeekAssignments({ ...base, assignments: [held], base: [held] }, [a1], [anna, away], weeks)).toEqual([]);
+    expect(validateWeekAssignments({ ...base, assignments: [held, assignment('a1', KW40[1], 'ulrich')], base: [held] }, [a1], [anna, away], weeks)).toHaveLength(1);
+  });
+
   it('rejects a week that is not in the month', () => {
     expect(validateWeekAssignments({ ...base, weekStart: '2026-11-02', assignments: [] }, [a1], [anna], weeks)).toHaveLength(1);
   });

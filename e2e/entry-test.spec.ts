@@ -149,10 +149,10 @@ test.describe('day-one placement test', () => {
     await client.query(`DELETE FROM entry_test_attempts WHERE sitting_id = $1 AND source = 'paper'`, [sitting]);
   });
 
-  test('opened today for a class from the archive (an A2.2 class, a late joiner), written, its results as a PDF page', async ({ page }) => {
+  test('„Tests öffnen" on a start day: only first-day courses, the chosen ones opened, written, its results as a PDF page', async ({ page }) => {
     const taken = await client.query(`SELECT 1 FROM entry_test_sittings WHERE on_date = $1::date AND test = 'a2'`, [today]);
     test.skip(taken.rows.length > 0, 'a real A2 test sitting exists today');
-    // A second part of A2, in the afternoon, whose first day was a week ago: it writes no test on the card.
+    // An A2.1 afternoon class starting today, and an A2.2 class whose first day was a week ago: only the first is listed.
     const start = (
       await client.query<{ id: string }>(
         `INSERT INTO course_instances (course_type_id, start_date, end_date, schedule)
@@ -160,15 +160,18 @@ test.describe('day-one placement test', () => {
         [today]
       )
     ).rows[0].id;
-    const course = (await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'A2.2', 1, 14) RETURNING id`, [start])).rows[0].id;
-    await client.query(`INSERT INTO course_days (course_id, group_index, on_date) VALUES ($1, 1, $2::date - 7), ($1, 1, $2::date)`, [course, today]);
-    const dayId = (await client.query<{ id: string }>(`SELECT id FROM course_days WHERE course_id = $1 AND on_date = $2::date`, [course, today])).rows[0].id;
+    const course = (await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'A2.1', 1, 14) RETURNING id`, [start])).rows[0].id;
+    const later = (await client.query<{ id: string }>(`INSERT INTO courses (course_instance_id, level_code, groups, places_per_group) VALUES ($1, 'A2.2', 1, 14) RETURNING id`, [start])).rows[0].id;
+    await client.query(`INSERT INTO course_days (course_id, group_index, on_date) VALUES ($1, 1, $3::date), ($2, 1, $3::date - 7), ($2, 1, $3::date)`, [course, later, today]);
     try {
       await page.goto('/admin/day/tests');
-      await page.getByRole('button', { name: 'Heute öffnen' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Test heute öffnen' });
-      await dialog.getByLabel('Kurs').selectOption(dayId);
-      await dialog.getByRole('button', { name: 'Öffnen' }).click();
+      await page.getByRole('button', { name: 'Tests öffnen' }).click();
+      const dialog = page.getByRole('dialog', { name: 'Tests öffnen' });
+      await expect(dialog.getByText('A2.1', { exact: true })).toBeVisible();
+      await expect(dialog.getByText('A2.2', { exact: true })).toHaveCount(0);
+      await dialog.getByText('Ausgewählte Kurse').click();
+      await dialog.getByRole('checkbox', { name: /A2\.1/ }).check();
+      await dialog.getByRole('button', { name: '1 Test öffnen' }).click();
       await expect(page).toHaveURL(/\/admin\/day\/tests$/);
       await expect(page.getByRole('button', { name: /Nachmittag.*Einstufungstest A2 Tag 1/ }).first()).toContainText(/Offen · Code \d{4}/);
 
@@ -187,8 +190,8 @@ test.describe('day-one placement test', () => {
       await expect(row).toContainText('/ 80');
     } finally {
       await client.query(`DELETE FROM entry_test_sittings WHERE on_date = $1::date AND test = 'a2'`, [today]);
-      await client.query(`DELETE FROM course_days WHERE course_id = $1`, [course]);
-      await client.query(`DELETE FROM courses WHERE id = $1`, [course]);
+      await client.query(`DELETE FROM course_days WHERE course_id = ANY($1::uuid[])`, [[course, later]]);
+      await client.query(`DELETE FROM courses WHERE id = ANY($1::uuid[])`, [[course, later]]);
       await client.query(`DELETE FROM course_instances WHERE id = $1`, [start]);
     }
   });

@@ -32,6 +32,10 @@ import { connect } from '../db/client.mjs';
 const ROLE = { 1: 'management', 2: 'teaching', 3: 'examiner', 4: 'author', 5: 'coach', 6: 'monitor', 7: 'placement', 8: 'front_office', 9: 'back_office', 10: 'exam_office', 11: 'house', 12: 'it', 13: 'accommodation', 14: 'host_families', 15: 'cleaning', 16: 'supervision' };
 const CONTRACT = { 1: 'employed', 2: 'freelance', 3: 'intern', 4: 'temporary', 5: 'federal_volunteer' };
 const LICENCE = { 3: 'telc_b2', 4: 'telc_c1_hochschule' };
+/** SchoolMan's course types (`CourseTypeReference`) as the workspace's kinds (staff-labels.ts, 0083). */
+const COURSE_KIND = { 1: 'intensive', 2: 'evening', 3: 'summer', 4: 'single', 5: 'closed_group', 7: 'exam_prep', 9: 'junior', 10: 'company', 11: 'special', 12: 'superintensive', 15: 'online', 16: 'extra' };
+/** SchoolMan's weekdays, 1 Sunday … 7 Saturday. */
+const WEEKDAY = { 2: 'Mo', 3: 'Di', 4: 'Mi', 5: 'Do', 6: 'Fr' };
 const OFFICE = new Set(['management', 'front_office', 'back_office', 'exam_office', 'accommodation', 'host_families', 'house', 'it']);
 const SALUTATION = { 1: 'mr', 2: 'ms' };
 const EMAIL_KIND = { 2: 'work' };
@@ -89,7 +93,7 @@ async function readStdin() {
 
 const colleagues = await readStdin();
 const client = await connect();
-const count = { colleagues: colleagues.length, new: 0, matched: 0, emails: 0, phones: 0, addresses: 0, hr: 0, banks: 0, roles: 0, contracts: 0, licences: 0, licencesSkipped: 0, accounts: 0, namesFixed: 0 };
+const count = { colleagues: colleagues.length, new: 0, matched: 0, emails: 0, phones: 0, addresses: 0, hr: 0, banks: 0, roles: 0, contracts: 0, licences: 0, licencesSkipped: 0, accounts: 0, namesFixed: 0, planning: 0 };
 
 try {
   await client.query('BEGIN');
@@ -100,6 +104,7 @@ try {
     if (!c.firstName) continue;
     // ---------------------------------------------------------------- who
     let staff = (await client.query(`SELECT id, person_id FROM staff_members WHERE filemaker_staff_id = $1`, [c.staffId])).rows[0];
+    const made = !staff;
     let personId = staff?.person_id ?? null;
     if (!personId && c.personId) {
       personId =
@@ -209,8 +214,30 @@ try {
     }
     // Someone the workspace marks as having left stays so: SchoolMan's "active" is not always kept up.
 
+    // What and when someone teaches, from SchoolMan's internal section (0083) — while nobody here has set it by
+    // hand (`planning_set_at`). The morning and afternoon days only for a colleague new here: the workspace's
+    // came from the planners' sheet and the board.
+    if (c.teaching) {
+      const kinds = [...new Set(c.teaching.kinds.map((k) => COURSE_KIND[k]).filter(Boolean))];
+      const weekdays = Object.keys(WEEKDAY).filter((d) => c.teaching.weekdays.includes(d)).map((d) => WEEKDAY[d]);
+      const at = (part) => (c.teaching.dayparts.includes(part) ? weekdays : []);
+      count.planning += (
+        await client.query(
+          `UPDATE staff_members SET course_kinds = $2, teaching_active = $3, evening_days = $4,
+                  morning_days = CASE WHEN $7 THEN $5 ELSE morning_days END,
+                  afternoon_days = CASE WHEN $7 THEN $6 ELSE afternoon_days END
+            WHERE id = $1 AND planning_set_at IS NULL`,
+          [staff.id, kinds, c.teaching.active, at('5'), at('2'), at('4').filter((d) => d !== 'Fr'), made]
+        )
+      ).rowCount;
+    }
+
     const roles = new Set(c.roles.filter((r) => ROLE[r.ref] && (!r.to || r.to >= today)).map((r) => ROLE[r.ref]));
     if (c.teacher) roles.add('teaching');
+    // Teaching is the staff record's „active as a teacher", not an old task left on it — and never for someone
+    // whose teaching the planners have set here (0083: Martin examines and no longer teaches).
+    const handSet = (await client.query(`SELECT 1 FROM staff_members WHERE id = $1 AND planning_set_at IS NOT NULL`, [staff.id])).rowCount > 0;
+    if (!c.teacher || handSet) roles.delete('teaching');
     // Marked as working in the office, with no office task named: Verwaltung.
     if (c.office && ![...roles].some((r) => OFFICE.has(r))) roles.add('back_office');
     for (const role of roles) {
@@ -270,5 +297,6 @@ try {
 console.log(
   `${count.colleagues} colleagues: ${count.matched} already in the register, ${count.new} new · names fixed ${count.namesFixed} · ` +
     `${count.emails} emails, ${count.phones} phones, ${count.addresses} addresses · HR numbers for ${count.hr}, ${count.banks} bank accounts · ` +
-    `${count.roles} roles, ${count.contracts} contract periods, ${count.licences} licences (${count.licencesSkipped} for exams not in the catalogue) · ${count.accounts} accounts linked`
+    `${count.roles} roles, ${count.contracts} contract periods, ${count.licences} licences (${count.licencesSkipped} for exams not in the catalogue) · ${count.accounts} accounts linked · ` +
+    `teaching rules from SchoolMan for ${count.planning}`
 );

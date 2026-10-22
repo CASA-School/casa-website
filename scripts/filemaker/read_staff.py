@@ -49,7 +49,9 @@ def first(value):
 
 
 staff = [s for s in table('StaffMember', '__ID_StaffMember', '_ID_Person', '_ID_ActiveStaff', '_ID_ActiveTeacher', '_ID_ActiveAdministration', 'TeacherFirstName.Surname.Short',
-                          'SearchFieldTeacherFirstName', 'SearchFieldTeacherSurName')
+                          'SearchFieldTeacherFirstName', 'SearchFieldTeacherSurName',
+                          # The internal section (2026-10-22): course types taught, weekdays, times of day.
+                          '_ID_CourseTypeReference', '_ID_WeekDay', '_ID_DayTimeReference')
          if first(s['_ID_ActiveStaff']) == '1']
 staff_ids = {s['__ID_StaffMember'] for s in staff}
 person_ids = {first(s['_ID_Person']) for s in staff if first(s['_ID_Person'])}
@@ -110,6 +112,10 @@ for s in staff:
         'personId': first(s['_ID_Person']) or None,
         'teacher': first(s['_ID_ActiveTeacher']) == '1',
         'office': first(s['_ID_ActiveAdministration']) == '1',
+        # SchoolMan's codes as they are: course types (1 Intensivkurs, 2 Abendkurs …), weekdays (2 Monday … 6
+        # Friday), times of day (2 vormittags, 4 nachmittags, 5 abends); import-staff.mjs names them.
+        'teaching': {'active': first(s['_ID_ActiveTeacher']) == '1', 'kinds': ids(s['_ID_CourseTypeReference']),
+                     'weekdays': ids(s['_ID_WeekDay']), 'dayparts': ids(s['_ID_DayTimeReference'])},
         'shortName': s['TeacherFirstName.Surname.Short'].strip() or None,
         # Six colleagues have no person in SchoolMan: their names are only on the staff row, in its search fields.
         'firstName': p.get('ZFirstName', '').strip() if p else split_name(s['SearchFieldTeacherFirstName'], s['SearchFieldTeacherSurName'])[0],
