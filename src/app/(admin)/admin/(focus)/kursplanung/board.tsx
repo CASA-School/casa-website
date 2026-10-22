@@ -12,7 +12,7 @@ import { absenceOn, assignmentKey, courseDays, fit, remainingDays, shiftDays, sp
 import { analysePlan } from '@/lib/admin/kursplanung/rules';
 import { SHIFT_INFO, SHIFTS, WEEKDAY_LABELS, type Assignment, type CourseGroup, type Shift, type Teacher, type Weekday } from '@/lib/admin/kursplanung/types';
 import { weekSlice } from '@/lib/admin/kursplanung/week';
-import { weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
+import { addDays, weekdayOf, type PlanningWeek } from '@/lib/admin/kursplanung/weeks';
 
 import { saveWeekAction, type SaveWeekResult } from './actions';
 import styles from './board.module.css';
@@ -53,12 +53,15 @@ const sig = (a: Assignment) => `${a.groupId}|${a.onDate}|${a.teacherId}|${a.isSu
 export function Board({
   plan,
   month,
+  today,
   canWrite,
   header,
   notice,
 }: {
   plan: PlanContext;
   month: string;
+  /** Today in Bremen: the board opens on its week when the month holds it. */
+  today: string;
   canWrite: boolean;
   /** The module's title, month and tabs — the board lays its own buttons beside them. */
   header: ReactNode;
@@ -70,7 +73,11 @@ export function Board({
   const [assignments, setAssignments] = useState<Assignment[]>(() => [...plan.assignments]);
   const [shift, setShift] = useState<Shift>(() => (plan.groups.some((g) => g.shift === 'morning') ? 'morning' : 'afternoon'));
   const [view, setView] = useState<'week' | 'month'>('week');
-  const [weekStart, setWeekStart] = useState(plan.weeks[0]?.start ?? '');
+  const [weekStart, setWeekStart] = useState(() => {
+    // A weekend looks ahead to the coming week, as the month does (planningMonthOf).
+    const ahead = weekdayOf(today) ? today : addDays(today, 2);
+    return (plan.weeks.find((w) => w.days[0] <= ahead && ahead <= w.days[4]) ?? plan.weeks.find((w) => w.start > today) ?? plan.weeks[0])?.start ?? '';
+  });
   const [hand, setHand] = useState<string | null>(null);
   const [undo, setUndo] = useState<Assignment[][]>([]);
   const [menu, setMenu] = useState<Menu | null>(null);
@@ -393,7 +400,10 @@ export function Board({
   const tray = useMemo(() => {
     if (!week) return { avail: [], other: [], away: [], full: [] };
     const rows = ctx.teachers.filter((t) => t.isActive).map((t) => ({ t, ...remainingDays(ctx, t, week.start), own: t.shifts.includes(shift) }));
-    const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) => b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
+    // Most days left first; a colleague with no level listed (SchoolMan's teachers who never teach an
+    // intensive class) after everyone who has one.
+    const byRest = (a: { rest: number; t: Teacher }, b: { rest: number; t: Teacher }) =>
+      Number(!a.t.levels.length) - Number(!b.t.levels.length) || b.rest - a.rest || a.t.shortName.localeCompare(b.t.shortName, 'de');
     return {
       avail: rows.filter((x) => x.own && x.rest > 0 && !x.awayAll).sort(byRest),
       other: rows.filter((x) => !x.own && x.rest > 0 && !x.awayAll).sort(byRest),
@@ -426,7 +436,7 @@ export function Board({
       let j = i;
       while (j + 1 < cd.length) {
         const n = assignments.find((x) => x.groupId === g.id && x.onDate === cd[j + 1]);
-        if (n && n.teacherId === a.teacherId && n.isSubstitute === a.isSubstitute && n.isTentative === a.isTentative) j++; else break;
+        if (n && n.teacherId === a.teacherId && n.isSubstitute === a.isSubstitute && n.isTentative === a.isTentative && Boolean(n.merged) === Boolean(a.merged)) j++; else break;
       }
       runs.push({ dates: cd.slice(i, j + 1), a });
       i = j + 1;
@@ -587,13 +597,15 @@ export function Board({
                     const hardIss = issues.filter((i) => i.severity === 'hard');
                     const warnIss = !hardIss.length && issues.some((i) => i.severity === 'warn');
                     const cap = dates.length > 1 ? `${day(dates[0])}–${day(dates[dates.length - 1])}` : day(dates[0]);
+                    const tag = hardIss.length ? pick(lang, hardIss[0].text) : a.merged ? t('Zusammengelegt', 'Merged') : a.isSubstitute ? t('Vertretung', 'Cover') : warnIss ? pick(lang, issues[0].text) : null;
+                    const one = dates.length === 1;
                     return (
                       <div
                         key={dates[0]}
                         role="button"
                         tabIndex={0}
                         draggable={canWrite}
-                        className={`${styles.piece} ${a.isSubstitute ? styles.pieceSub : ''} ${a.isTentative ? styles.pieceTent : ''} ${hardIss.length ? styles.pieceBad : warnIss ? styles.pieceWarn : ''}`}
+                        className={`${styles.piece} ${one ? styles.pieceOne : ''} ${a.isSubstitute ? styles.pieceSub : ''} ${a.isTentative ? styles.pieceTent : ''} ${hardIss.length ? styles.pieceBad : warnIss ? styles.pieceWarn : ''}`}
                         style={{ gridRow: `${rowOf(dates[0])} / span ${dates.length}` }}
                         data-row={rowOf(dates[0])}
                         data-group={g.id}
@@ -604,9 +616,19 @@ export function Board({
                         onDragStart={(e) => { dragRef.current = { teacherId: a.teacherId, from: 'board', groupId: g.id, dates, weekStart: w.start }; e.dataTransfer.effectAllowed = 'move'; markFor(a.teacherId, without(assignments, g.id, dates)); (e.currentTarget as HTMLElement).classList.add(styles.pieceDrag); }}
                         onDragEnd={(e) => { dragRef.current = null; setPreview(null); setMarks(new Map()); (e.currentTarget as HTMLElement).classList.remove(styles.pieceDrag); }}
                       >
-                        <span className={styles.pieceName}>{who?.shortName}{a.isTentative ? '?' : ''}</span>
-                        <span className={styles.pieceCap}>{cap}</span>
-                        {hardIss.length ? <span className={styles.tag}>{pick(lang, hardIss[0].text)}</span> : a.isSubstitute ? <span className={styles.tag}>{t('Vertretung', 'Cover')}</span> : warnIss ? <span className={styles.tag}>{pick(lang, issues[0].text)}</span> : null}
+                        {/* One day is one row high: its day sits beside the name, so the mark keeps a line of its own. */}
+                        {one ? (
+                          <span className={styles.pieceTop}>
+                            <span className={styles.pieceName}>{who?.shortName}{a.isTentative ? '?' : ''}</span>
+                            <span className={styles.pieceCap}>{cap}</span>
+                          </span>
+                        ) : (
+                          <>
+                            <span className={styles.pieceName}>{who?.shortName}{a.isTentative ? '?' : ''}</span>
+                            <span className={styles.pieceCap}>{cap}</span>
+                          </>
+                        )}
+                        {tag ? <span className={styles.tag}>{tag}</span> : null}
                         {canWrite ? <span className={styles.handle} title={t('Ziehen, um Tage zu ändern', 'Drag to change the days')} onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); resizeRef.current = { groupId: g.id, dates, row: null }; }} /> : null}
                       </div>
                     );

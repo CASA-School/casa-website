@@ -117,6 +117,9 @@ export type CourseGroup = {
    */
   courseStart?: string | null;
   courseEnd?: string | null;
+  /** The group's course (0045) and SchoolMan's number for it, its group's own when parallel groups have one each. */
+  courseId?: string | null;
+  schoolmanNumber?: string | null;
 };
 
 export type Assignment = {
@@ -125,6 +128,8 @@ export type Assignment = {
   teacherId: string;
   isSubstitute: boolean;
   isTentative: boolean;
+  /** A day of a „Zusammenlegung" (0074): the class is taught together with a parallel group, by one teacher. Read only. */
+  merged?: boolean;
 };
 
 export type Absence = {

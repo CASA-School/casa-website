@@ -54,6 +54,10 @@ the rules the planners kept in their heads.
    is `ui.module.css`. Served in the shell's focus mode — icon rail, no 1180px measure — because thirteen
    columns plus the tray need the width. Same gate, same tokens, same way back.
 
+The board opens on the planning month today falls in and on today's week (a weekend looks ahead to
+the coming one); `?month=` picks another. Until 2026-10-22 it opened on the last month with groups, which
+became November 2027 once lesson days were made a year ahead.
+
 Interactions, all of them: drag a piece from the tray onto a socket (it lays down as many consecutive
 days as it has left, `Mo–Mi` in one move); or click the piece (pick-up mode) and click a socket; click an
 open socket for a dropdown grouped by fit (Stamm/Vorschlag first, then free, other level, other shift as
@@ -103,6 +107,30 @@ that week is on the course page only. The board offers no slot outside a group's
 groups carry the course's first and last day, `validateWeekAssignments` and `setDayTeacher` refuse a
 date outside it, and `link_course_days()` joins a board day to its course only inside it — so the
 October board's KW 44 is empty for the groups whose course ended on 23 October.
+
+## What SchoolMan's days teach (2026-10-22, migration 0078)
+
+The teachers' rules were derived from the September sheet; SchoolMan's lesson days since then showed
+44 teacher-and-level pairs the rules did not list, so the October board carried 36 „… nicht hinterlegt"
+warnings about classes CASA had long decided, and 107 of 117 groups had no pair. `learn_kursplanung()`
+closes both and **only ever adds**:
+
+- a teacher's levels gain every level SchoolMan has them teaching (cover days too), their weekdays every
+  weekday, their shifts every shift taught as the class's own teacher;
+- a group without a pair gets the teacher who holds most of each half of its weeks that month, two
+  different people (Kurse refuses one person in both halves).
+
+Only SchoolMan's days count (`filemaker_id`): a planner who lays someone on a level not listed keeps the
+warning they accepted. The bridge runs it after every lesson-day import (`import-lesson-days.mjs`), so a
+rule a planner removes comes back only if SchoolMan keeps showing the person teaching it.
+
+A **Zusammenlegung** (docs/ADMIN_WORKSPACE.md, 0074) is one teacher for two parallel groups on purpose:
+the board reads `course_days.merged`, does not call it a double booking, and shows the day as its own
+piece marked „Zusammengelegt". It is set and lifted in the Tagesplan, not here.
+
+On Kurse a group of a course shows SchoolMan's number for it and opens the course's page; the typed
+„Kurs-ID" remains only for a group of no course. A colleague with no level listed (SchoolMan lists some
+teachers who never teach an intensive class) comes last in the tray.
 
 ## Course starts (2026-10-17)
 
@@ -210,3 +238,5 @@ now carry `null` there and the identifiers in `detail`; a save that throws is tr
 - Does October 2026 really run five weeks (to 30.10.), with November starting on the 2nd?
 - The derived rule table per teacher (shift, days, weekdays, levels) needs their confirmation; it is
   editable in the tool. FileMaker's `sessions`/`levels` fields were not used because they contradict the sheet.
+  Since 2026-10-22 it also holds what SchoolMan's lesson days show each person teaching (0078); days per
+  week are not learnt, and nothing is ever taken away.

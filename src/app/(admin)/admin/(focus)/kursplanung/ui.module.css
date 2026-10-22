@@ -84,7 +84,6 @@
 .days { font-weight: 600; color: var(--pz-ink2); font-size: 13px; margin-right: 4px; white-space: nowrap; }
 .lvChip { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: 6px; font-size: 10.5px; font-weight: 800; background: var(--lt); color: var(--li); }
 .abs { font-size: 12.5px; font-weight: 700; color: #b91c1c; }
-.absNone { font-size: 12.5px; font-weight: 600; color: var(--pz-faint); }
 
 /* the dialog form — the dialog is portalled out of the focus shell, so its title face is set here, not by the shell's heading rule */
 .dlgTitle { font-family: var(--font-sans), system-ui, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: normal; }

@@ -24,6 +24,24 @@ describe('analysePlan', () => {
     expect(doubles[0].severity).toBe('hard');
   });
 
+  it('takes two groups taught together (a Zusammenlegung) as one class, not a double booking', () => {
+    const anna = teacher({ id: 'anna' });
+    const merged = context({
+      teachers: [anna],
+      groups: [group({ id: 'a1' }), group({ id: 'a2', level: 'A2' })],
+      assignments: [assignment('a1', KW40[0], 'anna', { merged: true }), assignment('a2', KW40[0], 'anna', { merged: true })],
+    });
+    expect(codes(merged)).not.toContain('doppelt');
+
+    // A third group the same day is still one too many.
+    const third = context({
+      ...merged,
+      groups: [...merged.groups, group({ id: 'b1', level: 'B1' })],
+      assignments: [...merged.assignments, assignment('b1', KW40[0], 'anna')],
+    });
+    expect(codes(third)).toContain('doppelt');
+  });
+
   it('flags an assignment on an absent day and on a weekday not worked', () => {
     const anna = teacher({ id: 'anna', weekdays: ['Mo', 'Di', 'Mi', 'Do'] });
     const ctx = context({

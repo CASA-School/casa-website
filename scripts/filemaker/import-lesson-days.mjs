@@ -11,7 +11,7 @@
  * - a day the workspace already has on that date (the board's, or made from the plan) gets SchoolMan's
  *   number and only the teacher and room it lacks.
  * A day's hours and lessons are its own only where they differ from the plan's. An intensive course's
- * board groups are made (0047), so Kursplanung shows its days.
+ * board groups are made (0047), so Kursplanung shows its days, and learns from them (0078).
  */
 import { connect } from '../db/client.mjs';
 
@@ -23,7 +23,7 @@ async function readStdin() {
 
 const { classrooms, plans, days, closed } = await readStdin();
 const client = await connect();
-const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0 };
+const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0, learnt: 0 };
 
 try {
   await client.query('BEGIN');
@@ -170,6 +170,9 @@ try {
     count.inserted += made.rowCount ?? 0;
   }
   await client.query(`SELECT link_course_days()`);
+  // Kursplanung learns from these days: the levels, weekdays and shifts a teacher really teaches, and
+  // the pair of a group without one (0078; only ever added).
+  count.learnt = (await client.query(`SELECT learn_kursplanung() AS n`)).rows[0].n;
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -182,5 +185,6 @@ try {
 console.log(
   `${count.days} lesson days read (${closed} in a closure left out): ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
     `${count.kept} changed here and kept · ${count.plans} weekly-plan rows · skipped: ${count.noCourse} of a course not here · ` +
-    `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked`
+    `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked · ` +
+    `${count.learnt} Kursplanung rules or pairs learnt`
 );
