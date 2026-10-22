@@ -30,11 +30,14 @@ export type EntryTestSession = 'morning' | 'afternoon';
 
 export type EntryTestClass = { dayId: string; courseId: string; groupIndex: number; label: string; number: string | null; roomName: string | null; teacherName: string | null; startsAt: string | null };
 
+/** Open on its day; ready ahead of it (the code made, the phones see it from that day); closed. */
+export type SittingState = 'open' | 'ready' | 'closed';
+
 export type EntryTestSitting = {
   id: string;
   code: string;
   minutes: number;
-  state: 'open' | 'closed';
+  state: SittingState;
   openedAt: Date | null;
   running: number;
   paused: number;
@@ -54,8 +57,15 @@ export type DayEntryTest = {
 
 const SESSION_ORDER: EntryTestSession[] = ['morning', 'afternoon'];
 
-/** Open for the phones: opened, not closed, and on its own day — a day that is over is in the archive. */
-const isOpen = (s: { opened_at: Date | null; closed_at: Date | null }, day: string) => !!s.opened_at && !s.closed_at && day === berlinDay(new Date());
+/**
+ * Open for the phones: opened, not closed, and on its own day — a day that is over is in the archive. Opened
+ * ahead of its day (Rahman, 2026-10-22: the codes ready before the start), it is ready until then.
+ */
+function stateOf(s: { opened_at: Date | null; closed_at: Date | null }, day: string): SittingState {
+  if (!s.opened_at || s.closed_at) return 'closed';
+  const today = berlinDay(new Date());
+  return day === today ? 'open' : day > today ? 'ready' : 'closed';
+}
 
 /**
  * The archive (Rahman, 2026-10-20: once the day is over, its tests are archived): a sitting of a past day
@@ -121,6 +131,26 @@ export async function entryTestViews(day: string, origin: string): Promise<Entry
 }
 const NAME = (alias: string) => `concat_ws(' ', ${alias}.first_name, ${alias}.last_name)`;
 
+/** The first part of the levels that write a test on their first day. */
+const FIRST_LEVELS = ['A2', 'A2.1', 'B1', 'B1.1', 'B1+', 'B1+.1'];
+
+/** The next day, today or later, on which an A2, B1 or B1+ intensive class has its first lesson. */
+export async function nextEntryTestDay(from: string): Promise<string | null> {
+  const row = await queryFirst<{ day: string | null }>(
+    `SELECT to_char(min(f.first_day), 'YYYY-MM-DD') AS day
+       FROM (SELECT min(d.on_date) AS first_day
+               FROM course_days d
+               JOIN courses c ON c.id = d.course_id
+               JOIN course_instances i ON i.id = c.course_instance_id
+               JOIN course_types ty ON ty.id = i.course_type_id
+              WHERE NOT d.cancelled AND ty.slug = 'intensive-german' AND c.level_code = ANY($2::text[])
+              GROUP BY c.id) f
+      WHERE f.first_day >= $1::date`,
+    [from, FIRST_LEVELS]
+  );
+  return row?.day ?? null;
+}
+
 /** The tests of a day: the A2, B1 and B1+ intensive classes whose first lesson it is, by session and test. */
 export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
   const [classes, sittings] = await Promise.all([
@@ -142,7 +172,7 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
           AND c.level_code = ANY($2::text[])
           AND d.on_date = (SELECT min(x.on_date) FROM course_days x WHERE x.course_id = c.id AND NOT x.cancelled)
         ORDER BY t.starts_at NULLS LAST, level_rank(c.level_code), c.level_code, d.group_index`,
-      [day, ['A2', 'A2.1', 'B1', 'B1.1', 'B1+', 'B1+.1']]
+      [day, FIRST_LEVELS]
     ),
     query<{ id: string; session: EntryTestSession; test: EntryTestId; code: string; minutes: number; opened_at: Date | null; closed_at: Date | null; running: number; paused: number; handed_in: number }>(
       `SELECT s.id, s.session, s.test, s.code, s.minutes, s.opened_at, s.closed_at,
@@ -185,7 +215,7 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
       id: s.id,
       code: s.code,
       minutes: s.minutes,
-      state: isOpen(s, day) ? 'open' : 'closed',
+      state: stateOf(s, day),
       openedAt: s.opened_at,
       running: s.running,
       paused: s.paused,
@@ -196,11 +226,6 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
   return [...tests.values()].sort(
     (a, b) => SESSION_ORDER.indexOf(a.session) - SESSION_ORDER.indexOf(b.session) || testOrder.indexOf(a.test) - testOrder.indexOf(b.test)
   );
-}
-
-/** Whether a day has its tests — an intensive start's first day, or a sitting: the Tagesplan's link to them. */
-export async function hasEntryTests(day: string): Promise<boolean> {
-  return (await dayEntryTests(day)).length > 0;
 }
 
 function sessionOf(session: string | null, startsAt: string | null): EntryTestSession | null {
@@ -249,7 +274,7 @@ export type SittingDetail = {
   title: string;
   code: string;
   minutes: number;
-  state: 'open' | 'closed';
+  state: SittingState;
   attempts: EntryTestAttempt[];
 };
 
@@ -300,7 +325,7 @@ export async function sittingDetail(sittingId: string): Promise<SittingDetail | 
     title: ENTRY_TESTS[sitting.test].title,
     code: sitting.code,
     minutes: sitting.minutes,
-    state: isOpen(sitting, sitting.on_date) ? 'open' : 'closed',
+    state: stateOf(sitting, sitting.on_date),
     attempts: rows.map((r) => {
       const key = KEYS[sitting.test][r.version];
       const labels = slotLabels(CONTENT[sitting.test][r.version]);
@@ -352,7 +377,7 @@ async function freshCode(day: string): Promise<string> {
   return code;
 }
 
-/** Opens a session's test for the phones (made on first opening, with its own code); reopening keeps the code. */
+/** Opens a session's test for the phones — on its day, or ahead of it (made on first opening, with its own code); reopening keeps the code. */
 export async function openEntryTest(input: { day: string; session: EntryTestSession; test: EntryTestId; minutes: number }, actor: StaffUser): Promise<Result> {
   const minutes = Math.max(5, Math.min(180, Math.round(input.minutes || DEFAULT_MINUTES)));
   const row = await queryFirst<{ id: string }>(
@@ -368,16 +393,17 @@ export async function openEntryTest(input: { day: string; session: EntryTestSess
 }
 
 /**
- * „Tests öffnen" on the Tagesplan and the tests page (Rahman, 2026-10-22: only on the first day of an
- * intensive start, and every course or the chosen ones at once): the chosen classes' tests, today, one
- * sitting per test and morning or afternoon, shared by its classes. A test already open is left as it is.
+ * „Tests öffnen" on the Tagesplan and the tests page (Rahman, 2026-10-22): an intensive start's A2, B1 and
+ * B1+ courses, every one or the chosen ones, one sitting per test and morning or afternoon, shared by its
+ * classes — on the day, or ahead of it, so the codes are ready; the phones see a test only on its day. A
+ * test already open or ready is left as it is.
  */
-export async function openEntryTests(dayIds: readonly string[] | 'all', minutes: number, actor: StaffUser): Promise<Result> {
-  const day = berlinDay(new Date());
-  const tests = (await dayEntryTests(day)).filter((x) => dayIds === 'all' || x.classes.some((c) => dayIds.includes(c.dayId)));
-  if (!tests.length) return refuse('Heute beginnt keiner dieser Kurse.', 'None of these courses starts today.');
+export async function openEntryTests(day: string, dayIds: readonly string[] | 'all', minutes: number, actor: StaffUser): Promise<Result> {
+  if (day < berlinDay(new Date())) return refuse('Ein vergangener Test lässt sich nicht mehr öffnen.', 'A past test can no longer be opened.');
+  const tests = (await dayEntryTests(day)).filter((x) => x.classes.length && (dayIds === 'all' || x.classes.some((c) => dayIds.includes(c.dayId))));
+  if (!tests.length) return refuse('An diesem Tag beginnt keiner dieser Kurse.', 'None of these courses starts on this day.');
   for (const x of tests) {
-    if (x.sitting?.state === 'open') continue;
+    if (x.sitting && x.sitting.state !== 'closed') continue;
     const result = await openEntryTest({ day, session: x.session, test: x.test, minutes }, actor);
     if (!result.ok) return result;
   }

@@ -81,7 +81,7 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <DayHeader view="overview" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={entryTests.length > 0} t={t} lang={lang} />
+      <DayHeader view="overview" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} t={t} lang={lang} />
 
       {params.error ? (
         <p role="alert" className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
@@ -273,7 +273,7 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
         </SidePanel>
       </div>
 
-      {entryTests.length ? <EntryTestCard tests={entryTests} day={day} isToday={isToday} archived={day < today} canEdit={canEdit} canDelete={canDelete} /> : null}
+      {entryTests.length ? <EntryTestCard tests={entryTests} day={day} archived={day < today} canEdit={canEdit} canDelete={canDelete} /> : null}
 
       <Card
         title={t('Aufgaben', 'Tasks')}

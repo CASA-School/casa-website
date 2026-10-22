@@ -29,7 +29,6 @@ import { cn } from '@/lib/utils';
 export function EntryTestCard({
   tests,
   day,
-  isToday,
   canEdit,
   canDelete,
   heading,
@@ -37,7 +36,6 @@ export function EntryTestCard({
 }: {
   tests: EntryTestView[];
   day: string;
-  isToday: boolean;
   canEdit: boolean;
   canDelete: boolean;
   heading?: string;
@@ -67,7 +65,7 @@ export function EntryTestCard({
               {t('Archiv', 'Archive')}
             </ButtonLink>
           )}
-          {canEdit && isToday && !heading ? <OpenTestsDialog tests={tests} from="day" /> : null}
+          {canEdit && !archived && !heading ? <OpenTestsDialog tests={tests} day={day} from="day" /> : null}
         </span>
       </header>
       <ul className="divide-y divide-ws-line-soft">
@@ -83,7 +81,7 @@ export function EntryTestCard({
               width="lg"
               footer={<PanelFoot test={test} day={day} canEdit={canEdit} />}
             >
-              <TestPanel test={test} day={day} isToday={isToday} archived={archived} canEdit={canEdit} canDelete={canDelete} />
+              <TestPanel test={test} day={day} archived={archived} canEdit={canEdit} canDelete={canDelete} />
             </SidePanel>
           </li>
         ))}
@@ -134,15 +132,24 @@ function TestLine({ test, archived, t, lang }: { test: EntryTestView; archived: 
 function StatePill({ test, archived, t }: { test: EntryTestView; archived: boolean; t: T }) {
   const s = test.sitting;
   const open = s?.state === 'open';
+  const ready = s?.state === 'ready';
   return (
     <span
       className={cn(
         'inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[0.72rem] font-bold whitespace-nowrap',
-        open ? 'bg-[#e6f4ea] text-[#1e6b34]' : 'bg-ws-sunk text-[var(--casa-muted)]'
+        open ? 'bg-[#e6f4ea] text-[#1e6b34]' : ready ? 'bg-[#e3f4fc] text-[#075985]' : 'bg-ws-sunk text-[var(--casa-muted)]'
       )}
     >
-      <span aria-hidden="true" className={cn('size-1.5 rounded-full', open ? 'bg-[#2e9e4f]' : 'bg-[var(--casa-text-subtle)]')} />
-      {open ? t(`Offen · Code ${s.code}`, `Open · code ${s.code}`) : archived && s ? t('Archiviert', 'Archived') : s ? t('Geschlossen', 'Closed') : t('Nicht geöffnet', 'Not opened')}
+      <span aria-hidden="true" className={cn('size-1.5 rounded-full', open ? 'bg-[#2e9e4f]' : ready ? 'bg-[#0284c7]' : 'bg-[var(--casa-text-subtle)]')} />
+      {open
+        ? t(`Offen · Code ${s.code}`, `Open · code ${s.code}`)
+        : ready
+          ? t(`Bereit · Code ${s.code}`, `Ready · code ${s.code}`)
+          : archived && s
+            ? t('Archiviert', 'Archived')
+            : s
+              ? t('Geschlossen', 'Closed')
+              : t('Nicht geöffnet', 'Not opened')}
     </span>
   );
 }
@@ -158,7 +165,7 @@ function LiveRefresh({ active }: { active: boolean }) {
   return null;
 }
 
-function TestPanel({ test, day, isToday, archived, canEdit, canDelete }: { test: EntryTestView; day: string; isToday: boolean; archived: boolean; canEdit: boolean; canDelete: boolean }) {
+function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTestView; day: string; archived: boolean; canEdit: boolean; canDelete: boolean }) {
   const { t } = useWsLang();
   const detail = test.detail;
   const live = !!detail && (detail.state === 'open' || detail.attempts.some((a) => a.status === 'running' || a.status === 'paused'));
@@ -168,7 +175,7 @@ function TestPanel({ test, day, isToday, archived, canEdit, canDelete }: { test:
     <>
       <LiveRefresh active={live} />
       <Section title={t('Test', 'Test')}>
-        {detail?.state === 'open' ? (
+        {detail?.state === 'open' || detail?.state === 'ready' ? (
           <div className="flex flex-wrap items-end justify-between gap-4 px-6 py-2">
             <QrCode qr={test.qr} label={test.link} className="size-28 shrink-0" />
             <div className="mr-auto">
@@ -190,7 +197,7 @@ function TestPanel({ test, day, isToday, archived, canEdit, canDelete }: { test:
               </form>
             ) : null}
           </div>
-        ) : canEdit && isToday ? (
+        ) : canEdit && !archived ? (
           <form action={openEntryTestAction} className="flex flex-wrap items-end gap-3 px-6 py-2">
             <input type="hidden" name="day" value={day} />
             <input type="hidden" name="session" value={test.session} />
