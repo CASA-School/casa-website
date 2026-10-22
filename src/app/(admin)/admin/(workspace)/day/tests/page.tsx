@@ -53,7 +53,17 @@ export default async function EntryTestArchivePage({ searchParams }: { searchPar
         </p>
       ) : null}
 
-      <Card title={t('Tests', 'Tests')} icon={Icon.placement} tint="blue" bleed>
+      <Card
+        title={t('Tests', 'Tests')}
+        icon={Icon.placement}
+        tint="blue"
+        bleed
+        actions={
+          <ButtonLink href="/admin/day/tests/guide" variant="secondary" size="sm">
+            {t('Leitfaden für Lehrkräfte', 'Guide for teachers')}
+          </ButtonLink>
+        }
+      >
         <ul className="divide-y divide-ws-line-soft">
           {ENTRY_TEST_IDS.map((test) => (
             <li key={test} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">

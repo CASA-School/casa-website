@@ -38,7 +38,8 @@ only the first part of a level (`A2.1`) or the bare level writes one.
 1. **The office opens it.** The Tagesplan shows a card „Einstufungstest" on a day that is the first
    lesson of an intensive A2, B1 or B1+ course (`ty.slug = 'intensive-german'`, the course's earliest
    course day), one line per test and session. The line opens a side panel: the classes, „Test
-   öffnen" (on the day itself; minutes default 40), then the sitting's 4-digit code for the teachers.
+   öffnen" (on the day or ahead of it; A2 25, B1 30, B1+ 35 minutes, `ENTRY_TESTS[…].minutes`), then the
+   sitting's 4-digit code for the teachers.
 2. **Learners write on their phone** at `casa-bremen.de/test` (public site, no site chrome, noindex,
    German only, „Sie" as in the booklets), usually by a course's QR code (below). Name, e-mail, the
    course when more than one test is open (the QR code's `?kurs=` chooses it), then one task per page,
@@ -76,6 +77,14 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    courses. Opened ahead of its day a test is „Bereit" with its code, so the teachers can have it, and the
    phones see it only on that day (they read today's sittings). A test already open or ready is left as
    it is; the per-test „Test öffnen" in its panel stays. The old „Heute öffnen" for a later day is gone.
+8a. **The teachers' guide and the mail** (Rahman, 2026-10-22). „Leitfaden für Lehrkräfte" on the tests
+   page (`day/tests/guide`) is the general guide, one A4 page: each test's time, then preparing, starting,
+   during, after, the results — replacing the Google version's „Leitfaden zur Durchführung", whose
+   separate typing-in step the phones made unnecessary. „Leitfaden" in a test's panel, once its code
+   exists, is the same page with that test's day, classes, code and QR code (`?sitting=`), to print or
+   save as a PDF. „E-Mail an Lehrkräfte" in the panel opens a mail (`mailto:`, the workspace sends none)
+   to the teachers of its classes on that day, with the day, the code, the link and the time; the office
+   attaches the guide's PDF. Sent a few days ahead, with the course start mails.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
    per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
    notes, and the average; the Excel keeps every answer.
