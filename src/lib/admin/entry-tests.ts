@@ -140,17 +140,6 @@ export async function entryTestViews(day: string, origin: string): Promise<Entry
     })
   );
 }
-/** A sitting with its classes, for the guide that carries its code. */
-export async function sittingGuide(sittingId: string): Promise<{ day: string; test: DayEntryTest; sitting: EntryTestSitting } | null> {
-  const row = await queryFirst<{ day: string; session: EntryTestSession; test: EntryTestId }>(
-    `SELECT to_char(on_date, 'YYYY-MM-DD') AS day, session, test FROM entry_test_sittings WHERE id = $1`,
-    [sittingId]
-  );
-  if (!row) return null;
-  const test = (await dayEntryTests(row.day)).find((x) => x.session === row.session && x.test === row.test);
-  return test?.sitting ? { day: row.day, test, sitting: test.sitting } : null;
-}
-
 const NAME = (alias: string) => `concat_ws(' ', ${alias}.first_name, ${alias}.last_name)`;
 
 /** The first part of the levels that write a test on their first day. */

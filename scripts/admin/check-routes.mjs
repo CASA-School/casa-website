@@ -108,6 +108,7 @@ const routes = [
   '/admin/day/tests/qr?kurs=b1',
   '/admin/day/tests/booklet?kurs=b1plus&version=B',
   '/admin/day/tests/guide',
+  '/admin/day/tests/codes',
   '/admin/day/tests/mail',
   '/admin/day/courses',
   '/admin/day/rooms',

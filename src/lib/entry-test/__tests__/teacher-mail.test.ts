@@ -5,6 +5,7 @@ import { qrPng } from '@/lib/qr-png';
 
 const test: TeacherMailTest = {
   key: 'morning-b1',
+  test: 'b1',
   session: 'morning',
   title: 'Einstufungstest B1 Tag 1',
   course: 'B1',
@@ -22,6 +23,11 @@ describe('the teachers’ mail', () => {
     expect(html).toContain('src="cid:qr-morning-b1"');
     expect(html).toContain('B1.1</b> · Gruppe 1 · Berlin · Tanja M. · 09:00');
     expect(html).toContain('Während des Tests · 30 Minuten');
+    // Three parts, in this order: the code, the QR code, the guide.
+    const [code, qr, guide] = ['Code für die Lehrkraft', 'QR-Code für die Teilnehmenden', 'Leitfaden für Lehrkräfte'].map((h) => html.indexOf(h));
+    expect(code).toBeGreaterThan(0);
+    expect(qr).toBeGreaterThan(code);
+    expect(guide).toBeGreaterThan(qr);
     expect(html).not.toContain('kein Urteil');
   });
 

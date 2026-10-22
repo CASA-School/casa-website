@@ -230,9 +230,14 @@ function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTes
 
       <Section title={t('Drucken', 'Print')}>
         <div className="flex flex-wrap gap-2 px-6 py-1">
-          <ButtonLink href={detail && detail.state !== 'closed' ? `/admin/day/tests/guide?sitting=${detail.id}` : '/admin/day/tests/guide'} variant="secondary" size="sm">
+          <ButtonLink href="/admin/day/tests/guide" variant="secondary" size="sm">
             {t('Leitfaden', 'Guide')}
           </ButtonLink>
+          {detail && detail.state !== 'closed' ? (
+            <ButtonLink href={`/admin/day/tests/codes?date=${day}`} variant="secondary" size="sm">
+              {t('Code-Karten', 'Code cards')}
+            </ButtonLink>
+          ) : null}
           {(['A', 'B'] as const).map((v) => (
             <ButtonLink key={v} href={`/admin/day/tests/booklet?kurs=${test.test}&version=${v}`} variant="secondary" size="sm">
               {t(`Testheft ${v}`, `Booklet ${v}`)}

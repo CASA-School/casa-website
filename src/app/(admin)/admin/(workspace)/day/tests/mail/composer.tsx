@@ -126,8 +126,18 @@ export function TeacherMailComposer({
             ))}
           </ul>
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            {draft.tests.some((x) => x.code) ? (
+              <ButtonLink href={`/admin/day/tests/codes?date=${draft.day}`} variant="ghost" size="sm">
+                {t('Code-Karten', 'Code cards')}
+              </ButtonLink>
+            ) : null}
+            {[...new Set(draft.tests.map((x) => x.test))].map((test) => (
+              <ButtonLink key={test} href={`/admin/day/tests/qr?kurs=${test}`} variant="ghost" size="sm">
+                {t(`QR-Code ${draft.tests.find((x) => x.test === test)?.course}`, `QR code ${draft.tests.find((x) => x.test === test)?.course}`)}
+              </ButtonLink>
+            ))}
             <ButtonLink href="/admin/day/tests/guide" variant="ghost" size="sm">
-              {t('Leitfaden als PDF', 'Guide as PDF')}
+              {t('Leitfaden', 'Guide')}
             </ButtonLink>
           </div>
         </Card>
