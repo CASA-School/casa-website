@@ -10,7 +10,7 @@ import type { Bilingual } from './i18n';
 import { CONTENT } from '@/lib/entry-test/content';
 import { finalizeOverdue, finalizeWith } from '@/lib/entry-test/attempts.server';
 import { KEYS } from '@/lib/entry-test/keys.server';
-import { DEFAULT_MINUTES, ENTRY_TESTS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
+import { ENTRY_TESTS, cleanAnswers, entryTestFor, scoreAnswers, slotKinds, slotLabels, type Mark } from '@/lib/entry-test/tests';
 import type { Answer, AttemptStatus, EntryTestId, EntryTestVersion } from '@/lib/entry-test/types';
 import { publicSiteAddress } from '@/lib/cms/origins';
 import { lanAddresses } from '@/lib/dev/lan';
@@ -28,7 +28,19 @@ const refuse = (de: string, en: string): Result => ({ ok: false, reason: { de, e
 
 export type EntryTestSession = 'morning' | 'afternoon';
 
-export type EntryTestClass = { dayId: string; courseId: string; groupIndex: number; label: string; number: string | null; roomName: string | null; teacherName: string | null; startsAt: string | null };
+export type EntryTestClass = {
+  dayId: string;
+  courseId: string;
+  groupIndex: number;
+  label: string;
+  number: string | null;
+  roomName: string | null;
+  teacherName: string | null;
+  /** The day's teacher's first name and e-mail address, for the mail with the code. */
+  teacherFirst: string | null;
+  teacherEmail: string | null;
+  startsAt: string | null;
+};
 
 /** Open on its day; ready ahead of it (the code made, the phones see it from that day); closed. */
 export type SittingState = 'open' | 'ready' | 'closed';
@@ -113,8 +125,11 @@ export const entryTestLink = (origin: string, test: EntryTestId) => `${origin}/t
 
 export type PaperTask = { n: number; kind: 'mc' | 'rf'; statements: number };
 
-/** A day's tests as the Tagesplan and the archive show them: each with its attempts and its QR code. */
-export type EntryTestView = DayEntryTest & { detail: SittingDetail | null; paper: PaperTask[]; link: string; qr: { size: number; path: string } };
+/**
+ * A day's tests as the Tagesplan and the archive show them: each with its attempts, its QR code, and once
+ * its code exists the mail that gives it to the classes' teachers (Rahman, 2026-10-22: a few days ahead).
+ */
+export type EntryTestView = DayEntryTest & { detail: SittingDetail | null; paper: PaperTask[]; link: string; qr: { size: number; path: string }; mail: string | null };
 
 export async function entryTestViews(day: string, origin: string): Promise<EntryTestView[]> {
   const tests = await dayEntryTests(day);
@@ -125,10 +140,54 @@ export async function entryTestViews(day: string, origin: string): Promise<Entry
       const count = (...statuses: string[]) => detail?.attempts.filter((a) => statuses.includes(a.status)).length ?? 0;
       const sitting = test.sitting && { ...test.sitting, running: count('running'), paused: count('paused'), handedIn: count('submitted', 'expired') };
       const link = entryTestLink(origin, test.test);
-      return { ...test, sitting, detail, paper: paperLayout(test.test), link, qr: qrPath(link) };
+      const mail = sitting && sitting.state !== 'closed' ? teacherMail(day, { ...test, sitting }, link) : null;
+      return { ...test, sitting, detail, paper: paperLayout(test.test), link, qr: qrPath(link), mail };
     })
   );
 }
+const dayInGerman = (day: string) =>
+  new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`));
+
+/**
+ * The mail with a test's code for its classes' teachers, as a `mailto:` (the workspace sends no mail of its
+ * own): in German, du; the guide with the QR code goes along as the PDF from „Leitfaden".
+ */
+function teacherMail(day: string, test: DayEntryTest & { sitting: EntryTestSitting }, link: string): string {
+  const people = [...new Map(test.classes.filter((c) => c.teacherEmail).map((c) => [c.teacherEmail!.toLowerCase(), c])).values()];
+  const levels = [...new Set(test.classes.map((c) => c.label))].join(', ');
+  const session = test.session === 'morning' ? 'Vormittag' : 'Nachmittag';
+  const names = [...new Set(people.map((c) => c.teacherFirst).filter(Boolean))];
+  const many = people.length > 1;
+  const greeting = names.length && names.length === people.length ? names.map((n, i) => `${i ? 'hallo' : 'Hallo'} ${n}`).join(', ') + ',' : 'Hallo zusammen,';
+  const when = dayInGerman(day);
+  const body = [
+    greeting,
+    '',
+    `am ${when} ${many ? 'schreiben eure Kurse' : 'schreibt dein Kurs'} ${levels} (${session}) den ${test.title}.`,
+    '',
+    `Code für die Lehrkräfte: ${test.sitting.code}`,
+    `Link für die Teilnehmenden: ${link}`,
+    `Zeit: ${test.sitting.minutes} Minuten`,
+    '',
+    `Mit dem Code geht ein pausierter Test weiter; gib ihn nicht an die Teilnehmenden weiter. Den Leitfaden mit dem QR-Code ${many ? 'findet ihr' : 'findest du'} im Anhang.`,
+    '',
+    'Viele Grüße',
+  ].join('\n');
+  const to = people.map((c) => c.teacherEmail).join(',');
+  return `mailto:${to}?subject=${encodeURIComponent(`Einstufungstest am ${when} – ${levels} (${session})`)}&body=${encodeURIComponent(body)}`;
+}
+
+/** A sitting with its classes, for the guide that carries its code. */
+export async function sittingGuide(sittingId: string): Promise<{ day: string; test: DayEntryTest; sitting: EntryTestSitting } | null> {
+  const row = await queryFirst<{ day: string; session: EntryTestSession; test: EntryTestId }>(
+    `SELECT to_char(on_date, 'YYYY-MM-DD') AS day, session, test FROM entry_test_sittings WHERE id = $1`,
+    [sittingId]
+  );
+  if (!row) return null;
+  const test = (await dayEntryTests(row.day)).find((x) => x.session === row.session && x.test === row.test);
+  return test?.sitting ? { day: row.day, test, sitting: test.sitting } : null;
+}
+
 const NAME = (alias: string) => `concat_ws(' ', ${alias}.first_name, ${alias}.last_name)`;
 
 /** The first part of the levels that write a test on their first day. */
@@ -154,10 +213,12 @@ export async function nextEntryTestDay(from: string): Promise<string | null> {
 /** The tests of a day: the A2, B1 and B1+ intensive classes whose first lesson it is, by session and test. */
 export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
   const [classes, sittings] = await Promise.all([
-    query<{ day_id: string; course_id: string; group_index: number; level_code: string | null; number: string | null; room_name: string | null; teacher_name: string | null; starts_at: string | null; session: string | null }>(
+    query<{ day_id: string; course_id: string; group_index: number; level_code: string | null; number: string | null; room_name: string | null; teacher_name: string | null; teacher_first: string | null; teacher_email: string | null; starts_at: string | null; session: string | null }>(
       `SELECT d.id AS day_id, c.id AS course_id, d.group_index, c.level_code,
               coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
               coalesce(r.nickname, r.name, hr.nickname, hr.name) AS room_name, coalesce(nullif(trim(tm.short_name), ''), ${NAME('tp')}) AS teacher_name,
+              split_part(btrim(tp.first_name), ' ', 1) AS teacher_first,
+              (SELECT e.address FROM emails e WHERE e.person_id = tp.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS teacher_email,
               to_char(t.starts_at, 'HH24:MI') AS starts_at, coalesce(c.session, i.session) AS session
          FROM course_days d
          JOIN course_day_times t ON t.id = d.id
@@ -207,6 +268,8 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
       number: c.number,
       roomName: c.room_name,
       teacherName: c.teacher_name,
+      teacherFirst: c.teacher_first || null,
+      teacherEmail: c.teacher_email,
       startsAt: c.starts_at,
     });
   }
@@ -379,7 +442,7 @@ async function freshCode(day: string): Promise<string> {
 
 /** Opens a session's test for the phones — on its day, or ahead of it (made on first opening, with its own code); reopening keeps the code. */
 export async function openEntryTest(input: { day: string; session: EntryTestSession; test: EntryTestId; minutes: number }, actor: StaffUser): Promise<Result> {
-  const minutes = Math.max(5, Math.min(180, Math.round(input.minutes || DEFAULT_MINUTES)));
+  const minutes = Math.max(5, Math.min(180, Math.round(input.minutes || ENTRY_TESTS[input.test].minutes)));
   const row = await queryFirst<{ id: string }>(
     `INSERT INTO entry_test_sittings (on_date, session, test, code, minutes, opened_at, created_by)
      VALUES ($1::date, $2, $3, $4, $5, now(), $6)

@@ -15,7 +15,7 @@ import { Button, ButtonLink, Field, IconChip, Input } from '@/components/admin/u
 import type { EntryTestAttempt, EntryTestView, SittingDetail } from '@/lib/admin/entry-tests';
 import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
 import { pick, type T } from '@/lib/admin/i18n';
-import { DEFAULT_MINUTES } from '@/lib/entry-test/tests';
+import { ENTRY_TESTS } from '@/lib/entry-test/tests';
 import { cn } from '@/lib/utils';
 
 /**
@@ -187,15 +187,23 @@ function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTes
                 {shortLink(test.link)} · {t(`${detail.minutes} Minuten`, `${detail.minutes} minutes`)}
               </p>
             </div>
-            {canEdit ? (
-              <form action={closeEntryTestAction}>
-                <input type="hidden" name="sittingId" value={detail.id} />
-                <input type="hidden" name="day" value={day} />
-                <Button type="submit" variant="secondary" size="sm">
-                  {t('Test schließen', 'Close the test')}
-                </Button>
-              </form>
-            ) : null}
+            <span className="flex flex-wrap gap-2">
+              {test.mail ? (
+                <ButtonLink href={test.mail} plain variant="secondary" size="sm">
+                  {Icon.mail}
+                  {t('E-Mail an Lehrkräfte', 'Email the teachers')}
+                </ButtonLink>
+              ) : null}
+              {canEdit ? (
+                <form action={closeEntryTestAction}>
+                  <input type="hidden" name="sittingId" value={detail.id} />
+                  <input type="hidden" name="day" value={day} />
+                  <Button type="submit" variant="secondary" size="sm">
+                    {t('Test schließen', 'Close the test')}
+                  </Button>
+                </form>
+              ) : null}
+            </span>
           </div>
         ) : canEdit && !archived ? (
           <form action={openEntryTestAction} className="flex flex-wrap items-end gap-3 px-6 py-2">
@@ -203,7 +211,7 @@ function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTes
             <input type="hidden" name="session" value={test.session} />
             <input type="hidden" name="test" value={test.test} />
             <Field label={t('Minuten', 'Minutes')} htmlFor={`minutes-${test.session}-${test.test}`} className="w-24">
-              <Input id={`minutes-${test.session}-${test.test}`} name="minutes" type="number" min={5} max={180} defaultValue={detail?.minutes ?? DEFAULT_MINUTES} />
+              <Input id={`minutes-${test.session}-${test.test}`} name="minutes" type="number" min={5} max={180} defaultValue={detail?.minutes ?? ENTRY_TESTS[test.test].minutes} />
             </Field>
             <Button type="submit" variant="primary">
               {detail ? t('Wieder öffnen', 'Open again') : t('Test öffnen', 'Open the test')}
@@ -216,6 +224,9 @@ function TestPanel({ test, day, archived, canEdit, canDelete }: { test: EntryTes
 
       <Section title={t('Drucken', 'Print')}>
         <div className="flex flex-wrap gap-2 px-6 py-1">
+          <ButtonLink href={detail && detail.state !== 'closed' ? `/admin/day/tests/guide?sitting=${detail.id}` : '/admin/day/tests/guide'} variant="secondary" size="sm">
+            {t('Leitfaden', 'Guide')}
+          </ButtonLink>
           {(['A', 'B'] as const).map((v) => (
             <ButtonLink key={v} href={`/admin/day/tests/booklet?kurs=${test.test}&version=${v}`} variant="secondary" size="sm">
               {t(`Testheft ${v}`, `Booklet ${v}`)}

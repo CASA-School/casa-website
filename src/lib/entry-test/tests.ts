@@ -3,19 +3,18 @@ import type { Answer, EntryTestId, Task } from './types';
 /**
  * The three tests and the classes that write them (Rahman, 2026-10-20): each checks the level below the
  * course it opens, and is named after the course, as the corrected booklets are („Kurs B1 · Geprüfte
- * Kenntnisse: A2"). B2 classes write none for now. Safe for the browser: no answer in here.
+ * Kenntnisse: A2"). B2 classes write none for now. `minutes` is the time a sitting runs unless the office
+ * sets another (Rahman, 2026-10-22, as the teachers' guide has it). Safe for the browser: no answer in here.
  */
-export const ENTRY_TESTS: Record<EntryTestId, { course: 'A2' | 'B1' | 'B1+'; checks: 'A1' | 'A2' | 'B1'; title: string }> = {
-  a2: { course: 'A2', checks: 'A1', title: 'Einstufungstest A2 Tag 1' },
-  b1: { course: 'B1', checks: 'A2', title: 'Einstufungstest B1 Tag 1' },
-  b1plus: { course: 'B1+', checks: 'B1', title: 'Einstufungstest B1+ Tag 1' },
+export const ENTRY_TESTS: Record<EntryTestId, { course: 'A2' | 'B1' | 'B1+'; checks: 'A1' | 'A2' | 'B1'; title: string; minutes: number }> = {
+  a2: { course: 'A2', checks: 'A1', title: 'Einstufungstest A2 Tag 1', minutes: 25 },
+  b1: { course: 'B1', checks: 'A2', title: 'Einstufungstest B1 Tag 1', minutes: 30 },
+  b1plus: { course: 'B1+', checks: 'B1', title: 'Einstufungstest B1+ Tag 1', minutes: 35 },
 };
 
 export const ENTRY_TEST_IDS = Object.keys(ENTRY_TESTS) as EntryTestId[];
 export const isEntryTestId = (value: unknown): value is EntryTestId => typeof value === 'string' && value in ENTRY_TESTS;
 
-/** Minutes a sitting runs unless the office sets another time; the booklets recommend 35–40. */
-export const DEFAULT_MINUTES = 40;
 /** Two points per correct answer, as on the Google test and its printed teacher key (80 for 40 answers); the booklets count one. */
 export const POINTS_PER_ANSWER = 2;
 /** Saves that arrive this long after the deadline are still taken (a phone on a slow network). */

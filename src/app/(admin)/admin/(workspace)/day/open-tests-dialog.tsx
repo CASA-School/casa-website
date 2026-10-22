@@ -6,11 +6,11 @@ import { openEntryTestsAction } from './actions';
 import { DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
-import { Button, Field, Input } from '@/components/admin/ui';
+import { Button } from '@/components/admin/ui';
 import type { DayEntryTest } from '@/lib/admin/entry-tests';
 import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
 import { pick } from '@/lib/admin/i18n';
-import { DEFAULT_MINUTES } from '@/lib/entry-test/tests';
+import { ENTRY_TESTS } from '@/lib/entry-test/tests';
 
 /**
  * „Tests öffnen" (Rahman, 2026-10-22): an intensive start's A2, B1 and B1+ courses whose test is not open
@@ -85,7 +85,7 @@ export function OpenTestsDialog({ tests, day, when, from }: { tests: DayEntryTes
             {waiting.map((x) => (
               <li key={`${x.session}-${x.test}`}>
                 <p className="px-4 pt-2.5 pb-1 text-[0.74rem] font-semibold text-[var(--casa-muted)]">
-                  {pick(lang, SESSION_LABELS[x.session])} · {x.title}
+                  {pick(lang, SESSION_LABELS[x.session])} · {x.title} · {t(`${ENTRY_TESTS[x.test].minutes} Min.`, `${ENTRY_TESTS[x.test].minutes} min`)}
                 </p>
                 <ul>
                   {x.classes.map((c) => (
@@ -113,9 +113,6 @@ export function OpenTestsDialog({ tests, day, when, from }: { tests: DayEntryTes
           </ul>
         </div>
 
-        <Field label={t('Minuten', 'Minutes')} htmlFor={`open-tests-minutes-${from}`} className="w-28">
-          <Input id={`open-tests-minutes-${from}`} name="minutes" type="number" min={5} max={180} defaultValue={DEFAULT_MINUTES} />
-        </Field>
         <DialogFooter>
           <Button type="submit" disabled={!opening}>
             {opening === 1 ? t('1 Test öffnen', 'Open 1 test') : opening ? t(`${opening} Tests öffnen`, `Open ${opening} tests`) : t('Tests öffnen', 'Open tests')}
