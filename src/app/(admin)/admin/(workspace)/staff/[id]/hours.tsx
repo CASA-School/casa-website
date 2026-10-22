@@ -34,6 +34,8 @@ export function StaffHours({ data }: { data: StaffTime }) {
   const last = withSheet.at(-1) ?? null;
   const yearBalance = withSheet.reduce((sum, m) => sum + (m.balance ?? 0), 0);
   const today = new Date().toISOString().slice(0, 7);
+  // The month under way: its sheet's figures come once it is over (staffTime).
+  const current = data.months.find((m) => m.open)?.month ?? null;
   const sofar = data.months.filter((m) => m.month <= today);
   const taught = sofar.reduce((sum, m) => sum + (m.units ?? 0), 0);
   const owed = sofar.reduce((sum, m) => sum + (m.contractUnits ?? 0), 0);
@@ -133,6 +135,7 @@ export function StaffHours({ data }: { data: StaffTime }) {
                   <td className="px-5 py-2 font-semibold text-[var(--casa-ink)]">
                     {monthName(m.month, 'long')}
                     {m.approved ? <span className="ml-1.5 text-[0.72rem] font-medium text-[var(--casa-muted)]">{t('freigegeben', 'approved')}</span> : null}
+                    {m.open && m.month === current ? <span className="ml-1.5 text-[0.72rem] font-medium text-[var(--casa-muted)]">{t('läuft', 'running')}</span> : null}
                   </td>
                   <td className="px-3 py-2 text-right">{m.target !== null ? hours(m.target) : '—'}</td>
                   <td className="px-3 py-2 text-right">{m.worked !== null ? hours(m.worked) : '—'}</td>
