@@ -14,7 +14,7 @@ https://ca-casa-website.livelycliff-6187a034.germanywestcentral.azurecontainerap
 | --- | --- | --- |
 | Resource group | `rg-casa-website-prod` | germanywestcentral |
 | Container App | `ca-casa-website` | shared `cae-casa-prod` env, external ingress, port 3000 |
-| Scaling | `minReplicas: 1`, `maxReplicas: 2` (since 2026-10-09) | 0.5 vCPU / 1 GiB |
+| Scaling | `minReplicas: 1`, `maxReplicas: 2` (since 2026-10-09) | 1 vCPU / 2 GiB since 2026-10-23 (letters printed as PDFs by Chromium; 0.5 vCPU / 1 GiB peaked at 1,004 MB before it) |
 | Image | `acrcasaprodf8d745.azurecr.io/casa-website` | pinned by digest, built by `az acr build` |
 | Identity | `id-casa-website-prod` | `AcrPull` on the shared registry; no registry admin credentials |
 
