@@ -29,7 +29,7 @@ export function TeacherMailComposer({
   draft: TeacherMailDraft;
   days: { day: string; label: string }[];
   from: string | null;
-  /** The CASA logo as a picture, for the mail copied into Outlook. */
+  /** The CASA logo as a picture, for the mail copied into the mail program. */
   logo: string;
   sent: boolean;
 }) {
@@ -44,10 +44,10 @@ export function TeacherMailComposer({
         heading: draft.heading,
         intro: text,
         tests: draft.tests,
-        logoSrc: target === 'outlook' ? logo : '/brand/casa-logo.png',
-        // In Outlook the CASA add-in adds the signature, with its greeting.
-        signature: target === 'outlook' ? null : signature,
-        closing: target === 'outlook' || signature ? null : draft.closing,
+        logoSrc: target === 'mailapp' ? logo : '/brand/casa-logo.png',
+        // In the mail program (Outlook at CASA) the CASA add-in adds the signature, with its greeting.
+        signature: target === 'mailapp' ? null : signature,
+        closing: target === 'mailapp' || signature ? null : draft.closing,
       }),
     [draft, logo]
   );

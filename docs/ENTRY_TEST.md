@@ -96,8 +96,8 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    classes' other teachers of that week, unticked; any further address; a teacher without an address
    on record is named); the subject and text; and on the right
    the mail as it will arrive, built by the same function as the mail sent (`teacherMailHtml`),
-   at computer or phone width — the workspace's mail screen (docs/ADMIN_WORKSPACE.md §Mail): „In
-   Outlook öffnen" or „Direkt senden" after a review, with the sender's CASA signature. Until the
+   at computer or phone width — the workspace's mail screen (docs/ADMIN_WORKSPACE.md §Mail): „Im
+   Mailprogramm öffnen" or „Direkt senden" after a review, with the sender's CASA signature. Until the
    day's tests are opened, „Tests öffnen" stands in for both. „Direkt senden" sends through Microsoft
    Graph from `FORM_MAIL_FROM` — the teachers as blind copies, since
    their addresses are often private, the mailbox itself in „An" — with the logo and each QR code as

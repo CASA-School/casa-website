@@ -110,7 +110,7 @@ test.describe('letters', () => {
     await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     await expect(page.getByRole('status')).toContainText('Gespeichert');
     // The mail screen: both ways out, and the letter as a PDF printed by the server's browser (0085).
-    await expect(page.getByRole('button', { name: 'In Outlook öffnen' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Im Mailprogramm öffnen' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
     const letterId = new URL(page.url()).searchParams.get('ids')!;
     const pdf = await page.request.get(`/admin/letters/${letterId}/pdf`);

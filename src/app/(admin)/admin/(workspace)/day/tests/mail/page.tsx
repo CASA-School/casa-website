@@ -13,7 +13,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * The mail to a start day's teachers (Rahman, 2026-10-22): their codes, the QR codes and the guide in one
- * mail, a few days ahead, on the workspace's mail screen — sent from Outlook or directly, after a review
+ * mail, a few days ahead, on the workspace's mail screen — sent from one's own mail program or directly, after a review
  * (docs/ADMIN_WORKSPACE.md §Mail, docs/ENTRY_TEST.md §The teachers' mail).
  */
 export default async function TeacherMailPage({ searchParams }: { searchParams: Promise<{ date?: string; error?: string; sent?: string }> }) {

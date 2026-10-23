@@ -239,7 +239,7 @@ gone.
   (`playwright-core`, installed in the image with its system libraries) opens `/admin/letters/[id]` on
   `admin.localhost` inside the container with a three-minute session of the colleague who sends, and
   prints it with the page's print styles (`src/lib/admin/letter-pdf.ts`). `/admin/letters/[id]/pdf`
-  serves it to look at and to attach in Outlook — a route handler, so it checks sign-in and the letter's
+  serves it to look at and to attach in the mail program — a route handler, so it checks sign-in and the letter's
   right itself.
 - **The mail** (`letters/cover-mail.ts`): the letter's title as heading, the letter's own salutation, a
   short text in the letter's language („im Anhang findest du unser Schreiben „…" als PDF."), the PDF

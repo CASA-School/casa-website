@@ -2339,9 +2339,10 @@ inputs — the same function builds the preview and the mail sent) and the serve
   mail too.
 - **Preview** on the right: Von, Antworten an, Bcc, Betreff and the mail as it will arrive, at computer
   or phone width.
-- **Two ways out, always both.** „In Outlook öffnen" copies the mail (HTML) and opens a new message in
-  the colleague's mail program with the recipients (Bcc) and subject; the CASA add-in adds the
-  signature; ⌘V and send from one's own mailbox. „Direkt senden" opens a review — from, reply-to, how
+- **Two ways out, always both.** „Im Mailprogramm öffnen" (not „Outlook": the computer's own mail
+  program opens, whichever it is — Rahman, 2026-10-23) copies the mail (HTML) and opens a new message
+  with the recipients (Bcc) and subject; in Outlook the CASA add-in adds the signature; ⌘V and send from
+  one's own mailbox. „Direkt senden" opens a review — from, reply-to, how
   many recipients and who, subject, signature, what travels with it — and only „Jetzt senden" there
   sends it, through Microsoft Graph from `FORM_MAIL_FROM` with replies to the colleague. The server
   action refuses a request without that confirmation (`confirmed=1`).

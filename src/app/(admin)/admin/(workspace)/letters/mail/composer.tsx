@@ -29,7 +29,7 @@ export function LetterMailComposer({
   ids: string[];
   back: string | null;
   from: string | null;
-  /** The CASA logo as a picture, for the mail copied into Outlook. */
+  /** The CASA logo as a picture, for the mail copied into the mail program. */
   logo: string;
   sent: number;
   /** Just saved as it goes out (the letter's „Als gesendet speichern"). */
@@ -50,10 +50,10 @@ export function LetterMailComposer({
         text,
         files: [letter.file.name],
         language: letter.language,
-        logoSrc: target === 'outlook' ? logo : '/brand/casa-logo.png',
-        // In Outlook the CASA add-in adds the signature, with its greeting.
-        signature: target === 'outlook' ? null : signature,
-        closing: target === 'outlook' || signature ? null : draft.closings[letter.language],
+        logoSrc: target === 'mailapp' ? logo : '/brand/casa-logo.png',
+        // In the mail program (Outlook at CASA) the CASA add-in adds the signature, with its greeting.
+        signature: target === 'mailapp' ? null : signature,
+        closing: target === 'mailapp' || signature ? null : draft.closings[letter.language],
       });
     },
     [draft, first, logo]
