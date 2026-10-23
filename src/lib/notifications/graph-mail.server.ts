@@ -11,7 +11,8 @@ import { LOGO_CONTENT_ID, LOGO_PNG_BASE64 } from './casa-logo';
  * an inline picture, `cid:casa-logo`, and any other pictures it names.
  */
 
-export type GraphAttachment = { name: string; contentType: string; contentId: string; contentBytes: string };
+/** A file the mail carries: inline (a picture named by `cid:`, the default) or a plain attachment (a letter's PDF). */
+export type GraphAttachment = { name: string; contentType: string; contentId?: string; contentBytes: string; inline?: boolean };
 
 export type GraphMessage = {
   to: string | string[];
@@ -22,7 +23,7 @@ export type GraphMessage = {
   replyTo?: { emailAddress: { address: string; name?: string } }[];
   /** Keep a copy in the sender's Sent Items. Staff alerts do; a confirmation does not. */
   saveToSentItems?: boolean;
-  /** Further inline pictures, referenced as `cid:` like the logo. */
+  /** Further pictures, referenced as `cid:` like the logo, and files. */
   attachments?: GraphAttachment[];
 };
 
@@ -62,7 +63,7 @@ export async function sendGraphMail(from: string, message: GraphMessage) {
         attachments: [
           { name: 'casa-logo.png', contentType: 'image/png', contentId: LOGO_CONTENT_ID, contentBytes: LOGO_PNG_BASE64 },
           ...(message.attachments ?? []),
-        ].map((a) => ({ '@odata.type': '#microsoft.graph.fileAttachment', ...a, isInline: true })),
+        ].map(({ inline, ...a }: GraphAttachment) => ({ '@odata.type': '#microsoft.graph.fileAttachment', ...a, isInline: inline ?? true })),
         toRecipients: recipients.map((address) => ({ emailAddress: { address } })),
         ...(message.bcc?.length ? { bccRecipients: message.bcc.map((address) => ({ emailAddress: { address } })) } : {}),
         ...(message.replyTo ? { replyTo: message.replyTo } : {}),

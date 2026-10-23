@@ -6,12 +6,13 @@ import { useWsLang } from '@/components/admin/lang';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { PrintCopy, printLetter } from '@/components/admin/letters/print';
-import { Button } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Button, ButtonLink } from '@/components/admin/ui';
 import { subjectLine, type Letter } from '@/lib/admin/letters/types';
 
 /**
- * A letter as it went out (docs/LETTERS.md): to print, save as a PDF and email. Just after it was
- * saved, a line says what to do next — the workspace does not send mail itself yet.
+ * A letter as it went out (docs/LETTERS.md): to print, or to send by mail on the workspace's mail screen
+ * (the letter as a PDF, directly or from Outlook).
  */
 export function SentLetter({
   letter,
@@ -20,6 +21,7 @@ export function SentLetter({
   sentLine,
   back,
   justSent,
+  mailHref,
 }: {
   letter: Letter;
   email: string | null;
@@ -27,6 +29,8 @@ export function SentLetter({
   sentLine: string;
   back: { href: string; label: string };
   justSent: boolean;
+  /** The mail screen for this letter, for whoever may send it (docs/LETTERS.md §Sending). */
+  mailHref: string | null;
 }) {
   const { t } = useWsLang();
   const subject = subjectLine(letter);
@@ -46,25 +50,20 @@ export function SentLetter({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {email ? (
-            <a
-              href={`mailto:${email}?subject=${encodeURIComponent(subject)}`}
-              className="inline-flex h-9 items-center rounded-lg border border-ws-line bg-white px-3.5 text-sm font-semibold text-[var(--casa-ink)] hover:bg-ws-sunk"
-            >
-              {t(`E-Mail an ${recipientName}`, `Email ${recipientName}`)}
-            </a>
-          ) : null}
-          <Button type="button" onClick={() => printLetter(`${subject} ${recipientName}`)}>
+          <Button type="button" variant={mailHref ? 'secondary' : 'primary'} onClick={() => printLetter(`${subject} ${recipientName}`)}>
             {t('Drucken / PDF', 'Print / PDF')}
           </Button>
+          {mailHref ? (
+            <ButtonLink href={mailHref} variant="primary">
+              {Icon.mail}
+              {email ? t(`Per E-Mail an ${recipientName}`, `Email ${recipientName}`) : t('Per E-Mail senden', 'Send by e-mail')}
+            </ButtonLink>
+          ) : null}
         </div>
       </div>
       {justSent ? (
         <p role="status" className="mb-4 rounded-2xl bg-[#e9f6ee] px-4 py-3 text-[0.88rem] text-[#14532d] ring-1 ring-[#b7dfc6] ring-inset">
-          {t(
-            'Gespeichert, so wie er rausgeht. Jetzt als PDF speichern und mit der E-Mail schicken, oder drucken.',
-            'Saved as it goes out. Now save it as a PDF and attach it to the email, or print it.'
-          )}
+          {t('Gespeichert, so wie er rausgeht.', 'Saved as it goes out.')}
         </p>
       ) : null}
       <div className="mx-auto max-w-[860px]">

@@ -1,6 +1,6 @@
 import { guideSteps } from './guide';
 import type { EntryTestId } from './types';
-import { LOGO_HEIGHT, LOGO_WIDTH } from '@/lib/notifications/casa-logo';
+import { BODY, INK, MUTED, NAVY, RULE, SANS, TINT, escape, mailShell } from '@/lib/mail/shell';
 
 /**
  * The mail that gives a start day's teachers their test codes (Rahman, 2026-10-22): one mail for every
@@ -29,29 +29,7 @@ export type TeacherMailTest = {
   qrSrc: string;
 };
 
-const SANS = "font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;";
-const INK = '#0f172a';
-const BODY = '#334155';
-const MUTED = '#64748b';
-const RULE = '#e2e8f0';
-const CANVAS = '#f4f6f9';
-const NAVY = '#1d2f4f';
-const TINT = '#f5f8fb';
-const LOGO_STRIPE = [['#e30613', '34%'], ['#009fe3', '33%'], ['#ffd500', '33%']] as const;
-
-const escape = (value: string) =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
 const SESSION = { morning: 'Vormittag', afternoon: 'Nachmittag' } as const;
-
-/** The office's text: paragraphs at blank lines, line breaks kept. */
-function textHtml(text: string) {
-  return text
-    .trim()
-    .split(/\n\s*\n/)
-    .map((p) => `<p style="${SANS}margin:0 0 14px;font-size:15px;line-height:23px;color:${BODY};">${escape(p.trim()).replace(/\r?\n/g, '<br>')}</p>`)
-    .join('');
-}
 
 /** A section's heading and its one line, with a rule above: the code, the QR codes and the guide stay apart. */
 function sectionHead(number: number, title: string, line: string) {
@@ -150,30 +128,14 @@ export function teacherMailHtml(input: {
   closing?: string | null;
 }): string {
   const time = input.tests.length === 1 ? `${input.tests[0].minutes} Minuten` : input.tests.map((t) => `${t.course} ${t.minutes} Min.`).join(' · ');
-  return (
-    `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
-    `<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${escape(input.subject)}</title>` +
-    `<style>body{margin:0!important;padding:0!important;}table{border-collapse:collapse;}img{border:0;outline:none;text-decoration:none;}` +
-    `@media only screen and (max-width:620px){.shell{padding:0!important;}.px{padding-left:20px!important;padding-right:20px!important;}}</style></head>` +
-    `<body style="margin:0;padding:0;background:${CANVAS};">` +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${CANVAS}" style="background:${CANVAS};"><tr><td class="shell" align="center" style="padding:32px 16px;">` +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;"><tr>` +
-    LOGO_STRIPE.map(([colour, width]) => `<td width="${width}" height="4" bgcolor="${colour}" style="height:4px;background:${colour};font-size:0;line-height:0;">&nbsp;</td>`).join('') +
-    `</tr></table>` +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:640px;background:#ffffff;border:1px solid ${RULE};border-top:0;border-radius:0 0 10px 10px;">` +
-    `<tr><td class="px" style="padding:30px 40px 0;"><img src="${escape(input.logoSrc)}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="CASA Internationale Sprachschule" style="display:block;width:${LOGO_WIDTH}px;height:${LOGO_HEIGHT}px;"></td></tr>` +
-    `<tr><td class="px" style="${SANS}padding:26px 40px 14px;font-size:24px;line-height:31px;font-weight:bold;color:${INK};">${escape(input.heading)}</td></tr>` +
-    `<tr><td class="px" style="padding:0 40px 10px;">${textHtml(input.intro)}</td></tr>` +
-    codesHtml(input.tests) +
-    qrHtml(input.tests) +
-    guideHtml(time) +
-    (input.signature
-      ? `<tr><td class="px" style="padding:6px 40px 32px;"><div style="border-top:1px solid ${RULE};padding-top:24px;">${input.signature}</div></td></tr>`
-      : input.closing?.trim()
-        ? `<tr><td class="px" style="padding:6px 40px 26px;"><div style="border-top:1px solid ${RULE};padding-top:20px;">${textHtml(input.closing)}</div></td></tr>`
-        : '') +
-    `</table>` +
-    `<div style="${SANS}max-width:640px;margin:0 auto;padding:18px 8px 0;font-size:12px;line-height:19px;color:${MUTED};text-align:center;">CASA Internationale Sprachschule Bremen · Einstufungstest Tag 1</div>` +
-    `</td></tr></table></body></html>`
-  );
+  return mailShell({
+    subject: input.subject,
+    heading: input.heading,
+    text: input.intro,
+    rows: codesHtml(input.tests) + qrHtml(input.tests) + guideHtml(time),
+    logoSrc: input.logoSrc,
+    signature: input.signature,
+    closing: input.closing,
+    footer: 'CASA Internationale Sprachschule Bremen · Einstufungstest Tag 1',
+  });
 }

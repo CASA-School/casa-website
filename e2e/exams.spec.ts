@@ -165,7 +165,7 @@ test.describe('exam bookings', () => {
     await expect(sheet).toContainText(/überweise bitte 190,00\s€ bis zum/);
     await expect(sheet).toContainText('telc druckt dein Zertifikat mit diesem Namen');
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1`, [bookingId]);
     expect(rows).toEqual([{ kind: 'exam_confirmation' }]);
   });

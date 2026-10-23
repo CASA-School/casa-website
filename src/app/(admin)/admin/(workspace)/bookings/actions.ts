@@ -690,7 +690,7 @@ export async function issueBookingLetterAction(formData: FormData): Promise<void
   const result = await issueBookingLetter(bookingId, kind as BookingLetterKind, choices, actor);
   if (!result.ok) fail(back, pick(lang, result.reason));
   revalidatePath('/admin', 'layout');
-  redirect(`/admin/letters/${result.letterId}?sent=1`);
+  redirect(`/admin/letters/mail?ids=${result.letterId}&saved=1`);
 }
 
 /**

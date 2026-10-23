@@ -55,6 +55,16 @@ ENV NODE_ENV=production \
 RUN groupadd --system --gid 1001 nodejs \
  && useradd --system --uid 1001 --gid nodejs nextjs
 
+# A headless Chromium for the workspace's letters as PDFs (src/lib/admin/letter-pdf.ts,
+# 2026-10-23): the server's own browser prints a letter exactly as „Drucken / PDF" does, to send
+# it by mail. Installed by the playwright-core the app imports, so browser and library are the
+# same release; its system libraries come with it (`--with-deps`). Shared, read-only for the app.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+COPY --from=deps /app/node_modules/playwright-core /tmp/playwright-core
+RUN node /tmp/playwright-core/cli.js install --with-deps --only-shell chromium \
+ && rm -rf /tmp/playwright-core /var/lib/apt/lists/* \
+ && chmod -R a+rX /ms-playwright
+
 # `output: 'standalone'` traces the exact runtime files and writes its own
 # minimal node_modules, which is why no npm install happens in this stage. The
 # two directories it deliberately does NOT include are public/ and .next/static,
@@ -62,6 +72,8 @@ RUN groupadd --system --gid 1001 nodejs \
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
+# The whole of playwright-core: it loads parts of itself at run time, which file tracing can miss.
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/playwright-core ./node_modules/playwright-core
 
 USER nextjs
 EXPOSE 3000

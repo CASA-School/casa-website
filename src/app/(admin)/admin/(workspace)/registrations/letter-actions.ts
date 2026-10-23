@@ -30,5 +30,5 @@ export async function issueRegistrationLetterAction(formData: FormData): Promise
   const result = await issueRegistrationLetter(registrationId, kind as RegistrationLetterKind, choices, actor);
   if (!result.ok) redirect(`${back}&error=${encodeURIComponent(pick(lang, result.reason))}`);
   revalidatePath('/admin', 'layout');
-  redirect(`/admin/letters/${result.letterId}?sent=1`);
+  redirect(`/admin/letters/mail?ids=${result.letterId}&saved=1`);
 }

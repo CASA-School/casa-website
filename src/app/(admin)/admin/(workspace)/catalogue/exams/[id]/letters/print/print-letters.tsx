@@ -5,11 +5,25 @@ import Link from 'next/link';
 import { useWsLang } from '@/components/admin/lang';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { PrintCopies, printLetter } from '@/components/admin/letters/print';
-import { Button } from '@/components/admin/ui';
+import { Icon } from '@/components/admin/icons';
+import { Button, ButtonLink } from '@/components/admin/ui';
 import { subjectLine, type Letter } from '@/lib/admin/letters/types';
 
-/** A sitting's letters on screen, one after another; printed, a page each; one email to all, in BCC. */
-export function PrintSittingLetters({ letters, back, title }: { letters: { letter: Letter; email: string | null }[]; back: { href: string; label: string }; title: string }) {
+/**
+ * A sitting's letters on screen, one after another; printed, a page each; or sent by mail, each candidate
+ * their own letter as a PDF, on the workspace's mail screen (docs/LETTERS.md §Sending).
+ */
+export function PrintSittingLetters({
+  letters,
+  back,
+  title,
+  mailHref,
+}: {
+  letters: { letter: Letter; email: string | null }[];
+  back: { href: string; label: string };
+  title: string;
+  mailHref: string | null;
+}) {
   const { t } = useWsLang();
   const emails = [...new Set(letters.map((l) => l.email).filter((e): e is string => Boolean(e)))];
   const subject = letters[0] ? subjectLine(letters[0].letter) : '';
@@ -23,17 +37,15 @@ export function PrintSittingLetters({ letters, back, title }: { letters: { lette
           <h1 className="mt-1 text-[1.5rem] leading-tight font-extrabold tracking-[-0.02em] text-[var(--casa-ink)]">{title}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {emails.length ? (
-            <a
-              href={`mailto:?bcc=${emails.map(encodeURIComponent).join(',')}&subject=${encodeURIComponent(subject)}`}
-              className="inline-flex h-9 items-center rounded-lg border border-ws-line bg-white px-3.5 text-sm font-semibold text-[var(--casa-ink)] hover:bg-ws-sunk"
-            >
-              {t(`E-Mail an alle (${emails.length})`, `Email all (${emails.length})`)}
-            </a>
-          ) : null}
-          <Button type="button" onClick={() => printLetter(subject)} disabled={letters.length === 0}>
+          <Button type="button" variant={mailHref ? 'secondary' : 'primary'} onClick={() => printLetter(subject)} disabled={letters.length === 0}>
             {t('Alle drucken / PDF', 'Print all / PDF')}
           </Button>
+          {mailHref && emails.length ? (
+            <ButtonLink href={mailHref} variant="primary">
+              {Icon.mail}
+              {t(`Per E-Mail an alle (${emails.length})`, `Email all (${emails.length})`)}
+            </ButtonLink>
+          ) : null}
         </div>
       </div>
       <div className="mx-auto max-w-[860px] space-y-6">
