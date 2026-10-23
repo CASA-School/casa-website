@@ -136,7 +136,19 @@ function guideHtml(time: string) {
   );
 }
 
-export function teacherMailHtml(input: { subject: string; heading: string; intro: string; tests: TeacherMailTest[]; logoSrc: string }): string {
+/**
+ * `signature`: the sender's CASA signature (src/lib/admin/mail-signature.ts), at the foot of the mail, with
+ * its own greeting; without one, `closing` („Viele Grüße\nRahman") ends the mail instead.
+ */
+export function teacherMailHtml(input: {
+  subject: string;
+  heading: string;
+  intro: string;
+  tests: TeacherMailTest[];
+  logoSrc: string;
+  signature?: string | null;
+  closing?: string | null;
+}): string {
   const time = input.tests.length === 1 ? `${input.tests[0].minutes} Minuten` : input.tests.map((t) => `${t.course} ${t.minutes} Min.`).join(' · ');
   return (
     `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
@@ -155,6 +167,11 @@ export function teacherMailHtml(input: { subject: string; heading: string; intro
     codesHtml(input.tests) +
     qrHtml(input.tests) +
     guideHtml(time) +
+    (input.signature
+      ? `<tr><td class="px" style="padding:6px 40px 32px;"><div style="border-top:1px solid ${RULE};padding-top:24px;">${input.signature}</div></td></tr>`
+      : input.closing?.trim()
+        ? `<tr><td class="px" style="padding:6px 40px 26px;"><div style="border-top:1px solid ${RULE};padding-top:20px;">${textHtml(input.closing)}</div></td></tr>`
+        : '') +
     `</table>` +
     `<div style="${SANS}max-width:640px;margin:0 auto;padding:18px 8px 0;font-size:12px;line-height:19px;color:${MUTED};text-align:center;">CASA Internationale Sprachschule Bremen · Einstufungstest Tag 1</div>` +
     `</td></tr></table></body></html>`

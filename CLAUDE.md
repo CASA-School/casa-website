@@ -513,8 +513,13 @@ is still valid.
 - **No retention policy.** Enquiries, registrations, placement attempts and stored
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.
-- **No outbound email from the workspace.** Every "Reply" button is a `mailto:`,
-  and there is no emailed password reset: each colleague changes their own on
+- **Mail from the workspace goes through one screen (2026-10-23).** A mail the workspace
+  sends — so far the teachers' mail with the test codes — is composed on `MailComposer`
+  (`src/components/admin/mail/mail-composer.tsx`): recipients, subject, text, the sender's
+  CASA signature (the Outlook add-in's own, `src/lib/admin/mail-signature.ts`), a live preview,
+  and always two ways out — „In Outlook öffnen" and „Direkt senden" after a review dialog.
+  Read docs/ADMIN_WORKSPACE.md §Mail before adding another. Every other "Reply" is still a
+  `mailto:`, and there is no emailed password reset: each colleague changes their own on
   Your account (their name at the foot of the sidebar), an owner or admin resets a forgotten
   one on the Team screen, and `npm run admin:password` is the owner's way back in.
 - **Microsoft sign-in is registered (2026-10-10).** The workspace signs colleagues

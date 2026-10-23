@@ -2317,6 +2317,39 @@ time sheet — finance keeps it there until working time moves — brought by th
 hours are not stored on it and the daily calculations are too slow to read, so the chart shows the
 month's plus or minus, not the two. The units are the workspace's own lesson days (`staff-time.ts`).
 
+## Mail from the workspace (2026-10-23)
+
+Rahman: „we should have such an interface always when we send letters or emails through the platform
+directly", „ask one more time before allowing them to send a direct email", „always give two options,
+direct email or email from Outlook", and „offer the option to add the signature".
+
+**One screen for every mail the workspace sends:** `MailComposer`
+(`src/components/admin/mail/mail-composer.tsx`). A page supplies what the mail is about (a card above),
+the recipients (in groups, ticked or not), the subject and text, `render` (the mail's HTML from the
+inputs — the same function builds the preview and the mail sent) and the server action that sends it.
+
+- **Recipients** in groups with „all" per group, further addresses typed in, and anyone who should get
+  it but has no address on record named. A mail to several people goes as Bcc (often private
+  addresses), the sending mailbox in „An".
+- **Signature.** „Signatur anfügen", on by default: the sender's CASA V5 signature exactly as Outlook
+  adds it — read from the Outlook add-in's own data (`casa-signaturen.vercel.app/addin/signatures.json`
+  and `images.json`, `src/lib/admin/mail-signature.ts`), its pictures sent inline. A colleague without
+  a signature of their own signs with the office's (info@); without one, the mail ends „Viele Grüße"
+  and the first name. A change to the signature (casa-signaturen, `build.py`) reaches the workspace's
+  mail too.
+- **Preview** on the right: Von, Antworten an, Bcc, Betreff and the mail as it will arrive, at computer
+  or phone width.
+- **Two ways out, always both.** „In Outlook öffnen" copies the mail (HTML) and opens a new message in
+  the colleague's mail program with the recipients (Bcc) and subject; the CASA add-in adds the
+  signature; ⌘V and send from one's own mailbox. „Direkt senden" opens a review — from, reply-to, how
+  many recipients and who, subject, signature, what travels with it — and only „Jetzt senden" there
+  sends it, through Microsoft Graph from `FORM_MAIL_FROM` with replies to the colleague. The server
+  action refuses a request without that confirmation (`confirmed=1`).
+- What must exist first (the test codes) replaces the two buttons until it does.
+- Each mail as sent is kept (`entry_test_mails` for the teachers' mail) and listed under „Gesendet".
+
+When letters go out by mail from the workspace, they use this screen.
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,
