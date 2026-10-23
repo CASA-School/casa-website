@@ -881,6 +881,17 @@ doing … who is the teacher … morning, afternoon or evening … colour coding
   the day in its own column, what for, how as a badge (Bar and Karte, paid at the desk, stand out from
   Überweisung), the reference; „Eingegangen" and „Offen / Guthaben / Ausgeglichen"; „Empfangsbestätigung"
   on the card. Recording a payment asks the method in one click and goes on to the receipt (on by default).
+- **The booking predicts its costs** (Rahman, 2026-10-23: „if someone is booked in a course, it should
+  already predict the book and the course price, and whether the registration fee is necessary"):
+  `expectedCharges` prices the booking as the wizard would (`priceSelection`) and the Kosten card shows
+  what is missing under „Vorschlag aus der Preisliste", each with „Hinzufügen", or „Alle hinzufügen" —
+  the course price of each period when there is none; the book of each level booked (both halves of a
+  whole level) unless the learner bought it on any booking; the enrolment fee once per learner, only on
+  their first booking and never when one is kept anywhere. The server works the lines out again when
+  they are added. „Posten hinzufügen" offers the price list for the chosen kind — books with the
+  booking's level first, the fees, the exams — marks what is already on the booking, chooses the obvious
+  line by itself (the level's one book not yet charged, a kind's only fee), and keeps the line's charge
+  type and rate.
 - **Übersicht**, right: the letter due next; the **agency or company** (its kind as the title, linked, its
   role — pays the booking or refers the learner —, its commission terms, and this booking's commission
   and whether it is paid out); „Zur Buchung" (attendance, observation, stay, registration, the note); the

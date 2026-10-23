@@ -9,6 +9,7 @@ import {
   deleteBookingAction,
   removeChargeAction,
   removePeriodAction,
+  addSuggestedChargesAction,
   setBooksHandedOutAction,
   voidPaymentAction,
 } from '../actions';
@@ -48,7 +49,7 @@ import {
   PAYMENT_METHOD_LABELS,
   storedWords,
 } from '@/lib/admin/bookings';
-import { stayVocabulary } from '@/lib/admin/booking-offer';
+import { expectedCharges, stayVocabulary } from '@/lib/admin/booking-offer';
 import { SESSION_COLOURS, SESSION_LABELS } from '@/lib/admin/day-plan-labels';
 import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
 import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
@@ -229,6 +230,19 @@ export default async function BookingPage({
     org ? getOrganisation(org.id) : Promise.resolve(null),
     org ? commissionTerms(org.id) : Promise.resolve([]),
   ]);
+  // What the price list says the booking should cost and it does not show yet: the course price, the
+  // level's books, the enrolment fee once per learner (2026-10-23).
+  const expected =
+    canEdit && open && !exam
+      ? await expectedCharges({
+          bookingId: booking.id,
+          personId: booking.personId,
+          courseTypeId: booking.courseTypeId,
+          periods: courses.map((c) => ({ courseInstanceId: c.courseInstanceId, startDate: c.startDate, endDate: c.endDate, levelCode: c.levelCode })),
+          levelRange: booking.levelRange,
+          charges: booking.charges,
+        })
+      : [];
   // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
   const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
   const stayName = (list: { code: string; name: { de: string; en: string } }[] | undefined, code: string | null) =>
@@ -868,7 +882,11 @@ export default async function BookingPage({
             actions={
               canEdit && open ? (
                 <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
-                  <ChargeForm bookingId={booking.id} />
+                  <ChargeForm
+                    bookingId={booking.id}
+                    levels={booking.periods.map((p) => p.levelCode).filter((l): l is string => Boolean(l))}
+                    charged={booking.charges.filter((c) => c.amount > 0).map((c) => c.description)}
+                  />
                 </FormDialog>
               ) : undefined
             }
@@ -895,6 +913,40 @@ export default async function BookingPage({
                 ) : null}
               </div>
             )}
+            {expected.length ? (
+              // Predicted from the course booked: one click each, or all at once.
+              <div className="mt-4 rounded-2xl border border-dashed border-[#b9cbe6] bg-[#f5f9ff] px-3.5 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[0.8rem] font-bold text-[#1d4e96]">{t('Vorschlag aus der Preisliste', 'Suggested from the price list')}</span>
+                  {expected.length > 1 ? (
+                    <form action={addSuggestedChargesAction}>
+                      <input type="hidden" name="bookingId" value={booking.id} />
+                      {expected.map((e) => (
+                        <input key={e.key} type="hidden" name="key" value={e.key} />
+                      ))}
+                      <Button type="submit" size="sm">
+                        {t('Alle hinzufügen', 'Add all')}
+                      </Button>
+                    </form>
+                  ) : null}
+                </div>
+                <ul className="mt-2 divide-y divide-[#dbe6f5]">
+                  {expected.map((e) => (
+                    <li key={e.key} className="flex items-center gap-3 py-1.5 text-sm">
+                      <span className="min-w-0 flex-1 truncate font-semibold text-[var(--casa-ink)]">{e.description}</span>
+                      <span className="shrink-0 tabular-nums text-[var(--casa-ink)]">{money(e.amount, booking.currency)}</span>
+                      <form action={addSuggestedChargesAction}>
+                        <input type="hidden" name="bookingId" value={booking.id} />
+                        <input type="hidden" name="key" value={e.key} />
+                        <Button type="submit" variant="ghost" size="sm">
+                          {t('Hinzufügen', 'Add')}
+                        </Button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </Card>
 
           {/* What has come in: the day, what for, how — at the desk in cash or by card, or by transfer — and the balance. */}

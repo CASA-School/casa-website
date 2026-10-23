@@ -88,6 +88,26 @@ test.describe('booking colours', () => {
     await client.query(`DELETE FROM booking_charges WHERE id = $1`, [rows[0].id]);
   });
 
+  test('a cost line from the price list: one click fills the words and the price', async ({ page }) => {
+    await page.goto(`/admin/bookings/${bookingId}`);
+    await page.getByRole('button', { name: 'Posten hinzufügen' }).click();
+    const dialog = page.getByRole('dialog');
+    // Books are offered first, each with its price; a click fills the line.
+    const book = dialog.getByRole('button', { name: /^Bücher · / }).first();
+    const words = ((await book.locator('span').first().textContent()) ?? '').trim();
+    await book.click();
+    await expect(dialog.getByRole('textbox', { name: 'Beschreibung' })).toHaveValue(words);
+    await expect(dialog.getByRole('textbox', { name: 'Betrag' })).not.toHaveValue('');
+    await dialog.getByRole('button', { name: 'Posten hinzufügen' }).click();
+    await expect(page.getByRole('button', { name: `${words}: nicht ausgegeben` })).toBeVisible();
+    const { rows } = await client.query<{ kind: string; rate: boolean }>(
+      `SELECT kind, rate_id IS NOT NULL AS rate FROM booking_charges WHERE booking_id = $1 AND description = $2`,
+      [bookingId, words]
+    );
+    expect(rows).toEqual([{ kind: 'books', rate: true }]);
+    await client.query(`DELETE FROM booking_charges WHERE booking_id = $1 AND description = $2`, [bookingId, words]);
+  });
+
   test('grey until paid, yellow under observation, green when all is in, red when cancelled', async ({ page }) => {
     const light = page.locator('[data-light]').first();
 

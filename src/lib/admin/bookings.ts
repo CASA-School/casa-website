@@ -1240,12 +1240,13 @@ export async function removePeriod(
 
 export async function addCharge(
   bookingId: string,
-  input: { kind: ChargeKind; description: string; amount: number },
+  input: { kind: ChargeKind; description: string; amount: number; chargeTypeCode?: string | null; rateId?: string | null },
   actor: StaffUser
 ): Promise<void> {
   await query(
-    `INSERT INTO booking_charges (booking_id, kind, description, amount, created_by) VALUES ($1, $2, $3, $4, $5)`,
-    [bookingId, input.kind, input.description, input.amount, actor.id]
+    `INSERT INTO booking_charges (booking_id, kind, description, amount, charge_type_code, rate_id, created_by)
+     VALUES ($1, $2, $3, $4, (SELECT code FROM charge_types WHERE code = $5), (SELECT id FROM rates WHERE id = $6::uuid), $7)`,
+    [bookingId, input.kind, input.description, input.amount, input.chargeTypeCode ?? null, input.rateId ?? null, actor.id]
   );
   await logActivity({
     actor,
