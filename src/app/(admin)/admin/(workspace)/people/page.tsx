@@ -19,6 +19,7 @@ import { LEARNER_STAGE_LABELS, listCountries, listDeletedPeople, listPeople, peo
 import { restorePersonAction } from './actions';
 import { PersonForm } from './person-form';
 import { SessionMark } from '@/components/admin/session-mark';
+import { mailHref } from '@/lib/admin/mail/href';
 
 /**
  * The person register.
@@ -136,7 +137,7 @@ export default async function PeoplePage({
       ...(canBook && remind && view !== 'owing' ? [remind] : []),
       ...(canBook && p.owedBookingId ? [{ label: t('Zahlung erfassen', 'Record payment'), href: `/admin/bookings/${p.owedBookingId}?pay=1`, icon: Icon.money }] : []),
       ...(p.primaryEmail
-        ? [{ label: t('E-Mail schreiben', 'Write an email'), href: `mailto:${p.primaryEmail}`, icon: Icon.mail, divide: canBook }]
+        ? [{ label: t('E-Mail schreiben', 'Write an email'), href: mailHref('person', p.id, { back: '/admin/people' }), icon: Icon.mail, divide: canBook }]
         : []),
       { label: t('Anfragen & Buchungen', 'Enquiries & bookings'), href: `/admin/people/${p.id}?tab=cases`, icon: Icon.registrations, divide: !p.primaryEmail && canBook },
       { label: t('Briefe', 'Letters'), href: `/admin/people/${p.id}?tab=letters`, icon: Icon.statement },

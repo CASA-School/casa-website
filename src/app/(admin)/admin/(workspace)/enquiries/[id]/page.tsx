@@ -20,7 +20,7 @@ import { listNotes } from '@/lib/admin/notes';
 import { offersFor } from '@/lib/admin/offers/repo';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { STATUS_LABELS, STATUS_TONES } from '@/lib/admin/queues';
-import { replyHref } from '@/lib/admin/reply';
+import { mailHref } from '@/lib/admin/mail/href';
 import { listAssignableStaff } from '@/lib/admin/staff';
 
 import { EnquiryActions } from './enquiry-actions';
@@ -65,9 +65,9 @@ const BRIEF_SECTIONS: readonly { title: Bilingual; keys: readonly string[] }[] =
  * it the person it belongs to, what the same address asked before, and the
  * notes and changes in one line of time, ending with its arrival.
  *
- * „Antworten" is a `mailto:` — the workspace sends no mail (CLAUDE.md, known
- * open items) — opened with the subject and a greeting and sign-off in the
- * language the enquiry was written in, signed by the colleague replying.
+ * „Antworten" opens the workspace's mail screen (2026-10-23, `/admin/mail`): the subject, a greeting
+ * in the language the enquiry was written in, the colleague's signature; sent directly or from their
+ * own mail program.
  *
  * What an enquiry leads to is in the head: „Angebot erstellen" (the offer
  * wizard, from this enquiry) and „Weiter mit …" (2026-10-21, `enquiry-actions.tsx`): book onto a
@@ -117,13 +117,7 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
   const organisation = typeof brief.organisationName === 'string' ? brief.organisationName : null;
   const groupSize = brief.groupSize !== undefined ? formatBriefValue(brief.groupSize, lang) : null;
 
-  const reply = replyHref({
-    email: enquiry.email,
-    subject: `Re: ${enquiry.topic}`,
-    firstName: enquiry.firstName,
-    locale: enquiry.locale,
-    signer: user.name,
-  });
+  const reply = mailHref('enquiry', enquiry.id, { subject: `Re: ${enquiry.topic}` });
 
   return (
     <>
@@ -150,9 +144,9 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
                 </MetaItem>
               ) : null}
               <MetaItem icon={Icon.mail}>
-                <a href={`mailto:${enquiry.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                <Link href={reply} className="hover:text-[var(--casa-ink)] hover:underline">
                   {enquiry.email}
-                </a>
+                </Link>
               </MetaItem>
               <MetaItem icon={Icon.globe}>{german ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
             </MetaLine>

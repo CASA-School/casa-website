@@ -23,6 +23,8 @@ export type GraphMessage = {
   replyTo?: { emailAddress: { address: string; name?: string } }[];
   /** Keep a copy in the sender's Sent Items. Staff alerts do; a confirmation does not. */
   saveToSentItems?: boolean;
+  /** The CASA logo as `cid:casa-logo`; false for a mail that does not show it (a colleague's own mail). */
+  logo?: boolean;
   /** Further pictures, referenced as `cid:` like the logo, and files. */
   attachments?: GraphAttachment[];
 };
@@ -61,7 +63,7 @@ export async function sendGraphMail(from: string, message: GraphMessage) {
         // The logo travels with the mail and is referenced as cid:, so no
         // client blocks it as a remote image.
         attachments: [
-          { name: 'casa-logo.png', contentType: 'image/png', contentId: LOGO_CONTENT_ID, contentBytes: LOGO_PNG_BASE64 },
+          ...(message.logo === false ? [] : [{ name: 'casa-logo.png', contentType: 'image/png', contentId: LOGO_CONTENT_ID, contentBytes: LOGO_PNG_BASE64 }]),
           ...(message.attachments ?? []),
         ].map(({ inline, ...a }: GraphAttachment) => ({ '@odata.type': '#microsoft.graph.fileAttachment', ...a, isInline: inline ?? true })),
         toRecipients: recipients.map((address) => ({ emailAddress: { address } })),

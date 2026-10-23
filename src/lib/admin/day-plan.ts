@@ -880,6 +880,8 @@ export async function replaceFromDay(dayId: string, what: 'teacher' | 'room', va
 // --------------------------------------------------------- the class's list
 
 export type ClassContacts = {
+  /** The class's day (`course_days`). */
+  id: string;
   courseId: string;
   groupIndex: number;
   label: string;
@@ -938,6 +940,7 @@ export async function classContacts(courseDayId: string): Promise<ClassContacts 
     [head.course_id, head.group_index, head.on_date]
   );
   return {
+    id: courseDayId,
     courseId: head.course_id,
     groupIndex: head.group_index,
     label: head.label,

@@ -138,6 +138,7 @@ const routes = [
   booking && `/admin/bookings/${booking}/letter?kind=receipt`,
   letter && `/admin/letters/${letter}`,
   letter && `/admin/letters/mail?ids=${letter}`,
+  person && `/admin/mail?to=person:${person}`,
   entry && `/admin/catalogue/waitlist/${entry}/letter`,
   person && `/admin/people/${person}/letter`,
   courseReg && `/admin/registrations/course/${courseReg}/letter`,

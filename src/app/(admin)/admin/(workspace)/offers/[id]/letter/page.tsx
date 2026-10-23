@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { LetterView } from '@/components/admin/offers/letter-view';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
-import { sentOfferLetter } from '@/lib/admin/letters/repo';
+import { latestOfferLetterId, sentOfferLetter } from '@/lib/admin/letters/repo';
 import { offerBookingHref } from '@/lib/admin/offers/booking-link';
 import { editorOptions, getOffer, offerTexts } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
@@ -34,10 +34,11 @@ export default async function OfferLetterPage({
         : record.meta.status === 'draft'
           ? null
           : record.meta.version;
-  const [options, texts, sentLetter] = await Promise.all([
+  const [options, texts, sentLetter, letterId] = await Promise.all([
     editorOptions(),
     offerTexts(),
     shownVersion ? sentOfferLetter(id, shownVersion) : Promise.resolve(null),
+    canAccess(user, 'offers', 'edit') && record.meta.status !== 'draft' ? latestOfferLetterId(id) : Promise.resolve(null),
   ]);
 
   return (
@@ -52,6 +53,7 @@ export default async function OfferLetterPage({
       canWrite={canAccess(user, 'offers', 'edit')}
       canDelete={canAccess(user, 'offers', 'full')}
       canSetStandard={canAccess(user, 'offers', 'full')}
+      mailHref={letterId ? `/admin/letters/mail?ids=${letterId}&back=${encodeURIComponent(`/admin/offers/${id}/letter`)}` : null}
       bookHref={canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') ? offerBookingHref({ ...record.meta, draft: record.draft }) : null}
       notice={{ ok: sp.ok, error: sp.error }}
     />

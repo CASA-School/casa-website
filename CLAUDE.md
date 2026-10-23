@@ -519,8 +519,9 @@ is still valid.
   (`src/components/admin/mail/mail-composer.tsx`): recipients, subject, text, the sender's
   CASA signature (the Outlook add-in's own, `src/lib/admin/mail-signature.ts`), a live preview,
   and always two ways out — „Im Mailprogramm öffnen" and „Direkt senden" after a review dialog.
-  Read docs/ADMIN_WORKSPACE.md §Mail before adding another. Every other "Reply" is still a
-  `mailto:`, and there is no emailed password reset: each colleague changes their own on
+  Every other mail — „Antworten", „E-Mail an …", any address shown on a record, a class, its
+  teacher — opens the same screen at `/admin/mail?to=<kind>:<id>` (`mailHref`, 0086). Read
+  docs/ADMIN_WORKSPACE.md §Mail before adding another; never a new `mailto:`. There is no emailed password reset: each colleague changes their own on
   Your account (their name at the foot of the sidebar), an owner or admin resets a forgotten
   one on the Team screen, and `npm run admin:password` is the owner's way back in.
 - **Microsoft sign-in is registered (2026-10-10).** The workspace signs colleagues

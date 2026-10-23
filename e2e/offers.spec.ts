@@ -168,6 +168,11 @@ test.describe('offers', () => {
     );
     expect(rows[0]).toMatchObject({ status: 'sent', versions: '1' });
     expect(rows[0].subject).toContain('German and culture in Bremen');
+
+    // Sent: the offer goes back to its letter's mail screen whenever it is needed again.
+    await page.goto(`/admin/offers/${id}`);
+    await page.getByRole('link', { name: 'Send by e-mail' }).click();
+    await expect(page.getByRole('heading', { name: 'Send the letter by e-mail' })).toBeVisible();
   });
 
   test('a sent offer nobody answered is closed as „No answer“ and leaves the open list', async ({ page }) => {

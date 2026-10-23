@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -8,6 +9,7 @@ import { useWsLang } from '@/components/admin/lang';
 import { printLetter } from '@/components/admin/letters/print';
 import { Button } from '@/components/admin/ui';
 import type { ClassContacts } from '@/lib/admin/day-plan';
+import { mailHref } from '@/lib/admin/mail/href';
 
 const subscribeNothing = () => () => {};
 const de = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
@@ -15,32 +17,23 @@ const de = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('de-
 /**
  * A class's learners with their addresses, for its teacher (2026-10-19, Rahman: teachers ask for them;
  * SchoolMan has such a list): on A4, to print or save as a PDF and send — or straight into an email to
- * the teacher, the list in it.
+ * the teacher, the list in it, on the workspace's mail screen.
  */
 export function ContactList({ list }: { list: ClassContacts }) {
   const { t } = useWsLang();
   const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
   const title = `Teilnehmerliste ${list.label}${list.number ? ` #${list.number}` : ''}`;
-  const body = [
-    `Hallo${list.teacherName ? ` ${list.teacherName.split(' ')[0]}` : ''},`,
-    '',
-    `hier die Teilnehmenden von ${list.label}${list.number ? ` (#${list.number})` : ''} mit ihren E-Mail-Adressen:`,
-    '',
-    ...list.learners.map((l, i) => `${i + 1}. ${l.name}${l.email ? ` – ${l.email}` : ''}`),
-    '',
-    'Viele Grüße',
-  ].join('\n');
   return (
     <>
       <div className="mb-4 flex flex-wrap justify-end gap-2">
         {list.teacherEmail ? (
-          <a
-            href={`mailto:${encodeURIComponent(list.teacherEmail)}?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`}
+          <Link
+            href={mailHref('teacher_list', list.id)}
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-white px-4 text-[0.88rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line ring-inset transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]"
           >
             {Icon.mail}
             {t(`E-Mail an ${list.teacherName ?? 'die Lehrkraft'}`, `Email ${list.teacherName ?? 'the teacher'}`)}
-          </a>
+          </Link>
         ) : null}
         <Button type="button" onClick={() => printLetter(title)}>
           {t('Drucken / PDF', 'Print / PDF')}

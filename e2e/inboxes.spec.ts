@@ -103,7 +103,7 @@ test.describe('inboxes', () => {
       // Three states (2026-10-21): Offen, In Arbeit, Erledigt.
       await page.getByRole('button', { name: 'Offen' }).click();
       await expect(page.getByRole('button', { name: 'Offen' })).toHaveAttribute('aria-pressed', 'true');
-      await expect(page.getByRole('link', { name: 'Antworten' })).toHaveAttribute('href', /^mailto:/);
+      await expect(page.getByRole('link', { name: 'Antworten' })).toHaveAttribute('href', /^\/admin\/mail\?to=/);
       await expect(page.getByRole('heading', { name: 'Notizen und Verlauf' })).toBeVisible();
     });
   }

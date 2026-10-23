@@ -122,7 +122,7 @@ test.describe('staff register', () => {
     await dialog.getByLabel('Art').selectOption({ label: 'Honorarkraft' });
     await dialog.getByLabel('Stunden pro Woche').fill('12');
     await dialog.getByRole('button', { name: 'Vertrag hinzufügen' }).click();
-    await expect(page.getByText('Läuft')).toBeVisible();
+    await expect(page.getByText('Läuft', { exact: true })).toBeVisible();
     const { rows } = await client.query<{ kind: string; weekly_hours: string }>(`SELECT kind, weekly_hours::text FROM staff_contracts WHERE staff_member_id = $1`, [staffId]);
     expect(rows).toEqual([{ kind: 'freelance', weekly_hours: '12.0' }]);
   });

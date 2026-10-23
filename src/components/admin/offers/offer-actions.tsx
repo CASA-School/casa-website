@@ -25,6 +25,7 @@ export function OfferToolbarActions({
   canWrite,
   canDelete,
   bookHref,
+  mailHref,
   send,
   extra,
 }: {
@@ -33,6 +34,8 @@ export function OfferToolbarActions({
   canWrite: boolean;
   canDelete: boolean;
   bookHref?: string | null;
+  /** An offer that has gone out: its letter on the mail screen, to send it (again). */
+  mailHref?: string | null;
   send: Omit<Parameters<typeof SendButton>[0], 'id'> | null;
   extra?: { label: string; onSelect: () => void }[];
 }) {
@@ -60,6 +63,11 @@ export function OfferToolbarActions({
       </form>
       <MoreMenu items={items} />
       {canWrite && status === 'draft' && send ? <SendButton id={id} {...send} /> : null}
+      {canWrite && status !== 'draft' && mailHref ? (
+        <Link href={mailHref} className={ui.btn}>
+          {t('Per E-Mail senden', 'Send by e-mail')}
+        </Link>
+      ) : null}
       {canWrite && status === 'sent' ? (
         <button type="button" className={ui.primary} onClick={() => setDecision('accepted')}>
           {t('Angenommen', 'Accepted')}
@@ -100,7 +108,7 @@ export function OfferToolbarActions({
 
 /**
  * Send: this version is kept as it goes out, and the mail screen opens with the letter as a PDF — sent
- * directly after a review, or opened in Outlook (docs/LETTERS.md §Sending). Printing stays one click away.
+ * directly after a review, or opened in the mail program (docs/LETTERS.md §Sending). Printing stays one click away.
  */
 export function SendButton({
   id,

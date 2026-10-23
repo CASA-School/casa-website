@@ -14,6 +14,7 @@ import { offerBookingHref } from '@/lib/admin/offers/booking-link';
 import { courseCatalogue, learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { editorOptions, getOffer, offerTexts, priceListOptions, type OfferRecord } from '@/lib/admin/offers/repo';
 import { todayInputValue } from '@/lib/dates';
+import { latestOfferLetterId } from '@/lib/admin/letters/repo';
 
 /**
  * One offer: what it is, for whom, what it costs. Full screen, like the
@@ -45,6 +46,8 @@ export default async function Page({
   const own = offerEvents(record, activity, t);
   // An accepted offer to a learner leads to their booking: the person's wizard, at the offer's course.
   const bookHref = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') ? offerBookingHref({ ...record.meta, draft: record.draft }) : null;
+  const letterId = canWrite && record.meta.status !== 'draft' ? await latestOfferLetterId(id) : null;
+  const mailHref = letterId ? `/admin/letters/mail?ids=${letterId}&back=${encodeURIComponent(`/admin/offers/${id}`)}` : null;
 
   return (
     <OfferPage
@@ -59,6 +62,7 @@ export default async function Page({
       canWrite={canWrite}
       canDelete={canAccess(user, 'offers', 'full')}
       bookHref={bookHref}
+      mailHref={mailHref}
       notice={{ ok: sp.ok, error: sp.error }}
       timeline={
         <Timeline

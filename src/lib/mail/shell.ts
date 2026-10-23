@@ -69,3 +69,25 @@ export function mailShell(input: {
     `</td></tr></table></body></html>`
   );
 }
+
+/**
+ * A colleague's own mail — a reply, a line to a learner, a class or a host — as their mail program writes
+ * one: the text and, below it, their CASA signature (which carries the logo) or a short closing. No card,
+ * no heading: it is a person writing, not CASA announcing something.
+ */
+export function plainMailHtml(input: { subject: string; text: string; signature?: string | null; closing?: string | null }): string {
+  return (
+    `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+    `<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${escape(input.subject)}</title>` +
+    `<style>body{margin:0!important;padding:0!important;}table{border-collapse:collapse;}img{border:0;outline:none;text-decoration:none;}</style></head>` +
+    `<body style="margin:0;padding:0;background:#ffffff;">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background:#ffffff;"><tr><td style="padding:24px 20px;">` +
+    `<div style="max-width:640px;">${textHtml(input.text)}` +
+    (input.signature
+      ? `<div style="padding-top:10px;">${input.signature}</div>`
+      : input.closing?.trim()
+        ? `<div style="padding-top:6px;">${textHtml(input.closing)}</div>`
+        : '') +
+    `</div></td></tr></table></body></html>`
+  );
+}

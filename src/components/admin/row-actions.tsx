@@ -10,7 +10,7 @@ import { menuItem, menuPanel } from './choice-menu';
 
 export type RowAction = {
   label: string;
-  /** A page in the workspace, or a `mailto:`. */
+  /** A page in the workspace (a mail too: the mail screen). */
   href: string;
   icon?: ReactNode;
   /** A line above it in the menu: the next group of actions. */
@@ -54,17 +54,10 @@ export function RowActions({ label, primary, actions }: { label: string; primary
             {actions.map((action) => [
               action.divide ? <DropdownMenuSeparator key={`${action.href}-line`} className="mx-1 my-1 bg-ws-line-soft" /> : null,
               <DropdownMenuItem key={action.href} asChild className={menuItem}>
-                {action.href.startsWith('mailto:') ? (
-                  <a href={action.href}>
-                    {action.icon}
-                    {action.label}
-                  </a>
-                ) : (
-                  <Link href={action.href}>
-                    {action.icon}
-                    {action.label}
-                  </Link>
-                )}
+                <Link href={action.href}>
+                  {action.icon}
+                  {action.label}
+                </Link>
               </DropdownMenuItem>,
             ])}
           </DropdownMenuContent>
@@ -75,11 +68,7 @@ export function RowActions({ label, primary, actions }: { label: string; primary
 }
 
 function ActionLink({ action, className, children }: { action: RowAction; className?: string; children: ReactNode }) {
-  return action.href.startsWith('mailto:') ? (
-    <a href={action.href} className={className}>
-      {children}
-    </a>
-  ) : (
+  return (
     <Link href={action.href} className={className}>
       {children}
     </Link>

@@ -37,6 +37,7 @@ import { lettersForPlace } from '@/lib/admin/letters/repo';
 import { listNotes } from '@/lib/admin/notes';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { cn } from '@/lib/utils';
+import { mailHref } from '@/lib/admin/mail/href';
 
 const yesNo = (v: boolean | null, t: T) => (v === true ? t('Ja', 'Yes') : v === false ? t('Nein', 'No') : null);
 
@@ -119,9 +120,9 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
               ) : null}
               {place.email ? (
                 <MetaItem icon={Icon.mail}>
-                  <a href={`mailto:${place.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  <Link href={mailHref('accommodation', place.id)} className="hover:text-[var(--casa-ink)] hover:underline">
                     {place.email}
-                  </a>
+                  </Link>
                 </MetaItem>
               ) : null}
               {place.address ? (

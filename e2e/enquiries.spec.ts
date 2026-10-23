@@ -122,9 +122,11 @@ test.describe('enquiries', () => {
     await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();
     await expect(page.getByText('Angerufen, Platzanfrage an den Kurs weitergegeben.')).toBeVisible();
 
-    // Written in German, so the reply opens with a German greeting.
-    const reply = await page.getByRole('link', { name: 'Antworten' }).getAttribute('href');
-    expect(decodeURIComponent(reply ?? '')).toContain(`Hallo ${NAME.first},`);
+    // Written in German, so the reply on the mail screen opens with a German greeting.
+    await page.getByRole('link', { name: 'Antworten' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('E-Mail schreiben');
+    await expect(page.getByRole('textbox', { name: 'Text' })).toHaveValue(new RegExp(`^Hallo ${NAME.first},`));
+    await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
   });
 
   test('a learner’s enquiry leads to an offer or straight to a booking', async ({ page }) => {

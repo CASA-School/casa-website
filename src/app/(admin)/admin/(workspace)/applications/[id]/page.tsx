@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Icon } from '@/components/admin/icons';
@@ -10,7 +11,8 @@ import { formatFileSize } from '@/lib/admin/format';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
-import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
+import { mailHref } from '@/lib/admin/mail/href';
+import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { fileKind } from '../file-kind';
 
@@ -44,13 +46,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
 
   const fullName = `${application.firstName} ${application.lastName}`;
   const german = application.locale === 'de';
-  const reply = replyHref({
-    email: application.email,
-    subject: inTheirLanguage(application.locale, `Deine Bewerbung: ${application.positionTitle}`, `Your application: ${application.positionTitle}`),
-    firstName: application.firstName,
-    locale: application.locale,
-    signer: user.name,
-  });
+  const reply = mailHref('application', application.id, { subject: inTheirLanguage(application.locale, `Deine Bewerbung: ${application.positionTitle}`, `Your application: ${application.positionTitle}`) });
   const cvDetails = [fileKind(application.cvFileName, application.cvMimeType, lang), formatFileSize(application.cvFileSize)].filter(Boolean).join(' · ');
 
   return (
@@ -65,9 +61,9 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{application.positionTitle}</span>
             <MetaLine>
               <MetaItem icon={Icon.mail}>
-                <a href={`mailto:${application.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                <Link href={reply} className="hover:text-[var(--casa-ink)] hover:underline">
                   {application.email}
-                </a>
+                </Link>
               </MetaItem>
               {application.phone ? (
                 <MetaItem icon={Icon.phone}>

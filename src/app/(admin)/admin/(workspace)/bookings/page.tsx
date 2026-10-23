@@ -31,6 +31,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { SessionMark } from '@/components/admin/session-mark';
 import { BookingFilters } from './booking-filters';
 import { owesMoney } from '@/lib/admin/open-money';
+import { mailHref } from '@/lib/admin/mail/href';
 
 /**
  * Bookings.
@@ -206,7 +207,7 @@ export default async function BookingsPage({
       ...(canEdit && owes(b) && !primary ? [remind] : []),
       ...(canEdit ? [{ label: t('Buchungsbestätigung', 'Booking confirmation'), href: `/admin/bookings/${b.id}/letter?kind=confirmation`, icon: Icon.statement }] : []),
       ...(b.personEmail
-        ? [{ label: t(`E-Mail an ${b.personName}`, `Email ${b.personName}`), href: `mailto:${b.personEmail}?subject=${encodeURIComponent(b.number)}`, icon: Icon.mail, divide: canEdit }]
+        ? [{ label: t(`E-Mail an ${b.personName}`, `Email ${b.personName}`), href: mailHref('person', b.personId, { subject: b.number, address: b.personEmail, back: '/admin/bookings' }), icon: Icon.mail, divide: canEdit }]
         : []),
       { label: t('Zur Person', 'Open the learner'), href: `/admin/people/${b.personId}`, icon: Icon.person, divide: !b.personEmail && canEdit },
     ];

@@ -23,7 +23,8 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
 import { getCourseRegistration } from '@/lib/admin/registrations';
-import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
+import { mailHref } from '@/lib/admin/mail/href';
+import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { startLevelPlaces } from '@/lib/admin/waitlist';
 import { LetterList } from '@/components/admin/letters/letter-list';
@@ -103,13 +104,7 @@ export default async function CourseRegistrationPage({ params, searchParams }: {
   const option = parseOptionLabel(registration.courseInstanceLabel);
   const german = registration.locale === 'de';
   const via = t('über das Anmeldeformular', 'from the registration form');
-  const reply = replyHref({
-    email: registration.email,
-    subject: inTheirLanguage(registration.locale, `Deine Anmeldung: ${course}`, `Your registration: ${course}`),
-    firstName: registration.firstName,
-    locale: registration.locale,
-    signer: user.name,
-  });
+  const reply = mailHref('course_registration', registration.id, { subject: inTheirLanguage(registration.locale, `Deine Anmeldung: ${course}`, `Your registration: ${course}`) });
   const accommodation = registration.accommodationType
     ? ACCOMMODATION[registration.accommodationType]
       ? pick(lang, ACCOMMODATION[registration.accommodationType])
@@ -145,9 +140,9 @@ export default async function CourseRegistrationPage({ params, searchParams }: {
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{course}</span>
             <MetaLine>
               <MetaItem icon={Icon.mail}>
-                <a href={`mailto:${registration.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                <Link href={reply} className="hover:text-[var(--casa-ink)] hover:underline">
                   {registration.email}
-                </a>
+                </Link>
               </MetaItem>
               <MetaItem icon={Icon.phone}>
                 <a href={`tel:${registration.phone}`} className="hover:text-[var(--casa-ink)] hover:underline">

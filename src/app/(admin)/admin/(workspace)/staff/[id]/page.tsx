@@ -46,6 +46,7 @@ import { staffDesk } from '@/lib/admin/day-plan';
 import { staffTime } from '@/lib/admin/staff-time';
 import { StaffHours } from './hours';
 import { DESK_LABELS } from '@/lib/admin/day-plan-labels';
+import { mailHref } from '@/lib/admin/mail/href';
 
 /** How far ahead the lesson days are shown: four weeks unless a colleague asks for more (`?weeks=`). */
 const SPANS = [4, 8, 12, 26] as const;
@@ -161,9 +162,9 @@ export default async function StaffMemberPage({
             <MetaLine>
               {email ? (
                 <MetaItem icon={Icon.mail}>
-                  <a href={`mailto:${email.address}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  <Link href={mailHref('staff', member.id, { address: email.address })} className="hover:text-[var(--casa-ink)] hover:underline">
                     {email.address}
-                  </a>
+                  </Link>
                 </MetaItem>
               ) : null}
               {phone ? (
