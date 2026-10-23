@@ -23,7 +23,7 @@ const SESSION_TONE: Record<Session, { band: string; bar: string; dot: string }> 
  * row per class — when, which course, where, who teaches, how many. A click opens the class at the side.
  * The chips narrow the day to one part; the search finds a learner, a teacher, a room or a course.
  */
-export function CoursesTable({ day, lessons, editing, canBooks = false }: { day: string; lessons: DayLesson[]; editing?: Omit<LessonEditing, 'lessons'>; canBooks?: boolean }) {
+export function CoursesTable({ day, lessons, editing }: { day: string; lessons: DayLesson[]; editing?: Omit<LessonEditing, 'lessons'> }) {
   const { t, lang } = useWsLang();
   const [session, setSession] = useState<Session | 'all'>('all');
   const [q, setQ] = useState('');
@@ -204,7 +204,7 @@ export function CoursesTable({ day, lessons, editing, canBooks = false }: { day:
           </table>
         </div>
       )}
-      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} canBooks={canBooks} onClose={() => setOpenId(null)} />
+      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} onClose={() => setOpenId(null)} />
     </section>
   );
 }
