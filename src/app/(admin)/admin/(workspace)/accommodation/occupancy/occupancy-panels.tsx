@@ -12,6 +12,7 @@ import { weekPlan } from '@/lib/admin/cleaning-plan';
 import { pick, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import type { OccupancyFlat, OccupancyHold, OccupancyRoom, OccupancyStay, PlaceableStay } from '@/lib/admin/occupancy';
 import { cn } from '@/lib/utils';
+import { mailHref } from '@/lib/admin/mail/href';
 
 const noon = (iso: string) => new Date(`${iso}T12:00:00Z`);
 const plus = (iso: string, n: number) => new Date(noon(iso).getTime() + n * 86_400_000).toISOString().slice(0, 10);
@@ -114,9 +115,9 @@ export function StayPanel({
                 <Avatar name={stay.name} size="sm" />
                 <span className="min-w-0 text-[0.84rem]">
                   {stay.email ? (
-                    <a href={`mailto:${stay.email}`} className="block truncate font-semibold text-[var(--casa-accent-text)] hover:underline">
+                    <Link href={mailHref('person', stay.personId, { address: stay.email, back: '/admin/accommodation/occupancy' })} className="block truncate font-semibold text-[var(--casa-accent-text)] hover:underline">
                       {stay.email}
-                    </a>
+                    </Link>
                   ) : null}
                   {stay.phone ? <span className="block text-[var(--casa-muted)] tabular-nums">{stay.phone}</span> : null}
                 </span>

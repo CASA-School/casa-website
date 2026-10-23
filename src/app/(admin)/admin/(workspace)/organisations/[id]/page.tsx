@@ -48,6 +48,7 @@ import {
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
+import { mailHref } from '@/lib/admin/mail/href';
 
 const GROUP_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
 
@@ -155,9 +156,9 @@ export default async function OrganisationPage({
               </MetaItem>
               {organisation.email ? (
                 <MetaItem icon={Icon.mail}>
-                  <a href={`mailto:${organisation.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  <Link href={mailHref('organisation', organisation.id)} className="hover:text-[var(--casa-ink)] hover:underline">
                     {organisation.email}
-                  </a>
+                  </Link>
                 </MetaItem>
               ) : null}
               {organisation.phone ? (
@@ -236,9 +237,9 @@ export default async function OrganisationPage({
                         </span>
                         <span className="mt-0.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[0.8rem] text-[var(--casa-muted)]">
                           {c.email && c.email !== c.name ? (
-                            <a href={`mailto:${c.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                            <Link href={mailHref('contact', c.id)} className="hover:text-[var(--casa-ink)] hover:underline">
                               {c.email}
-                            </a>
+                            </Link>
                           ) : null}
                           {c.phone ? (
                             <a href={`tel:${c.phone}`} className="tabular-nums hover:text-[var(--casa-ink)] hover:underline">

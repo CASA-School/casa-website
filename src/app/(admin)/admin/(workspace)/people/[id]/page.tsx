@@ -58,6 +58,7 @@ import { toDateInputValue } from '@/lib/dates';
 import { teachingWeeks } from '@/lib/admin/offers/course';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
+import { mailHref } from '@/lib/admin/mail/href';
 
 const SALUTATIONS: Record<string, Bilingual> = {
   mr: { de: 'Herr', en: 'Mr' },
@@ -391,9 +392,9 @@ export default async function PersonPage({
             <MetaLine>
               {email ? (
                 <MetaItem icon={Icon.mail}>
-                  <a href={`mailto:${email.address}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  <Link href={mailHref('person', person.id, { address: email.address })} className="hover:text-[var(--casa-ink)] hover:underline">
                     {email.address}
-                  </a>
+                  </Link>
                 </MetaItem>
               ) : null}
               {phone ? (
@@ -621,9 +622,9 @@ export default async function PersonPage({
                       <ul className="space-y-0.5">
                         {person.emails.map((e) => (
                           <li key={e.address} className="truncate">
-                            <a href={`mailto:${e.address}`} className="font-medium hover:underline">
+                            <Link href={mailHref('person', person.id, { address: e.address })} className="font-medium hover:underline">
                               {e.address}
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>

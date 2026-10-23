@@ -97,6 +97,7 @@ export function OfferPage({
   canWrite,
   canDelete,
   bookHref,
+  mailHref,
   notice,
   timeline,
 }: {
@@ -112,6 +113,8 @@ export function OfferPage({
   canDelete: boolean;
   /** An accepted offer to a learner: their booking wizard, at the offer's course. */
   bookHref?: string | null;
+  /** Sent: the letter on the mail screen. */
+  mailHref?: string | null;
   notice: { ok?: string; error?: string };
   /** „Notizen und Verlauf", the workspace's own, rendered on the server. */
   timeline: ReactNode;
@@ -166,6 +169,7 @@ export function OfferPage({
             canWrite={canWrite}
             canDelete={canDelete}
             bookHref={bookHref}
+            mailHref={mailHref}
             extra={[{ label: t('Drucken / PDF', 'Print / PDF'), onSelect: print }]}
             send={{
               canSend: !hasProblems(checks) && od.saveState !== 'stale',

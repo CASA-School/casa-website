@@ -220,6 +220,12 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t(`hat die Zuständigkeit für ${acc} entfernt`, `removed the owner from ${subject}`);
     case 'note_added':
       return t(`hat eine Notiz zu ${dat} hinzugefügt`, `added a note to ${subject}`);
+    case 'mail_sent':
+      return entry.detail?.subject
+        ? t(`hat eine E-Mail gesendet: „${String(entry.detail.subject)}“`, `sent an e-mail: “${String(entry.detail.subject)}”`)
+        : t('hat eine E-Mail gesendet', 'sent an e-mail');
+    case 'letter_mailed':
+      return t('hat einen Brief per E-Mail gesendet', 'sent a letter by e-mail');
     case 'cv_downloaded':
       return t(`hat den Lebenslauf zu ${dat} heruntergeladen`, `downloaded the CV on ${subject}`);
     case 'person_created':

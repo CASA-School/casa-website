@@ -17,6 +17,7 @@ import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
 import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
 import { cn } from '@/lib/utils';
+import { mailHref } from '@/lib/admin/mail/href';
 
 /** A course's own page; a parallel group has its own under it. */
 export const courseHref = (l: Pick<DayLesson, 'courseId' | 'groupIndex'>) => `/admin/catalogue/courses/${l.courseId}${l.groupIndex > 1 ? `/${l.groupIndex}` : ''}`;
@@ -41,7 +42,6 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
   const { t, lang } = useWsLang();
   const l = lesson;
   const emails = l ? [...new Set(l.learners.map((p) => p.email).filter((e): e is string => Boolean(e)))] : [];
-  const subject = l ? `${l.label} · ${new Date(`${day}T12:00:00Z`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}` : '';
   return (
     <SidePanel
       open={l !== null}
@@ -68,13 +68,13 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
               {t('Liste für die Lehrkraft', 'List for the teacher')}
             </Link>
             {emails.length ? (
-              <a
-                href={`mailto:?bcc=${emails.map(encodeURIComponent).join(',')}&subject=${encodeURIComponent(subject)}`}
+              <Link
+                href={mailHref('class', l.id, { back: `/admin/day?date=${day}` })}
                 className="inline-flex h-9 items-center gap-2 rounded-lg bg-white px-3.5 text-[0.84rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line ring-inset transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]"
               >
                 {Icon.mail}
                 {t(`E-Mail an alle (${emails.length})`, `Email all (${emails.length})`)}
-              </a>
+              </Link>
             ) : null}
             <Link
               href={courseHref(l)}

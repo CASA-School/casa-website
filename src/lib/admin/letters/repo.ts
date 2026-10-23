@@ -183,6 +183,12 @@ export async function lettersForOffer(offerId: string): Promise<LetterListItem[]
 }
 
 /** One sent version of an offer's letter, as it went out; null when there is none or it cannot be read. */
+/** The letter of an offer's latest version that went out, for the mail screen. */
+export async function latestOfferLetterId(offerId: string): Promise<string | null> {
+  const row = await queryFirst<{ id: string }>(`SELECT id FROM letters WHERE offer_id = $1 ORDER BY version DESC, sent_at DESC LIMIT 1`, [offerId]);
+  return row?.id ?? null;
+}
+
 export async function sentOfferLetter(offerId: string, version: number): Promise<Letter | null> {
   const row = await queryFirst<{ document: unknown }>(`SELECT document FROM letters WHERE offer_id = $1 AND version = $2`, [offerId, version]);
   return row ? readLetter(row.document) : null;

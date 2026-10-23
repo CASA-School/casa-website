@@ -1,0 +1,49 @@
+import type { WorkspaceModule } from '../access';
+
+/**
+ * „E-Mail" anywhere in the workspace opens the mail screen (Rahman, 2026-10-23: „we should have such an
+ * interface always when we send letters or emails through the platform directly"): `/admin/mail?to=…`,
+ * the record the mail is about. Letters have their own (`/admin/letters/mail`), the teachers' test mail
+ * too (`/admin/day/tests/mail`). Safe for the browser.
+ */
+
+export type MailAbout =
+  | 'person'
+  | 'staff'
+  | 'organisation'
+  | 'contact'
+  | 'accommodation'
+  | 'enquiry'
+  | 'course_registration'
+  | 'exam_registration'
+  | 'application'
+  | 'class'
+  | 'teacher_list';
+
+/**
+ * The rights a mail about each kind of record is written with: the first one the colleague has. A learner
+ * is written to from the learners, a booking, a flat or the waiting list alike.
+ */
+export const MAIL_MODULES: Record<MailAbout, readonly WorkspaceModule[]> = {
+  person: ['people', 'bookings', 'accommodation', 'catalogue'],
+  staff: ['staff'],
+  organisation: ['organisations'],
+  contact: ['organisations'],
+  accommodation: ['accommodation'],
+  enquiry: ['enquiries'],
+  course_registration: ['registrations'],
+  exam_registration: ['registrations'],
+  application: ['applications'],
+  class: ['day'],
+  teacher_list: ['day'],
+};
+
+export const isMailAbout = (value: string): value is MailAbout => value in MAIL_MODULES;
+
+export function mailHref(about: MailAbout, id: string, options: { subject?: string; address?: string; back?: string } = {}): string {
+  const query = new URLSearchParams({ to: `${about}:${id}` });
+  if (options.subject) query.set('subject', options.subject);
+  if (options.address) query.set('address', options.address);
+  if (options.back) query.set('back', options.back);
+  return `/admin/mail?${query.toString()}`;
+}

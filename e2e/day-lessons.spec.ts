@@ -106,7 +106,12 @@ test.describe('a class from the Tagesplan', () => {
     await panel.getByRole('link', { name: 'Liste für die Lehrkraft' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Teilnehmerliste B1.1');
     await expect(page.getByRole('row').filter({ hasText: 'Listentest, Lena' })).toContainText(`lena.${stamp}@example.org`);
-    await expect(page.getByRole('link', { name: new RegExp(`^E-Mail an ${escape(teachers[0].name)}`) })).toHaveAttribute('href', /^mailto:/);
+    // The mail to the teacher on the workspace's mail screen (2026-10-23): the list in the text.
+    await page.getByRole('link', { name: new RegExp(`^E-Mail an ${escape(teachers[0].name)}`) }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('E-Mail schreiben');
+    await expect(page.getByRole('textbox', { name: 'Text' })).toHaveValue(new RegExp(`lena\\.${stamp}@example\\.org`));
+    await expect(page.getByRole('button', { name: 'Im Mailprogramm öffnen' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
   });
 
   test('the room on one day, then the teacher from that day on — each after saying what changes', async ({ page }) => {

@@ -49,6 +49,7 @@ import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForEntries, type SentLetter } from '@/lib/admin/letters/repo';
 import { listBookableRooms, type Room } from '@/lib/admin/rooms';
 import { cn } from '@/lib/utils';
+import { mailHref } from '@/lib/admin/mail/href';
 
 /**
  * One course start (2026-10-16): its levels, their places and their waiting lists
@@ -712,14 +713,14 @@ function QueueRow({
           </Link>
           {offered ? <Badge tone="accent">{pick(lang, WAITLIST_STATUS_LABELS.offered)}</Badge> : null}
           {entry.email ? (
-            <a
-              href={`mailto:${entry.email}?subject=${encodeURIComponent(subject)}`}
+            <Link
+              href={mailHref('person', entry.personId, { subject, address: entry.email, back })}
               className="text-[var(--casa-muted)] hover:text-[var(--casa-ink)] [&_svg]:size-3.5"
               title={entry.email}
               aria-label={t(`E-Mail an ${entry.personName}`, `Email ${entry.personName}`)}
             >
               {Icon.mail}
-            </a>
+            </Link>
           ) : null}
         </div>
         <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">

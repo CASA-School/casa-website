@@ -21,7 +21,8 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { listNotes } from '@/lib/admin/notes';
 import { findDuplicateCandidates, getPersonSummary } from '@/lib/admin/people';
 import { getExamRegistration, registrationTypeLabel } from '@/lib/admin/registrations';
-import { inTheirLanguage, replyHref } from '@/lib/admin/reply';
+import { mailHref } from '@/lib/admin/mail/href';
+import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { toDateInputValue } from '@/lib/dates';
 import { formatDay, parseOptionLabel } from '../../option-label';
@@ -78,13 +79,7 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
   const exam = registration.examTypeLabel ?? t('Prüfung', 'Exam');
   const sitting = parseOptionLabel(registration.examSessionLabel);
   const german = registration.locale === 'de';
-  const reply = replyHref({
-    email: registration.email,
-    subject: inTheirLanguage(registration.locale, `Deine Prüfungsanmeldung: ${exam}`, `Your exam registration: ${exam}`),
-    firstName: registration.firstName,
-    locale: registration.locale,
-    signer: user.name,
-  });
+  const reply = mailHref('exam_registration', registration.id, { subject: inTheirLanguage(registration.locale, `Deine Prüfungsanmeldung: ${exam}`, `Your exam registration: ${exam}`) });
 
   return (
     <>
@@ -130,9 +125,9 @@ export default async function ExamRegistrationPage({ params }: { params: Promise
             <span className="block text-[0.98rem] font-semibold text-[#2b3546]">{exam}</span>
             <MetaLine>
               <MetaItem icon={Icon.mail}>
-                <a href={`mailto:${registration.email}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                <Link href={reply} className="hover:text-[var(--casa-ink)] hover:underline">
                   {registration.email}
-                </a>
+                </Link>
               </MetaItem>
               <MetaItem icon={Icon.phone}>
                 <a href={`tel:${registration.phone}`} className="hover:text-[var(--casa-ink)] hover:underline">

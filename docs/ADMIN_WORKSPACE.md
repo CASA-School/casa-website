@@ -2356,6 +2356,21 @@ letters to all. A letter travels as a PDF printed by the server's own browser ex
 prints it; several letters go one mail each, to their own recipients, with a language switch when they
 are in German and English. No workspace screen offers a `mailto:` for a letter any more.
 
+**And every other mail (2026-10-23, Rahman: „did you do it for offer? buchungen? and other platforms?").**
+`/admin/mail?to=<kind>:<id>` (`src/lib/admin/mail/`, migration 0086 `workspace_mails`) is the same screen
+for a colleague's own mail about a record: „Antworten" on an enquiry, a course or exam registration and an
+application; „E-Mail an …" / „E-Mail schreiben" on Buchungen, Teilnehmende and the waiting list; every
+address shown on a learner, a colleague, an organisation (and its contacts), a host or a flat's guest;
+the Tagesplan's „E-Mail an alle" to a class (Bcc) and „E-Mail an die Lehrkraft" with the class list in
+the text. `mailHref(kind, id, { subject, address, back })` builds the link; the server reads the record
+again for recipients, language and greeting („Hallo Anna," / „Hello Anna," / „Hallo zusammen,") and
+checks the right per kind (`MAIL_MODULES`: a learner is written to from Teilnehmende, Buchungen,
+Unterkünfte or the Kurse alike; without `edit` only „Im Mailprogramm öffnen" is offered). The mail looks
+like one written in Outlook — the text and the signature, no card, no logo of its own — and is noted on
+the record's timeline („hat eine E-Mail gesendet: …"). A sent offer has „Per E-Mail senden" beside
+„Angenommen", back to its letter's mail screen. The only `mailto:` left is the mail screen's own „Im
+Mailprogramm öffnen".
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,
