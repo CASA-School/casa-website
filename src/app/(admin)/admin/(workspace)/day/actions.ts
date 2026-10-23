@@ -246,7 +246,13 @@ export async function sendTeacherMailAction(formData: FormData): Promise<void> {
   const to = `/admin/day/tests/mail?date=${day}`;
   if (formData.get('confirmed') !== '1') fail(to, pick(lang, { de: 'Bitte bestätige den Versand.', en: 'Please confirm sending.' }));
   const result = await sendTeacherMail(
-    { day, subject: String(formData.get('subject') ?? ''), intro: String(formData.get('intro') ?? ''), emails: formData.getAll('email').map(String) },
+    {
+      day,
+      subject: String(formData.get('subject') ?? ''),
+      intro: String(formData.get('intro') ?? ''),
+      emails: formData.getAll('email').map(String),
+      signature: formData.get('signature') === '1',
+    },
     actor
   );
   if (!result.ok) fail(to, pick(lang, result.reason));

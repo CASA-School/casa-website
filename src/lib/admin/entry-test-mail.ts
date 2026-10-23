@@ -8,6 +8,7 @@ import { berlinDay } from './days';
 import { query } from './db';
 import { dayEntryTests, entryTestLink, entryTestOrigin, openEntryTests, type DayEntryTest } from './entry-tests';
 import type { Bilingual } from './i18n';
+import { signatureFor } from './mail-signature';
 import { teacherMailHtml, type TeacherMailTest } from '@/lib/entry-test/teacher-mail';
 import { ENTRY_TESTS } from '@/lib/entry-test/tests';
 import { LOGO_CONTENT_ID } from '@/lib/notifications/casa-logo';
@@ -45,6 +46,12 @@ export type TeacherMailDraft = {
   missing: string[];
   subject: string;
   intro: string;
+  /** The sender's CASA signature as Outlook adds it (preview pictures), or none to be had. */
+  signature: { owner: 'own' | 'office'; html: string } | null;
+  /** The mail's end without a signature: „Viele Grüße" and the first name. */
+  closing: string;
+  /** Answers go to the colleague who sends it. */
+  replyTo: string;
   sent: SentTeacherMail[];
   /** Whether this deployment can send mail (Graph and its identity). */
   canSend: boolean;
@@ -57,9 +64,10 @@ const SESSION = { morning: 'Vormittag', afternoon: 'Nachmittag' } as const;
 const SENT_AT = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' });
 
 export async function teacherMailDraft(day: string, actor: StaffUser): Promise<TeacherMailDraft> {
-  const [tests, origin, sent] = await Promise.all([
+  const [tests, origin, signature, sent] = await Promise.all([
     dayEntryTests(day),
     entryTestOrigin(),
+    signatureFor(actor.email),
     query<{ id: string; sent_at: Date; by: string | null; subject: string; recipients: { email: string; name: string | null }[] }>(
       `SELECT m.id, m.sent_at, u.name AS by, m.subject, m.recipients
          FROM entry_test_mails m LEFT JOIN staff_users u ON u.id = m.sent_by
@@ -130,7 +138,7 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
   const dayLong = dayLongOf(day);
   const levels = [...new Set(ready.flatMap((x) => x.classes.map((c) => c.label)))].join(', ');
   const sessions = [...new Set(ready.map((x) => SESSION[x.session]))].join(' und ');
-  const signature = actor.name.trim().split(/\s+/)[0] ?? '';
+  const firstName = actor.name.trim().split(/\s+/)[0] ?? '';
   return {
     day,
     dayLong,
@@ -143,8 +151,10 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
     intro: [
       'Hallo zusammen,',
       `am ${dayLong} schreiben die neuen Teilnehmenden der Kurse ${levels || '…'}${sessions ? ` (${sessions})` : ''} den Einstufungstest. Hier findet ihr eure Codes, die QR-Codes und den Leitfaden.`,
-      `Viele Grüße\n${signature}`,
     ].join('\n\n'),
+    signature: signature ? { owner: signature.owner, html: signature.html } : null,
+    closing: `Viele Grüße\n${firstName}`,
+    replyTo: actor.email,
     sent: sent.map((m) => ({ id: m.id, when: SENT_AT.format(m.sent_at), by: m.by, subject: m.subject, recipients: Array.isArray(m.recipients) ? m.recipients : [] })),
     canSend: graphSender() !== null,
   };
@@ -153,7 +163,7 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
 const Email = z.email();
 
 /** Sends the day's mail as the office checked it: its subject, its text, to the addresses chosen. */
-export async function sendTeacherMail(input: { day: string; subject: string; intro: string; emails: string[] }, actor: StaffUser): Promise<Result> {
+export async function sendTeacherMail(input: { day: string; subject: string; intro: string; emails: string[]; signature: boolean }, actor: StaffUser): Promise<Result> {
   if (input.day < berlinDay(new Date())) return refuse('Dieser Testtag ist vorbei.', 'This test day is over.');
   const subject = input.subject.trim();
   const intro = input.intro.trim();
@@ -178,12 +188,16 @@ export async function sendTeacherMail(input: { day: string; subject: string; int
   const sitting = (x: (typeof draft.tests)[number]) => (x.code && x.sittingId ? [x.sittingId] : []);
   if (draft.tests.some((x) => !x.code)) return refuse('Die Tests ließen sich nicht öffnen.', 'The tests could not be opened.');
 
+  const signature = input.signature ? await signatureFor(actor.email) : null;
+  if (input.signature && !signature) return refuse('Die Signatur ist gerade nicht erreichbar. Sende ohne Signatur oder versuch es gleich noch einmal.', 'The signature cannot be reached just now. Send without it or try again shortly.');
   const html = teacherMailHtml({
     subject,
     heading: draft.heading,
     intro,
     tests: draft.tests.map((x) => ({ ...x, qrSrc: `cid:qr-${x.key}` })),
     logoSrc: `cid:${LOGO_CONTENT_ID}`,
+    signature: signature?.mailHtml ?? null,
+    closing: draft.closing,
   });
   const names = new Map(draft.recipients.map((r) => [r.email.toLowerCase(), r.name]));
   try {
@@ -199,7 +213,7 @@ export async function sendTeacherMail(input: { day: string; subject: string; int
         contentType: 'image/png',
         contentId: `qr-${x.key}`,
         contentBytes: x.qrSrc.replace(/^data:image\/png;base64,/, ''),
-      })),
+      })).concat(signature?.attachments ?? []),
     });
   } catch (error) {
     console.error('[entry-test-mail] not sent', error);

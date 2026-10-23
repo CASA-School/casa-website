@@ -6,14 +6,15 @@ import { teacherMailDraft } from '@/lib/admin/entry-test-mail';
 import { upcomingEntryTestDays } from '@/lib/admin/entry-tests';
 import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { LOGO_PNG_BASE64 } from '@/lib/notifications/casa-logo';
 import { graphSender } from '@/lib/notifications/graph-mail.server';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * The mail to a start day's teachers (Rahman, 2026-10-22): their codes, the QR codes and the guide in one
- * mail, a few days ahead. The office chooses the day, checks who gets it, writes the subject and text, and
- * sees the mail as it will arrive before sending it (docs/ENTRY_TEST.md §The teachers' mail).
+ * mail, a few days ahead, on the workspace's mail screen — sent from Outlook or directly, after a review
+ * (docs/ADMIN_WORKSPACE.md §Mail, docs/ENTRY_TEST.md §The teachers' mail).
  */
 export default async function TeacherMailPage({ searchParams }: { searchParams: Promise<{ date?: string; error?: string; sent?: string }> }) {
   const [params, user, { t, lang }] = await Promise.all([searchParams, requireModule('day', 'edit'), getI18n()]);
@@ -37,6 +38,7 @@ export default async function TeacherMailPage({ searchParams }: { searchParams: 
           draft={draft}
           days={days.map((d) => ({ day: d, label: dayLabel(d, lang, { weekday: 'short', day: 'numeric', month: 'short' }) }))}
           from={graphSender()}
+          logo={`data:image/png;base64,${LOGO_PNG_BASE64}`}
           sent={params.sent === '1'}
         />
       ) : (
