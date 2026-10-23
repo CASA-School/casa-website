@@ -21,6 +21,7 @@ import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MoreInPanel } from '@/components/admin/more-in-panel';
+import { RecordTabLink, RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { dayRange } from '@/components/admin/list';
 import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader } from '@/components/admin/ui';
@@ -38,6 +39,7 @@ import {
   CHARGE_KIND_LABELS,
   getBooking,
   type BookingCharge,
+  type ChargeKind,
   type Payment,
   listCohortOptions,
   PAYER_LABELS,
@@ -63,6 +65,9 @@ import { num, pick, wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
+
+/** The order of the account's charges: the course and its fees, the books, the stay, the deposit, the rest, then what comes off. */
+const CHARGE_ORDER: ChargeKind[] = ['tuition', 'enrolment_fee', 'exam_fee', 'books', 'accommodation', 'deposit', 'other', 'discount', 'cancellation'];
 
 const money = (n: number, currency: string) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(
@@ -156,9 +161,9 @@ export default async function BookingPage({
 }: {
   params: Promise<{ id: string }>;
   /** `pay=1` opens „Zahlung erfassen" at once: the list's action for a booking with money open. */
-  searchParams: Promise<{ error?: string; pay?: string }>;
+  searchParams: Promise<{ error?: string; pay?: string; tab?: string }>;
 }) {
-  const [{ id }, { error, pay }, user] = await Promise.all([
+  const [{ id }, { error, pay, tab }, user] = await Promise.all([
     params,
     searchParams,
     requireModule('bookings'),
@@ -214,6 +219,11 @@ export default async function BookingPage({
   const weeks = booking.startDate && booking.endDate ? teachingWeeks(toDateInputValue(booking.startDate), toDateInputValue(booking.endDate)) : null;
   const stay = booking.accommodation;
   const removesCharges = canFull && open;
+  // The account in the order finance reads it (2026-10-23): the course, its fees, the books, the stay,
+  // the deposit, the rest, then what comes off — each kind in the order it was charged.
+  const orderedCharges = [...booking.charges].sort(
+    (a, b) => CHARGE_ORDER.indexOf(a.kind) - CHARGE_ORDER.indexOf(b.kind) || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
   // A cost line in words: its own text (its kind's label in this language when that is all it says),
   // and its kind when the text does not already say it.
   const chargeWords = (c: BookingCharge) => {
@@ -242,15 +252,16 @@ export default async function BookingPage({
   const received = booking.payments.filter((p) => !p.voidedAt);
   const voided = booking.payments.filter((p) => p.voidedAt).reverse();
   const voidsPayments = canFull && received.length > 0;
+  // One account, one column for the row menus: the amounts of charges and payments stand under one another.
+  const ledgerAction = (removesCharges && booking.charges.length > 0) || voidsPayments;
   // A reference SchoolMan kept twice, or in both languages on two lines, on one line.
   const paymentReference = (reference: string | null) =>
     reference ? [...new Set(reference.split('\n').map((l) => l.trim()).filter(Boolean))].join(' / ') : null;
   // A payment's day, how it came (a carry-over: the booking on its other side) and its reference.
-  const paymentWhen = (p: Payment) => {
+  const paymentHow = (p: Payment) => {
     const reference = paymentReference(p.reference);
     return (
       <>
-        <DateText value={p.receivedAt} compact /> ·{' '}
         {p.counterpart ? (
           <>
             {p.amount < 0 ? t('an ', 'to ') : t('von ', 'from ')}
@@ -271,6 +282,11 @@ export default async function BookingPage({
       </>
     );
   };
+  const paymentWhen = (p: Payment) => (
+    <>
+      <DateText value={p.receivedAt} compact /> · {paymentHow(p)}
+    </>
+  );
   // The record's own fields, those that have a value: when it was booked is
   // in the head, so a booking with nothing else has no card for it.
   const single = booking.periods.length === 1 ? booking.periods[0] : null;
@@ -287,6 +303,21 @@ export default async function BookingPage({
   );
   const recordFields = [
     single && single.courseInstanceId ? { label: t('Niveau', 'Level'), value: levelValue(single) } : null,
+    // How often they came, as the Klassenbuch recorded it; the days missed are on their own tab.
+    attendance
+      ? {
+          label: t('Anwesenheit', 'Attendance'),
+          wide: true,
+          value: (
+            <RecordTabLink to="attendance" className="text-[0.88rem] whitespace-nowrap">
+              {num(lang, Math.round((attendance.present / attendance.days) * 100))} %
+              <span className="font-medium text-[var(--casa-muted)]">
+                {t(` · ${num(lang, attendance.present)} von ${num(lang, attendance.days)} Tagen`, ` · ${num(lang, attendance.present)} of ${num(lang, attendance.days)} days`)}
+              </span>
+            </RecordTabLink>
+          ),
+        }
+      : null,
     // An exam candidate is reported to telc before the deadline; the sitting's page marks it.
     exam && open
       ? {
@@ -447,8 +478,81 @@ export default async function BookingPage({
       ? single.cohortLabel
       : null;
 
+  // One cost line: its words (a book line red until handed out, green after, 0087), its amount, its row menu.
+  const costRows = foldReversals(orderedCharges);
+  const costRow = ({ line, reversal }: { line: BookingCharge; reversal: BookingCharge | null }) => {
+        const { description, kind } = chargeWords(line);
+        return (
+          <li key={line.id} title={reversal ? `${description} · ${chargeWords(reversal).description}` : description}>
+            <LedgerLine
+              className="min-h-7 py-0.5"
+              withAction={ledgerAction}
+              amount={
+                reversal ? (
+                  // Cancelled: the amount it was, struck through; it does not count.
+                  <span className="text-[var(--casa-muted)] line-through">{money(line.amount, booking.currency)}</span>
+                ) : (
+                  <span className={cn('font-semibold', line.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
+                    {money(line.amount, booking.currency)}
+                  </span>
+                )
+              }
+              action={
+                removesCharges ? (
+                  <RowMenu label={t(`Aktionen: ${description}`, `Actions: ${description}`)}>
+                    {reversal ? (
+                      <>
+                        {removeChargeForm(line, description, t('Posten entfernen', 'Remove the line'))}
+                        {removeChargeForm(reversal, chargeWords(reversal).description, t('Storno entfernen', 'Remove the reversal'))}
+                      </>
+                    ) : (
+                      removeChargeForm(line, description, t('Entfernen', 'Remove'))
+                    )}
+                  </RowMenu>
+                ) : null
+              }
+            >
+              <span className={cn('flex min-w-0 items-center gap-1.5 text-sm', reversal && 'text-[var(--casa-muted)]')}>
+                {line.books && !reversal && line.amount > 0 && booking.status !== 'cancelled' ? (
+                  // The books: red until handed out, green after (0087).
+                  <BookLine
+                    key={`${line.id}:${line.books.handedOut}`}
+                    id={line.id}
+                    label={description}
+                    handedOut={line.books.handedOut}
+                    detail={
+                      line.books.at
+                        ? [line.books.at.toLocaleDateString(wsLocale(lang), { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' }), line.books.by].filter(Boolean).join(' · ')
+                        : null
+                    }
+                    canEdit={canEdit}
+                    onSet={setBooksHandedOutAction}
+                  />
+                ) : (
+                  <span className={cn('truncate', reversal ? 'min-w-0 font-medium line-through' : 'max-w-full shrink-0 font-semibold')}>{description}</span>
+                )}
+                {/* The kind only when the line's own words do not already say it. */}
+                {kind ? <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">· {kind}</span> : null}
+                {reversal ? <Badge tone="quiet" className="shrink-0">{t('Storniert', 'Cancelled')}</Badge> : null}
+              </span>
+            </LedgerLine>
+          </li>
+        );
+  };
+
+  // The booking in tabs, as the learner's page (2026-10-23, Rahman: „one of the most important interfaces,
+  // for office and finance"): the account first, the rest a click away instead of a column without end.
+  const hasLedgerExtras = extras.instalments.length + extras.commissions.length + extras.payouts.length + extras.invoices.length > 0;
+  const tabs: RecordTab[] = [
+    { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
+    ...(attendance ? [{ id: 'attendance', label: t('Anwesenheit', 'Attendance'), icon: Icon.check }] : []),
+    { id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length },
+    ...(hasLedgerExtras ? [{ id: 'accounting', label: t('Abrechnung', 'Accounting'), icon: Icon.statement }] : []),
+    { id: 'history', label: t('Notizen und Verlauf', 'Notes and history'), icon: Icon.note, count: notes.length },
+  ];
+
   return (
-    <>
+    <RecordTabs tabs={tabs} initial={tab}>
       <RecordHeader
         backHref="/admin/bookings"
         backLabel={t('Buchungen', 'Bookings')}
@@ -612,6 +716,7 @@ export default async function BookingPage({
             ) : null}
           </StatBar>
         }
+        tabs={<RecordTabList label={t(`Buchung von ${booking.personName}: Bereiche`, `Booking of ${booking.personName}: sections`)} />}
       />
 
       {error ? (
@@ -623,9 +728,11 @@ export default async function BookingPage({
         </p>
       ) : null}
 
-      {/* One column on a phone that never grows past the screen: a ledger line shortens its words instead. */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        <div className="space-y-4">
+      {/* What the office and finance need first: the account, and beside it what the booking is. */}
+      <RecordTabPanel id="overview">
+        {/* One column on a phone that never grows past the screen: a ledger line shortens its words instead. */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+          <div className="space-y-4">
           {booking.periods.length > 1 ? (
             <Card title={t('Zeiträume', 'Periods')} icon={Icon.calendar} tint="blue">
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
@@ -667,105 +774,21 @@ export default async function BookingPage({
             </Card>
           ) : null}
 
+          {/* The account as finance reads it (2026-10-23): the charges in a fixed order, the payments, the balance. */}
           <Card
-            title={t('Kosten', 'Cost')}
-            icon={Icon.catalogue}
-            tint="red"
-            // The row menus open over the lines below and past the card's foot.
-            overflow="visible"
-            actions={
-              canEdit && open ? (
-                <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
-                  <ChargeForm bookingId={booking.id} />
-                </FormDialog>
-              ) : undefined
-            }
-            footer={
-              <LedgerLine
-                withAction={removesCharges && booking.charges.length > 0}
-                amount={
-                  <span className="font-extrabold">{money(booking.charged, booking.currency)}</span>
-                }
-              >
-                <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Gesamt', 'Total')}</span>
-              </LedgerLine>
-            }
-          >
-            {booking.charges.length === 0 ? (
-              <p className="text-sm text-[var(--casa-muted)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
-            ) : (
-              <ul className="-my-2 divide-y divide-ws-line-soft">
-                {foldReversals(booking.charges).map(({ line, reversal }) => {
-                  const { description, kind } = chargeWords(line);
-                  return (
-                    <li key={line.id} title={reversal ? `${description} · ${chargeWords(reversal).description}` : description}>
-                      <LedgerLine
-                        className="min-h-7 py-0.5"
-                        withAction={removesCharges}
-                        amount={
-                          reversal ? (
-                            // Cancelled: the amount it was, struck through; it does not count.
-                            <span className="text-[var(--casa-muted)] line-through">{money(line.amount, booking.currency)}</span>
-                          ) : (
-                            <span className={cn('font-semibold', line.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
-                              {money(line.amount, booking.currency)}
-                            </span>
-                          )
-                        }
-                        action={
-                          removesCharges ? (
-                            <RowMenu label={t(`Aktionen: ${description}`, `Actions: ${description}`)}>
-                              {reversal ? (
-                                <>
-                                  {removeChargeForm(line, description, t('Posten entfernen', 'Remove the line'))}
-                                  {removeChargeForm(reversal, chargeWords(reversal).description, t('Storno entfernen', 'Remove the reversal'))}
-                                </>
-                              ) : (
-                                removeChargeForm(line, description, t('Entfernen', 'Remove'))
-                              )}
-                            </RowMenu>
-                          ) : null
-                        }
-                      >
-                        <span className={cn('flex min-w-0 items-center gap-1.5 text-sm', reversal && 'text-[var(--casa-muted)]')}>
-                          {line.books && !reversal && line.amount > 0 && booking.status !== 'cancelled' ? (
-                            // The books: red until handed out, green after (0087).
-                            <BookLine
-                              key={`${line.id}:${line.books.handedOut}`}
-                              id={line.id}
-                              label={description}
-                              handedOut={line.books.handedOut}
-                              detail={
-                                line.books.at
-                                  ? [line.books.at.toLocaleDateString(wsLocale(lang), { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' }), line.books.by].filter(Boolean).join(' · ')
-                                  : null
-                              }
-                              canEdit={canEdit}
-                              onSet={setBooksHandedOutAction}
-                            />
-                          ) : (
-                            <span className={cn('truncate', reversal ? 'min-w-0 font-medium line-through' : 'max-w-full shrink-0 font-semibold')}>{description}</span>
-                          )}
-                          {/* The kind only when the line's own words do not already say it. */}
-                          {kind ? <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">· {kind}</span> : null}
-                          {reversal ? <Badge tone="quiet" className="shrink-0">{t('Storniert', 'Cancelled')}</Badge> : null}
-                        </span>
-                      </LedgerLine>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Card>
-
-          <Card
-            title={t('Zahlungen', 'Payments')}
+            title={t('Konto', 'Account')}
             icon={Icon.money}
             tint="green"
+            // The row menus open over the lines below and past the card's foot.
             overflow="visible"
             actions={
               canEdit && (open || carriesOver) ? (
                 <>
+                  {open ? (
+                    <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
+                      <ChargeForm bookingId={booking.id} />
+                    </FormDialog>
+                  ) : null}
                   {carriesOver ? (
                     <FormDialog icon={Icon.money} tint="green"
                       trigger={t('Guthaben übertragen', 'Carry credit over')}
@@ -792,28 +815,56 @@ export default async function BookingPage({
             }
             footer={
               <LedgerLine
-                withAction={voidsPayments}
+                withAction={ledgerAction}
                 amount={
-                  <span className="font-extrabold text-[var(--casa-success-text)]">
-                    {money(booking.paid, booking.currency)}
+                  <span className={cn('text-[1.05rem] font-extrabold', owesMoney(booking.balance) ? 'text-[#9a5b00]' : booking.balance < -0.005 ? 'text-[var(--casa-danger-text)]' : 'text-[#17693a]')}>
+                    {money(Math.abs(booking.balance) < 0.005 ? 0 : Math.abs(booking.balance), booking.currency)}
                   </span>
                 }
               >
-                <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Eingegangen', 'Received')}</span>
+                <span className="text-sm font-extrabold text-[var(--casa-ink)]">
+                  {booking.balance > 0.005 ? t('Offen', 'Balance due') : booking.balance < -0.005 ? t('Guthaben', 'Credit') : t('Ausgeglichen', 'Settled')}
+                </span>
               </LedgerLine>
             }
           >
+            <h3 className="text-[0.78rem] font-bold text-[var(--casa-muted)]">{t('Kosten', 'Charges')}</h3>
+            <div className="mt-1.5">
+            {booking.charges.length === 0 ? (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
+            ) : (
+              <>
+                <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => !r.reversal).map(costRow)}</ul>
+                {costRows.some((r) => r.reversal) ? (
+                  // Cancelled lines count for nothing — the line and its reversal — so they wait folded, one click away.
+                  <details className="group border-t border-ws-line-soft">
+                    <summary className="flex cursor-pointer list-none items-center gap-1.5 py-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
+                      <span className="transition-transform group-open:rotate-90 [&_svg]:size-3.5">{Icon.chevronRight}</span>
+                      {t(`${costRows.filter((r) => r.reversal).length} stornierte Posten`, `${costRows.filter((r) => r.reversal).length} cancelled lines`)}
+                    </summary>
+                    <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => r.reversal).map(costRow)}</ul>
+                  </details>
+                ) : null}
+              </>
+            )}
+            </div>
+            <LedgerLine className="mt-1 border-t border-ws-line pt-2.5" withAction={ledgerAction} amount={<span className="font-bold">{money(booking.charged, booking.currency)}</span>}>
+              <span className="text-sm font-semibold text-[var(--casa-muted)]">{t('Summe Kosten', 'Total charges')}</span>
+            </LedgerLine>
+
+            <h3 className="mt-7 text-[0.78rem] font-bold text-[var(--casa-muted)]">{t('Zahlungen', 'Payments')}</h3>
+            <div className="mt-1.5">
             {received.length === 0 ? (
               <p className="text-sm text-[var(--casa-muted)]">{t('Noch nichts eingegangen.', 'Nothing received yet.')}</p>
             ) : (
-              <ul className="-my-2 divide-y divide-ws-line-soft">
+              <ul className="divide-y divide-ws-line-soft">
                 {received.map((p) => {
                   const subject = storedWords(p.subject, lang);
                   return (
                     <li key={p.id} title={[subject, paymentReference(p.reference), p.recordedByName].filter(Boolean).join(' · ')}>
                       <LedgerLine
                         className="min-h-7 py-0.5"
-                        withAction={voidsPayments}
+                        withAction={ledgerAction}
                         amount={
                           <span className={cn('font-semibold', p.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
                             {money(p.amount, booking.currency)}
@@ -849,9 +900,12 @@ export default async function BookingPage({
                           ) : null
                         }
                       >
-                        <span className="flex min-w-0 items-center gap-2 text-sm">
+                        <span className="flex min-w-0 items-center gap-3 text-sm">
+                          <span className="w-[5.5rem] shrink-0 text-xs text-[var(--casa-muted)] tabular-nums">
+                            <DateText value={p.receivedAt} compact />
+                          </span>
                           <span className="max-w-full shrink-0 truncate font-semibold">{subject}</span>
-                          <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">{paymentWhen(p)}</span>
+                          <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">{paymentHow(p)}</span>
                         </span>
                       </LedgerLine>
                     </li>
@@ -895,7 +949,201 @@ export default async function BookingPage({
                 })}
               />
             ) : null}
+            </div>
+            <LedgerLine
+              className="mt-1 border-t border-ws-line pt-2.5"
+              withAction={ledgerAction}
+              amount={<span className="font-bold text-[var(--casa-success-text)]">{money(booking.paid, booking.currency)}</span>}
+            >
+              <span className="text-sm font-semibold text-[var(--casa-muted)]">{t('Summe Zahlungen', 'Total paid')}</span>
+            </LedgerLine>
           </Card>
+          </div>
+
+          <div className="space-y-4">
+          {dueLetter ? (
+            // What is due now: one click to the letter, written from the booking.
+            <Link
+              href={`/admin/bookings/${booking.id}/letter?kind=${BOOKING_LETTER_KEYS[dueLetter]}`}
+              className="flex items-center gap-3 rounded-2xl bg-[#eef6fd] px-3.5 py-3 ring-1 ring-[#cfe5f7] transition-colors ring-inset hover:bg-[#e3f0fb]"
+            >
+              <LetterKindIcon kind={dueLetter} size="md" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.72rem] font-semibold text-[#065f8c]">{t('Als Nächstes', 'Next')}</span>
+                <span className="block truncate text-[0.88rem] font-bold text-[var(--casa-ink)]">{pick(lang, LETTER_KIND_LABELS[dueLetter])}</span>
+              </span>
+              <span className="text-[#065f8c]">{Icon.chevronRight}</span>
+            </Link>
+          ) : null}
+          {recordFields.length > 0 || booking.notes ? (
+            <Card title={t('Zur Buchung', 'About the booking')} icon={Icon.bookings} tint="ink">
+              {recordFields.length > 0 ? <DetailList items={recordFields} /> : null}
+              {booking.notes ? (
+                // The booking's own note, written in Edit.
+                <blockquote
+                  className={cn(
+                    'max-w-prose border-l-2 border-[#d3dbe6] pl-3.5 text-[0.9rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]',
+                    recordFields.length > 0 && 'mt-4'
+                  )}
+                >
+                  {booking.notes}
+                </blockquote>
+              ) : null}
+            </Card>
+          ) : null}
+
+          {/* When to look at it again, and why (0062; SchoolMan's Wiedervorlage). */}
+          {followUps.open.length || followUps.doneTotal || canEdit ? (
+            <Card
+              title={t('Wiedervorlage', 'Follow-up')}
+              icon={Icon.clock}
+              tint="sun"
+              actions={
+                canEdit ? (
+                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Setzen', 'Set')} title={t('Wiedervorlage', 'Follow-up')} triggerVariant="ghost" size="sm">
+                    <form action={addFollowUpAction} className="space-y-3">
+                      <input type="hidden" name="bookingId" value={booking.id} />
+                      <Field label={t('Am', 'On')} htmlFor="follow-up-day">
+                        <DateFormField id="follow-up-day" name="dueOn" required />
+                      </Field>
+                      <Field label={t('Worum es geht', 'What it is about')} htmlFor="follow-up-reason">
+                        <Input id="follow-up-reason" name="reason" required maxLength={300} />
+                      </Field>
+                      <DialogFooter>
+                        <Button type="submit">{t('Setzen', 'Set')}</Button>
+                      </DialogFooter>
+                    </form>
+                  </FormDialog>
+                ) : undefined
+              }
+            >
+              {followUps.open.length ? (
+                <ul className="-my-1 divide-y divide-ws-line-soft">
+                  {followUps.open.map((f) => {
+                    const due = f.dueOn <= todayInputValue();
+                    return (
+                      <li key={f.id} className="flex items-center justify-between gap-3 py-2">
+                        <span className="min-w-0 text-[0.86rem]">
+                          <span className={cn('font-semibold tabular-nums', due ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
+                            <DateText value={f.dueOn} />
+                          </span>
+                          <span className="block text-[var(--casa-muted)]">{[f.reason, f.createdByName].filter(Boolean).join(' · ')}</span>
+                        </span>
+                        {canEdit ? (
+                          <form action={completeFollowUpAction}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <input type="hidden" name="followUpId" value={f.id} />
+                            <Button type="submit" variant="ghost" size="sm">
+                              {t('Erledigt', 'Done')}
+                            </Button>
+                          </form>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--casa-muted)]">{t('Nichts offen.', 'Nothing open.')}</p>
+              )}
+              {followUps.doneTotal ? (
+                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
+                  {t(`${num(lang, followUps.doneTotal)} erledigt`, `${num(lang, followUps.doneTotal)} done`)}
+                  {followUps.done[0] ? t(`, zuletzt ${followUps.done[0].reason}`, `, last: ${followUps.done[0].reason}`) : ''}
+                </p>
+              ) : null}
+            </Card>
+          ) : null}
+
+          </div>
+        </div>
+      </RecordTabPanel>
+
+      {attendance ? (
+        <RecordTabPanel id="attendance">
+          <div className="max-w-3xl">
+            <Card title={t('Anwesenheit', 'Attendance')} icon={Icon.check} tint="green">
+              <p className="text-sm text-[var(--casa-ink)]">
+                <span className="text-[1.15rem] font-extrabold tabular-nums">{num(lang, Math.round((attendance.present / attendance.days) * 100))} %</span>
+                <span className="ml-2 text-[var(--casa-muted)]">
+                  {t(`${num(lang, attendance.present)} von ${num(lang, attendance.days)} Tagen da`, `there ${num(lang, attendance.present)} of ${num(lang, attendance.days)} days`)}
+                  {attendance.lateCount
+                    ? t(` · ${num(lang, attendance.lateCount)}× zu spät (${num(lang, attendance.lateMinutes)} Min.)`, ` · late ${num(lang, attendance.lateCount)}× (${num(lang, attendance.lateMinutes)} min)`)
+                    : ''}
+                </span>
+              </p>
+              {attendance.absences.length ? (
+                <ul className="mt-3 space-y-1 text-[0.84rem]">
+                  {attendance.absences.map((a) => (
+                    <li key={a.day} className="flex gap-2">
+                      <span className="w-24 shrink-0 tabular-nums text-[var(--casa-muted)]">
+                        <DateText value={a.day} compact />
+                      </span>
+                      <span className="min-w-0 text-[var(--casa-ink)]">
+                        {[
+                          a.absence === 'ill'
+                            ? t('krank', 'ill')
+                            : a.absence === 'excused'
+                              ? t('entschuldigt', 'excused')
+                              : a.absence === 'unexcused'
+                                ? t('unentschuldigt', 'unexcused')
+                                : t('ohne Grund', 'no reason'),
+                          a.sickNote === 'certificate' ? t('Attest', "doctor's note") : a.sickNote === 'self' ? t('eigene Krankmeldung', 'own sick note') : null,
+                          a.comment,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {attendance.absentTotal > attendance.absences.length ? (
+                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
+                  {t(`Die letzten ${num(lang, attendance.absences.length)} von ${num(lang, attendance.absentTotal)} Fehltagen`, `The latest ${num(lang, attendance.absences.length)} of ${num(lang, attendance.absentTotal)} days missed`)}
+                </p>
+              ) : null}
+            </Card>
+          </div>
+        </RecordTabPanel>
+      ) : null}
+
+      <RecordTabPanel id="letters">
+        <Card
+          bleed
+          title={t('Briefe', 'Letters')}
+          icon={Icon.mail}
+          tint="blue"
+          actions={
+            canEdit ? (
+              <Link href={`/admin/bookings/${booking.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                {t('Brief schreiben', 'Write a letter')}
+              </Link>
+            ) : undefined
+          }
+        >
+          {letters.length ? (
+            <LetterList
+              variant="tab"
+              title={t('Briefe', 'Letters')}
+              rows={letters.map((l) => ({
+                id: l.id,
+                kind: l.kind,
+                kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
+                subject: l.subject,
+                note: l.version > 1 ? t(`Fassung ${l.version}`, `version ${l.version}`) : null,
+                by: l.sentByName,
+                sentAt: new Date(l.sentAt).toISOString(),
+              }))}
+            />
+          ) : (
+            <p className="px-4 py-4 text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
+          )}
+        </Card>
+      </RecordTabPanel>
+
+      {hasLedgerExtras ? (
+        <RecordTabPanel id="accounting">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
           {/* The rest of SchoolMan's ledger for this booking, read as it is (0063): its payment plan, its agency's
               commission, what was paid out for it, its invoices. Finance keeps the accounts in DATEV. */}
           {extras.instalments.length ? (
@@ -999,182 +1247,12 @@ export default async function BookingPage({
               </ul>
             </Card>
           ) : null}
-        </div>
+          </div>
+        </RecordTabPanel>
+      ) : null}
 
-        <div className="space-y-4">
-          {recordFields.length > 0 || booking.notes ? (
-            <Card title={t('Zur Buchung', 'About the booking')} icon={Icon.bookings} tint="ink">
-              {recordFields.length > 0 ? <DetailList items={recordFields} /> : null}
-              {booking.notes ? (
-                // The booking's own note, written in Edit.
-                <blockquote
-                  className={cn(
-                    'max-w-prose border-l-2 border-[#d3dbe6] pl-3.5 text-[0.9rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]',
-                    recordFields.length > 0 && 'mt-4'
-                  )}
-                >
-                  {booking.notes}
-                </blockquote>
-              ) : null}
-            </Card>
-          ) : null}
-
-          {/* Attendance as the Klassenbuch recorded it (0064): read here, never written. */}
-          {attendance ? (
-            <Card title={t('Anwesenheit', 'Attendance')} icon={Icon.check} tint="green">
-              <p className="text-sm text-[var(--casa-ink)]">
-                <span className="text-[1.15rem] font-extrabold tabular-nums">{num(lang, Math.round((attendance.present / attendance.days) * 100))} %</span>
-                <span className="ml-2 text-[var(--casa-muted)]">
-                  {t(`${num(lang, attendance.present)} von ${num(lang, attendance.days)} Tagen da`, `there ${num(lang, attendance.present)} of ${num(lang, attendance.days)} days`)}
-                  {attendance.lateCount
-                    ? t(` · ${num(lang, attendance.lateCount)}× zu spät (${num(lang, attendance.lateMinutes)} Min.)`, ` · late ${num(lang, attendance.lateCount)}× (${num(lang, attendance.lateMinutes)} min)`)
-                    : ''}
-                </span>
-              </p>
-              {attendance.absences.length ? (
-                <ul className="mt-3 space-y-1 text-[0.84rem]">
-                  {attendance.absences.map((a) => (
-                    <li key={a.day} className="flex gap-2">
-                      <span className="w-24 shrink-0 tabular-nums text-[var(--casa-muted)]">
-                        <DateText value={a.day} compact />
-                      </span>
-                      <span className="min-w-0 text-[var(--casa-ink)]">
-                        {[
-                          a.absence === 'ill'
-                            ? t('krank', 'ill')
-                            : a.absence === 'excused'
-                              ? t('entschuldigt', 'excused')
-                              : a.absence === 'unexcused'
-                                ? t('unentschuldigt', 'unexcused')
-                                : t('ohne Grund', 'no reason'),
-                          a.sickNote === 'certificate' ? t('Attest', "doctor's note") : a.sickNote === 'self' ? t('eigene Krankmeldung', 'own sick note') : null,
-                          a.comment,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              {attendance.absentTotal > attendance.absences.length ? (
-                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
-                  {t(`Die letzten ${num(lang, attendance.absences.length)} von ${num(lang, attendance.absentTotal)} Fehltagen`, `The latest ${num(lang, attendance.absences.length)} of ${num(lang, attendance.absentTotal)} days missed`)}
-                </p>
-              ) : null}
-            </Card>
-          ) : null}
-
-          {/* When to look at it again, and why (0062; SchoolMan's Wiedervorlage). */}
-          {followUps.open.length || followUps.doneTotal || canEdit ? (
-            <Card
-              title={t('Wiedervorlage', 'Follow-up')}
-              icon={Icon.clock}
-              tint="sun"
-              actions={
-                canEdit ? (
-                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Setzen', 'Set')} title={t('Wiedervorlage', 'Follow-up')} triggerVariant="ghost" size="sm">
-                    <form action={addFollowUpAction} className="space-y-3">
-                      <input type="hidden" name="bookingId" value={booking.id} />
-                      <Field label={t('Am', 'On')} htmlFor="follow-up-day">
-                        <DateFormField id="follow-up-day" name="dueOn" required />
-                      </Field>
-                      <Field label={t('Worum es geht', 'What it is about')} htmlFor="follow-up-reason">
-                        <Input id="follow-up-reason" name="reason" required maxLength={300} />
-                      </Field>
-                      <DialogFooter>
-                        <Button type="submit">{t('Setzen', 'Set')}</Button>
-                      </DialogFooter>
-                    </form>
-                  </FormDialog>
-                ) : undefined
-              }
-            >
-              {followUps.open.length ? (
-                <ul className="-my-1 divide-y divide-ws-line-soft">
-                  {followUps.open.map((f) => {
-                    const due = f.dueOn <= todayInputValue();
-                    return (
-                      <li key={f.id} className="flex items-center justify-between gap-3 py-2">
-                        <span className="min-w-0 text-[0.86rem]">
-                          <span className={cn('font-semibold tabular-nums', due ? 'text-[#9a5b00]' : 'text-[var(--casa-ink)]')}>
-                            <DateText value={f.dueOn} />
-                          </span>
-                          <span className="block text-[var(--casa-muted)]">{[f.reason, f.createdByName].filter(Boolean).join(' · ')}</span>
-                        </span>
-                        {canEdit ? (
-                          <form action={completeFollowUpAction}>
-                            <input type="hidden" name="bookingId" value={booking.id} />
-                            <input type="hidden" name="followUpId" value={f.id} />
-                            <Button type="submit" variant="ghost" size="sm">
-                              {t('Erledigt', 'Done')}
-                            </Button>
-                          </form>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="text-sm text-[var(--casa-muted)]">{t('Nichts offen.', 'Nothing open.')}</p>
-              )}
-              {followUps.doneTotal ? (
-                <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)]">
-                  {t(`${num(lang, followUps.doneTotal)} erledigt`, `${num(lang, followUps.doneTotal)} done`)}
-                  {followUps.done[0] ? t(`, zuletzt ${followUps.done[0].reason}`, `, last: ${followUps.done[0].reason}`) : ''}
-                </p>
-              ) : null}
-            </Card>
-          ) : null}
-
-          {/* The booking's letters: the confirmation and a receipt, and everything sent (docs/LETTERS.md). */}
-          <Card
-            title={t('Briefe', 'Letters')}
-            icon={Icon.mail}
-            tint="blue"
-            actions={
-              canEdit ? (
-                <Link href={`/admin/bookings/${booking.id}/letter`} className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
-                  {t('Brief schreiben', 'Write a letter')}
-                </Link>
-              ) : undefined
-            }
-          >
-            {dueLetter ? (
-              // What is due now: one click to the letter, written from the booking.
-              <Link
-                href={`/admin/bookings/${booking.id}/letter?kind=${BOOKING_LETTER_KEYS[dueLetter]}`}
-                className={cn(
-                  'flex items-center gap-3 rounded-2xl bg-[#eef6fd] px-3 py-2.5 ring-1 ring-[#cfe5f7] transition-colors ring-inset hover:bg-[#e3f0fb]',
-                  letters.length ? 'mb-3' : ''
-                )}
-              >
-                <LetterKindIcon kind={dueLetter} size="md" />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[0.72rem] font-semibold text-[#065f8c]">{t('Als Nächstes', 'Next')}</span>
-                  <span className="block truncate text-[0.88rem] font-bold text-[var(--casa-ink)]">{pick(lang, LETTER_KIND_LABELS[dueLetter])}</span>
-                </span>
-                <span className="text-[#065f8c]">{Icon.chevronRight}</span>
-              </Link>
-            ) : null}
-            {letters.length ? (
-              <LetterList
-                variant="side"
-                title={t('Briefe', 'Letters')}
-                rows={letters.map((l) => ({
-                  id: l.id,
-                  kind: l.kind,
-                  kindLabel: pick(lang, LETTER_KIND_LABELS[l.kind]),
-                  subject: l.subject,
-                  note: l.version > 1 ? t(`Fassung ${l.version}`, `version ${l.version}`) : null,
-                  sentAt: new Date(l.sentAt).toISOString(),
-                }))}
-              />
-            ) : dueLetter ? null : (
-              <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Brief.', 'No letter yet.')}</p>
-            )}
-          </Card>
-
+      <RecordTabPanel id="history">
+        <div className="max-w-3xl">
           <Timeline
             canWrite={canEdit}
             entity="booking"
@@ -1185,7 +1263,7 @@ export default async function BookingPage({
             origin={{ at: booking.createdAt, label: t('Gebucht', 'Booked'), icon: Icon.bookings }}
           />
         </div>
-      </div>
+      </RecordTabPanel>
 
       {canFull ? (
         <RecordFoot>
@@ -1218,6 +1296,6 @@ export default async function BookingPage({
           </form>
         </RecordFoot>
       ) : null}
-    </>
+    </RecordTabs>
   );
 }

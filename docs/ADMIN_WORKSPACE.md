@@ -863,6 +863,22 @@ name, so a person is recognisable down a list; a colleague's stay navy. A list
 without views says what it holds where the tabs would be ("18 students"), and a
 row shows a quiet arrow at its end when pointed at.
 
+### The booking page (2026-10-23)
+
+Rahman: „one of the most important interfaces, for office and finance … the money part should have an
+order … the boxes on the right go down in a never ending way." The booking is a record in tabs (below):
+
+- **Übersicht**: the **Konto**, one statement as finance reads it — the charges in a fixed order (course
+  price, enrolment and exam fees, books, accommodation, deposit, other, discount, cancellation; each
+  kind in the order it was charged), „Summe Kosten"; the payments with the day in its own column, then
+  what, how and the reference, „Summe Zahlungen"; and in the card's foot the balance („Offen",
+  „Guthaben", „Ausgeglichen"). Cancelled charges (a line and its reversal, worth nothing together)
+  fold into „N stornierte Posten". „Posten hinzufügen" and „Zahlung erfassen" sit on the card. Beside
+  it, short: the letter due next, „Zur Buchung" (level, attendance as one line, observation, stay,
+  registration, the booking's note) and the follow-up.
+- **Anwesenheit** (when the Klassenbuch has days), **Briefe**, **Abrechnung** (SchoolMan's payment
+  plan, the agency's commission, payouts and invoices, when there are any) and **Notizen und Verlauf**.
+
 ### A record in tabs (2026-10-16)
 
 Rahman: the person page, and the teacher, staff and organisation pages to come,
