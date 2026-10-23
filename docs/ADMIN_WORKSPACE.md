@@ -2328,9 +2328,17 @@ direct email or email from Outlook", and „offer the option to add the signatur
 the recipients (in groups, ticked or not), the subject and text, `render` (the mail's HTML from the
 inputs — the same function builds the preview and the mail sent) and the server action that sends it.
 
-- **Recipients** in groups with „all" per group, further addresses typed in, and anyone who should get
-  it but has no address on record named. A mail to several people goes as Bcc (often private
-  addresses), the sending mailbox in „An".
+- **Laid out like a mail program (2026-10-23, Rahman: „clean, elegant, properly structured and easy to
+  navigate").** The page's title says what it is („Antwort an Amara Okonkwo", „E-Mail an C1.1 ·
+  Intensivkurs", „Brief per E-Mail an …") with the record linked under it — no „Worum es geht" card.
+  One card to write in: An as name chips (more than three of one group as one chip, „Teilnehmende
+  (14)"; „Auswählen" opens the list with checkboxes; further addresses typed straight into the row),
+  Betreff, Anhang (the PDF), a letter's own salutation shown above the text, the text growing as it is
+  written, the signature switch. The preview („So kommt sie an") beside it, as tall as the mail. A bar
+  at the foot of the screen stays in view: to whom, with or without signature, and the two buttons. On
+  a phone: „Schreiben | Vorschau" tabs and the two buttons stacked. Earlier mails in a fold.
+- **Recipients.** Anyone who should get it but has no address on record is named under „An". A mail to
+  several people goes as Bcc (often private addresses), the sending mailbox in „An".
 - **Signature.** „Signatur anfügen", on by default: the sender's CASA V5 signature exactly as Outlook
   adds it — read from the Outlook add-in's own data (`casa-signaturen.vercel.app/addin/signatures.json`
   and `images.json`, `src/lib/admin/mail-signature.ts`), its pictures sent inline. A colleague without

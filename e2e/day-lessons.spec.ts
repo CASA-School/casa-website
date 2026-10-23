@@ -108,7 +108,7 @@ test.describe('a class from the Tagesplan', () => {
     await expect(page.getByRole('row').filter({ hasText: 'Listentest, Lena' })).toContainText(`lena.${stamp}@example.org`);
     // The mail to the teacher on the workspace's mail screen (2026-10-23): the list in the text.
     await page.getByRole('link', { name: new RegExp(`^E-Mail an ${escape(teachers[0].name)}`) }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('E-Mail schreiben');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Teilnehmerliste an /);
     await expect(page.getByRole('textbox', { name: 'Text' })).toHaveValue(new RegExp(`lena\\.${stamp}@example\\.org`));
     await expect(page.getByRole('button', { name: 'Im Mailprogramm öffnen' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
