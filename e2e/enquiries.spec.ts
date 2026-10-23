@@ -124,7 +124,7 @@ test.describe('enquiries', () => {
 
     // Written in German, so the reply on the mail screen opens with a German greeting.
     await page.getByRole('link', { name: 'Antworten' }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('E-Mail schreiben');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(new RegExp(`^Antwort an ${NAME.first}`));
     await expect(page.getByRole('textbox', { name: 'Text' })).toHaveValue(new RegExp(`^Hallo ${NAME.first},`));
     await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
   });

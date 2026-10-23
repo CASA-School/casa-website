@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { LetterMailComposer } from './composer';
@@ -30,7 +31,20 @@ export default async function LetterMailPage({ searchParams }: { searchParams: P
       <PageHeader
         backHref={back}
         backLabel={t('Zurück', 'Back')}
-        title={single ? t('Brief per E-Mail senden', 'Send the letter by e-mail') : t(`${draft.letters.length} Briefe per E-Mail senden`, `Send ${draft.letters.length} letters by e-mail`)}
+        title={
+          single
+            ? t(`Brief per E-Mail an ${draft.letters[0].recipientName}`, `Letter by e-mail to ${draft.letters[0].recipientName}`)
+            : t(`${draft.letters.length} Briefe per E-Mail`, `${draft.letters.length} letters by e-mail`)
+        }
+        description={
+          single ? (
+            <Link href={`/admin/letters/${draft.letters[0].id}`} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
+              {draft.letters[0].subject}
+            </Link>
+          ) : (
+            draft.variants.map((v) => v.subject).join(' · ')
+          )
+        }
       />
       {params.error ? (
         <p role="alert" className="mb-5 rounded-lg border border-[var(--casa-danger-text)]/30 bg-[var(--casa-danger-text)]/6 px-4 py-3 text-sm text-[var(--casa-danger-text)]">
@@ -40,7 +54,6 @@ export default async function LetterMailPage({ searchParams }: { searchParams: P
       <LetterMailComposer
         draft={draft}
         ids={ids}
-        back={params.back && back === params.back ? back : null}
         from={graphSender()}
         logo={`data:image/png;base64,${LOGO_PNG_BASE64}`}
         sent={sent}
