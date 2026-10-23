@@ -24,7 +24,7 @@ import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { RecordTabLink, RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { dayRange } from '@/components/admin/list';
-import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader } from '@/components/admin/ui';
+import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import {
@@ -32,6 +32,7 @@ import {
   BOOKING_STATUS_TONES,
   bookingLight,
   bookingAttendance,
+  bookingCourses,
   bookingFollowUps,
   bookingLedgerExtras,
   bookingStays,
@@ -41,12 +42,18 @@ import {
   type BookingCharge,
   type ChargeKind,
   type Payment,
+  type PaymentMethod,
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
   storedWords,
 } from '@/lib/admin/bookings';
 import { stayVocabulary } from '@/lib/admin/booking-offer';
+import { SESSION_COLOURS, SESSION_LABELS } from '@/lib/admin/day-plan-labels';
+import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
+import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
+import { commissionTerms, getOrganisation } from '@/lib/admin/organisations';
+import { ORGANISATION_KIND_LABELS } from '@/lib/admin/organisation-labels';
 import { listCourseTypes } from '@/lib/admin/catalogue';
 import { EXAM_OUTCOME_LABELS, EXAM_OVERALL_LABELS, EXAM_PARTS_LABELS, overallOutcome } from '@/lib/admin/exam-parts';
 import { sittingsOf } from '@/lib/admin/exams';
@@ -61,13 +68,32 @@ import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
 import { BOOKING_LETTER_KEYS, LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
 import { suggestBookingLetters } from '@/lib/admin/letters/suggest';
-import { num, pick, wsLocale } from '@/lib/admin/i18n';
+import { num, pick, wsLocale, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
 
 /** The order of the account's charges: the course and its fees, the books, the stay, the deposit, the rest, then what comes off. */
 const CHARGE_ORDER: ChargeKind[] = ['tuition', 'enrolment_fee', 'exam_fee', 'books', 'accommodation', 'deposit', 'other', 'discount', 'cancellation'];
+
+/** How a payment came, as a badge: what was paid at the desk (cash, card) stands out from a transfer. */
+const METHOD_TONES: Record<PaymentMethod, BadgeTone> = {
+  cash: 'positive',
+  card: 'accent',
+  transfer: 'neutral',
+  carryover: 'quiet',
+  agency: 'warning',
+  offset: 'quiet',
+};
+
+/** The weekdays a teacher has a class: „Mo–Mi", or „Mo, Do". */
+function dayRun(dates: readonly string[], lang: WsLang): string {
+  const days = dates.map((d) => weekdayOf(d)).filter((d): d is NonNullable<typeof d> => d !== null);
+  const index = days.map((d) => WEEKDAYS.indexOf(d));
+  const label = (d: (typeof days)[number]) => pick(lang, WEEKDAY_LABELS[d]);
+  const consecutive = index.every((n, i) => i === 0 || n === index[i - 1] + 1);
+  return days.length > 1 && consecutive ? `${label(days[0])}–${label(days[days.length - 1])}` : days.map(label).join(', ');
+}
 
 const money = (n: number, currency: string) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(
@@ -184,7 +210,8 @@ export default async function BookingPage({
   const credit = booking.balance < -0.005 ? -booking.balance : 0;
 
   const exam = booking.exam;
-  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps, extras, attendance] = await Promise.all([
+  const org = booking.payerOrganisation;
+  const [notes, activity, cohorts, courseTypes, targets, levels, letters, sittings, stays, arranged, followUps, extras, attendance, courses, payerOrg, terms] = await Promise.all([
     listNotes('booking', booking.id),
     activityFor('booking', booking.id),
     canEdit && !exam ? listCohortOptions() : Promise.resolve([]),
@@ -198,6 +225,9 @@ export default async function BookingPage({
     bookingFollowUps(booking.id),
     bookingLedgerExtras(booking.id),
     bookingAttendance(booking.id),
+    exam ? Promise.resolve([]) : bookingCourses(booking.id),
+    org ? getOrganisation(org.id) : Promise.resolve(null),
+    org ? commissionTerms(org.id) : Promise.resolve([]),
   ]);
   // The stays as arranged (0056), each in words: when, what kind, where, which room, meals.
   const stayNames = arranged.length ? (stays ?? (await stayVocabulary())) : null;
@@ -252,8 +282,6 @@ export default async function BookingPage({
   const received = booking.payments.filter((p) => !p.voidedAt);
   const voided = booking.payments.filter((p) => p.voidedAt).reverse();
   const voidsPayments = canFull && received.length > 0;
-  // One account, one column for the row menus: the amounts of charges and payments stand under one another.
-  const ledgerAction = (removesCharges && booking.charges.length > 0) || voidsPayments;
   // A reference SchoolMan kept twice, or in both languages on two lines, on one line.
   const paymentReference = (reference: string | null) =>
     reference ? [...new Set(reference.split('\n').map((l) => l.trim()).filter(Boolean))].join(' / ') : null;
@@ -282,6 +310,11 @@ export default async function BookingPage({
       </>
     );
   };
+  // Beside the method's badge: a carry-over's other booking, and the reference.
+  const paymentNote = (p: Payment) => {
+    const reference = paymentReference(p.reference);
+    return p.counterpart ? paymentHow(p) : reference;
+  };
   const paymentWhen = (p: Payment) => (
     <>
       <DateText value={p.receivedAt} compact /> · {paymentHow(p)}
@@ -302,7 +335,6 @@ export default async function BookingPage({
     </span>
   );
   const recordFields = [
-    single && single.courseInstanceId ? { label: t('Niveau', 'Level'), value: levelValue(single) } : null,
     // How often they came, as the Klassenbuch recorded it; the days missed are on their own tab.
     attendance
       ? {
@@ -486,7 +518,7 @@ export default async function BookingPage({
           <li key={line.id} title={reversal ? `${description} · ${chargeWords(reversal).description}` : description}>
             <LedgerLine
               className="min-h-7 py-0.5"
-              withAction={ledgerAction}
+              withAction={removesCharges}
               amount={
                 reversal ? (
                   // Cancelled: the amount it was, struck through; it does not count.
@@ -540,6 +572,8 @@ export default async function BookingPage({
         );
   };
 
+  // The course shown in full: the one running, else the next, else the last.
+  const focusId = (courses.find((c) => c.when === 'running') ?? courses.find((c) => c.when === 'upcoming') ?? courses[courses.length - 1])?.id ?? null;
   // The booking in tabs, as the learner's page (2026-10-23, Rahman: „one of the most important interfaces,
   // for office and finance"): the account first, the rest a click away instead of a column without end.
   const hasLedgerExtras = extras.instalments.length + extras.commissions.length + extras.payouts.length + extras.invoices.length > 0;
@@ -733,61 +767,152 @@ export default async function BookingPage({
         {/* One column on a phone that never grows past the screen: a ledger line shortens its words instead. */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="space-y-4">
-          {booking.periods.length > 1 ? (
-            <Card title={t('Zeiträume', 'Periods')} icon={Icon.calendar} tint="blue">
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {booking.periods.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="min-w-0 text-sm">
-                      <span className="flex items-center gap-2 font-semibold">
-                        <DateText value={p.startDate} /> – <DateText value={p.endDate} />
-                        {p.kind === 'extension' ? <Badge tone="quiet">{t('Verlängerung', 'Extension')}</Badge> : null}
-                      </span>
-                      {p.courseInstanceId ? <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">{levelValue(p)}</span> : null}
-                      <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
-                        {p.courseInstanceId ? (
-                          <Link href={`/admin/catalogue/${p.courseInstanceId}`} className="hover:underline">
-                            {p.cohortLabel}
-                          </Link>
-                        ) : (
-                          <Badge tone="warning">{t('Noch kein Termin', 'No cohort yet')}</Badge>
-                        )}
-                      </span>
-                    </span>
-                    {canFull && booking.periods.length > 1 ? (
-                      <form action={removePeriodAction}>
-                        <input type="hidden" name="bookingId" value={booking.id} />
-                        <input type="hidden" name="periodId" value={p.id} />
-                        <ConfirmSubmit
-                          title={t('Diesen Zeitraum entfernen?', 'Remove these dates?')}
-                          description={t('Der Zeitraum wird aus der Buchung entfernt.', 'The period is removed from the booking.')}
-                          confirmLabel={t('Entfernen', 'Remove')}
-                          variant="ghost"
-                        >
-                          {t('Entfernen', 'Remove')}
-                        </ConfirmSubmit>
-                      </form>
-                    ) : null}
-                  </li>
-                ))}
+          {/* The course they are in (Rahman, 2026-10-23): the class, its part of the day in its colour, who teaches and where. */}
+          {courses.length ? (
+            <Card title={courses.length > 1 ? t('Kurse', 'Courses') : t('Kurs', 'Course')} icon={Icon.catalogue} tint="blue">
+              <ul className="space-y-2.5">
+                {courses.map((c) => {
+                  const focus = c.id === focusId;
+                  const colour = c.session ? SESSION_COLOURS[c.session] : null;
+                  const weeks = teachingWeeks(c.startDate, c.endDate);
+                  return (
+                    <li
+                      key={c.id}
+                      // One course reads as the card's content; several are rows, the one now in full.
+                      className={cn('relative overflow-hidden pl-4', courses.length > 1 && 'rounded-2xl border border-ws-line-soft py-3 pr-4', courses.length > 1 && (focus ? 'bg-white' : 'bg-ws-sunk/40'))}
+                    >
+                      <span aria-hidden="true" className={cn('absolute left-0 w-1 rounded-full', courses.length > 1 ? 'inset-y-0 rounded-none' : 'inset-y-0.5')} style={{ background: colour?.hex ?? '#c3cbd6' }} />
+                      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+                        <div className="min-w-0">
+                          <p className={cn('font-extrabold text-[var(--casa-ink)]', focus ? 'text-[1rem]' : 'text-[0.9rem]')}>
+                            {c.typeName ?? t('Kurs', 'Course')}
+                            {c.levelCode ? ` · ${c.levelCode}` : ''}
+                            {c.number ? <span className="ml-2 text-[0.78rem] font-semibold text-[var(--casa-muted)] tabular-nums">#{c.number}</span> : null}
+                          </p>
+                          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.84rem] text-[var(--casa-ink)]">
+                            {c.session ? (
+                              <span className={cn('rounded-md border px-1.5 py-px text-[0.74rem] font-bold', colour!.block)}>{pick(lang, SESSION_LABELS[c.session])}</span>
+                            ) : null}
+                            {focus && c.week?.times ? <span className="tabular-nums">{c.week.times}</span> : null}
+                            <span className="text-[var(--casa-muted)] tabular-nums">
+                              {dayRange(c.startDate, c.endDate, lang)}
+                              {weeks ? ` · ${weeks === 1 ? t('1 Woche', '1 week') : t(`${weeks} Wochen`, `${weeks} weeks`)}` : ''}
+                              {c.kind === 'extension' ? ` · ${t('Verlängerung', 'Extension')}` : ''}
+                            </span>
+                          </p>
+                        </div>
+                        <Badge tone={c.when === 'running' ? 'positive' : c.when === 'upcoming' ? 'accent' : 'quiet'}>
+                          {c.when === 'running' ? t('Läuft', 'Running') : c.when === 'upcoming' ? t('Kommt', 'Upcoming') : t('Vorbei', 'Over')}
+                        </Badge>
+                      </div>
+                      {focus ? (
+                        <dl className="mt-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[0.86rem]">
+                          <dt className="text-[var(--casa-muted)]">{c.week && c.week.teachers.length > 1 ? t('Lehrkräfte', 'Teachers') : t('Lehrkraft', 'Teacher')}</dt>
+                          <dd className="font-semibold text-[var(--casa-ink)]">
+                            {c.week?.teachers.length
+                              ? c.week.teachers.map((w, i) => (
+                                  <span key={w.name}>
+                                    {i ? ', ' : ''}
+                                    {w.name}
+                                    {c.week!.teachers.length > 1 ? <span className="font-normal text-[var(--casa-muted)]"> ({dayRun(w.days, lang)})</span> : null}
+                                    {w.substitute ? <span className="font-normal text-[#8a5a00]"> · {t('Vertretung', 'cover')}</span> : null}
+                                  </span>
+                                ))
+                              : '—'}
+                          </dd>
+                          <dt className="text-[var(--casa-muted)]">{t('Raum', 'Room')}</dt>
+                          <dd className="font-semibold text-[var(--casa-ink)]">{c.week?.rooms.length ? c.week.rooms.join(', ') : '—'}</dd>
+                          {c.courseInstanceId ? (
+                            <>
+                              <dt className="pt-1 text-[var(--casa-muted)]">{t('Niveau', 'Level')}</dt>
+                              <dd>{levelValue(c)}</dd>
+                            </>
+                          ) : null}
+                        </dl>
+                      ) : null}
+                      {focus && c.courseInstanceId && canAccess(user, 'catalogue') ? (
+                        <Link href={`/admin/catalogue/${c.courseInstanceId}`} className="mt-2.5 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                          {t('Zum Kurs', 'Open the course')} {Icon.chevronRight}
+                        </Link>
+                      ) : null}
+                      {!c.courseId && !c.courseInstanceId ? <Badge tone="warning" className="mt-2">{t('Noch kein Termin', 'No cohort yet')}</Badge> : null}
+                      {canFull && courses.length > 1 ? (
+                        // One of several periods taken off the booking, asked once more.
+                        <form action={removePeriodAction} className="mt-2 flex justify-end">
+                          <input type="hidden" name="bookingId" value={booking.id} />
+                          <input type="hidden" name="periodId" value={c.id} />
+                          <ConfirmSubmit
+                            title={t('Diesen Zeitraum entfernen?', 'Remove these dates?')}
+                            description={t('Der Zeitraum wird aus der Buchung entfernt.', 'The period is removed from the booking.')}
+                            confirmLabel={t('Entfernen', 'Remove')}
+                            variant="ghost"
+                          >
+                            {t('Zeitraum entfernen', 'Remove the dates')}
+                          </ConfirmSubmit>
+                        </form>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
             </Card>
           ) : null}
 
-          {/* The account as finance reads it (2026-10-23): the charges in a fixed order, the payments, the balance. */}
+          {/* The charges in the order finance reads them (2026-10-23): the course, its fees, the books, the stay, the rest. */}
           <Card
-            title={t('Konto', 'Account')}
-            icon={Icon.money}
-            tint="green"
+            title={t('Kosten', 'Charges')}
+            icon={Icon.catalogue}
+            tint="red"
             // The row menus open over the lines below and past the card's foot.
             overflow="visible"
             actions={
-              canEdit && (open || carriesOver) ? (
+              canEdit && open ? (
+                <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
+                  <ChargeForm bookingId={booking.id} />
+                </FormDialog>
+              ) : undefined
+            }
+            footer={
+              <LedgerLine withAction={removesCharges && booking.charges.length > 0} amount={<span className="font-extrabold">{money(booking.charged, booking.currency)}</span>}>
+                <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Gesamt', 'Total')}</span>
+              </LedgerLine>
+            }
+          >
+            {booking.charges.length === 0 ? (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
+            ) : (
+              <div className="-my-2">
+                <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => !r.reversal).map(costRow)}</ul>
+                {costRows.some((r) => r.reversal) ? (
+                  // Cancelled lines count for nothing — the line and its reversal — so they wait folded, one click away.
+                  <details className="group border-t border-ws-line-soft">
+                    <summary className="flex cursor-pointer list-none items-center gap-1.5 py-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
+                      <span className="transition-transform group-open:rotate-90 [&_svg]:size-3.5">{Icon.chevronRight}</span>
+                      {t(`${costRows.filter((r) => r.reversal).length} stornierte Posten`, `${costRows.filter((r) => r.reversal).length} cancelled lines`)}
+                    </summary>
+                    <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => r.reversal).map(costRow)}</ul>
+                  </details>
+                ) : null}
+              </div>
+            )}
+          </Card>
+
+          {/* What has come in: the day, what for, how — at the desk in cash or by card, or by transfer — and the balance. */}
+          <Card
+            title={t('Zahlungen', 'Payments')}
+            icon={Icon.money}
+            tint="green"
+            overflow="visible"
+            actions={
+              canEdit && (open || carriesOver || received.length > 0) ? (
                 <>
-                  {open ? (
-                    <FormDialog icon={Icon.money} tint="green" trigger={t('Posten hinzufügen', 'Add line')} title={t('Kostenposten hinzufügen', 'Add a cost line')} size="sm">
-                      <ChargeForm bookingId={booking.id} />
-                    </FormDialog>
+                  {received.length > 0 ? (
+                    <Link
+                      href={`/admin/bookings/${booking.id}/letter?kind=${BOOKING_LETTER_KEYS.payment_receipt}`}
+                      className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                    >
+                      {t('Empfangsbestätigung', 'Receipt')}
+                    </Link>
                   ) : null}
                   {carriesOver ? (
                     <FormDialog icon={Icon.money} tint="green"
@@ -814,57 +939,36 @@ export default async function BookingPage({
               ) : undefined
             }
             footer={
-              <LedgerLine
-                withAction={ledgerAction}
-                amount={
-                  <span className={cn('text-[1.05rem] font-extrabold', owesMoney(booking.balance) ? 'text-[#9a5b00]' : booking.balance < -0.005 ? 'text-[var(--casa-danger-text)]' : 'text-[#17693a]')}>
-                    {money(Math.abs(booking.balance) < 0.005 ? 0 : Math.abs(booking.balance), booking.currency)}
+              <div className="space-y-1.5">
+                <LedgerLine withAction={voidsPayments || removesCharges} amount={<span className="font-extrabold text-[var(--casa-success-text)]">{money(booking.paid, booking.currency)}</span>}>
+                  <span className="text-sm font-bold text-[var(--casa-muted)]">{t('Eingegangen', 'Received')}</span>
+                </LedgerLine>
+                <LedgerLine
+                  withAction={voidsPayments || removesCharges}
+                  amount={
+                    <span className={cn('font-extrabold', owesMoney(booking.balance) ? 'text-[#9a5b00]' : booking.balance < -0.005 ? 'text-[var(--casa-danger-text)]' : 'text-[#17693a]')}>
+                      {money(Math.abs(booking.balance) < 0.005 ? 0 : Math.abs(booking.balance), booking.currency)}
+                    </span>
+                  }
+                >
+                  <span className="text-sm font-bold text-[var(--casa-ink)]">
+                    {booking.balance > 0.005 ? t('Offen', 'Balance due') : booking.balance < -0.005 ? t('Guthaben', 'Credit') : t('Ausgeglichen', 'Settled')}
                   </span>
-                }
-              >
-                <span className="text-sm font-extrabold text-[var(--casa-ink)]">
-                  {booking.balance > 0.005 ? t('Offen', 'Balance due') : booking.balance < -0.005 ? t('Guthaben', 'Credit') : t('Ausgeglichen', 'Settled')}
-                </span>
-              </LedgerLine>
+                </LedgerLine>
+              </div>
             }
           >
-            <h3 className="text-[0.78rem] font-bold text-[var(--casa-muted)]">{t('Kosten', 'Charges')}</h3>
-            <div className="mt-1.5">
-            {booking.charges.length === 0 ? (
-              <p className="text-sm text-[var(--casa-muted)]">{t('Keine Kostenposten.', 'No cost lines.')}</p>
-            ) : (
-              <>
-                <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => !r.reversal).map(costRow)}</ul>
-                {costRows.some((r) => r.reversal) ? (
-                  // Cancelled lines count for nothing — the line and its reversal — so they wait folded, one click away.
-                  <details className="group border-t border-ws-line-soft">
-                    <summary className="flex cursor-pointer list-none items-center gap-1.5 py-2 text-[0.8rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
-                      <span className="transition-transform group-open:rotate-90 [&_svg]:size-3.5">{Icon.chevronRight}</span>
-                      {t(`${costRows.filter((r) => r.reversal).length} stornierte Posten`, `${costRows.filter((r) => r.reversal).length} cancelled lines`)}
-                    </summary>
-                    <ul className="divide-y divide-ws-line-soft">{costRows.filter((r) => r.reversal).map(costRow)}</ul>
-                  </details>
-                ) : null}
-              </>
-            )}
-            </div>
-            <LedgerLine className="mt-1 border-t border-ws-line pt-2.5" withAction={ledgerAction} amount={<span className="font-bold">{money(booking.charged, booking.currency)}</span>}>
-              <span className="text-sm font-semibold text-[var(--casa-muted)]">{t('Summe Kosten', 'Total charges')}</span>
-            </LedgerLine>
-
-            <h3 className="mt-7 text-[0.78rem] font-bold text-[var(--casa-muted)]">{t('Zahlungen', 'Payments')}</h3>
-            <div className="mt-1.5">
             {received.length === 0 ? (
               <p className="text-sm text-[var(--casa-muted)]">{t('Noch nichts eingegangen.', 'Nothing received yet.')}</p>
             ) : (
-              <ul className="divide-y divide-ws-line-soft">
+              <ul className="-my-2 divide-y divide-ws-line-soft">
                 {received.map((p) => {
                   const subject = storedWords(p.subject, lang);
                   return (
                     <li key={p.id} title={[subject, paymentReference(p.reference), p.recordedByName].filter(Boolean).join(' · ')}>
                       <LedgerLine
                         className="min-h-7 py-0.5"
-                        withAction={ledgerAction}
+                        withAction={voidsPayments}
                         amount={
                           <span className={cn('font-semibold', p.amount < 0 ? 'text-[var(--casa-danger-text)]' : '')}>
                             {money(p.amount, booking.currency)}
@@ -904,8 +1008,13 @@ export default async function BookingPage({
                           <span className="w-[5.5rem] shrink-0 text-xs text-[var(--casa-muted)] tabular-nums">
                             <DateText value={p.receivedAt} compact />
                           </span>
-                          <span className="max-w-full shrink-0 truncate font-semibold">{subject}</span>
-                          <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">{paymentHow(p)}</span>
+                          <span className="min-w-0 truncate font-semibold">{subject}</span>
+                          {p.counterpart ? null : (
+                            <Badge tone={METHOD_TONES[p.method]} className="shrink-0">
+                              {pick(lang, PAYMENT_METHOD_LABELS[p.method])}
+                            </Badge>
+                          )}
+                          <span className="min-w-0 flex-1 truncate text-xs text-[var(--casa-muted)]">{paymentNote(p)}</span>
                         </span>
                       </LedgerLine>
                     </li>
@@ -949,14 +1058,6 @@ export default async function BookingPage({
                 })}
               />
             ) : null}
-            </div>
-            <LedgerLine
-              className="mt-1 border-t border-ws-line pt-2.5"
-              withAction={ledgerAction}
-              amount={<span className="font-bold text-[var(--casa-success-text)]">{money(booking.paid, booking.currency)}</span>}
-            >
-              <span className="text-sm font-semibold text-[var(--casa-muted)]">{t('Summe Zahlungen', 'Total paid')}</span>
-            </LedgerLine>
           </Card>
           </div>
 
@@ -974,6 +1075,59 @@ export default async function BookingPage({
               </span>
               <span className="text-[#065f8c]">{Icon.chevronRight}</span>
             </Link>
+          ) : null}
+          {/* Who sends or pays for the learner — HERE AHEAD, an agency — and what it earns (Rahman, 2026-10-23). */}
+          {org || extras.commissions.length ? (
+            <Card
+              title={payerOrg ? pick(lang, ORGANISATION_KIND_LABELS[payerOrg.kind]) : t('Agentur', 'Agency')}
+              icon={Icon.people}
+              tint="sun"
+            >
+              {org ? (
+                canAccess(user, 'organisations') ? (
+                  <Link href={`/admin/organisations/${org.id}`} className="block text-[0.95rem] leading-snug font-bold text-[var(--fm-navy)] hover:underline">
+                    {org.name}
+                  </Link>
+                ) : (
+                  <p className="text-[0.95rem] leading-snug font-bold text-[var(--casa-ink)]">{org.name}</p>
+                )
+              ) : (
+                <p className="text-[0.95rem] leading-snug font-bold text-[var(--casa-ink)]">{extras.commissions[0]?.agency ?? '—'}</p>
+              )}
+              <dl className="mt-3 grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[0.84rem]">
+                {org ? (
+                  <>
+                    <dt className="text-[var(--casa-muted)]">{t('Rolle', 'Role')}</dt>
+                    <dd className="font-semibold text-[var(--casa-ink)]">{booking.payer === 'self' ? t('Vermittelt', 'Refers the learner') : t('Zahlt die Buchung', 'Pays for the booking')}</dd>
+                  </>
+                ) : null}
+                {terms.length ? (
+                  <>
+                    <dt className="text-[var(--casa-muted)]">{t('Provision', 'Commission')}</dt>
+                    <dd className="font-semibold text-[var(--casa-ink)]">
+                      {terms
+                        .map((c) => `${num(lang, c.percentage)} %${c.chargeType ? ` ${t('auf', 'on')} ${pick(lang, c.chargeType)}` : ''}`)
+                        .join(' · ')}
+                    </dd>
+                  </>
+                ) : null}
+                {extras.commissions.length ? (
+                  <>
+                    <dt className="text-[var(--casa-muted)]">{t('Diese Buchung', 'This booking')}</dt>
+                    <dd className="text-[var(--casa-ink)]">
+                      <span className="font-semibold tabular-nums">{money(extras.commissions.reduce((sum, c) => sum + c.amount, 0), booking.currency)}</span>
+                      <span className="text-[var(--casa-muted)]">
+                        {extras.commissions.every((c) => c.paid === true)
+                          ? t(' · ausgezahlt', ' · paid out')
+                          : extras.commissions.some((c) => c.paid === false)
+                            ? t(' · noch nicht ausgezahlt', ' · not paid out yet')
+                            : ''}
+                      </span>
+                    </dd>
+                  </>
+                ) : null}
+              </dl>
+            </Card>
           ) : null}
           {recordFields.length > 0 || booking.notes ? (
             <Card title={t('Zur Buchung', 'About the booking')} icon={Icon.bookings} tint="ink">

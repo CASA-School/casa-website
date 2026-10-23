@@ -320,22 +320,23 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
   return (
     <form action={recordPaymentAction} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
-      <div className="grid grid-cols-2 items-start gap-3">
-        <Field label={t('Betrag', 'Amount')} htmlFor="pay-amount">
-          <PaymentAmountField id="pay-amount" open={balance} />
-        </Field>
-        <Field label={t('Zahlungsart', 'Method')} htmlFor="pay-method">
-          <Select id="pay-method" name="method" defaultValue="transfer">
-            {(Object.keys(PAYMENT_METHOD_LABELS) as (keyof typeof PAYMENT_METHOD_LABELS)[]).map(
-              (m) => (
-                <option key={m} value={m}>
-                  {pick(lang, PAYMENT_METHOD_LABELS[m])}
-                </option>
-              )
-            )}
-          </Select>
-        </Field>
-      </div>
+      <Field label={t('Betrag', 'Amount')} htmlFor="pay-amount">
+        <PaymentAmountField id="pay-amount" open={balance} />
+      </Field>
+      {/* How it came, one click (Rahman, 2026-10-23): many pay at the desk in cash or by card, others transfer. */}
+      <fieldset>
+        <legend className="mb-1.5 text-[0.8rem] font-semibold text-[var(--casa-ink)]">{t('Zahlungsart', 'Method')}</legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {(['cash', 'card', 'transfer', 'agency'] as const).map((m) => (
+            <label key={m} className="cursor-pointer">
+              <input type="radio" name="method" value={m} required className="peer sr-only" />
+              <span className="flex h-10 items-center justify-center rounded-xl border border-ws-line bg-white px-2 text-[0.86rem] font-semibold text-[var(--casa-ink)] transition-colors peer-checked:border-[var(--fm-navy)] peer-checked:bg-[var(--fm-navy)] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--casa-blue)]/40 hover:bg-ws-sunk peer-checked:hover:bg-[var(--fm-navy)]">
+                {m === 'agency' ? t('Agentur', 'Agency') : pick(lang, PAYMENT_METHOD_LABELS[m])}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <PaymentSubjectField />
       <More heading={t('Datum und Referenz', 'Date and reference')}>
         <div className="grid grid-cols-2 gap-3">
@@ -352,6 +353,10 @@ export async function PaymentForm({ bookingId, balance }: { bookingId: string; b
           </Field>
         </div>
       </More>
+      <label className="flex cursor-pointer items-center gap-2.5 text-[0.86rem] text-[var(--casa-ink)]">
+        <input type="checkbox" name="receipt" value="1" defaultChecked className="size-4 rounded border-ws-line-firm accent-[var(--casa-accent-surface)]" />
+        {t('Danach die Empfangsbestätigung schreiben', 'Then write the receipt')}
+      </label>
       <DialogFooter>
         <Button type="submit">{t('Zahlung erfassen', 'Record payment')}</Button>
       </DialogFooter>

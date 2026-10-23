@@ -264,7 +264,8 @@ export async function recordPaymentAction(formData: FormData): Promise<void> {
     actor
   );
   revalidatePath('/admin/bookings', 'layout');
-  redirect(back);
+  // The payment confirmed in writing at once, when the colleague asked for it: the receipt, then its mail screen.
+  redirect(formData.get('receipt') === '1' && amount! > 0 ? `${back}/letter?kind=receipt` : back);
 }
 
 export async function voidPaymentAction(formData: FormData): Promise<void> {
