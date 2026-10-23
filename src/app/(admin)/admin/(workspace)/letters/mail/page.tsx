@@ -12,7 +12,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * A letter — or a sitting's letters to all — sent by mail (Rahman, 2026-10-23): on the workspace's mail
- * screen, the letter as a PDF, sent directly after a review or opened in Outlook (docs/LETTERS.md
+ * screen, the letter as a PDF, sent directly after a review or opened in the mail program (docs/LETTERS.md
  * §Sending). Seen with the right the letters are seen with, at `edit`; anything else is a 404.
  */
 export default async function LetterMailPage({ searchParams }: { searchParams: Promise<{ ids?: string; back?: string; error?: string; sent?: string; saved?: string }> }) {

@@ -13,8 +13,9 @@ import { cn } from '@/lib/utils';
  * Every mail the workspace sends goes through this screen (Rahman, 2026-10-23: „we should have such an
  * interface always when we send letters or emails through the platform directly"): who gets it, the
  * subject and the text, the sender's signature, and on the right the mail as it will arrive. Two ways out,
- * always both: „In Outlook öffnen" — the mail is copied, its files are downloaded, Outlook opens with
- * recipients and subject, the CASA add-in adds the signature, ⌘V and send from one's own mailbox — or
+ * always both: „Im Mailprogramm öffnen" — the mail is copied, its files are downloaded, the computer's own
+ * mail program (Outlook at CASA, Apple Mail or another) opens with recipients and subject; Outlook's CASA
+ * add-in adds the signature; ⌘V and send from one's own mailbox — or
  * „Direkt senden", which asks once more on a review of everything before the workspace sends it.
  *
  * A mail goes `together` (one mail, to everyone ticked; Bcc for several people) or to `each` recipient on
@@ -47,7 +48,7 @@ export type RenderInput = {
   subject: string;
   text: string;
   signature: string | null;
-  target: 'preview' | 'outlook';
+  target: 'preview' | 'mailapp';
   recipient: ComposerRecipient | null;
   variant: string;
 };
@@ -102,7 +103,7 @@ export function MailComposer({
   /** People who should get it and have no address on record. */
   missing?: string[];
   variants: ComposerVariant[];
-  /** The sender's CASA signature, as Outlook adds it; none when it cannot be had. */
+  /** The sender's CASA signature, as their mail program adds it; none when it cannot be had. */
   signature: { owner: 'own' | 'office'; html: string } | null;
   /** The mailbox the workspace sends from; none where sending is not set up. */
   from: string | null;
@@ -136,8 +137,8 @@ export function MailComposer({
   const [width, setWidth] = useState<'desktop' | 'phone'>('desktop');
   const [previewKey, setPreviewKey] = useState<string | null>(null);
   const [reviewing, setReviewing] = useState(false);
-  const [outlookList, setOutlookList] = useState(false);
-  const [openedInOutlook, setOpenedInOutlook] = useState<ReadonlySet<string>>(new Set());
+  const [mailAppList, setMailAppList] = useState(false);
+  const [openedInMailApp, setOpenedInMailApp] = useState<ReadonlySet<string>>(new Set());
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState<'yes' | 'no' | null>(null);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -183,11 +184,11 @@ export function MailComposer({
     setChosen(next);
   };
 
-  /** Outlook: the mail on the clipboard, its files downloaded, a new message with recipients and subject. */
-  const prepareOutlook = (recipient: ComposerRecipient | null, addresses: readonly string[], ownFiles: readonly ComposerFile[]) => {
+  /** The mail program: the mail on the clipboard, its files downloaded, a new message with recipients and subject. */
+  const prepareMailApp = (recipient: ComposerRecipient | null, addresses: readonly string[], ownFiles: readonly ComposerFile[]) => {
     const v = recipient?.variant ?? variant;
     const text = texts[v] ?? current;
-    const mail = render({ subject: text.subject, text: text.text, signature: null, target: 'outlook', recipient, variant: v });
+    const mail = render({ subject: text.subject, text: text.text, signature: null, target: 'mailapp', recipient, variant: v });
     const plain = new DOMParser().parseFromString(mail, 'text/html').body.innerText;
     const copy =
       typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write
@@ -380,7 +381,7 @@ export function MailComposer({
                   <span className="block text-[0.76rem] text-[var(--casa-muted)]">
                     {signature
                       ? signature.owner === 'own'
-                        ? t('Deine CASA-Signatur, wie in Outlook', 'Your CASA signature, as in Outlook')
+                        ? t('Deine CASA-Signatur, wie in deinen E-Mails', 'Your CASA signature, as in your e-mails')
                         : t('Signatur des Büros (info@)', 'The office’s signature (info@)')
                       : t('Gerade nicht erreichbar', 'Not available just now')}
                   </span>
@@ -402,11 +403,11 @@ export function MailComposer({
                   variant="secondary"
                   size="md"
                   disabled={!filled}
-                  onClick={() => (each ? setOutlookList(true) : prepareOutlook(people[0] ?? null, to, files))}
+                  onClick={() => (each ? setMailAppList(true) : prepareMailApp(people[0] ?? null, to, files))}
                   className="w-full justify-center"
                 >
                   {Icon.external}
-                  {t('In Outlook öffnen', 'Open in Outlook')}
+                  {t('Im Mailprogramm öffnen', 'Open in mail app')}
                 </Button>
                 <Button type="button" variant="primary" size="md" disabled={!filled || !from || sending} onClick={() => setReviewing(true)} className="w-full justify-center">
                   {Icon.mail}
@@ -418,8 +419,8 @@ export function MailComposer({
           {copied === 'yes' && !each ? (
             <p role="status" className="mt-2.5 text-[0.8rem] font-semibold text-[#1e6b34]">
               {files.length
-                ? t(`Text kopiert, PDF geladen · in Outlook mit ${paste} einfügen und das PDF anhängen`, `Text copied, PDF downloaded · paste with ${paste} in Outlook and attach the PDF`)
-                : t(`Text kopiert · in Outlook mit ${paste} einfügen`, `Text copied · paste it in Outlook with ${paste}`)}
+                ? t(`Text kopiert, PDF geladen · im Mailprogramm mit ${paste} einfügen und das PDF anhängen`, `Text copied, PDF downloaded · paste with ${paste} in your mail app and attach the PDF`)
+                : t(`Text kopiert · im Mailprogramm mit ${paste} einfügen`, `Text copied · paste it in your mail app with ${paste}`)}
             </p>
           ) : copied === 'no' ? (
             <p role="alert" className="mt-2.5 text-[0.8rem] font-semibold text-[var(--casa-danger-text)]">
@@ -576,17 +577,17 @@ export function MailComposer({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={outlookList} onOpenChange={setOutlookList}>
+      <Dialog open={mailAppList} onOpenChange={setMailAppList}>
         <DialogContent className={dialogPanel('md')} overlayClassName={DIALOG_OVERLAY} closeLabel={t('Schließen', 'Close')}>
           <div className="px-6 pt-6">
-            <DialogTitle className="text-[1.04rem] font-extrabold text-[var(--casa-ink)]">{t('In Outlook öffnen', 'Open in Outlook')}</DialogTitle>
+            <DialogTitle className="text-[1.04rem] font-extrabold text-[var(--casa-ink)]">{t('Im Mailprogramm öffnen', 'Open in mail app')}</DialogTitle>
             <DialogDescription className="mt-1 text-[0.84rem] text-[var(--casa-muted)]">
               {t(`Eine E-Mail je Person · Text mit ${paste} einfügen, PDF anhängen`, `One e-mail per person · paste the text with ${paste}, attach the PDF`)}
             </DialogDescription>
           </div>
           <ul className="mx-6 mt-4 mb-6 max-h-[24rem] divide-y divide-ws-line-soft overflow-y-auto rounded-2xl border border-ws-line">
             {people.map((r) => {
-              const done = openedInOutlook.has(keyOf(r));
+              const done = openedInMailApp.has(keyOf(r));
               return (
                 <li key={keyOf(r)} className="flex items-center gap-3 px-3.5 py-2.5">
                   <span className="min-w-0 flex-1">
@@ -598,8 +599,8 @@ export function MailComposer({
                     variant={done ? 'ghost' : 'secondary'}
                     size="sm"
                     onClick={() => {
-                      prepareOutlook(r, [r.email], r.file ? [r.file] : []);
-                      setOpenedInOutlook(new Set(openedInOutlook).add(keyOf(r)));
+                      prepareMailApp(r, [r.email], r.file ? [r.file] : []);
+                      setOpenedInMailApp(new Set(openedInMailApp).add(keyOf(r)));
                     }}
                   >
                     {done ? Icon.check : Icon.external}

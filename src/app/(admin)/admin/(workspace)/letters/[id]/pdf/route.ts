@@ -8,7 +8,7 @@ import { letterModule } from '@/lib/admin/letters/module';
 import { getSentLetter } from '@/lib/admin/letters/repo';
 
 /**
- * One letter as a PDF, as it went out — to look at beside the mail, and to attach in Outlook. A route
+ * One letter as a PDF, as it went out — to look at beside the mail, and to attach in the mail program. A route
  * handler, so it checks for itself what the workspace's layouts check for a page (CLAUDE.md, rule 7):
  * signed in, and holding the right the letter is seen with. A 404 otherwise, which does not confirm that
  * the letter exists.

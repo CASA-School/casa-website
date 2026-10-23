@@ -157,7 +157,7 @@ test.describe('offers', () => {
     // The version is kept, and the mail screen opens with the letter as a PDF (2026-10-23).
     await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1&back=/);
     await expect(page.getByRole('heading', { name: 'Send the letter by e-mail' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Open in Outlook' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Open in mail app' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Send directly' })).toBeVisible();
 
     const { rows } = await client.query<{ status: string; versions: string; subject: string }>(

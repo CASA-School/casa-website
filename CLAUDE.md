@@ -518,7 +518,7 @@ is still valid.
   the teachers' mail with the test codes — is composed on `MailComposer`
   (`src/components/admin/mail/mail-composer.tsx`): recipients, subject, text, the sender's
   CASA signature (the Outlook add-in's own, `src/lib/admin/mail-signature.ts`), a live preview,
-  and always two ways out — „In Outlook öffnen" and „Direkt senden" after a review dialog.
+  and always two ways out — „Im Mailprogramm öffnen" and „Direkt senden" after a review dialog.
   Read docs/ADMIN_WORKSPACE.md §Mail before adding another. Every other "Reply" is still a
   `mailto:`, and there is no emailed password reset: each colleague changes their own on
   Your account (their name at the foot of the sidebar), an owner or admin resets a forgotten
