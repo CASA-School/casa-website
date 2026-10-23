@@ -640,7 +640,7 @@ export async function duplicateOffer(id: string, actor: StaffUser): Promise<stri
 
 // ------------------------------------------------------------- sending
 
-export type SendResult = { ok: true } | { ok: false; error: Bilingual };
+export type SendResult = { ok: true; letterId: string } | { ok: false; error: Bilingual };
 
 async function nameOf(client: PoolClient, sql: string, value: string): Promise<string | null> {
   const { rows } = await client.query<{ name: string }>(sql, [value]);
@@ -681,7 +681,7 @@ export async function markSent(id: string, actor: StaffUser): Promise<SendResult
     });
 
     await writeLines(client, id, priced.lines);
-    await issueLetter(
+    const letterId = await issueLetter(
       client,
       {
         letter,
@@ -716,7 +716,7 @@ export async function markSent(id: string, actor: StaffUser): Promise<SendResult
         );
       }
     }
-    return { ok: true };
+    return { ok: true, letterId };
   });
 }
 

@@ -80,7 +80,8 @@ export async function sendOfferAction(formData: FormData) {
   if (!result.ok) redirect(`/admin/offers/${id}/letter?error=${encodeURIComponent(pick(lang, result.error))}`);
   await logActivity({ actor, entity: 'offer', entityId: id, action: 'offer_sent' });
   revalidatePath(`/admin/offers/${id}`);
-  redirect(`/admin/offers/${id}?ok=sent`);
+  // The version is kept as it goes out; the mail screen sends it (docs/LETTERS.md §Sending).
+  redirect(`/admin/letters/mail?ids=${result.letterId}&saved=1&back=${encodeURIComponent(`/admin/offers/${id}`)}`);
 }
 
 const DecisionSchema = z.object({

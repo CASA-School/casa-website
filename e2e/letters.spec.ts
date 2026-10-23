@@ -107,8 +107,16 @@ test.describe('letters', () => {
     await expect(sheet).toContainText(/Bitte überweise den offenen Betrag von 740,00\s€/);
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
 
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     await expect(page.getByRole('status')).toContainText('Gespeichert');
+    // The mail screen: both ways out, and the letter as a PDF printed by the server's browser (0085).
+    await expect(page.getByRole('button', { name: 'In Outlook öffnen' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Direkt senden' })).toBeVisible();
+    const letterId = new URL(page.url()).searchParams.get('ids')!;
+    const pdf = await page.request.get(`/admin/letters/${letterId}/pdf`);
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()['content-type']).toBe('application/pdf');
+    expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
     const { rows } = await client.query<{ kind: string; version: number }>(`SELECT kind, version FROM letters WHERE booking_id = $1`, [bookingId]);
     expect(rows).toEqual([{ kind: 'booking_confirmation', version: 1 }]);
 
@@ -125,7 +133,7 @@ test.describe('letters', () => {
     await page.getByRole('link', { name: 'Zahlungserinnerung' }).click();
     await expect(page.locator('article').first()).toContainText(/Für deine Buchung ist noch ein Betrag von 740,00\s€ offen/);
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1 ORDER BY sent_at`, [bookingId]);
     expect(rows.map((r) => r.kind)).toEqual(['booking_confirmation', 'payment_reminder']);
   });
@@ -134,7 +142,7 @@ test.describe('letters', () => {
     await page.goto(`/admin/catalogue/waitlist/${entryId}/letter?kind=place_free`);
     await expect(page.locator('article').first()).toContainText('ein Platz ist frei');
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     const { rows } = await client.query<{ status: string }>(`SELECT status FROM waitlist_entries WHERE id = $1`, [entryId]);
     expect(rows[0].status).toBe('offered');
 
@@ -149,7 +157,7 @@ test.describe('letters', () => {
     await expect(sheet).toContainText(/Buchung Nr\. B-\d{4}-\d{4}/);
     await expect(sheet).toContainText(/Noch offen\s*740,00\s€/);
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     const { rows } = await client.query<{ booking_id: string | null }>(`SELECT booking_id FROM letters WHERE person_id = $1 AND kind = 'learner_confirmation'`, [personId]);
     expect(rows).toEqual([{ booking_id: null }]);
   });
@@ -160,7 +168,7 @@ test.describe('letters', () => {
     await expect(sheet).toContainText('Lieber Omar,');
     await expect(sheet).toContainText(/Anzahlung von \d+,00\s€/);
     await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
-    await expect(page).toHaveURL(/\/admin\/letters\/[0-9a-f-]{36}\?sent=1$/);
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1$/);
     const { rows } = await client.query<{ kind: string; status: string }>(
       `SELECT l.kind, r.status::text AS status FROM letters l JOIN course_registrations r ON r.id = l.registration_id WHERE r.id = $1`,
       [registrationId]

@@ -227,6 +227,29 @@ show the exam where a course's would be, and the reminder's deadline is the exam
 writes the three waiting-list letters with the sitting; „no place this time" names the next sitting
 of the same exam. The confirmation of several bookings lists an exam booking with its day.
 
+## Sending (2026-10-23, migration 0085)
+
+Rahman: every letter the workspace makes goes out through the workspace's mail screen, the letter as a PDF
+(docs/ADMIN_WORKSPACE.md §Mail). „Als gesendet speichern" on a booking's, a learner's, the waiting
+list's or a registration's letter, „Senden" on an offer, and a sitting's letters to all now lead to
+`/admin/letters/mail?ids=…`; a saved letter's page offers „Per E-Mail an …". The `mailto:` buttons are
+gone.
+
+- **The PDF** is the letter exactly as „Drucken / PDF" prints it: the server's own headless Chromium
+  (`playwright-core`, installed in the image with its system libraries) opens `/admin/letters/[id]` on
+  `admin.localhost` inside the container with a three-minute session of the colleague who sends, and
+  prints it with the page's print styles (`src/lib/admin/letter-pdf.ts`). `/admin/letters/[id]/pdf`
+  serves it to look at and to attach in Outlook — a route handler, so it checks sign-in and the letter's
+  right itself.
+- **The mail** (`letters/cover-mail.ts`): the letter's title as heading, the letter's own salutation, a
+  short text in the letter's language („im Anhang findest du unser Schreiben „…" als PDF."), the PDF
+  named, the sender's signature. Several letters: one mail each, to that letter's recipient, with their
+  own letter; a language switch when they are in German and English.
+- **The right** is the letter's (`letters/module.ts`: offers, registrations, else bookings) at `edit`,
+  checked on the page, first in the action, and again for every letter sent.
+- **Kept**: each mail sent directly in `letter_mails` (recipients, subject, text, signature, who, when),
+  and the letter's `sent_via = 'email'`. At most 60 letters in one sending (`MAX_LETTERS`).
+
 ## Adding a kind of letter
 
 1. Migration: add the kind to both `CHECK`s, its record's column to `letters` (a foreign key) and to
@@ -239,7 +262,5 @@ of the same exam. The confirmation of several bookings lists an exam booking wit
 
 ## Open
 
-- Letters are emailed by hand (`mailto:` and the PDF). Sending through Microsoft Graph from the
-  workspace would let `letters` record that it went, not only that it was marked.
 - A list of every letter to an organisation (`letters_organisation_idx`) belongs on its page once
   organisations have one; a learner's is their „Briefe" tab.

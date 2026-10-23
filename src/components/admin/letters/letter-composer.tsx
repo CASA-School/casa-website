@@ -291,7 +291,6 @@ export function LetterComposer({
 
   const name = [person.firstName, person.lastName].filter(Boolean).join(' ');
   const print = () => printLetter(`${subjectLine(letter)} ${name}`);
-  const mail = person.email ? `mailto:${person.email}?subject=${encodeURIComponent(subjectLine(letter))}` : null;
   const addresses = [
     ...(person.home ? [{ key: 'home' as const, label: t('Zuhause', 'Home') }] : []),
     ...(person.local ? [{ key: 'local' as const, label: t('In Bremen', 'In Bremen') }] : []),
@@ -541,11 +540,9 @@ export function LetterComposer({
                 </div>
               </Choice>
             ) : null}
-            {mail ? (
+            {person.email ? (
               <Choice label={t('E-Mail', 'Email')}>
-                <a href={mail} className="truncate text-[0.84rem] font-semibold text-[var(--casa-accent-text)] hover:underline">
-                  {person.email}
-                </a>
+                <span className="truncate text-[0.84rem] font-semibold text-[var(--casa-ink)]">{person.email}</span>
               </Choice>
             ) : null}
           </section>

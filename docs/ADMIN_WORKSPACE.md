@@ -2348,7 +2348,12 @@ inputs — the same function builds the preview and the mail sent) and the serve
 - What must exist first (the test codes) replaces the two buttons until it does.
 - Each mail as sent is kept (`entry_test_mails` for the teachers' mail) and listed under „Gesendet".
 
-When letters go out by mail from the workspace, they use this screen.
+**Where it is used.** The teachers' mail with the test codes (docs/ENTRY_TEST.md), and every letter
+(docs/LETTERS.md §Sending): a booking's, a learner's, the waiting list's and a registration's after
+„Als gesendet speichern", an offer's „Senden", a saved letter's „Per E-Mail an …", and a sitting's
+letters to all. A letter travels as a PDF printed by the server's own browser exactly as „Drucken / PDF"
+prints it; several letters go one mail each, to their own recipients, with a language switch when they
+are in German and English. No workspace screen offers a `mailto:` for a letter any more.
 
 ## Copy on screens — labels, not explanations
 

@@ -514,7 +514,8 @@ is still valid.
   CVs are all personal data, none of it deleted on a schedule. A period needs a
   named privacy owner at CASA.
 - **Mail from the workspace goes through one screen (2026-10-23).** A mail the workspace
-  sends — so far the teachers' mail with the test codes — is composed on `MailComposer`
+  sends — every letter (as a PDF printed by the server's headless Chromium, `letter-pdf.ts`) and
+  the teachers' mail with the test codes — is composed on `MailComposer`
   (`src/components/admin/mail/mail-composer.tsx`): recipients, subject, text, the sender's
   CASA signature (the Outlook add-in's own, `src/lib/admin/mail-signature.ts`), a live preview,
   and always two ways out — „In Outlook öffnen" and „Direkt senden" after a review dialog.

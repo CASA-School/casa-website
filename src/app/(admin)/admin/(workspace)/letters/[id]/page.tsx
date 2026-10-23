@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
 
 import { SentLetter } from '@/components/admin/letters/sent-letter';
+import { canAccess } from '@/lib/admin/access';
 import { queryFirst } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
 import { wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { letterModule } from '@/lib/admin/letters/module';
 import { getSentLetter } from '@/lib/admin/letters/repo';
 
 /**
@@ -16,7 +18,7 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const found = await getSentLetter(id);
   if (!found) notFound();
-  await requireModule(found.kind === 'offer' ? 'offers' : found.kind.startsWith('registration_') ? 'registrations' : 'bookings');
+  const user = await requireModule(letterModule(found.kind));
   const { t, lang } = await getI18n();
 
   let back = { href: found.personId ? `/admin/people/${found.personId}?tab=letters` : '/admin', label: t('Zur Person', 'Back to the person') };
@@ -48,6 +50,7 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
       }
       back={back}
       justSent={sent === '1'}
+      mailHref={canAccess(user, letterModule(found.kind), 'edit') ? `/admin/letters/mail?ids=${found.id}` : null}
     />
   );
 }

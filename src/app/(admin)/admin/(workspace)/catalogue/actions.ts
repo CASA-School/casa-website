@@ -291,7 +291,7 @@ export async function issueWaitlistLetterAction(formData: FormData): Promise<voi
   const result = await issueWaitlistLetter(entryId, kind as WaitlistLetterKind, choices, actor);
   if (!result.ok) fail(back, pick(lang, result.reason));
   revalidatePath('/admin', 'layout');
-  redirect(`/admin/letters/${result.letterId}?sent=1`);
+  redirect(`/admin/letters/mail?ids=${result.letterId}&saved=1`);
 }
 
 // ------------------------------------------------------------------ a course start

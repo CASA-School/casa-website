@@ -197,6 +197,23 @@ export async function openSession(staffUserId: string, userAgent: string | null)
 }
 
 /**
+ * A session of three minutes for the server's own browser, which opens a letter as the colleague who sends
+ * it and prints it to a PDF (src/lib/admin/letter-pdf.ts); closed as soon as the PDF exists.
+ */
+export async function openRenderSession(staffUserId: string): Promise<string> {
+  const token = randomBytes(32).toString('base64url');
+  await query(
+    `INSERT INTO staff_sessions (staff_user_id, token_hash, expires_at, user_agent) VALUES ($1, $2, $3, 'letter-pdf')`,
+    [staffUserId, hashToken(token), new Date(Date.now() + 3 * 60 * 1000)]
+  );
+  return token;
+}
+
+export async function closeRenderSession(token: string): Promise<void> {
+  await query(`DELETE FROM staff_sessions WHERE token_hash = $1`, [hashToken(token)]).catch(() => {});
+}
+
+/**
  * The account a Microsoft sign-in belongs to.
  *
  * First by the directory object id the account was linked to; else by the

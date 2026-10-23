@@ -12,7 +12,7 @@ import { signatureFor } from './mail-signature';
 import { teacherMailHtml, type TeacherMailTest } from '@/lib/entry-test/teacher-mail';
 import { ENTRY_TESTS } from '@/lib/entry-test/tests';
 import { LOGO_CONTENT_ID } from '@/lib/notifications/casa-logo';
-import { graphSender, sendGraphMail } from '@/lib/notifications/graph-mail.server';
+import { graphSender, sendGraphMail, type GraphAttachment } from '@/lib/notifications/graph-mail.server';
 import { qrPng } from '@/lib/qr-png';
 
 /**
@@ -208,7 +208,7 @@ export async function sendTeacherMail(input: { day: string; subject: string; int
       subject,
       html,
       replyTo: actor.email ? [{ emailAddress: { address: actor.email, name: actor.name } }] : undefined,
-      attachments: draft.tests.map((x) => ({
+      attachments: draft.tests.map((x): GraphAttachment => ({
         name: `QR-Code ${x.title}.png`,
         contentType: 'image/png',
         contentId: `qr-${x.key}`,

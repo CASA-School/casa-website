@@ -151,12 +151,15 @@ test.describe('offers', () => {
     await saved(page);
     await expect(letter).toContainText('German and culture in Bremen');
 
+    const id = page.url().split('/offers/')[1].split('/')[0];
     await page.getByRole('button', { name: /^Send/ }).click();
-    await page.getByRole('button', { name: 'Mark as sent' }).click();
-    await expect(page).toHaveURL(/ok=sent/);
-    await expect(page.getByText(/· Sent$/)).toBeVisible();
+    await page.getByRole('button', { name: 'Save and send …' }).click();
+    // The version is kept, and the mail screen opens with the letter as a PDF (2026-10-23).
+    await expect(page).toHaveURL(/\/admin\/letters\/mail\?ids=[0-9a-f-]{36}&saved=1&back=/);
+    await expect(page.getByRole('heading', { name: 'Send the letter by e-mail' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Open in Outlook' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send directly' })).toBeVisible();
 
-    const id = page.url().split('/').pop()!.split('?')[0];
     const { rows } = await client.query<{ status: string; versions: string; subject: string }>(
       `SELECT o.status, (SELECT count(*) FROM letters WHERE offer_id = o.id) AS versions,
               (SELECT subject FROM letters WHERE offer_id = o.id) AS subject

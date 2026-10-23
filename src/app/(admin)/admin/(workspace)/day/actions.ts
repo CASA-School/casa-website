@@ -248,8 +248,8 @@ export async function sendTeacherMailAction(formData: FormData): Promise<void> {
   const result = await sendTeacherMail(
     {
       day,
-      subject: String(formData.get('subject') ?? ''),
-      intro: String(formData.get('intro') ?? ''),
+      subject: String(formData.get('subject.main') ?? ''),
+      intro: String(formData.get('intro.main') ?? ''),
       emails: formData.getAll('email').map(String),
       signature: formData.get('signature') === '1',
     },

@@ -98,20 +98,9 @@ export function OfferToolbarActions({
   );
 }
 
-function mailto(email: string, letter: Letter) {
-  const body =
-    letter.language === 'de'
-      ? `${letter.salutation}\n\nim Anhang findest du unser Angebot.\n\n${letter.signOff}\n${letter.signature.join('\n')}`
-      : `${letter.salutation}\n\nPlease find our offer attached.\n\n${letter.signOff}\n${letter.signature.join('\n')}`;
-  // The address goes in as it is: it passed the email check, and an encoded
-  // `@` is something not every mail client reads back.
-  return `mailto:${email.trim()}?subject=${encodeURIComponent(subjectLine(letter))}&body=${encodeURIComponent(body)}`;
-}
-
 /**
- * Send. The workspace sends no email of its own (docs/ADMIN_WORKSPACE.md), so
- * this is the three things a colleague does — save the PDF, write the email,
- * mark it sent — in one dialog, and only the last one writes.
+ * Send: this version is kept as it goes out, and the mail screen opens with the letter as a PDF — sent
+ * directly after a review, or opened in Outlook (docs/LETTERS.md §Sending). Printing stays one click away.
  */
 export function SendButton({
   id,
@@ -154,37 +143,20 @@ export function SendButton({
           <DialogDescription className="mt-1 text-sm">{subjectLine(letter)}</DialogDescription>
           <form action={sendOfferAction} className={ui.form} style={{ marginTop: 18 }}>
             <input type="hidden" name="id" value={id} />
-            <ol className={ui.steps}>
-              <li>
-                <b>1</b>
-                <span>{t('Brief als PDF speichern', 'Save the letter as a PDF')}</span>
-                <button type="button" className={`${ui.btn} ${ui.btnSm}`} onClick={onPrint}>
-                  {t('Drucken / PDF', 'Print / PDF')}
-                </button>
-              </li>
-              <li>
-                <b>2</b>
-                <span>{email ? t(`Per E-Mail an ${email} schicken`, `Email it to ${email}`) : t('Per E-Mail schicken', 'Email it')}</span>
-                {email ? (
-                  <a className={`${ui.btn} ${ui.btnSm}`} href={mailto(email, letter)}>
-                    {t('E-Mail schreiben', 'Write email')}
-                  </a>
-                ) : (
-                  <span />
-                )}
-              </li>
-              <li>
-                <b>3</b>
-                <span>{t('Als gesendet markieren. Diese Fassung wird so aufbewahrt, wie sie ist.', 'Mark it as sent. This version is kept as it is.')}</span>
-                <span />
-              </li>
-            </ol>
+            <p className="text-sm">
+              {email
+                ? t(`Diese Fassung wird so aufbewahrt, wie sie ist. Danach geht sie als PDF an ${email}.`, `This version is kept as it is. Then it goes to ${email} as a PDF.`)
+                : t('Diese Fassung wird so aufbewahrt, wie sie ist. Danach geht sie als PDF hinaus.', 'This version is kept as it is. Then it goes out as a PDF.')}
+            </p>
             <div className={ui.foot}>
+              <button type="button" className={ui.btn} onClick={onPrint}>
+                {t('Drucken / PDF', 'Print / PDF')}
+              </button>
               <button type="button" className={ui.btn} onClick={() => setOpen(false)}>
                 {t('Abbrechen', 'Cancel')}
               </button>
               <button type="submit" className={ui.primary} disabled={busy}>
-                {t('Als gesendet markieren', 'Mark as sent')}
+                {t('Speichern und senden …', 'Save and send …')}
               </button>
             </div>
           </form>

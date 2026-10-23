@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { openEntryTestsAction, sendTeacherMailAction } from '../../actions';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
-import { MailComposer } from '@/components/admin/mail/mail-composer';
+import { MailComposer, type RenderInput } from '@/components/admin/mail/mail-composer';
 import { Button, ButtonLink, Card } from '@/components/admin/ui';
 import type { TeacherMailDraft } from '@/lib/admin/entry-test-mail';
 import { SESSION_LABELS } from '@/lib/admin/day-plan-labels';
@@ -38,7 +38,7 @@ export function TeacherMailComposer({
   const last = draft.sent[0];
 
   const render = useCallback(
-    ({ subject, text, signature, target }: { subject: string; text: string; signature: string | null; target: 'preview' | 'outlook' }) =>
+    ({ subject, text, signature, target }: RenderInput) =>
       teacherMailHtml({
         subject,
         heading: draft.heading,
@@ -128,8 +128,7 @@ export function TeacherMailComposer({
         chosen: !r.optional,
       }))}
       missing={draft.missing}
-      subject={draft.subject}
-      text={draft.intro}
+      variants={[{ key: 'main', label: 'Deutsch', subject: draft.subject, text: draft.intro }]}
       signature={draft.signature}
       from={from}
       replyTo={draft.replyTo}
@@ -137,7 +136,7 @@ export function TeacherMailComposer({
       action={sendTeacherMailAction}
       hidden={{ day: draft.day }}
       blocker={blocker}
-      attachments={t(`${draft.tests.length} ${draft.tests.length === 1 ? 'QR-Code' : 'QR-Codes'}`, `${draft.tests.length} QR ${draft.tests.length === 1 ? 'code' : 'codes'}`)}
+      inText={t(`${draft.tests.length} ${draft.tests.length === 1 ? 'QR-Code' : 'QR-Codes'}`, `${draft.tests.length} QR ${draft.tests.length === 1 ? 'code' : 'codes'}`)}
       sentNotice={sent && last ? t(`Gesendet an ${last.recipients.length} Empfänger · ${last.when}`, `Sent to ${last.recipients.length} recipients · ${last.when}`) : null}
       history={draft.sent.map((m) => ({
         id: m.id,
