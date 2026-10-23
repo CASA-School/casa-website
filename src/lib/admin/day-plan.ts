@@ -164,7 +164,13 @@ export async function taskColleagues(): Promise<{ id: string; name: string }[]> 
 
 // ---------------------------------------------------------------- lessons
 
-export type DayLearner = { personId: string; name: string; email: string | null };
+export type DayLearner = {
+  personId: string;
+  name: string;
+  email: string | null;
+  /** The book lines of the booking they are in the class with: handed out or not yet (0087). */
+  books: { id: string; label: string; handedOut: boolean }[];
+};
 
 export type DayLesson = {
   id: string;
@@ -272,14 +278,25 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
   );
   const courseIds = [...new Set(rows.map((r) => r.course_id))];
   const learners = courseIds.length
-    ? await query<{ course_id: string; group_index: number | null; person_id: string; name: string; email: string | null }>(
-        `SELECT bp.course_id, bp.group_index, p.id AS person_id, concat_ws(' ', p.first_name, p.last_name) AS name,
+    ? await query<{ course_id: string; group_index: number | null; person_id: string; booking_id: string; name: string; email: string | null }>(
+        `SELECT bp.course_id, bp.group_index, p.id AS person_id, b.id AS booking_id, concat_ws(' ', p.first_name, p.last_name) AS name,
                 (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
            FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
           WHERE bp.course_id = ANY($1::uuid[]) AND bp.start_date <= $2::date AND bp.end_date >= $2::date
             AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
           ORDER BY p.last_name, p.first_name`,
         [courseIds, day]
+      )
+    : [];
+  // The books of those bookings: lines charged and not taken back (a negative book line of the same amount).
+  const bookLines = learners.length
+    ? await query<{ id: string; booking_id: string; description: string; handed_out: boolean }>(
+        `SELECT c.id, c.booking_id, c.description, c.handed_out
+           FROM booking_charges c
+          WHERE c.booking_id = ANY($1::uuid[]) AND c.kind = 'books' AND c.amount > 0
+            AND NOT EXISTS (SELECT 1 FROM booking_charges r WHERE r.booking_id = c.booking_id AND r.kind = 'books' AND r.amount = -c.amount)
+          ORDER BY c.created_at`,
+        [[...new Set(learners.map((l) => l.booking_id))]]
       )
     : [];
   const week = courseIds.length
@@ -307,12 +324,28 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
         [day]
       )
     : [];
+  // A booking for two levels has a book line for each („Bücher · Netzwerk neu A2.1", „… A2.2"); in the
+  // A2.1 class, the A2.1 books are the ones handed out — when the lines name their level.
+  const ofLevel = <T extends { label: string }>(books: T[], level: string | null) => {
+    if (!level) return books;
+    const named = new RegExp(`(^|[^\\w+.])${level.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\w+.])`);
+    const mine = books.filter((b) => named.test(b.label));
+    return mine.length ? mine : books;
+  };
   const lessons = rows.map((r) => {
     const own = learners.filter((l) => l.course_id === r.course_id && (l.group_index === null || l.group_index === r.group_index));
     const seen = new Set<string>();
     const people = own
       .filter((l) => (seen.has(l.person_id) ? false : (seen.add(l.person_id), true)))
-      .map((l) => ({ personId: l.person_id, name: l.name, email: l.email }));
+      .map((l) => ({
+        personId: l.person_id,
+        name: l.name,
+        email: l.email,
+        books: ofLevel(
+          bookLines.filter((c) => c.booking_id === l.booking_id).map((c) => ({ id: c.id, label: c.description, handedOut: c.handed_out })),
+          r.level_code
+        ),
+      }));
     return {
       id: r.id,
       courseId: r.course_id,

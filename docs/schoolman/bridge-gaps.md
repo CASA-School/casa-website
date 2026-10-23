@@ -154,6 +154,7 @@ charges (268).
 | `PaymentIn._ID_Instalment` | 1,045 · 221 | Which instalment a payment paid | useful later. "Paid" on the instalment comes across. |
 | `PaymentIn._ID_StaffSchool` | 50,336 · 18,870 (41 values) | Unknown: the receiving account or cash box, or the colleague. To confirm (money.md). | **ask finance.** It may be the key to matching with DATEV. |
 | `CostDetail._ID_Course` | 48,156 · 17,501 | Which course or period a charge belongs to. It matters on bookings with several periods. | useful later |
+| `CostDetail._ID_ProductDelivered` | in use (1 / 2) | Books handed out: red until the learner has them, green after | **across since 0087** (`booking_charges.handed_out`) |
 | `CostDetail._ID_BookReference` | 33,080 · 12,031 (41 books) | Which book a book charge is for. The line's label comes across; the link to materials and orders does not. | useful later (book stock and orders) |
 | `CostDetail._ID_CostDetailReferenceComment`, `_ID_CancellationSet` | 14,715 · 4,915 / 32,857 · 9,192 | A standard sub-label of the charge, and a cancellation-set flag *(?)* | leave in SchoolMan until confirmed |
 | `PaymentOut.ZStartDate`/`ZEndDate`, `_ID_BankAccount`, `_ID_MethodPayment`, `_ID_Person` | 1,276 · 1,112 / 3,342 · 2,659 / 3,954 · 1,748 / 5,589 · 2,107 | For rent to a host: the period it covers, the account, the method and the payee | useful later (finance) |

@@ -9,12 +9,14 @@ import {
   deleteBookingAction,
   removeChargeAction,
   removePeriodAction,
+  setBooksHandedOutAction,
   voidPaymentAction,
 } from '../actions';
 import { BookingColour } from '../booking-colour';
 import { CarryOverForm, ChargeForm, EditBookingForm, ExamChangeForm, ExtendBookingForm, PaymentForm, PeriodLevelForm } from '../booking-forms';
 import { RecordFoot } from '../record-foot';
 import { RowMenu } from '../row-menu';
+import { BooksToggle } from '@/components/admin/books-mark';
 import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -730,6 +732,19 @@ export default async function BookingPage({
                           {/* The kind only when the line's own words do not already say it. */}
                           {kind ? <span className="min-w-0 truncate text-xs text-[var(--casa-muted)]">· {kind}</span> : null}
                           {reversal ? <Badge tone="quiet" className="shrink-0">{t('Storniert', 'Cancelled')}</Badge> : null}
+                          {line.books && !reversal && line.amount > 0 && booking.status !== 'cancelled' ? (
+                            <BooksToggle
+                              key={`${line.id}:${line.books.handedOut}`}
+                              line={{
+                                id: line.id,
+                                label: description,
+                                handedOut: line.books.handedOut,
+                                detail: line.books.handedOut && line.books.at ? [line.books.at.toLocaleDateString(wsLocale(lang), { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' }), line.books.by].filter(Boolean).join(' · ') : null,
+                              }}
+                              onSet={setBooksHandedOutAction}
+                              canEdit={canEdit}
+                            />
+                          ) : null}
                         </span>
                       </LedgerLine>
                     </li>

@@ -73,6 +73,21 @@ test.describe('booking colours', () => {
     ]);
   });
 
+  test('the books: red until handed out at the desk, green after, and back', async ({ page }) => {
+    const { rows } = await client.query<{ id: string }>(
+      `INSERT INTO booking_charges (booking_id, kind, description, amount) VALUES ($1, 'books', 'Bücher · Netzwerk neu A2.1', 26.99) RETURNING id`,
+      [bookingId]
+    );
+    await page.goto(`/admin/bookings/${bookingId}`);
+    await page.getByRole('button', { name: 'Bücher · Netzwerk neu A2.1: nicht ausgegeben' }).click();
+    await expect(page.getByRole('button', { name: 'Bücher · Netzwerk neu A2.1: ausgegeben' })).toBeVisible();
+    await expect.poll(async () => (await client.query<{ handed_out: boolean }>(`SELECT handed_out FROM booking_charges WHERE id = $1`, [rows[0].id])).rows[0].handed_out).toBe(true);
+    await page.reload();
+    await page.getByRole('button', { name: 'Bücher · Netzwerk neu A2.1: ausgegeben' }).click();
+    await expect.poll(async () => (await client.query<{ handed_out: boolean }>(`SELECT handed_out FROM booking_charges WHERE id = $1`, [rows[0].id])).rows[0].handed_out).toBe(false);
+    await client.query(`DELETE FROM booking_charges WHERE id = $1`, [rows[0].id]);
+  });
+
   test('grey until paid, yellow under observation, green when all is in, red when cancelled', async ({ page }) => {
     const light = page.locator('[data-light]').first();
 
