@@ -96,16 +96,19 @@ test.describe('carry-over', () => {
     await expect(light).toHaveAttribute('data-light', 'unclear');
     await expect(light).toContainText('680,00 € offen');
     await expect(payments).toContainText('Guthaben übertragen');
+    await page.getByRole('tab', { name: /^Notizen und Verlauf/ }).click();
     await expect(page.getByText('hat 260,00 € Guthaben von einer anderen Buchung übertragen')).toBeVisible();
+    await page.getByRole('tab', { name: /^Übersicht/ }).click();
 
     // Voided here, voided there, from the line's row menu: the credit is back on the first booking.
-    await payments.getByRole('button', { name: /^Aktionen: / }).click();
+    // The account is one card now (2026-10-23): the payment's row menu, by its amount.
+    await payments.getByRole('button', { name: /^Aktionen: .*260,00 €$/ }).click();
     await payments.getByRole('button', { name: 'Stornieren' }).click();
     await dialog.getByRole('button', { name: 'Stornieren' }).click();
     await expect(light).toContainText('Offen');
     await expect(light).toContainText('940,00 €');
     // The voided line leaves the card for the side panel.
-    await expect(payments.getByRole('button', { name: /^Aktionen: / })).toHaveCount(0);
+    await expect(payments.getByRole('button', { name: /^Aktionen: .*260,00 €$/ })).toHaveCount(0);
     await expect(payments.getByRole('button', { name: /^Stornierte Zahlungen/ })).toBeVisible();
     await page.goto(`/admin/bookings/${sourceId}`);
     await expect(payments.getByRole('button', { name: 'Guthaben übertragen', exact: true })).toBeVisible();

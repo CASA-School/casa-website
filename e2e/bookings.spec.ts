@@ -100,7 +100,10 @@ test.describe('booking colours', () => {
     await page.getByRole('button', { name: /^Farbe: Offen/ }).click();
     await page.getByRole('dialog', { name: 'Farbe der Buchung' }).getByRole('button', { name: 'Unter Beobachtung' }).click();
     await expect(light).toHaveAttribute('data-light', 'watch');
+    // The history is on its own tab (2026-10-23); the account stays the first.
+    await page.getByRole('tab', { name: /^Notizen und Verlauf/ }).click();
     await expect(page.getByText('hat die Buchung unter Beobachtung gestellt')).toBeVisible();
+    await page.getByRole('tab', { name: /^Übersicht/ }).click();
 
     // Found by its number, which stands beside the course.
     const number = (await client.query<{ number: string }>(`SELECT number FROM bookings WHERE id = $1`, [bookingId])).rows[0].number;

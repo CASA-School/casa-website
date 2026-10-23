@@ -121,6 +121,8 @@ test.describe('letters', () => {
     expect(rows).toEqual([{ kind: 'booking_confirmation', version: 1 }]);
 
     await page.goto(`/admin/bookings/${bookingId}`);
+    // The booking's letters are on their own tab (2026-10-23).
+    await page.getByRole('tab', { name: /^Briefe/ }).click();
     const letters = page.getByRole('heading', { name: 'Briefe' }).locator('xpath=ancestor::section[1]');
     await expect(letters).toContainText('Buchungsbestätigung');
   });
