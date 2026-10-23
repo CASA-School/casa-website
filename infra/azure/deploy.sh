@@ -80,7 +80,9 @@ if az containerapp show -n "$APP" -g "$WEBSITE_RG" >/dev/null 2>&1; then
     rm -f "$MIGLOG"
   fi
   echo "==> updating $APP"
-  az containerapp update -n "$APP" -g "$WEBSITE_RG" --image "$IMAGE" -o none
+  # 1 vCPU / 2 GiB (2026-10-23): letters are printed as PDFs by Chromium inside the
+  # container, and 1 GiB already peaked at 1,004 MB without it.
+  az containerapp update -n "$APP" -g "$WEBSITE_RG" --image "$IMAGE" --cpu 1.0 --memory 2.0Gi -o none
 else
   echo "==> creating $APP"
   ENV_ID="$(az containerapp env show -n "$ENV_NAME" -g "$PLATFORM_RG" --query id -o tsv)"
@@ -92,7 +94,7 @@ else
     --registry-server "${ACR}.azurecr.io" --registry-identity "$IDENTITY_ID" \
     --user-assigned "$IDENTITY_ID" \
     --target-port 3000 --ingress external --transport auto \
-    --min-replicas 1 --max-replicas 2 --cpu 0.5 --memory 1.0Gi \
+    --min-replicas 1 --max-replicas 2 --cpu 1.0 --memory 2.0Gi \
     --env-vars NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 -o none
 fi
 
