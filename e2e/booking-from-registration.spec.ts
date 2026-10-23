@@ -129,6 +129,9 @@ test.describe('a booking from a registration', () => {
     await expect(dialog.getByRole('textbox', { name: 'Betrag' })).not.toHaveValue('');
     await dialog.getByRole('textbox', { name: 'Betrag' }).fill('200');
     await dialog.getByRole('radio', { name: 'Anzahlung' }).check();
+    // How it came, one click (2026-10-23): at the desk in cash, by card, or by transfer.
+    await dialog.getByText('Überweisung', { exact: true }).click();
+    await dialog.getByRole('checkbox', { name: 'Danach die Empfangsbestätigung schreiben' }).uncheck();
     await dialog.getByRole('button', { name: 'Zahlung erfassen' }).click();
     await expect(page.locator('[data-light]').first()).toContainText('Anzahlung erhalten');
 

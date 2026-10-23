@@ -866,18 +866,27 @@ row shows a quiet arrow at its end when pointed at.
 ### The booking page (2026-10-23)
 
 Rahman: „one of the most important interfaces, for office and finance … the money part should have an
-order … the boxes on the right go down in a never ending way." The booking is a record in tabs (below):
+order … the boxes on the right go down in a never ending way", then: „keep the course price and payments
+in separate boxes", „some students pay at CASA with card or cash", „the course they are currently
+doing … who is the teacher … morning, afternoon or evening … colour coding", and „the agency or company
+… that gets commission". The booking is a record in tabs (below):
 
-- **Übersicht**: the **Konto**, one statement as finance reads it — the charges in a fixed order (course
-  price, enrolment and exam fees, books, accommodation, deposit, other, discount, cancellation; each
-  kind in the order it was charged), „Summe Kosten"; the payments with the day in its own column, then
-  what, how and the reference, „Summe Zahlungen"; and in the card's foot the balance („Offen",
-  „Guthaben", „Ausgeglichen"). Cancelled charges (a line and its reversal, worth nothing together)
-  fold into „N stornierte Posten". „Posten hinzufügen" and „Zahlung erfassen" sit on the card. Beside
-  it, short: the letter due next, „Zur Buchung" (level, attendance as one line, observation, stay,
-  registration, the booking's note) and the follow-up.
-- **Anwesenheit** (when the Klassenbuch has days), **Briefe**, **Abrechnung** (SchoolMan's payment
-  plan, the agency's commission, payouts and invoices, when there are any) and **Notizen und Verlauf**.
+- **Übersicht**, left: **Kurs** — the class each period is in (`bookingCourses`): course type, level, group
+  number, its part of the day as a coloured badge and a coloured edge (the colours of the day: green
+  Vormittag, blue Nachmittag, purple Abend; a course without a stored session takes it from its times),
+  the times, the dates and weeks, „Läuft / Kommt / Vorbei"; for the one running (else the next, else the
+  last) the week's teachers with their days, the room, the level (changed here) and „Zum Kurs".
+  **Kosten** — the charges in a fixed order (course price, enrolment and exam fees, books red/green,
+  accommodation, deposit, other, discount, cancellation), cancelled ones folded, „Gesamt". **Zahlungen** —
+  the day in its own column, what for, how as a badge (Bar and Karte, paid at the desk, stand out from
+  Überweisung), the reference; „Eingegangen" and „Offen / Guthaben / Ausgeglichen"; „Empfangsbestätigung"
+  on the card. Recording a payment asks the method in one click and goes on to the receipt (on by default).
+- **Übersicht**, right: the letter due next; the **agency or company** (its kind as the title, linked, its
+  role — pays the booking or refers the learner —, its commission terms, and this booking's commission
+  and whether it is paid out); „Zur Buchung" (attendance, observation, stay, registration, the note); the
+  follow-up.
+- **Anwesenheit**, **Briefe**, **Abrechnung** (SchoolMan's payment plan, commission, payouts, invoices) and
+  **Notizen und Verlauf** as tabs.
 
 ### A record in tabs (2026-10-16)
 

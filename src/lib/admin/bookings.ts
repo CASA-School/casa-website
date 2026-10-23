@@ -12,7 +12,7 @@ import { bookedLevelLabel, PAYMENT_SUBJECTS } from './booking-levels';
 import { pick, type Bilingual, type WsLang } from './i18n';
 import { isUuid } from './ids';
 import { courseSessionSql } from './course-session';
-import { isSession, type Session } from './day-plan-labels';
+import { isSession, sessionAt, type Session } from './day-plan-labels';
 import { owesMoney, owesSql } from './open-money';
 
 /**
@@ -1658,6 +1658,111 @@ export type AttendanceSummary = {
   absences: { day: string; absence: 'ill' | 'excused' | 'unexcused' | null; sickNote: 'certificate' | 'self' | null; comment: string | null }[];
   absentTotal: number;
 };
+
+/** A period of a booking as the class it is in: the course, its part of the day, and that class's week. */
+export type BookingCoursePeriod = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  kind: 'initial' | 'extension';
+  courseId: string | null;
+  courseInstanceId: string | null;
+  typeName: string | null;
+  levelCode: string | null;
+  session: Session | null;
+  /** SchoolMan's number of the group: „#4771". */
+  number: string | null;
+  /** Where it stands today. */
+  when: 'running' | 'upcoming' | 'past';
+  /** The class's week — this one while it runs, else its first or its last: the times, the room, who teaches. */
+  week: { times: string | null; rooms: string[]; teachers: { name: string; days: string[]; substitute: boolean }[] } | null;
+};
+
+/**
+ * The course a booking is in, period by period (Rahman, 2026-10-23: „the course that they are currently
+ * doing … who is the teacher, type of course and morning or afternoon or evening"): read from the class
+ * the period is placed in (`booking_periods.course_id`, `group_index`) and its lesson days.
+ */
+export async function bookingCourses(bookingId: string): Promise<BookingCoursePeriod[]> {
+  const rows = await query<{
+    id: string;
+    start_date: string;
+    end_date: string;
+    kind: 'initial' | 'extension';
+    course_id: string | null;
+    group_index: number | null;
+    course_instance_id: string | null;
+    type_name: string | null;
+    level_code: string | null;
+    session: string | null;
+    number: string | null;
+  }>(
+    `SELECT bp.id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.kind,
+            bp.course_id, bp.group_index, coalesce(c.course_instance_id, bp.course_instance_id) AS course_instance_id,
+            coalesce(nullif(trim(ty.name_de), ''), ty.name) AS type_name, coalesce(bp.level_code, c.level_code) AS level_code,
+            coalesce(c.session, i.session) AS session,
+            coalesce(c.filemaker_group_ids[coalesce(bp.group_index, 1)], c.filemaker_course_id) AS number
+       FROM booking_periods bp
+       LEFT JOIN courses c ON c.id = bp.course_id
+       LEFT JOIN course_instances i ON i.id = coalesce(c.course_instance_id, bp.course_instance_id)
+       LEFT JOIN course_types ty ON ty.id = i.course_type_id
+      WHERE bp.booking_id = $1
+      ORDER BY bp.start_date`,
+    [bookingId]
+  );
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' });
+  return Promise.all(
+    rows.map(async (r) => {
+      const when = r.end_date < today ? 'past' : r.start_date > today ? 'upcoming' : 'running';
+      let week: BookingCoursePeriod['week'] = null;
+      if (r.course_id) {
+        // The week shown: this one while it runs, the first before it starts, the last once it is over.
+        const ref = when === 'running' ? today : when === 'upcoming' ? r.start_date : r.end_date;
+        const days = await query<{ on_date: string; times: string | null; room: string | null; teacher: string | null; is_substitute: boolean }>(
+          `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS times,
+                  coalesce(r.nickname, r.name) AS room, coalesce(sm.short_name, trim(concat_ws(' ', tp.first_name, tp.last_name))) AS teacher, d.is_substitute
+             FROM course_days d
+             JOIN course_day_times t ON t.id = d.id
+             LEFT JOIN rooms r ON r.id = d.room_id
+             LEFT JOIN staff_members sm ON sm.id = d.teacher_id LEFT JOIN people tp ON tp.id = sm.person_id
+            WHERE d.course_id = $1 AND d.group_index = coalesce($2::int, (SELECT min(g.group_index) FROM course_days g WHERE g.course_id = $1))
+              AND NOT d.cancelled AND d.on_date BETWEEN date_trunc('week', $3::date)::date AND date_trunc('week', $3::date)::date + 6
+              AND d.on_date BETWEEN $4::date AND $5::date
+            ORDER BY d.on_date`,
+          [r.course_id, r.group_index, ref, r.start_date, r.end_date]
+        );
+        if (days.length) {
+          const teachers = new Map<string, { name: string; days: string[]; substitute: boolean }>();
+          for (const d of days) {
+            if (!d.teacher) continue;
+            const seen = teachers.get(d.teacher) ?? { name: d.teacher, days: [], substitute: true };
+            teachers.set(d.teacher, { ...seen, days: [...seen.days, d.on_date], substitute: seen.substitute && d.is_substitute });
+          }
+          week = {
+            times: days.find((d) => d.times)?.times ?? null,
+            rooms: [...new Set(days.map((d) => d.room).filter((room): room is string => Boolean(room)))],
+            teachers: [...teachers.values()],
+          };
+        }
+      }
+      return {
+        id: r.id,
+        startDate: r.start_date,
+        endDate: r.end_date,
+        kind: r.kind,
+        courseId: r.course_id,
+        courseInstanceId: r.course_instance_id,
+        typeName: r.type_name,
+        levelCode: r.level_code,
+        // A course without its part of the day stored: the class's own times say it.
+        session: isSession(r.session) ? r.session : sessionAt(week?.times),
+        number: r.number,
+        when,
+        week,
+      } satisfies BookingCoursePeriod;
+    })
+  );
+}
 
 /** A booking's attendance as the Klassenbuch recorded it: the rate, lateness, and the latest absences. */
 export async function bookingAttendance(bookingId: string): Promise<AttendanceSummary | null> {
