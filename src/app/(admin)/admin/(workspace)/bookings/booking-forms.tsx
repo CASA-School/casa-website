@@ -23,7 +23,6 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { EXAM_PARTS, EXAM_PARTS_LABELS } from '@/lib/admin/exam-parts';
 import { freeSeats, type ExamSitting } from '@/lib/admin/exams';
 import {
-  addChargeAction,
   carryOverAction,
   changeExamAction,
   extendBookingAction,
@@ -33,6 +32,8 @@ import {
 } from './actions';
 import { DialogFooter } from '@/components/admin/dialogs';
 import { PaymentAmountField, PaymentSubjectField } from './payment-fields';
+import { chargeSuggestions } from '@/lib/admin/booking-offer';
+import { ChargeFormFields } from './charge-form';
 
 /**
  * The booking forms, rendered inside dialogs.
@@ -276,42 +277,17 @@ export async function ExtendBookingForm({
   );
 }
 
-export async function ChargeForm({ bookingId }: { bookingId: string }) {
-  const { t, lang } = await getI18n();
+/** A cost line, from the price list in one click or typed (charge-form.tsx); the booking's levels put their books first. */
+export async function ChargeForm({ bookingId, levels, charged }: { bookingId: string; levels: readonly string[]; charged: readonly string[] }) {
+  const [{ lang }, suggestions] = await Promise.all([getI18n(), chargeSuggestions(levels)]);
+  const order: (keyof typeof CHARGE_KIND_LABELS)[] = ['books', 'enrolment_fee', 'exam_fee', 'accommodation', 'deposit', 'tuition', 'discount', 'cancellation', 'other'];
   return (
-    <form action={addChargeAction} className="space-y-3">
-      <input type="hidden" name="bookingId" value={bookingId} />
-      <div className="grid grid-cols-[auto_1fr] gap-3">
-        <Field label={t('Art', 'Kind')} htmlFor="charge-kind">
-          <Select id="charge-kind" name="kind" defaultValue="other">
-            {(Object.keys(CHARGE_KIND_LABELS) as (keyof typeof CHARGE_KIND_LABELS)[]).map((k) => (
-              <option key={k} value={k}>
-                {pick(lang, CHARGE_KIND_LABELS[k])}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field label={t('Beschreibung', 'Description')} htmlFor="charge-desc">
-          <Input id="charge-desc" name="description" required maxLength={160} />
-        </Field>
-      </div>
-      <Field
-        label={t('Betrag', 'Amount')}
-        hint={t('negativ für eine Erstattung oder Stornierung', 'negative for a refund or cancellation')}
-        htmlFor="charge-amount"
-      >
-        <Input
-          id="charge-amount"
-          name="amount"
-          inputMode="decimal"
-          required
-          className="text-right"
-        />
-      </Field>
-      <DialogFooter>
-        <Button type="submit">{t('Posten hinzufügen', 'Add line')}</Button>
-      </DialogFooter>
-    </form>
+    <ChargeFormFields
+      bookingId={bookingId}
+      kinds={order.map((k) => ({ value: k, label: pick(lang, CHARGE_KIND_LABELS[k]) }))}
+      suggestions={suggestions}
+      charged={charged.map((c) => c.toLocaleLowerCase('de'))}
+    />
   );
 }
 

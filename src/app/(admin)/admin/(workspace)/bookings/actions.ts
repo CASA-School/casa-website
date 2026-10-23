@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import {
   addCharge,
   addFollowUp,
+  bookingCourses,
   BOOKING_STATUSES,
   BookingRefused,
   cancelBooking,
@@ -17,6 +18,7 @@ import {
   deleteBooking,
   endObservation,
   extendBooking,
+  getBooking,
   isLevelCode,
   observeBooking,
   recordPayment,
@@ -35,7 +37,7 @@ import {
 import { bildungszeitClasses, bildungszeitTypeId } from '@/lib/admin/bildungszeit';
 import { setBooksHandedOut } from '@/lib/admin/books';
 import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
-import { accommodationCharge, bookedPeriod, priceSelection, stayVocabulary, type BookingSelection } from '@/lib/admin/booking-offer';
+import { accommodationCharge, bookedPeriod, expectedCharges, priceSelection, stayVocabulary, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
 import type { StaffUser } from '@/lib/admin/auth';
 import { isExamParts, ratedParts } from '@/lib/admin/exam-parts';
@@ -215,7 +217,48 @@ export async function addChargeAction(formData: FormData): Promise<void> {
   if (amount === null || amount === 0) fail(back, t('Ein Betrag ist nötig.', 'An amount is required.'));
   const description = text(formData, 'description', 160);
   if (!description) fail(back, t('Schreib dazu, wofür der Posten ist.', 'Say what the line is for.'));
-  await addCharge(bookingId, { kind: kind as ChargeKind, description, amount }, actor);
+  // A line taken from the price list keeps its charge type and the rate it came from.
+  const chargeTypeCode = String(formData.get('chargeTypeCode') ?? '');
+  const rateId = String(formData.get('rateId') ?? '');
+  await addCharge(
+    bookingId,
+    {
+      kind: kind as ChargeKind,
+      description,
+      amount,
+      chargeTypeCode: /^[a-z_]{2,40}$/.test(chargeTypeCode) ? chargeTypeCode : null,
+      rateId: UUID.test(rateId) ? rateId : null,
+    },
+    actor
+  );
+  revalidatePath('/admin/bookings', 'layout');
+  redirect(back);
+}
+
+/**
+ * The lines the price list says a booking is missing, added in one click (2026-10-23): each one asked for,
+ * or all. Worked out again here from the booking — the page sends only which ones — so the amounts are the
+ * price list's.
+ */
+export async function addSuggestedChargesAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const bookingId = id(formData, 'bookingId');
+  const back = `/admin/bookings/${bookingId}`;
+  const keys = new Set(formData.getAll('key').map(String));
+  const booking = await getBooking(bookingId);
+  if (!booking || booking.status === 'cancelled' || booking.exam) redirect(back);
+  const courses = await bookingCourses(bookingId);
+  const expected = await expectedCharges({
+    bookingId,
+    personId: booking.personId,
+    courseTypeId: booking.courseTypeId,
+    periods: courses.map((c) => ({ courseInstanceId: c.courseInstanceId, startDate: c.startDate, endDate: c.endDate, levelCode: c.levelCode })),
+    levelRange: booking.levelRange,
+    charges: booking.charges,
+  });
+  for (const line of expected.filter((e) => keys.has(e.key))) {
+    await addCharge(bookingId, { kind: line.kind, description: line.description, amount: line.amount, chargeTypeCode: line.chargeTypeCode, rateId: line.rateId }, actor);
+  }
   revalidatePath('/admin/bookings', 'layout');
   redirect(back);
 }

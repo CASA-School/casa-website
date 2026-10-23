@@ -594,3 +594,186 @@ const formatIso = (iso: string) =>
     month: '2-digit',
     year: '2-digit',
   });
+
+// ------------------------------------------------------------------ a cost line from the price list
+
+/** A line a colleague can add to a booking with one click: its words and its price from the price list. */
+export type ChargeSuggestion = {
+  key: string;
+  kind: 'tuition' | 'books' | 'enrolment_fee' | 'exam_fee' | 'accommodation' | 'deposit' | 'discount' | 'cancellation' | 'other';
+  description: string;
+  amount: number;
+  chargeTypeCode: string | null;
+  rateId: string | null;
+  /** A book of the booking's own level: first in the list. */
+  ownLevel: boolean;
+};
+
+const SUGGESTED_KIND: Record<string, ChargeSuggestion['kind']> = {
+  enrolment_fee: 'enrolment_fee',
+  exam_fee: 'exam_fee',
+  deposit: 'deposit',
+  discount: 'discount',
+  cancellation: 'cancellation',
+  books: 'books',
+  teaching_material: 'books',
+};
+
+/**
+ * What „Posten hinzufügen" offers (Rahman, 2026-10-23: „we can't waste time on typing everything"): every
+ * book with its price, the booking's level first; every fee the price list in force prices (enrolment,
+ * deposit, the accommodation's placement fee …); every exam with its fee. A click fills the line.
+ */
+export async function chargeSuggestions(levels: readonly string[]): Promise<ChargeSuggestion[]> {
+  const [books, fees, exams] = await Promise.all([
+    query<{ id: string; title: string; level_code: string | null; rate_id: string; amount: string }>(
+      `SELECT m.id, m.title, m.level_code, r.id AS rate_id, r.amount
+         FROM materials m
+         JOIN rates r ON r.id = applicable_rate('material'::rate_scope, current_date, NULL, NULL, m.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+        WHERE m.is_active
+        ORDER BY level_rank(m.level_code), m.level_code NULLS LAST, m.part NULLS LAST, m.title`
+    ),
+    query<{ code: string; category_code: string | null; name_de: string | null; name_en: string; rate_id: string; amount: string }>(
+      `SELECT ct.code, ct.category_code, ct.name_de, ct.name_en, r.id AS rate_id, r.amount
+         FROM charge_types ct
+         JOIN rates r ON r.id = applicable_rate('charge_type'::rate_scope, current_date, NULL, NULL, NULL, NULL, NULL, NULL, ct.code, NULL, NULL, NULL, NULL)
+        WHERE ct.is_active AND ct.code NOT IN ('tuition', 'accommodation_rent', 'carry_over', 'refund')
+        ORDER BY ct.position`
+    ),
+    query<{ id: string; name: string; rate_id: string; amount: string }>(
+      `SELECT e.id, e.name, r.id AS rate_id, r.amount
+         FROM exam_types e
+         JOIN rates r ON r.id = applicable_rate('exam_type'::rate_scope, current_date, NULL, e.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2::smallint)
+        WHERE e.is_active
+        ORDER BY e.name`
+    ),
+  ]);
+  const own = new Set(levels);
+  return [
+    ...books
+      .map((b) => ({
+        key: `book:${b.id}`,
+        kind: 'books' as const,
+        description: `Bücher · ${b.title}`,
+        amount: Number(b.amount),
+        chargeTypeCode: 'books',
+        rateId: b.rate_id,
+        ownLevel: Boolean(b.level_code && own.has(b.level_code)),
+      }))
+      .sort((a, b) => Number(b.ownLevel) - Number(a.ownLevel)),
+    ...fees.map((f) => ({
+      key: `fee:${f.code}`,
+      kind: SUGGESTED_KIND[f.code] ?? (f.category_code === 'accommodation' ? ('accommodation' as const) : ('other' as const)),
+      description: f.name_de?.trim() || f.name_en,
+      amount: Number(f.amount),
+      chargeTypeCode: f.code,
+      rateId: f.rate_id,
+      ownLevel: false,
+    })),
+    ...exams.map((e) => ({
+      key: `exam:${e.id}`,
+      kind: 'exam_fee' as const,
+      description: e.name,
+      amount: Number(e.amount),
+      chargeTypeCode: 'exam_fee',
+      rateId: e.rate_id,
+      ownLevel: false,
+    })),
+  ];
+}
+
+/** The learner and every record merged into them: one person's bookings, wherever SchoolMan kept them. */
+const SAME_PERSON = `SELECT p.id FROM people p, (SELECT coalesce(merged_into, id) AS id FROM people WHERE id = $1) me WHERE p.id = me.id OR p.merged_into = me.id`;
+
+/**
+ * What a booking should cost and does not yet show (Rahman, 2026-10-23: „if someone is booked in a course,
+ * it should already predict the book and the course price, and whether the registration fee is necessary,
+ * since every student pays it only once"): the course price of each period when the booking has none; the
+ * book of each level booked, unless the learner bought it already, on this booking or another; the
+ * enrolment fee, unless the learner has paid it on any booking. Priced as the booking wizard prices
+ * (`priceSelection`), so a suggestion is what a new booking would have cost.
+ */
+export async function expectedCharges(input: {
+  bookingId: string;
+  personId: string;
+  courseTypeId: string | null;
+  periods: readonly { courseInstanceId: string | null; startDate: string; endDate: string; levelCode: string | null }[];
+  /** „B1.1–B1.2": a whole level booked, both halves and their books. */
+  levelRange: string | null;
+  charges: readonly { kind: string; description: string; amount: number }[];
+}): Promise<ChargeSuggestion[]> {
+  const out: ChargeSuggestion[] = [];
+  const none = (kind: string) => !input.charges.some((c) => c.kind === kind && c.amount > 0);
+
+  if (none('tuition')) {
+    for (const p of input.periods) {
+      if (!p.courseInstanceId) continue;
+      const lines = await priceSelection({
+        kind: 'course',
+        courseInstanceId: p.courseInstanceId,
+        courseTypeId: input.courseTypeId,
+        examTypeId: null,
+        examParts: null,
+        startDate: p.startDate,
+        endDate: p.endDate,
+        levelCode: p.levelCode,
+        tuitionOverride: null,
+        includeEnrolmentFee: false,
+        materialIds: [],
+        accommodationTypeCode: null,
+        roomTypeCode: null,
+        cateringCode: null,
+        accommodationFrom: null,
+        accommodationTo: null,
+      });
+      for (const l of lines.filter((line) => line.kind === 'tuition')) {
+        out.push({ key: `tuition:${p.courseInstanceId}:${p.startDate}`, kind: 'tuition', description: l.description, amount: l.amount, chargeTypeCode: 'tuition', rateId: l.rateId, ownLevel: true });
+      }
+    }
+  }
+
+  // The levels booked: each period's, and both halves of a whole level („B1.1–B1.2").
+  const levels = new Set(input.periods.map((p) => p.levelCode).filter((l): l is string => Boolean(l)));
+  for (const end of input.levelRange?.split(/[–-]/) ?? []) if (/^[ABC][12]\+?\.\d$/.test(end.trim())) levels.add(end.trim());
+  const [books, bought, enrolled, fee] = await Promise.all([
+    levels.size
+      ? query<{ id: string; title: string; rate_id: string; amount: string }>(
+          `SELECT DISTINCT ON (m.level_code) m.id, m.title, r.id AS rate_id, r.amount
+             FROM materials m
+             JOIN rates r ON r.id = applicable_rate('material'::rate_scope, current_date, NULL, NULL, m.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+            WHERE m.is_active AND m.level_code = ANY($1::text[])
+            ORDER BY m.level_code, m.part NULLS LAST, m.title`,
+          [[...levels]]
+        )
+      : Promise.resolve([]),
+    query<{ words: string }>(
+      `SELECT lower(c.description) AS words FROM booking_charges c JOIN bookings b ON b.id = c.booking_id
+        WHERE b.person_id IN (${SAME_PERSON}) AND c.kind = 'books' AND c.amount > 0`,
+      [input.personId]
+    ),
+    // Once per learner, on their first booking: none when a fee is kept on any booking (charged and not taken
+    // back), nor when they booked before — SchoolMan's older years are not all here, and a returning learner paid then.
+    queryFirst<{ one: number }>(
+      `SELECT 1 AS one FROM booking_charges c JOIN bookings b ON b.id = c.booking_id
+        WHERE b.person_id IN (${SAME_PERSON}) AND c.kind = 'enrolment_fee'
+        GROUP BY c.booking_id HAVING sum(c.amount) > 0
+       UNION ALL
+       SELECT 1 FROM bookings b
+        WHERE b.person_id IN (${SAME_PERSON}) AND b.id <> $2 AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+          AND b.created_at < (SELECT created_at FROM bookings WHERE id = $2)
+       LIMIT 1`,
+      [input.personId, input.bookingId]
+    ),
+    queryFirst<{ id: string; amount: string }>(
+      `SELECT id, amount FROM rates WHERE id = applicable_rate('charge_type'::rate_scope, current_date, NULL, NULL, NULL, NULL, NULL, NULL, 'enrolment_fee', NULL, NULL, NULL, NULL)`
+    ),
+  ]);
+  for (const b of books) {
+    if (bought.some((x) => x.words.includes(b.title.toLocaleLowerCase('de')))) continue;
+    out.push({ key: `book:${b.id}`, kind: 'books', description: `Bücher · ${b.title}`, amount: Number(b.amount), chargeTypeCode: 'books', rateId: b.rate_id, ownLevel: true });
+  }
+  if (!enrolled && fee && none('enrolment_fee')) {
+    out.push({ key: 'fee:enrolment_fee', kind: 'enrolment_fee', description: ENROLMENT_FEE.de, amount: Number(fee.amount), chargeTypeCode: 'enrolment_fee', rateId: fee.id, ownLevel: false });
+  }
+  return out;
+}
