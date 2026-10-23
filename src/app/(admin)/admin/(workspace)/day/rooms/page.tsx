@@ -26,7 +26,7 @@ export default async function DayRoomsPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <DayHeader view="rooms" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={tests} t={t} lang={lang} />
-      <RoomPlan day={day} today={today} lessons={lessons} rooms={rooms} editing={choices ? { choices, canTeacher, canRoom, back } : undefined} canBooks={canAccess(user, 'day', 'edit')} />
+      <RoomPlan day={day} today={today} lessons={lessons} rooms={rooms} editing={choices ? { choices, canTeacher, canRoom, back } : undefined} />
     </>
   );
 }

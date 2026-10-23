@@ -39,14 +39,12 @@ export function RoomPlan({
   lessons,
   rooms,
   editing,
-  canBooks = false,
 }: {
   day: string;
   today: string;
   lessons: DayLesson[];
   rooms: PlanRoom[];
   editing?: Omit<LessonEditing, 'lessons'>;
-  canBooks?: boolean;
 }) {
   const { t, lang } = useWsLang();
   const [q, setQ] = useState('');
@@ -256,7 +254,7 @@ export function RoomPlan({
         </div>
       </div>
       {lessons.length === 0 ? <p className="border-t border-ws-line-soft px-5 py-4 text-center text-[0.86rem] text-[var(--casa-muted)]">{t('An diesem Tag ist kein Unterricht.', 'No lessons on this day.')}</p> : null}
-      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} canBooks={canBooks} onClose={() => setOpenId(null)} />
+      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} onClose={() => setOpenId(null)} />
     </section>
   );
 }
