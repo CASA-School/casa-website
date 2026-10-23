@@ -224,6 +224,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return entry.detail?.subject
         ? t(`hat eine E-Mail gesendet: „${String(entry.detail.subject)}“`, `sent an e-mail: “${String(entry.detail.subject)}”`)
         : t('hat eine E-Mail gesendet', 'sent an e-mail');
+    case 'books_handed_out':
+      return t(`hat die Bücher ausgegeben: ${String(entry.detail?.description ?? '')}`, `handed out the books: ${String(entry.detail?.description ?? '')}`);
+    case 'books_taken_back':
+      return t(`hat „Bücher ausgegeben" zurückgenommen: ${String(entry.detail?.description ?? '')}`, `took back „books handed out": ${String(entry.detail?.description ?? '')}`);
     case 'letter_mailed':
       return t('hat einen Brief per E-Mail gesendet', 'sent a letter by e-mail');
     case 'cv_downloaded':

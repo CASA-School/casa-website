@@ -130,7 +130,7 @@ taken = {b['__ID_Booking'].strip() for bs in bookings_of.values() for b in bs}
 # The money of those bookings: charges, payments received, refunds to the learner.
 charges_of = collections.defaultdict(list)
 for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailReference', 'CostDetail_1', 'CostGross', 'Unit', 'CostGrossUnit', 'TimeStampOfCreation',
-               'CostDetailComment_1'):
+               'CostDetailComment_1', '_ID_ProductDelivered'):
     if first(r['_ID_Booking']) in taken:
         charges_of[first(r['_ID_Booking'])].append(r)
 payments_of = collections.defaultdict(list)
@@ -310,7 +310,9 @@ for pid, p in persons.items():
                         for r in periods_of[b['__ID_Booking'].strip()]],
             'charges': [{'id': r['__ID_CostDetail'].strip(), 'ref': first(r['_ID_CostDetailReference']) or None, 'label': r['CostDetail_1'].strip() or None,
                          'comment': r['CostDetailComment_1'].strip() or None,
-                         'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': stamp(r['TimeStampOfCreation'])}
+                         'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': stamp(r['TimeStampOfCreation']),
+                         # Books handed out (red/green in SchoolMan): 1 yes, 2 not yet (0087).
+                         'delivered': first(r['_ID_ProductDelivered']) == '1'}
                         for r in charges_of[b['__ID_Booking'].strip()]],
             'payments': [{'id': f"PaymentIn:{r['__ID_PaymentIn'].strip()}", 'amount': amount(r['PaymentIn']), 'method': first(r['_ID_MethodPayment']) or None,
                           'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DateOfPayment']), 'for': r['CostDetailReference_1'].strip() or None,

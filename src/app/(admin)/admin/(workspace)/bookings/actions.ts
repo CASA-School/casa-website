@@ -33,6 +33,7 @@ import {
   type BookingYear,
 } from '@/lib/admin/bookings';
 import { bildungszeitClasses, bildungszeitTypeId } from '@/lib/admin/bildungszeit';
+import { setBooksHandedOut } from '@/lib/admin/books';
 import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
 import { accommodationCharge, bookedPeriod, priceSelection, stayVocabulary, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
@@ -217,6 +218,15 @@ export async function addChargeAction(formData: FormData): Promise<void> {
   await addCharge(bookingId, { kind: kind as ChargeKind, description, amount }, actor);
   revalidatePath('/admin/bookings', 'layout');
   redirect(back);
+}
+
+/** A book line's books handed out — or, a mistake, not (0087): red to green and back, on the booking. */
+export async function setBooksHandedOutAction(input: { chargeId: string; handedOut: boolean }): Promise<{ ok: boolean }> {
+  const actor = await requireModule('bookings', 'edit');
+  if (!UUID.test(String(input.chargeId))) return { ok: false };
+  const result = await setBooksHandedOut(input.chargeId, input.handedOut === true, actor);
+  revalidatePath('/admin/bookings', 'layout');
+  return result;
 }
 
 export async function removeChargeAction(formData: FormData): Promise<void> {

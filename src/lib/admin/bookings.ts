@@ -217,6 +217,8 @@ export type BookingCharge = {
   description: string;
   amount: number;
   createdAt: Date;
+  /** A book line: whether the books are handed out, when and by whom (0087); null for other lines. */
+  books: { handedOut: boolean; at: Date | null; by: string | null } | null;
 };
 
 export type Payment = {
@@ -685,8 +687,10 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
         ORDER BY bp.start_date`,
       [id]
     ),
-    query<{ id: string; kind: ChargeKind; description: string; amount: string; created_at: Date }>(
-      `SELECT id, kind, description, amount, created_at FROM booking_charges WHERE booking_id = $1 ORDER BY created_at`,
+    query<{ id: string; kind: ChargeKind; description: string; amount: string; created_at: Date; handed_out: boolean; handed_out_at: Date | null; handed_out_by: string | null }>(
+      `SELECT c.id, c.kind, c.description, c.amount, c.created_at, c.handed_out, c.handed_out_at, u.name AS handed_out_by
+         FROM booking_charges c LEFT JOIN staff_users u ON u.id = c.handed_out_by
+        WHERE c.booking_id = $1 ORDER BY c.created_at`,
       [id]
     ),
     query<{
@@ -779,6 +783,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       description: c.description,
       amount: Number(c.amount),
       createdAt: c.created_at,
+      books: c.kind === 'books' ? { handedOut: c.handed_out, at: c.handed_out_at, by: c.handed_out_by } : null,
     })),
     payments: payments.map((p) => ({
       id: p.id,

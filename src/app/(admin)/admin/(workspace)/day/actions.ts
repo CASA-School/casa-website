@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { isMergeReason, isTaskStatus } from '@/lib/admin/day-plan-labels';
 import { canAccess } from '@/lib/admin/access';
+import { setBooksHandedOut } from '@/lib/admin/books';
 import { changeDay } from '@/lib/admin/course-days';
 import { berlinDay } from '@/lib/admin/days';
 import { closeEntryTest, deleteAttempt, enterPaper, handInAttempt, openEntryTest, openEntryTests, releaseAttempt } from '@/lib/admin/entry-tests';
@@ -97,6 +98,18 @@ export async function deleteTaskAction(formData: FormData): Promise<void> {
   const result = await deleteTask(id, actor);
   if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
   done(from);
+}
+
+/**
+ * Books handed out at the desk, from the class in the Tagesplan (0087): the learners pick them up on the
+ * first day or a few days before, so the day's right is enough.
+ */
+export async function dayBooksHandedOutAction(input: { chargeId: string; handedOut: boolean }): Promise<{ ok: boolean }> {
+  const actor = await requireModule('day', 'edit');
+  if (!UUID.test(String(input.chargeId))) return { ok: false };
+  const result = await setBooksHandedOut(input.chargeId, input.handedOut === true, actor);
+  revalidatePath('/admin/day', 'layout');
+  return result;
 }
 
 /** „Ich bin da" / „Ich gehe" — today only, for the colleague behind the account. */

@@ -1268,6 +1268,25 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     the same `/admin/lang` the top bar uses). Team, Einstellungen, Preise and
     Räume were already in the shared design and kept as they are.
 
+## Course books handed out (2026-10-23, migration 0087)
+
+Rahman: in SchoolMan a booking's book line is **red until the books are handed over and green after**.
+Many learners book online from abroad, pay, and pick their books up on the first day or a few days
+before; the colleague at the desk switches the line. SchoolMan keeps it as `CostDetail._ID_ProductDelivered`
+(1 handed out, 2 not yet).
+
+- `booking_charges.handed_out` (+ `handed_out_at`, `handed_out_by`) on a line of kind `books`.
+- **On the booking**, beside each book line: a red „Nicht ausgegeben" / green „Ausgegeben" pill; one
+  click switches it (bookings at `edit`), the date and colleague on hover. Not on a cancelled booking.
+- **In the Tagesplan's class panel**, beside each learner: „Bücher offen" (red) / „✓ Bücher" (green),
+  one click (the day's right at `edit`, so the desk can do it on the first day). A booking for several
+  levels has a book line per level; the class shows the line that names its own level („… A2.1" in
+  A2.1) and all of them when none does; several lines open a short list.
+- Each switch is on the booking's timeline („hat die Bücher ausgegeben: …").
+- **The bridge** reads `_ID_ProductDelivered` (`read_learners.py`) and brings SchoolMan's green across;
+  a tick made in the workspace is never undone by it. SchoolMan records no date or colleague, so those
+  stay empty on imported lines.
+
 ## Tagesplan (2026-10-19, migration 0071)
 
 Rahman: FileMaker's calendar — Cmd+1, the screen colleagues see first when they open SchoolMan —

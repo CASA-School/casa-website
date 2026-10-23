@@ -404,11 +404,13 @@ try {
         const kind = (type && KIND[type.code]) ?? (type?.category_code === 'accommodation' || /miete|unterkunft/i.test(c.label ?? '') ? 'accommodation' : 'other');
         charges.push(c.id);
         await client.query(
-          `INSERT INTO booking_charges (booking_id, kind, description, amount, charge_type_code, quantity, unit_amount, filemaker_cost_detail_id, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+          // Books handed out (0087): SchoolMan's green comes across; a tick made in the workspace is never undone by it.
+          `INSERT INTO booking_charges (booking_id, kind, description, amount, charge_type_code, quantity, unit_amount, filemaker_cost_detail_id, created_at, handed_out)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::timestamp AT TIME ZONE 'Europe/Berlin', now()), $10 AND $2 = 'books')
            ON CONFLICT (filemaker_cost_detail_id) WHERE filemaker_cost_detail_id IS NOT NULL DO UPDATE
              SET booking_id = EXCLUDED.booking_id, kind = EXCLUDED.kind, description = EXCLUDED.description, amount = EXCLUDED.amount,
-                 charge_type_code = EXCLUDED.charge_type_code, quantity = EXCLUDED.quantity, unit_amount = EXCLUDED.unit_amount`,
+                 charge_type_code = EXCLUDED.charge_type_code, quantity = EXCLUDED.quantity, unit_amount = EXCLUDED.unit_amount,
+                 handed_out = booking_charges.handed_out OR EXCLUDED.handed_out`,
           [
             bookingId,
             kind,
@@ -419,6 +421,7 @@ try {
             c.unitAmount,
             c.id,
             c.created,
+            c.delivered === true,
           ]
         );
         count.charges++;

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 
-import { changeLessonAction, mergeLessonAction, unmergeLessonAction } from './actions';
+import { changeLessonAction, dayBooksHandedOutAction, mergeLessonAction, unmergeLessonAction } from './actions';
 import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
@@ -18,6 +18,7 @@ import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
 import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
 import { cn } from '@/lib/utils';
 import { mailHref } from '@/lib/admin/mail/href';
+import { BooksMark } from '@/components/admin/books-mark';
 
 /** A course's own page; a parallel group has its own under it. */
 export const courseHref = (l: Pick<DayLesson, 'courseId' | 'groupIndex'>) => `/admin/catalogue/courses/${l.courseId}${l.groupIndex > 1 ? `/${l.groupIndex}` : ''}`;
@@ -38,7 +39,20 @@ export const shortName = (name: string | null) => {
  */
 export type LessonEditing = { choices: LessonChoices; canTeacher: boolean; canRoom: boolean; lessons: DayLesson[]; back: string };
 
-export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLesson | null; day: string; editing?: LessonEditing; onClose: () => void }) {
+export function LessonPanel({
+  lesson,
+  day,
+  editing,
+  canBooks = false,
+  onClose,
+}: {
+  lesson: DayLesson | null;
+  day: string;
+  editing?: LessonEditing;
+  /** May switch a learner's books handed out (the day's right). */
+  canBooks?: boolean;
+  onClose: () => void;
+}) {
   const { t, lang } = useWsLang();
   const l = lesson;
   const emails = l ? [...new Set(l.learners.map((p) => p.email).filter((e): e is string => Boolean(e)))] : [];
@@ -179,14 +193,16 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
             {l.learners.length ? (
               <ul>
                 {l.learners.map((p) => (
-                  <li key={p.personId}>
-                    <Link href={`/admin/people/${p.personId}`} className="flex items-center gap-3 px-6 py-2 transition-colors outline-none hover:bg-[var(--ws-row-hover)] focus-visible:bg-[var(--ws-row-hover)]">
+                  <li key={p.personId} className="flex items-center gap-2 pr-6 transition-colors hover:bg-[var(--ws-row-hover)]">
+                    <Link href={`/admin/people/${p.personId}`} className="flex min-w-0 flex-1 items-center gap-3 py-2 pl-6 outline-none focus-visible:bg-[var(--ws-row-hover)]">
                       <Avatar name={p.name} size="sm" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{p.name}</span>
                         {p.email ? <span className="block truncate text-[0.76rem] text-[var(--casa-muted)]">{p.email}</span> : null}
                       </span>
                     </Link>
+                    {/* The books: red until handed out at the desk, green after (0087). */}
+                    <BooksMark key={p.books.map((b) => `${b.id}:${b.handedOut}`).join(',')} lines={p.books} onSet={dayBooksHandedOutAction} canEdit={canBooks} />
                   </li>
                 ))}
               </ul>
