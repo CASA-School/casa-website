@@ -3,7 +3,8 @@
  * record, whether its fingerprint — SchoolMan's data together with what it was matched to here — is
  * the same as last time, and passes over it if so; it saves the fingerprints in its own transaction, so
  * a step that fails remembers nothing. A record that depends on something here (its booking, its course)
- * puts that in the fingerprint, so it is written again the run that something arrives.
+ * puts that in the fingerprint, so it is written again the run that something arrives. Never a value a
+ * step of the run itself changes (a sitting's hours, a count): it would make every record look changed.
  *
  * `BRIDGE_FULL=1` (or `--full`) writes every record, as every run did before. Without the table (a
  * database not yet migrated) every record is written and nothing is remembered.
