@@ -218,3 +218,5 @@ nobody else has access to them.
 **What the bridge still leaves behind (2026-10-20):** per entity, after the first live run — fields in use that no reader reads, rows the sample and the skip rules leave out, a top 10 for the office and the decisions only Rahman can make — `bridge-gaps.md`.
 
 **The Data API layouts for the sync (2026-10-26):** one `Sync_<Table>` layout per table the bridge reads, with its fields, key and change field, and how each table is polled — `sync-layouts.md` (machine-readable: `scripts/filemaker/sync-layouts.json`).
+
+**What the bridge still misses or reads wrongly, per the FileMaker session (2026-10-26):** the night jobs that mark thousands of records changed, fields copied from related records that never update, abandoned and never-filled fields, missing link ids and the tables `DateCourse`, `DateStaffAtWork`, `SingleDayCalendar`, `SingleDateExam`, duplicate and empty keys — `mapping-review-2026-10-26.md`.

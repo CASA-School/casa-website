@@ -30,14 +30,18 @@ The service asks every 1–2 minutes for what changed since its last look; a ful
 
 | Change field | Tables | Polling |
 | --- | --- | --- |
-| A timestamp (`TimeStampOfChange`, `TimestampChange`, `Timestamp.Change`) | 25 | find records changed since the last look, to the second |
-| A date only (`DateOfChange`, `DateChange`) | 35 | find records changed today (and yesterday, around midnight), compare fingerprints, write what differs |
-| None | 7: DateValidity, Flag, Letter, Order, OrderDetail, StatementLandlord, WorkFlowLetter | new records by their key above the last one seen; changes in the nightly full read |
+| A timestamp (`TimeStampOfChange`, `TimestampChange`, `Timestamp.Change`, and six fields named `DateOfChange` that are timestamps) | 29 | find records changed since the last look, to the second |
+| A date only (`DateOfChange`, `DateChange`) | 30 | find records changed today (and yesterday, around midnight), compare fingerprints, write what differs |
+| None | 8: DateValidity, Flag, Letter, Order, OrderDetail, StatementLandlord, WeekDay, WorkFlowLetter | new records by their key above the last one seen; changes in the nightly full read |
 
-Open for the FileMaker session to confirm: that every change field is an auto-enter modification value
-(not set by a script), and which of the listed fields are unstored calculations whose value changes
-when a *related* record changes — such a change does not move the record's own change field, so the
-service needs the related table's change instead.
+Checked by the FileMaker session (`mapping-review-2026-10-26.md`): every change field is an auto-enter
+modification value and no script sets one, except `Group::TimeStampOfChange` (a creation stamp: use
+`DateOfChange`), `SingleMonthStaff::TimeStampOfChange` (empty: use `DateOfChange`) and
+`WeekDay::DateOfChange` (empty: WeekDay has none). **The night jobs (00:00–01:05) touch thousands of
+records** — every Person at 00:07, every Corporate, Agency, Accommodation and StaffMember daily — so a
+change field says „perhaps changed": the service compares fingerprints of the fields it reads, and the
+first pass after 02:00 sees the wave settled. Fields copied from related records, abandoned fields,
+duplicate keys and the tables still missing are in the review, §4–§9.
 
 ## The layouts
 
@@ -73,7 +77,7 @@ service needs the related table's change instead.
 | `Sync_Email` | `__ID_Email` | `TimeStampOfChange` | 12 |
 | `Sync_Exam` | `__ID_Exam` | `DateOfChange` | 5 |
 | `Sync_Flag` | `__ID_Flag` | — | 3 |
-| `Sync_Group` | `__ID_Group` | `TimeStampOfChange` | 21 |
+| `Sync_Group` | `__ID_Group` | `DateOfChange` | 21 |
 | `Sync_Instalment` | `__ID_Instalment` | `DateOfChange` | 8 |
 | `Sync_Institution` | `__ID_Institution` | `TimestampChange` | 6 |
 | `Sync_Invoice` | `__ID_Invoice` | `TimeStampOfChange` | 11 |
@@ -100,14 +104,14 @@ service needs the related table's change instead.
 | `Sync_SingleDateOccupancy` | `__ID_SingleDateOccupancy` | `DateOfChange` | 5 |
 | `Sync_SingleDateStudent` | `__ID_SingleDateStudent` | `TimeStampOfChange` | 12 |
 | `Sync_SingleDayStaff` | `__ID_SingleDayStaff` | `DateOfChange` | 10 |
-| `Sync_SingleMonthStaff` | `__ID_SingleMonthStaff` | `TimeStampOfChange` | 10 |
+| `Sync_SingleMonthStaff` | `__ID_SingleMonthStaff` | `DateOfChange` | 10 |
 | `Sync_SingleWeekCleaning` | `__ID_SingleWeekCleaning` | `DateOfChange` | 7 |
 | `Sync_SingleYearStaff` | `__ID_SingleYearStaff` | `DateOfChange` | 7 |
 | `Sync_StaffMember` | `__ID_StaffMember` | `DateOfChange` | 13 |
 | `Sync_StatementLandlord` | `__ID_StatementLandlord` | — | 10 |
 | `Sync_TestStudent` | `__ID_TestStudent` | `DateOfChange` | 11 |
 | `Sync_WaitingRoom` | `__ID_WaitingRoom` | `Timestamp.Change` | 9 |
-| `Sync_WeekDay` | `__ID_WeekDay` | `DateOfChange` | 9 |
+| `Sync_WeekDay` | `__ID_WeekDay` | — | 8 |
 | `Sync_WorkFlow` | `__ID_Workflow` | `TimeStampOfChange` | 16 |
 | `Sync_WorkFlowLetter` | `__ID_WorkFlowLetter` | — | 4 |
 
@@ -173,7 +177,7 @@ service needs the related table's change instead.
 
 **Flag** (3): `CountryLong_1`, `Country_1`, `__ID_Flag`
 
-**Group** (21): `AgeStudent`, `CommentArrival_Departure`, `CommentArrival_Departure_Short`, `NumberStudent`, `NumberTeacher`, `TimeStampOfChange`, `TimeStampOfCreation`, `TitleGroup`, `UserName`, `ZEndDateAcco`, `ZEndDateTuition`, `ZStartDateAcco`, `ZStartDateTuition`, `_ID_Agency`, `_ID_Corporate`, `_ID_Country`, `_ID_CourseTypeReference`, `_ID_Level`, `_ID_Platform`, `_ID_StatusGroup`, `__ID_Group`
+**Group** (21): `AgeStudent`, `CommentArrival_Departure`, `CommentArrival_Departure_Short`, `DateOfChange`, `NumberStudent`, `NumberTeacher`, `TimeStampOfCreation`, `TitleGroup`, `UserName`, `ZEndDateAcco`, `ZEndDateTuition`, `ZStartDateAcco`, `ZStartDateTuition`, `_ID_Agency`, `_ID_Corporate`, `_ID_Country`, `_ID_CourseTypeReference`, `_ID_Level`, `_ID_Platform`, `_ID_StatusGroup`, `__ID_Group`
 
 **Instalment** (8): `DateOfChange`, `Instalment`, `InstalmentDetail_1`, `OrdinalNumber`, `Z_DatePaymentDue`, `_ID_Booking`, `_ID_PaymentDone`, `__ID_Instalment`
 
@@ -228,7 +232,7 @@ service needs the related table's change instead.
 **SingleDayStaff** (10): `DateOfChange`, `HourEnd`, `HourStart`, `ZSingleDay`, `_ID_Absence`, `_ID_AbsenceDetail`, `_ID_Holiday`, `_ID_Illness`, `_ID_StaffMember`, `__ID_SingleDayStaff`  
 *Never on the layout:* `cal_*`
 
-**SingleMonthStaff** (10): `MonthSingleDay`, `StaticBalanceHolidayRunning`, `StaticBalanceWorkMonth`, `StaticBalanceWorkRunning`, `TimeStampOfChange`, `YearSingleDay`, `ZStartDate`, `_ID_Approved`, `_ID_StaffMember`, `__ID_SingleMonthStaff`
+**SingleMonthStaff** (10): `DateOfChange`, `MonthSingleDay`, `StaticBalanceHolidayRunning`, `StaticBalanceWorkMonth`, `StaticBalanceWorkRunning`, `YearSingleDay`, `ZStartDate`, `_ID_Approved`, `_ID_StaffMember`, `__ID_SingleMonthStaff`
 
 **SingleWeekCleaning** (7): `DateOfChange`, `ZEndDate`, `ZStartDate`, `_ID_Accommodation`, `_ID_CleaningJobReference`, `_ID_Room`, `__ID_SingleWeekCleaning`
 
@@ -243,7 +247,7 @@ service needs the related table's change instead.
 
 **WaitingRoom** (9): `DateOfCreation`, `Timestamp.Change`, `Timestamp.Creation`, `UserName`, `_ID_Booking`, `_ID_Course`, `_ID_Person`, `_ID_PreBooking`, `__ID_WaitingRoom`
 
-**WeekDay** (9): `DateOfChange`, `HourEnd`, `HourStart`, `NumberLesson`, `_ID_ClassRoom`, `_ID_Course`, `_ID_StaffMember`, `_ID_WeekDayReference`, `__ID_WeekDay`
+**WeekDay** (8): `HourEnd`, `HourStart`, `NumberLesson`, `_ID_ClassRoom`, `_ID_Course`, `_ID_StaffMember`, `_ID_WeekDayReference`, `__ID_WeekDay`
 
 **WorkFlow** (16): `CommentWorkflow`, `FollowUp`, `HourEnd`, `HourStart`, `TimeStampOfChange`, `TimeStampOfCreation`, `UserName`, `Workflow_1`, `ZSingleDayCalendar`, `_ID_Booking`, `_ID_Completed`, `_ID_Group`, `_ID_Offer`, `_ID_Person`, `_ID_PublicCalendar`, `__ID_Workflow`
 

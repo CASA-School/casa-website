@@ -199,7 +199,7 @@
   "layout": "Sync_Commission",
   "key": "__ID_Commission",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "Commission",
    "CostDetail_1",
@@ -285,7 +285,7 @@
   "layout": "Sync_CostDetailSample",
   "key": "__ID_CostDetailSample",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "CostDetailComment_1",
    "CostDetailComment_2",
@@ -512,15 +512,15 @@
  "Group": {
   "layout": "Sync_Group",
   "key": "__ID_Group",
-  "change": "TimeStampOfChange",
-  "changeKind": "timestamp",
+  "change": "DateOfChange",
+  "changeKind": "date",
   "fields": [
    "AgeStudent",
    "CommentArrival_Departure",
    "CommentArrival_Departure_Short",
+   "DateOfChange",
    "NumberStudent",
    "NumberTeacher",
-   "TimeStampOfChange",
    "TimeStampOfCreation",
    "TitleGroup",
    "UserName",
@@ -542,7 +542,7 @@
   "layout": "Sync_Instalment",
   "key": "__ID_Instalment",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "DateOfChange",
    "Instalment",
@@ -858,7 +858,7 @@
   "layout": "Sync_ServiceDetail",
   "key": "__ID_ServiceDetail",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "DateOfChange",
    "ServiceDetailComment_1",
@@ -873,7 +873,7 @@
   "layout": "Sync_ServiceDetailReference",
   "key": "__ID_ServiceDetailReference",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "DateOfChange",
    "ServiceDetailReference_1",
@@ -884,7 +884,7 @@
   "layout": "Sync_ServiceDetailSpecificationReference",
   "key": "__ID_ServiceDetailSpecificationReference",
   "change": "DateOfChange",
-  "changeKind": "date",
+  "changeKind": "timestamp",
   "fields": [
    "DateOfChange",
    "ServiceDetailSpecificationReference_1",
@@ -997,14 +997,14 @@
  "SingleMonthStaff": {
   "layout": "Sync_SingleMonthStaff",
   "key": "__ID_SingleMonthStaff",
-  "change": "TimeStampOfChange",
-  "changeKind": "timestamp",
+  "change": "DateOfChange",
+  "changeKind": "date",
   "fields": [
+   "DateOfChange",
    "MonthSingleDay",
    "StaticBalanceHolidayRunning",
    "StaticBalanceWorkMonth",
    "StaticBalanceWorkRunning",
-   "TimeStampOfChange",
    "YearSingleDay",
    "ZStartDate",
    "_ID_Approved",
@@ -1121,10 +1121,9 @@
  "WeekDay": {
   "layout": "Sync_WeekDay",
   "key": "__ID_WeekDay",
-  "change": "DateOfChange",
-  "changeKind": "date",
+  "change": null,
+  "changeKind": "none",
   "fields": [
-   "DateOfChange",
    "HourEnd",
    "HourStart",
    "NumberLesson",
