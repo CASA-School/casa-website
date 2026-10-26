@@ -152,6 +152,8 @@ test.describe('day-one placement test', () => {
   test('„Tests öffnen" on a start day: only first-day courses, the chosen ones opened, written, its results as a PDF page', async ({ page }) => {
     const taken = await client.query(`SELECT 1 FROM entry_test_sittings WHERE on_date = $1::date AND test = 'a2'`, [today]);
     test.skip(taken.rows.length > 0, 'a real A2 test sitting exists today');
+    const classes = await client.query(`SELECT 1 FROM course_days d JOIN courses c ON c.id = d.course_id WHERE d.on_date = $1::date AND c.level_code LIKE 'A2%'`, [today]);
+    test.skip(classes.rows.length > 0, 'real A2 classes start today');
     // An A2.1 afternoon class starting today, and an A2.2 class whose first day was a week ago: only the first is listed.
     const start = (
       await client.query<{ id: string }>(

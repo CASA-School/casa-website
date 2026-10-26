@@ -532,3 +532,98 @@ export async function exportSittings(day: string, sittingId?: string): Promise<E
   }
   return out;
 }
+
+// ------------------------------------------------------------------ results by class
+
+/** A learner of a class that writes a day-one test; `isNew` when their first course at CASA starts that day. */
+export type ClassLearner = { personId: string; name: string; isNew: boolean };
+
+/** One class's page of a day's results: its learners' attempts, and who in it has not written. */
+export type ClassResults = {
+  session: EntryTestSession;
+  test: EntryTestId;
+  title: string;
+  cls: EntryTestClass;
+  rows: { attempt: EntryTestAttempt; learner: ClassLearner | null }[];
+  missing: ClassLearner[];
+};
+
+/** A name in comparable words: no accents, Turkish dotless i as i, lower case, the parts of two letters or more. */
+const nameWords = (name: string) =>
+  name
+    .replace(/ı/g, 'i')
+    .replace(/İ/g, 'I')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter((w) => w.length > 1);
+
+/**
+ * A day's results by class (Rahman, 2026-10-26: „the results should be per course so we know which course
+ * the students are", the learners new at CASA colour-coded): each attempt placed in the class its learner
+ * is booked into — by the learner it is linked to, else by the name typed on the phone, matched among the
+ * learners of the classes that wrote that test — and each class's learners who have not written. An
+ * attempt that fits no learner, or more than one, is left for the colleague to place.
+ */
+export async function resultsByClass(day: string, sittings: readonly ExportSitting[]): Promise<{ classes: ClassResults[]; unplaced: { session: EntryTestSession; test: EntryTestId; title: string; attempts: EntryTestAttempt[] }[] }> {
+  const tests = await dayEntryTests(day);
+  const courseIds = [...new Set(tests.flatMap((t) => t.classes.map((c) => c.courseId)))];
+  const learners = courseIds.length
+    ? await query<{ course_id: string; group_index: number | null; person_id: string; name: string; is_new: boolean }>(
+        `SELECT DISTINCT ON (bp.course_id, p.id) bp.course_id, bp.group_index, p.id AS person_id,
+                trim(concat_ws(' ', p.first_name, p.last_name)) AS name,
+                coalesce((SELECT min(bp2.start_date) FROM booking_periods bp2 JOIN bookings b2 ON b2.id = bp2.booking_id
+                           WHERE b2.status <> 'cancelled' AND b2.deleted_at IS NULL
+                             AND b2.person_id IN (SELECT q.id FROM people q WHERE coalesce(q.merged_into, q.id) = coalesce(p.merged_into, p.id))
+                         ) >= $2::date, false) AS is_new
+           FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
+          WHERE bp.course_id = ANY($1::uuid[]) AND bp.start_date <= $2::date AND bp.end_date >= $2::date
+            AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
+          ORDER BY bp.course_id, p.id, bp.group_index NULLS LAST`,
+        [courseIds, day]
+      )
+    : [];
+
+  const classes: ClassResults[] = [];
+  const unplaced: { session: EntryTestSession; test: EntryTestId; title: string; attempts: EntryTestAttempt[] }[] = [];
+  for (const s of sittings) {
+    const meta = tests.find((t) => t.session === s.session && t.test === s.test);
+    const own = (meta?.classes ?? []).map((cls) => ({
+      session: s.session,
+      test: s.test,
+      title: s.title,
+      cls,
+      rows: [] as ClassResults['rows'],
+      // A learner without a group belongs to the course's first class.
+      members: learners
+        .filter((l) => l.course_id === cls.courseId && (l.group_index === cls.groupIndex || (l.group_index === null && cls.groupIndex === Math.min(...(meta?.classes ?? []).filter((c) => c.courseId === cls.courseId).map((c) => c.groupIndex)))))
+        .map((l) => ({ personId: l.person_id, name: l.name, isNew: l.is_new, words: new Set(nameWords(l.name)) })),
+    }));
+    const left: EntryTestAttempt[] = [];
+    for (const a of s.attempts) {
+      const typed = new Set(nameWords(a.name));
+      const fits = (m: { personId: string; words: Set<string> }) =>
+        a.personId === m.personId ||
+        (typed.size > 0 && ([...typed].every((w) => m.words.has(w)) || [...m.words].every((w) => typed.has(w)) || [...typed].filter((w) => m.words.has(w)).length >= 2));
+      const hits = own.flatMap((c) => c.members.filter(fits).map((m) => ({ c, m })));
+      const linked = hits.find((h) => h.m.personId === a.personId);
+      const hit = linked ?? (hits.length === 1 ? hits[0] : null);
+      if (hit) hit.c.rows.push({ attempt: a, learner: { personId: hit.m.personId, name: hit.m.name, isNew: hit.m.isNew } });
+      else left.push(a);
+    }
+    for (const c of own) {
+      const wrote = new Set(c.rows.map((r) => r.learner?.personId));
+      classes.push({
+        session: c.session,
+        test: c.test,
+        title: c.title,
+        cls: c.cls,
+        rows: c.rows,
+        missing: c.members.filter((m) => !wrote.has(m.personId)).map(({ personId, name, isNew }) => ({ personId, name, isNew })),
+      });
+    }
+    if (left.length) unplaced.push({ session: s.session, test: s.test, title: s.title, attempts: left });
+  }
+  return { classes, unplaced };
+}
