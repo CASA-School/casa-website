@@ -57,7 +57,6 @@ const COPY = {
     inboxes: { enquiries: 'Anfragen', registrations: 'Anmeldungen', applications: 'Bewerbungen', placement: 'Einstufungstests' },
     notStored: 'Nicht im Arbeitsbereich gespeichert. Diese E-Mail ist der einzige Eintrag.',
     generated: (source: string) => `Automatisch erstellt ${source} auf casa-bremen.de.`,
-    address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen',
     logoAlt: 'CASA Internationale Sprachschule',
     name: 'Name',
     salutation: 'Anrede',
@@ -240,7 +239,6 @@ const COPY = {
     inboxes: { enquiries: 'Enquiries', registrations: 'Registrations', applications: 'Applications', placement: 'Placement tests' },
     notStored: 'Not stored in the staff workspace. This email is the only record.',
     generated: (source: string) => `Generated automatically ${source} on casa-bremen.de.`,
-    address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany',
     logoAlt: 'CASA Internationale Sprachschule',
     name: 'Name',
     salutation: 'Salutation',
@@ -976,7 +974,7 @@ export function buildFormMail(kind: FormKind, payload: Payload, options: FormMai
     testLine: options.test ? c.test(options.testRecipient) : null,
     logoAlt: c.logoAlt,
     rows,
-    footer: `${escape(c.generated(SOURCES[kind](c, payload)))}<br>${escape(c.address)}`,
+    footer: escape(c.generated(SOURCES[kind](c, payload))),
   });
 
   return { subject: `${options.test ? '[TEST] ' : ''}${mail.subject}`, html };
