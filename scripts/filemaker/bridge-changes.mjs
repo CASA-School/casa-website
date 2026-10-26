@@ -25,8 +25,10 @@ export async function changes(client, step) {
     /** Whether this record is as it was last time; remembered either way. */
     same(record, value) {
       const f = fingerprint(value);
+      // A record SchoolMan holds twice is written each time, so the last one wins as in a full run.
+      const twice = seen.has(String(record));
       seen.set(String(record), f);
-      const unchanged = known.get(String(record)) === f;
+      const unchanged = !twice && known.get(String(record)) === f;
       if (unchanged) same++;
       return unchanged;
     },

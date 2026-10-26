@@ -537,14 +537,23 @@ a learner moved to January had kept their old place.
 **Only what changed (2026-10-26, 0088).** A run took about an hour: seven minutes reading SchoolMan, two
 importing on the Mac, and an hour inside Azure. Every row was its own statement, each waits about 10 ms
 for the database (the job runs in Germany West Central, the server is in Belgium Central), and every run
-wrote every record again — 354,000 statements, 302,000 of them the learners'. Now the learners, lesson
-days, follow-ups and money importers keep a fingerprint per record (`bridge-changes.mjs`, table
-`bridge_fingerprints`, hashes only): SchoolMan's data together with what it was matched to here (the
-booking, the course, the teacher and room, whether a booking is over, the vocabularies). A record whose
+wrote every record again — 354,000 statements, 302,000 of them the learners'. Every importer that writes per record now keeps a
+fingerprint per record (`bridge-changes.mjs`, table `bridge_fingerprints`, hashes only): SchoolMan's data
+together with what it was matched to here (the booking, the course, the teacher and room, the group, the
+bookings and letters a party pays for, whether a booking is over, the vocabularies). A record whose
 fingerprint is the same as last time is passed over; one whose dependency arrives here gets a new
-fingerprint and is written. Measured on the Mac with the round trips counted: 354,000 → 21,000, about an
-hour → about four minutes inside Azure. `bridge.sh --full` (`BRIDGE_FULL=1`) writes every record, as
-before. The first run after the table exists is a full one.
+fingerprint and is written; a record SchoolMan holds twice is written each time, so the last one wins as
+in a full run. The offers importer also reads what an offer is matched to once instead of per offer.
+Measured on the Mac with the round trips counted (×10.3 ms for Azure), the same SchoolMan read twice:
+354,000 statements (about an hour inside Azure) → 4,300 (under a minute). A full import after the fast
+one leaves all 39 tables the bridge writes identical, apart from offer lines' ids (a full run recreates
+them) and the date of two SchoolMan notes that have none (a full run stamps them „now"). What remains is
+the steps that are small anyway (staff, courses and their counts, absences, groups, the day).
+`bridge.sh --full` (`BRIDGE_FULL=1`) writes every record, as before. The first run after the table exists
+is a full one, and so is a step's first run after it starts keeping fingerprints.
+
+A run is started without `--local-first` since 2026-10-26 (Rahman): the bundle goes straight to Azure, the
+Mac's own database is not filled with learners, and the run is two minutes shorter.
 
 **How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`, or `--local-first` to import into the Mac's own database first and send the same bundle only if that worked, or `--full` to write every record) on the office Mac, with SchoolMan
 open in FileMaker Pro and `az` signed in:

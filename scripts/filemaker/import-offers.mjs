@@ -26,6 +26,7 @@
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -94,15 +95,35 @@ try {
   const valid = new Set((await client.query(`SELECT code FROM countries`)).rows.map((r) => r.code.trim()));
   const chargeTypes = new Map((await client.query(`SELECT code, filemaker_id FROM charge_types WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [Number(r.filemaker_id), r.code]));
   const chargeType = (ref) => chargeTypes.get(Number(String(ref ?? '').replace(',', '.'))) ?? 'additional_costs';
-  const linked = async (entity, layout, recordId) =>
-    recordId
-      ? ((
-          await client.query(
-            `SELECT entity_id FROM filemaker_links WHERE entity = $1 AND source_database = 'SchoolMan' AND source_layout = $2 AND source_record_id = $3`,
-            [entity, layout, recordId]
-          )
-        ).rows[0]?.entity_id ?? null)
-      : null;
+  // Everything an offer is matched to, read once rather than per offer (2026-10-26): inside Azure every
+  // statement waits ~10 ms for the database.
+  const links = new Map(
+    (
+      await client.query(
+        `SELECT entity, source_layout, source_record_id, entity_id FROM filemaker_links
+          WHERE source_database = 'SchoolMan' AND ((entity = 'organisation' AND source_layout IN ('Agency', 'Corporate')) OR (entity = 'person' AND source_layout = 'Person'))`
+      )
+    ).rows.map((r) => [`${r.entity}|${r.source_layout}|${r.source_record_id}`, r.entity_id])
+  );
+  const linked = (entity, layout, recordId) => (recordId ? (links.get(`${entity}|${layout}|${recordId}`) ?? null) : null);
+  const visits = new Map(
+    (await client.query(`SELECT filemaker_group_id, id, organisation_id, agency_id FROM group_visits WHERE filemaker_group_id IS NOT NULL`)).rows.map((r) => [
+      String(r.filemaker_group_id),
+      r,
+    ])
+  );
+  const organisations = new Map((await client.query(`SELECT id, name, language, country_code FROM organisations`)).rows.map((r) => [r.id, r]));
+  const people = new Map((await client.query(`SELECT id, first_name, last_name FROM people`)).rows.map((r) => [r.id, r]));
+  const knownOffers = new Map(
+    (
+      await client.query(
+        `SELECT f.filemaker_offer_id, f.id, EXISTS (SELECT 1 FROM staff_activity a WHERE a.entity = 'offer' AND a.entity_id = f.id AND a.action <> 'schoolman_log') AS changed_here
+           FROM offers f WHERE f.filemaker_offer_id IS NOT NULL`
+      )
+    ).rows.map((r) => [String(r.filemaker_offer_id), r])
+  );
+  // An offer as it was last time, for the same recipient here, is passed over (0088).
+  const changed = await changes(client, 'offers');
 
   // A confirmed group's newest offer is the one it took.
   const newestOfGroup = new Map();
@@ -110,31 +131,23 @@ try {
 
   for (const o of offers) {
     // Who it is for.
-    const visit = o.group
-      ? (await client.query(`SELECT id, organisation_id, agency_id FROM group_visits WHERE filemaker_group_id = $1`, [o.group])).rows[0]
-      : null;
+    const visit = o.group ? (visits.get(String(o.group)) ?? null) : null;
     const organisationId = visit
       ? (visit.organisation_id ?? visit.agency_id)
       : o.recipient === 'agency'
-        ? await linked('organisation', 'Agency', o.agency)
+        ? linked('organisation', 'Agency', o.agency)
         : o.recipient === 'company'
-          ? await linked('organisation', 'Corporate', o.company)
+          ? linked('organisation', 'Corporate', o.company)
           : null;
-    const personId = o.recipient === 'learner' ? await linked('person', 'Person', o.person) : null;
-    const organisation = organisationId ? (await client.query(`SELECT name, language, country_code FROM organisations WHERE id = $1`, [organisationId])).rows[0] : null;
-    const person = personId ? (await client.query(`SELECT first_name, last_name FROM people WHERE id = $1`, [personId])).rows[0] : null;
+    const personId = o.recipient === 'learner' ? linked('person', 'Person', o.person) : null;
+    const organisation = organisationId ? (organisations.get(organisationId) ?? null) : null;
+    const person = personId ? (people.get(personId) ?? null) : null;
     if (!organisation && !person && !visit) {
       count.noRecipient++;
       continue;
     }
 
-    const known = (
-      await client.query(
-        `SELECT f.id, EXISTS (SELECT 1 FROM staff_activity a WHERE a.entity = 'offer' AND a.entity_id = f.id AND a.action <> 'schoolman_log') AS changed_here
-           FROM offers f WHERE f.filemaker_offer_id = $1`,
-        [o.id]
-      )
-    ).rows[0];
+    const known = knownOffers.get(String(o.id));
     if (known?.changed_here) {
       count.keptHere++;
       continue;
@@ -191,6 +204,10 @@ try {
       decided ? (sentAt ?? o.created) : null,
       visit?.id ?? null,
     ];
+    if (known && changed.same(o.id, [o, values])) {
+      count.unchanged++;
+      continue;
+    }
 
     let offerId = known?.id;
     if (!offerId) {
@@ -210,7 +227,7 @@ try {
       ).rows[0].id;
       count.made++;
     } else {
-      const changed = await client.query(
+      const written = await client.query(
         `UPDATE offers SET kind = $1, status = $2, language = $3, title = $4, group_name = $5, organisation_id = $6, person_id = $7, recipient_name = $8,
                 contact_salutation = $9, contact_first_name = $10, contact_last_name = $11, contact_email = $12, address = $13, country_code = $14,
                 arrival = $15, departure = $16, participants = $17, escorts = $18, stay = $19::jsonb, version = $20,
@@ -223,7 +240,7 @@ try {
                                   $21::timestamp AT TIME ZONE 'Europe/Berlin', $22::timestamp AT TIME ZONE 'Europe/Berlin', $23)`,
         [...values, offerId]
       );
-      if (changed.rowCount) count.updated++;
+      if (written.rowCount) count.updated++;
       else count.unchanged++;
     }
 
@@ -284,7 +301,10 @@ try {
       );
       count.log++;
     }
+    // A new offer is remembered once written.
+    if (!known) changed.same(o.id, [o, values]);
   }
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');

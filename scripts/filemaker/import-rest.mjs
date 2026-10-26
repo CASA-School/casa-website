@@ -10,6 +10,7 @@
  * number; they come across once.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -32,6 +33,8 @@ try {
   const managements = await map(
     `SELECT source_record_id AS k, entity_id AS v FROM filemaker_links WHERE entity = 'organisation' AND source_database = 'SchoolMan' AND source_layout = 'Management'`
   );
+  // A row as it was last time, matched to the same records here, is passed over (0088).
+  const changed = await changes(client, 'rest');
   const upsert = async (table, columns, values, filemakerId) => {
     const cols = [...columns, 'filemaker_id'];
     const params = [...values, filemakerId];
@@ -48,6 +51,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`programme:${p.id}`, [p, groupId])) continue;
     await upsert('group_programme', ['group_visit_id', 'day', 'starts_at', 'activity', 'meeting_point'], [groupId, p.day, p.time, p.activity, p.meeting], p.id);
     count.programme++;
   }
@@ -57,6 +61,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`service:${s.id}`, [s, groupId])) continue;
     await upsert('group_services', ['group_visit_id', 'service', 'detail'], [groupId, s.service, s.detail], s.id);
     count.services++;
   }
@@ -66,6 +71,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`internship:${i.id}`, [i, groupId, i.management ? (managements.get(i.management) ?? null) : null])) continue;
     await upsert(
       'group_internships',
       ['group_visit_id', 'organisation_id', 'place', 'starts_on', 'ends_on', 'min_people', 'max_people'],
@@ -103,10 +109,12 @@ try {
     publisherOrg.set(o.publisherId, orgId);
   }
   for (const o of data.orders) {
+    const orgId = o.publisherId ? (publisherOrg.get(o.publisherId) ?? null) : null;
+    if (changed.same(`order:${o.id}`, [o, orgId, o.lines.map((l) => (l.book ? (books.get(l.book) ?? null) : null))])) continue;
     await upsert(
       'book_orders',
       ['organisation_id', 'ordered_on', 'done', 'email', 'ordered_by_name'],
-      [o.publisherId ? (publisherOrg.get(o.publisherId) ?? null) : null, o.day, o.done, o.email, o.by],
+      [orgId, o.day, o.done, o.email, o.by],
       o.id
     );
     const orderId = (await client.query(`SELECT id FROM book_orders WHERE filemaker_id = $1`, [o.id])).rows[0].id;
@@ -123,6 +131,7 @@ try {
   }
 
   for (const k of data.keys) {
+    if (changed.same(`key:${k.id}`, [k, k.holder ? (staff.get(k.holder) ?? null) : null])) continue;
     await upsert('staff_keys', ['number', 'kind', 'holder_id', 'is_active', 'note'], [k.number, k.kind, k.holder ? (staff.get(k.holder) ?? null) : null, k.active, k.note], k.id);
     count.keys++;
   }
@@ -133,6 +142,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`job:${j.id}`, [j, placeId])) continue;
     await upsert('cleaning_jobs', ['accommodation_id', 'job_de', 'job_en', 'filemaker_ref'], [placeId, j.de, j.en, j.ref], j.id);
     count.jobs++;
   }
@@ -142,6 +152,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`week:${w.id}`, [w, placeId, w.room ? (rooms.get(w.room) ?? null) : null])) continue;
     // The week's job by its number (0069): SchoolMan ties it to no task list.
     await upsert(
       'cleaning_weeks',
@@ -168,6 +179,8 @@ try {
     )
   ).rowCount;
   await client.query(`UPDATE accommodations SET cleaning_from = DATE '2026-01-05' WHERE cleaning_from IS NULL AND id IN (SELECT accommodation_id FROM cleaning_duties)`);
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -179,5 +192,5 @@ try {
 
 console.log(
   `programme ${count.programme} · services ${count.services} · internship places ${count.internships} · book orders ${count.orders} (${count.lines} lines, ` +
-    `${count.publishersMade} publishers new) · keys ${count.keys} · cleaning jobs ${count.jobs}, weeks ${count.weeks}, duties made ${count.duties} · ${count.notHere} not here`
+    `${count.publishersMade} publishers new) · keys ${count.keys} · cleaning jobs ${count.jobs}, weeks ${count.weeks}, duties made ${count.duties} · ${count.notHere} not here · ${count.unchanged ?? 0} as last time`
 );
