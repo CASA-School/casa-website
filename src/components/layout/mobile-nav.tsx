@@ -31,6 +31,10 @@ import { useSiteCopy } from '@/components/cms/site-copy-provider';
  * is large serif type on the page ground, the rows inside a panel are white
  * cards with icons in the logo colour of that part of the school. Escape steps
  * back out of a panel before it closes the menu.
+ *
+ * On a tablet (768 up to the desktop bar at 1280) the same sheet shows every
+ * section open in three columns instead, with one bar for contact and
+ * registration: the drill-down is a phone's answer to a phone's width.
  */
 
 type MobileNavProps = {
@@ -68,6 +72,19 @@ const copy = {
 } as const;
 
 const EASE = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
+
+/**
+ * The tablet menu's three columns, as positions in `navConfig.main`: what to learn (courses, groups),
+ * where to live and what to sit with the resources, and the school's own pages, the longest list.
+ * In menu order the third column held both long lists and the second stayed short. A position not
+ * named here joins the last column, so a new menu item still shows.
+ */
+const TABLET_COLUMNS = [[0, 1], [2, 3, 5], [4]].map((positions, column, columns) =>
+  (column === columns.length - 1
+    ? [...positions, ...navConfig.main.map((_, index) => index).filter((index) => !columns.flat().includes(index))]
+    : positions
+  ).filter((index) => navConfig.main[index])
+);
 const RISE = 'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 [animation-fill-mode:both]';
 
 const isDropdown = (item: NavDropdown | NavItem): item is NavDropdown => 'trigger' in item;
@@ -165,7 +182,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
         <SheetTitle className="sr-only">{t.title}</SheetTitle>
         <SheetDescription className="sr-only">{t.description}</SheetDescription>
 
-        <div className="relative flex h-16 shrink-0 items-center justify-between px-5 sm:px-8">
+        <div className="relative flex h-16 shrink-0 items-center justify-between px-5 sm:px-8 lg:px-12">
           <SheetClose asChild>
             <Link href="/" aria-label={say(contentLocale, 'Zur CASA-Startseite', 'Go to CASA homepage')} className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]">
               <Logo className="h-8 w-auto" />
@@ -207,7 +224,88 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
           <span aria-hidden className="casa-logo-stripe absolute inset-x-0 bottom-0 h-[3px]" />
         </div>
 
-        <div className="relative min-h-0 flex-1 overflow-hidden">
+        {/*
+          From a tablet up (Rahman, 2026-10-26): full screen, every section open at once in
+          three columns, so nothing is a tap away and the screen is filled rather than holding
+          the phone's narrow list in its middle. A heading opens that section's overview page.
+        */}
+        <nav aria-label={t.title} className="hidden min-h-0 flex-1 overflow-y-auto overscroll-contain md:block">
+          <div className="grid grid-cols-3 gap-x-10 px-8 pb-4 pt-8 lg:gap-x-16 lg:px-12 lg:pt-10 [@media(min-height:900px)]:pt-12">
+            {TABLET_COLUMNS.map((positions, column) => (
+              <div key={column}>
+                {positions.map((index) => {
+                  const item = navConfig.main[index];
+                  const heading = localizeNavText(isDropdown(item) ? item.trigger : item.label, contentLocale, say);
+                  const headingHref = isDropdown(item) ? (item.overview ? item.href : undefined) : item.href;
+                  const words = (heading ?? '').split(' ');
+                  const headingClass = cn(
+                    'group rounded-sm font-display text-[1.5rem] font-semibold leading-tight tracking-[-0.01em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] lg:text-[1.625rem]',
+                    index === currentIndex ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]',
+                    headingHref && 'hover:text-[var(--casa-accent-text)]'
+                  );
+                  return (
+                    <section
+                      key={index}
+                      className={cn('mb-8 last:mb-0 [@media(min-height:900px)]:mb-12', RISE)}
+                      style={{ animationDelay: `${60 + index * 45}ms` }}
+                    >
+                      <h2>
+                        {headingHref ? (
+                          <SheetClose asChild>
+                            <Link href={headingHref} aria-current={pathname === headingHref ? 'page' : undefined} className={headingClass}>
+                              {/* The arrow stays with the last word when a heading wraps. */}
+                              {words.slice(0, -1).map((word) => `${word} `)}
+                              <span className="whitespace-nowrap">
+                                {words.at(-1)}
+                                <ArrowRight className="ml-2 inline size-5 align-[-0.1em] text-[var(--casa-muted)] transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                              </span>
+                            </Link>
+                          </SheetClose>
+                        ) : (
+                          <span className={headingClass}>{heading}</span>
+                        )}
+                      </h2>
+                      {isDropdown(item)
+                        ? item.sections.map((section) => (
+                            <div key={section.title} className="mt-3">
+                              {item.sections.length > 1 ? (
+                                <h3 className="pt-1 text-[0.8125rem] font-semibold text-[var(--casa-muted)] [@media(min-height:900px)]:text-[0.9375rem]">
+                                  {localizeNavText(section.title, contentLocale, say)}
+                                </h3>
+                              ) : null}
+                              <ul>
+                                {section.items.map((sub) => {
+                                  const active = isCurrent(sub.href);
+                                  return (
+                                    <li key={sub.href}>
+                                      <SheetClose asChild>
+                                        <Link
+                                          href={sub.href}
+                                          aria-current={active ? 'page' : undefined}
+                                          className={cn(
+                                            'flex min-h-11 items-center rounded-sm py-1.5 text-[1.0625rem] font-medium leading-snug transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] [@media(min-height:900px)]:min-h-13 [@media(min-height:900px)]:text-[1.1875rem]',
+                                            active ? 'text-[var(--casa-accent-text)]' : 'text-[var(--casa-ink)]'
+                                          )}
+                                        >
+                                          {localizeNavText(sub.label, contentLocale, say)}
+                                        </Link>
+                                      </SheetClose>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          ))
+                        : null}
+                    </section>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        <div className="relative min-h-0 flex-1 overflow-hidden md:hidden">
           {/* The main list. */}
           <nav
             aria-label={t.title}
@@ -402,7 +500,48 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
           Registration is the action the filled control is for; advice is a
           question, and a question reads correctly as a link.
         */}
-        <div className="shrink-0 border-t border-[color:var(--casa-sand)]/80 bg-white/85 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:px-8">
+        {/* From a tablet up, one bar across the screen: the office hours, a call, an email, registration. */}
+        <div className="hidden shrink-0 border-t border-[color:var(--casa-sand)]/80 bg-white/85 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur md:block">
+          <div className="flex items-center gap-3 px-8 lg:px-12">
+            <div className="mr-auto min-w-0 pr-2">
+              <p className="font-display text-base font-semibold text-[var(--casa-ink)]">{t.help}</p>
+              <p className="text-[0.8125rem] leading-relaxed text-[var(--casa-muted)]">
+                {/* One line per day range on a narrow tablet, one line in all from 1024. */}
+                {footerConfig.contact.officeHours.map((entry, index) => (
+                  <span key={entry} className="block lg:inline">
+                    {index > 0 ? <span className="hidden lg:inline"> · </span> : null}
+                    {footerText(entry, contentLocale, say)}
+                  </span>
+                ))}
+              </p>
+            </div>
+            <a
+              href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
+              className="flex h-12 shrink-0 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
+            >
+              <Phone className="size-4" aria-hidden />
+              {t.call}
+            </a>
+            <a
+              href={footerConfig.contact.emails[0]?.href ?? 'mailto:info@casa-bremen.de'}
+              className="flex h-12 shrink-0 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[var(--casa-ink)] shadow-[var(--shadow-soft)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
+            >
+              <Mail className="size-4" aria-hidden />
+              {t.email}
+            </a>
+            {!isRegistrationPage && (
+              <Button asChild className="h-12 shrink-0 rounded-xl casa-button-prism bg-[var(--casa-ink-deep)] px-6 text-[0.9375rem] font-bold text-white hover:bg-[var(--casa-ink-deep-hover)]">
+                <SheetClose asChild>
+                  <Link href={isExamContext ? '/registration/exam' : '/registration/course'}>
+                    {isExamContext ? t.registerExam : t.registerCourse}
+                  </Link>
+                </SheetClose>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 border-t border-[color:var(--casa-sand)]/80 bg-white/85 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:px-8 md:hidden">
           <div className="mx-auto grid max-w-xl gap-2">
             {!isRegistrationPage && (
               <Button asChild className="h-12 w-full rounded-xl casa-button-prism bg-[var(--casa-ink-deep)] text-[0.9375rem] font-bold text-white hover:bg-[var(--casa-ink-deep-hover)]">
