@@ -93,7 +93,8 @@ describe('public form notifications', () => {
     expect(body.message.subject).toBe('[TEST] Kursanmeldung: Ada Lovelace – Intensive German');
     const content: string = body.message.body.content;
     expect(content).toContain('Neue Kursanmeldung');
-    expect(content).toContain('Referenz ref-1');
+    // The alert carries no request id: nobody at CASA looks a request up by it.
+    expect(content).not.toContain('ref-1');
     expect(content).toContain('href="mailto:ada@example.com"');
     expect(content).toContain('Intensive German');
     expect(content).toContain('Nicht benötigt');
@@ -135,9 +136,10 @@ describe('public form notifications', () => {
     expect(content).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
   });
   it('names only the position for a job application, and no token in a placement subject', async () => {
-    const careers = await sentMessage('careers', { requestId: 'r', positionTitle: 'Lehrkraft DaF', locale: 'de' });
+    const careers = await sentMessage('careers', { requestId: 'r', positionTitle: 'Lehrkraft DaF', locale: 'de' }, { stored: true });
     expect(careers.message.subject).toBe('[TEST] Bewerbung: Lehrkraft DaF');
-    expect(careers.message.body.content).toContain('„Bewerbungen“');
+    expect(careers.message.body.content).toContain('href="https://admin.casa-bremen.de/applications"');
+    expect(careers.message.body.content).toContain('>Bewerbungen</a>');
     const placement = await sentMessage('placement', { token: 'secret-token', band: 'B1.1', confidence: 'medium', locale: 'de' });
     expect(placement.message.subject).toBe('[TEST] Einstufungstest: Empfehlung B1.1');
     expect(placement.message.subject).not.toContain('secret-token');
@@ -159,11 +161,12 @@ describe('public form notifications', () => {
     const stored = await sentMessage('contact', { requestId: 'r' }, { stored: true });
     const notStored = await sentMessage('contact', { requestId: 'r' }, { stored: false });
     const unknown = await sentMessage('contact', { requestId: 'r' });
-    expect(stored.message.body.content).toContain('Auch im Arbeitsbereich gespeichert.');
+    expect(stored.message.body.content).toContain('Im Arbeitsbereich unter ');
+    expect(stored.message.body.content).toContain('href="https://admin.casa-bremen.de/enquiries"');
     expect(notStored.message.body.content).toContain('Diese E-Mail ist der einzige Eintrag.');
     for (const message of [stored.message, notStored.message]) {
       expect(message.subject.startsWith('[TEST] ')).toBe(true);
-      expect(message.body.content).toContain('Testbetrieb: Alle Formular-E-Mails gehen derzeit an admin@casa-bremen.de.');
+      expect(message.body.content).toContain('Test: Formular-E-Mails gehen derzeit an admin@casa-bremen.de.');
     }
     expect(unknown.message.body.content).not.toContain('Arbeitsbereich');
   });
@@ -287,11 +290,11 @@ describe('confirmation to the sender', () => {
     expect(message.attachments[0]).toEqual(expect.objectContaining({ contentId: 'casa-logo', isInline: true }));
   });
 
-  it('prints the catalogue choices and the reference, never what the sender typed', async () => {
+  it('prints the catalogue choices, never what the sender typed, and no request id', async () => {
     const { message } = await confirmation('course', course);
     const content: string = message.body.content;
     expect(content).toContain('Intensivkurs Deutsch');
-    expect(content).toContain('ref-42');
+    expect(content).not.toContain('ref-42');
     expect(content).not.toContain('PRIVATE-ALLERGY');
     expect(content).not.toContain('PRIVATE-NOTE');
     const contact = (await confirmation('contact', {
@@ -408,13 +411,22 @@ describe('confirmation to the sender', () => {
     expect(contact).toContain('href="tel:+4942146041430"');
   });
 
+  it('shows an exam candidate the name to check, never the date of birth a mistyped address would receive', async () => {
+    const content = (await confirmation('exam', {
+      requestId: 'r', locale: 'de', firstName: 'Maria', lastName: 'Rossi', email: 'maria@example.com',
+      examTypeLabel: 'telc Deutsch B2', birthDate: '1998-04-17',
+    })).message.body.content as string;
+    expect(content).toContain('Maria Rossi');
+    expect(content).not.toContain('1998');
+  });
+
   it('tells an interested learner they are on the list, and that nothing is booked yet', async () => {
     const content = (await confirmation('interest', {
       requestId: 'r', locale: 'de', firstName: 'Amira', email: 'amira@example.com', courseName: 'Deutsch für Pflege und Medizin',
     })).message.body.content as string;
     expect(content).toContain('Danke für dein Interesse');
     expect(content).toContain('Deutsch für Pflege und Medizin');
-    expect(content).toContain('Bis dahin entstehen dir keine Kosten.');
+    expect(content).toContain('Der Eintrag ist unverbindlich und kostet nichts.');
     expect(content).toContain('Hallo Amira,');
   });
 

@@ -263,7 +263,6 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
   }, []);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
-  const [requestId, setRequestId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof initialFields, string>>>({});
   const [briefOpen, setBriefOpen] = useState(false);
   const messageLength = fields.message.trim().length;
@@ -291,7 +290,6 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     setStatus('idle');
     setFeedbackMessage('');
     setFieldErrors({});
-    setRequestId(null);
   };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -300,7 +298,6 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
     const form = event.currentTarget;
     setStatus('submitting');
     setFeedbackMessage('');
-    setRequestId(null);
     setFieldErrors({});
 
     // Only the brief fields that belong to the selected topic travel with the
@@ -380,7 +377,6 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       }
 
       setFeedbackMessage(result.message || copy.successBody);
-      setRequestId(result.requestId || null);
       setConfirmationSent(result.confirmationSent === true);
       setStatus('success');
       setFields({
@@ -428,11 +424,6 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
               <p className="text-lg font-bold text-[var(--casa-success-text)]">{copy.successTitle}</p>
               <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{feedbackMessage || copy.successBody}</p>
               {confirmationSent ? <p className="mt-1 text-sm leading-relaxed text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
-              {requestId ? (
-                <p className="mt-3 text-xs font-medium text-[var(--casa-muted)]">
-                  {say(locale, 'Deine Referenz', 'Your reference')}: <span className="break-all font-mono">{requestId}</span>
-                </p>
-              ) : null}
             </div>
           </div>
           <Button type="button" variant="outline" className={cn(formSecondaryButtonClassName, 'mt-5')} onClick={resetForm}>

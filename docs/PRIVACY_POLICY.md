@@ -36,7 +36,7 @@ the same in both languages.
 - Mailboxes: contact and group enquiries → `info@`; course, exam and accommodation
   registrations → `online@` (learners email their Klett result there themselves); appointment requests → the responsible
   contact person's mailbox (group consultations: Ina Eismann), who confirms by email;
-  job-application alerts → `info@`, naming only the position and a reference.
+  job-application alerts → `info@`, naming only the position (no reference since 2026-10-26).
 - Job applications themselves: management only, in the workspace's Applications module.
 - Host families get name, age, gender, nationality, German level, dates of stay, and
   allergies only with the separate consent. No smoking in any CASA accommodation, so the
@@ -49,8 +49,8 @@ the same in both languages.
 - CLARA and the search answer from CASA's own index of the website, on CASA's server (§17 as
   published). CLARA's AI mode (`CLARA_AI`, off; docs/CLARA_AND_SEARCH.md) would send the
   visitor's messages to a model provider: §17 must name that processor before it is switched on.
-- Since 2026-10-01 the sender gets a confirmation (receipt): their name, the reference and their
-  catalogue choices, never their free text; no copy kept; at most three per inbox in 24 hours per
+- Since 2026-10-01 the sender gets a confirmation (receipt): their name and their catalogue
+  choices, never their free text or date of birth (no reference since 2026-10-26); no copy kept; at most three per inbox in 24 hours per
   server process (§14, §15, §16, §19).
 - Logs: Log Analytics `log-casa-prod`, Germany West Central, 30 days (verified 2026-09-30);
   no Application Insights on `ca-casa-website`.
@@ -78,7 +78,7 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 1. Ina's mailbox address, for `FORM_RECIPIENT_APPOINTMENT`.
 2. Minors: may someone under 18 register for a course, exam or accommodation without a
    parent or guardian? The policy says nothing about it today.
-3. Job-application alert to `info@`: the site now sends only the position and a reference,
+3. Job-application alert to `info@`: the site now sends only the position,
    so nobody outside management sees applicant data. Confirm that is what you want.
 4. Where the careers page's email fallback should point once `bewerbungen@` is retired
    (`src/lib/mock/store.ts`, and `apply_email` per position in the database).
@@ -94,7 +94,7 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
    used only to tell people when the course starts, never for marketing.
 
 8. AGB 2.2 promises „eine Kopie der Anmeldung per E-Mail". The new receipt deliberately shows only
-   the name, the catalogue choices and the reference, so a mistyped address reveals little. Either
+   the name and the catalogue choices, so a mistyped address reveals little. Either
    amend 2.2 („erhält eine Eingangsbestätigung per E-Mail; sie ist noch keine Annahme") or decide
    to send the full copy. Also whether the receipt should carry the Widerrufsbelehrung on a
    durable medium.

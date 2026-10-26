@@ -29,7 +29,7 @@ export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'p
 type Locale = 'de' | 'en';
 type Payload = Record<string, unknown>;
 
-type Row = { label: string; value: string | null; href?: string; detail?: string; block?: boolean; item?: boolean; mono?: boolean };
+type Row = { label: string; value: string | null; href?: string; detail?: string; block?: boolean; item?: boolean };
 type Section = { title: string | null; rows: Row[] };
 type Action = { label: string; href: string; hint: string | null };
 type Mail = {
@@ -50,11 +50,11 @@ const COPY = {
     language: 'Deutsch',
     yes: 'Ja',
     no: 'Nein',
-    test: (to: string) => `Testbetrieb: Alle Formular-E-Mails gehen derzeit an ${to}.`,
-    replyHint: 'Oder antworten Sie einfach auf diese E-Mail.',
-    reference: 'Referenz',
+    test: (to: string) => `Test: Formular-E-Mails gehen derzeit an ${to}.`,
+    replyHint: 'Oder antworte einfach auf diese E-Mail.',
     formLanguage: 'Sprache',
-    stored: 'Auch im Arbeitsbereich gespeichert.',
+    stored: (inbox: string) => `Im Arbeitsbereich unter ${inbox} gespeichert.`,
+    inboxes: { enquiries: 'Anfragen', registrations: 'Anmeldungen', applications: 'Bewerbungen', placement: 'Einstufungstests' },
     notStored: 'Nicht im Arbeitsbereich gespeichert. Diese E-Mail ist der einzige Eintrag.',
     generated: (source: string) => `Automatisch erstellt ${source} auf casa-bremen.de.`,
     address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen',
@@ -103,7 +103,7 @@ const COPY = {
     courseTitle: 'Neue Kursanmeldung',
     courseSource: 'aus der Kursanmeldung',
     courseLead: (name: string, course: string | null) =>
-      course ? `${name} hat sich für den Kurs „${course}“ angemeldet.` : `${name} hat sich für einen Kurs angemeldet.`,
+      course ? `${name} hat sich für ${course} angemeldet.` : `${name} hat sich für einen Kurs angemeldet.`,
     courseReply: 'Deine Kursanmeldung bei CASA',
     course: 'Kurs',
     dates: 'Zeitraum',
@@ -134,7 +134,7 @@ const COPY = {
     examTitle: 'Neue Prüfungsanmeldung',
     examSource: 'aus der Prüfungsanmeldung',
     examLead: (name: string, exam: string | null) =>
-      exam ? `${name} hat sich zur Prüfung „${exam}“ angemeldet.` : `${name} hat sich zu einer Prüfung angemeldet.`,
+      exam ? `${name} hat sich für ${exam} angemeldet.` : `${name} hat sich zu einer Prüfung angemeldet.`,
     examReply: 'Deine Prüfungsanmeldung bei CASA',
     exam: 'Prüfung',
     examSession: 'Termin',
@@ -159,7 +159,7 @@ const COPY = {
     duration: 'Dauer',
     minutes: (n: string) => `${n} Minuten`,
     confirmAppointment: 'Termin bestätigen',
-    confirmHint: (address: string) => `Die Antwort geht an ${address}. Ergänzen Sie vor dem Senden, wie das Gespräch stattfindet.`,
+    confirmHint: (address: string) => `Die Antwort geht an ${address}. Ergänze vor dem Senden, wie das Gespräch stattfindet.`,
     confirmSubject: (day: string, time: string) => `Dein Beratungstermin bei CASA: ${day}, ${time} Uhr`,
     confirmBody: (greeting: string, day: string, time: string, minutes: string) =>
       `${greeting}\n\nvielen Dank für deine Anfrage. Gerne bestätige ich deinen Beratungstermin am ${day}, um ${time} Uhr (Bremer Zeit). `
@@ -185,7 +185,7 @@ const COPY = {
     careersSource: 'aus dem Bewerbungsformular',
     careersLead: (position: string | null) =>
       position ? `Für die Stelle „${position}“ ist eine neue Bewerbung eingegangen.` : 'Eine neue Bewerbung ist eingegangen.',
-    careersNote: 'Bewerbung und Lebenslauf finden Sie im Arbeitsbereich unter „Bewerbungen“. Diese E-Mail enthält bewusst keine persönlichen Angaben.',
+    careersNote: 'Diese E-Mail enthält bewusst keine persönlichen Angaben.',
     position: 'Stelle',
 
     placementKind: 'Einstufungstest',
@@ -194,7 +194,7 @@ const COPY = {
     placementLead: (band: string | null) =>
       band ? `Ein Einstufungstest auf der Website ist abgeschlossen. Das System empfiehlt ${band}; die Einstufung bestätigt eine Lehrkraft.`
       : 'Ein Einstufungstest auf der Website ist abgeschlossen.',
-    placementNote: 'Prüfen und bestätigen Sie die Empfehlung im Arbeitsbereich unter „Einstufungstests“.',
+    placementNote: 'Prüfe und bestätige die Empfehlung im Arbeitsbereich unter „Einstufungstests“.',
     recommendation: 'Empfehlung',
     confidence: 'Sicherheit',
     confidences: { high: 'Hoch', medium: 'Mittel', low: 'Niedrig' } as Record<string, string>,
@@ -233,11 +233,11 @@ const COPY = {
     language: 'English',
     yes: 'Yes',
     no: 'No',
-    test: (to: string) => `Test mode: all form emails currently go to ${to}.`,
+    test: (to: string) => `Test: form emails currently go to ${to}.`,
     replyHint: 'Or simply reply to this email.',
-    reference: 'Reference',
     formLanguage: 'Language',
-    stored: 'Also stored in the staff workspace.',
+    stored: (inbox: string) => `Stored in the workspace under ${inbox}.`,
+    inboxes: { enquiries: 'Enquiries', registrations: 'Registrations', applications: 'Applications', placement: 'Placement tests' },
     notStored: 'Not stored in the staff workspace. This email is the only record.',
     generated: (source: string) => `Generated automatically ${source} on casa-bremen.de.`,
     address: 'CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany',
@@ -285,7 +285,7 @@ const COPY = {
     courseTitle: 'New course registration',
     courseSource: 'from the course registration',
     courseLead: (name: string, course: string | null) =>
-      course ? `${name} has registered for the course “${course}”.` : `${name} has registered for a course.`,
+      course ? `${name} has registered for ${course}.` : `${name} has registered for a course.`,
     courseReply: 'Your course registration at CASA',
     course: 'Course',
     dates: 'Dates',
@@ -316,7 +316,7 @@ const COPY = {
     examTitle: 'New exam registration',
     examSource: 'from the exam registration',
     examLead: (name: string, exam: string | null) =>
-      exam ? `${name} has registered for the exam “${exam}”.` : `${name} has registered for an exam.`,
+      exam ? `${name} has registered for ${exam}.` : `${name} has registered for an exam.`,
     examReply: 'Your exam registration at CASA',
     exam: 'Exam',
     examSession: 'Date',
@@ -367,7 +367,7 @@ const COPY = {
     careersSource: 'from the application form',
     careersLead: (position: string | null) =>
       position ? `A new application has arrived for the position “${position}”.` : 'A new application has arrived.',
-    careersNote: 'The application and CV are in the workspace under Applications. This email deliberately contains no personal details.',
+    careersNote: 'This email deliberately contains no personal details.',
     position: 'Position',
 
     placementKind: 'Placement test',
@@ -481,7 +481,7 @@ function personSection(p: Payload, locale: Locale, c: Copy, extra: Row[] = []): 
 
 /** `dates | schedule | location` from the catalogue, as one row per part. */
 function optionRows(label: unknown, names: string[], fallback: string): Row[] {
-  const parts = text(label)?.split(' | ').map((part) => part.trim()).filter(Boolean) ?? [];
+  const parts = text(label)?.split(' | ').map((part) => rangeDash(part.trim())).filter(Boolean) ?? [];
   if (parts.length !== names.length) return [{ label: fallback, value: parts.join(' · ') || null }];
   return parts.map((value, index) => ({ label: names[index], value }));
 }
@@ -859,9 +859,7 @@ function rowHtml(row: Row) {
   }
   const shown = row.href
     ? `<a href="${escape(row.href)}" style="color:${LINK};text-decoration:underline;">${escape(value)}</a>`
-    : row.mono
-      ? `<span style="font-family:Menlo,Consolas,'Courier New',monospace;font-size:13px;word-break:break-all;">${escape(value)}</span>`
-      : multiline(value);
+    : multiline(value);
   const detail = row.detail ? `<div style="${SANS}padding-top:3px;font-size:13px;line-height:19px;color:${MUTED};">${escape(row.detail)}</div>` : '';
   return `<tr class="row"><td class="label" valign="top" width="200" style="${SANS}width:200px;padding:7px 16px 7px 0;font-size:14px;line-height:21px;color:${MUTED};">${escape(row.label)}</td>`
     + `<td class="value" valign="top" style="${SANS}padding:7px 0;font-size:15px;line-height:22px;color:${INK};">${shown}${detail}</td></tr>`;
@@ -931,17 +929,29 @@ function renderShell(input: {
     + `</td></tr></table></body></html>`;
 }
 
+/** The workspace inbox each form's record lands in, on the workspace's own host. */
+const INBOX: Record<FormKind, keyof Copy['inboxes']> = {
+  contact: 'enquiries', groups: 'enquiries', interest: 'enquiries', appointment: 'enquiries',
+  course: 'registrations', exam: 'registrations', careers: 'applications', placement: 'placement',
+};
+
+function workspaceLink(kind: FormKind, c: Copy) {
+  const origin = (process.env.CMS_EDITOR_ORIGIN?.trim() || 'https://admin.casa-bremen.de').replace(/\/$/, '');
+  const inbox = INBOX[kind];
+  const label = `<a href="${escape(`${origin}/${inbox}`)}" style="color:${LINK};text-decoration:underline;">${escape(c.inboxes[inbox])}</a>`;
+  return escape(c.stored('\u0000')).replace('\u0000', label);
+}
+
 export function buildFormMail(kind: FormKind, payload: Payload, options: FormMailOptions) {
   const locale: Locale = payload.locale === 'en' ? 'en' : 'de';
   const c = COPY[locale];
   const mail = mailFor(kind, payload, locale);
-  const reference = kind === 'placement' ? null : text(payload.requestId);
   const received = formatInstant(payload.submittedAt, locale);
   const kicker = [mail.kindLabel, received].filter(Boolean).join(' · ');
 
-  const meta = [reference ? `${c.reference} ${reference}` : null, `${c.formLanguage}: ${c.language}`].filter(Boolean).join(' · ');
+  const meta = `${c.formLanguage}: ${c.language}`;
   const storage =
-    options.stored === true ? escape(c.stored)
+    options.stored === true ? workspaceLink(kind, c)
     : options.stored === false ? `<strong style="color:#d20612;">${escape(c.notStored)}</strong>`
     : '';
 
@@ -1048,7 +1058,6 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
   const stay = p.accommodationRequired === true ? (c.accommodationTypes[String(p.accommodationType)] ?? null) : null;
   const site = getSiteUrl();
   return {
-    reference: text(p.requestId),
     firstName: first,
     lastName: last,
     phone: '+49 421 460 414 30',
@@ -1127,9 +1136,9 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
   const rows = copy.summaryRows
     // `{moreCourses}` is one row per further course, under the same label.
     .flatMap((row) => row.value === '{moreCourses}'
-      ? (values.moreCourses ?? '').split('\n').filter(Boolean).map((value) => ({ label: row.label as string, value, mono: false }))
-      : [{ label: row.label as string, value: line(row.value), mono: row.value === '{reference}' }])
-    .filter((row): row is { label: string; value: string; mono: boolean } => Boolean(row.value));
+      ? (values.moreCourses ?? '').split('\n').filter(Boolean).map((value) => ({ label: row.label as string, value }))
+      : [{ label: row.label as string, value: line(row.value) }])
+    .filter((row): row is { label: string; value: string } => Boolean(row.value));
   const steps = copy.nextSteps.map((step) => line(step.text)).filter((step): step is string => Boolean(step));
   const paragraphs = (value: string | null) =>
     value ? value.split(/\n\s*\n/).map((part) => paragraph(part.trim())).join('') : '';
@@ -1171,8 +1180,8 @@ export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, 
 
   const testLine = options.test
     ? (locale === 'de'
-      ? `Testbetrieb: Diese Bestätigung ginge an ${options.intendedRecipient}. Sie wurde stattdessen an ${options.testRecipient} gesendet.`
-      : `Test mode: this confirmation would go to ${options.intendedRecipient}. It was sent to ${options.testRecipient} instead.`)
+      ? `Test: Diese E-Mail ginge an ${options.intendedRecipient}, nicht an ${options.testRecipient}.`
+      : `Test: this email would go to ${options.intendedRecipient}, not ${options.testRecipient}.`)
     : null;
 
   const html = renderShell({
