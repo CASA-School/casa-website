@@ -46,7 +46,7 @@ const country = (name) => {
 
 const parties = await readStdin();
 const client = await connect();
-const count = { read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, sharedEmail: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0 };
+const count = { log: 0, read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, sharedEmail: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0 };
 
 try {
   await client.query('BEGIN');
@@ -168,6 +168,19 @@ try {
     count.letters += (
       await client.query(`UPDATE letters SET organisation_id = $1 WHERE filemaker_letter_id = ANY($2::text[]) AND organisation_id IS DISTINCT FROM $1`, [orgId, p.letters ?? []])
     ).rowCount;
+    // Its history as SchoolMan has it now (2026-10-26): about itself, or about a learner here.
+    await client.query(`DELETE FROM staff_activity WHERE action = 'schoolman_log' AND entity = 'organisation' AND entity_id = $1`, [orgId]);
+    if (p.log?.length) {
+      count.log += (
+        await client.query(
+          `INSERT INTO staff_activity (staff_name, entity, entity_id, action, detail, created_at)
+           SELECT coalesce(v.author, 'SchoolMan'), 'organisation', $1, 'schoolman_log', jsonb_build_object('text', v.text, 'ref', v.ref),
+                  coalesce(v.at::timestamp AT TIME ZONE 'Europe/Berlin', timezone('utc', now()))
+             FROM unnest($2::text[], $3::text[], $4::text[], $5::text[]) AS v(author, text, ref, at)`,
+          [orgId, p.log.map((w) => w.author), p.log.map((w) => w.text), p.log.map((w) => w.ref), p.log.map((w) => w.at)]
+        )
+      ).rowCount;
+    }
     if (p.courses.length) {
       count.courses += (
         await client.query(
@@ -191,5 +204,5 @@ try {
 console.log(
   `${count.read} organisations read: ${count.unchanged ?? 0} as last time, ${count.made} new, ${count.known} known (${count.byName} by their name here) · ${count.noName} without a name left out\n` +
     `${count.contacts} contacts (${count.sharedEmail} without an address another contact there has) · ${count.commissions} commission terms (${count.commissionsRemoved} no longer in SchoolMan removed) · ` +
-    `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked`
+    `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked · ${count.log} history lines`
 );

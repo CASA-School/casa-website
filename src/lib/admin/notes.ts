@@ -19,7 +19,8 @@ export type NoteEntity =
   | 'person'
   | 'offer'
   | 'group_visit'
-  | 'accommodation';
+  | 'accommodation'
+  | 'organisation';
 
 export type StaffNote = {
   id: string;

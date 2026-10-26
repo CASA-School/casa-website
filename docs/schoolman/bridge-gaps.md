@@ -15,7 +15,10 @@ generated birthday texts kept out of attendance comments; a payment without a la
 charge type (`_ID_CostDetailReference`); refunds' comment from `Comment`; an invoice's amount from its cost
 lines when `Invoice::Amount` is empty; the waiting list's course through its pre-booking (0 → 147 entries
 locally); lesson days SchoolMan re-planned under new numbers relinked to them (80), and future days it
-dropped removed unless changed here, attended or merged.
+dropped removed unless changed here, attended or merged. Then: exam parts and examiners (`read_exams.py`); an organisation's
+history from the work log (8,977 lines on 178 organisations locally; lines about learners the workspace does
+not hold stay in SchoolMan). SchoolMan's teacher plan (`DateStaffAtWork`) matched Kursplanung's pairs in 80 of
+90 group-months and was not brought across.
 
 **The one gap behind most of the others: the sample.** Everything about learners is cut by `sample.py`:
 a booked period this week or in the next four weeks, plus this year's group participants. Run 3 brought

@@ -21,7 +21,7 @@ import collections, json, os, re, sys
 from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from fm_read import column  # noqa: E402
+from fm_read import column, column_chunked  # noqa: E402
 from sample import sample_persons  # noqa: E402
 
 
@@ -215,6 +215,28 @@ for lid, agency, corp in zip(column('Letter', '__ID_Letter'), column('Letter', '
     if p:
         letters_of[id(p)].append(lid.strip())
 
+# Its history (2026-10-26, mapping review §8): the work-log lines that name it, about itself or about a
+# learner the workspace holds. A line about someone it does not hold stays in SchoolMan.
+def moment(value):
+    """`15.03.2021 14:05:09` → `2021-03-15T14:05:09`; a date alone at noon."""
+    m = re.match(r'\s*(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?', value or '')
+    if not m:
+        return None
+    hh, mm, ss = (int(m.group(4)), int(m.group(5)), int(m.group(6) or 0)) if m.group(4) else (12, 0, 0)
+    return f'{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}T{hh:02d}:{mm:02d}:{ss:02d}'
+
+
+log_of = collections.defaultdict(list)
+wf = table('WorkFlow', '__ID_Workflow', '_ID_Person', '_ID_Booking', *LINKS, 'UserName', 'TimeStampOfCreation')
+for r, line, comment in zip(wf, column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'CommentWorkflow', 5000)):
+    p = party_of(r)
+    if not p:
+        continue
+    person = first(r['_ID_Person']) or first(bookings.get(first(r['_ID_Booking']), {}).get('_ID_Person'))
+    body = '\n'.join(x.strip() for x in (line, comment) if x and x.strip())
+    if body and (not person or person in chosen):
+        log_of[id(p)].append({'ref': r['__ID_Workflow'].strip(), 'at': moment(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None, 'text': body[:4000]})
+
 out = []
 for p in parties:
     o = own[id(p)]
@@ -230,7 +252,8 @@ for p in parties:
                     b['__ID_Booking'].strip() for b in theirs
                     if first(b['_ID_Agency' if p['kind'] == 'agency' else '_ID_Corporate']) == p['id'] and (p['kind'] == 'agency' or first(b['_ID_PaymentThird']) != '2')),
                 'courses': sorted(c for c, corp in course_corporates.items() if p['kind'] == 'company' and not p.get('relation') and corp == p['id']),
-                'letters': letters_of[id(p)]})
+                'letters': letters_of[id(p)],
+                'log': sorted(log_of[id(p)], key=lambda x: (x['at'] or '', x['ref']))})
 
 if '--stats' in sys.argv:
     print('other parties', dict(collections.Counter(p['relation'] for p in out if p.get('relation'))))
@@ -240,7 +263,8 @@ if '--stats' in sys.argv:
           '· phone', sum(bool(p['phone']) for p in out), '· address', sum(bool(p['address']) for p in out), '· agreement', sum(bool(p['agreement']) for p in out))
     print('contacts', sum(len(p['contacts']) for p in out), '· with a job title', sum(bool(c['role']) for p in out for c in p['contacts']),
           '· commission terms', sum(len(p['commissions']) for p in out), f'(+{per_booking} on single bookings)', '· bookings named', sum(len(p['bookings']) for p in out),
-          '· courses', sum(len(p['courses']) for p in out), '· letters naming them', sum(len(p['letters']) for p in out))
+          '· courses', sum(len(p['courses']) for p in out), '· letters naming them', sum(len(p['letters']) for p in out),
+          '· history lines', sum(len(p['log']) for p in out))
     sys.exit(0)
 
 json.dump(out, sys.stdout, ensure_ascii=False)
