@@ -16,6 +16,7 @@
  * - The comments on a place become its notes, under their SchoolMan author.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -31,7 +32,13 @@ try {
   await client.query('BEGIN');
   const roomTypes = new Map((await client.query(`SELECT code, filemaker_id::text AS fm FROM accommodation_room_types WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.code]));
 
+  // A place as it was last time, its reservations' groups here as they were, is passed over (0088).
+  const changed = await changes(client, 'accommodation');
+  const groupsHere = new Set((await client.query(`SELECT filemaker_group_id::text AS k FROM group_visits WHERE filemaker_group_id IS NOT NULL`)).rows.map((r) => r.k));
+  const vocabulary = [...roomTypes];
+
   for (const p of places) {
+    if (changed.same(p.id, [p, vocabulary, p.reservations.map((r) => groupsHere.has(String(r.group)))])) continue;
     const values = [
       p.name.slice(0, 200),
       p.kind,
@@ -160,6 +167,8 @@ try {
         WHERE a.filemaker_id = s.filemaker_place_id AND s.accommodation_id IS DISTINCT FROM a.id`
     )
   ).rowCount;
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -170,7 +179,7 @@ try {
 }
 
 console.log(
-  `${count.read} places read: ${count.made} new, ${count.updated} updated, ${count.keptHere} changed here (only gaps filled)\n` +
+  `${count.read} places read: ${count.unchanged ?? 0} as last time, ${count.made} new, ${count.updated} updated, ${count.keptHere} changed here (only gaps filled)\n` +
     `${count.members} family members · ${count.rooms} rooms · ${count.reservations} group reservations · ${count.gone} no longer in SchoolMan removed · ` +
     `${count.stays} stays placed · ${count.notes} comments`
 );

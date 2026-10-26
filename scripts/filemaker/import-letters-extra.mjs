@@ -12,6 +12,7 @@
  * - A complaint is a note on its booking, else on the learner, under its SchoolMan author.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -32,6 +33,8 @@ try {
   const places = await map(`SELECT filemaker_id AS k, id AS v FROM accommodations WHERE filemaker_id IS NOT NULL`);
   const persons = await map(`SELECT source_record_id AS k, entity_id AS v FROM filemaker_links WHERE entity = 'person' AND source_database = 'SchoolMan' AND source_layout = 'Person'`);
 
+  // A letter or complaint as it was last time, on the same records here, is passed over (0088).
+  const changed = await changes(client, 'letters-extra');
   for (const s of statements) {
     const placeId = s.place ? (places.get(s.place) ?? null) : null;
     const bookingId = bookings.get(s.booking) ?? null;
@@ -39,6 +42,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`statement:${s.ref}`, [s, placeId, bookingId])) continue;
     const doc = letterDocument(s, 'schoolman');
     const subject = doc.subject.title || 'Brief an die Unterkunft';
     const recipient = doc.recipient[0] ?? '';
@@ -89,6 +93,7 @@ try {
       count.notHere++;
       continue;
     }
+    if (changed.same(`complaint:${c.ref}`, [c, bookingId, personId])) continue;
     await client.query(
       `INSERT INTO staff_notes (entity, entity_id, body, author_name, filemaker_ref, created_at)
        VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
@@ -97,6 +102,8 @@ try {
     );
     count.complaints++;
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -107,5 +114,5 @@ try {
 }
 
 console.log(
-  `${count.statements} letters to hosts new, ${count.updated} updated · ${count.via} letters told how they went · ${count.complaints} complaints · ${count.notHere} not here`
+  `${count.statements} letters to hosts new, ${count.updated} updated · ${count.via} letters told how they went · ${count.complaints} complaints · ${count.notHere} not here · ${count.unchanged ?? 0} as last time`
 );

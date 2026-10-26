@@ -20,6 +20,7 @@
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -60,12 +61,25 @@ try {
         )
       : null;
 
+  // A party as it was last time, with the same bookings, letters and courses here, is passed over (0088): a
+  // booking that arrives with the learners changes the fingerprint, so its payer is set that run.
+  const changed = await changes(client, 'organisations');
+  const here = async (sql) => new Set((await client.query(sql)).rows.map((r) => String(r.k)));
+  const bookingsHere = await here(`SELECT filemaker_booking_id AS k FROM bookings WHERE filemaker_booking_id IS NOT NULL`);
+  const lettersHere = await here(`SELECT filemaker_letter_id AS k FROM letters WHERE filemaker_letter_id IS NOT NULL`);
+  const coursesHere = await here(
+    `SELECT filemaker_course_id AS k FROM courses WHERE filemaker_course_id IS NOT NULL UNION SELECT unnest(filemaker_group_ids) FROM courses`
+  );
+  const vocabulary = [...chargeTypes];
+
   // The agency first: a booking naming both is paid through the agency.
   for (const p of [...parties].sort((a, b) => Number(a.kind === 'company') - Number(b.kind === 'company'))) {
     if (!p.name) {
       count.noName++;
       continue;
     }
+    const matched = [p.bookings.filter((b) => bookingsHere.has(String(b))), (p.letters ?? []).filter((l) => lettersHere.has(String(l))), p.courses.filter((c) => coursesHere.has(String(c)))];
+    if (changed.same(`${p.relation ? 'Management' : LAYOUT[p.kind]}:${p.id}`, [p, matched, vocabulary])) continue;
     const code = country(p.address?.country);
     const countryCode = code && valid.has(code) ? code : null;
     const address = p.address ? [p.address.street, [p.address.postcode, p.address.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || null : null;
@@ -163,6 +177,8 @@ try {
       ).rowCount;
     }
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -173,7 +189,7 @@ try {
 }
 
 console.log(
-  `${count.read} organisations read: ${count.made} new, ${count.known} known (${count.byName} by their name here) · ${count.noName} without a name left out\n` +
+  `${count.read} organisations read: ${count.unchanged ?? 0} as last time, ${count.made} new, ${count.known} known (${count.byName} by their name here) · ${count.noName} without a name left out\n` +
     `${count.contacts} contacts (${count.sharedEmail} without an address another contact there has) · ${count.commissions} commission terms (${count.commissionsRemoved} no longer in SchoolMan removed) · ` +
     `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked`
 );

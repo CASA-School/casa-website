@@ -8,6 +8,7 @@
  * SchoolMan's reference, and a re-run writes it again — SchoolMan's time sheet is the one kept by finance.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -24,12 +25,15 @@ try {
   const staff = new Map(
     (await client.query(`SELECT id, filemaker_staff_id::text AS fm FROM staff_members WHERE filemaker_staff_id IS NOT NULL`)).rows.map((r) => [r.fm, r.id])
   );
+  // A month or year as it was last time is passed over (0088).
+  const changed = await changes(client, 'time');
   for (const m of months) {
     const member = staff.get(m.staff);
     if (!member) {
       count.noColleague++;
       continue;
     }
+    if (changed.same(`month:${member}:${m.month}`, m)) continue;
     await client.query(
       `INSERT INTO staff_time_months (staff_member_id, month, balance_hours, running_hours, holiday_days_left, approved, filemaker_ref)
        VALUES ($1, ($2 || '-01')::date, $3, $4, $5, $6, $7)
@@ -46,6 +50,7 @@ try {
       count.noColleague++;
       continue;
     }
+    if (changed.same(`year:${member}:${y.year}`, y)) continue;
     await client.query(
       `INSERT INTO staff_time_years (staff_member_id, year, holiday_days, holiday_days_left, running_hours, filemaker_ref)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -56,6 +61,8 @@ try {
     );
     count.years++;
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -65,4 +72,6 @@ try {
   await client.end();
 }
 
-console.log(`${count.months} months and ${count.years} years of working time written · skipped: ${count.noColleague} of a colleague not here`);
+console.log(
+  `${count.months} months and ${count.years} years of working time written · ${count.unchanged ?? 0} as last time · skipped: ${count.noColleague} of a colleague not here`
+);

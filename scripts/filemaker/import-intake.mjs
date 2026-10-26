@@ -14,6 +14,7 @@
  *   here, else closed („no place") once the course has begun, else still waiting.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -42,6 +43,8 @@ try {
     ).rows.map((r) => [r.k, r])
   );
 
+  // A pre-booking or waiting-list entry as it was last time, on the same records here, is passed over (0088).
+  const changed = await changes(client, 'intake');
   for (const p of preBookings) {
     const personId = persons.get(p.person);
     if (!personId) {
@@ -59,6 +62,7 @@ try {
       p.state === 'ja' || p.state === 'nein' ? `Status ${p.state}` : null,
     ].filter(Boolean);
     const body = `Anmeldung in SchoolMan${parts.length ? `: ${parts.join(' · ')}` : ''}`;
+    if (changed.same(`pre-booking:${p.id}`, [p, personId, bookingId, body])) continue;
     await client.query(
       `INSERT INTO staff_notes (entity, entity_id, body, author_name, filemaker_ref, created_at)
        VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
@@ -82,6 +86,7 @@ try {
     const status = bookingId ? 'booked' : course.start <= today ? 'withdrawn' : 'waiting';
     const closed = status !== 'waiting';
     const joined = w.joined ?? `${today}T12:00:00`;
+    if (changed.same(`waiting:${w.id}`, [w, personId, course.id, bookingId, status])) continue;
     await client.query(
       `INSERT INTO waitlist_entries (person_id, course_instance_id, level_code, course_id, status, joined_at, rank, source, note, closed_at, close_reason, booking_id, filemaker_id)
        VALUES ($1, $2, $3, $4, $5, $6::timestamp AT TIME ZONE 'Europe/Berlin', extract(epoch FROM $6::timestamp), 'schoolman', $7,
@@ -93,6 +98,8 @@ try {
     count.waiting++;
     count[status === 'booked' ? 'booked' : closed ? 'closed' : 'open']++;
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -104,5 +111,5 @@ try {
 
 console.log(
   `${count.notes} pre-bookings as notes (${count.onBooking} on the booking they became) · ` +
-    `${count.waiting} waiting-list entries (${count.booked} booked, ${count.closed} closed, ${count.open} waiting) · ${count.notHere} whose learner or course is not here`
+    `${count.waiting} waiting-list entries (${count.booked} booked, ${count.closed} closed, ${count.open} waiting) · ${count.notHere} whose learner or course is not here · ${count.unchanged ?? 0} as last time`
 );
