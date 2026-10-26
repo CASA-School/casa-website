@@ -125,8 +125,9 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
    * The formats that teach whole levels say what each level means in the words
    * of the levels page (config/content/cefr-levels.ts, the old casa-bremen.de
    * „Niveaustufen"), and the section links there for the full text (2026-10-12).
-   * Groups, in-company teaching, the special courses and German for nursing and
-   * medicine keep their own lines: they say what that course does at a level.
+   * Groups and in-company teaching keep their own lines: they say what that
+   * course does at a level. The special courses and German for nursing and
+   * medicine show no level section (their archetypes leave it out).
    */
   const levelRows = (labels: string[]): LevelGoalItem[] =>
     labels.flatMap((label) => {
@@ -157,15 +158,6 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
         { level: 'C1', textbook: 'kontext', focus: say(locale, 'Vertiefung nach Absprache, etwa Projektarbeit oder Fachthemen', 'Deeper work by arrangement, such as project work or subject-specific topics') },
       ],
     },
-    'medical-german': {
-      title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
-      description:
-        say(locale, 'Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.', 'You learn the specialist language of medicine at levels B2 and C1, with a focus on everyday hospital work and communication within the team.'),
-      levels: [
-        { level: 'B2', textbook: 'kontext', focus: say(locale, 'Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.', 'You take patient histories, explain treatment to patients and write up your documentation.') },
-        { level: 'C1', textbook: 'kontext', focus: say(locale, 'Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.', 'You hold professional discussions with colleagues, write medical reports and practise ward rounds.') },
-      ],
-    },
     /*
      * Bildungszeit was falling through to the generic fallback, which opens
      * "A1-B1: build core foundations using Netzwerk". The course starts at B1
@@ -178,21 +170,6 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
       description:
         say(locale, 'Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.', 'With two intensive courses a day, you have twice as many lessons as in a single intensive course. You can join from B1.'),
       levels: levelRows(['B1', 'B1+', 'B2', 'C1']),
-    },
-    /*
-     * Also previously on the A1-B1 fallback, while the catalogue's own modules
-     * run A2/B1 to C1+. A module page should state the module range, not a
-     * course range it does not have.
-     */
-    'special-courses': {
-      title: say(locale, 'Was die Module abdecken', 'What the modules cover'),
-      description:
-        say(locale, 'Die Module gibt es auf verschiedenen Niveaus, von A2/B1 bis C1+.', 'The modules are offered at different levels, from A2/B1 to C1+.'),
-      levels: [
-        { level: 'A2/B1', textbook: 'netzwerk', focus: say(locale, 'Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.', 'You revise and consolidate the basics of grammar and learn to write simple everyday texts.') },
-        { level: 'B1/B2', textbook: 'kontext', focus: say(locale, 'Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.', 'You focus on grammar, pronunciation, writing or speaking freely.') },
-        { level: 'C1', textbook: 'kontext', focus: say(locale, 'Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.', 'You practise spoken and written expression for telc Deutsch C1 Hochschule.') },
-      ],
     },
     'in-company': {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),

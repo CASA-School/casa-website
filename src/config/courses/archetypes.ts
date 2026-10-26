@@ -113,14 +113,13 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
     buyingQuestion: 'Which module, and does the slot fit my week?',
     // The catalogue leads: on this archetype the page IS the picker, and the
     // reader cannot evaluate anything else until they have found their module.
+    // No 'level-goals' (Rahman, 2026-10-26): each module already names its level in the catalogue,
+    // so a ladder of the same levels below it said everything twice.
     sections: [
       'module-catalogue',
       'practical-details',
-      'level-goals',
       'audience',
       'next-steps',
-      // Added once real testimonials existed: CASA publishes one from a learner
-      // who took the B1/B2 grammar module, and this is the page it belongs on.
       'testimonials',
       'related-courses',
     ],
@@ -141,10 +140,10 @@ export const courseArchetypes: Record<CourseArchetypeId, CourseArchetype> = {
   'professional-track': {
     id: 'professional-track',
     buyingQuestion: 'Does this get me to my licence or my role?',
-    // No term table: CASA publishes no dates for the professional formats.
+    // No term table: CASA publishes no dates for the professional formats. No level ladder either
+    // (Rahman, 2026-10-26): a specialised course is not a path through the levels.
     sections: [
       'practical-details',
-      'level-goals',
       'audience',
       'next-steps',
       'testimonials',

@@ -5514,18 +5514,6 @@
    "/resources/why-germany"
   ]
  },
- "t.die-module-gibt-es.tj33g4": {
-  "de": "Die Module gibt es auf verschiedenen Niveaus, von A2/B1 bis C1+.",
-  "en": "The modules are offered at different levels, from A2/B1 to C1+.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.die-nachmittage.1ihq0gp": {
   "de": "Die Nachmittage",
   "en": "The afternoons",
@@ -6187,30 +6175,6 @@
    "/about"
   ]
  },
- "t.du-fuehrst-anamnesegespraeche-kl.18vh935": {
-  "de": "Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.",
-  "en": "You take patient histories, explain treatment to patients and write up your documentation.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-fuehrst-fachgespraeche-mit.xnhxxm": {
-  "de": "Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.",
-  "en": "You hold professional discussions with colleagues, write medical reports and practise ward rounds.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
  "t.du-hast-ein-moebliertes.199xm6o": {
   "de": "Du hast ein möbliertes Zimmer mit Bett, Schreibtisch und Kleiderschrank frei.",
   "en": "You have a furnished room free, with a bed, a desk and a wardrobe.",
@@ -6309,18 +6273,6 @@
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-lernst-die-fachsprache.3m1y53": {
-  "de": "Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.",
-  "en": "You learn the specialist language of medicine at levels B2 and C1, with a focus on everyday hospital work and communication within the team.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
    "/courses",
    "/courses/[slug]"
   ]
@@ -6458,30 +6410,6 @@
   ],
   "pages": [
    "/accommodation/become-host"
-  ]
- },
- "t.du-trainierst-den-muendlichen.1c96cf3": {
-  "de": "Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.",
-  "en": "You practise spoken and written expression for telc Deutsch C1 Hochschule.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-trainierst-gezielt-grammatik.1r0t4p3": {
-  "de": "Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.",
-  "en": "You focus on grammar, pronunciation, writing or speaking freely.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
   ]
  },
  "t.du-uebernimmst-verantwortung-fue.10pq82t": {
@@ -6764,18 +6692,6 @@
    "src/config/courses/course-page-content.ts"
   ],
   "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.du-wiederholst-und-festigst.ow4bw9": {
-  "de": "Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.",
-  "en": "You revise and consolidate the basics of grammar and learn to write simple everyday texts.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
    "/courses/[slug]"
   ]
  },
@@ -21458,18 +21374,6 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
-  ]
- },
- "t.was-die-module-abdecken.lwjjnz": {
-  "de": "Was die Module abdecken",
-  "en": "What the modules cover",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
-   "/courses",
-   "/courses/[slug]"
   ]
  },
  "t.was-die-stufen-bedeuten.1nlttzl": {

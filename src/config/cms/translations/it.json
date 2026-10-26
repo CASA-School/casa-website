@@ -2055,10 +2055,6 @@
     "de": "Die Miete bestimmt dein Monatsbudget. Wie hoch sie ist, hängt von der Stadt ab, in der du wohnst.",
     "text": "L’affitto determina il tuo budget mensile. Quanto è alto dipende dalla città in cui vivi."
   },
-  "t.die-module-gibt-es.tj33g4": {
-    "de": "Die Module gibt es auf verschiedenen Niveaus, von A2/B1 bis C1+.",
-    "text": "I moduli sono disponibili a diversi livelli, da A2/B1 a C1+."
-  },
   "t.die-nachmittage.1ihq0gp": {
     "de": "Die Nachmittage",
     "text": "I pomeriggi"
@@ -2271,14 +2267,6 @@
     "de": "Du frischst deine Sprachkenntnisse auf und verbesserst sie.",
     "text": "Rinfreschi e migliori le tue conoscenze linguistiche."
   },
-  "t.du-fuehrst-anamnesegespraeche-kl.18vh935": {
-    "de": "Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.",
-    "text": "Conduci colloqui anamnestici, informi i pazienti e redigi la documentazione."
-  },
-  "t.du-fuehrst-fachgespraeche-mit.xnhxxm": {
-    "de": "Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.",
-    "text": "Hai colloqui professionali con colleghe e colleghi, scrivi relazioni mediche e ti eserciti nel giro visite."
-  },
   "t.du-hast-ein-moebliertes.199xm6o": {
     "de": "Du hast ein möbliertes Zimmer mit Bett, Schreibtisch und Kleiderschrank frei.",
     "text": "Hai una stanza libera arredata con letto, scrivania e armadio."
@@ -2318,10 +2306,6 @@
   "t.du-lernst-das-ganze.3te892": {
     "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.",
     "text": "Studi tutto l’anno in gruppi internazionali da 10 a 16 partecipanti. Le lezioni seguono rigorosamente il Quadro comune europeo di riferimento e allenano in modo mirato lettura, ascolto, scrittura e soprattutto il parlato."
-  },
-  "t.du-lernst-die-fachsprache.3m1y53": {
-    "de": "Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.",
-    "text": "Impari il linguaggio specialistico della medicina ai livelli B2 e C1, con attenzione al lavoro quotidiano in ospedale e alla comunicazione nel team."
   },
   "t.du-lernst-neue-menschen.zt2ead": {
     "de": "Du lernst neue Menschen und ihre Kultur kennen.",
@@ -2374,14 +2358,6 @@
   "t.du-stellst.17ffavg": {
     "de": "Du stellst",
     "text": "Tu metti a disposizione"
-  },
-  "t.du-trainierst-den-muendlichen.1c96cf3": {
-    "de": "Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.",
-    "text": "Alleni l’espressione orale e scritta per l’esame telc Deutsch C1 Hochschule."
-  },
-  "t.du-trainierst-gezielt-grammatik.1r0t4p3": {
-    "de": "Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.",
-    "text": "Alleni in modo mirato grammatica, pronuncia, scrittura o conversazione libera."
   },
   "t.du-uebernimmst-verantwortung-fue.10pq82t": {
     "de": "Du übernimmst Verantwortung für deinen Bereich und achtest auf gute Qualität.",
@@ -2442,10 +2418,6 @@
   "t.du-waehlst-eine-bis.1a9ah4d": {
     "de": "Du wählst eine bis neun Wochen und beginnst an einem Montag.",
     "text": "Scegli da una a nove settimane e inizi di lunedì."
-  },
-  "t.du-wiederholst-und-festigst.ow4bw9": {
-    "de": "Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.",
-    "text": "Ripassi e consolidi le basi della grammatica e impari a scrivere semplici testi di uso quotidiano."
   },
   "t.du-wohnst-in-bremen.2pq167": {
     "de": "Du wohnst in Bremen und hast ein Zimmer frei?",
@@ -7678,10 +7650,6 @@
   "t.was-der-erste-monat.1qjg2zh": {
     "de": "Was der erste Monat kostet",
     "text": "Quanto costa il primo mese"
-  },
-  "t.was-die-module-abdecken.lwjjnz": {
-    "de": "Was die Module abdecken",
-    "text": "Cosa trattano i moduli"
   },
   "t.was-die-stufen-bedeuten.1nlttzl": {
     "de": "Was die Stufen bedeuten",
