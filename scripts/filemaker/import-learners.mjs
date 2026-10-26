@@ -212,6 +212,8 @@ try {
   // Only what names things, never a value the run itself changes: the exam types' usual hours come from
   // their first sitting, which the exams step corrects, and had made every learner look changed (2026-10-26).
   const vocabularies = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes].map(([code, t]) => [code, t.id]), [...stayTypes], [...roomTypes], [...caterings]];
+  // The fingerprint before 2026-10-26 evening, with the hours: accepted once (bridge-changes.mjs). Remove after one run.
+  const vocabulariesBefore = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes], [...stayTypes], [...roomTypes], [...caterings]];
   const matched = (l) =>
     l.bookings.map((b) => [
       b.exam ? (b.exam.day ?? '') < today : (b.periods ?? []).every((p) => !p.end || p.end < today),
@@ -223,7 +225,7 @@ try {
 
   for (const l of learners) {
     if (!l.firstName) continue;
-    if (changed.same(l.personId, [l, matched(l), vocabularies])) continue;
+    if (changed.same(l.personId, [l, matched(l), vocabularies], [l, matched(l), vocabulariesBefore])) continue;
     // Their SchoolMan person, else their student id; else a new person, made when SchoolMan made them.
     let personId = (
       await client.query(
