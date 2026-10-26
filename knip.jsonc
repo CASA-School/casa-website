@@ -81,6 +81,8 @@
     //
     // Removal condition: delete when the FileMaker bridge brings learners across.
     "scripts/filemaker/import-learners.mjs",
+    // The exam parts and their examiners, from scripts/filemaker/read_exams.py through a pipe (2026-10-26).
+    "scripts/filemaker/import-exams.mjs",
 
     // Writes the agencies and companies the learner sample depends on into
     // `organisations` (contacts, commission terms, who pays a booking), from

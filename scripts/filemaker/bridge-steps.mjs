@@ -13,6 +13,7 @@ export const BRIDGE_STEPS = [
   { name: 'absences', reader: 'read_absences.py', importer: 'import-absences.mjs' },
   { name: 'time', reader: 'read_time.py', importer: 'import-time.mjs' },
   { name: 'learners', reader: 'read_learners.py', importer: 'import-learners.mjs' },
+  { name: 'exams', reader: 'read_exams.py', importer: 'import-exams.mjs' },
   { name: 'organisations', reader: 'read_organisations.py', importer: 'import-organisations.mjs' },
   { name: 'groups', reader: 'read_groups.py', importer: 'import-groups.mjs' },
   { name: 'offers', reader: 'read_offers.py', importer: 'import-offers.mjs' },
