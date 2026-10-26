@@ -106,8 +106,13 @@ only the first part of a level (`A2.1`) or the bare level writes one.
    on purpose). Each mail as sent is kept in `entry_test_mails` (0084) and listed under „Gesendet". A
    laptop without the Container App's identity cannot send.
 9. **The PDF** (`/admin/day/tests/results`, „PDF" in the panel, „PDF des Tages" on the card): one A4 page
-   per test and session, the learners by points with the two parts, blanks, paper/time-up/left-the-page
-   notes, and the average; the Excel keeps every answer.
+   per class since 2026-10-26 (Rahman: „the results should be per course"): its level, number, teacher
+   and room, its learners by points with the two parts, blanks, paper/time-up/left-the-page notes, the
+   average, and „nicht geschrieben" for a booked learner without a result. A learner whose first course
+   at CASA starts that day is marked in yellow. An attempt is placed by its linked person, else by the
+   typed name against the class's bookings (`resultsByClass`); one that fits no class goes on an
+   „Ohne Kurszuordnung" page per test, and a typed name that differs from the booked one is shown as
+   „eingegeben: …". The Excel keeps every answer.
 
 No pass/fail and no level verdict: the points go to the teachers, who place the learner.
 
