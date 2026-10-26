@@ -98,9 +98,26 @@ describe('Google reviews (2026-10-20)', () => {
     }
   });
 
-  it('are labelled as translations on English pages', () => {
+  it('are labelled as translations wherever they are not in the reader’s language', () => {
+    // English pages: a review without the label must be one written in English.
     for (const review of googleReviewsFor('en')) {
-      expect(review.country, `${review.id} must say it is translated`).toContain('translated from German');
+      if (review.country.includes('translated from German')) continue;
+      expect(/\b(und|ich|der|die|das|sehr)\b/i.test(review.quote), `${review.id} is German without the label`).toBe(false);
+    }
+    // German pages: an English original is always shown translated, and says so.
+    for (const review of googleReviewsFor('de')) {
+      if (!review.country.includes('aus dem Englischen übersetzt')) continue;
+      expect(/\b(the|and|was|my)\b/i.test(review.quote), `${review.id} still renders English`).toBe(false);
+    }
+  });
+
+  it('give the courses with no review of their own three different ones each (2026-10-26)', () => {
+    const shown = (slug: string) => socialProofForCourse(slug, 'de').slice(0, 3).map((item) => item.id);
+    const pages = ['medical-german', 'special-courses', 'bildungszeit'].map(shown);
+    for (const ids of pages) expect(ids).toHaveLength(3);
+    expect(new Set(pages.flat()).size).toBe(9);
+    for (const slug of ['medical-german', 'special-courses', 'bildungszeit']) {
+      expect(socialProofForCourse(slug, 'de').slice(0, 3).every((item) => item.rating === 5), slug).toBe(true);
     }
   });
 

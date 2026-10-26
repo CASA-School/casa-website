@@ -807,6 +807,10 @@
     "de": "B1/B2 Sprechwerkstatt – Sicher und überzeugend kommunizieren",
     "text": "Taller de expresión oral B1/B2 – Comunicarse con seguridad y de forma convincente"
   },
+  "t.b2-kurs.adkdkz": {
+    "de": "B2-Kurs",
+    "text": "Curso B2"
+  },
   "t.bad-zum-mitbenutzen.1fmw1sp": {
     "de": "Bad zum Mitbenutzen",
     "text": "Baño compartido"
@@ -1266,6 +1270,10 @@
   "t.bus-und-bahnverbindungen-zur.7b1xt9": {
     "de": "Bus- und Bahnverbindungen zur Schule heraussuchen",
     "text": "Buscar las conexiones de autobús y tranvía hasta la escuela"
+  },
+  "t.c1-kurs.12sk7zb": {
+    "de": "C1-Kurs",
+    "text": "Curso C1"
   },
   "t.c1-sicheres-fachliches-auftreten.1qwvud": {
     "de": "C1+: Sicheres fachliches Auftreten in Studium und Beruf",
@@ -4511,6 +4519,10 @@
     "de": "Kulturprogramme",
     "text": "Programas culturales"
   },
+  "t.kurs-a2-2.i12fzr": {
+    "de": "Kurs A2.2",
+    "text": "Curso A2.2"
+  },
   "t.kurs-anfragen.vqjdy": {
     "de": "Kurs anfragen",
     "text": "Pide información sobre el curso"
@@ -4570,6 +4582,10 @@
   "t.kurse-b1-bis-c1.s4cd63": {
     "de": "Kurse B1 bis C1",
     "text": "Cursos del B1 al C1"
+  },
+  "t.kurse-b1-und-b1.q3jdt2": {
+    "de": "Kurse B1 und B1+",
+    "text": "Cursos B1 y B1+"
   },
   "t.kurse-beratung.1yqjvaw": {
     "de": "Kurse & Beratung",
@@ -6267,6 +6283,10 @@
     "de": "Sicherheit",
     "text": "Seguridad"
   },
+  "t.sieben-monate-ab-b1.zjhead": {
+    "de": "Sieben Monate, ab B1+",
+    "text": "Siete meses, desde B1+"
+  },
   "t.so-entsteht-ein-firmenkurs.18nwhhl": {
     "de": "So entsteht ein Firmenkurs bei CASA.",
     "text": "Así nace un curso para empresas en CASA."
@@ -7407,9 +7427,17 @@
     "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
     "text": "Del A1 al C1: en la página «Niveles» verás qué puedes entender y decir en cada nivel."
   },
+  "t.von-a2-bis-c1.1cdwfoq": {
+    "de": "Von A2 bis C1.2",
+    "text": "De A2 a C1.2"
+  },
   "t.von-anfang-an-bis.g28svc": {
     "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
     "text": "Desde cero hasta el C1, hoy con título de grado y máster"
+  },
+  "t.von-b1-bis-zum.wxgeof": {
+    "de": "Von B1 bis zum Studium",
+    "text": "De B1 a la universidad"
   },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
