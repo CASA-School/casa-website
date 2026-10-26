@@ -17,6 +17,11 @@ letters of 33,218, 1,696 follow-ups of 7,455. Two kinds of learner fall out of i
 **anyone starting more than four weeks ahead** (visa learners book months ahead), and **exam-only
 candidates** (an exam booking has no `DateBooking` period, so the sample never sees them).
 
+Since 2026-10-26 the sample reaches every booking from this week on, however far ahead, and the bookings
+set to „nein" or „storno" in the last four weeks: a learner moved to January or cancelled had kept their
+old place in the workspace (B1.1 #4786 showed 17 where SchoolMan had 15). Exam-only candidates are still
+outside.
+
 ---
 
 ## 1. Learners / people
