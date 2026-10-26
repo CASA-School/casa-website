@@ -133,6 +133,8 @@ const confirmed = (message: string) => z.boolean({ message }).refine((value) => 
  */
 const honeypot = z
   .unknown()
+  // Optional before the transform: from zod 4.6 a missing key on an unknown-then-transform field fails.
+  .optional()
   .transform((value) => (value === undefined || value === null ? '' : String(value).trim().slice(0, 200)));
 
 /** Up to three courses in one registration (CASA, 2026-10-05). */
