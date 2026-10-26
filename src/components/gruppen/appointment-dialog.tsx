@@ -31,7 +31,7 @@ const copy = {
     taken: 'Someone has just requested this time. Please choose another appointment.',
     success: 'Your request is with us', thanks: 'Thank you. Your chosen time is reserved while Ina checks your request. She’ll email you to confirm the appointment and how to join.',
     thanksUnheld: 'Thank you. Ina will check your chosen time and email you to confirm the appointment and how to join.',
-    reference: 'Your reference', done: 'Done', weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+    done: 'Done', weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
   },
   de: {
     trigger: 'Termin buchen', title: 'Gemeinsam deine Gruppenreise planen',
@@ -49,7 +49,7 @@ const copy = {
     taken: 'Dieser Termin wurde gerade angefragt. Bitte wähle einen anderen Termin.',
     success: 'Deine Anfrage ist angekommen', thanks: 'Vielen Dank. Deine Wunschzeit ist vorerst für dich reserviert. Ina prüft deine Anfrage und meldet sich per E-Mail mit der Terminbestätigung und den Informationen zur Teilnahme.',
     thanksUnheld: 'Vielen Dank. Ina prüft deine Wunschzeit und meldet sich per E-Mail mit der Terminbestätigung und den Informationen zur Teilnahme.',
-    reference: 'Deine Referenz', done: 'Fertig', weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+    done: 'Fertig', weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
   },
 } as const;
 
@@ -156,7 +156,6 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
         <Check aria-hidden className="size-7 text-[var(--casa-accent-text)]" />
         <p className="font-semibold">{dateLabel(date)} · {time}</p>
         <p className="text-sm text-[var(--casa-muted)]">{t.zone}</p>
-        <p className="break-all text-xs text-[var(--casa-muted)]">{t.reference}: {reference}</p>
         <Button variant="prism" size="lg" onClick={onDone}>{t.done}</Button>
       </div> : loading ? <p role="status">{t.loading}</p> : unavailable ? <div role="status" className="space-y-4">
         <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{t.unavailable}</p>

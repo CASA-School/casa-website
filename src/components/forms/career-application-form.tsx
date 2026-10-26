@@ -50,7 +50,6 @@ export function CareerApplicationForm({
             submitting: 'Wird gesendet...',
             success: 'Bewerbung eingegangen',
             error: 'Bewerbung konnte nicht gesendet werden',
-            requestId: 'Vorgangsnummer',
             cvRequired: 'Bitte lade deinen Lebenslauf hoch.',
             cvInvalid: 'Bitte lade deinen Lebenslauf als PDF, DOC oder DOCX mit höchstens 8 MB hoch.',
           }, en: {
@@ -67,7 +66,6 @@ export function CareerApplicationForm({
             submitting: 'Sending...',
             success: 'Application received',
             error: 'Your application could not be sent',
-            requestId: 'Reference number',
             cvRequired: 'Please upload your CV.',
             cvInvalid: 'Please upload your CV as a PDF, DOC or DOCX file of no more than 8 MB.',
           } }),
@@ -86,7 +84,6 @@ export function CareerApplicationForm({
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [requestId, setRequestId] = useState<string | null>(null);
   const [confirmationSent, setConfirmationSent] = useState(false);
 
   const validateCv = (file: File | null) => {
@@ -125,7 +122,6 @@ export function CareerApplicationForm({
     event.preventDefault();
     setStatus('submitting');
     setMessage('');
-    setRequestId(null);
 
     const cvValidationError = validateCv(cvFile);
     if (cvValidationError) {
@@ -166,7 +162,6 @@ export function CareerApplicationForm({
 
       setStatus('success');
       setMessage(result.message || copy.success);
-      setRequestId(result.requestId || null);
       setConfirmationSent(result.confirmationSent === true);
       resetForm();
       trackCasaEvent('form_success', {
@@ -286,11 +281,6 @@ export function CareerApplicationForm({
             <CheckCircle2 className="h-4 w-4" />
             {message || copy.success}
           </p>
-          {requestId ? (
-            <p className="mt-1 text-xs text-[var(--casa-success-text)]">
-              {copy.requestId}: <span className="font-mono">{requestId}</span>
-            </p>
-          ) : null}
           {confirmationSent ? <p className="mt-1 text-xs text-[var(--casa-success-text)]">{confirmationNotice(locale)}</p> : null}
         </div>
       ) : null}

@@ -4499,32 +4499,6 @@
    "/accommodation/become-host"
   ]
  },
- "t.deine-referenz.vojj0y": {
-  "de": "Deine Referenz",
-  "en": "Your reference",
-  "files": [
-   "src/components/courses/interest-dialog.tsx",
-   "src/components/forms/contact-inquiry-form.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/contact",
-   "/courses",
-   "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/placement-test",
-   "/search",
-   "/team"
-  ]
- },
  "t.deine-schaetzung.1chamlm": {
   "de": "Deine Schätzung",
   "en": "Your estimate",
@@ -21018,16 +20992,6 @@
   ],
   "pages": [
    "/exams"
-  ]
- },
- "t.vorgangsnummer.1sgkbi5": {
-  "de": "Vorgangsnummer",
-  "en": "Reference number",
-  "files": [
-   "src/components/forms/career-application-form.tsx"
-  ],
-  "pages": [
-   "/careers/[slug]"
   ]
  },
  "t.vorherige-stimmen.1hlewgg": {

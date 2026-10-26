@@ -7,6 +7,12 @@
  * exam contract forms only with CASA's own Anmeldebestätigung and the payment
  * (AGB 2.2), and an appointment only once the contact person confirms it.
  *
+ * Shortened 2026-10-26 (Rahman: "a lot of text"): no reference code (nobody
+ * at CASA looks a request up by it), no status row the steps already say, at
+ * most three short steps, one closing line. The exam receipt shows the name it
+ * asks the candidate to check; never the date of birth, which a mistyped
+ * address would receive.
+ *
  * `{placeholders}` are filled by `buildConfirmationMail` from values the server
  * produced or checked, never from the sender's free text; a line whose
  * placeholder has no value is left out.
@@ -26,49 +32,25 @@ export const CONFIRMATION_COPY = {
       "variant": "",
       "de": {
         "subject": "Deine Anfrage ist bei CASA angekommen",
-        "preheader": "Jemand aus unserem Team antwortet dir persönlich per E-Mail.",
+        "preheader": "Wir antworten dir so bald wie möglich persönlich per E-Mail.",
         "heading": "Danke für deine Nachricht",
-        "intro": "schön, dass du uns geschrieben hast. Deine Nachricht ist gut bei uns angekommen, und wir nehmen uns gern Zeit für dein Anliegen.",
-        "summaryTitle": "Deine Anfrage",
-        "summaryRows": [
-          {
-            "label": "Referenz",
-            "value": "{reference}"
-          }
-        ],
-        "nextStepsTitle": "So geht es weiter",
-        "nextSteps": [
-          {
-            "text": "Unser Team in Bremen liest deine Nachricht und antwortet dir so bald wie möglich persönlich per E-Mail."
-          },
-          {
-            "text": "Eilt es? Dann ruf uns gern während unserer Bürozeiten unter {phone} an."
-          }
-        ],
-        "closing": "Wir helfen dir gern weiter."
+        "intro": "deine Nachricht ist bei uns angekommen. Jemand aus unserem Team in Bremen liest sie und antwortet dir so bald wie möglich per E-Mail.",
+        "summaryTitle": "",
+        "summaryRows": [],
+        "nextStepsTitle": "",
+        "nextSteps": [],
+        "closing": "Eilt es? Dann ruf uns gern während der Bürozeiten an: {phone}."
       },
       "en": {
         "subject": "Your enquiry has reached CASA",
-        "preheader": "Someone from our team will reply to you personally by email.",
+        "preheader": "We’ll reply to you personally by email as soon as we can.",
         "heading": "Thank you for your message",
-        "intro": "It’s good to hear from you. We’ve received your message, and we’re happy to take the time to help.",
-        "summaryTitle": "Your enquiry",
-        "summaryRows": [
-          {
-            "label": "Reference",
-            "value": "{reference}"
-          }
-        ],
-        "nextStepsTitle": "What happens next",
-        "nextSteps": [
-          {
-            "text": "Someone from our team in Bremen will read your message and send you a personal reply by email as soon as we can."
-          },
-          {
-            "text": "If it’s urgent, call us during office hours on {phone}."
-          }
-        ],
-        "closing": "We look forward to helping you."
+        "intro": "We’ve received your message. Someone from our team in Bremen will read it and reply to you by email as soon as we can.",
+        "summaryTitle": "",
+        "summaryRows": [],
+        "nextStepsTitle": "",
+        "nextSteps": [],
+        "closing": "If it’s urgent, call us during office hours on {phone}."
       }
     },
     {
@@ -76,60 +58,36 @@ export const CONFIRMATION_COPY = {
       "variant": "",
       "de": {
         "subject": "Du stehst auf unserer Interessentenliste",
-        "preheader": "Sobald genug Interessierte zusammen sind, melden wir uns mit den Terminen bei dir.",
+        "preheader": "Sobald die Termine feststehen, melden wir uns bei dir.",
         "heading": "Danke für dein Interesse",
-        "intro": "schön, dass du beim Kurs „{course}“ dabei sein möchtest. Deine Angaben sind gut bei uns angekommen, und dein Eintrag ist selbstverständlich unverbindlich.",
-        "summaryTitle": "Dein Eintrag",
-        "summaryRows": [
-          {
-            "label": "Kurs",
-            "value": "{course}"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
-          }
-        ],
+        "intro": "du stehst jetzt auf der Interessentenliste für „{course}“. Der Eintrag ist unverbindlich und kostet nichts.",
+        "summaryTitle": "",
+        "summaryRows": [],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sammeln die Interessierten für diesen Kurs. Einen festen Termin gibt es noch nicht."
+            "text": "Sobald genug Interessierte zusammen sind, legen wir die Termine fest und melden uns per E-Mail oder Telefon bei dir."
           },
           {
-            "text": "Sobald genug Interessierte zusammen sind, legen wir den Kurszeitraum fest und melden uns per E-Mail oder Telefon bei dir."
-          },
-          {
-            "text": "Dann entscheidest du, ob du dich verbindlich anmeldest. Bis dahin entstehen dir keine Kosten."
+            "text": "Dann entscheidest du, ob du dich anmeldest."
           }
         ],
         "closing": "Wir freuen uns darauf, dich im Kurs zu begrüßen."
       },
       "en": {
         "subject": "You’re on our interest list",
-        "preheader": "As soon as enough people have signed up, we’ll get in touch with the dates.",
+        "preheader": "As soon as the dates are set, we’ll get in touch.",
         "heading": "Thank you for your interest",
-        "intro": "We’re glad you’d like to join “{course}”. We’ve received your details, and being on the list doesn’t commit you to anything.",
-        "summaryTitle": "Your entry",
-        "summaryRows": [
-          {
-            "label": "Course",
-            "value": "{course}"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
-          }
-        ],
+        "intro": "You’re now on the interest list for “{course}”. Being on the list is free and doesn’t commit you to anything.",
+        "summaryTitle": "",
+        "summaryRows": [],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "We’re collecting names for this course. There are no fixed dates yet."
+            "text": "As soon as enough people have signed up, we’ll set the dates and get in touch by email or phone."
           },
           {
-            "text": "As soon as there are enough people, we’ll set the course dates and get in touch by email or phone."
-          },
-          {
-            "text": "Then you decide whether to register. Until then, there’s nothing to pay."
+            "text": "Then you decide whether to register."
           }
         ],
         "closing": "We look forward to welcoming you to the course."
@@ -140,52 +98,46 @@ export const CONFIRMATION_COPY = {
       "variant": "",
       "de": {
         "subject": "Deine Gruppenanfrage ist bei CASA angekommen",
-        "preheader": "Wir melden uns per E-Mail und planen das Programm gern gemeinsam mit dir.",
+        "preheader": "Wir melden uns per E-Mail und planen den Aufenthalt gern mit dir.",
         "heading": "Danke für deine Gruppenanfrage",
-        "intro": "schön, dass du für deine Gruppe an CASA denkst. Deine Angaben sind gut bei uns angekommen, und deine Anfrage ist selbstverständlich unverbindlich.",
+        "intro": "schön, dass du für deine Gruppe an CASA denkst. Deine Anfrage ist bei uns angekommen und natürlich unverbindlich.",
         "summaryTitle": "Deine Anfrage",
         "summaryRows": [
           {
-            "label": "Referenz",
-            "value": "{reference}"
+            "label": "Gruppe",
+            "value": "{groupSize} Personen"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sehen uns deine Angaben an, melden uns so bald wie möglich per E-Mail und klären mit dir, was noch offen ist."
+            "text": "Wir melden uns so bald wie möglich per E-Mail und klären mit dir, was noch offen ist."
           },
           {
-            "text": "Gemeinsam planen wir den Unterricht so, wie es zu deiner Gruppe passt, und wenn du möchtest, auch Kulturprogramm und Unterkunft."
-          },
-          {
-            "text": "Wenn alles zusammenpasst, erhältst du ein Angebot mit allen Leistungen und Kosten. Auch das Angebot ist unverbindlich."
+            "text": "Gemeinsam planen wir den Unterricht und, wenn du möchtest, Kulturprogramm und Unterkunft. Danach bekommst du ein unverbindliches Angebot."
           }
         ],
         "closing": "Wir freuen uns auf die gemeinsame Planung."
       },
       "en": {
         "subject": "Your group enquiry has reached CASA",
-        "preheader": "We’ll be in touch by email and would be glad to plan the programme with you.",
+        "preheader": "We’ll be in touch by email and would be glad to plan the stay with you.",
         "heading": "Thank you for your group enquiry",
-        "intro": "We’re glad you’re thinking of CASA for your group. We’ve received your details, and there’s no obligation at this stage.",
+        "intro": "We’re glad you’re thinking of CASA for your group. We’ve received your enquiry, and there’s no obligation at this stage.",
         "summaryTitle": "Your enquiry",
         "summaryRows": [
           {
-            "label": "Reference",
-            "value": "{reference}"
+            "label": "Group",
+            "value": "{groupSize} people"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "We’ll look through your details, reply by email as soon as we can and clear up anything we still need to know."
+            "text": "We’ll reply by email as soon as we can and clear up anything we still need to know."
           },
           {
-            "text": "Together we’ll plan the lessons to suit your group and, if you wish, a culture programme and accommodation as well."
-          },
-          {
-            "text": "If it all comes together, you’ll receive a quote with everything that’s included and what it costs. The quote doesn’t commit you to anything either."
+            "text": "Together we’ll plan the lessons and, if you wish, a culture programme and accommodation. Then you’ll receive a quote, with no obligation."
           }
         ],
         "closing": "We look forward to planning your group’s programme with you."
@@ -196,26 +148,23 @@ export const CONFIRMATION_COPY = {
       "variant": "company",
       "de": {
         "subject": "Deine Anfrage zum Firmenunterricht ist angekommen",
-        "preheader": "Wir melden uns per E-Mail und klären gemeinsam mit dir, was dein Team braucht.",
-        "heading": "Danke für deine Anfrage zum Firmenunterricht",
-        "intro": "schön, dass du deine Mitarbeitenden beim Deutschlernen unterstützen möchtest. Deine Angaben sind gut bei uns angekommen, und deine Anfrage ist selbstverständlich unverbindlich.",
+        "preheader": "Wir melden uns per E-Mail und klären mit dir, was dein Team braucht.",
+        "heading": "Danke für deine Anfrage",
+        "intro": "schön, dass du dein Team beim Deutschlernen unterstützen möchtest. Deine Anfrage ist bei uns angekommen und natürlich unverbindlich.",
         "summaryTitle": "Deine Anfrage",
         "summaryRows": [
           {
-            "label": "Referenz",
-            "value": "{reference}"
+            "label": "Teilnehmende",
+            "value": "{groupSize}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sehen uns deine Angaben an, melden uns so bald wie möglich per E-Mail und klären mit dir, was noch offen ist."
+            "text": "Wir melden uns so bald wie möglich per E-Mail und vereinbaren ein Gespräch mit dir."
           },
           {
-            "text": "In einer gemeinsamen Beratung ermitteln wir Lernbedürfnisse, Ziele und Sprachniveaus in deinem Team und entwickeln daraus einen passenden Unterrichtsplan."
-          },
-          {
-            "text": "Wenn alles zusammenpasst, erhältst du ein Angebot. Beratung und Angebot sind für dich unverbindlich."
+            "text": "Darin klären wir Ziele, Sprachniveaus und Zeiten deines Teams. Danach bekommst du ein unverbindliches Angebot."
           }
         ],
         "closing": "Wir freuen uns auf das Gespräch mit dir."
@@ -223,25 +172,22 @@ export const CONFIRMATION_COPY = {
       "en": {
         "subject": "Your enquiry about in-company teaching has reached CASA",
         "preheader": "We’ll be in touch by email, and together we’ll work out what your team needs.",
-        "heading": "Thank you for your enquiry about in-company teaching",
-        "intro": "It’s good to hear you’d like to help your staff learn German. We’ve received your details, and there’s no obligation at this stage.",
+        "heading": "Thank you for your enquiry",
+        "intro": "It’s good to hear you’d like to help your team learn German. We’ve received your enquiry, and there’s no obligation at this stage.",
         "summaryTitle": "Your enquiry",
         "summaryRows": [
           {
-            "label": "Reference",
-            "value": "{reference}"
+            "label": "Participants",
+            "value": "{groupSize}"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "We’ll look through your details, reply by email as soon as we can and clear up anything we still need to know."
+            "text": "We’ll reply by email as soon as we can and arrange a conversation with you."
           },
           {
-            "text": "In a consultation with you, we’ll find out about your team’s learning needs, goals and language levels, and draw up a teaching plan to match."
-          },
-          {
-            "text": "If it all comes together, you’ll receive a quote. Neither the consultation nor the quote commits you to anything."
+            "text": "In it, we’ll talk about your team’s goals, language levels and times. Then you’ll receive a quote, with no obligation."
           }
         ],
         "closing": "We look forward to speaking with you."
@@ -252,9 +198,9 @@ export const CONFIRMATION_COPY = {
       "variant": "",
       "de": {
         "subject": "Deine Kursanmeldung ist bei CASA eingegangen",
-        "preheader": "Wir prüfen deine Anmeldung persönlich und melden uns per E-Mail bei dir.",
+        "preheader": "Wir prüfen deine Anmeldung und melden uns per E-Mail bei dir.",
         "heading": "Schön, dass du bei uns Deutsch lernen möchtest",
-        "intro": "vielen Dank für deine Anmeldung. Wir haben sie gut erhalten und kümmern uns persönlich darum.",
+        "intro": "deine Anmeldung ist bei uns angekommen.",
         "summaryTitle": "Deine Anmeldung",
         "summaryRows": [
           {
@@ -288,35 +234,27 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Unterkunft",
             "value": "{accommodation} – angefragt"
-          },
-          {
-            "label": "Status",
-            "value": "Eingegangen – Platz noch nicht reserviert"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir sehen uns deine Angaben an und prüfen, ob noch ein Platz frei ist und der Kurs gut zu dir passt. Wenn wir Fragen haben, melden wir uns bei dir."
+            "text": "Wir prüfen, ob noch ein Platz frei ist und der Kurs zu dir passt. Wenn wir Fragen haben, melden wir uns."
           },
           {
-            "text": "Wenn alles in Ordnung ist, bekommst du per E-Mail deine Anmeldebestätigung mit der Zahlungsfrist und den Details zum Kursstart."
+            "text": "Danach bekommst du per E-Mail deine Anmeldebestätigung mit der Zahlungsfrist und allen Infos zum Kursstart."
           },
           {
-            "text": "Fest reserviert ist dein Platz, sobald die angeforderte Zahlung fristgerecht auf unserem Konto eingegangen ist."
+            "text": "Fest reserviert ist dein Platz, sobald deine Zahlung fristgerecht bei uns eingegangen ist."
           }
         ],
-        "closing": "Unsere Geschäftsbedingungen mit der Widerrufsbelehrung findest du unter {siteUrl}/agb.\n\nIm Moment musst du nichts weiter tun. Wir melden uns so bald wie möglich per E-Mail bei dir."
+        "closing": "Du musst jetzt nichts weiter tun. Unsere AGB mit der Widerrufsbelehrung findest du unter {siteUrl}/agb."
       },
       "en": {
         "subject": "Your course registration has reached CASA",
-        "preheader": "A member of our team will review your registration and be in touch by email.",
+        "preheader": "We’ll review your registration and be in touch by email.",
         "heading": "We’re glad you’d like to learn German with us",
-        "intro": "Thank you for your registration. We’ve received it, and a member of our team will review it personally.",
+        "intro": "We’ve received your registration.",
         "summaryTitle": "Your registration",
         "summaryRows": [
           {
@@ -350,29 +288,21 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Accommodation",
             "value": "{accommodation} (requested)"
-          },
-          {
-            "label": "Status",
-            "value": "Received, place not yet reserved"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "We’ll look at your details and check whether a place is still free and whether the course suits you. If we have any questions, we’ll get in touch."
+            "text": "We’ll check that a place is free and that the course suits you. If we have questions, we’ll get in touch."
           },
           {
-            "text": "If everything is in order, we’ll email you your confirmation of registration, with the payment deadline and the details of your course start."
+            "text": "Then we’ll email you your confirmation of registration, with the payment deadline and everything about your course start."
           },
           {
-            "text": "Your place is reserved once the requested payment reaches our account by the deadline."
+            "text": "Your place is reserved once your payment reaches us by the deadline."
           }
         ],
-        "closing": "Our terms and conditions, including the right of withdrawal, are at {siteUrl}/en/terms.\n\nThere’s nothing more you need to do for now. We’ll be in touch by email as soon as we can."
+        "closing": "There’s nothing more you need to do for now. Our terms and conditions, including the right of withdrawal, are at {siteUrl}/en/terms."
       }
     },
     {
@@ -382,7 +312,7 @@ export const CONFIRMATION_COPY = {
         "subject": "Deine Prüfungsanmeldung ist bei CASA eingegangen",
         "preheader": "Wir prüfen deine Anmeldung und melden uns per E-Mail bei dir.",
         "heading": "Danke für deine Prüfungsanmeldung",
-        "intro": "deine Anmeldung ist gut bei uns angekommen, und wir kümmern uns persönlich darum.",
+        "intro": "deine Anmeldung ist bei uns angekommen.",
         "summaryTitle": "Deine Anmeldung",
         "summaryRows": [
           {
@@ -402,36 +332,29 @@ export const CONFIRMATION_COPY = {
             "value": "{location}"
           },
           {
-            "label": "Status",
-            "value": "Eingegangen – Platz noch nicht bestätigt"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
+            "label": "Name",
+            "value": "{firstName} {lastName}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "Wir prüfen deine Angaben und sehen nach, ob zum gewählten Termin noch ein Platz frei ist."
+            "text": "Wir prüfen, ob zu deinem Termin noch ein Platz frei ist, und schicken dir dann die Fristen für Zahlung und Dokumente."
           },
           {
-            "text": "Ist das der Fall, bekommst du per E-Mail die Fristen für Zahlung und Dokumente."
+            "text": "Fest ist dein Platz, sobald deine Zahlung eingegangen ist und deine Angaben stimmen."
           },
           {
-            "text": "Deinen Prüfungsplatz können wir erst bestätigen, wenn deine Zahlung eingegangen ist und deine Angaben und Dokumente stimmen."
-          },
-          {
-            "text": "Vor dem Prüfungstag schicken wir dir die nötigen Unterlagen und Hinweise per E-Mail."
+            "text": "Vor der Prüfung bekommst du alle Unterlagen und Hinweise per E-Mail."
           }
         ],
-        "closing": "Unsere Geschäftsbedingungen mit der Widerrufsbelehrung findest du unter {siteUrl}/agb.\n\nBitte prüfe, ob Vor- und Nachname und Geburtsdatum, so wie du sie im Formular angegeben hast, genau mit deinem Pass oder amtlichen Ausweis übereinstimmen. Falls nicht, antworte bitte einfach auf diese E-Mail. Für deine Vorbereitung wünschen wir dir schon jetzt alles Gute."
+        "closing": "Bitte prüfe deinen Namen und dein Geburtsdatum: Sie müssen genau so wie in deinem Pass oder Ausweis geschrieben sein. Stimmt etwas nicht, antworte einfach auf diese E-Mail.\n\nUnsere AGB mit der Widerrufsbelehrung findest du unter {siteUrl}/agb. Wir wünschen dir viel Erfolg bei der Vorbereitung."
       },
       "en": {
         "subject": "Your exam registration has reached CASA",
         "preheader": "We’ll review your registration and be in touch by email.",
         "heading": "Thank you for your exam registration",
-        "intro": "We’ve received your registration, and a member of our team will review it personally.",
+        "intro": "We’ve received your registration.",
         "summaryTitle": "Your registration",
         "summaryRows": [
           {
@@ -451,30 +374,23 @@ export const CONFIRMATION_COPY = {
             "value": "{location}"
           },
           {
-            "label": "Status",
-            "value": "Received, place not yet confirmed"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
+            "label": "Name",
+            "value": "{firstName} {lastName}"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "We’ll check your details and whether a place is still free on your chosen date."
+            "text": "We’ll check that a place is still free on your date, then email you the deadlines for payment and documents."
           },
           {
-            "text": "If so, we’ll email you the deadlines for payment and for any documents we need from you."
-          },
-          {
-            "text": "We can only confirm your exam place once your payment has arrived and your details and documents are in order."
+            "text": "Your place is confirmed once your payment has arrived and your details are in order."
           },
           {
             "text": "Before the exam, we’ll email you everything you need for the day."
           }
         ],
-        "closing": "Our terms and conditions, including the right of withdrawal, are at {siteUrl}/en/terms.\n\nPlease check that your first name, surname and date of birth, as you entered them in the form, match your passport or official ID exactly. If they don’t, simply reply to this email. We wish you all the best with your preparation."
+        "closing": "Please check your name and date of birth: they must be written exactly as in your passport or ID. If anything is wrong, simply reply to this email.\n\nOur terms and conditions, including the right of withdrawal, are at {siteUrl}/en/terms. We wish you every success with your preparation."
       },
       "replyNote": false
     },
@@ -483,9 +399,9 @@ export const CONFIRMATION_COPY = {
       "variant": "",
       "de": {
         "subject": "Deine Terminanfrage bei CASA: {dayShort}, {time} Uhr",
-        "preheader": "Wir halten dir die Zeit vorerst frei, und {contactPerson} meldet sich persönlich per E-Mail bei dir.",
+        "preheader": "Wir halten dir die Zeit vorerst frei, und {contactPerson} meldet sich per E-Mail bei dir.",
         "heading": "Deine Wunschzeit ist vorerst reserviert",
-        "intro": "vielen Dank für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
+        "intro": "danke für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
         "summaryTitle": "Deine Wunschzeit",
         "summaryRows": [
           {
@@ -503,33 +419,22 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Gespräch mit",
             "value": "{contactPerson}"
-          },
-          {
-            "label": "Status",
-            "value": "Angefragt, noch nicht bestätigt"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "{contactPerson} prüft deine Anfrage und meldet sich persönlich per E-Mail bei dir. Erst mit der Bestätigung steht der Termin fest. Darin erfährst du auch, wie das Gespräch stattfindet."
+            "text": "{contactPerson} meldet sich per E-Mail bei dir. Erst damit steht der Termin fest, und du erfährst, wie ihr sprecht."
           },
           {
-            "text": "Notier dir gern schon deine Ideen, offenen Fragen und Wünsche für deine Gruppe."
-          },
-          {
-            "text": "Passt dir die Zeit doch nicht, oder brauchst du den Termin nicht mehr? Antworte einfach auf diese E-Mail. Dann suchen wir gemeinsam einen anderen Termin oder geben die Zeit wieder frei."
+            "text": "Passt die Zeit doch nicht? Antworte einfach auf diese E-Mail. Dann finden wir eine andere Zeit oder geben sie wieder frei."
           }
         ],
         "closing": "Wir freuen uns, von deiner Gruppe zu hören."
       },
       "en": {
         "subject": "Your CASA appointment request: {dayShort}, {time}",
-        "preheader": "We’re holding the time for you for now, and {contactPerson} will email you personally.",
+        "preheader": "We’re holding the time for you for now, and {contactPerson} will email you.",
         "heading": "Your chosen time is reserved for now",
         "intro": "Thank you for your request. We’re glad you’d like to talk to us about your group.",
         "summaryTitle": "Your chosen time",
@@ -549,26 +454,15 @@ export const CONFIRMATION_COPY = {
           {
             "label": "With",
             "value": "{contactPerson}"
-          },
-          {
-            "label": "Status",
-            "value": "Requested, not yet confirmed"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "{contactPerson} will check your request and email you personally. Only that email confirms the appointment. It will also tell you how the conversation will take place."
+            "text": "{contactPerson} will email you. Only that email confirms the appointment, and it will tell you how you’ll talk."
           },
           {
-            "text": "If you like, you can already note down your ideas, questions and what your group needs."
-          },
-          {
-            "text": "If the time turns out not to suit you, or you no longer need the appointment, simply reply to this email. We’ll then look for another time together or release the slot."
+            "text": "If the time doesn’t suit you after all, simply reply to this email. We’ll find another time or release the slot."
           }
         ],
         "closing": "We look forward to hearing about your group."
@@ -580,9 +474,9 @@ export const CONFIRMATION_COPY = {
       "variant": "unheld",
       "de": {
         "subject": "Deine Terminanfrage bei CASA: {dayShort}, {time} Uhr",
-        "preheader": "{contactPerson} prüft deine Wunschzeit und meldet sich persönlich per E-Mail bei dir.",
+        "preheader": "{contactPerson} prüft deine Wunschzeit und meldet sich per E-Mail bei dir.",
         "heading": "Deine Terminanfrage ist angekommen",
-        "intro": "vielen Dank für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
+        "intro": "danke für deine Anfrage. Schön, dass du mit uns über deine Gruppe sprechen möchtest.",
         "summaryTitle": "Deine Wunschzeit",
         "summaryRows": [
           {
@@ -600,33 +494,22 @@ export const CONFIRMATION_COPY = {
           {
             "label": "Gespräch mit",
             "value": "{contactPerson}"
-          },
-          {
-            "label": "Status",
-            "value": "Angefragt, noch nicht bestätigt"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
         "nextSteps": [
           {
-            "text": "{contactPerson} prüft, ob die Zeit passt, und meldet sich persönlich per E-Mail bei dir. Erst mit der Bestätigung steht der Termin fest. Darin erfährst du auch, wie das Gespräch stattfindet."
+            "text": "{contactPerson} prüft, ob die Zeit passt, und meldet sich per E-Mail bei dir. Erst damit steht der Termin fest, und du erfährst, wie ihr sprecht."
           },
           {
-            "text": "Notier dir gern schon deine Ideen, offenen Fragen und Wünsche für deine Gruppe."
-          },
-          {
-            "text": "Passt dir die Zeit doch nicht, oder brauchst du den Termin nicht mehr? Antworte einfach auf diese E-Mail. Dann suchen wir gemeinsam einen anderen Termin."
+            "text": "Passt die Zeit doch nicht? Antworte einfach auf diese E-Mail. Dann finden wir eine andere Zeit."
           }
         ],
         "closing": "Wir freuen uns, von deiner Gruppe zu hören."
       },
       "en": {
         "subject": "Your CASA appointment request: {dayShort}, {time}",
-        "preheader": "{contactPerson} will check your chosen time and email you personally.",
+        "preheader": "{contactPerson} will check your chosen time and email you.",
         "heading": "Your appointment request has reached us",
         "intro": "Thank you for your request. We’re glad you’d like to talk to us about your group.",
         "summaryTitle": "Your chosen time",
@@ -646,26 +529,15 @@ export const CONFIRMATION_COPY = {
           {
             "label": "With",
             "value": "{contactPerson}"
-          },
-          {
-            "label": "Status",
-            "value": "Requested, not yet confirmed"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "What happens next",
         "nextSteps": [
           {
-            "text": "{contactPerson} will check that the time works and email you personally. Only that email confirms the appointment. It will also tell you how the conversation will take place."
+            "text": "{contactPerson} will check that the time works and email you. Only that email confirms the appointment, and it will tell you how you’ll talk."
           },
           {
-            "text": "If you like, you can already note down your ideas, questions and what your group needs."
-          },
-          {
-            "text": "If the time turns out not to suit you, or you no longer need the appointment, simply reply to this email. We’ll then look for another time together."
+            "text": "If the time doesn’t suit you after all, simply reply to this email. We’ll find another time."
           }
         ],
         "closing": "We look forward to hearing about your group."
@@ -679,16 +551,12 @@ export const CONFIRMATION_COPY = {
         "subject": "Deine Bewerbung ist bei CASA angekommen",
         "preheader": "Wir lesen deine Unterlagen sorgfältig und melden uns bei dir.",
         "heading": "Danke für deine Bewerbung",
-        "intro": "deine Unterlagen sind gut bei uns angekommen. Wir freuen uns über dein Interesse an CASA und wissen die Zeit zu schätzen, die du dir dafür genommen hast.",
+        "intro": "deine Bewerbung ist bei uns angekommen. Danke für dein Interesse an CASA und die Zeit, die du dir dafür genommen hast.",
         "summaryTitle": "Deine Bewerbung",
         "summaryRows": [
           {
             "label": "Stelle",
             "value": "{position}"
-          },
-          {
-            "label": "Referenz",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "So geht es weiter",
@@ -706,16 +574,12 @@ export const CONFIRMATION_COPY = {
         "subject": "Your application has reached CASA",
         "preheader": "We’ll read your application carefully and get back to you.",
         "heading": "Thank you for your application",
-        "intro": "We’ve received your application. We appreciate your interest in CASA and the time you put into it.",
+        "intro": "We’ve received your application. Thank you for your interest in CASA and the time you put into it.",
         "summaryTitle": "Your application",
         "summaryRows": [
           {
             "label": "Position",
             "value": "{position}"
-          },
-          {
-            "label": "Reference",
-            "value": "{reference}"
           }
         ],
         "nextStepsTitle": "What happens next",
@@ -735,18 +599,18 @@ export const CONFIRMATION_COPY = {
     "de": {
       "greetingNamed": "Hallo {firstName},",
       "greetingNeutral": "Hallo,",
-      "replyNote": "Möchtest du noch etwas ergänzen oder hast du eine Frage? Antworte einfach auf diese E-Mail. Deine Antwort geht direkt an unser Team.",
+      "replyNote": "Fragen oder etwas vergessen? Antworte einfach auf diese E-Mail.",
       "signoff": "Herzliche Grüße aus Bremen",
       "team": "Dein CASA-Team",
-      "footer": "Gemeinnützige Sprachschule in Bremen. Seit 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen\nTelefon +49 421 460 414 3-0 · {siteHost}\nBürozeiten: Montag bis Donnerstag 08:30–19:00 Uhr, Freitag 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nDu bekommst diese E-Mail, weil auf {siteHost} ein Formular mit deiner E-Mail-Adresse abgeschickt wurde. Falls du das nicht warst, antworte bitte kurz auf diese E-Mail. Dann löschen wir die Angaben. Wie wir mit deinen Daten umgehen, liest du unter {siteUrl}/datenschutz."
+      "footer": "CASA – Internationale Sprachschule gGmbH · Gemeinnützige Sprachschule in Bremen, seit 1983\nAm Dobben 14–16 · 28203 Bremen · Telefon +49 421 460 414 30 · {siteHost}\nBürozeiten: Mo–Do 08:30–19:00 Uhr, Fr 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nDu bekommst diese E-Mail, weil deine Adresse auf {siteHost} in ein Formular eingetragen wurde. Warst du das nicht? Dann antworte kurz, und wir löschen die Angaben. Datenschutz: {siteUrl}/datenschutz"
     },
     "en": {
       "greetingNamed": "Hello {firstName},",
       "greetingNeutral": "Hello,",
-      "replyNote": "Would you like to add something, or do you have a question? Simply reply to this email. Your reply goes straight to our team.",
+      "replyNote": "Questions, or something to add? Simply reply to this email.",
       "signoff": "Best wishes from Bremen",
       "team": "The CASA team",
-      "footer": "Non-profit language school in Bremen. Since 1983.\nCASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany\nPhone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Monday to Thursday 08:30–19:00, Friday 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because this address was entered in a form on {siteHost}. If that wasn’t you, please reply briefly to this email and we’ll delete the details. You can read how we handle your data at {siteUrl}/en/privacy."
+      "footer": "CASA – Internationale Sprachschule gGmbH · Non-profit language school in Bremen, since 1983\nAm Dobben 14–16 · 28203 Bremen, Germany · Phone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Mon–Thu 08:30–19:00, Fri 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because your address was entered in a form on {siteHost}. If that wasn’t you, reply briefly and we’ll delete the details. Privacy: {siteUrl}/en/privacy"
     }
   }
 } as const;

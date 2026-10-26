@@ -28,12 +28,13 @@ Built by `buildFormMail` in `src/lib/notifications/form-mail.ts`; `notifyForm` o
   stays in the logo, as on the website. Headline in a serif (Georgia, standing in for the site's
   display face), body in Arial.
 - **Structure.** The form and the time received; a headline; one sentence saying who wants what
-  („Maria Rossi hat sich für den Kurs „Intensivkurs Deutsch“ angemeldet.“); highlights such as
+  („Maria Rossi hat sich für Intensivkurse angemeldet.“); highlights such as
   „Visum benötigt“ or „Gastfamilie gewünscht“; one button; then labelled sections with empty
-  fields left out. Footer: reference, language, whether the workspace also stored it, and the
-  CASA address.
-- **The button.** „Maria antworten“ opens a reply to the sender, greeting them by salutation
-  („Sehr geehrte Frau Rossi,“). For an appointment it is „Termin bestätigen“: a confirmation in the
+  fields left out. Footer: language, and whether the workspace also stored it, linked to that
+  inbox on admin.casa-bremen.de (`CMS_EDITOR_ORIGIN`); then the CASA address. The alert speaks
+  du, like the workspace. No request id since 2026-10-26: nobody looks a request up by it.
+- **The button.** „Maria antworten“ opens a reply to the sender, greeting them by first name
+  („Hallo Maria,“). For an appointment it is „Termin bestätigen“: a confirmation in the
   guest's language with the date, time and duration filled in and one bracketed line, how the
   conversation takes place, for the contact person to complete before sending. Job applications
   and placement results have no button; they point to the workspace.
@@ -67,7 +68,8 @@ applications now send the person a branded confirmation in the form's language
 - **What it prints.** The greeting name (checked: letters only, no links, digits or mixed scripts)
   and only what the server produced or checked: catalogue labels (course, dates, classes, location,
   accommodation type, exam, exam date, exam part), the validated appointment slot, the published
-  position title (looked up by slug, not taken from the request), the reference. Never the
+  position title (looked up by slug, not taken from the request), the exam candidate's name to
+  check against their ID (never the date of birth). No reference since 2026-10-26. Never the
   message, notes, topic, allergies or any other free text. A name with a link, digits or an
   address in it gets the neutral greeting.
 - **Abuse limits.** At most three confirmations per inbox in 24 hours (`+tags`, Gmail dots and
@@ -95,7 +97,7 @@ applications now send the person a branded confirmation in the form's language
 | Exam registration | `EXAM` | `online@casa-bremen.de` |
 | Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |
 | Appointment request | `APPOINTMENT` | the contact person who holds the consultations — for group consultations, **Ina Eismann's mailbox** (address still to come). She confirms each appointment herself by email |
-| Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position and a reference only; the application itself is read in the workspace by management |
+| Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position only; the application itself is read in the workspace by management |
 
 `bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here
 is a change there (`docs/PRIVACY_POLICY.md`).
@@ -152,7 +154,7 @@ registration routes also logged simulated confirmation emails.
 - Failed notifications do not discard stored enquiries. Contact/course/exam requests now return
   503 if **neither storage nor delivery succeeded**. Since 2026-10-01 the sender also gets a
   confirmation, see below.
-  A job-application alert names only the position and a reference; the application and CV are
+  A job-application alert names only the position; the application and CV are
   read in the workspace.
 - `/admin/settings` shows test/live mode and whether the Microsoft connection is configured.
 

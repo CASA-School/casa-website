@@ -44,7 +44,7 @@ const copy = {
     error: 'Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.',
     success: 'Du stehst auf der Liste',
     thanks: 'Vielen Dank. Sobald genug Interessierte zusammen sind, legen wir die Termine fest und melden uns per E-Mail oder Telefon bei dir.',
-    reference: 'Deine Referenz', done: 'Fertig', close: 'Schließen',
+    done: 'Fertig', close: 'Schließen',
   },
   en: {
     eyebrow: 'Interest list',
@@ -67,7 +67,7 @@ const copy = {
     error: 'Your details could not be sent. Please try again.',
     success: 'You’re on the list',
     thanks: 'Thank you. As soon as there are enough people, we’ll set the dates and get in touch by email or phone.',
-    reference: 'Your reference', done: 'Done', close: 'Close',
+    done: 'Done', close: 'Close',
   },
 } as const;
 
@@ -228,7 +228,6 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
           <div role="status" className="space-y-5">
             <Check aria-hidden className="size-7 text-[var(--casa-accent-text)]" />
             <p className="font-semibold">{pick(locale, INTEREST_COURSES[course])}</p>
-            <p className="break-all text-xs text-[var(--casa-muted)]">{t.reference}: {reference}</p>
             <Button variant="prism" size="lg" onClick={onDone}>{t.done}</Button>
           </div>
         ) : !details ? (
