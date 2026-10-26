@@ -4,7 +4,7 @@
     python3 -I scripts/filemaker/read_learners.py | node scripts/filemaker/import-learners.mjs [--dry-run]
 
 Rahman, 2026-10-17: bring some learners across to see the workspace work with real data. The sample is
-everyone in a course this week or starting one in the next four weeks — a `DateBooking` period that
+everyone in a course this week or starting one later — a `DateBooking` period that
 runs then, of a booking that is not „nein" or „storno" — with all they have in SchoolMan: the person,
 their e-mail addresses, phones and address, and every booking with its periods and its money — the
 charges (`CostDetail`), the payments received (`PaymentIn`) and the refunds paid back to the learner
@@ -81,7 +81,7 @@ def amount(value):
     except ValueError:
         return None
 
-# The sample: whoever sits in a course from this Monday to four weeks ahead, on a booking taken (sample.py).
+# The sample: whoever sits in a course from this Monday on, and the bookings cancelled lately (sample.py).
 chosen = sample_persons(bookings, periods, today)
 
 person_rows = table('Person', '__ID_Person', '_ID_Student', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'Gender_1', 'DateOfBirth',
