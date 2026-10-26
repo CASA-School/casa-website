@@ -64,7 +64,7 @@ case "$TASK" in
   import)
     : "${BRIDGE_URL:?set BRIDGE_URL}" "${BRIDGE_KEY:?set BRIDGE_KEY}"
     secrets+=("database-url=$(az containerapp secret show -n "$APP" -g "$RG" --secret-name database-url --query value -o tsv)" "bridge-url=$BRIDGE_URL" "bridge-key=$BRIDGE_KEY")
-    envs+=("DATABASE_URL=secretref:database-url" "BRIDGE_URL=secretref:bridge-url" "BRIDGE_KEY=secretref:bridge-key")
+    envs+=("DATABASE_URL=secretref:database-url" "BRIDGE_URL=secretref:bridge-url" "BRIDGE_KEY=secretref:bridge-key" "BRIDGE_FULL=${BRIDGE_FULL:-0}")
     # The learners' step holds a few thousand bookings in memory, and a whole run takes minutes. Two hours
     # since 2024 and 2025 came across (2026-10-21): the first such run writes some 9,000 bookings.
     CPU=1.0

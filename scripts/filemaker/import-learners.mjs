@@ -45,6 +45,7 @@
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -113,7 +114,7 @@ const count = {
   bookingsNew: 0, bookingsUpdated: 0, periodsNew: 0, periodsUpdated: 0, periodsRemoved: 0,
   skippedNoPeriod: 0, periodsNoCourse: 0, nationalityUnmatched: 0, twins: 0,
   charges: 0, chargesRemoved: 0, payments: 0, refunds: 0, paymentsRemoved: 0, zero: 0,
-  notes: 0, log: 0, letters: 0, lettersOnPerson: 0, banks: 0,
+  notes: 0, log: 0, letters: 0, lettersOnPerson: 0, banks: 0, unchanged: 0,
   examBookings: 0, examNoKind: 0, sittingsLinked: 0, sittingsMade: 0, stays: 0, staysRemoved: 0, staysNoDates: 0,
 };
 
@@ -205,8 +206,22 @@ try {
       [entity, entityId, layout, recordId]
     );
 
+  // A learner as they were last time is passed over (0088): their data, what their periods are matched to
+  // here, whether each booking is over, and the vocabularies everything is matched through.
+  const changed = await changes(client, 'learners');
+  const vocabularies = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes], [...stayTypes], [...roomTypes], [...caterings]];
+  const matched = (l) =>
+    l.bookings.map((b) => [
+      b.exam ? (b.exam.day ?? '') < today : (b.periods ?? []).every((p) => !p.end || p.end < today),
+      (b.periods ?? []).map((p) => {
+        const c = courses.get(p.course ?? '');
+        return c ? [c.id, c.group, c.level_code, c.start_date, c.format] : null;
+      }),
+    ]);
+
   for (const l of learners) {
     if (!l.firstName) continue;
+    if (changed.same(l.personId, [l, matched(l), vocabularies])) continue;
     // Their SchoolMan person, else their student id; else a new person, made when SchoolMan made them.
     let personId = (
       await client.query(
@@ -617,6 +632,8 @@ try {
       count.banks++;
     }
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -627,7 +644,7 @@ try {
 }
 
 console.log(
-  `${count.learners} learners read: ${count.peopleNew} new, ${count.peopleKnown} known · ${count.emails} e-mail, ${count.phones} phones, ${count.addresses} addresses\n` +
+  `${count.learners} learners read: ${count.unchanged ?? 0} as last time, ${count.peopleNew} new, ${count.peopleKnown} known · ${count.emails} e-mail, ${count.phones} phones, ${count.addresses} addresses\n` +
     `bookings ${count.bookingsNew} new, ${count.bookingsUpdated} updated · periods ${count.periodsNew} new, ${count.periodsUpdated} updated, ${count.periodsRemoved} removed\n` +
     `left out: ${count.skippedNoPeriod} without a period · ${count.periodsNoCourse} periods of a course not here · ` +
     `${count.nationalityUnmatched} nationalities not matched · ${count.twins} likely twins flagged\n` +

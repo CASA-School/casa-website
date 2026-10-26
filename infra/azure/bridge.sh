@@ -7,6 +7,8 @@
 #   ./infra/azure/bridge.sh --only staff,day     some steps (they keep their order)
 #   ./infra/azure/bridge.sh --local-first        import into this Mac's database (.env.local) first, and
 #                                                send the same sealed bundle to Azure only if that worked
+#   ./infra/azure/bridge.sh --full               write every record again, not only what changed since
+#                                                the last run (0088): about an hour inside Azure
 #
 # Run on the office Mac, with SchoolMan open in FileMaker Pro and `az` signed in to CASA's tenant.
 #   1. The readers read SchoolMan (read-only) and the result is sealed under a key made for this run.
@@ -25,10 +27,12 @@ CONTAINER=bridge
 
 ONLY=()
 LOCAL_FIRST=false
+export BRIDGE_FULL=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --only) ONLY=(--only "${2:?--only needs step names}"); shift 2 ;;
     --local-first) LOCAL_FIRST=true; shift ;;
+    --full) BRIDGE_FULL=1; shift ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done

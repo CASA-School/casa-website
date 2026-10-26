@@ -37,6 +37,7 @@
     "scripts/filemaker/bridge-pack.mjs",
     "scripts/filemaker/bridge-unpack.mjs",
     "scripts/filemaker/bridge-steps.mjs",
+    "scripts/filemaker/bridge-changes.mjs",
     // The Tagesplan's tasks, desks and shifts, from scripts/filemaker/read_day.py through a pipe
     // (docs/ADMIN_WORKSPACE.md §Tagesplan).
     "scripts/filemaker/import-day.mjs",

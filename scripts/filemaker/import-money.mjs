@@ -15,6 +15,7 @@
  * - An invoice comes across when its booking or its organisation is here.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -39,6 +40,8 @@ try {
   const companies = await linked('organisation', 'Corporate');
   const persons = await linked('person', 'Person');
   const organisationOf = (r) => (r.agency && agencies.get(r.agency)) || (r.company && companies.get(r.company)) || null;
+  // A row as it was last time, matched to the same records here, is passed over (0088).
+  const changed = await changes(client, 'money');
 
   for (const i of data.instalments) {
     const bookingId = bookings.get(i.booking);
@@ -46,6 +49,7 @@ try {
       count.skipped++;
       continue;
     }
+    if (changed.same(`instalment:${i.id}`, [i, bookingId])) continue;
     await client.query(
       `INSERT INTO booking_instalments (booking_id, position, label, due_on, amount, paid, filemaker_id) VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (filemaker_id) WHERE filemaker_id IS NOT NULL DO UPDATE
@@ -61,6 +65,7 @@ try {
       count.skipped++;
       continue;
     }
+    if (changed.same(`commission:${c.id}`, [c, bookingId, organisationOf(c), charges.get(c.charge) ?? null])) continue;
     // SchoolMan keeps the share as 20 or as 0.2.
     const percentage = c.percentage == null ? null : c.percentage > 0 && c.percentage <= 1 ? c.percentage * 100 : c.percentage;
     await client.query(
@@ -80,20 +85,22 @@ try {
       count.skipped++;
       continue;
     }
+    const placeId = places.get(p.accommodation ?? '') ?? stayPlaces.get(p.stay ?? '') ?? null;
+    if (changed.same(`payout:${p.id}`, [p, bookingId, placeId, organisationOf(p)])) continue;
     await client.query(
       `INSERT INTO payouts (kind, booking_id, accommodation_id, organisation_id, amount, paid_on, method, note, filemaker_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        ON CONFLICT (filemaker_id) WHERE filemaker_id IS NOT NULL DO UPDATE
          SET kind = EXCLUDED.kind, booking_id = EXCLUDED.booking_id, accommodation_id = EXCLUDED.accommodation_id, organisation_id = EXCLUDED.organisation_id,
              amount = EXCLUDED.amount, paid_on = EXCLUDED.paid_on, method = EXCLUDED.method, note = EXCLUDED.note`,
-      [p.kind, bookingId, places.get(p.accommodation ?? '') ?? stayPlaces.get(p.stay ?? '') ?? null, organisationOf(p), p.amount, p.paid, p.method, p.note?.slice(0, 2000) ?? null, p.id]
+      [p.kind, bookingId, placeId, organisationOf(p), p.amount, p.paid, p.method, p.note?.slice(0, 2000) ?? null, p.id]
     );
     count.payouts++;
   }
 
   for (const s of data.stamps) {
     const chargeId = charges.get(s.charge);
-    if (!chargeId) continue;
+    if (!chargeId || changed.same(`stamp:${s.charge}`, [s, chargeId])) continue;
     count.stamps += (await client.query(`UPDATE booking_charges SET invoice_number = $2 WHERE id = $1 AND invoice_number IS DISTINCT FROM $2`, [chargeId, s.invoice])).rowCount;
   }
 
@@ -104,6 +111,7 @@ try {
       count.skipped++;
       continue;
     }
+    if (changed.same(`invoice:${i.id}`, [i, bookingId, organisationId, persons.get(i.person ?? '') ?? null])) continue;
     await client.query(
       `INSERT INTO invoices (number, issued_on, booking_id, person_id, organisation_id, recipient, subject, amount, filemaker_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -114,6 +122,8 @@ try {
     );
     count.invoices++;
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -125,5 +135,5 @@ try {
 
 console.log(
   `${count.instalments} instalments · ${count.commissions} commission lines · ${count.payouts} payouts · ${count.stamps} charges stamped with their invoice · ` +
-    `${count.invoices} invoices · ${count.skipped} rows whose booking or organisation is not here`
+    `${count.invoices} invoices · ${count.skipped} rows whose booking or organisation is not here · ${count.unchanged ?? 0} as last time`
 );

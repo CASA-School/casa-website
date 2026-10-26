@@ -11,6 +11,7 @@
  *   the rest are open, for a colleague to look at.
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -28,12 +29,15 @@ try {
   const bookings = new Map(
     (await client.query(`SELECT id, filemaker_booking_id FROM bookings WHERE filemaker_booking_id IS NOT NULL AND deleted_at IS NULL`)).rows.map((r) => [r.filemaker_booking_id, r.id])
   );
+  // A follow-up as it was last time, on the same booking, is passed over (0088).
+  const changed = await changes(client, 'follow-ups');
   for (const f of rows) {
     const bookingId = bookings.get(f.booking);
     if (!bookingId) {
       count.notHere++;
       continue;
     }
+    if (changed.same(f.id, [f, bookingId])) continue;
     const done = f.due < closedBefore;
     const result = await client.query(
       `INSERT INTO booking_follow_ups (booking_id, due_on, reason, done_at, created_by_name, created_at, filemaker_id)
@@ -47,6 +51,8 @@ try {
     else count.updated++;
     if (result.rows[0].open) count.open++;
   }
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -56,4 +62,4 @@ try {
   await client.end();
 }
 
-console.log(`${count.read} follow-ups read: ${count.made} new, ${count.updated} updated, ${count.open} open · ${count.notHere} on bookings not here`);
+console.log(`${count.read} follow-ups read: ${count.unchanged ?? 0} as last time, ${count.made} new, ${count.updated} updated, ${count.open} of those open · ${count.notHere} on bookings not here`);
