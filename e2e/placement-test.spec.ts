@@ -189,7 +189,7 @@ test('the test runs one item at a time and names the phase, not a total', async 
 
   // The running test is an app surface: no site navbar, no footer, and the
   // answer button is pinned rather than in the scrolling content.
-  await expect(page.locator('nav[aria-label="Main navigation"]')).toHaveCount(0);
+  await expect(page.locator('nav[aria-label="Main navigation"], nav[aria-label="Hauptnavigation"]')).toHaveCount(0);
   await expect(page.locator('footer')).toHaveCount(0);
   await expect(page.locator('[data-casa-placement="action-bar"]')).toBeVisible();
 

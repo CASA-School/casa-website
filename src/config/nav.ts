@@ -313,12 +313,12 @@ export const navConfig = {
              * down, and only the second one carried a name and an icon.
              *
              * The `#mission` anchor still exists and is still linked from
-             * /ueber-uns/gemeinnuetzigkeit ("Read our mission") and from the
+             * /about/nonprofit ("Read our mission") and from the
              * footer. Nothing about /about changed; only the duplicate way in.
              */
             {
               label: 'Non-profit status',
-              href: '/ueber-uns/gemeinnuetzigkeit',
+              href: '/about/nonprofit',
               icon: 'mission',
               description: 'How we use your course fees for the public good.',
             },

@@ -215,7 +215,7 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      {/* `#mission` is linked from the footer and from /ueber-uns/gemeinnuetzigkeit. */}
+      {/* `#mission` is linked from the footer and from /about/nonprofit. */}
       <section id="mission" className="scroll-mt-28 py-16 md:py-24">
         <Container>
           <div className="mx-auto grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
@@ -230,7 +230,7 @@ export default async function AboutPage() {
               <p className="mt-3 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsText}</p>
               <p className="mt-4 text-pretty text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.aimsClassText}</p>
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
-                <TextCta href="/ueber-uns/gemeinnuetzigkeit">
+                <TextCta href="/about/nonprofit">
                   {say(locale, 'Was gemeinnützig bei uns heißt', 'What being a non-profit means at CASA')}
                 </TextCta>
                 <TextCta href="/team">

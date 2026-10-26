@@ -225,7 +225,8 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
 
 ## Before public-domain launch
 
-1. Connect the production database and apply migrations, including `0015_group_appointments`.
+1. ~~Connect the production database and apply migrations, including `0015_group_appointments`.~~
+   Done 2026-10-09; `deploy.sh` applies every migration before each release.
 2. ~~Complete the Microsoft connection and verify receipt at admin@~~ done 2026-10-01 for contact,
    course, exam and placement; appointments and applications once the database exists.
 3. Confirm Ina's closure dates and who handles confirmation/cancellation. If she wants automatic

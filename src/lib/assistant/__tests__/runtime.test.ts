@@ -153,8 +153,8 @@ describe('assistant knowledge search', () => {
     const nonprofit = searchPublicKB('gemeinnützige gGmbH Mittelverwendung', 'de');
     const integration = searchPublicKB('Here Ahead Garantiefonds Hochschule Integration', 'de');
 
-    expect(nonprofit.passages.some((entry) => entry.url === '/ueber-uns/gemeinnuetzigkeit')).toBeTruthy();
-    expect(nonprofit.routeSuggestions.some((entry) => entry.href === '/ueber-uns/gemeinnuetzigkeit')).toBeTruthy();
+    expect(nonprofit.passages.some((entry) => entry.url === '/about/nonprofit')).toBeTruthy();
+    expect(nonprofit.routeSuggestions.some((entry) => entry.href === '/about/nonprofit')).toBeTruthy();
     // The partners have their own page since 2026-10-05; the mission page keeps to the gGmbH.
     expect(integration.passages.some((entry) => entry.url === '/partners')).toBeTruthy();
     expect(integration.routeSuggestions.some((entry) => entry.href === '/partners')).toBeTruthy();

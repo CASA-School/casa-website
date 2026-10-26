@@ -672,7 +672,7 @@
     "query": "Ist CASA eine gemeinnützige Schule?",
     "kind": "question",
     "expect": [
-      "/ueber-uns/gemeinnuetzigkeit",
+      "/about/nonprofit",
       "/about"
     ],
     "facts": [
@@ -895,7 +895,7 @@
     "query": "gemeinützig",
     "kind": "search",
     "expect": [
-      "/ueber-uns/gemeinnuetzigkeit"
+      "/about/nonprofit"
     ],
     "facts": [],
     "topic": "nonprofit"
@@ -1560,7 +1560,7 @@
     "query": "non profit language school",
     "kind": "search",
     "expect": [
-      "/ueber-uns/gemeinnuetzigkeit",
+      "/about/nonprofit",
       "/about"
     ],
     "facts": [],

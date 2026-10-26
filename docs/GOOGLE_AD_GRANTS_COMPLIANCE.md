@@ -45,17 +45,31 @@ Reference points to keep in view:
 - [ ] Confirm the exact current wording of the latest `Freistellungsbescheid` before making more detailed tax-exemption claims.
 - [ ] Confirm that `Staatlich anerkannter Träger der freien Jugendhilfe` and `Amtsgericht Bremen HRB 32761 HB` are still the exact public wording CASA wants in the footer.
 - [ ] Confirm Here Ahead, Garantiefonds Hochschule, and Tandem descriptions with CASA staff before production launch.
-- [ ] Verify production HTTP to HTTPS 301 redirect for every public route.
-- [ ] Verify no display ads, affiliate links, or third-party commercial ad placements are present.
-- [ ] Crawl public links after deployment, including the mission page, nav dropdowns, footer, registration forms, and contact routes.
-- [~] Run mobile QA for the homepage, nonprofit page, footer, and nav dropdown.
+- [~] Verify production HTTP to HTTPS 301 redirect for every public route.
+      **On the preview, 2026-10-26:** `http://neu.casa-bremen.de/…` answers 301 to the same
+      path and query on https (the Container App's ingress refuses plain http). Check once more
+      on `casa-bremen.de` and `www` after the domain moves.
+- [x] Verify no display ads, affiliate links, or third-party commercial ad placements are present.
+      **2026-10-26:** no page loads a third-party script or iframe; the 35 outbound links go to
+      partners, telc/TestDaF/Klett, public bodies (Auswärtiges Amt, uni-assist, Studierendenwerke),
+      Google Maps and CASA's own Facebook and Instagram.
+- [x] Crawl public links after deployment, including the mission page, nav dropdowns, footer, registration forms, and contact routes.
+      **2026-10-26**, against a production build of the go-live branch: all 72 sitemap pages
+      answer 200, every internal link on them (113) answers 200 or redirects once to a 200, all
+      35 outbound links open (studierendenwerke.de refuses scripts with 403 but opens in a
+      browser). axe (WCAG 2.1 A/AA) found two faults, both fixed: a gold label on the news page
+      at 2.76:1, and the job cards' `<dl>` markup on the careers page.
+- [x] Run mobile QA for the homepage, nonprofit page, footer, and nav dropdown.
+      **Footer and phone menu done 2026-10-26** at 375 and 320, German and English: no overflow,
+      the menu and each of its five panels clean under axe, the footer's legal links wrap
+      clear of the CLARA button. The header's screen-reader labels („Menü öffnen",
+      „Zur CASA-Startseite", „Hauptnavigation") now follow the page's language.
       **Homepage nonprofit band and `/ueber-uns/gemeinnuetzigkeit` done 2026-08-20**,
       measured at 375 / 414 / 768 / 1024 / 1280 / 1440: no document overflow at any
       width, no element overflowing its parent, and the two worst measures fixed —
       the mission page's three principles were 167px wide at 1024 (now 288px) and
       the legal table's label column collapsed to 133px (now floored at 9rem).
       The secondary-CTA link primitive also went from a 21px hit area to 45px.
-      **Footer and nav dropdown are still unaudited.**
 
 ## Content Principle
 

@@ -39,7 +39,7 @@ export default async function TeamPage() {
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       {/*
-        THE SITE'S STANDARD HERO, one action. This page and /ueber-uns/gemeinnuetzigkeit
+        THE SITE'S STANDARD HERO, one action. This page and /about/nonprofit
         were the last two on HeroBEditorial: a smaller, heavier h1 than every other
         page, a framed photo card instead of the bleed, and two actions where the
         rest of the site offers one. The course finder the second action pointed at

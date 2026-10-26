@@ -140,34 +140,35 @@ export default async function CareersPage() {
                       <h2 className="mt-4 text-2xl font-bold leading-tight text-[var(--casa-ink)]">{position.title}</h2>
                       <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{position.shortDescription}</p>
 
+                      {/* A <dl> may hold only dt/dd groups in a div, so the icon sits inside the dt. */}
                       <dl className="mt-5 grid gap-2 text-sm text-[var(--casa-muted)] sm:grid-cols-2">
-                        <div className="inline-flex items-start gap-2">
-                          <Users className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
-                          <div>
-                            <dt className="font-semibold text-[var(--casa-ink)]">{copy.team}</dt>
-                            <dd>{position.team || (say(locale, 'CASA-Team', 'CASA team'))}</dd>
-                          </div>
+                        <div className="relative pl-6">
+                          <dt className="font-semibold text-[var(--casa-ink)]">
+                            <Users className="absolute left-0 top-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
+                            {copy.team}
+                          </dt>
+                          <dd>{position.team || (say(locale, 'CASA-Team', 'CASA team'))}</dd>
                         </div>
-                        <div className="inline-flex items-start gap-2">
-                          <MapPin className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
-                          <div>
-                            <dt className="font-semibold text-[var(--casa-ink)]">{copy.location}</dt>
-                            <dd>{position.location}</dd>
-                          </div>
+                        <div className="relative pl-6">
+                          <dt className="font-semibold text-[var(--casa-ink)]">
+                            <MapPin className="absolute left-0 top-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
+                            {copy.location}
+                          </dt>
+                          <dd>{position.location}</dd>
                         </div>
-                        <div className="inline-flex items-start gap-2">
-                          <Briefcase className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
-                          <div>
-                            <dt className="font-semibold text-[var(--casa-ink)]">{copy.contract}</dt>
-                            <dd>{position.employmentType}</dd>
-                          </div>
+                        <div className="relative pl-6">
+                          <dt className="font-semibold text-[var(--casa-ink)]">
+                            <Briefcase className="absolute left-0 top-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
+                            {copy.contract}
+                          </dt>
+                          <dd>{position.employmentType}</dd>
                         </div>
-                        <div className="inline-flex items-start gap-2">
-                          <Clock className="mt-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
-                          <div>
-                            <dt className="font-semibold text-[var(--casa-ink)]">{copy.mode}</dt>
-                            <dd>{position.workMode}</dd>
-                          </div>
+                        <div className="relative pl-6">
+                          <dt className="font-semibold text-[var(--casa-ink)]">
+                            <Clock className="absolute left-0 top-0.5 h-4 w-4 text-[var(--casa-accent-text)]" />
+                            {copy.mode}
+                          </dt>
+                          <dd>{position.workMode}</dd>
                         </div>
                       </dl>
 

@@ -147,7 +147,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
       }}
     >
       <SheetTrigger asChild>
-        <Button aria-label="Open navigation menu" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] xl:hidden">
+        <Button aria-label={say(contentLocale, 'Menü öffnen', 'Open navigation menu')} data-nav-trigger="" variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] xl:hidden">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
@@ -167,7 +167,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
 
         <div className="relative flex h-16 shrink-0 items-center justify-between px-5 sm:px-8">
           <SheetClose asChild>
-            <Link href="/" aria-label="Go to CASA homepage" className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]">
+            <Link href="/" aria-label={say(contentLocale, 'Zur CASA-Startseite', 'Go to CASA homepage')} className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]">
               <Logo className="h-8 w-auto" />
             </Link>
           </SheetClose>

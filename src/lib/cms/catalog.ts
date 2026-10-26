@@ -53,7 +53,7 @@ export const PAGE_NAMES: Record<string, string> = {
   '/accommodation/become-host': 'Gastfamilie werden',
   '/about': 'Leitbild',
   '/team': 'Team',
-  '/ueber-uns/gemeinnuetzigkeit': 'Gemeinnützigkeit',
+  '/about/nonprofit': 'Gemeinnützigkeit',
   '/partners': 'Kooperationspartner',
   '/careers': 'Karriere',
   '/careers/[slug]': 'Every job posting',

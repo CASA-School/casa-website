@@ -64,6 +64,6 @@
 }
 
 /* The phone menu button is a ghost Button, whose colour is the dark foreground. */
-.night [aria-label='Open navigation menu'] {
+.night [data-nav-trigger] {
   color: #ffffff;
 }
