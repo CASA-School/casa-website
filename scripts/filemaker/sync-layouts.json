@@ -1,0 +1,1174 @@
+{
+ "Accommodation": {
+  "layout": "Sync_Accommodation",
+  "key": "__ID_Accommodation",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "DateOfCreation",
+   "DescriptionAccommodation_1",
+   "DescriptionAccommodation_2",
+   "SearchfieldAccommodation.Institution",
+   "_ID_AccommodationTypeOffer",
+   "_ID_Active",
+   "_ID_Management",
+   "_ID_Person",
+   "_ID_Pet",
+   "_ID_Quality",
+   "_ID_SchoolFlatShare",
+   "_ID_Smoker",
+   "_ID_WashingMachine",
+   "__ID_Accommodation"
+  ]
+ },
+ "ActivityReference": {
+  "layout": "Sync_ActivityReference",
+  "key": "__ID_ActivityReference",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "ActivityReference_1",
+   "DateOfChange",
+   "__ID_ActivityReference"
+  ]
+ },
+ "Address": {
+  "layout": "Sync_Address",
+  "key": "__ID_Address",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "City",
+   "HouseNumber",
+   "Street",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "ZCountry_1",
+   "ZPostCode",
+   "_ID_Accommodation",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_Institution",
+   "_ID_Management",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "__ID_Address"
+  ]
+ },
+ "Agency": {
+  "layout": "Sync_Agency",
+  "key": "__ID_Agency",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "Agreement",
+   "DateOfChange",
+   "InstitutionAgency",
+   "_ID_Active",
+   "_ID_Institution",
+   "_ID_Management",
+   "__ID_Agency"
+  ]
+ },
+ "Agreement": {
+  "layout": "Sync_Agreement",
+  "key": "__ID_Agreement",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "AgreementComment_1",
+   "Agreement_1",
+   "Agreement_2",
+   "Agreement_3",
+   "Agreement_4",
+   "Agreement_5",
+   "DateOfChange",
+   "DateOfCreation",
+   "LengthDuration",
+   "Level",
+   "Recommendation",
+   "Subject",
+   "TypeAgreement_1",
+   "UserName",
+   "_ID_Booking",
+   "_ID_Person",
+   "__ID_Agreement"
+  ]
+ },
+ "AnimalAtHome": {
+  "layout": "Sync_AnimalAtHome",
+  "key": "__ID_AnimalAtHome",
+  "change": "TimestampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Animal_1",
+   "TimestampOfChange",
+   "_ID_Accommodation",
+   "__ID_AnimalAtHome"
+  ]
+ },
+ "BankAccount": {
+  "layout": "Sync_BankAccount",
+  "key": "__ID_BankAccount",
+  "change": "TimestampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "AccountOwner",
+   "BIC",
+   "BankName",
+   "IBAN.Text",
+   "SWIFT.Text",
+   "TimestampOfChange",
+   "TimestampOfCreation",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "__ID_BankAccount"
+  ]
+ },
+ "Booking": {
+  "layout": "Sync_Booking",
+  "key": "__ID_Booking",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "DateOfCreation",
+   "FinalNote",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_CourseTypeReference",
+   "_ID_EnrolmentDone",
+   "_ID_Exam",
+   "_ID_Group",
+   "_ID_PaymentThird",
+   "_ID_Person",
+   "_ID_Student",
+   "_ID_VisaRequired",
+   "__ID_Booking"
+  ]
+ },
+ "Classroom": {
+  "layout": "Sync_Classroom",
+  "key": "__ID_Classroom",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CityClassRoom",
+   "DateOfChange",
+   "NumberRoom.Text",
+   "__ID_Classroom"
+  ]
+ },
+ "CleaningDetail": {
+  "layout": "Sync_CleaningDetail",
+  "key": "__ID_CleaningDetail",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CleaningDetail_1",
+   "CleaningDetail_2",
+   "DateOfChange",
+   "_ID_Accommodation",
+   "_ID_CleaningJobReference",
+   "__ID_CleaningDetail"
+  ]
+ },
+ "Comment": {
+  "layout": "Sync_Comment",
+  "key": "__ID_Comment",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Comment_1",
+   "Comment_2",
+   "Subject",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "UserName",
+   "_ID_Accommodation",
+   "_ID_Booking",
+   "_ID_Group",
+   "_ID_Offer",
+   "_ID_Person",
+   "__ID_Comment"
+  ]
+ },
+ "Commission": {
+  "layout": "Sync_Commission",
+  "key": "__ID_Commission",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "Commission",
+   "CostDetail_1",
+   "CostGross",
+   "DateOfChange",
+   "Percentage",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_Corporate",
+   "_ID_CostDetail",
+   "_ID_PaymentCommission",
+   "__ID_Commission"
+  ]
+ },
+ "CommissionDetail": {
+  "layout": "Sync_CommissionDetail",
+  "key": "__ID_CommissionDetail",
+  "change": "TimestampOfchange",
+  "changeKind": "timestamp",
+  "fields": [
+   "CommentPercentage",
+   "Percentage",
+   "TimestampOfchange",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_CostDetailReference",
+   "__ID_CommissionDetail"
+  ]
+ },
+ "Complaint": {
+  "layout": "Sync_Complaint",
+  "key": "__ID_Complaint",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "CommentNote",
+   "ComplaintReference_1",
+   "Complaint_1",
+   "Complaint_2",
+   "Subject",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "UserName",
+   "_ID_Booking",
+   "_ID_Person",
+   "__ID_Complaint"
+  ]
+ },
+ "Corporate": {
+  "layout": "Sync_Corporate",
+  "key": "__ID_Corporate",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "HeaderCorporate.Text",
+   "_ID_Active",
+   "_ID_Management",
+   "__ID_Corporate"
+  ]
+ },
+ "CostDetail": {
+  "layout": "Sync_CostDetail",
+  "key": "__ID_CostDetail",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "CostDetailComment_1",
+   "CostDetail_1",
+   "CostGross",
+   "CostGrossUnit",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "Unit",
+   "_ID_Booking",
+   "_ID_CostDetailReference",
+   "_ID_ProductDelivered",
+   "_ID_SerialNumberInvoice",
+   "__ID_CostDetail"
+  ]
+ },
+ "CostDetailSample": {
+  "layout": "Sync_CostDetailSample",
+  "key": "__ID_CostDetailSample",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CostDetailComment_1",
+   "CostDetailComment_2",
+   "CostDetail_1",
+   "CostDetail_2",
+   "CostGrossUnit",
+   "DateOfChange",
+   "Unit",
+   "_ID_CostDetailReference",
+   "_ID_Offer",
+   "_ID_Sort",
+   "__ID_CostDetailSample"
+  ]
+ },
+ "Course": {
+  "layout": "Sync_Course",
+  "key": "__ID_Course",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CapStudent",
+   "CoursePrice",
+   "CourseTitle",
+   "DateOfChange",
+   "LevelShort",
+   "LevelShown",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Active",
+   "_ID_Bookable",
+   "_ID_Corporate",
+   "_ID_CourseTypeReference",
+   "_ID_DayTimeReference",
+   "_ID_Group",
+   "__ID_Course"
+  ]
+ },
+ "DateAccommodation": {
+  "layout": "Sync_DateAccommodation",
+  "key": "__ID_DateAccommodation",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "TimeStampOfChange",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Accommodation",
+   "_ID_AccommodationCatering",
+   "_ID_AccommodationRoom",
+   "_ID_AccommodationType",
+   "_ID_Booking",
+   "_ID_DepartureConfirmed",
+   "_ID_EnrolmentDone",
+   "_ID_Room",
+   "__ID_DateAccommodation"
+  ]
+ },
+ "DateBooking": {
+  "layout": "Sync_DateBooking",
+  "key": "__ID_DateBooking",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CommentBooking",
+   "DateOfChange",
+   "DateOfCreation",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Booking",
+   "_ID_Course",
+   "__ID_DateBooking"
+  ]
+ },
+ "DateOffer": {
+  "layout": "Sync_DateOffer",
+  "key": "__ID_DateOffer",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Offer",
+   "_ID_TypeOfferReference",
+   "__ID_DateOffer"
+  ]
+ },
+ "DatePlacement": {
+  "layout": "Sync_DatePlacement",
+  "key": "__ID_DatePlacement",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Institution",
+   "TimeStampOfChange",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Group",
+   "_ID_Management",
+   "__ID_DatePlacement",
+   "max_NumberStudent",
+   "min_NumberStudent"
+  ]
+ },
+ "DateRent": {
+  "layout": "Sync_DateRent",
+  "key": "__ID_DateRent",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "DescriptionRent.Short",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Accommodation",
+   "_ID_Group",
+   "_ID_Room",
+   "__ID_DateRent",
+   "max_NumberStudent",
+   "min_NumberStudent"
+  ]
+ },
+ "DateTargetWorkTime": {
+  "layout": "Sync_DateTargetWorkTime",
+  "key": "__ID_DateTargetWorkTime",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "TargetWorkTime.Teaching.Week",
+   "TargetWorkTime.Week",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "_ID_StatusSalarylReference",
+   "__ID_DateTargetWorkTime"
+  ]
+ },
+ "DateValidity": {
+  "layout": "Sync_DateValidity",
+  "key": "__ID_DateValidity",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "LicenseNumber",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_LicenseReference",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "__ID_DateValidity"
+  ]
+ },
+ "DayTime": {
+  "layout": "Sync_DayTime",
+  "key": "__ID_DayTime",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "HourEnd",
+   "HourStart",
+   "TimeStampOfChange",
+   "_ID_Course",
+   "__ID_DayTime"
+  ]
+ },
+ "Editorial": {
+  "layout": "Sync_Editorial",
+  "key": "__ID_Editorial",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "InstitutionEditorial",
+   "_ID_Management",
+   "__ID_Editorial"
+  ]
+ },
+ "Email": {
+  "layout": "Sync_Email",
+  "key": "__ID_Email",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Email",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "_ID_Accommodation",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_Institution",
+   "_ID_Management",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "_ID_Use",
+   "__ID_Email"
+  ]
+ },
+ "Exam": {
+  "layout": "Sync_Exam",
+  "key": "__ID_Exam",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "Exam.ZSingleDate_OneLine",
+   "NumberPlace",
+   "_ID_ExamReference",
+   "__ID_Exam"
+  ]
+ },
+ "Flag": {
+  "layout": "Sync_Flag",
+  "key": "__ID_Flag",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "CountryLong_1",
+   "Country_1",
+   "__ID_Flag"
+  ]
+ },
+ "Group": {
+  "layout": "Sync_Group",
+  "key": "__ID_Group",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "AgeStudent",
+   "CommentArrival_Departure",
+   "CommentArrival_Departure_Short",
+   "NumberStudent",
+   "NumberTeacher",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "TitleGroup",
+   "UserName",
+   "ZEndDateAcco",
+   "ZEndDateTuition",
+   "ZStartDateAcco",
+   "ZStartDateTuition",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_Country",
+   "_ID_CourseTypeReference",
+   "_ID_Level",
+   "_ID_Platform",
+   "_ID_StatusGroup",
+   "__ID_Group"
+  ]
+ },
+ "Instalment": {
+  "layout": "Sync_Instalment",
+  "key": "__ID_Instalment",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "Instalment",
+   "InstalmentDetail_1",
+   "OrdinalNumber",
+   "Z_DatePaymentDue",
+   "_ID_Booking",
+   "_ID_PaymentDone",
+   "__ID_Instalment"
+  ]
+ },
+ "Institution": {
+  "layout": "Sync_Institution",
+  "key": "__ID_Institution",
+  "change": "TimestampChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Institution",
+   "TimestampChange",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_Management",
+   "__ID_Institution"
+  ]
+ },
+ "Invoice": {
+  "layout": "Sync_Invoice",
+  "key": "__ID_Invoice",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "AddressHeader",
+   "Amount",
+   "DateOfCreation",
+   "Subject",
+   "TimeStampOfChange",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_Corporate",
+   "_ID_Person",
+   "_ID_SerialNumberInvoice",
+   "__ID_Invoice"
+  ]
+ },
+ "Key": {
+  "layout": "Sync_Key",
+  "key": "__ID_Key",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "Comment",
+   "DateOfChange",
+   "KeyNumber",
+   "_ID_Active",
+   "_ID_KeyTypeReference",
+   "_ID_StaffMember",
+   "__ID_Key"
+  ]
+ },
+ "KeyTypeReference": {
+  "layout": "Sync_KeyTypeReference",
+  "key": "__ID_KeyTypeReference",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "KeyTypeReference_1",
+   "__ID_KeyTypeReference"
+  ]
+ },
+ "Letter": {
+  "layout": "Sync_Letter",
+  "key": "__ID_Letter",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "AddressHeader",
+   "DateOfEmission",
+   "Date_LetterSent",
+   "Email",
+   "FreeField",
+   "ScriptName",
+   "ScriptParameter",
+   "Subject",
+   "TimeStampOfCreation",
+   "UserName",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_Corporate",
+   "_ID_Offer",
+   "_ID_Person",
+   "__ID_Letter"
+  ]
+ },
+ "Management": {
+  "layout": "Sync_Management",
+  "key": "__ID_Management",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "TimeStampOfChange",
+   "_ID_StatusManagementReference",
+   "__ID_Management"
+  ]
+ },
+ "Offer": {
+  "layout": "Sync_Offer",
+  "key": "__ID_Offer",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "DateOfCreation",
+   "Email",
+   "Subject",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "UserName",
+   "_ID_ActiveTemplate",
+   "_ID_Address",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_Corporate",
+   "_ID_Group",
+   "_ID_Invoice",
+   "_ID_Person",
+   "_ID_PreBooking",
+   "__ID_Offer"
+  ]
+ },
+ "Order": {
+  "layout": "Sync_Order",
+  "key": "__ID_Order",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "DateOfEmission",
+   "Email",
+   "UserName",
+   "_ID_Editorial",
+   "_ID_OrderDone",
+   "__ID_Order"
+  ]
+ },
+ "OrderDetail": {
+  "layout": "Sync_OrderDetail",
+  "key": "__ID_OrderDetail",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "CostNet",
+   "CostNetUnit",
+   "OrderDetail_OneLine",
+   "Unit",
+   "_ID_BookReference",
+   "_ID_Order",
+   "__ID_OrderDetail"
+  ]
+ },
+ "PaymentIn": {
+  "layout": "Sync_PaymentIn",
+  "key": "__ID_PaymentIn",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "CommentPaymentIn_1",
+   "CommentPaymentIn_2",
+   "CostDetailReference_1",
+   "DateOfPayment",
+   "MethodPayment_1",
+   "PaymentIn",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "_ID_Booking",
+   "_ID_MethodPayment",
+   "__ID_PaymentIn"
+  ]
+ },
+ "PaymentOut": {
+  "layout": "Sync_PaymentOut",
+  "key": "__ID_PaymentOut",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "Comment",
+   "DateOfChange",
+   "DatePaymentOut",
+   "MethodPayment_1",
+   "PaymentOut",
+   "PaymentOutComment_1",
+   "PaymentOutDetailReference_1",
+   "TimeStampOfCreation",
+   "ZSingleDatePayment",
+   "_ID_Accommodation",
+   "_ID_Agency",
+   "_ID_Booking",
+   "_ID_Corporate",
+   "_ID_DateAccommodation",
+   "_ID_PaymentOutReference",
+   "__ID_PaymentOut"
+  ]
+ },
+ "Person": {
+  "layout": "Sync_Person",
+  "key": "__ID_Person",
+  "change": "TimestampChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "BirthPlace",
+   "CountryBirth_1",
+   "DateOfBirth",
+   "DateOfCreation",
+   "Function",
+   "Gender_1",
+   "MotherTongue_1",
+   "NickName",
+   "NumberAgeInsurance",
+   "NumberHealthInsurance",
+   "NumberTaxe",
+   "Occupation",
+   "TimestampChange",
+   "TimestampCreation",
+   "ZFirstName",
+   "ZSurName",
+   "ZSurName2",
+   "_ID_Accommodation",
+   "_ID_Agency",
+   "_ID_Client",
+   "_ID_Corporate",
+   "_ID_GenderReference",
+   "_ID_Homeland",
+   "_ID_Institution",
+   "_ID_Management",
+   "_ID_Status_Family",
+   "_ID_Student",
+   "__ID_Person"
+  ]
+ },
+ "Phone": {
+  "layout": "Sync_Phone",
+  "key": "__ID_Phone",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "AreaCode",
+   "Phone",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "_ID_Accommodation",
+   "_ID_Agency",
+   "_ID_Corporate",
+   "_ID_Institution",
+   "_ID_Management",
+   "_ID_Person",
+   "_ID_StaffMember",
+   "_ID_Use",
+   "__ID_Phone"
+  ]
+ },
+ "PreBooking": {
+  "layout": "Sync_PreBooking",
+  "key": "__ID_PreBooking",
+  "change": "Timestamp.Change",
+  "changeKind": "timestamp",
+  "fields": [
+   "DateOfCreation",
+   "Timestamp.Change",
+   "Timestamp.Creation",
+   "UserName",
+   "_ID_Booking",
+   "_ID_Course",
+   "_ID_CourseTypeReference",
+   "_ID_DayTimeReference",
+   "_ID_Level",
+   "_ID_LevelStepReference",
+   "_ID_Person",
+   "_ID_StatusPreBooking",
+   "_ID_VisaRequired",
+   "__ID_PreBooking"
+  ]
+ },
+ "Purview": {
+  "layout": "Sync_Purview",
+  "key": "__ID_Purview",
+  "change": "DateChange",
+  "changeKind": "date",
+  "fields": [
+   "DateChange",
+   "Z_EndDate",
+   "Z_StartDate",
+   "_ID_Active",
+   "_ID_Person",
+   "_ID_PurviewReference",
+   "_ID_StaffMember",
+   "__ID_Purview"
+  ]
+ },
+ "Room": {
+  "layout": "Sync_Room",
+  "key": "__ID_Room",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CommentRoom_1",
+   "DateOfChange",
+   "NumberPerson",
+   "RoomName",
+   "_ID_Accommodation",
+   "_ID_TypeRoom",
+   "__ID_Room"
+  ]
+ },
+ "ServiceDetail": {
+  "layout": "Sync_ServiceDetail",
+  "key": "__ID_ServiceDetail",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ServiceDetailComment_1",
+   "ServiceDetail_1",
+   "_ID_Group",
+   "_ID_ServiceDetailReference",
+   "_ID_ServiceDetailSpecificationReference",
+   "__ID_ServiceDetail"
+  ]
+ },
+ "ServiceDetailReference": {
+  "layout": "Sync_ServiceDetailReference",
+  "key": "__ID_ServiceDetailReference",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ServiceDetailReference_1",
+   "__ID_ServiceDetailReference"
+  ]
+ },
+ "ServiceDetailSpecificationReference": {
+  "layout": "Sync_ServiceDetailSpecificationReference",
+  "key": "__ID_ServiceDetailSpecificationReference",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ServiceDetailSpecificationReference_1",
+   "__ID_ServiceDetailSpecificationReference"
+  ]
+ },
+ "SingleDateActivity": {
+  "layout": "Sync_SingleDateActivity",
+  "key": "__ID_SingleDateActivity",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "Activity_1",
+   "DateOfChange",
+   "HourStart",
+   "MeetingPoint_1",
+   "ZSingleDate",
+   "_ID_ActivityReference",
+   "_ID_Group",
+   "__ID_SingleDateActivity"
+  ]
+ },
+ "SingleDateControl": {
+  "layout": "Sync_SingleDateControl",
+  "key": "__ID_SingleDateControl",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ScriptName",
+   "TimeStampOfCreation",
+   "UserName",
+   "ZSingleDate",
+   "_ID_Booking",
+   "__ID_SingleDateControl"
+  ]
+ },
+ "SingleDateCourse": {
+  "layout": "Sync_SingleDateCourse",
+  "key": "__ID_SingleDateCourse",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "HourEnd",
+   "HourStart",
+   "NumberLesson",
+   "ZSingleDateCourse",
+   "_ID_Classroom",
+   "_ID_Course",
+   "_ID_Holiday",
+   "_ID_Particularity",
+   "_ID_PersonSubstituted",
+   "_ID_StaffMember",
+   "__ID_SingleDateCourse"
+  ]
+ },
+ "SingleDateOccupancy": {
+  "layout": "Sync_SingleDateOccupancy",
+  "key": "__ID_SingleDateOccupancy",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "_ID_Classroom",
+   "_ID_ClassroomSubstituted",
+   "_ID_SingleDateCourse",
+   "__ID_SingleDateOccupancy"
+  ]
+ },
+ "SingleDateStudent": {
+  "layout": "Sync_SingleDateStudent",
+  "key": "__ID_SingleDateStudent",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "Comment",
+   "DelayMinute",
+   "NumberLesson",
+   "TimeStampOfChange",
+   "ZSingleDateStudent",
+   "_ID_Absence",
+   "_ID_Booking",
+   "_ID_Excuse",
+   "_ID_IllnessDetail",
+   "_ID_Presence",
+   "_ID_SingleDateCourse",
+   "__ID_SingleDateStudent"
+  ]
+ },
+ "SingleDayStaff": {
+  "layout": "Sync_SingleDayStaff",
+  "key": "__ID_SingleDayStaff",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "HourEnd",
+   "HourStart",
+   "ZSingleDay",
+   "_ID_Absence",
+   "_ID_AbsenceDetail",
+   "_ID_Holiday",
+   "_ID_Illness",
+   "_ID_StaffMember",
+   "__ID_SingleDayStaff"
+  ],
+  "never": "cal_*"
+ },
+ "SingleMonthStaff": {
+  "layout": "Sync_SingleMonthStaff",
+  "key": "__ID_SingleMonthStaff",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "MonthSingleDay",
+   "StaticBalanceHolidayRunning",
+   "StaticBalanceWorkMonth",
+   "StaticBalanceWorkRunning",
+   "TimeStampOfChange",
+   "YearSingleDay",
+   "ZStartDate",
+   "_ID_Approved",
+   "_ID_StaffMember",
+   "__ID_SingleMonthStaff"
+  ]
+ },
+ "SingleWeekCleaning": {
+  "layout": "Sync_SingleWeekCleaning",
+  "key": "__ID_SingleWeekCleaning",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Accommodation",
+   "_ID_CleaningJobReference",
+   "_ID_Room",
+   "__ID_SingleWeekCleaning"
+  ]
+ },
+ "SingleYearStaff": {
+  "layout": "Sync_SingleYearStaff",
+  "key": "__ID_SingleYearStaff",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "NumberDayHolidayYear",
+   "RemainingHoliday",
+   "StaticBalanceWorkRunning",
+   "YearSingleDay",
+   "_ID_StaffMember",
+   "__ID_SingleYearStaff"
+  ]
+ },
+ "StaffMember": {
+  "layout": "Sync_StaffMember",
+  "key": "__ID_StaffMember",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "SearchFieldTeacherFirstName",
+   "SearchFieldTeacherSurName",
+   "TeacherFirstName.Surname.Short",
+   "_ID_ActiveAdministration",
+   "_ID_ActiveStaff",
+   "_ID_ActiveTeacher",
+   "_ID_CourseTypeReference",
+   "_ID_DayTimeReference",
+   "_ID_Person",
+   "_ID_ShiftReception",
+   "_ID_WeekDay",
+   "__ID_StaffMember"
+  ],
+  "never": "CommentsOnTeacher"
+ },
+ "StatementLandlord": {
+  "layout": "Sync_StatementLandlord",
+  "key": "__ID_StatementLandlord",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "DateOfEmission",
+   "FreeField",
+   "HeaderAccommodation",
+   "HeaderLandlord",
+   "Subject",
+   "TimeStampOfCreation",
+   "UserName",
+   "_ID_Accommodation",
+   "_ID_Booking",
+   "__ID_StatementLandlord"
+  ]
+ },
+ "TestStudent": {
+  "layout": "Sync_TestStudent",
+  "key": "__ID_TestStudent",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "CommentTest",
+   "DateOfChange",
+   "DateOfCreation",
+   "DateOfTest",
+   "LevelShort",
+   "Result",
+   "TestReference",
+   "User",
+   "_ID_Booking",
+   "_ID_Person",
+   "__ID_TestStudent"
+  ]
+ },
+ "WaitingRoom": {
+  "layout": "Sync_WaitingRoom",
+  "key": "__ID_WaitingRoom",
+  "change": "Timestamp.Change",
+  "changeKind": "timestamp",
+  "fields": [
+   "DateOfCreation",
+   "Timestamp.Change",
+   "Timestamp.Creation",
+   "UserName",
+   "_ID_Booking",
+   "_ID_Course",
+   "_ID_Person",
+   "_ID_PreBooking",
+   "__ID_WaitingRoom"
+  ]
+ },
+ "WeekDay": {
+  "layout": "Sync_WeekDay",
+  "key": "__ID_WeekDay",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "HourEnd",
+   "HourStart",
+   "NumberLesson",
+   "_ID_ClassRoom",
+   "_ID_Course",
+   "_ID_StaffMember",
+   "_ID_WeekDayReference",
+   "__ID_WeekDay"
+  ]
+ },
+ "WorkFlow": {
+  "layout": "Sync_WorkFlow",
+  "key": "__ID_Workflow",
+  "change": "TimeStampOfChange",
+  "changeKind": "timestamp",
+  "fields": [
+   "CommentWorkflow",
+   "FollowUp",
+   "HourEnd",
+   "HourStart",
+   "TimeStampOfChange",
+   "TimeStampOfCreation",
+   "UserName",
+   "Workflow_1",
+   "ZSingleDayCalendar",
+   "_ID_Booking",
+   "_ID_Completed",
+   "_ID_Group",
+   "_ID_Offer",
+   "_ID_Person",
+   "_ID_PublicCalendar",
+   "__ID_Workflow"
+  ]
+ },
+ "WorkFlowLetter": {
+  "layout": "Sync_WorkFlowLetter",
+  "key": "__ID_WorkFlowLetter",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "DateOfCreation",
+   "FormCommunication",
+   "_ID_Letter",
+   "__ID_WorkFlowLetter"
+  ]
+ }
+}

@@ -216,3 +216,5 @@ nobody else has access to them.
 **Learners brought across (2026-10-17):** what of a learner comes into the workspace, and what has no place there yet — `learner-transfer.md`.
 
 **What the bridge still leaves behind (2026-10-20):** per entity, after the first live run — fields in use that no reader reads, rows the sample and the skip rules leave out, a top 10 for the office and the decisions only Rahman can make — `bridge-gaps.md`.
+
+**The Data API layouts for the sync (2026-10-26):** one `Sync_<Table>` layout per table the bridge reads, with its fields, key and change field, and how each table is polled — `sync-layouts.md` (machine-readable: `scripts/filemaker/sync-layouts.json`).
