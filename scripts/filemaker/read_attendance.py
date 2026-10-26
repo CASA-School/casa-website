@@ -51,6 +51,15 @@ bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking
 chosen = sample_persons(bookings, table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate'), date.today())
 ours = {bid for bid, b in bookings.items() if first(b['_ID_Person']) in chosen}
 
+# `MakeSingleDateStudent` writes „… hat heute Geburtstag" / „… hat morgen Geburtstag" into the comment
+# (mapping review 2026-10-26 §3): a birthday comes from the birth date, so only a teacher's own words stay.
+BIRTHDAY = re.compile(r'^.*hat (heute|morgen) Geburtstag\W*$', re.I | re.M)
+
+
+def teacher_comment(value):
+    return BIRTHDAY.sub('', value or '').strip() or None
+
+
 F = ['__ID_SingleDateStudent', '_ID_Booking', '_ID_SingleDateCourse', 'ZSingleDateStudent', '_ID_Presence', '_ID_Excuse', '_ID_Absence', '_ID_IllnessDetail', 'DelayMinute',
      'NumberLesson', 'Comment']
 out = []
@@ -64,7 +73,7 @@ for r in table('SingleDateStudent', *F):
                 'present': True if presence == '1' else False if presence == '2' else None,
                 'absence': ABSENCE.get(first(r['_ID_Excuse'])) or ABSENCE.get(first(r['_ID_Absence'])),
                 'sickNote': SICK_NOTE.get(first(r['_ID_IllnessDetail'])), 'late': int(late) if late and 0 < late <= 600 else None,
-                'lessons': number(r['NumberLesson']), 'comment': r['Comment'].strip() or None})
+                'lessons': number(r['NumberLesson']), 'comment': teacher_comment(r['Comment'])})
 
 if '--stats' in sys.argv:
     print('rows', len(out), '· present', sum(1 for o in out if o['present']), '· absent', sum(1 for o in out if o['present'] is False), '·',

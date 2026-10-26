@@ -460,7 +460,7 @@ try {
            ON CONFLICT (filemaker_payment_id) WHERE filemaker_payment_id IS NOT NULL DO UPDATE
              SET booking_id = EXCLUDED.booking_id, amount = EXCLUDED.amount, method = EXCLUDED.method, received_at = EXCLUDED.received_at,
                  subject = EXCLUDED.subject, reference = EXCLUDED.reference`,
-          [bookingId, p.amount, method(p), p.date, p.for ?? 'Zahlung', p.created, p.id, p.comment ?? null]
+          [bookingId, p.amount, method(p), p.date, p.for ?? typeOfCharge(p.ref)?.name_de ?? 'Zahlung', p.created, p.id, p.comment ?? null]
         );
         if (p.amount < 0 && p.id.startsWith('PaymentOut:')) count.refunds++;
         else count.payments++;

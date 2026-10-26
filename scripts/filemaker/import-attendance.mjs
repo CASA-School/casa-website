@@ -51,6 +51,9 @@ try {
     count.written += result.rowCount;
     count.withDay += part.filter((r) => days.has(r.courseDay)).length;
   }
+  // FileMaker's generated birthday notes are not a teacher's comment (read_attendance.py), also on rows
+  // this run did not read.
+  await client.query(`UPDATE booking_attendance SET comment = NULL WHERE filemaker_id IS NOT NULL AND comment ~* '^\\s*hat (heute|morgen) Geburtstag\\W*$'`);
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
