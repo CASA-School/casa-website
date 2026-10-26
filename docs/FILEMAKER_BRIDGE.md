@@ -529,6 +529,9 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 - the exam parts (`SingleDateExam`, 2026-10-26): a sitting's real hours, unless a colleague changed it here,
   and the examiners of its written and oral parts;
 - organisations, groups, offers, accommodation, follow-ups, intake and the rest;
+- an organisation's history (2026-10-26): SchoolMan's work-log lines that name it (`WorkFlow` by
+  `_ID_Corporate`, `_ID_Agency`, `_ID_Institution`, `_ID_Management`), about itself or about a learner the
+  workspace holds, shown in „Notizen und Verlauf" on its page (notes on organisations: 0089);
 - the Tagesplan's tasks.
 
 Each importer is idempotent, so a run changes only what differs. The window moves with the date.

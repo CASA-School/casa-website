@@ -11,15 +11,17 @@ import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { LetterList } from '@/components/admin/letters/letter-list';
 import { dayRange, euros } from '@/components/admin/list';
-import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
+import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Card, DateText, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { MoreInPanel, MoreLink } from '@/components/admin/more-in-panel';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
+import { activityFor } from '@/lib/admin/activity';
 import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
 import { organisationGroups } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
+import { listNotes } from '@/lib/admin/notes';
 import { num, pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
@@ -99,7 +101,7 @@ export default async function OrganisationPage({
   const seesGroups = canAccess(user, 'groups');
   const isAgency = organisation.kind === 'agency';
 
-  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts, orders] = await Promise.all([
+  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts, orders, notes, activity] = await Promise.all([
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
@@ -114,6 +116,9 @@ export default async function OrganisationPage({
     seesBookings ? organisationInvoices(id) : Promise.resolve([]),
     seesBookings ? organisationPayouts(id) : Promise.resolve([]),
     organisation.relation === 'publisher' ? organisationOrders(id) : Promise.resolve([]),
+    listNotes('organisation', id),
+    // Its history: what colleagues changed here, and SchoolMan's work-log lines about it (the bridge, 2026-10-26).
+    activityFor('organisation', id),
   ]);
   const seenLetters = letters.items.filter((l) => canAccess(user, letterModule(l.kind)));
   const letterCount = seenLetters.length === letters.items.length ? letters.total : seenLetters.length;
@@ -130,6 +135,7 @@ export default async function OrganisationPage({
     ...(invoices.length ? [{ id: 'invoices', label: t('Rechnungen', 'Invoices'), icon: Icon.statement, count: invoices.length }] : []),
     ...(payouts.length ? [{ id: 'payouts', label: t('Auszahlungen', 'Paid out'), icon: Icon.money, count: payouts.length }] : []),
     ...(orders.length ? [{ id: 'orders', label: t('Bestellungen', 'Orders'), icon: Icon.book, count: orders.length }] : []),
+    { id: 'history', label: t('Notizen und Verlauf', 'Notes and history'), icon: Icon.note, count: notes.length },
   ];
   const hidden = <input type="hidden" name="organisationId" value={id} />;
   const muted = (text: string) => <span className="font-semibold text-[var(--casa-muted)]">{text}</span>;
@@ -523,6 +529,12 @@ export default async function OrganisationPage({
           </Card>
         </RecordTabPanel>
       ) : null}
+
+      <RecordTabPanel id="history">
+        <div className="max-w-3xl">
+          <Timeline canWrite={canEdit} entity="organisation" id={id} notes={notes} activity={activity} />
+        </div>
+      </RecordTabPanel>
 
       {canEdit ? (
         <RecordFoot>
