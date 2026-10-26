@@ -9,7 +9,8 @@
  *
  * Shortened 2026-10-26 (Rahman: "a lot of text"): no reference code (nobody
  * at CASA looks a request up by it), no status row the steps already say, at
- * most three short steps, one closing line. The exam receipt shows the name it
+ * most three short steps, one closing line, a two-line footer with only what a
+ * GmbH's business mail must carry and the privacy link. The exam receipt shows the name it
  * asks the candidate to check; never the date of birth, which a mistyped
  * address would receive.
  *
@@ -602,7 +603,7 @@ export const CONFIRMATION_COPY = {
       "replyNote": "Fragen oder etwas vergessen? Antworte einfach auf diese E-Mail.",
       "signoff": "Herzliche Grüße aus Bremen",
       "team": "Dein CASA-Team",
-      "footer": "CASA – Internationale Sprachschule gGmbH · Gemeinnützige Sprachschule in Bremen, seit 1983\nAm Dobben 14–16 · 28203 Bremen · Telefon +49 421 460 414 30 · {siteHost}\nBürozeiten: Mo–Do 08:30–19:00 Uhr, Fr 08:30–13:00 Uhr\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick\nDu bekommst diese E-Mail, weil deine Adresse auf {siteHost} in ein Formular eingetragen wurde. Warst du das nicht? Dann antworte kurz, und wir löschen die Angaben. Datenschutz: {siteUrl}/datenschutz"
+      "footer": "CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen · {siteHost}\nAmtsgericht Bremen, HRB 32761 HB · Geschäftsführerin: Bettina Rick · Datenschutz: {siteUrl}/datenschutz"
     },
     "en": {
       "greetingNamed": "Hello {firstName},",
@@ -610,7 +611,7 @@ export const CONFIRMATION_COPY = {
       "replyNote": "Questions, or something to add? Simply reply to this email.",
       "signoff": "Best wishes from Bremen",
       "team": "The CASA team",
-      "footer": "CASA – Internationale Sprachschule gGmbH · Non-profit language school in Bremen, since 1983\nAm Dobben 14–16 · 28203 Bremen, Germany · Phone +49 421 460 414 30 · {siteHost}/en\nOffice hours: Mon–Thu 08:30–19:00, Fri 08:30–13:00 (Bremen time)\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick\nYou’re receiving this email because your address was entered in a form on {siteHost}. If that wasn’t you, reply briefly and we’ll delete the details. Privacy: {siteUrl}/en/privacy"
+      "footer": "CASA – Internationale Sprachschule gGmbH · Am Dobben 14–16 · 28203 Bremen, Germany · {siteHost}/en\nAmtsgericht Bremen, HRB 32761 HB · Managing director: Bettina Rick · Privacy: {siteUrl}/en/privacy"
     }
   }
 } as const;
