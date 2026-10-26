@@ -209,7 +209,9 @@ try {
   // A learner as they were last time is passed over (0088): their data, what their periods are matched to
   // here, whether each booking is over, and the vocabularies everything is matched through.
   const changed = await changes(client, 'learners');
-  const vocabularies = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes], [...stayTypes], [...roomTypes], [...caterings]];
+  // Only what names things, never a value the run itself changes: the exam types' usual hours come from
+  // their first sitting, which the exams step corrects, and had made every learner look changed (2026-10-26).
+  const vocabularies = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes].map(([code, t]) => [code, t.id]), [...stayTypes], [...roomTypes], [...caterings]];
   const matched = (l) =>
     l.bookings.map((b) => [
       b.exam ? (b.exam.day ?? '') < today : (b.periods ?? []).every((p) => !p.end || p.end < today),
