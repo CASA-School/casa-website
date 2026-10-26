@@ -89,6 +89,13 @@ for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', '_ID_PaymentOutRe
 stamps = [{'charge': r['__ID_CostDetail'].strip(), 'invoice': first(r['_ID_SerialNumberInvoice'])}
           for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_SerialNumberInvoice') if first(r['_ID_Booking']) in ours and first(r['_ID_SerialNumberInvoice'])]
 
+# `Invoice::Amount` is barely filled since 2025 (mapping review §6): the invoice is the sum of the cost lines
+# stamped with its number.
+invoiced = collections.defaultdict(float)
+for serial, gross in zip(column('CostDetail', '_ID_SerialNumberInvoice'), column('CostDetail', 'CostGross')):
+    if first(serial) and number(gross) is not None:
+        invoiced[first(serial)] += number(gross)
+
 invoices = []
 for r in table('Invoice', '__ID_Invoice', '_ID_SerialNumberInvoice', '_ID_Booking', '_ID_Person', '_ID_Agency', '_ID_Corporate', 'Amount', 'DateOfCreation', 'AddressHeader',
                'Subject'):
@@ -96,7 +103,7 @@ for r in table('Invoice', '__ID_Invoice', '_ID_SerialNumberInvoice', '_ID_Bookin
     if not (booking in ours or agency or company) or not first(r['_ID_SerialNumberInvoice']):
         continue
     invoices.append({'id': r['__ID_Invoice'].strip(), 'number': first(r['_ID_SerialNumberInvoice']), 'booking': booking if booking in ours else None,
-                     'person': first(r['_ID_Person']) or None, 'agency': agency or None, 'company': company or None, 'amount': number(r['Amount']),
+                     'person': first(r['_ID_Person']) or None, 'agency': agency or None, 'company': company or None, 'amount': number(r['Amount']) if number(r['Amount']) is not None else (round(invoiced[first(r['_ID_SerialNumberInvoice'])], 2) if first(r['_ID_SerialNumberInvoice']) in invoiced else None),
                      'issued': iso(r['DateOfCreation']), 'recipient': r['AddressHeader'].strip() or None, 'subject': r['Subject'].strip() or None})
 
 out = {'instalments': instalments, 'commissions': commissions, 'payouts': payouts, 'stamps': stamps, 'invoices': invoices}

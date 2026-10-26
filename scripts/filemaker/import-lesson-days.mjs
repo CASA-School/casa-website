@@ -98,6 +98,33 @@ try {
   // A day as it was last time, in the same course and with the same teacher and room here, is passed over (0088).
   const changed = await changes(client, 'lesson-days');
 
+  // SchoolMan re-plans a course by deleting its lesson days and making them again under new numbers
+  // (mapping review 2026-10-26 §9). A day here keeps its place and takes the new number of SchoolMan's day
+  // on its date; a future day SchoolMan no longer has goes, unless it was changed here, attendance was
+  // taken on it or it is part of a merge.
+  const read = days.map((d) => d.id);
+  const placed = days.flatMap((d) => (courses.has(d.course) ? [[courses.get(d.course), d]] : []));
+  count.relinked = (
+    await client.query(
+      `UPDATE course_days c SET filemaker_id = v.id, updated_at = timezone('utc', now())
+         FROM unnest($1::uuid[], $2::int[], $3::date[], $4::text[]) AS v(course_id, group_index, on_date, id)
+        WHERE c.course_id = v.course_id AND c.group_index = v.group_index AND c.on_date = v.on_date
+          AND c.filemaker_id IS NOT NULL AND NOT (c.filemaker_id = ANY($5::text[]))
+          AND NOT EXISTS (SELECT 1 FROM course_days x WHERE x.filemaker_id = v.id)`,
+      [placed.map(([t]) => t.course), placed.map(([t]) => t.group), placed.map(([, d]) => d.date), placed.map(([, d]) => d.id), read]
+    )
+  ).rowCount;
+  count.removed = (
+    await client.query(
+      `DELETE FROM course_days c
+        WHERE c.filemaker_id IS NOT NULL AND NOT (c.filemaker_id = ANY($1::text[])) AND c.course_id = ANY($2::uuid[])
+          AND c.on_date >= current_date AND c.changed_by IS NULL
+          AND NOT EXISTS (SELECT 1 FROM booking_attendance a WHERE a.course_day_id = c.id)
+          AND NOT EXISTS (SELECT 1 FROM course_day_merges m WHERE c.id IN (m.guest_day_id, m.host_day_id))`,
+      [read, [...new Set([...courses.values()].map((t) => t.course))]]
+    )
+  ).rowCount;
+
   for (const d of days) {
     const target = courses.get(d.course);
     if (!target) {
@@ -192,5 +219,5 @@ console.log(
   `${count.days} lesson days read (${closed} in a closure left out): ${count.unchanged ?? 0} as last time, ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
     `${count.kept} changed here and kept · ${count.plans} weekly-plan rows · skipped: ${count.noCourse} of a course not here · ` +
     `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked · ` +
-    `${count.learnt} Kursplanung rules or pairs learnt`
+    `${count.learnt} Kursplanung rules or pairs learnt · re-planned in SchoolMan: ${count.relinked ?? 0} days renumbered, ${count.removed ?? 0} future days gone`
 );

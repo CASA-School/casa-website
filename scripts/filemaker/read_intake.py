@@ -45,8 +45,10 @@ bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking
 chosen = sample_persons(bookings, table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate'), date.today())
 
 pre = []
+course_of = {}  # a pre-booking's course, for the waiting list
 for r in table('PreBooking', '__ID_PreBooking', '_ID_Person', '_ID_CourseTypeReference', '_ID_Level', '_ID_LevelStepReference', '_ID_DayTimeReference', '_ID_Course',
                '_ID_VisaRequired', '_ID_StatusPreBooking', '_ID_Booking', 'UserName', 'Timestamp.Creation', 'DateOfCreation'):
+    course_of[r['__ID_PreBooking'].strip()] = first(r['_ID_Course'])
     if first(r['_ID_Person']) not in chosen:
         continue
     visa = first(r['_ID_VisaRequired'])
@@ -58,9 +60,11 @@ for r in table('PreBooking', '__ID_PreBooking', '_ID_Person', '_ID_CourseTypeRef
 
 waiting = []
 for r in table('WaitingRoom', '__ID_WaitingRoom', '_ID_Person', '_ID_PreBooking', '_ID_Course', '_ID_Booking', 'Timestamp.Creation', 'DateOfCreation', 'UserName'):
-    if first(r['_ID_Person']) not in chosen or not first(r['_ID_Course']):
+    # Since 2025 the row names its pre-booking, whose course it is (mapping review 2026-10-26 §6).
+    course = first(r['_ID_Course']) or course_of.get(first(r['_ID_PreBooking']))
+    if first(r['_ID_Person']) not in chosen or not course:
         continue
-    waiting.append({'id': r['__ID_WaitingRoom'].strip(), 'person': first(r['_ID_Person']), 'course': first(r['_ID_Course']), 'booking': first(r['_ID_Booking']) or None,
+    waiting.append({'id': r['__ID_WaitingRoom'].strip(), 'person': first(r['_ID_Person']), 'course': course, 'booking': first(r['_ID_Booking']) or None,
                     'joined': stamp(r['Timestamp.Creation']) or stamp(r['DateOfCreation']), 'author': r['UserName'].strip() or None})
 
 if '--stats' in sys.argv:

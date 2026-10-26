@@ -135,12 +135,12 @@ for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailRe
         charges_of[first(r['_ID_Booking'])].append(r)
 payments_of = collections.defaultdict(list)
 for r in table('PaymentIn', '__ID_PaymentIn', '_ID_Booking', 'PaymentIn', '_ID_MethodPayment', 'MethodPayment_1', 'DateOfPayment', 'CostDetailReference_1', 'TimeStampOfCreation',
-               'CommentPaymentIn_1', 'CommentPaymentIn_2'):
+               'CommentPaymentIn_1', 'CommentPaymentIn_2', '_ID_CostDetailReference'):
     if first(r['_ID_Booking']) in taken:
         payments_of[first(r['_ID_Booking'])].append(r)
 refunds_of = collections.defaultdict(list)
 for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', 'MethodPayment_1', 'DatePaymentOut', 'ZSingleDatePayment', 'TimeStampOfCreation',
-               'PaymentOutComment_1'):
+               'PaymentOutComment_1', 'Comment'):
     if first(r['_ID_Booking']) in taken and first(r['_ID_PaymentOutReference']) == '3':  # 3 Rückzahlung Student
         refunds_of[first(r['_ID_Booking'])].append(r)
 
@@ -316,12 +316,14 @@ for pid, p in persons.items():
                         for r in charges_of[b['__ID_Booking'].strip()]],
             'payments': [{'id': f"PaymentIn:{r['__ID_PaymentIn'].strip()}", 'amount': amount(r['PaymentIn']), 'method': first(r['_ID_MethodPayment']) or None,
                           'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DateOfPayment']), 'for': r['CostDetailReference_1'].strip() or None,
+                          # The charge type it pays, only where the label copy is empty (mapping review §4).
+                          **({} if r['CostDetailReference_1'].strip() else {'ref': first(r['_ID_CostDetailReference']) or None}),
                           'comment': text(r['CommentPaymentIn_1'], r['CommentPaymentIn_2']) or None,
                           'created': stamp(r['TimeStampOfCreation'])} for r in payments_of[b['__ID_Booking'].strip()]]
                         # A refund paid back to the learner is money out of their account: a payment below zero.
                         + [{'id': f"PaymentOut:{r['__ID_PaymentOut'].strip()}", 'amount': -abs(amount(r['PaymentOut']) or 0), 'method': None,
                             'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DatePaymentOut']) or iso(r['ZSingleDatePayment']), 'for': 'Rückzahlung',
-                            'comment': r['PaymentOutComment_1'].strip() or None,
+                            'comment': text(r['Comment'], r['PaymentOutComment_1']) or None,
                             'created': stamp(r['TimeStampOfCreation'])} for r in refunds_of[b['__ID_Booking'].strip()]],
         } for b in bookings_of[pid]],
         'notes': notes_of[pid],

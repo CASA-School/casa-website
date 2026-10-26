@@ -10,7 +10,12 @@ profile's `recent`). Where a field is auto-entered (`*`) the count says little a
 meanings are inferred from the field name and the study pages — these are marked *(?)* and should be
 confirmed with the team before anything is built.
 
-**Since 2026-10-26** the FileMaker session's review adds what this page did not have (copied fields that never update, night-job writes, missing tables and link ids, duplicate keys): `mapping-review-2026-10-26.md`.
+**Since 2026-10-26** the FileMaker session's review adds what this page did not have (copied fields that never update, night-job writes, missing tables and link ids, duplicate keys): `mapping-review-2026-10-26.md`. Fixed the same day:
+generated birthday texts kept out of attendance comments; a payment without a label copy named by its
+charge type (`_ID_CostDetailReference`); refunds' comment from `Comment`; an invoice's amount from its cost
+lines when `Invoice::Amount` is empty; the waiting list's course through its pre-booking (0 → 147 entries
+locally); lesson days SchoolMan re-planned under new numbers relinked to them (80), and future days it
+dropped removed unless changed here, attended or merged.
 
 **The one gap behind most of the others: the sample.** Everything about learners is cut by `sample.py`:
 a booked period this week or in the next four weeks, plus this year's group participants. Run 3 brought
