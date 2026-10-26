@@ -10,6 +10,8 @@ profile's `recent`). Where a field is auto-entered (`*`) the count says little a
 meanings are inferred from the field name and the study pages — these are marked *(?)* and should be
 confirmed with the team before anything is built.
 
+**Since 2026-10-26** the FileMaker session's review adds what this page did not have (copied fields that never update, night-job writes, missing tables and link ids, duplicate keys): `mapping-review-2026-10-26.md`.
+
 **The one gap behind most of the others: the sample.** Everything about learners is cut by `sample.py`:
 a booked period this week or in the next four weeks, plus this year's group participants. Run 3 brought
 673 people of 15,514, 2,338 bookings of 22,488, 2,254 periods of 20,206, 451 stays of 2,465, 9,804
