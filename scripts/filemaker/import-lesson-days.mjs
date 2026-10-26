@@ -14,6 +14,7 @@
  * board groups are made (0047), so Kursplanung shows its days, and learns from them (0078).
  */
 import { connect } from '../db/client.mjs';
+import { changes } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -94,6 +95,8 @@ try {
     )
   );
   const isoWeekday = (iso) => ((new Date(`${iso}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  // A day as it was last time, in the same course and with the same teacher and room here, is passed over (0088).
+  const changed = await changes(client, 'lesson-days');
 
   for (const d of days) {
     const target = courses.get(d.course);
@@ -133,6 +136,7 @@ try {
       values.merged,
       values.note,
     ];
+    if (changed.same(d.id, [d, target, fields])) continue;
 
     // Read before: updated while nobody here has changed it.
     const before = (await client.query(`SELECT changed_by FROM course_days WHERE filemaker_id = $1`, [d.id])).rows[0];
@@ -173,6 +177,8 @@ try {
   // Kursplanung learns from these days: the levels, weekdays and shifts a teacher really teaches, and
   // the pair of a group without one (0078; only ever added).
   count.learnt = (await client.query(`SELECT learn_kursplanung() AS n`)).rows[0].n;
+  count.unchanged = changed.unchanged;
+  await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -183,7 +189,7 @@ try {
 }
 
 console.log(
-  `${count.days} lesson days read (${closed} in a closure left out): ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
+  `${count.days} lesson days read (${closed} in a closure left out): ${count.unchanged ?? 0} as last time, ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
     `${count.kept} changed here and kept · ${count.plans} weekly-plan rows · skipped: ${count.noCourse} of a course not here · ` +
     `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked · ` +
     `${count.learnt} Kursplanung rules or pairs learnt`

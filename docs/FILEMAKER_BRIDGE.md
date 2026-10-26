@@ -530,9 +530,23 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 - the Tagesplan's tasks.
 
 Each importer is idempotent, so a run changes only what differs. The window moves with the date.
-Nothing is ever written to SchoolMan.
+Nothing is ever written to SchoolMan. Since 2026-10-26 the sample also reaches every booking from this
+week on, however far ahead, and bookings set to „nein" or „storno" in the last four weeks (`sample.py`):
+a learner moved to January had kept their old place.
 
-**How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`, or `--local-first` to import into the Mac's own database first and send the same bundle only if that worked) on the office Mac, with SchoolMan
+**Only what changed (2026-10-26, 0088).** A run took about an hour: seven minutes reading SchoolMan, two
+importing on the Mac, and an hour inside Azure. Every row was its own statement, each waits about 10 ms
+for the database (the job runs in Germany West Central, the server is in Belgium Central), and every run
+wrote every record again — 354,000 statements, 302,000 of them the learners'. Now the learners, lesson
+days, follow-ups and money importers keep a fingerprint per record (`bridge-changes.mjs`, table
+`bridge_fingerprints`, hashes only): SchoolMan's data together with what it was matched to here (the
+booking, the course, the teacher and room, whether a booking is over, the vocabularies). A record whose
+fingerprint is the same as last time is passed over; one whose dependency arrives here gets a new
+fingerprint and is written. Measured on the Mac with the round trips counted: 354,000 → 21,000, about an
+hour → about four minutes inside Azure. `bridge.sh --full` (`BRIDGE_FULL=1`) writes every record, as
+before. The first run after the table exists is a full one.
+
+**How it runs.** `./infra/azure/bridge.sh` (or `--only staff,day`, or `--local-first` to import into the Mac's own database first and send the same bundle only if that worked, or `--full` to write every record) on the office Mac, with SchoolMan
 open in FileMaker Pro and `az` signed in:
 1. `bridge-pack.mjs` runs the readers. Their output stays in memory and is sealed with AES-256-GCM under
    a key made for that run (`bridge-bundle.mjs`), then uploaded to the private container `bridge` in
