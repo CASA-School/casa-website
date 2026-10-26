@@ -34,7 +34,7 @@ const ROUTE_META: Array<{
 }> = [
   { href: '/', topic: 'home', label: { en: 'Home', de: 'Startseite' } },
   { href: '/about', topic: 'school', label: { en: 'Our School', de: 'Unsere Schule' } },
-  { href: '/ueber-uns/gemeinnuetzigkeit', topic: 'school', label: { en: 'Non-profit status', de: 'Gemeinnützigkeit' } },
+  { href: '/about/nonprofit', topic: 'school', label: { en: 'Non-profit status', de: 'Gemeinnützigkeit' } },
   { href: '/partners', topic: 'school', label: { en: 'Cooperation partners', de: 'Kooperationspartner' } },
   { href: '/team', topic: 'school', label: { en: 'Team', de: 'Team' } },
   { href: '/courses', topic: 'courses', label: { en: 'Courses', de: 'Kurse' } },
@@ -344,7 +344,7 @@ function buildSchoolPassages(): KbPassage[] {
       id: 'school-nonprofit-en',
       locale: 'en',
       title: 'CASA non-profit status and mission',
-      url: '/ueber-uns/gemeinnuetzigkeit',
+      url: '/about/nonprofit',
       topic: 'school',
       keywords: ['nonprofit', 'non-profit', 'gGmbH', 'public benefit', 'mission', 'reinvestment', 'gemeinnuetzig'],
       content:
@@ -354,7 +354,7 @@ function buildSchoolPassages(): KbPassage[] {
       id: 'school-nonprofit-de',
       locale: 'de',
       title: 'CASA Gemeinnützigkeit und Mission',
-      url: '/ueber-uns/gemeinnuetzigkeit',
+      url: '/about/nonprofit',
       topic: 'school',
       keywords: ['gemeinnützig', 'gemeinnuetzig', 'gGmbH', 'gemeinwohl', 'mission', 'reinvestition', 'mittelverwendung'],
       content:

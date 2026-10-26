@@ -73,7 +73,7 @@ export function SiteShell({ children, contentLocale }: SiteShellProps) {
         {children}
       </div>
       {!hideSiteChrome && <Footer contentLocale={contentLocale} closingCta={!isRegistrationPage} />}
-      {!isFocusedTestSurface && <AssistantLauncher />}
+      {!isFocusedTestSurface && <AssistantLauncher contentLocale={contentLocale} />}
       {!isFocusedTestSurface && <NewSiteNotice contentLocale={contentLocale} />}
     </>
   );

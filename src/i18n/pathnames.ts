@@ -61,7 +61,7 @@ export const ACCOMMODATION_TYPES_DE: Record<string, string> = {
 export const routes: readonly RouteDefinition[] = [
   { internal: '/', de: '/' },
   { internal: '/about', de: '/ueber-uns/casa-leitbild' },
-  { internal: '/ueber-uns/gemeinnuetzigkeit', de: '/ueber-uns/gemeinnuetzigkeit' },
+  { internal: '/about/nonprofit', de: '/ueber-uns/gemeinnuetzigkeit' },
   { internal: '/team', de: '/ueber-uns/casa-team' },
   { internal: '/partners', de: '/ueber-uns/kooperationspartner' },
 

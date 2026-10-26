@@ -1419,6 +1419,10 @@
     "de": "Checkliste drucken",
     "text": "Imprimir lista de comprobación"
   },
+  "t.clara-oeffnen.a7mxqp": {
+    "de": "CLARA öffnen",
+    "text": "Abrir CLARA"
+  },
   "t.clara-sucht-die-passende.iau8p0": {
     "de": "CLARA sucht die passende Antwort …",
     "text": "CLARA está buscando la respuesta adecuada…"
@@ -3599,6 +3603,10 @@
     "de": "Hast du noch eine Frage?",
     "text": "¿Tienes alguna otra pregunta?"
   },
+  "t.hauptnavigation.o20e7b": {
+    "de": "Hauptnavigation",
+    "text": "Navegación principal"
+  },
   "t.hauptpartner.1pbimbj": {
     "de": "Hauptpartner",
     "text": "Socio principal"
@@ -4986,6 +4994,10 @@
   "t.menschen-aus-aller-welt.1mdvmib": {
     "de": "Menschen aus aller Welt in unseren Kursen",
     "text": "Personas de todo el mundo en nuestros cursos"
+  },
+  "t.menue-oeffnen.1p2sf4e": {
+    "de": "Menü öffnen",
+    "text": "Abrir el menú"
   },
   "t.menue.dcdvw3": {
     "de": "Menü",
@@ -6414,6 +6426,14 @@
   "t.sport-und-jugendarbeit.1qfgfoy": {
     "de": "Sport und Jugendarbeit",
     "text": "Deporte y trabajo con jóvenes"
+  },
+  "t.sprache-waehlen-aktuell-deutsch.pmtd0y": {
+    "de": "Sprache wählen, aktuell Deutsch",
+    "text": "Elegir idioma, actual: español"
+  },
+  "t.sprache-waehlen.xuudh8": {
+    "de": "Sprache wählen",
+    "text": "Elegir idioma"
   },
   "t.sprache.ru8uz0": {
     "de": "Sprache",
@@ -8514,6 +8534,10 @@
   "t.zum-ratgeber-leben-in.9uel6k": {
     "de": "Zum Ratgeber „Leben in Deutschland“",
     "text": "Ir a la guía «Vivir en Alemania»"
+  },
+  "t.zur-casa-startseite.ldc95j": {
+    "de": "Zur CASA-Startseite",
+    "text": "Ir a la página de inicio de CASA"
   },
   "t.zur-deutschen-fassung.1esgk92": {
     "de": "Zur deutschen Fassung",

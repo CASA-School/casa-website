@@ -2755,3 +2755,24 @@ its own language) and planners' shorthand. Words the workspace writes into a boo
 stored in English and shown in the reader's language. The site's copy extractor now skips
 `src/app/(admin)`. e2e specs that read English set the cookie; Kursplanung's pins German.
 docs/ADMIN_I18N.md has the API, the rules and the glossary.
+
+## 50. The public site's go-live pass (2026-10-26)
+
+Rahman: "Under this new branch, we are going to finalize the public facing pages so we could go
+live." Branch `website`, in its own worktree `~/Downloads/CASA-site` (the workspace stays in
+`~/Downloads/CASA-admin`). First block, the work that needed no decision:
+
+- The English non-profit page moved from `/en/ueber-uns/gemeinnuetzigkeit` to
+  `/en/about/nonprofit` (internal path `/about/nonprofit`); the German keeps
+  `/ueber-uns/gemeinnuetzigkeit`, the old English address redirects.
+- CASA's content review: the team's written changes covered four sheets (homepage, Sprachkurse,
+  Intensiv, Abend), all applied on 20–21 October; the other 28 sheets came back unchanged, and the
+  Inhaltsabgleich page holds no saved edits.
+- QA against a production build: 72/72 pages 200, every internal and outbound link good, no
+  overflow at 375 or 320, no third-party scripts. axe fixed: the news page's gold label (2.76:1)
+  and the careers cards' `<dl>`. The header, phone menu, footer logo and CLARA button spoke
+  English to screen readers on German pages; they now follow the page (six languages merged).
+
+Still open, and not page code: live mail (the Exchange scope covers admin@ only), the domain
+move (apex + www, TYPO3 backup), test records in the Azure database, and the legal questions in
+docs/PRIVACY_POLICY.md.

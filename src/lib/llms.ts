@@ -122,7 +122,7 @@ export async function buildLlmsTxt({ full }: { full: boolean }) {
     '## About CASA',
     '',
     `- About the school: ${links('/about')}`,
-    `- Non-profit status: ${links('/ueber-uns/gemeinnuetzigkeit')}`,
+    `- Non-profit status: ${links('/about/nonprofit')}`,
     `- Team: ${links('/team')}`,
     `- Cooperation partners: ${links('/partners')}`,
     `- News: ${links('/news')}`,

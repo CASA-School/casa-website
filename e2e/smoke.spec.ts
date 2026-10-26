@@ -123,7 +123,7 @@ test('mobile nav switches language and closes independently', async ({ page }) =
   await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
 
   if (await sheet.isHidden()) {
-    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+    await page.getByRole('button', { name: 'Menü öffnen' }).click();
     await expect(sheet).toBeVisible();
   }
   await expect(page.getByTestId('mobile-locale-option-de')).toHaveAttribute('aria-pressed', 'true');
@@ -135,7 +135,7 @@ test('mobile nav switches language and closes independently', async ({ page }) =
 test('mobile nav reaches every overview page through its panel', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  const open = () => page.getByRole('button', { name: 'Open navigation menu' }).click();
+  const open = () => page.getByRole('button', { name: 'Menü öffnen' }).click();
 
   for (const [section, overview, url] of [
     ['Kurse', 'Alle Kurse im Überblick', /\/sprachkurse$/],
@@ -173,7 +173,7 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
    * /accommodation/become-host, which moved off A so the four accommodation
    * pages agree with each other.
    *
-   * /team and /ueber-uns/gemeinnuetzigkeit joined A on 2026-09-10, which retired
+   * /team and /about/nonprofit joined A on 2026-09-10, which retired
    * B. Contact uses a compact heading so its form is immediately accessible.
    * E stays on the other utility and legal pages: a legal page has no
    * photograph to lead with. Listed so a future pass changes this table on
@@ -187,7 +187,7 @@ test('hero archetypes map correctly across key public routes', async ({ page }) 
     { route: '/en/accommodation', archetype: 'A' },
     { route: '/en/courses/german-for-groups', archetype: 'A' },
     { route: '/en/team', archetype: 'A' },
-    { route: '/en/ueber-uns/gemeinnuetzigkeit', archetype: 'A' },
+    { route: '/en/about/nonprofit', archetype: 'A' },
     { route: '/en/courses/intensive-german', archetype: 'C' },
     { route: '/en/exams/b2', archetype: 'C' },
     { route: '/en/exams/c1', archetype: 'C' },
@@ -259,7 +259,7 @@ test('registration pages render main navbar without register CTA button', async 
     await page.goto(route);
     // Main header/navbar should be visible. Scoped to the header that holds the
     // site nav — these pages also render a page-title <header> for their h1.
-    await expect(page.locator('header:has(nav[aria-label="Main navigation"])')).toBeVisible();
+    await expect(page.locator('header:has(nav[aria-label="Main navigation"], nav[aria-label="Hauptnavigation"])')).toBeVisible();
     // The header's register button should not be present on a registration page.
     await expect(page.locator('a:has-text("Register for a course"), a:has-text("Zur Kursanmeldung"), a:has-text("Register for an exam"), a:has-text("Zur Prüfungsanmeldung")')).toHaveCount(0);
     // The site footer closes the page as everywhere, so the Impressum and the
@@ -335,7 +335,7 @@ test('an unknown address is a 404 in the site’s own frame and language', async
 
 test('the non-profit page leads with the gGmbH and points to the partners', async ({ page }) => {
   for (const locale of ['de', 'en']) {
-    await page.goto(`${locale === 'de' ? '' : '/en'}/ueber-uns/gemeinnuetzigkeit`);
+    await page.goto(locale === 'de' ? '/ueber-uns/gemeinnuetzigkeit' : '/en/about/nonprofit');
     await expect(page.locator('#nonprofit-transparency-title')).toBeVisible();
     await expect(page.locator('#nonprofit-legal-title')).toBeVisible();
     await expect(page.getByText('Amtsgericht Bremen HRB 32761 HB', { exact: true })).toBeVisible();

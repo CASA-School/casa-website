@@ -29,7 +29,7 @@ const PAGE_TITLES: Record<string, { de: string; en: string }> = {
   '/accommodation/become-host': { de: 'Gastfamilie werden', en: 'Become a host family' },
   '/about': { de: 'CASA Leitbild', en: 'Our school' },
   '/team': { de: 'Team', en: 'Team' },
-  '/ueber-uns/gemeinnuetzigkeit': { de: 'Gemeinnützigkeit', en: 'Non-profit status' },
+  '/about/nonprofit': { de: 'Gemeinnützigkeit', en: 'Non-profit status' },
   '/partners': { de: 'Kooperationspartner', en: 'Cooperation partners' },
   '/careers': { de: 'Karriere', en: 'Careers' },
   '/contact': { de: 'Kontakt', en: 'Contact' },

@@ -107,3 +107,11 @@ Azure preview, so the last block of the map sends each to `/aktuelles` or `/en/n
 (24 more redirects, covered by the same unit and e2e tests). A real post published
 later under one of these slugs would be hidden by its redirect: pick another slug or
 remove the line.
+
+## The non-profit page's English address (2026-10-26)
+
+Until 2026-10-26 the English non-profit page answered at `/en/ueber-uns/gemeinnuetzigkeit`, a
+German slug under `/en`, and that address was in the sitemap of the preview. It is now
+`/en/about/nonprofit`; the German page keeps `/ueber-uns/gemeinnuetzigkeit`. One more redirect
+sends the old English address to the new one, and every old-site URL that pointed at the English
+page now points straight at `/en/about/nonprofit`, with no second hop.

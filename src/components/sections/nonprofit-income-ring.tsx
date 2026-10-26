@@ -14,7 +14,7 @@ import { useHeroGlow } from './use-hero-glow';
  * scene (branch claude/casa-film): CASA at the centre, a marker at each node,
  * light flowing round, on the ink ground with a warm glow behind it.
  *
- * It stands in the hero's media slot on /ueber-uns/gemeinnuetzigkeit, in place
+ * It stands in the hero's media slot on /about/nonprofit, in place
  * of a photograph, with the ring kept round inside it and the labels around.
  *
  * Interactive: each marker and its label is one button. Hover, focus or a tap

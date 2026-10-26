@@ -347,7 +347,7 @@ export default async function NewsPage() {
 
             {/* Wort des Monats — the issue's closing rubric. */}
             <aside className="rounded-xl bg-[var(--casa-warm-soft)] p-7">
-              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-gold-deep)]">
+              <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-warning-text)]">
                 {copy.wordTitle}
               </p>
               <p className="mt-3 text-2xl font-bold text-[var(--casa-ink)]">

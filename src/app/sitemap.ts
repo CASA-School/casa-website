@@ -26,7 +26,7 @@ const STATIC_ROUTES: Array<{ path: string; priority: number; lastModified?: Date
   { path: '/registration/exam', priority: 0.6 },
   { path: '/placement-test', priority: 0.7 },
   { path: '/about', priority: 0.6 },
-  { path: '/ueber-uns/gemeinnuetzigkeit', priority: 0.6 },
+  { path: '/about/nonprofit', priority: 0.6 },
   { path: '/team', priority: 0.5 },
   { path: '/partners', priority: 0.5 },
   { path: '/contact', priority: 0.6 },

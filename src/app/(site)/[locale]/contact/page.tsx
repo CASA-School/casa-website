@@ -148,7 +148,7 @@ const formCopyByLocale = {
     lastNameLabel: 'Nachname (optional)',
     lastNamePlaceholder: 'Müller',
     emailLabel: 'E-Mail',
-    emailPlaceholder: 'you@example.com',
+    emailPlaceholder: 'name@beispiel.de',
     topicLabel: 'Worum geht es?',
     messageLabel: 'Nachricht',
     messagePlaceholder: 'Was möchtest du wissen?',

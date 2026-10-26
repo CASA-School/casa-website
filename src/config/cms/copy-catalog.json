@@ -668,7 +668,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.alle-kurse-ansehen.1fsrtm8": {
@@ -817,10 +817,10 @@
   "de": "Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.",
   "en": "As a non-profit language school, we are committed to education, understanding and inclusion. Our income goes back into this work.",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.als-gemeinnuetzige-sprachschule-.mzbju3": {
@@ -830,7 +830,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.altersgruppe.qqathq": {
@@ -946,20 +946,20 @@
   "de": "Anerkennung wegen Förderung der Volks- und Berufsbildung",
   "en": "Recognised for promoting adult education and vocational training",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.anerkennung.ajzenp": {
   "de": "Anerkennung",
   "en": "Recognition",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.anerkennungen-und-partnerschafte.1wurszd": {
@@ -1852,10 +1852,10 @@
   "de": "Ausstattung, Beratung und sichere Lernräume in Bremen",
   "en": "Facilities, advice and safe places to learn in Bremen",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.auswaertiges-amt-sperrkonto.1lj7hhj": {
@@ -2401,10 +2401,10 @@
   "de": "Beratung & Lernräume",
   "en": "Advice & places to learn",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.beratung-und-foerderung.151cgla": {
@@ -2414,8 +2414,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.beratung-zu-autonomen-lernoption.y3ul57": {
@@ -3252,8 +3252,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.casa-ist-eine-gemeinnuetzige.1e2c6yh": {
@@ -3273,8 +3273,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.casa-lehrkraft-begleitet-erwachs.w93r9i": {
@@ -3666,6 +3666,16 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.clara-oeffnen.a7mxqp": {
+  "de": "CLARA öffnen",
+  "en": "Open CLARA assistant",
+  "files": [
+   "src/components/assistant/AssistantLauncher.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.clara-sucht-die-passende.iau8p0": {
@@ -4452,10 +4462,10 @@
   "de": "Deine Kursgebühren bleiben in der Bildungsarbeit.",
   "en": "Your course fees go back into our educational work.",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.deine-kursgebuehren-foerdern-bil.1sawxgj": {
@@ -4672,8 +4682,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.der-hahn-sitzt-ganz.74nexs": {
@@ -5062,8 +5072,7 @@
   "de": "Deutsch",
   "en": "English",
   "files": [
-   "src/components/layout/mobile-nav.tsx",
-   "src/components/layout/navbar.tsx"
+   "src/components/layout/mobile-nav.tsx"
   ],
   "pages": [
    "*"
@@ -5086,8 +5095,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.di.2pheey": {
@@ -7468,8 +7477,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.eine-gemeinsame-kueche-erleichte.b9m2bl": {
@@ -8194,10 +8203,10 @@
   "de": "Es werden keine Gewinne ausgeschüttet. Unsere Einnahmen fließen in den Schulbetrieb und die gemeinnützigen Aufgaben von CASA zurück.",
   "en": "Profits are not distributed. Our income is reinvested in running the school and fulfilling CASA’s non-profit purpose.",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.esel-hund-katze-hahn.1v12ywe": {
@@ -9353,7 +9362,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.gemeinnuetzige-sprachschule.8osvkv": {
@@ -9370,30 +9379,30 @@
   "de": "Gemeinnützigkeit & Mission",
   "en": "Non-profit status & mission",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.gemeinnuetzigkeit-transparenz.1s40dw8": {
   "de": "Gemeinnützigkeit & Transparenz",
   "en": "Non-profit status & transparency",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.gemeinnuetzigkeit.w3ys0m": {
   "de": "Gemeinnützigkeit",
   "en": "Non-profit status",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.gemeinsam-bei-casa.1qsvk21": {
@@ -9494,8 +9503,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.gemeinsame-kueche.141toyp": {
@@ -10138,6 +10147,16 @@
    "/faq"
   ]
  },
+ "t.hauptnavigation.o20e7b": {
+  "de": "Hauptnavigation",
+  "en": "Main navigation",
+  "files": [
+   "src/components/layout/navbar.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
  "t.hauptpartner.1pbimbj": {
   "de": "Hauptpartner",
   "en": "Main partner",
@@ -10219,8 +10238,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.herkunftslaender-in-unseren-kurs.532wrc": {
@@ -10503,8 +10522,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.i-aah.nzvvan": {
@@ -12205,20 +12224,20 @@
   "de": "Kleine Gruppen, in denen viel gesprochen wird, und ein verlässlicher Kursablauf",
   "en": "Small groups where there is plenty of speaking, and courses that run reliably",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.kleine-gruppen.nz1g60": {
   "de": "Kleine Gruppen",
   "en": "Small groups",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.kling-gut-aussprachetraining-deu.1gfao5x": {
@@ -12470,8 +12489,8 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.korrektur-in-kleingruppen.oc3ou5": {
@@ -12549,8 +12568,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.kueche-einer-studierendenunterku.1l06i72": {
@@ -14018,6 +14037,17 @@
   ],
   "pages": []
  },
+ "t.menue-oeffnen.1p2sf4e": {
+  "de": "Menü öffnen",
+  "en": "Open navigation menu",
+  "files": [
+   "src/components/layout/mobile-nav.tsx",
+   "src/components/layout/navbar.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
  "t.menue.dcdvw3": {
   "de": "Menü",
   "en": "Menu",
@@ -14188,7 +14218,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.mit-einem-einstufungstest-weisst.1xvc9u6": {
@@ -14573,8 +14603,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.muendlich.1gl16pd": {
@@ -15950,8 +15980,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.privater-haushalt.rza175": {
@@ -16398,20 +16428,20 @@
   "de": "Qualifizierte Lehrkräfte und pädagogische Begleitung",
   "en": "Qualified teachers and educational guidance",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.qualifizierte-lehrkraefte.1chg5q8": {
   "de": "Qualifizierte Lehrkräfte",
   "en": "Qualified teachers",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.qualitaet-und-partnerschaften.gp334y": {
@@ -16535,20 +16565,20 @@
   "de": "Rechtsform und Nachweise",
   "en": "Legal form and recognition",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.rechtsform.72ohoy": {
   "de": "Rechtsform",
   "en": "Legal form",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.regal-nachttisch.10mcwv8": {
@@ -16565,10 +16595,10 @@
   "de": "Register",
   "en": "Commercial register",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.reinigung-gesamteindruck-bei-aus.p02q0g": {
@@ -17697,20 +17727,20 @@
   "de": "Soziale Bildungsprojekte, Sprachtandems und, wo es möglich ist, ermäßigte Gebühren",
   "en": "Social education projects, language tandems and, where possible, reduced fees",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.soziale-projekte.nj7zt4": {
   "de": "Soziale Projekte",
   "en": "Social projects",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.spanien.skocoz": {
@@ -17720,8 +17750,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.spezialkurs-grammatik-b1-b2.qmnq87": {
@@ -17771,8 +17801,28 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
+  ]
+ },
+ "t.sprache-waehlen-aktuell-deutsch.pmtd0y": {
+  "de": "Sprache wählen, aktuell Deutsch",
+  "en": "Select content language, current English",
+  "files": [
+   "src/components/layout/navbar.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
+ "t.sprache-waehlen.xuudh8": {
+  "de": "Sprache wählen",
+  "en": "Language options",
+  "files": [
+   "src/components/layout/navbar.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.sprache.ru8uz0": {
@@ -17916,10 +17966,10 @@
   "de": "Staatlich anerkannter Träger der freien Jugendhilfe",
   "en": "A state-recognised independent youth welfare provider",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.staerkeres-lese-und-hoerverstehe.1ve6awg": {
@@ -17966,6 +18016,7 @@
   "de": "Start",
   "en": "Home",
   "files": [
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx",
    "src/app/(site)/[locale]/about/page.tsx",
    "src/app/(site)/[locale]/accommodation/[type]/page.tsx",
    "src/app/(site)/[locale]/accommodation/become-host/page.tsx",
@@ -17983,12 +18034,12 @@
    "src/app/(site)/[locale]/placement-test/page.tsx",
    "src/app/(site)/[locale]/search/page.tsx",
    "src/app/(site)/[locale]/team/page.tsx",
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx",
    "src/components/registration/registration-page-shell.tsx",
    "src/components/resources/ResourceGuidePage.tsx"
   ],
   "pages": [
    "/about",
+   "/about/nonprofit",
    "/accommodation",
    "/accommodation/[type]",
    "/accommodation/become-host",
@@ -18009,8 +18060,7 @@
    "/resources/study-in-germany",
    "/resources/why-germany",
    "/search",
-   "/team",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/team"
   ]
  },
  "t.startpunkt-waehlen.1dnzq1g": {
@@ -18051,10 +18101,10 @@
   "de": "Steuerliche Einordnung",
   "en": "Tax status",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.stimme-von.17t1nzy": {
@@ -18588,8 +18638,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.tandempartnerschaften-mit-deutsc.twbifn": {
@@ -19461,7 +19511,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.unser-kursangebot-ist-verlaessli.1lrt8ip": {
@@ -19552,7 +19602,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.unsere-kursformate-im-ueberblick.1gehz3s": {
@@ -19695,17 +19745,17 @@
   "de": "Unsere Schule",
   "en": "Our school",
   "files": [
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx",
    "src/app/(site)/[locale]/about/page.tsx",
    "src/app/(site)/[locale]/partners/page.tsx",
    "src/app/(site)/[locale]/team/page.tsx",
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx",
    "src/config/content/heroes.ts"
   ],
   "pages": [
    "/about",
+   "/about/nonprofit",
    "/partners",
-   "/team",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/team"
   ]
  },
  "t.unsere-ziele.15d6p7v": {
@@ -20140,8 +20190,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.vereinbare-alle-termine-bei.1vcw1m4": {
@@ -20597,8 +20647,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.visum-intensiv.e9m79n": {
@@ -20893,8 +20943,8 @@
    "src/config/content/partners.ts"
   ],
   "pages": [
-   "/partners",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit",
+   "/partners"
   ]
  },
  "t.vorbereitung-im-kurs.1atuija": {
@@ -21568,12 +21618,12 @@
   "de": "Was gemeinnützig bei uns heißt",
   "en": "What being a non-profit means at CASA",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx",
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx",
+   "src/app/(site)/[locale]/about/page.tsx"
   ],
   "pages": [
    "/about",
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.was-in-deinem-haushalt.14onbwc": {
@@ -22613,7 +22663,7 @@
    "src/components/sections/nonprofit-mission.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.wir-besprechen-mit-dir.1vfaho": {
@@ -22680,10 +22730,10 @@
   "de": "Wir finanzieren uns zum großen Teil über Kursgebühren. Mit diesen Einnahmen tragen wir den laufenden Schulbetrieb und sichern Angebote, die für internationale Lernende und schutzbedürftige Gruppen besonders wichtig sind.",
   "en": "We are funded largely through course fees. This income pays for the day-to-day running of the school and secures services that are especially important to international learners and vulnerable groups.",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.wir-finden-dein-passendes.vo8o0d": {
@@ -23096,10 +23146,10 @@
   "de": "Wirkung ansehen",
   "en": "See the impact",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.wischen-fuer-weitere-kurse.1twm40f": {
@@ -23281,10 +23331,10 @@
   "de": "Wohin unsere Einnahmen fließen: in qualifizierte Lehrkräfte, kleine Gruppen, Beratung und Lernräume sowie soziale Projekte.",
   "en": "Where our income goes: qualified teachers, small groups, advice and places to learn, and social projects.",
   "files": [
-   "src/app/(site)/[locale]/ueber-uns/gemeinnuetzigkeit/page.tsx"
+   "src/app/(site)/[locale]/about/nonprofit/page.tsx"
   ],
   "pages": [
-   "/ueber-uns/gemeinnuetzigkeit"
+   "/about/nonprofit"
   ]
  },
  "t.wohnen-4-wochen-danach.19eskr4": {
@@ -23717,6 +23767,18 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.zur-casa-startseite.ldc95j": {
+  "de": "Zur CASA-Startseite",
+  "en": "Go to CASA homepage",
+  "files": [
+   "src/components/layout/footer.tsx",
+   "src/components/layout/mobile-nav.tsx",
+   "src/components/layout/navbar.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.zur-deutschen-fassung.1esgk92": {

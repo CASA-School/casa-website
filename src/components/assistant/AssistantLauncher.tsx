@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { usePathname } from '@/i18n/navigation';
 
 import { AssistantWidget } from '@/components/assistant/AssistantWidget';
+import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
 const COMPACT_VIEWPORT_MEDIA_QUERY = '(max-width: 767px)';
@@ -39,7 +41,8 @@ function ClaraIcon({ size }: { size: 'sm' | 'md' }) {
   );
 }
 
-export function AssistantLauncher() {
+export function AssistantLauncher({ contentLocale }: { contentLocale: ContentLocale }) {
+  const { say } = useSiteCopy();
   const pathname = usePathname();
   const activePath = pathname ?? '/';
   const [openPath, setOpenPath] = useState<string | null>(null);
@@ -72,7 +75,7 @@ export function AssistantLauncher() {
         )}
         aria-expanded={isOpen}
         aria-controls="casa-assistant-panel"
-        aria-label="Open CLARA assistant"
+        aria-label={say(contentLocale, 'CLARA öffnen', 'Open CLARA assistant')}
       >
         {/* Slightly larger on desktop, compact on mobile */}
         <ClaraIcon size={isCompactViewport ? 'sm' : 'md'} />

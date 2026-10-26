@@ -392,7 +392,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
         ref={navContainerRef}
         className="flex h-full items-center justify-between gap-3 xl:grid xl:grid-cols-[1fr_auto_1fr]"
       >
-        <Link href="/" aria-label="Go to CASA homepage" className="flex shrink-0 items-center focus-visible:outline-none">
+        <Link href="/" aria-label={say(contentLocale, 'Zur CASA-Startseite', 'Go to CASA homepage')} className="flex shrink-0 items-center focus-visible:outline-none">
           <Logo
             // Below 380px (the smallest phones, a folded phone's cover screen) the logo and the three
             // round buttons do not fit at 48px: the page scrolled sideways by 19px at 320.
@@ -423,7 +423,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
           the remaining nav items take a comfortable px-3 instead of the
           cramped lg:px-2.5 they were squeezed into.
         */}
-        <nav className="hidden h-full xl:flex" aria-label="Main navigation">
+        <nav className="hidden h-full xl:flex" aria-label={say(contentLocale, 'Hauptnavigation', 'Main navigation')}>
           <ul className="flex h-full items-stretch gap-1">
             {navConfig.main.map((item) => {
               const key = 'trigger' in item ? item.trigger : item.label;
@@ -665,7 +665,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
               <DropdownMenuTrigger asChild>
                 <button
                   data-testid="locale-trigger"
-                  aria-label={`Select content language, current ${say(contentLocale, 'Deutsch', 'English')}`}
+                  aria-label={say(contentLocale, 'Sprache wählen, aktuell Deutsch', 'Select content language, current English')}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)] transition-colors hover:text-[var(--casa-accent-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
                 >
                   <Globe className="h-5 w-5" />
@@ -697,7 +697,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
           ) : (
             <button
               type="button"
-              aria-label="Language options"
+              aria-label={say(contentLocale, 'Sprache wählen', 'Language options')}
               disabled
               className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--casa-sand)] p-2 text-[var(--casa-muted)]"
             >
@@ -744,7 +744,8 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
               <MobileNav contentLocale={contentLocale} />
             ) : (
               <Button
-                aria-label="Open navigation menu"
+                aria-label={say(contentLocale, 'Menü öffnen', 'Open navigation menu')}
+                data-nav-trigger=""
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 rounded-full border border-[color:var(--casa-sand)] xl:hidden"

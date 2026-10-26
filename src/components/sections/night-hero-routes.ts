@@ -5,7 +5,7 @@
  * Add a page here when its hero becomes a night hero.
  */
 export const NIGHT_HERO_PATHS: ReadonlySet<string> = new Set([
-  '/ueber-uns/gemeinnuetzigkeit',
+  '/about/nonprofit',
   '/accommodation',
   '/courses',
   '/exams',

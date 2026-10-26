@@ -12,7 +12,7 @@ import { createPublicMetadata } from '@/lib/seo';
 import { organizationId, pageUrl } from '@/lib/structured-data';
 import { pickTree, say } from '@/lib/cms/copy';
 
-const PATH = '/ueber-uns/gemeinnuetzigkeit';
+const PATH = '/about/nonprofit';
 const KEYWORDS = [
   'CASA gemeinnützig',
   'CASA gGmbH',
@@ -66,7 +66,7 @@ export default async function NonProfitStatusPage() {
           title: 'Was gemeinnützig bei uns heißt',
           description:
             'Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.',
-          ctas: [{ label: 'Wirkung ansehen', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
+          ctas: [{ label: 'Wirkung ansehen', href: '/about/nonprofit#integrationsprojekte', kind: 'primary' as const }],
         },
         ring: {
           nodes: ['Qualifizierte Lehrkräfte', 'Kleine Gruppen', 'Beratung & Lernräume', 'Soziale Projekte'] as const,
@@ -99,7 +99,7 @@ export default async function NonProfitStatusPage() {
           title: 'What being a non-profit means at CASA',
           description:
             'As a non-profit language school, we are committed to education, understanding and inclusion. Our income goes back into this work.',
-          ctas: [{ label: 'See the impact', href: '/ueber-uns/gemeinnuetzigkeit#integrationsprojekte', kind: 'primary' as const }],
+          ctas: [{ label: 'See the impact', href: '/about/nonprofit#integrationsprojekte', kind: 'primary' as const }],
         },
         ring: {
           nodes: ['Qualified teachers', 'Small groups', 'Advice & places to learn', 'Social projects'] as const,

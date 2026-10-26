@@ -80,7 +80,7 @@ export function CoursesFormatSelector({ title, description, items, labels }: Cou
           needs no scroll affordance and cannot clip. `shrink-0` goes with the
           scrolling; in a wrapping row it would stop long labels from fitting.
         */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Course format selector">
+        <div className="mt-6 flex flex-wrap justify-center gap-2" role="tablist" aria-label={title}>
           {items.map((item) => (
             <button
               key={item.id}

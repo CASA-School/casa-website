@@ -41,7 +41,7 @@ export const footerConfig: FooterConfig = {
       title: 'School',
       items: [
         { label: 'Our school', href: '/about#mission' },
-        { label: 'Non-profit status', href: '/ueber-uns/gemeinnuetzigkeit' },
+        { label: 'Non-profit status', href: '/about/nonprofit' },
         { label: 'Team', href: '/team' },
         { label: 'Cooperation partners', href: '/partners' },
       ],
@@ -88,7 +88,7 @@ export const footerConfig: FooterConfig = {
   ],
   legalLinks: [
     { label: 'Imprint', href: '/imprint' },
-    { label: 'Non-profit status', href: '/ueber-uns/gemeinnuetzigkeit' },
+    { label: 'Non-profit status', href: '/about/nonprofit' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms & Conditions', href: '/terms' },
   ],

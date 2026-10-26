@@ -601,7 +601,7 @@ export default async function HomePage() {
         Ad Grants note: docs/GOOGLE_AD_GRANTS_COMPLIANCE.md requires the
         non-profit narrative to be VISIBLE on the homepage, not to be in any
         particular position. It is still here, still linked to
-        /ueber-uns/gemeinnuetzigkeit, and now reads as a statement rather than a
+        /about/nonprofit, and now reads as a statement rather than a
         two-column aside — so the requirement is met more strongly than before,
         not less. Do not remove this band.
 
@@ -692,7 +692,7 @@ export default async function HomePage() {
           </ul>
 
           <div className="mt-10 text-center md:mt-12">
-            <TextCta href="/ueber-uns/gemeinnuetzigkeit">
+            <TextCta href="/about/nonprofit">
               {say(locale, 'Wie CASA Kursgebühren gemeinnützig einsetzt', 'How CASA reinvests course fees')}
             </TextCta>
           </div>

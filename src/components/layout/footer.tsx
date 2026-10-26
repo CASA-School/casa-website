@@ -134,7 +134,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
         <div className="md:hidden">
           <Link
             href="/"
-            aria-label="Go to CASA homepage"
+            aria-label={say(locale, 'Zur CASA-Startseite', 'Go to CASA homepage')}
             className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
           >
             {/* The logo's colours with white lettering, straight on the dark footer. */}
@@ -189,7 +189,7 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
             <div className="inline-flex px-1 py-1">
               <Link
                 href="/"
-                aria-label="Go to CASA homepage"
+                aria-label={say(locale, 'Zur CASA-Startseite', 'Go to CASA homepage')}
                 className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
               >
                 <Logo className="h-12 w-auto" variant="onDark" />
