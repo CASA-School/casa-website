@@ -1898,6 +1898,14 @@
    "/courses/[slug]"
   ]
  },
+ "t.b2-kurs.adkdkz": {
+  "de": "B2-Kurs",
+  "en": "B2 course",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.bad-zum-mitbenutzen.1fmw1sp": {
   "de": "Bad zum Mitbenutzen",
   "en": "A bathroom to share",
@@ -3147,6 +3155,14 @@
   "pages": [
    "/accommodation/[type]"
   ]
+ },
+ "t.c1-kurs.12sk7zb": {
+  "de": "C1-Kurs",
+  "en": "C1 course",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
  },
  "t.c1-sicheres-fachliches-auftreten.1qwvud": {
   "de": "C1+: Sicheres fachliches Auftreten in Studium und Beruf",
@@ -12652,6 +12668,14 @@
   ],
   "pages": []
  },
+ "t.kurs-a2-2.i12fzr": {
+  "de": "Kurs A2.2",
+  "en": "A2.2 class",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.kurs-anfragen.vqjdy": {
   "de": "Kurs anfragen",
   "en": "Ask about this course",
@@ -12838,6 +12862,14 @@
  "t.kurse-b1-bis-c1.s4cd63": {
   "de": "Kurse B1 bis C1",
   "en": "Courses B1 to C1",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
+ "t.kurse-b1-und-b1.q3jdt2": {
+  "de": "Kurse B1 und B1+",
+  "en": "B1 and B1+ classes",
   "files": [
    "src/config/content/social-proof.ts"
   ],
@@ -17362,6 +17394,14 @@
   ],
   "pages": []
  },
+ "t.sieben-monate-ab-b1.zjhead": {
+  "de": "Sieben Monate, ab B1+",
+  "en": "Seven months, from B1+",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.so-entsteht-ein-firmenkurs.18nwhhl": {
   "de": "So entsteht ein Firmenkurs bei CASA.",
   "en": "This is how we put together a course for your company.",
@@ -20666,9 +20706,25 @@
    "/placement-test"
   ]
  },
+ "t.von-a2-bis-c1.1cdwfoq": {
+  "de": "Von A2 bis C1.2",
+  "en": "From A2 to C1.2",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
  "t.von-anfang-an-bis.g28svc": {
   "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
   "en": "From the start to C1, now with a bachelor’s and a master’s degree",
+  "files": [
+   "src/config/content/social-proof.ts"
+  ],
+  "pages": []
+ },
+ "t.von-b1-bis-zum.wxgeof": {
+  "de": "Von B1 bis zum Studium",
+  "en": "From B1 to university",
   "files": [
    "src/config/content/social-proof.ts"
   ],

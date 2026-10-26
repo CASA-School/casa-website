@@ -45,9 +45,11 @@ import { pick } from '@/lib/cms/copy';
  * quotes, under the same rules, with their stars (`google`); the homepage shows only them, course
  * pages lead with their own voices and fill from them. Narges and Fatameh left the course pages.
  *
- * ONLY STARS ON THE COURSE PAGES (Rahman, 2026-10-26): Sulaiman, Laura and Ahmed left the special
- * courses, medical and Bildungszeit pages, which now show the Google reviews alone. Their quotes come
- * from casa-bremen.de and carry no rating, so they were not given stars they never gave.
+ * STARS FOR ALL OF THEM (2026-10-26). Every quote casa-bremen.de published is also a review on CASA's
+ * Google listing, each with five stars (checked against the listing that day: Sulaiman's is the English
+ * original „SE" posted, which casa-bremen.de printed in German), so they carry their stars. Seven more
+ * 5-star reviews joined the pool the same day (Rahman: „keep the pool big"), and each course page
+ * starts its fill at a different one (FILL_FROM), so no two pages show the same three.
  */
 
 type TestimonialSource = {
@@ -100,7 +102,16 @@ type TestimonialSource = {
 };
 
 /** Where a course page's fill of Google reviews starts. */
-const FILL_FROM: Record<string, string> = { 'intensive-german': 'mila-google', 'evening-german': 'roberto-google' };
+const FILL_FROM: Record<string, string> = {
+  'intensive-german': 'mila-google',
+  'evening-german': 'roberto-google',
+  // From B1 to university, the C1 course, A2 to C1.2: the advanced voices beside a specialised course.
+  'medical-german': 'leo-google',
+  // Grammar gaps filled, creative methods: next to Sulaiman's grammar module.
+  'special-courses': 'dimitra-google',
+  // Seven months from B1+, B1 and B1+ classes: Bildungszeit starts at B1.
+  bildungszeit: 'tahir-google',
+};
 
 /** CASA's Google listing, where the reviews are. */
 const GOOGLE_LISTING = 'https://maps.google.com/?cid=4736578749741248132';
@@ -109,6 +120,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   {
     id: 'narges-intensive',
     coursePage: false,
+    google: { rating: 5 },
     person: 'Narges',
     courseSlug: 'intensive-german',
     writtenIn: 'en',
@@ -132,6 +144,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   {
     id: 'fatameh-evening',
     coursePage: false,
+    google: { rating: 5 },
     person: 'Fatameh',
     courseSlug: 'evening-german',
     examCode: 'telc_b2',
@@ -155,24 +168,35 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'sulaiman-special',
-    coursePage: false,
     person: 'Sulaiman',
     courseSlug: 'special-courses',
-    writtenIn: 'de',
+    // Written in English on Google; casa-bremen.de printed the German below.
+    writtenIn: 'en',
+    google: { rating: 5 },
     quote:
-      'Der B1/B2 Grammatik-Kurs hat mir bemerkenswert geholfen, meine mündlichen und schriftlichen Deutschkenntnisse zu verbessern. Vom Kursmaterial über die effiziente Nutzung und Aufteilung der Kurszeit, die freundliche Lehrkraft bis hin zur zentralen Lage der Akademie – ein wirklich hervorragendes Preis-Leistungs-Verhältnis. Sehr zu empfehlen.',
-    excerpt:
-      'Der B1/B2 Grammatik-Kurs hat mir bemerkenswert geholfen, meine mündlichen und schriftlichen Deutschkenntnisse zu verbessern.',
+      'The B1/B2 grammar course has helped me remarkably to improve my spoken and written German skills. From course material to efficiently use and distribution of course time, friendly and nice teacher and central location of the academy, was really good value for money. Highly recommended.',
+    excerpt: 'The B1/B2 grammar course has helped me remarkably to improve my spoken and written German skills.',
     context: {
       en: 'B1/B2 grammar special course',
       de: 'Spezialkurs Grammatik B1/B2',
     },
+    translation: {
+      de: {
+        quote:
+          'Der B1/B2 Grammatik-Kurs hat mir bemerkenswert geholfen, meine mündlichen und schriftlichen Deutschkenntnisse zu verbessern. Vom Kursmaterial über die effiziente Nutzung und Aufteilung der Kurszeit, die freundliche Lehrkraft bis hin zur zentralen Lage der Akademie – ein wirklich hervorragendes Preis-Leistungs-Verhältnis. Sehr zu empfehlen.',
+        excerpt:
+          'Der B1/B2 Grammatik-Kurs hat mir bemerkenswert geholfen, meine mündlichen und schriftlichen Deutschkenntnisse zu verbessern.',
+      },
+    },
   },
   {
     id: 'laura-medical',
+    // She writes about the intensive course; casa-bremen.de showed her on the medical page. The intensive
+    // page leads with fresher reviews, so she stays off the course pages (the About page names her).
     coursePage: false,
     person: 'Laura',
-    courseSlug: 'medical-german',
+    courseSlug: 'intensive-german',
+    google: { rating: 5 },
     writtenIn: 'en',
     quote:
       'I am a student at CASA, I am taking part in the intensive course and right now at the B1 level. I am having a great experience here, the teachers are great as well as the school’s environment. It makes justice to its name, I truly feel welcome and at home here. I am also really pleased with my development in the language in such a short time.',
@@ -193,6 +217,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'majd-in-company',
+    google: { rating: 5 },
     person: 'Majd',
     courseSlug: 'in-company',
     writtenIn: 'de',
@@ -207,8 +232,8 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'ahmed-bildungszeit',
-    coursePage: false,
     person: 'Ahmed',
+    google: { rating: 5 },
     courseSlug: 'bildungszeit',
     writtenIn: 'de',
     quote:
@@ -219,9 +244,18 @@ const TESTIMONIALS: TestimonialSource[] = [
       en: 'Bildungszeit course',
       de: 'Bildungszeit-Kurs',
     },
+    translation: {
+      en: {
+        quote:
+          'One of my best learning experiences! The teachers are professional, the courses are effective and the management team is also very friendly and helpful. I would definitely recommend this school!',
+        excerpt:
+          'One of my best learning experiences! The teachers are professional, the courses are effective and the management team is also very friendly and helpful.',
+      },
+    },
   },
   {
     id: 'elena-groups',
+    google: { rating: 5 },
     person: 'Elena',
     courseSlug: 'german-for-groups',
     writtenIn: 'de',
@@ -367,6 +401,140 @@ const TESTIMONIALS: TestimonialSource[] = [
       },
     },
   },
+  /*
+   * More from the listing (read 2026-10-26, Rahman: „keep the pool big"): 5-star reviews in German or
+   * English that say something concrete, the newest a month old. Light typo repair only („i" → „I",
+   * „german" → „German", a missing space); English ones carry a labelled German translation.
+   */
+  {
+    id: 'leo-google',
+    person: 'Leo A.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Ich bin sehr zufrieden mit der Sprachschule und dem gesamten Team. Alle sind äußerst kompetent, hilfsbereit und engagiert. Ich wurde von meinem B1-Sprachniveau bis hin zum Eintritt in die Universität begleitet und dabei jederzeit bestens unterstützt. Vielen Dank für die tolle Betreuung und die wertvolle Unterstützung auf meinem Weg! Ich kann die Sprachschule jedem empfehlen, der seine Deutschkenntnisse verbessern und anschließend erfolgreich studieren möchte.',
+    excerpt:
+      'Ich wurde von meinem B1-Sprachniveau bis hin zum Eintritt in die Universität begleitet und dabei jederzeit bestens unterstützt.',
+    context: { de: 'Von B1 bis zum Studium', en: 'From B1 to university' },
+    translation: {
+      en: {
+        quote:
+          'I am very happy with the language school and the whole team. Everyone is extremely competent, helpful and committed. I was accompanied from my B1 level all the way to starting university, and supported in the best possible way at every step. Thank you very much for the great guidance and the valuable support on my way! I can recommend the language school to anyone who wants to improve their German and then go on to study successfully.',
+        excerpt:
+          'I was accompanied from my B1 level all the way to starting university, and supported in the best possible way at every step.',
+      },
+    },
+  },
+  {
+    id: 'mateo-google',
+    person: 'Mateo',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Während ich im anderen Kurszentrum meine Zeit verschwendet habe, konnte ich im C1-Kurs bei Casa endlich richtig Deutsch lernen. Der Unterricht wurde umfangreich und professionell gestaltet, und die Lehrerinnen und Lehrer waren sehr gut qualifiziert. Über die anderen Niveaustufen bei Casa kann ich keine Aussage treffen. Sehr zu empfehlen ist es, die eigene wertvolle Zeit nicht woanders zu verschwenden, sondern direkt Casa zu besuchen.',
+    excerpt:
+      'Der Unterricht wurde umfangreich und professionell gestaltet, und die Lehrerinnen und Lehrer waren sehr gut qualifiziert.',
+    context: { de: 'C1-Kurs', en: 'C1 course' },
+    translation: {
+      en: {
+        quote:
+          'While I wasted my time at another course centre, in the C1 course at CASA I was finally able to learn German properly. The lessons were comprehensive and professionally designed, and the teachers were very well qualified. I can’t say anything about the other levels at CASA. I highly recommend not wasting your own valuable time elsewhere, but going straight to CASA.',
+        excerpt: 'The lessons were comprehensive and professionally designed, and the teachers were very well qualified.',
+      },
+    },
+  },
+  {
+    id: 'oksana-google',
+    person: 'Oksana F.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Casa Sprachschule Bremen – das Beste, was mir in Deutschland passiert ist🌈 ✨🪐 Heute habe ich bei Casa C1.2 abgeschlossen. Ich habe hier von A2 bis C1 gelernt und bin unglaublich dankbar für diese Zeit. Ich möchte mich besonders bei allen Lehrerinnen und Lehrern für ihre Geduld, ihr Wissen und ihre Unterstützung bedanken. Jeder von ihnen ist unglaublich engagiert und lebt seinen Beruf mit Leidenschaft – und das spürt man. Sie sind herzlich, freundlich, hilfsbereit und immer bereit, uns zu unterstützen und zu motivieren. Deutsch zu lernen ist wirklich nicht einfach. Es braucht sehr viel Übung, Wiederholung und Praxis. Es gab Momente, in denen man einfach aufgeben wollte. Aber unsere Lehrer haben uns immer wieder motiviert, weiterzumachen und an uns selbst zu glauben🌤️ Die Unterrichtsstunden waren immer abwechslungsreich, lebendig und voller Atmosphäre. Wir haben nicht einfach nur Grammatik gelernt, sondern viele verschiedene Übungen gemacht, Texte bearbeitet, diskutiert, Präsentationen vorbereitet und unsere sprachlichen Fähigkeiten ständig weiterentwickelt. Besonders schätze ich, dass Casa Menschen aus unterschiedlichen Ländern und Kulturen zusammenbringt. Die Lehrer schaffen es, diese Unterschiede zu verbinden und eine gute Lernatmosphäre für alle zu schaffen. Menschen aus verschiedenen Ländern haben gemeinsam gefeiert – und genau darin zeigt sich für mich, was Casa besonders macht: Casa verbindet Menschen. Ein besonderes Dankeschön geht auch an Lutz für seine Geduld, seine Energie und seine Fähigkeit, uns immer wieder zu motivieren. Man merkt, wie viel Herzblut er in seinen Beruf steckt. Vielen Dank an das gesamte Casa-Team für eure Geduld, euer Wissen, eure Unterstützung und euren Einsatz☀️☀️☀️ Casa ist für mich nicht einfach nur eine Sprachschule. Für mich ist Casa die beste Sprachschule in Bremen. ❤️',
+    excerpt:
+      'Heute habe ich bei Casa C1.2 abgeschlossen. Ich habe hier von A2 bis C1 gelernt und bin unglaublich dankbar für diese Zeit.',
+    context: { de: 'Von A2 bis C1.2', en: 'From A2 to C1.2' },
+    translation: {
+      en: {
+        quote:
+          'CASA language school Bremen – the best thing that has happened to me in Germany🌈 ✨🪐 Today I finished C1.2 at CASA. I learnt here from A2 to C1 and am incredibly grateful for this time. I would especially like to thank all the teachers for their patience, their knowledge and their support. Every one of them is incredibly committed and lives their profession with passion – and you can feel it. They are warm, friendly, helpful and always ready to support and motivate us. Learning German really isn’t easy. It takes a great deal of practice, repetition and use. There were moments when you just wanted to give up. But our teachers kept motivating us to carry on and to believe in ourselves🌤️ The lessons were always varied, lively and full of atmosphere. We didn’t just learn grammar; we did lots of different exercises, worked on texts, discussed, prepared presentations and kept developing our language skills. I especially value that CASA brings together people from different countries and cultures. The teachers manage to connect these differences and create a good learning atmosphere for everyone. People from different countries celebrated together – and for me that is exactly what makes CASA special: CASA brings people together. A special thank-you also goes to Lutz for his patience, his energy and his ability to keep motivating us. You can tell how much heart he puts into his work. Many thanks to the whole CASA team for your patience, your knowledge, your support and your commitment☀️☀️☀️ For me, CASA is not just a language school. For me, CASA is the best language school in Bremen. ❤️',
+        excerpt: 'Today I finished C1.2 at CASA. I learnt here from A2 to C1 and am incredibly grateful for this time.',
+      },
+    },
+  },
+  {
+    id: 'tahir-google',
+    person: 'Tahir E.',
+    writtenIn: 'en',
+    google: { rating: 5 },
+    quote:
+      'Let me tell you about my 7 month journey with CASA and why they are the best option when it comes to language schools. I started at CASA with the B1+ niveau. Before that I was studying at another language school in Bremen. Once I started at CASA I was not just listening and writing I was actively joining the class and the teaching since teachers here aren’t just talking but also asking. They are asking if you understood, asking for self examples and the lesson becomes much more enjoyable. Besides we play games all the time which include the grammar we just learned and helps a lot with becoming natural at the language. Teamworks is also a big thing at CASA. Almost every lesson there is a Partnerarbeit where you and a classmate try to solve or answer questions which helps to discover other views and to understand the subject better. When it comes to the office they inform students really well about their situations and what they can do. If you ever have any questions about the school I would recommend you to visit their office and ask anything that comes across your mind since thats what I did and what helped me a lot by picking my language school. Sky is the limit when it comes to service by CASA! Classes and bathrooms are pristine clean all the time and get cleaned daily. Overall was really satisfied with everything at CASA and I would recommend it to everyone with my whole heart. Ich habe auf Englisch geschrieben, so dass jeder meine Meinung verstehen können. Nun möchte ich mich für einzige besondere Menschen auf Deutsch bedanken. Vielen herzlichen dank für alles; Christian, Natàlia, Lutz und Claudia. Meine Erfahrung hier war zwar gut aber mit euch ist es super gut geworden! Ich kann mich nicht genug bedanken, weil ihr immer da wart und mich immer unterstützt habt. Ich wünsche euch alle die beste! Bleibt gesund, bleibt glücklich!',
+    excerpt:
+      'Once I started at CASA I was not just listening and writing I was actively joining the class and the teaching since teachers here aren’t just talking but also asking.',
+    context: { de: 'Sieben Monate, ab B1+', en: 'Seven months, from B1+' },
+    translation: {
+      de: {
+        quote:
+          'Ich erzähle euch von meinen sieben Monaten bei CASA und warum sie die beste Wahl unter den Sprachschulen sind. Ich habe bei CASA auf dem Niveau B1+ angefangen. Davor habe ich an einer anderen Sprachschule in Bremen gelernt. Seit ich bei CASA angefangen habe, habe ich nicht nur zugehört und geschrieben, sondern aktiv am Unterricht teilgenommen, denn die Lehrkräfte hier reden nicht nur, sie fragen auch. Sie fragen, ob man es verstanden hat, und bitten um eigene Beispiele, so macht der Unterricht viel mehr Spaß. Außerdem spielen wir ständig Spiele mit der Grammatik, die wir gerade gelernt haben, und das hilft sehr, die Sprache natürlich zu sprechen. Teamarbeit ist bei CASA auch sehr wichtig. Fast in jeder Stunde gibt es eine Partnerarbeit, in der man mit jemandem aus dem Kurs Fragen löst oder beantwortet. So lernt man andere Sichtweisen kennen und versteht das Thema besser. Das Büro informiert die Lernenden sehr gut über ihre Situation und ihre Möglichkeiten. Wenn ihr Fragen zur Schule habt, geht ins Büro und fragt alles, was euch einfällt. Das habe ich auch gemacht, und es hat mir bei der Wahl meiner Sprachschule sehr geholfen. Beim Service von CASA sind keine Grenzen gesetzt! Kursräume und Toiletten sind immer blitzsauber und werden täglich gereinigt. Insgesamt war ich mit allem bei CASA sehr zufrieden und empfehle die Schule von ganzem Herzen weiter. Ich habe auf Englisch geschrieben, so dass jeder meine Meinung verstehen können. Nun möchte ich mich für einzige besondere Menschen auf Deutsch bedanken. Vielen herzlichen dank für alles; Christian, Natàlia, Lutz und Claudia. Meine Erfahrung hier war zwar gut aber mit euch ist es super gut geworden! Ich kann mich nicht genug bedanken, weil ihr immer da wart und mich immer unterstützt habt. Ich wünsche euch alle die beste! Bleibt gesund, bleibt glücklich!',
+        excerpt:
+          'Seit ich bei CASA angefangen habe, habe ich nicht nur zugehört und geschrieben, sondern aktiv am Unterricht teilgenommen, denn die Lehrkräfte hier reden nicht nur, sie fragen auch.',
+      },
+    },
+  },
+  {
+    id: 'carlo-google',
+    person: 'Carlo X.',
+    writtenIn: 'en',
+    google: { rating: 5 },
+    quote:
+      'I had a wonderful experience at this language school! I’ve tried about 4 German language schools in the past, and CASA is by far the best in terms of teaching quality, administrative logistics, and classroom comfort. - Teaching Quality: I had 4 teachers for my B1 and B1+ German classes (2 per class), and each instructor was not only extremely knowledgeable but also really passionate about teaching. The energy is appreciated, especially during the afternoons! - Administrative Logistics: I received a response the day of my inquiry and had a placement test scheduled for the next day. I received all the supplies I needed on the first day. No complaints. - Classroom Comfort: Classrooms are clean and some even have a digital whiteboard. The building is huge, and I like that there’s a cafe downstairs where you can go and speak German to students of all levels. I made some great friends during these breaks at the cafe. Overall, I highly recommend CASA if you want to improve your language skills!',
+    excerpt:
+      'I had 4 teachers for my B1 and B1+ German classes (2 per class), and each instructor was not only extremely knowledgeable but also really passionate about teaching.',
+    context: { de: 'Kurse B1 und B1+', en: 'B1 and B1+ classes' },
+    translation: {
+      de: {
+        quote:
+          'Ich hatte eine wunderbare Zeit an dieser Sprachschule! Ich habe früher etwa vier Deutschschulen ausprobiert, und CASA ist mit Abstand die beste, was Unterrichtsqualität, Organisation und Komfort in den Kursräumen angeht. – Unterrichtsqualität: Ich hatte vier Lehrkräfte in meinen Deutschkursen B1 und B1+ (zwei pro Kurs), und alle waren nicht nur sehr kompetent, sondern unterrichteten auch mit echter Leidenschaft. Die Energie tut gut, besonders am Nachmittag! – Organisation: Ich bekam noch am Tag meiner Anfrage eine Antwort und hatte schon am nächsten Tag einen Einstufungstest. Alle Unterlagen, die ich brauchte, bekam ich am ersten Tag. Keine Beschwerden. – Kursräume: Die Kursräume sind sauber, und einige haben sogar ein digitales Whiteboard. Das Gebäude ist riesig, und mir gefällt, dass es unten ein Café gibt, in dem man mit Lernenden aller Niveaus Deutsch sprechen kann. In diesen Pausen im Café habe ich tolle Freundschaften geschlossen. Insgesamt kann ich CASA sehr empfehlen, wenn du deine Sprachkenntnisse verbessern möchtest!',
+        excerpt:
+          'Ich hatte vier Lehrkräfte in meinen Deutschkursen B1 und B1+ (zwei pro Kurs), und alle waren nicht nur sehr kompetent, sondern unterrichteten auch mit echter Leidenschaft.',
+      },
+    },
+  },
+  {
+    id: 'dimitra-google',
+    person: 'Dimitra B.',
+    writtenIn: 'en',
+    google: { rating: 5 },
+    quote:
+      'I am currently taking the A2.2 class. The courses are always interactive, helpful and fun. I have filled many grammar gaps I had on the German language. The atmosphere in Casa is very cozy and friendly, the staff is always helping as much as possible with any paper work that might be needed. The teachers I had so far, among them Janne and Tanja (I took some extra classes too) were all very professional and kind :). I would highly recommend Casa to anyone who is searching for a language school!',
+    excerpt: 'The courses are always interactive, helpful and fun. I have filled many grammar gaps I had on the German language.',
+    context: { de: 'Kurs A2.2', en: 'A2.2 class' },
+    translation: {
+      de: {
+        quote:
+          'Ich besuche gerade den Kurs A2.2. Die Kurse sind immer interaktiv, hilfreich und machen Spaß. Ich habe viele Grammatiklücken geschlossen, die ich im Deutschen hatte. Die Atmosphäre bei Casa ist sehr gemütlich und freundlich, und das Team hilft immer, so gut es geht, bei allem Papierkram, der anfallen kann. Die Lehrkräfte, die ich bisher hatte, darunter Janne und Tanja (ich habe auch ein paar zusätzliche Kurse besucht), waren alle sehr professionell und freundlich :). Ich kann Casa allen sehr empfehlen, die eine Sprachschule suchen!',
+        excerpt:
+          'Die Kurse sind immer interaktiv, hilfreich und machen Spaß. Ich habe viele Grammatiklücken geschlossen, die ich im Deutschen hatte.',
+      },
+    },
+  },
+  {
+    id: 'fayez-google',
+    person: 'Fayez N.',
+    writtenIn: 'de',
+    google: { rating: 5 },
+    quote:
+      'Sehr nette und professionelle Lehrer/innen und Mitarbeiter/innen, kreative Lehrmethoden und lustige Aktivitäten. Alles in einer gemütlichen Atmosphäre. Ich habe den B2 Deutschkurs bei Casa gemacht und mich wie zu Hause gefühlt. Außerdem habe ich dort viele tolle Menschen kennengelernt. Marina A. war meine Lehrerin dort, eine wunderbare Lehrerin und ihr Unterricht ist voller positiver Energie und macht Spaß zu lernen. Einfach gesagt, die beste Sprachschule in Bremen.',
+    excerpt:
+      'Sehr nette und professionelle Lehrer/innen und Mitarbeiter/innen, kreative Lehrmethoden und lustige Aktivitäten. Alles in einer gemütlichen Atmosphäre.',
+    context: { de: 'B2-Kurs', en: 'B2 course' },
+    translation: {
+      en: {
+        quote:
+          'Very kind and professional teachers and staff, creative teaching methods and fun activities. All in a cosy atmosphere. I took the B2 German course at CASA and felt at home. I also met lots of great people there. Marina A. was my teacher there, a wonderful teacher, and her lessons are full of positive energy and make learning fun. Simply put, the best language school in Bremen.',
+        excerpt: 'Very kind and professional teachers and staff, creative teaching methods and fun activities. All in a cosy atmosphere.',
+      },
+    },
+  },
 ];
 
 function toSocialProof(source: TestimonialSource, locale: ContentLocale): SocialProofItem {
@@ -430,9 +598,9 @@ export function socialProofForCourse(slug: string, locale: ContentLocale): Socia
   return [...own.filter((item) => item.google), ...own.filter((item) => !item.google), ...rest].map((item) => toSocialProof(item, locale));
 }
 
-/** The Google reviews, for the homepage's carousel. */
+/** The homepage's carousel: the Google reviews about the school as a whole; one about a course stays on its page. */
 export function googleReviewsFor(locale: ContentLocale): SocialProofItem[] {
-  return TESTIMONIALS.filter((item) => item.google).map((item) => toSocialProof(item, locale));
+  return TESTIMONIALS.filter((item) => item.google && !item.courseSlug).map((item) => toSocialProof(item, locale));
 }
 
 /**

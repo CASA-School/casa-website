@@ -807,6 +807,10 @@
     "de": "B1/B2 Sprechwerkstatt – Sicher und überzeugend kommunizieren",
     "text": "B1/B2 Laboratorio di conversazione – Comunicare con sicurezza e in modo convincente"
   },
+  "t.b2-kurs.adkdkz": {
+    "de": "B2-Kurs",
+    "text": "Corso B2"
+  },
   "t.bad-zum-mitbenutzen.1fmw1sp": {
     "de": "Bad zum Mitbenutzen",
     "text": "Bagno in condivisione"
@@ -1266,6 +1270,10 @@
   "t.bus-und-bahnverbindungen-zur.7b1xt9": {
     "de": "Bus- und Bahnverbindungen zur Schule heraussuchen",
     "text": "Cercare i collegamenti in autobus e tram fino alla scuola"
+  },
+  "t.c1-kurs.12sk7zb": {
+    "de": "C1-Kurs",
+    "text": "Corso C1"
   },
   "t.c1-sicheres-fachliches-auftreten.1qwvud": {
     "de": "C1+: Sicheres fachliches Auftreten in Studium und Beruf",
@@ -4511,6 +4519,10 @@
     "de": "Kulturprogramme",
     "text": "Programmi culturali"
   },
+  "t.kurs-a2-2.i12fzr": {
+    "de": "Kurs A2.2",
+    "text": "Corso A2.2"
+  },
   "t.kurs-anfragen.vqjdy": {
     "de": "Kurs anfragen",
     "text": "Chiedi informazioni sul corso"
@@ -4570,6 +4582,10 @@
   "t.kurse-b1-bis-c1.s4cd63": {
     "de": "Kurse B1 bis C1",
     "text": "Corsi dal B1 al C1"
+  },
+  "t.kurse-b1-und-b1.q3jdt2": {
+    "de": "Kurse B1 und B1+",
+    "text": "Corsi B1 e B1+"
   },
   "t.kurse-beratung.1yqjvaw": {
     "de": "Kurse & Beratung",
@@ -6267,6 +6283,10 @@
     "de": "Sicherheit",
     "text": "Sicurezza"
   },
+  "t.sieben-monate-ab-b1.zjhead": {
+    "de": "Sieben Monate, ab B1+",
+    "text": "Sette mesi, dal B1+"
+  },
   "t.so-entsteht-ein-firmenkurs.18nwhhl": {
     "de": "So entsteht ein Firmenkurs bei CASA.",
     "text": "Ecco come nasce un corso in azienda con CASA."
@@ -7407,9 +7427,17 @@
     "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
     "text": "Dall’A1 al C1: nella pagina «Livelli» vedi che cosa riesci a capire e a dire a ogni livello."
   },
+  "t.von-a2-bis-c1.1cdwfoq": {
+    "de": "Von A2 bis C1.2",
+    "text": "Da A2 a C1.2"
+  },
   "t.von-anfang-an-bis.g28svc": {
     "de": "Von Anfang an bis C1, heute mit Bachelor und Master",
     "text": "Da zero al C1, oggi con laurea triennale e magistrale"
+  },
+  "t.von-b1-bis-zum.wxgeof": {
+    "de": "Von B1 bis zum Studium",
+    "text": "Da B1 all’università"
   },
   "t.von-der-anfrage-bis.10fxaxv": {
     "de": "Von der Anfrage bis zur Abreise hast du eine feste Ansprechperson.",
