@@ -44,6 +44,10 @@ import { pick } from '@/lib/cms/copy';
  * intensive and evening pages. Seven 5-star reviews from CASA's Google listing follow the published
  * quotes, under the same rules, with their stars (`google`); the homepage shows only them, course
  * pages lead with their own voices and fill from them. Narges and Fatameh left the course pages.
+ *
+ * ONLY STARS ON THE COURSE PAGES (Rahman, 2026-10-26): Sulaiman, Laura and Ahmed left the special
+ * courses, medical and Bildungszeit pages, which now show the Google reviews alone. Their quotes come
+ * from casa-bremen.de and carry no rating, so they were not given stars they never gave.
  */
 
 type TestimonialSource = {
@@ -151,6 +155,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'sulaiman-special',
+    coursePage: false,
     person: 'Sulaiman',
     courseSlug: 'special-courses',
     writtenIn: 'de',
@@ -165,6 +170,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'laura-medical',
+    coursePage: false,
     person: 'Laura',
     courseSlug: 'medical-german',
     writtenIn: 'en',
@@ -201,6 +207,7 @@ const TESTIMONIALS: TestimonialSource[] = [
   },
   {
     id: 'ahmed-bildungszeit',
+    coursePage: false,
     person: 'Ahmed',
     courseSlug: 'bildungszeit',
     writtenIn: 'de',

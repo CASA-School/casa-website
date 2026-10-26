@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getCourseAudienceContent, getCourseNextSteps } from '@/config/courses/course-page-content';
+import { courseArchetypes } from '@/config/courses/archetypes';
 import { getCourseLevelGoals, courseProfiles } from '@/config/courses/course-profiles';
 import { publicCourseOrder } from '@/config/courses/course-order';
 import { fallbackCourseTypes } from '@/config/content/public-fixtures';
@@ -79,7 +80,7 @@ describe('per-course page content', () => {
   it('keeps the level table inside each course’s published range', () => {
     for (const slug of Object.keys(courseProfiles)) {
       const course = fallbackCourseTypes.find((c) => c.slug === slug);
-      if (!course) continue;
+      if (!course || !courseArchetypes[courseProfiles[slug].archetype].sections.includes('level-goals')) continue;
 
       const levels = getCourseLevelGoals(slug, 'en').levels.map((l) => l.level).join(' ');
 

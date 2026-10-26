@@ -2055,10 +2055,6 @@
     "de": "Die Miete bestimmt dein Monatsbudget. Wie hoch sie ist, hängt von der Stadt ab, in der du wohnst.",
     "text": "يحدّد الإيجار ميزانيتك الشهرية، ويعتمد مقداره على المدينة التي تسكن فيها."
   },
-  "t.die-module-gibt-es.tj33g4": {
-    "de": "Die Module gibt es auf verschiedenen Niveaus, von A2/B1 bis C1+.",
-    "text": "تتوفر الوحدات في مستويات مختلفة، من A2/B1 إلى C1+."
-  },
   "t.die-nachmittage.1ihq0gp": {
     "de": "Die Nachmittage",
     "text": "فترات بعد الظهر"
@@ -2271,14 +2267,6 @@
     "de": "Du frischst deine Sprachkenntnisse auf und verbesserst sie.",
     "text": "تنعش معرفتك اللغوية وتحسّنها."
   },
-  "t.du-fuehrst-anamnesegespraeche-kl.18vh935": {
-    "de": "Du führst Anamnesegespräche, klärst Patientinnen und Patienten auf und dokumentierst.",
-    "text": "تُجري مقابلات أخذ التاريخ المرضي، وتشرح للمرضى، وتوثّق."
-  },
-  "t.du-fuehrst-fachgespraeche-mit.xnhxxm": {
-    "de": "Du führst Fachgespräche mit Kolleginnen und Kollegen, schreibst Arztbriefe und übst Visiten.",
-    "text": "تُجري نقاشات مهنية مع زملائك، وتكتب التقارير الطبية، وتتدرّب على الجولات الطبية في الأقسام."
-  },
   "t.du-hast-ein-moebliertes.199xm6o": {
     "de": "Du hast ein möbliertes Zimmer mit Bett, Schreibtisch und Kleiderschrank frei.",
     "text": "لديك غرفة مفروشة شاغرة فيها سرير ومكتب وخزانة ملابس."
@@ -2318,10 +2306,6 @@
   "t.du-lernst-das-ganze.3te892": {
     "de": "Du lernst das ganze Jahr über in internationalen Gruppen mit 10 bis 16 Teilnehmenden. Der Unterricht orientiert sich streng am Gemeinsamen Europäischen Referenzrahmen und schult gezielt Lesen, Hören, Schreiben und besonders das Sprechen.",
     "text": "تتعلّم على مدار السنة في مجموعات دولية تضم من 10 إلى 16 مشاركًا. وتلتزم الدروس التزامًا صارمًا بالإطار الأوروبي المرجعي العام للغات، وتدرّب بشكل مركّز على القراءة والاستماع والكتابة، وعلى المحادثة بشكل خاص."
-  },
-  "t.du-lernst-die-fachsprache.3m1y53": {
-    "de": "Du lernst die Fachsprache der Medizin auf den Niveaustufen B2 und C1, mit Blick auf den Klinikalltag und die Kommunikation im Team.",
-    "text": "تتعلّم لغة الطب المتخصصة في المستويين B2 و C1، مع التركيز على العمل اليومي في المستشفى والتواصل ضمن الفريق."
   },
   "t.du-lernst-neue-menschen.zt2ead": {
     "de": "Du lernst neue Menschen und ihre Kultur kennen.",
@@ -2374,14 +2358,6 @@
   "t.du-stellst.17ffavg": {
     "de": "Du stellst",
     "text": "ما تقدّمه"
-  },
-  "t.du-trainierst-den-muendlichen.1c96cf3": {
-    "de": "Du trainierst den mündlichen und schriftlichen Ausdruck für telc Deutsch C1 Hochschule.",
-    "text": "تتدرّب على التعبير الشفهي والكتابي لامتحان telc Deutsch C1 Hochschule."
-  },
-  "t.du-trainierst-gezielt-grammatik.1r0t4p3": {
-    "de": "Du trainierst gezielt Grammatik, Aussprache, Schreiben oder freies Sprechen.",
-    "text": "تتدرّب بتركيز على القواعد أو النطق أو الكتابة أو التحدث بحرية."
   },
   "t.du-uebernimmst-verantwortung-fue.10pq82t": {
     "de": "Du übernimmst Verantwortung für deinen Bereich und achtest auf gute Qualität.",
@@ -2442,10 +2418,6 @@
   "t.du-waehlst-eine-bis.1a9ah4d": {
     "de": "Du wählst eine bis neun Wochen und beginnst an einem Montag.",
     "text": "تختار مدة من أسبوع إلى تسعة أسابيع، وتبدأ يوم اثنين."
-  },
-  "t.du-wiederholst-und-festigst.ow4bw9": {
-    "de": "Du wiederholst und festigst die Grundlagen der Grammatik und lernst, einfache Alltagstexte zu schreiben.",
-    "text": "تراجع أساسيات القواعد وتثبّتها، وتتعلّم كتابة نصوص يومية بسيطة."
   },
   "t.du-wohnst-in-bremen.2pq167": {
     "de": "Du wohnst in Bremen und hast ein Zimmer frei?",
@@ -7678,10 +7650,6 @@
   "t.was-der-erste-monat.1qjg2zh": {
     "de": "Was der erste Monat kostet",
     "text": "كم يكلّف الشهر الأول"
-  },
-  "t.was-die-module-abdecken.lwjjnz": {
-    "de": "Was die Module abdecken",
-    "text": "ما تغطيه الوحدات"
   },
   "t.was-die-stufen-bedeuten.1nlttzl": {
     "de": "Was die Stufen bedeuten",

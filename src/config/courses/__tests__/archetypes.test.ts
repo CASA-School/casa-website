@@ -129,9 +129,9 @@ describe('course archetypes', () => {
     expect(catalogue.sections).toContain('module-catalogue');
 
     // It leads: on this archetype the page IS the picker.
-    expect(catalogue.sections.indexOf('module-catalogue')).toBeLessThan(
-      catalogue.sections.indexOf('level-goals')
-    );
+    expect(catalogue.sections[0]).toBe('module-catalogue');
+    // Each module names its level, so no level ladder repeats them (2026-10-26).
+    expect(catalogue.sections).not.toContain('level-goals');
 
     for (const [id, archetype] of Object.entries(courseArchetypes)) {
       if (id === 'module-catalogue') continue;
