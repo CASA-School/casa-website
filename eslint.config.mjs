@@ -111,6 +111,18 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // eslint-config-next 16.4.3 (2026-10-26, the Next.js security update) brings eslint-plugin-react-hooks
+    // 7.1, which reports these three on code that works: nine places in the navbar, the phone menu, the
+    // search popover, CLARA, the offer draft and the Kursplanung board. Warnings until each is rewritten
+    // and checked in the browser — not as part of a security update.
+    // Removal condition: delete when `npx eslint .` reports none of them.
+    rules: {
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+    },
+  },
 ]);
 
 export default eslintConfig;

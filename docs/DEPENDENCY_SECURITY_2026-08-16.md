@@ -218,3 +218,30 @@ are all this one advisory. Re-check when `braces` 3.0.4 (or a `micromatch` that 
 ships; `npm audit fix` will then clear it.
 
 Verified: lint, typecheck, 615 unit tests, knip, build; production audit 0.
+
+---
+
+## 2026-10-26 — `next` 16.3.8 → 16.4.3, `zod` 4.3.6 → 4.6.7, `vitest` 4.1.11 → 4.1.12
+
+Dependabot opened #135 (vitest) and #136 (next, without `eslint-config-next`). Both carried security
+fixes, and the production audit also failed on `zod`:
+
+| Package | Severity | Advisory | Applies |
+| --- | --- | --- | --- |
+| `next` <16.4.1 | **critical** | Unauthenticated RCE in `use cache` functions returning typed arrays | yes, any host |
+| `next` <16.4.1 | **critical** | Unauthenticated RCE in the Image Optimization API with SVG files | yes, the site optimises images |
+| `next` <16.4.1 | high | Denial of service in the App Router through Server Actions | yes, the workspace is built on them |
+| `zod` <4.6.6 | high | Memory exhaustion validating oversized constrained collections | yes, every public form validates with zod |
+| `@vitest/mocker` <4.1.12 | medium | Code injection through manual mock registration | dev only |
+
+Done in one branch instead of merging Dependabot's PRs, which were closed:
+
+- `next` and `eslint-config-next` moved together to **16.4.3** (the pinned pair).
+- `eslint-config-next` 16.4.3 brings `eslint-plugin-react-hooks` 7.1, which reports
+  `set-state-in-effect`, `refs` and `preserve-manual-memoization` on nine places of working code. They
+  are warnings in `eslint.config.mjs` until each is rewritten and checked in the browser.
+- **`zod` 4.6 fails a missing key on an `unknown()`-then-`transform()` field.** The registration
+  honeypot (`website`) was such a field, so every registration without it answered 400 with
+  „Invalid input: expected nonoptional". It is now `.unknown().optional().transform(…)`, the same on
+  4.3 and 4.6; the 23 registration tests caught it.
+- `npm audit --omit=dev` reports 0 vulnerabilities.
