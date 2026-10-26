@@ -942,6 +942,22 @@
    "__ID_SingleDateCourse"
   ]
  },
+ "SingleDateExam": {
+  "layout": "Sync_SingleDateExam",
+  "key": "__ID_SingleDateExamReference",
+  "change": "DateOfChange",
+  "changeKind": "date",
+  "fields": [
+   "DateOfChange",
+   "HourEnd",
+   "HourStart",
+   "ZSingleDate",
+   "_ID_Exam",
+   "_ID_PartExamReference",
+   "_ID_StaffMember",
+   "__ID_SingleDateExamReference"
+  ]
+ },
  "SingleDateOccupancy": {
   "layout": "Sync_SingleDateOccupancy",
   "key": "__ID_SingleDateOccupancy",

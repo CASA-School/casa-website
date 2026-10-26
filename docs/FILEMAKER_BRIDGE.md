@@ -526,6 +526,8 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 - the learner sample (a course this week or in the next four, plus this year's group participants,
   plus — since 2026-10-21, Rahman: „all of 2024 and 2025" — everyone with a booking whose period began
   in 2024 or 2025, `HISTORY_YEARS` in `sample.py`), with history, money, attendance and letters;
+- the exam parts (`SingleDateExam`, 2026-10-26): a sitting's real hours, unless a colleague changed it here,
+  and the examiners of its written and oral parts;
 - organisations, groups, offers, accommodation, follow-ups, intake and the rest;
 - the Tagesplan's tasks.
 

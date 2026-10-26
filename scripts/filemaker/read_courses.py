@@ -24,6 +24,8 @@ def first(value):
 
 
 def iso(value):
+    if re.fullmatch(r'\d{4}-\d{2}-\d{2}', value or ''):
+        return value
     m = re.match(r'\s*(\d{1,2})\.(\d{1,2})\.(\d{4})', value or '')
     return f'{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}' if m else None
 
@@ -38,6 +40,16 @@ def hhmm(value):
 F = ['__ID_Course', '_ID_CourseTypeReference', 'ZStartDate', 'ZEndDate', '_ID_DayTimeReference', 'LevelShown', 'LevelShort',
      'CourseTitle', 'CapStudent', 'CoursePrice', '_ID_Bookable', '_ID_Active']
 rows = [dict(zip(F, r)) for r in zip(*[column('Course', f) for f in F])]
+# `Course::ZStartDate`/`ZEndDate` are copies made when the course was; its periods (`DateCourse`) are the
+# source (mapping review 2026-10-26 §4). A course's dates are its periods' first and last day where it has them.
+periods = collections.defaultdict(list)
+for course, start, end in zip(column('DateCourse', '_ID_Course'), column('DateCourse', 'ZStartDate'), column('DateCourse', 'ZEndDate')):
+    if first(course) and iso(start) and iso(end):
+        periods[first(course)].append((iso(start), iso(end)))
+for r in rows:
+    own = periods.get(first(r['__ID_Course']))
+    if own:
+        r['ZStartDate'], r['ZEndDate'] = min(p[0] for p in own), max(p[1] for p in own)
 since = (date.today() - timedelta(days=240)).isoformat()
 live = [r for r in rows if iso(r['ZEndDate']) and iso(r['ZEndDate']) >= since]
 

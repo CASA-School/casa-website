@@ -347,7 +347,7 @@ reception weekday shifts.
 | 3 | **Waiting list empty**: the bridge looks for the course in the wrong place | 0 imported; 575 joined in 2026 | Take the course from `PreBooking._ID_Course` through `PreBooking._ID_WaitingRoom` |
 | 4 | **Missing documents per booking** | `_ID_MissingItemReference` 2,754 (1,133 since 2025) | Read the list; the missing-information letter needs it |
 | 5 | **Host offer and pets read from fields abandoned in 2024** | Offer fields 128/122/95 on `Management`; `_ID_Animal` 90 | Change two lines in `read_accommodation.py` |
-| 6 | **Exam sittings are incomplete**: external candidates, the oral and written part days, and the examiners | `SingleDateExam` 270; `exam_session_examiners` empty | Add exam bookings to the sample; read `SingleDateExam` |
+| 6 | **Exam sittings are incomplete**: external candidates, the oral and written part days, and the examiners | `SingleDateExam` 270; `exam_session_examiners` empty | **Parts and examiners done 2026-10-26** (`read_exams.py`: real hours on 76 sittings, 55 examiners); external candidates still open |
 | 7 | **Follow-ups outside the sample** | 5,759 not brought | Follows #1 |
 | 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | Read it; offer it as a filter |
 | 9 | **Course notes and group-reservation notes** | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 | Read them onto the course and the reservation |
