@@ -2804,3 +2804,28 @@ declined). The inbox lists one row per Anmeldung, courses and exams together, a 
 course ends, no date, gaps), „Alle buchen" (one booking per level, as SchoolMan does), and one
 confirmation of the bookings. The Anmeldung closes itself once every line is settled (a trigger). The
 staff mail's subject says the path too. docs/ADMIN_WORKSPACE.md §One Anmeldung, several lines.
+
+## 53. SchoolMan in real time: the sync, the copy, every field mapped (2026-10-27)
+
+Rahman: „stop the bridge and finish this real-time sync" — the WorkspaceSync account was the whole idea —
+and then „map everything properly so every data is transferred properly to our new system".
+
+- **The sync** (PRs #157–#164): 90 `Sync_<Table>` layouts made in SchoolMan by script (902 fields, hidden from
+  menus, every binding checked); a read-only Data API service on Rahman's Mac (launchd) keeps a copy in the
+  workspace's database (`schoolman_records`, 0090); the Azure job runs the bridge from the copy every five
+  minutes (`bridge-mirror.mjs`). Measured: SchoolMan whole in 2½ min; 13 of 19 readers byte-identical to
+  FileMaker Pro, the rest alike in meaning. The old AppleScript bridge stays the way back.
+- **Completeness** (PRs #165–#168, 0092–0095): four reviews sorted every in-use field no reader read (541) and
+  every uncovered table (155) into facts, copies, plumbing and decisions; every fact was mapped — passports,
+  internships, leave, trainings, the waiting list with exam waits, results, programmes, payment ↔ charge,
+  letters on every booking they name, the kind of every history line, hosts' offers, room numbers, the
+  Wohnungsgeberbestätigungen. Learners who book only an exam now come across (telc B2 13.11.: 21, not 7).
+- **Fixes on the way**: lesson days compare with what is held (Birte/Mariella swapped); vocabularies
+  fingerprinted unordered (a release reshuffles seeds); staff linked person→staff; remaining holiday from the
+  days taken; NUL characters; dotted change fields; doubled attendance keys; a two-hour job limit.
+- **Also today**: the workspace's contrast pass (#160), the search and record links (#162), the Prüfungen
+  module rebuilt (#170, 0096, places from SchoolMan).
+- **Read** docs/schoolman/MIGRATION.md (state, runbook, pitfalls); the reviews in docs/schoolman/completeness/;
+  layout tools in scripts/filemaker/layouts/. **Open**: Rahman's decisions (MIGRATION.md §3), the service onto
+  the office server (CT 103).
+

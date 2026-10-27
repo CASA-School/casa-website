@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="LayoutObjectList">
+<Layout enclosingRectTop="64.0000000" enclosingRectLeft="990.0000000" enclosingRectBottom="81.0000000" enclosingRectRight="1110.0000000">
+<Object type="Field" key="290" LabelKey="0" flags="0" rotation="0">
+<Bounds top="64.0000000" left="990.0000000" bottom="81.0000000" right="1110.0000000"/>
+<FieldObj numOfReps="1" flags="32" inputMode="0" keyboardType="0" displayType="0" quickFind="0" pictFormat="3">
+<Name>Agreement::_ID_Student</Name>
+<ExtendedAttributes fontHeight="12" graphicFormat="3">
+<NumFormat flags="256" charStyle="0" negativeStyle="0" currencySymbol="€" thousandsSep="46" decimalPoint="44" negativeColor="#DD000000" decimalDigits="2" trueString="Yes" falseString="No"/>
+<DateFormat format="0" charStyle="0" monthStyle="1" dayStyle="1" separator="46">
+<DateElement>3</DateElement>
+<DateElement>1</DateElement>
+<DateElement>6</DateElement>
+<DateElement>8</DateElement>
+<DateElementSep index="0"></DateElementSep>
+<DateElementSep index="1">, </DateElementSep>
+<DateElementSep index="2">. </DateElementSep>
+<DateElementSep index="3"> </DateElementSep>
+<DateElementSep index="4"></DateElementSep>
+</DateFormat>
+<TimeFormat flags="159" charStyle="0" hourStyle="0" minsecStyle="1" separator="58" amString=" vorm." pmString=" nachm." ampmString=""/>
+<CharacterStyle mask="32695">
+<Font-family codeSet="Roman" fontId="7" postScript="Helvetica">Helvetica</Font-family>
+<Font-size>12</Font-size>
+<Face>0</Face>
+<Color>#000000</Color>
+</CharacterStyle>
+</ExtendedAttributes>
+<Styles>
+<FullCSS>
+self:normal .self&#10;{&#10;&#09;background-image: none;&#10;&#09;background-position: 0% 0%;&#10;&#09;background-size: auto;&#10;&#09;background-repeat: repeat repeat;&#10;&#09;background-origin: padding-box;&#10;&#09;background-clip: border-box;&#10;&#09;background-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-color: rgba(60%,60%,60%,1);&#10;&#09;border-right-color: rgba(60%,60%,60%,1);&#10;&#09;border-bottom-color: rgba(60%,60%,60%,1);&#10;&#09;border-left-color: rgba(60%,60%,60%,1);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0.25pt;&#10;&#09;border-right-width: 0.25pt;&#10;&#09;border-bottom-width: 0.25pt;&#10;&#09;border-left-width: 0.25pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;border-image-source: none;&#10;&#09;border-image-slice: 100% 100% 100% 100% fill;&#10;&#09;border-image-width: 1 1 1 1;&#10;&#09;border-image-outset: 0 0 0 0;&#10;&#09;border-image-repeat: stretch stretch;&#10;&#09;outline-width: 0pt;&#10;&#09;outline-style: none;&#10;&#09;outline-color: invert;&#10;&#09;outline-offset: 0pt;&#10;&#09;font-family: -fm-font-family(Helvetica,Helvetica);&#10;&#09;font-weight: normal;&#10;&#09;font-stretch: normal;&#10;&#09;font-style: normal;&#10;&#09;font-variant: normal;&#10;&#09;font-size: 12pt;&#10;&#09;color: rgba(0%,0%,0%,1);&#10;&#09;direction: ltr;&#10;&#09;line-height: 1line;&#10;&#09;block-progression: tb;&#10;&#09;text-align: center;&#10;&#09;text-transform: none;&#10;&#09;text-indent: 0pt;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;&#09;vertical-align: baseline;&#10;&#09;-fm-digit-set: roman;&#10;&#09;-fm-space-before: 0line;&#10;&#09;-fm-space-after: 0line;&#10;&#09;-fm-tab-stops: ;&#10;&#09;-fm-strikethrough: false;&#10;&#09;-fm-underline: none;&#10;&#09;-fm-glyph-variant: ;&#10;&#09;-fm-paragraph-margin-left: 0pt;&#10;&#09;-fm-paragraph-margin-right: 0pt;&#10;&#09;-fm-character-direction: ;&#10;&#09;-fm-use-default-appearance: false;&#10;&#09;-fm-override-with-classic: false;&#10;&#09;-fm-baseline-shift: 0pt;&#10;&#09;-fm-fill-effect: 0;&#10;&#09;-fm-highlight-color: rgba(0%,0%,0%,0);&#10;&#09;-fm-text-vertical-align: top;&#10;&#09;-fm-tategaki: false;&#10;&#09;-fm-rotation: 0;&#10;&#09;-fm-borders-between-reps: false;&#10;&#09;-fm-borders-baseline: false;&#10;&#09;-fm-texty-field: false;&#10;&#09;-fm-box-shadow-persist: none;&#10;}&#10;self:focus .self&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,1);&#10;&#09;border-right-color: rgba(0%,0%,0%,1);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,1);&#10;&#09;border-left-color: rgba(0%,0%,0%,1);&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;&#09;box-shadow: none;&#10;}&#10;self:droptarget .self&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,1);&#10;&#09;border-right-color: rgba(0%,0%,0%,1);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,1);&#10;&#09;border-left-color: rgba(0%,0%,0%,1);&#10;&#09;border-top-width: 1pt;&#10;&#09;border-right-width: 1pt;&#10;&#09;border-bottom-width: 1pt;&#10;&#09;border-left-width: 1pt;&#10;}&#10;self:placeholder .self&#10;{&#10;&#09;color: rgba(53.3333%,53.3333%,53.3333%,1);&#10;}&#10;self:normal .inner_border&#10;{&#10;&#09;border-top-color: rgba(0%,0%,0%,0);&#10;&#09;border-right-color: rgba(0%,0%,0%,0);&#10;&#09;border-bottom-color: rgba(0%,0%,0%,0);&#10;&#09;border-left-color: rgba(0%,0%,0%,0);&#10;&#09;border-top-style: none;&#10;&#09;border-right-style: none;&#10;&#09;border-bottom-style: none;&#10;&#09;border-left-style: none;&#10;&#09;border-top-width: 0pt;&#10;&#09;border-right-width: 0pt;&#10;&#09;border-bottom-width: 0pt;&#10;&#09;border-left-width: 0pt;&#10;&#09;border-top-right-radius: 0pt 0pt;&#10;&#09;border-bottom-right-radius: 0pt 0pt;&#10;&#09;border-bottom-left-radius: 0pt 0pt;&#10;&#09;border-top-left-radius: 0pt 0pt;&#10;&#09;padding-top: 1pt;&#10;&#09;padding-right: 1pt;&#10;&#09;padding-bottom: 1pt;&#10;&#09;padding-left: 1pt;&#10;&#09;margin-top: 0pt;&#10;&#09;margin-right: 0pt;&#10;&#09;margin-bottom: 0pt;&#10;&#09;margin-left: 0pt;&#10;&#09;width: auto;&#10;&#09;height: auto;&#10;&#09;top: auto;&#10;&#09;right: auto;&#10;&#09;bottom: auto;&#10;&#09;left: auto;&#10;&#09;position: static;&#10;&#09;box-shadow: none;&#10;&#09;box-sizing: content-box;&#10;}&#10;self:droptarget .inner_border&#10;{&#10;&#09;box-shadow: inset 0pt 0pt 4pt 2pt rgba(21.5686%,43.5294%,87.8431%,1);&#10;}&#10;self:normal .baseline&#10;{&#10;&#09;border-bottom-width: 1pt;&#10;}&#10;</FullCSS>
+<ThemeName>com.filemaker.theme.custom.10D5336A_7C31_4A2C_BF4E_83B55F9D1CA6</ThemeName></Styles>
+<DDRInfo>
+<Field name="_ID_Student" id="76" repetition="1" maxRepetition="1" table="Agreement"/>
+</DDRInfo>
+</FieldObj>
+</Object>
+</Layout>
+</fmxmlsnippet>

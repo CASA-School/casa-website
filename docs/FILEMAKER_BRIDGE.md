@@ -609,6 +609,12 @@ open in FileMaker Pro and `az` signed in:
 
 ## 9. The sync service: SchoolMan over the Data API (2026-10-27)
 
+> **Live since 2026-10-27; the current state, coverage and runbook are in [schoolman/MIGRATION.md](schoolman/MIGRATION.md).**
+> Since this section was written: 90 layouts and 902 fields (the completeness review added 22 tables and
+> 246 fields); the job may run two hours and waits for a whole copy; tables whose change field has a dot are
+> read whole every five minutes; NUL characters are dropped on arrival; the learner selection takes in exam
+> bookings and open waiting places; exam dates take their places from SchoolMan.
+
 Rahman: the WorkspaceSync account was the whole idea — a faster, better link than reading SchoolMan through
 FileMaker Pro on his laptop, which needs the laptop on, SchoolMan open and an hour or more whenever the
 learners' step is rewritten. The sync service replaces the reading; the importers stay as they are.

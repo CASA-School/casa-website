@@ -11,6 +11,9 @@
   // board U6 landed, and is now imported by
   // `src/components/courses/special-course-catalogue.tsx`.
   "ignore": [
+    // A JXA script for `osascript -l JavaScript` (FileMaker's layout clipboard), not a module anything imports.
+    // Removal condition: none while the Sync_ layouts are made by UI scripting.
+    "scripts/filemaker/layouts/pbxml2.js",
     // Operator scripts, run by hand against a DATABASE_URL rather than
     // imported. `seed-demo.mjs` fills the staff workspace with plausible
     // records for a design review or a demo; it deliberately does NOT live in
@@ -45,6 +48,8 @@
     // sync service on the office network that keeps the copy (docs/FILEMAKER_BRIDGE.md §9, 2026-10-27).
     "scripts/filemaker/bridge-mirror.mjs",
     "scripts/filemaker/bridge-run.mjs",
+    // Making and checking the Sync_ layouts in SchoolMan, run by hand (scripts/filemaker/layouts/README.md).
+    "scripts/filemaker/layouts/verify_layouts.mjs",
     "scripts/filemaker/mirror-export.mjs",
     "scripts/schoolman-sync/sync.mjs",
     "scripts/schoolman-sync/signature.mjs",

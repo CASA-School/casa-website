@@ -9,7 +9,13 @@ selectively, never all at once**, so the new system is not filled with FileMaker
 defects. Staff get the workspace **one module at a time** so they get used to it. Nothing in
 SchoolMan is lost while the team moves out of it. And first: understand everything in FileMaker.
 
-**Status: research.** Everything here was read from the live `SchoolMan.fmp12` through FileMaker Pro
+**Status (2026-10-27): the data comes across.** SchoolMan is read over the Data API through 90 `Sync_`
+layouts into a copy in the workspace's database and from there into the workspace every five minutes —
+[MIGRATION.md](MIGRATION.md) is the page to read first: what runs, what comes across and what deliberately
+not, the open decisions, the runbook and the pitfalls. The completeness review of 2026-10-27 is in
+[completeness/](completeness/). The pages below are the study it grew from.
+
+**The study (2026-10-15).** Everything here was read from the live `SchoolMan.fmp12` through FileMaker Pro
 on the office Mac, **read-only, counts only** — no value of a person leaves FileMaker — on
 2026-10-15, plus the July 2026 DDR for screens and scripts. Nothing has been imported and the
 workspace's schema has not changed for it. Read with `docs/FILEMAKER_LESSONS.md` (the defects and the
@@ -32,6 +38,9 @@ rule for each) and `docs/FILEMAKER_BRIDGE.md` (the bridge design).
 | Staff, working time and holidays | [staff.md](staff.md) |
 | The Klassenbuch — the teachers' app that reads and writes SchoolMan | [klassenbuch.md](klassenbuch.md) |
 | The screens the team works in, and what they teach | [screens.md](screens.md) |
+| **The migration as it stands: sync, copy, bridge, coverage, decisions, runbook** | [MIGRATION.md](MIGRATION.md) |
+| The completeness review: every in-use field no reader read, and every table no layout covered, with a verdict | [completeness/](completeness/) |
+| The Data API layouts and their fields | [sync-layouts.md](sync-layouts.md) |
 | Which fields are in use, rare, abandoned or never used — per table, generated | [fields.md](fields.md) |
 
 Generated files, all in `output/filemaker/` (gitignored, counts and names only): one

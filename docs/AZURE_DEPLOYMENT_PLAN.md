@@ -226,6 +226,19 @@ applicants' CVs is a policy question, not a technical one.
 - **Image cache:** Azure Files share `next-image-cache` in `stcasawebsitef8d745`, registered on the
   environment as `website-image-cache` and mounted at `/app/.next/cache/images`.
 
+## SchoolMan sync in Azure (2026-10-27)
+
+Beside the app (docs/schoolman/MIGRATION.md):
+
+- **App secret `schoolman-sync-key`**, env `SCHOOLMAN_SYNC_KEY=secretref:schoolman-sync-key` on
+  `ca-casa-website`: signs what the sync service sends to `/api/schoolman/sync`. The same key is the Keychain
+  item `casa-schoolman-sync-key` on the Mac that runs the service. Rotate both together.
+- **Scheduled job `caj-casa-website-schoolman`** in `rg-casa-website-prod` on `cae-casa-prod`: cron `*/5 * * * *`,
+  1 vCPU / 2 GiB, replica timeout 7200 s, no retries, image `casa-website-db:<tag>` (the database image, with
+  python3 for the readers), command `sh task.sh bridge-mirror`, secret `database-url`. Made and updated by
+  `infra/azure/schoolman-job.sh` (`--off` removes it; `db-job.sh` never touches it — its prefix differs).
+  A release whose migration ALTERs a table the bridge writes runs with the job removed and re-made after.
+
 ## Migration order
 
 0. ~~Provision the PostgreSQL server, migrate, seed, connect~~ **done 2026-10-09** (see "Database").
