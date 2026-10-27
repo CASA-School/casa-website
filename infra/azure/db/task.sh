@@ -12,5 +12,6 @@ case "$1" in
   owner) node scripts/admin/seed-staff.mjs ;;
   password) node scripts/admin/seed-staff.mjs --reset ;;
   import) node scripts/filemaker/bridge-unpack.mjs ;;
+  bridge-mirror) node scripts/filemaker/bridge-mirror.mjs ;;
   *) echo "unknown task: $1" >&2; exit 2 ;;
 esac

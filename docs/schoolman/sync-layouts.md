@@ -11,6 +11,14 @@ once against SchoolMan with its reads recorded (2026-10-26): 634 fields in 67 ta
 with its own key (`__ID_…`) and its change field. No `SingleDayStaff::cal_*` field and no
 `StaffMember::CommentsOnTeacher` is read, and none may be put on a layout.
 
+**Built 2026-10-27, with Rahman's go:** all 69 layouts, 653 fields — the first list, plus the fields
+the readers took up on 2026-10-26 (`DateCourse` with its start, end and course; `PaymentIn::
+_ID_CostDetailReference`; `WorkFlow`'s links to agency, company, institution and management) and the
+carry-overs of `SingleYearStaff`, from which the year's remaining holiday is now worked out
+(`read_time.py`). Each is hidden from the layout menus. Read back over the Data API as WorkspaceSync:
+69 of 69 complete. The JSON also carries each field's type (`types`), from which the copy's export
+writes values as FileMaker Pro's AppleScript gives them (docs/FILEMAKER_BRIDGE.md §9).
+
 ## Rules for the layouts
 
 - One layout per table, named **`Sync_<Table>`**, based on the table's **base table occurrence**, so the
@@ -20,7 +28,7 @@ with its own key (`__ID_…`) and its change field. No `SingleDayStaff::cal_*` f
   filemaker-for-website-session-2026-10-26.md` §4): clipboard XML2 from a generator, exact field ids
   from the schema export, objects placed beyond the page width, a copy before and after, compared.
 - One table first (`Sync_Booking`), read through the Data API and compared with today's reader; then
-  the rest. **Every layout change in SchoolMan needs Rahman's go.** The Klassenbuch's `*_API` layouts
+  the rest (done 2026-10-27). **Every layout change in SchoolMan needs Rahman's go.** The Klassenbuch's `*_API` layouts
   are not touched.
 
 ## How each table is polled

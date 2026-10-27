@@ -4,10 +4,13 @@
 # private data network, reachable only from the container environment. So
 # migrations cannot run from a laptop; they run here, in the same network as
 # the site. The image carries the migration runner, the SQL and pg, and the
-# SchoolMan importers the bridge feeds (infra/azure/bridge.sh) — never data.
+# SchoolMan readers and importers the bridge runs (infra/azure/bridge.sh, schoolman-job.sh) — never data.
 FROM node:22-bookworm-slim
 WORKDIR /app
 RUN npm init -y >/dev/null && npm install --no-audit --no-fund pg@8.23.0 country-list@2.4.1 && npm cache clean --force
+# The SchoolMan readers (read_*.py, standard library only) run here on the workspace's copy of SchoolMan
+# (scripts/filemaker/bridge-mirror.mjs, docs/FILEMAKER_BRIDGE.md §9).
+RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*
 COPY scripts/db ./scripts/db
 COPY scripts/admin/seed-staff.mjs ./scripts/admin/seed-staff.mjs
 COPY scripts/filemaker ./scripts/filemaker

@@ -37,7 +37,7 @@ ACR=acrcasaprodf8d745
 ENV_ID=$(az containerapp env show -n cae-casa-prod -g rg-casa-platform-prod --query id -o tsv)
 IDENTITY=$(az identity show -n id-casa-website-prod -g "$RG" --query id -o tsv)
 ROOT=$(git rev-parse --show-toplevel)
-TAG="db-$(git -C "$ROOT" rev-parse --short HEAD)-$(cat "$ROOT"/infra/azure/db/* "$ROOT"/db/*/*.sql "$ROOT"/scripts/filemaker/*.mjs | shasum | cut -c1-8)"
+TAG="db-$(git -C "$ROOT" rev-parse --short HEAD)-$(cat "$ROOT"/infra/azure/db/* "$ROOT"/db/*/*.sql "$ROOT"/scripts/filemaker/*.mjs "$ROOT"/scripts/filemaker/*.py "$ROOT"/scripts/filemaker/*.json | shasum | cut -c1-8)"
 IMAGE="$ACR.azurecr.io/casa-website-db:$TAG"
 
 secrets=()
@@ -84,7 +84,7 @@ if ! az acr repository show-tags -n "$ACR" --repository casa-website-db -o tsv 2
   mkdir -p "$CTX/scripts/admin" "$CTX/scripts/filemaker" "$CTX/infra/azure/db"
   cp -R "$ROOT/scripts/db" "$CTX/scripts/db"
   cp "$ROOT/scripts/admin/seed-staff.mjs" "$CTX/scripts/admin/"
-  cp "$ROOT"/scripts/filemaker/*.mjs "$CTX/scripts/filemaker/"
+  cp "$ROOT"/scripts/filemaker/*.mjs "$ROOT"/scripts/filemaker/*.py "$ROOT"/scripts/filemaker/*.json "$CTX/scripts/filemaker/"
   cp -R "$ROOT/db" "$CTX/db"
   cp "$ROOT/infra/azure/db/bootstrap.mjs" "$ROOT/infra/azure/db/task.sh" "$CTX/infra/azure/db/"
   az acr build -r "$ACR" -t "casa-website-db:$TAG" -f "$ROOT/infra/azure/db/Dockerfile" "$CTX" --only-show-errors -o none

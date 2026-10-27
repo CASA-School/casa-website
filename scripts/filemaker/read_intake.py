@@ -44,6 +44,13 @@ STATE = {'1': 'ja', '2': 'nein', '4': 'u.B.'}
 bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_EnrolmentDone', '_ID_Group') if b['__ID_Booking'].strip()}
 chosen = sample_persons(bookings, table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate'), date.today())
 
+def step(value):
+    """The level step typed into the number field `_ID_LevelStepReference` („A1.1", „B1+.2"): the Data API hands
+    it back without the point („A11"), FileMaker Pro as typed; the point goes back before the last digit."""
+    value = value.replace(',', '.')
+    return (re.sub(r'^([A-Ca-c][12]\+?)(\d)$', r'\1.\2', value) or None) if value else None
+
+
 pre = []
 course_of = {}  # a pre-booking's course, for the waiting list
 for r in table('PreBooking', '__ID_PreBooking', '_ID_Person', '_ID_CourseTypeReference', '_ID_Level', '_ID_LevelStepReference', '_ID_DayTimeReference', '_ID_Course',
@@ -53,7 +60,7 @@ for r in table('PreBooking', '__ID_PreBooking', '_ID_Person', '_ID_CourseTypeRef
         continue
     visa = first(r['_ID_VisaRequired'])
     pre.append({'id': r['__ID_PreBooking'].strip(), 'person': first(r['_ID_Person']), 'courseType': first(r['_ID_CourseTypeReference']) or None,
-                'band': BAND.get(first(r['_ID_Level'])), 'step': first(r['_ID_LevelStepReference']) or None, 'daytime': DAYTIME.get(first(r['_ID_DayTimeReference'])),
+                'band': BAND.get(first(r['_ID_Level'])), 'step': step(first(r['_ID_LevelStepReference'])), 'daytime': DAYTIME.get(first(r['_ID_DayTimeReference'])),
                 'course': first(r['_ID_Course']) or None, 'visa': True if visa == '1' else False if visa == '2' else None,
                 'state': STATE.get(first(r['_ID_StatusPreBooking'])), 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
                 'created': stamp(r['Timestamp.Creation']) or stamp(r['DateOfCreation'])})

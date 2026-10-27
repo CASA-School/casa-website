@@ -9,16 +9,13 @@
  *
  * Runs inside Azure as `db-job.sh import`, started by `infra/azure/bridge.sh`.
  */
-import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { connect, requireConnectionString } from '../db/client.mjs';
 import { open } from './bridge-bundle.mjs';
+import { counts, importStep, printCounts } from './bridge-run.mjs';
 import { BRIDGE_STEPS } from './bridge-steps.mjs';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
 const at = process.argv.indexOf('--file');
 const file = at > 0 ? process.argv[at + 1] : undefined;
 const url = process.env.BRIDGE_URL;
@@ -27,43 +24,6 @@ requireConnectionString();
 if (!file && !url) {
   console.error('Set BRIDGE_URL, or pass --file.');
   process.exit(2);
-}
-
-/** The tables a run fills, counted before and after. */
-const TABLES = [
-  'staff_members', 'courses', 'course_days', 'people', 'bookings', 'booking_periods', 'organisations', 'group_visits',
-  'offers', 'accommodations', 'booking_stays', 'payments', 'letters', 'staff_notes', 'day_tasks',
-];
-
-async function counts() {
-  const client = await connect();
-  try {
-    const out = {};
-    for (const table of TABLES) {
-      if ((await client.query('SELECT to_regclass($1) AS t', [table])).rows[0].t) {
-        out[table] = Number((await client.query(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n);
-      }
-    }
-    return out;
-  } finally {
-    await client.end();
-  }
-}
-
-/** One importer, fed its step's input on stdin; its output is passed on and its last line kept. */
-function importStep(importer, input) {
-  return new Promise((resolve) => {
-    const child = spawn(process.execPath, [path.join(HERE, importer)], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const lines = [];
-    const keep = (chunk, stream) => {
-      stream.write(chunk);
-      lines.push(...chunk.toString('utf8').split('\n').filter((l) => l.trim()));
-    };
-    child.stdout.on('data', (c) => keep(c, process.stdout));
-    child.stderr.on('data', (c) => keep(c, process.stderr));
-    child.on('close', (code) => resolve({ ok: code === 0, summary: lines.at(-1)?.slice(0, 500) ?? '' }));
-    child.stdin.end(input);
-  });
 }
 
 async function remove() {
@@ -125,7 +85,6 @@ try {
   await client.end();
 }
 
-console.log('\nrows        before → after');
-for (const table of Object.keys(after)) console.log(`  ${table.padEnd(16)} ${String(before[table] ?? '').padStart(7)} → ${after[table]}`);
+printCounts(before, after);
 console.log(ok ? '\nbridge run complete' : '\nbridge run FAILED');
 process.exit(ok ? 0 : 1);

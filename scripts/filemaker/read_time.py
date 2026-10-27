@@ -6,8 +6,8 @@
 Rahman, 2026-10-22: management sees each colleague's hours at one look on their page — the month's plus
 or minus, the balance carried, the holidays left (docs/ADMIN_WORKSPACE.md §Staff, tab „Stunden").
 SchoolMan keeps the month's time sheet (`SingleMonthStaff`: StaticBalanceWorkMonth, StaticBalanceWorkRunning,
-StaticBalanceHolidayRunning, _ID_Approved) and the year (`SingleYearStaff`: NumberDayHolidayYear,
-RemainingHoliday, StaticBalanceWorkRunning). The month's worked and target hours are not stored on it, and
+StaticBalanceHolidayRunning, _ID_Approved) and the year (`SingleYearStaff`: NumberDayHolidayYear, the
+carry-overs, StaticBalanceWorkRunning); the holidays left are worked out from the days (`holidays_taken`). The month's worked and target hours are not stored on it, and
 summing the daily calculations (`SingleDayStaff.cal_*`) is too slow to read. This year and the two before.
 Only the staff number, the month and the numbers leave this script.
 """
@@ -68,15 +68,33 @@ def read_months():
     return months
 
 
+def holidays_taken():
+    """Holiday days taken per colleague and year, from the days themselves (`SingleDayStaff::_ID_Holiday`, 1 or ½).
+
+    SchoolMan's `RemainingHoliday` subtracts the holidays of the year chosen on screen (the relationship
+    runs over the global `StaffMember::_adjustYear`), not of the row's own year: its value depends on who
+    reads it and when (2026-10-27, the Data API and FileMaker Pro gave 35 and 12 for the same row). The
+    year's remaining holiday is worked out here from the facts it is made of instead."""
+    taken = collections.Counter()
+    for staff, day, holiday in zip(*[column('SingleDayStaff', f) for f in ('_ID_StaffMember', 'ZSingleDay', '_ID_Holiday')]):
+        n, year = number(holiday), re.search(r'\b(\d{4})\b', day or '')
+        if n and first(staff) and year:
+            taken[(first(staff), int(year.group(1)))] += n
+    return taken
+
+
 def read_years():
-    Y = ['__ID_SingleYearStaff', '_ID_StaffMember', 'YearSingleDay', 'NumberDayHolidayYear', 'RemainingHoliday', 'StaticBalanceWorkRunning']
+    Y = ['__ID_SingleYearStaff', '_ID_StaffMember', 'YearSingleDay', 'NumberDayHolidayYear', 'OverhangHoliday', 'OverhangWorkDay', 'StaticBalanceWorkRunning']
+    taken = holidays_taken()
     years = []
     for r in (dict(zip(Y, v)) for v in zip(*[column('SingleYearStaff', f) for f in Y])):
         staff, year = first(r['_ID_StaffMember']), first(r['YearSingleDay'])
         if not staff or not year.isdigit() or int(year) < since:
             continue
-        years.append({'ref': first(r['__ID_SingleYearStaff']), 'staff': staff, 'year': int(year), 'holidays': number(r['NumberDayHolidayYear']),
-                      'holidaysLeft': number(r['RemainingHoliday']), 'running': number(r['StaticBalanceWorkRunning'])})
+        holidays = number(r['NumberDayHolidayYear'])
+        left = None if holidays is None else holidays - taken[(staff, int(year))] + (number(r['OverhangHoliday']) or 0) + (number(r['OverhangWorkDay']) or 0)
+        years.append({'ref': first(r['__ID_SingleYearStaff']), 'staff': staff, 'year': int(year), 'holidays': holidays,
+                      'holidaysLeft': left, 'running': number(r['StaticBalanceWorkRunning'])})
     return years
 
 
