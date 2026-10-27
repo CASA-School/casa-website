@@ -18,10 +18,12 @@ import {
 import { AbsenceForm, AccountForm, ContractForm, DeskForm, HrNumbersForm, LicenceForm, RolesForm, TeachingForm } from '../staff-forms';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { RecordLink } from '@/components/admin/record-link';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, BirthDate, Button, Card, DetailList, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
+import { recordHref } from '@/lib/admin/record-href';
 import { EXAMINER_PART_LABELS, needsLicence } from '@/lib/admin/exam-parts';
 import { licenceExams, staffLicences, staffSittings } from '@/lib/admin/examiners';
 import { requireModule } from '@/lib/admin/guard';
@@ -224,7 +226,7 @@ export default async function StaffMemberPage({
                   </span>
                 }
               >
-                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} />
+                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} courses={canAccess(user, 'catalogue')} />
               </Card>
             ) : null}
             <Card title={t('Abwesend', 'Away')} icon={Icon.calendar} tint="ink">
@@ -326,7 +328,7 @@ export default async function StaffMemberPage({
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             <div className="space-y-4">
               <Card title={t('Auf dem Plan', 'On the board')} icon={Icon.kursplanung} tint="sun" actions={<SpanChoice id={id} tab="teaching" weeks={weeks} t={t} />}>
-                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} />
+                <TeachingWeeks days={teaching} weeks={weeks} lang={lang} courses={canAccess(user, 'catalogue')} />
               </Card>
               <Card
                 title={t('Abwesenheiten', 'Time away')}
@@ -772,7 +774,8 @@ function SpanChoice({ id, tab, weeks, t }: { id: string; tab: string | null; wee
 const SHIFT_SHORT = { morning: { de: 'Vorm.', en: 'a.m.' }, afternoon: { de: 'Nachm.', en: 'p.m.' }, evening: { de: 'Abends', en: 'eve.' } } as const;
 
 /** Their lesson days, week by week: the days, the course, a substitution or a tentative day marked. */
-function TeachingWeeks({ days, weeks, lang }: { days: TeachingDay[]; weeks: Span; lang: WsLang }) {
+/** `courses`: the colleague may open the courses, so each line links to its course (its group's page). */
+function TeachingWeeks({ days, weeks, lang, courses }: { days: TeachingDay[]; weeks: Span; lang: WsLang; courses: boolean }) {
   if (!days.length)
     return (
       <p className="text-sm text-[var(--casa-muted)]">
@@ -791,11 +794,12 @@ function TeachingWeeks({ days, weeks, lang }: { days: TeachingDay[]; weeks: Span
     d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
     return d.toISOString().slice(0, 10);
   };
-  const lines = new Map<string, { week: string; group: string; shift: TeachingDay['shift']; dates: string[]; substitute: boolean; tentative: boolean }>();
+  const lines = new Map<string, { week: string; group: string; href: string | null; shift: TeachingDay['shift']; dates: string[]; substitute: boolean; tentative: boolean }>();
   for (const d of days) {
     const group = `${d.label}${d.groupIndex > 1 ? ` · ${lang === 'de' ? 'Gruppe' : 'group'} ${d.groupIndex}` : ''}`;
     const key = `${monday(d.date)}|${group}|${d.shift}`;
-    const line = lines.get(key) ?? { week: monday(d.date), group, shift: d.shift, dates: [], substitute: false, tentative: false };
+    const href = courses && d.courseId ? recordHref('course', d.courseId, { group: d.groupIndex }) : null;
+    const line = lines.get(key) ?? { week: monday(d.date), group, href, shift: d.shift, dates: [], substitute: false, tentative: false };
     line.dates.push(d.date);
     line.substitute ||= d.substitute;
     line.tentative ||= d.tentative;
@@ -810,7 +814,9 @@ function TeachingWeeks({ days, weeks, lang }: { days: TeachingDay[]; weeks: Span
             <span className="w-20 shrink-0 text-[0.8rem] text-[var(--casa-muted)] tabular-nums">
               {new Date(`${l.week}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'short' })}
             </span>
-            <span className="font-semibold">{l.group}</span>
+            <span className="font-semibold">
+              <RecordLink href={l.href}>{l.group}</RecordLink>
+            </span>
             {l.shift ? <span className="text-[var(--casa-muted)]">{SHIFT_SHORT[l.shift][lang]}</span> : null}
             {l.substitute ? <Badge tone="warning">{lang === 'de' ? 'Vertretung' : 'Cover'}</Badge> : null}
             {l.tentative ? <Badge tone="quiet">?</Badge> : null}

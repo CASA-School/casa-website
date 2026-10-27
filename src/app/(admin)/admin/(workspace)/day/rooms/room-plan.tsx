@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Search } from '../courses/courses-table';
-import { floorName, groupName, LessonPanel, shortName, together, type LessonEditing } from '../lesson-panel';
+import { floorName, groupName, LessonPanel, shortName, together, type LessonEditing, type LessonOpens } from '../lesson-panel';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import type { DayLesson, PlanRoom } from '@/lib/admin/day-plan';
@@ -39,12 +39,14 @@ export function RoomPlan({
   lessons,
   rooms,
   editing,
+  opens,
 }: {
   day: string;
   today: string;
   lessons: DayLesson[];
   rooms: PlanRoom[];
   editing?: Omit<LessonEditing, 'lessons'>;
+  opens?: LessonOpens;
 }) {
   const { t, lang } = useWsLang();
   const [q, setQ] = useState('');
@@ -254,7 +256,7 @@ export function RoomPlan({
         </div>
       </div>
       {lessons.length === 0 ? <p className="border-t border-ws-line-soft px-5 py-4 text-center text-[0.86rem] text-[var(--casa-muted)]">{t('An diesem Tag ist kein Unterricht.', 'No lessons on this day.')}</p> : null}
-      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} onClose={() => setOpenId(null)} />
+      <LessonPanel lesson={lessons.find((l) => l.id === openId) ?? null} day={day} editing={editing ? { ...editing, lessons } : undefined} opens={opens} onClose={() => setOpenId(null)} />
     </section>
   );
 }

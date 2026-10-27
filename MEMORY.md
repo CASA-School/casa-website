@@ -2776,3 +2776,17 @@ live." Branch `website`, in its own worktree `~/Downloads/CASA-site` (the worksp
 Still open, and not page code: live mail (the Exchange scope covers admin@ only), the domain
 move (apex + www, TYPO3 backup), test records in the Azure database, and the legal questions in
 docs/PRIVACY_POLICY.md.
+
+## 51. Search that finds everything, and the way back (2026-10-27)
+
+Rahman: „improvement of page navigation between different entities, as well as the search bar that
+is more advanced and dynamic and intelligent, now that we are having all the data". The workspace's
+⌘K now searches every kind of record a colleague works with — learners (name, address, phone,
+SchoolMan customer number, birth date), bookings (number, or learner with course), courses („B1.1
+Oktober", SchoolMan number), exam sittings, staff, organisations, groups, offers, places, rooms,
+letters (kind + recipient), the inbox — forgiving (accents, ä/ae, ß/ss, partial words, any order,
+phone digits) and ranked (identifier, name, current). Migration 0091 adds `ws_fold` and two stored
+folded columns; no extension. A record named on another record's page links to it (`RecordLink`,
+`recordHrefFor`, by module), and the way back above a record returns to the page the colleague
+came from in this visit (`nav-trail.tsx`). docs/ADMIN_WORKSPACE.md §Search (⌘K) and the way
+between records. Typical queries answer in 4–40 ms of server time on the full SchoolMan data.

@@ -362,4 +362,16 @@ describe('workspace auth gate', () => {
     expect(route.indexOf("canAccess(user, 'day'")).toBeLessThan(route.indexOf('exportSittings('));
     expect(route).toContain('attachment;');
   });
+
+  it('checks the session in the search route, and searches only the modules the colleague holds', () => {
+    // The palette's search (2026-10-27) is a route handler, so cancellable: outside every layout, it
+    // checks the session itself, and hands every reader the colleague's own access.
+    const route = readFileSync(path.join(ADMIN_APP, '(workspace)/search/route.ts'), 'utf8');
+    expect(route).toContain('getStaffUser');
+    expect(route).toMatch(/if \(!user\) \{\s*return apiError\('signed_out', 'Signed out', 401\);/);
+    expect(route.indexOf('getStaffUser')).toBeLessThan(route.indexOf('searchWorkspace('));
+    expect(route.indexOf('getStaffUser')).toBeLessThan(route.indexOf('recentRecords('));
+    expect(route).toContain('const holds = (module: Parameters<typeof canAccess>[1]) => canAccess(user, module);');
+    expect(route).not.toMatch(/searchWorkspace\([^)]*\(\) => true/);
+  });
 });

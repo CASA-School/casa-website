@@ -1,49 +1,125 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 
-import { searchWorkspaceAction } from '@/app/(admin)/admin/(workspace)/search/actions';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { pick, type Bilingual } from '@/lib/admin/i18n';
-import type { SearchHit, SearchKind } from '@/lib/admin/search';
+import type { SearchGroup, SearchHit, SearchKind } from '@/lib/admin/search';
+import { foldSearch, matchesShortcut, searchTokens } from '@/lib/admin/search-query';
 import { cn } from '@/lib/utils';
 
-import { Icon } from './icons';
+import type { Shortcut } from './command-shortcuts';
 import { DIALOG_OVERLAY } from './dialogs';
+import { Icon } from './icons';
 import { useWsLang } from './lang';
+import { readRecent } from './nav-trail';
 
-const GROUPS: { kind: SearchKind; label: Bilingual }[] = [
-  { kind: 'person', label: { de: 'Teilnehmende', en: 'Students' } },
-  { kind: 'staff', label: { de: 'Mitarbeitende', en: 'Staff' } },
-  { kind: 'enquiry', label: { de: 'Anfragen', en: 'Enquiries' } },
-  { kind: 'course', label: { de: 'Kursanmeldungen', en: 'Course registrations' } },
-  { kind: 'exam', label: { de: 'Prüfungsanmeldungen', en: 'Exam registrations' } },
-  { kind: 'offer', label: { de: 'Angebote', en: 'Offers' } },
-  { kind: 'booking', label: { de: 'Buchungen', en: 'Bookings' } },
-  { kind: 'application', label: { de: 'Bewerbungen', en: 'Job applications' } },
-  { kind: 'group', label: { de: 'Gruppen', en: 'Groups' } },
-  { kind: 'organisation', label: { de: 'Organisationen', en: 'Organisations' } },
-  { kind: 'place', label: { de: 'Unterkünfte', en: 'Accommodation' } },
-];
+const KINDS: Record<SearchKind, { label: Bilingual; icon: ReactNode }> = {
+  person: { label: { de: 'Teilnehmende', en: 'Students' }, icon: Icon.people },
+  booking: { label: { de: 'Buchungen', en: 'Bookings' }, icon: Icon.bookings },
+  course: { label: { de: 'Kurse', en: 'Courses' }, icon: Icon.catalogue },
+  exam: { label: { de: 'Prüfungstermine', en: 'Exam sittings' }, icon: Icon.award },
+  staff: { label: { de: 'Mitarbeitende', en: 'Staff' }, icon: Icon.team },
+  organisation: { label: { de: 'Organisationen', en: 'Organisations' }, icon: Icon.globe },
+  group: { label: { de: 'Gruppen', en: 'Groups' }, icon: Icon.group },
+  offer: { label: { de: 'Angebote', en: 'Offers' }, icon: Icon.offers },
+  place: { label: { de: 'Unterkünfte', en: 'Accommodation' }, icon: Icon.home },
+  room: { label: { de: 'Räume', en: 'Rooms' }, icon: Icon.rooms },
+  enquiry: { label: { de: 'Anfragen', en: 'Enquiries' }, icon: Icon.enquiries },
+  course_registration: { label: { de: 'Kursanmeldungen', en: 'Course registrations' }, icon: Icon.registrations },
+  exam_registration: { label: { de: 'Prüfungsanmeldungen', en: 'Exam registrations' }, icon: Icon.registrations },
+  application: { label: { de: 'Bewerbungen', en: 'Job applications' }, icon: Icon.applications },
+  letter: { label: { de: 'Briefe', en: 'Letters' }, icon: Icon.mail },
+};
+
+type Row = { key: string; href: string; title: string; detail?: string; icon: ReactNode };
+type Section = { id: string; label: string; rows: Row[] };
+
+/** Asked once a letter has rested this long: a word typed quickly is one request, not five. */
+const DEBOUNCE = 120;
+
+async function ask<T>(body: object, signal?: AbortSignal): Promise<T> {
+  const response = await fetch('/admin/search', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!response.ok) throw new Error(`search ${response.status}`);
+  return ((await response.json()) as { data: T }).data;
+}
+
+const hitRow = (hit: SearchHit): Row => ({ key: `${hit.kind}:${hit.id}`, href: hit.href, title: hit.title, detail: hit.detail, icon: KINDS[hit.kind].icon });
+const shortcutRow = (prefix: string, s: Shortcut): Row => ({ key: `${prefix}:${s.href}`, href: s.href, title: s.label, icon: s.icon });
+
+/** The typed words marked in a title, matched the way the search matched them (case, accents). */
+function Marked({ text, tokens }: { text: string; tokens: readonly string[] }) {
+  if (!tokens.length) return <>{text}</>;
+  // Fold letter by letter, remembering which letter each folded one came from.
+  let folded = '';
+  const from: number[] = [];
+  [...text].forEach((char, i) => {
+    const f = foldSearch(char) || ' ';
+    for (const c of f) {
+      folded += c;
+      from.push(i);
+    }
+  });
+  const chars = [...text];
+  const marked = new Array<boolean>(chars.length).fill(false);
+  for (const token of tokens) {
+    // The start of a word first: „an" marks Anna, not the end of Johann.
+    const word = new RegExp(`(?:^|[^\\p{L}\\p{N}])${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u').exec(folded);
+    const at = word ? word.index + word[0].length - token.length : folded.indexOf(token);
+    if (at < 0) continue;
+    for (let k = at; k < at + token.length && k < from.length; k++) marked[from[k]] = true;
+  }
+  const parts: { text: string; on: boolean }[] = [];
+  chars.forEach((char, i) => {
+    const last = parts.at(-1);
+    if (last && last.on === marked[i]) last.text += char;
+    else parts.push({ text: char, on: marked[i] });
+  });
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.on ? (
+          <mark key={i} className="rounded-[3px] bg-[var(--casa-blue)]/12 text-inherit">
+            {part.text}
+          </mark>
+        ) : (
+          <span key={i}>{part.text}</span>
+        )
+      )}
+    </>
+  );
+}
 
 /**
- * Search: ⌘K (Ctrl K) or "/" from anywhere, a name, an address or an offer
- * number, and Enter opens the record. One box for the whole workspace instead
- * of knowing which list a person is in (src/lib/admin/search.ts). `bar` is the
- * field in the desktop top bar, `rail-icon` the magnifier in the phone's navy
- * band. Both are mounted and CSS shows one, so only the visible one answers
- * the shortcut — otherwise ⌘K would open two dialogs.
+ * Search: ⌘K (Ctrl K) or "/" from anywhere (2026-10-18; made forgiving and ranked 2026-10-27).
+ *
+ * A name with or without its accents, part of a phone number, a booking number, „B1.1 Oktober", an
+ * organisation: the records come back grouped by kind, the best group first (src/lib/admin/search.ts),
+ * each with the line that tells two of them apart. Keyboard first: ↑ ↓ to move, Enter to open, ⌘ Enter
+ * in a new tab, Esc to close. Empty, it offers the records opened last and „Neu …"; typed, also the
+ * pages whose name fits. Each letter cancels the request before it.
+ *
+ * `bar` is the field in the desktop top bar, `rail-icon` the magnifier in the phone's navy band. Both
+ * are mounted and CSS shows one, so only the visible one answers the shortcut — otherwise ⌘K would
+ * open two dialogs.
  */
-export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-icon' }) {
+export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: 'bar' | 'rail-icon'; pages: readonly Shortcut[]; creates: readonly Shortcut[] }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
-  const [hits, setHits] = useState<SearchHit[]>([]);
-  const [searched, setSearched] = useState('');
+  const [result, setResult] = useState<{ term: string; groups: SearchGroup[]; failed?: boolean }>({ term: '', groups: [] });
+  const [loading, setLoading] = useState(false);
+  const [recent, setRecent] = useState<SearchHit[]>([]);
   const [active, setActive] = useState(0);
-  const [pending, startTransition] = useTransition();
-  const asked = useRef(0);
+  const cache = useRef(new Map<string, SearchGroup[]>());
+  const list = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const { t, lang } = useWsLang();
 
@@ -60,33 +136,122 @@ export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-ico
     return () => window.removeEventListener('keydown', key);
   }, []);
 
+  // Opened: the records opened last, read again — only those this colleague may still open come back.
   useEffect(() => {
-    const term = text.trim();
+    if (!open) return;
+    const refs = readRecent();
+    if (!refs.length) return;
+    const controller = new AbortController();
+    ask<{ hits: SearchHit[] }>({ recent: refs }, controller.signal)
+      .then((data) => setRecent(data.hits.slice(0, 7)))
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [open]);
+
+  const term = text.trim();
+  useEffect(() => {
     if (term.length < 2) return;
-    const ticket = ++asked.current;
+    const cached = cache.current.get(term);
+    if (cached) {
+      setResult({ term, groups: cached });
+      setActive(0);
+      return;
+    }
+    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      startTransition(async () => {
-        const found = await searchWorkspaceAction(term);
-        if (ticket !== asked.current) return;
-        setHits(found);
-        setSearched(term);
-        setActive(0);
-      });
-    }, 180);
-    return () => window.clearTimeout(timer);
-  }, [text]);
+      setLoading(true);
+      ask<{ groups: SearchGroup[] }>({ q: term }, controller.signal)
+        .then((data) => {
+          cache.current.set(term, data.groups);
+          if (cache.current.size > 40) cache.current.delete(cache.current.keys().next().value!);
+          setResult({ term, groups: data.groups });
+          setActive(0);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setResult({ term, groups: [], failed: true });
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    }, DEBOUNCE);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [term]);
 
-  const short = text.trim().length < 2;
-  const shown = useMemo(() => (short ? [] : hits), [short, hits]);
-  const grouped = GROUPS.map((g) => ({ ...g, hits: shown.filter((h) => h.kind === g.kind) })).filter((g) => g.hits.length);
-  const ordered = grouped.flatMap((g) => g.hits);
+  const tokens = useMemo(() => searchTokens(term), [term]);
+  const short = term.length < 2;
+  const sections: Section[] = useMemo(() => {
+    if (short) {
+      return [
+        // The record on screen is not offered again.
+        { id: 'recent', label: t('Zuletzt geöffnet', 'Recently opened'), rows: recent.filter((hit) => hit.href !== pathname).slice(0, 6).map(hitRow) },
+        { id: 'new', label: t('Neu', 'New'), rows: creates.map((s) => shortcutRow('new', s)) },
+      ].filter((s) => s.rows.length);
+    }
+    const records = result.groups.map((g) => ({ id: g.kind, label: pick(lang, KINDS[g.kind].label), rows: g.hits.map(hitRow) }));
+    const pageRows = pages.filter((p) => matchesShortcut(tokens, p.label, p.keywords)).slice(0, 4);
+    const createRows = creates.filter((c) => matchesShortcut(tokens, c.label, c.keywords)).slice(0, 4);
+    const shortcuts = [
+      { id: 'pages', label: t('Seiten', 'Pages'), rows: pageRows.map((p) => shortcutRow('page', p)) },
+      { id: 'new', label: t('Neu', 'New'), rows: createRows.map((c) => shortcutRow('new', c)) },
+    ];
+    // „Neu …" asked for, or a page named in full („Buchungen"): the shortcut first, then the records.
+    const named = ['neu', 'new'].includes(tokens[0] ?? '') || pageRows.some((p) => foldSearch(p.label) === tokens.join(' '));
+    return (named ? [...shortcuts, ...records] : [...records, ...shortcuts]).filter((s) => s.rows.length);
+  }, [short, recent, pathname, creates, result.groups, pages, tokens, lang, t]);
 
-  const go = (hit: SearchHit | undefined) => {
-    if (!hit) return;
+  const rows = sections.flatMap((s) => s.rows);
+  const current = Math.min(active, Math.max(rows.length - 1, 0));
+  const settled = !loading && result.term === term;
+
+  useEffect(() => {
+    list.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+  }, [current, sections]);
+
+  const close = () => {
     setOpen(false);
     setText('');
-    setHits([]);
-    router.push(hit.href);
+    setActive(0);
+  };
+
+  const go = (row: Row | undefined, newTab = false) => {
+    if (!row) return;
+    if (newTab) {
+      window.open(row.href, '_blank', 'noopener');
+      return;
+    }
+    close();
+    router.push(row.href);
+  };
+
+  // Enter typed before the answer to the last letters came: it opens the first hit of that answer,
+  // never a hit left over from the letters before.
+  const pendingEnter = useRef<{ term: string; newTab: boolean } | null>(null);
+  const enter = (newTab: boolean) => {
+    if (!short && result.term !== term) pendingEnter.current = { term, newTab };
+    else go(rows[current], newTab);
+  };
+  useEffect(() => {
+    const waiting = pendingEnter.current;
+    if (!waiting || result.term !== waiting.term) return;
+    pendingEnter.current = null;
+    if (waiting.term !== term || !rows.length) return;
+    if (waiting.newTab) window.open(rows[0].href, '_blank', 'noopener');
+    else {
+      setOpen(false);
+      setText('');
+      setActive(0);
+      router.push(rows[0].href);
+    }
+  }, [result, term, rows, router]);
+
+  const click = (e: MouseEvent<HTMLAnchorElement>, row: Row) => {
+    // ⌘/Ctrl/Shift-click and the middle button keep the browser's own way: a new tab or window.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    go(row);
   };
 
   return (
@@ -120,10 +285,17 @@ export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-ico
         </button>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="casa-ws-dialog max-w-xl gap-0 overflow-hidden rounded-3xl p-0 sm:mt-[8vh] sm:self-start" overlayClassName={DIALOG_OVERLAY} showCloseButton={false}>
+      <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
+        <DialogContent
+          // Pinned near the top, on a phone too: the list grows downwards and the keyboard stays clear of it.
+          className="casa-ws-dialog mt-3 max-w-xl gap-0 self-start overflow-hidden rounded-3xl p-0 sm:mt-[8vh]"
+          overlayClassName={DIALOG_OVERLAY}
+          showCloseButton={false}
+        >
           <DialogTitle className="sr-only">{t('Im Arbeitsbereich suchen', 'Search the workspace')}</DialogTitle>
-          <DialogDescription className="sr-only">{t('Ein Name, eine E-Mail-Adresse oder eine Angebotsnummer', 'A name, an email address or an offer number')}</DialogDescription>
+          <DialogDescription className="sr-only">
+            {t('Ein Name, eine Nummer, eine E-Mail-Adresse, ein Kurs wie „B1.1 Oktober"', 'A name, a number, an email address, a course like “B1.1 October”')}
+          </DialogDescription>
           <div className="flex items-center gap-3 border-b border-ws-line px-4">
             <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
               {Icon.search}
@@ -135,59 +307,84 @@ export function CommandSearch({ variant = 'bar' }: { variant?: 'bar' | 'rail-ico
               onKeyDown={(e) => {
                 if (e.key === 'ArrowDown') {
                   e.preventDefault();
-                  setActive((i) => Math.min(i + 1, ordered.length - 1));
+                  setActive(rows.length ? (current + 1) % rows.length : 0);
                 } else if (e.key === 'ArrowUp') {
                   e.preventDefault();
-                  setActive((i) => Math.max(i - 1, 0));
+                  setActive(rows.length ? (current - 1 + rows.length) % rows.length : 0);
                 } else if (e.key === 'Enter') {
                   e.preventDefault();
-                  go(ordered[active]);
+                  enter(e.metaKey || e.ctrlKey);
                 }
               }}
-              placeholder={t('Name, E-Mail oder Nummer', 'A name, an email or a number')}
+              placeholder={t('Name, Nummer, E-Mail, Kurs …', 'Name, number, email, course …')}
               aria-label={t('Im Arbeitsbereich suchen', 'Search the workspace')}
+              aria-controls="casa-search-results"
+              aria-activedescendant={rows[current] ? `casa-search-${current}` : undefined}
+              autoComplete="off"
+              spellCheck={false}
               className="h-14 flex-1 bg-transparent text-[0.95rem] text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-text-subtle)]"
             />
-            {pending ? <span className="text-xs text-[var(--casa-text-subtle)]">{t('Suche läuft…', 'Searching…')}</span> : null}
+            {loading ? (
+              <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-ws-line border-t-[var(--casa-muted)] motion-reduce:animate-none" />
+            ) : null}
           </div>
 
-          <div className="max-h-[56vh] overflow-y-auto py-2" role="listbox" aria-label={t('Ergebnisse', 'Results')}>
-            {short ? (
-              <p className="px-5 py-6 text-sm text-[var(--casa-text-subtle)]">{t('Teilnehmende, Anfragen, Anmeldungen, Angebote, Buchungen.', 'Students, enquiries, registrations, offers, bookings.')}</p>
-            ) : grouped.length === 0 && !pending && searched === text.trim() ? (
-              <p className="px-5 py-6 text-sm text-[var(--casa-text-subtle)]">{t(`Nichts gefunden für „${text.trim()}“.`, `Nothing found for “${text.trim()}”.`)}</p>
+          <div ref={list} id="casa-search-results" className="max-h-[min(60vh,32rem)] overflow-y-auto py-2" role="listbox" aria-label={t('Ergebnisse', 'Results')}>
+            {sections.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-[var(--casa-text-subtle)]">
+                {short
+                  ? t('Teilnehmende, Buchungen, Kurse, Organisationen, Angebote …', 'Students, bookings, courses, organisations, offers …')
+                  : settled
+                    ? result.failed
+                      ? t('Die Suche hat gerade nicht geantwortet. Tippe weiter oder versuche es noch einmal.', 'The search did not answer just now. Keep typing or try again.')
+                      : t(`Nichts gefunden für „${term}“.`, `Nothing found for “${term}”.`)
+                    : t('Suche läuft…', 'Searching…')}
+              </p>
             ) : (
-              grouped.map((group) => (
-                <div key={group.kind} className="px-2 pb-1">
-                  <p className="px-3 pt-2 pb-1 text-xs font-bold text-[var(--casa-muted)]">{pick(lang, group.label)}</p>
-                  {group.hits.map((hit) => {
-                    const index = ordered.indexOf(hit);
+              sections.map((section) => (
+                <div key={section.id} className="px-2 pb-1" role="group" aria-label={section.label}>
+                  <p className="px-3 pt-2 pb-1 text-xs font-bold text-[var(--casa-muted)]">{section.label}</p>
+                  {section.rows.map((row) => {
+                    const index = rows.indexOf(row);
+                    const on = index === current;
                     return (
-                      <button
-                        key={`${hit.kind}:${hit.id}`}
-                        type="button"
+                      <a
+                        key={row.key}
+                        id={`casa-search-${index}`}
+                        href={row.href}
                         role="option"
-                        aria-selected={index === active}
-                        onMouseEnter={() => setActive(index)}
-                        onClick={() => go(hit)}
-                        className={cn(
-                          'flex w-full items-baseline justify-between gap-4 rounded-xl px-3 py-2 text-left transition-colors',
-                          index === active ? 'bg-ws-sunk' : 'hover:bg-ws-sunk/60'
-                        )}
+                        aria-selected={on}
+                        tabIndex={-1}
+                        onMouseMove={() => (on ? null : setActive(index))}
+                        onClick={(e) => click(e, row)}
+                        className={cn('flex items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors', on ? 'bg-ws-sunk' : 'hover:bg-ws-sunk/60')}
                       >
-                        <span className="min-w-0 truncate text-sm font-semibold text-[var(--casa-ink)]">{hit.title}</span>
-                        <span className="min-w-0 shrink truncate text-xs text-[var(--casa-text-subtle)]">{hit.detail}</span>
-                      </button>
+                        <span aria-hidden="true" className={cn('shrink-0 [&_svg]:size-4', on ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-text-subtle)]')}>
+                          {row.icon}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-[var(--casa-ink)]">
+                            <Marked text={row.title} tokens={short ? [] : tokens} />
+                          </span>
+                          {row.detail ? <span className="block truncate text-xs text-[var(--casa-text-subtle)]">{row.detail}</span> : null}
+                        </span>
+                        {on ? (
+                          <kbd aria-hidden="true" className="hidden shrink-0 rounded-md px-1.5 font-sans text-[0.7rem] font-semibold text-[var(--casa-muted)] sm:inline">
+                            ↵
+                          </kbd>
+                        ) : null}
+                      </a>
                     );
                   })}
                 </div>
               ))
             )}
           </div>
-          <div className="flex items-center gap-4 border-t border-ws-line-soft bg-[#f8fafc] px-5 py-2 text-[0.7rem] text-[var(--casa-text-subtle)]">
+          <div className="hidden items-center gap-4 border-t border-ws-line-soft bg-[#f8fafc] px-5 py-2 text-[0.7rem] text-[var(--casa-text-subtle)] sm:flex">
             <span>{t('↑ ↓ zum Wählen', '↑ ↓ to move')}</span>
             <span>{t('Enter zum Öffnen', 'Enter to open')}</span>
-            <span>{t('Esc zum Schließen', 'Esc to close')}</span>
+            <span>{t('⌘ Enter in neuem Tab', '⌘ Enter in a new tab')}</span>
+            <span className="ml-auto">{t('Esc zum Schließen', 'Esc to close')}</span>
           </div>
         </DialogContent>
       </Dialog>

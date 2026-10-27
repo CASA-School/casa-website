@@ -603,6 +603,73 @@ Nine top-level items, and the placements are the argument:
 - The register is labelled **Students**, the word the team uses, and the screen
   says the same. A rail label and a page title that disagree is a bug.
 
+### Search (⌘K) and the way between records (2026-10-27)
+
+Rahman: „improvement of page navigation between different entities, as well as
+the search bar that is more advanced and dynamic and intelligent, now that we are
+having all the data". With all of SchoolMan in the workspace (~3,100 people,
+~11,700 bookings, ~28,000 letters) a list a colleague has to know is too slow.
+
+**The search finds every record a colleague works with** (`src/lib/admin/search.ts`):
+learners by name, address, phone, SchoolMan customer number or birth date
+(„14.03.1998"); bookings by number (`B-2026-0042`, also „b 2026 42") or by the
+learner with the course („Schmidt B1"); courses by level, month, year, type or
+SchoolMan number („B1.1 Oktober", „4982"); exam sittings („telc B2 November");
+staff (also by short name); organisations (also through a contact person); group
+visits; offers (by number „2026-042"); places to stay; rooms („Raum Dresden");
+letters, when a word names the kind and another the recipient („Zahlungserinnerung
+Schmidt"); and the inbox's enquiries, registrations and job applications.
+
+- **Forgiving.** Case and accents do not matter, nor ä/ae, ö/oe, ü/ue, ß/ss, Ş/S;
+  words may be partial and in any order; a phone number matches whatever spaces,
+  dashes, `+49` or national `0` it was typed with. Both sides go through the same
+  fold: the database's `ws_fold` (migration 0091, no extension — unaccent and
+  pg_trgm would need the Azure server's allow-list) and `foldSearch` in
+  `search-query.ts`, step for step. People and letters keep their folded text in
+  a stored column (`people.search_name`, `letters.search_subject`); everything
+  else is small enough to fold per search. Should `ws_fold` change, rewrite those
+  two columns (the migration says how).
+- **Ranked** (`scoreCandidate`, `rankGroups`): an exact identifier first, then how
+  the words fit the name (the whole name, every word's start, inside it), then
+  what is current — a learner in a course, a course that runs, an offer still open
+  — above what is long past. A record found through another (a booking through its
+  learner, an organisation through its contact) sits below the one it was found
+  through. The groups come in the order of their best hit, five hits each.
+- **One line to choose by** under each hit: a learner's course now („Intensivkurs
+  B1.1 · bis 19. Nov."), or what matched (the phone number, „Kd.-Nr."); a booking's
+  number, course, dates and status; a course's dates and part of the day.
+- **The palette** (`command-search.tsx`): ⌘K, Ctrl K or „/"; ↑ ↓, Enter, ⌘ Enter
+  in a new tab, Esc. Each letter cancels the request before it (a POST to
+  `/admin/search`, a route handler: a server action cannot be cancelled, and what
+  was typed stays out of addresses and logs), and an Enter typed before the answer
+  opens the first hit of that answer. Empty, it offers the records opened last and
+  „Neu …"; typed, also the pages whose name fits (`command-shortcuts.tsx`, in both
+  languages: „teachers" finds Mitarbeitende).
+- **Access.** The route checks the session itself (a route handler is outside the
+  layouts) and every kind is searched only for a colleague who holds its module; a
+  letter only in the kinds whose module they hold. „Recently opened" keeps the kind
+  and id of the last twelve records per colleague in the browser, never a name;
+  the server reads them again and returns only what may still be opened.
+
+**A record named on another record's page is a link to it** (`RecordLink`,
+`record-link.tsx`, with `recordHrefFor` in `src/lib/admin/record-href.ts`, which
+gives an address only to a colleague who holds the target's module — without it,
+the name is text): a booking's learner (its title), class, teachers, rooms, start,
+exam sitting and agency; a course's teachers and room, in its head and its weekly
+plan; a learner's current course; a teacher's classes week by week; the Tagesplan
+panel's teacher, room and course; a letter's recipient; an offer's organisation.
+A quiet link keeps the text's own look with a faint underline.
+
+**The way back returns where the colleague came from** (`nav-trail.tsx`). The
+pill above a record used to lead to its module's list wherever one had come from.
+Now the workspace keeps the pages of the visit as a trail (in memory): a page
+opened again cuts the trail back to it, as the browser's Back would, and the pill
+names and opens the page before this one, with its filters — learner → booking →
+course → teacher, and back: „← Intensivkurs B1.1 · 5069", „← Name · B-2026-0582",
+„← Name", „← Teilnehmende". A page's head names it for the next one (`PageHeader`'s
+title, `RecordHeader`'s title or `trailLabel`). Opened fresh — a reload, a link
+from outside — there is no trail and the pill is the module's list as before.
+
 ### Overview — the start page (2026-10-14)
 
 `/admin` is a clean start page: a greeting, and shortcut cards into every area
@@ -702,11 +769,9 @@ professional tool looks like (`shell.tsx`):
   and elegant for some of the functionalities"; `top-bar.tsx`).** 56px of glass
   over the canvas — the page's own ground, a fine line under it — aligned with
   the page's 1180px measure. On the left the search (`command-search.tsx`, ⌘K,
-  Ctrl K or "/"): a name, an email address or a number, and Enter opens
-  the record — students, enquiries, registrations, offers, bookings, job
-  applications, and since 2026-10-18 groups, organisations (also by a contact) and
-  places to stay (also by someone of the family), each only for a colleague who
-  holds that module (`src/lib/admin/search.ts`), five a kind. On the right „Neu" (a
+  Ctrl K or "/"): a name, a number, an address, a course, and Enter opens the
+  record — every kind a colleague works with since 2026-10-27, each only for a
+  colleague who holds its module (§Search (⌘K) and the way between records). On the right „Neu" (a
   booking, an offer, a person, a cohort, a group, an organisation, a place to stay —
   what this colleague may create; `?new=1` opens the form on its page), DE | EN, and who is signed in: their initials and first name open
   a menu with Your account, the website and sign-out. Navigation stays in the

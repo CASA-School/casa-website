@@ -6,6 +6,8 @@ import { OfferPage } from '@/components/admin/offers/offer-page';
 import { Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor, type ActivityEntry } from '@/lib/admin/activity';
+import type { StaffUser } from '@/lib/admin/auth';
+import { recordHref } from '@/lib/admin/record-href';
 import { requireModule } from '@/lib/admin/guard';
 import type { T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -72,7 +74,7 @@ export default async function Page({
           notes={notes}
           activity={own.rest}
           events={own.events}
-          origin={origin(record, t)}
+          origin={origin(record, t, user)}
         />
       }
     />
@@ -137,19 +139,28 @@ function offerEvents(record: OfferRecord, activity: readonly ActivityEntry[], t:
 }
 
 /** Where the offer came from: who wrote it, and the enquiry, the learner or the earlier offer behind it. */
-function origin(record: OfferRecord, t: T) {
+function origin(record: OfferRecord, t: T, user: StaffUser) {
   const { meta, draft } = record;
   const links = [
-    meta.enquiryId ? (
+    meta.enquiryId && canAccess(user, 'enquiries') ? (
       <Link key="enquiry" href={`/admin/enquiries/${meta.enquiryId}`} className={link}>
         {t('Aus einer Anfrage', 'From an enquiry')}
       </Link>
     ) : null,
-    meta.personId ? (
+    meta.personId && canAccess(user, 'people') ? (
       <span key="person">
         {t('Für', 'For')}{' '}
         <Link href={`/admin/people/${meta.personId}`} className={link}>
           {draft.recipientName || t('die Person', 'the person')}
+        </Link>
+      </span>
+    ) : null,
+    // The organisation it is for: its page holds its other offers, groups and bookings.
+    draft.organisationId && canAccess(user, 'organisations') ? (
+      <span key="organisation">
+        {t('Für', 'For')}{' '}
+        <Link href={recordHref('organisation', draft.organisationId)} className={link}>
+          {draft.recipientName || t('die Organisation', 'the organisation')}
         </Link>
       </span>
     ) : null,

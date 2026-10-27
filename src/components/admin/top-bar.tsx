@@ -4,9 +4,10 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
 import { CommandSearch } from './command-search';
+import { createItems, type Shortcut } from './command-shortcuts';
 import { Icon } from './icons';
 import { LangSwitch } from './lang-switch';
-import { AccountMenu, BarLink, CreateMenu, type CreateItem } from './top-bar-menus';
+import { AccountMenu, BarLink, CreateMenu } from './top-bar-menus';
 
 /**
  * The top bar (Rahman, 2026-10-14: "a top nav but very sleek and elegant for
@@ -25,9 +26,12 @@ export async function TopBar({
   roleText,
   siteHref,
   signOutAction,
+  pages,
   focus = false,
 }: {
   user: StaffUser;
+  /** The pages the palette offers (command-shortcuts.tsx), built once by the shell. */
+  pages: Shortcut[];
   /** The role in this language; the shell owns the role names. */
   roleText: string;
   /** The public website, from the admin host too. */
@@ -36,26 +40,12 @@ export async function TopBar({
   focus?: boolean;
 }) {
   const { t } = await getI18n();
-
-  const creates: CreateItem[] = [
-    // A walk-in: the person, then straight on into the booking wizard.
-    ...(canAccess(user, 'people', 'edit') && canAccess(user, 'bookings', 'edit')
-      ? [{ href: '/admin/people?new=1&then=book', label: t('Buchung', 'Booking'), icon: Icon.bookings }]
-      : []),
-    ...(canAccess(user, 'offers', 'edit') ? [{ href: '/admin/offers/new', label: t('Angebot', 'Offer'), icon: Icon.offers }] : []),
-    ...(canAccess(user, 'people', 'edit') ? [{ href: '/admin/people?new=1', label: t('Person', 'Person'), icon: Icon.people }] : []),
-    ...(canAccess(user, 'catalogue') && canAccess(user, 'rooms', 'edit')
-      ? [{ href: '/admin/catalogue?new=1', label: t('Kurstermin', 'Cohort'), icon: Icon.catalogue }]
-      : []),
-    ...(canAccess(user, 'groups', 'edit') ? [{ href: '/admin/groups?new=1', label: t('Gruppe', 'Group'), icon: Icon.group }] : []),
-    ...(canAccess(user, 'organisations', 'edit') ? [{ href: '/admin/organisations?new=1', label: t('Organisation', 'Organisation'), icon: Icon.globe }] : []),
-    ...(canAccess(user, 'accommodation', 'edit') ? [{ href: '/admin/accommodation?new=1', label: t('Unterkunft', 'Place to stay'), icon: Icon.home }] : []),
-  ];
+  const creates: Shortcut[] = createItems(user, t);
 
   return (
     <header className="sticky top-0 z-30 hidden border-b border-ws-line/70 bg-[color-mix(in_srgb,var(--ws-canvas)_80%,transparent)] backdrop-blur-xl backdrop-saturate-150 lg:block">
       <div className={cn('flex h-14 items-center gap-3', focus ? 'px-6' : 'mx-auto max-w-[calc(1180px+4.5rem)] px-9')}>
-        <CommandSearch variant="bar" />
+        <CommandSearch variant="bar" pages={pages} creates={creates} />
         <div className="ml-auto flex items-center gap-1.5">
           {canAccess(user, 'day') ? <BarLink href="/admin/day" label={t('Tagesplan', 'Day plan')} icon={Icon.calendar} /> : null}
           {creates.length ? <CreateMenu items={creates} /> : null}

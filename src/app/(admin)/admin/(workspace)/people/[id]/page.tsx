@@ -13,6 +13,7 @@ import { courseNameResolver } from '../../registrations/course-names';
 import { optionLine } from '../../registrations/option-label';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
+import { RecordLink } from '@/components/admin/record-link';
 import { MakeOffer } from '@/components/admin/make-offer';
 import { MetaItem, MetaLine, Stat, StatBar, StatePill, Timeline } from '@/components/admin/record-parts';
 import { RecordTabLink, RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
@@ -20,7 +21,8 @@ import { Badge, BirthDate, Button, Card, DateText, DetailList, IconChip, RecordH
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer } from '@/lib/admin/booking-offer';
-import { type BookingListItem, personBookings } from '@/lib/admin/bookings';
+import { bookingCourses, type BookingListItem, personBookings } from '@/lib/admin/bookings';
+import { recordHref } from '@/lib/admin/record-href';
 import { listFileMakerLinks } from '@/lib/admin/filemaker-links';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
@@ -332,6 +334,9 @@ export default async function PersonPage({
   const current = dated.find((b) => b.startDate! <= today && b.endDate! >= today) ?? null;
   const next = current ? null : (dated.filter((b) => b.startDate! > today).sort((a, b) => a.startDate!.getTime() - b.startDate!.getTime())[0] ?? null);
   const spotlight = current ?? next;
+  // The class the spotlit booking is in now (else its next), so the card names it and opens it.
+  const spotlightPeriods = spotlight && canAccess(user, 'catalogue') ? await bookingCourses(spotlight.id) : [];
+  const spotlightClass = spotlightPeriods.find((c) => c.when === 'running') ?? spotlightPeriods.find((c) => c.when === 'upcoming') ?? null;
   const overviewOpen = openCases.filter((c) => c.key !== `booking-${spotlight?.id}`);
   const recent = pastCases.slice(0, 3);
 
@@ -491,7 +496,16 @@ export default async function PersonPage({
       <RecordTabPanel id="overview">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="space-y-4">
-            {spotlight ? <CourseNow booking={spotlight} running={spotlight === current} today={today} lang={lang} canEdit={canBook} canCancel={canCancelBookings} /> : null}
+            {spotlight ? <CourseNow
+                booking={spotlight}
+                running={spotlight === current}
+                today={today}
+                lang={lang}
+                canEdit={canBook}
+                canCancel={canCancelBookings}
+                level={spotlightClass?.levelCode ?? null}
+                courseHref={spotlightClass?.courseId ? recordHref('course', spotlightClass.courseId, { group: spotlightClass.groupIndex ?? 1 }) : null}
+              /> : null}
             {/* The course above is already open; „nothing open" only when nothing at all is. */}
             {overviewOpen.length || !spotlight ? (
               <Card title={t('Offen', 'Open')} icon={Icon.registrations} tint="blue" bleed>
@@ -1029,6 +1043,8 @@ function CourseNow({
   lang,
   canEdit,
   canCancel,
+  level,
+  courseHref,
 }: {
   booking: BookingListItem;
   running: boolean;
@@ -1036,6 +1052,9 @@ function CourseNow({
   lang: WsLang;
   canEdit: boolean;
   canCancel: boolean;
+  /** The level of the class, and its page (null without the Courses module). */
+  level: string | null;
+  courseHref: string | null;
 }) {
   const t = translator(lang);
   const start = booking.startDate!;
@@ -1059,7 +1078,12 @@ function CourseNow({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{booking.courseTypeName ?? t('Buchung', 'Booking')}</span>
+            <span className="text-[1.15rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">
+              <RecordLink href={courseHref}>
+                {booking.courseTypeName ?? t('Buchung', 'Booking')}
+                {level ? ` · ${level}` : ''}
+              </RecordLink>
+            </span>
             <BookingColour booking={booking} lang={lang} canEdit={canEdit} canCancel={canCancel} />
           </div>
           <p className="mt-1 text-sm text-[var(--casa-muted)]">

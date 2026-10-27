@@ -8,6 +8,7 @@ import type {
 
 import { Tr } from './lang';
 import { Avatar } from './list';
+import { TrailBackLink, TrailLabel } from './nav-trail';
 import { cn } from '@/lib/utils';
 
 /**
@@ -274,26 +275,32 @@ export function Card({
   );
 }
 
+/**
+ * The way back: to the page the colleague came from in this visit — another record, a filtered
+ * list — else to `href`, the module's list (nav-trail.tsx, 2026-10-27).
+ */
 function BackLink({ href, label }: { href: string; label?: string }) {
   return (
-    <Link
+    <TrailBackLink
       href={href}
+      label={label}
+      fallbackLabel={<Tr de="Zurück" en="Back" />}
       className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/60 py-1 pr-3 pl-2 text-xs font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset transition-colors outline-none hover:bg-white hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
-    >
-      <svg
-        viewBox="0 0 16 16"
-        aria-hidden="true"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-3 w-3"
-      >
-        <path d="M6.5 3.5 2.5 8l4 4.5M2.5 8h11" />
-      </svg>
-      {label ?? <Tr de="Zurück" en="Back" />}
-    </Link>
+      icon={
+        <svg
+          viewBox="0 0 16 16"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-3 w-3"
+        >
+          <path d="M6.5 3.5 2.5 8l4 4.5M2.5 8h11" />
+        </svg>
+      }
+    />
   );
 }
 
@@ -313,6 +320,7 @@ export function PageHeader({
 }) {
   return (
     <header className="mb-6">
+      <TrailLabel label={title} />
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
       <div className="flex min-h-10 flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
@@ -363,9 +371,12 @@ export function RecordHeader({
   facts = [],
   bar,
   tabs,
+  trailLabel,
 }: {
   backHref?: string;
   backLabel?: string;
+  /** What the way back from the next page calls this record, when the title is not plain text. */
+  trailLabel?: string;
   /** A person's record: their name, shown as large tinted initials beside the title. */
   avatar?: string;
   title: ReactNode;
@@ -378,8 +389,10 @@ export function RecordHeader({
   /** The record's tabs (`RecordTabList`), on the head's lower edge. */
   tabs?: ReactNode;
 }) {
+  const named = trailLabel ?? (typeof title === 'string' ? title : null);
   return (
     <header className="mb-5">
+      {named ? <TrailLabel label={named} /> : null}
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
       <section className={cn('overflow-hidden rounded-3xl', cardFrame)}>
         {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}

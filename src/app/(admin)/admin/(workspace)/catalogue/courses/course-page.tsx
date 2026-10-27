@@ -12,12 +12,14 @@ import { PersonForm } from '../../people/person-form';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MoreInPanel } from '@/components/admin/more-in-panel';
+import { RecordLink } from '@/components/admin/record-link';
 import { PersonPicker } from '@/components/admin/person-picker';
 import { dayRange } from '@/components/admin/list';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Button, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
+import { recordHrefFor } from '@/lib/admin/record-href';
 import type { StaffUser } from '@/lib/admin/auth';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
 import { courseDayChoices, courseInfo, hours, listCourseDays, weekPlans, type CourseDay, type WeekPlanRow } from '@/lib/admin/course-days';
@@ -243,8 +245,19 @@ export async function CoursePage({
                 <WeekBars weeks={weeks} week={row.week} places={places} today={today} t={t} />
               </span>
             </Stat>
-            <Stat label={t('Lehrkräfte', 'Teachers')}>{here.teachers.length ? here.teachers.join(' · ') : <Dash />}</Stat>
-            <Stat label={t('Raum', 'Room')}>{here.room ?? <Dash />}</Stat>
+            <Stat label={t('Lehrkräfte', 'Teachers')}>
+              {here.teachers.length ? (
+                here.teachers.map((name, i) => (
+                  <span key={name}>
+                    {i ? ' · ' : ''}
+                    <RecordLink href={recordHrefFor(user, 'staff', here.teacherIds[i])}>{name}</RecordLink>
+                  </span>
+                ))
+              ) : (
+                <Dash />
+              )}
+            </Stat>
+            <Stat label={t('Raum', 'Room')}>{here.room ? <RecordLink href={recordHrefFor(user, 'room', here.roomId)}>{here.room}</RecordLink> : <Dash />}</Stat>
             <Stat label={t('Kurstage', 'Lesson days')}>
               {num(lang, held.length)}
               <span className="text-[0.78rem] font-semibold text-[var(--casa-muted)]"> · {t(`${num(lang, lessons)} UE`, `${num(lang, lessons)} lessons`)}</span>
@@ -359,7 +372,7 @@ export async function CoursePage({
           }
         >
           {plan?.rows.length ? (
-            <PlanSummary rows={plan.rows} t={t} lang={lang} />
+            <PlanSummary rows={plan.rows} t={t} lang={lang} user={user} />
           ) : (
             <p className="px-5 py-4 text-sm text-[var(--casa-muted)]">{t('Noch kein Wochenplan.', 'No weekly plan yet.')}</p>
           )}
@@ -474,7 +487,7 @@ function mondayOf(day: string): string {
  * The weekly plan read as sentences: the days that follow each other with the same hours, teacher and
  * room together — „Mo–Mi · 08:45–12:15 · Mikis Weber · Heidelberg".
  */
-function PlanSummary({ rows, t, lang }: { rows: WeekPlanRow[]; t: T; lang: WsLang }) {
+function PlanSummary({ rows, t, lang, user }: { rows: WeekPlanRow[]; t: T; lang: WsLang; user: StaffUser }) {
   const sorted = [...rows].sort((a, b) => a.weekday - b.weekday);
   const runs: WeekPlanRow[][] = [];
   for (const r of sorted) {
@@ -496,8 +509,8 @@ function PlanSummary({ rows, t, lang }: { rows: WeekPlanRow[]; t: T; lang: WsLan
                 {r.startsAt}–{r.endsAt}
                 <span className="text-[0.78rem]"> · {t(`${num(lang, r.lessons)} UE`, `${num(lang, r.lessons)} lessons`)}</span>
               </span>
-              <span className="max-sm:col-start-2">{r.teacherName ?? <span className="font-semibold text-[#9a5b00]">{t('Lehrkraft noch offen', 'Teacher not yet set')}</span>}</span>
-              <span className="text-[#2b3546] max-sm:col-start-2">{r.roomName ?? <span className="text-[var(--casa-muted)]">{t('Raum noch offen', 'Room not yet set')}</span>}</span>
+              <span className="max-sm:col-start-2">{r.teacherName ? <RecordLink href={recordHrefFor(user, 'staff', r.teacherId)}>{r.teacherName}</RecordLink> : <span className="font-semibold text-[#9a5b00]">{t('Lehrkraft noch offen', 'Teacher not yet set')}</span>}</span>
+              <span className="text-[#2b3546] max-sm:col-start-2">{r.roomName ? <RecordLink href={recordHrefFor(user, 'room', r.roomId)}>{r.roomName}</RecordLink> : <span className="text-[var(--casa-muted)]">{t('Raum noch offen', 'Room not yet set')}</span>}</span>
             </li>
           );
         })}
