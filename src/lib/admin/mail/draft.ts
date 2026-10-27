@@ -97,7 +97,7 @@ function oneReader(name: string, addresses: { address: string; is_primary: boole
 
 async function inbox(table: 'registrations' | 'enquiries' | 'course_registrations' | 'exam_registrations' | 'career_applications', id: string) {
   if (table === 'registrations') {
-    // The Anmeldung (0096): who sent it, from its first line, in the language it was sent in.
+    // The Anmeldung (0097): who sent it, from its first line, in the language it was sent in.
     return queryFirst<{ first_name: string | null; last_name: string | null; email: string; locale: string | null; label: string | null }>(
       `SELECT l.first_name, l.last_name, l.email, g.locale, l.label
          FROM registrations g

@@ -65,7 +65,7 @@ type Line = (RegistrationCourseLine | RegistrationExamLine) & {
 const isOpen = (outcome: LineOutcome) => outcome.kind !== 'booked' && outcome.kind !== 'declined';
 
 /**
- * One Anmeldung (0096, Rahman 2026-10-27): what one person sent at once, worked as one. The head says who
+ * One Anmeldung (0097, Rahman 2026-10-27): what one person sent at once, worked as one. The head says who
  * and what — „Intensive German A1 → C1 + telc Deutsch B2" — and, in its bar, where it stands and who has
  * it. The registration as sent is the plan: each course and the exam at its dates, with what became of
  * it (booked, on a waiting list, a later course offered, declined) and what can be done with it. „Alle

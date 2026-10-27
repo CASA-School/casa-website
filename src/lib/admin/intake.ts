@@ -316,7 +316,7 @@ type StayInput = {
 };
 
 /**
- * The Anmeldung (0096): what one person sent at once, with its lines below. Its reference is the first
+ * The Anmeldung (0097): what one person sent at once, with its lines below. Its reference is the first
  * line's request id; null when that exists already, i.e. a retried submission.
  */
 async function insertRegistration(client: PoolClient, person: CreatedPerson, requestId: string, locale: 'en' | 'de', now: Date): Promise<string | null> {
@@ -491,7 +491,7 @@ export async function storeCourseRegistration(input: RegistrantInput & StayInput
 }
 
 /**
- * One registration as the learner sent it: one person, one Anmeldung (0096,
+ * One registration as the learner sent it: one person, one Anmeldung (0097,
  * 2026-10-27), and below it a line per course and a line for an exam booked
  * with them, all in one transaction, each line with its own request id. The
  * learner's reference is the first line's request id, which is also the

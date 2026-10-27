@@ -10,7 +10,7 @@ import { normaliseStatus, type WorkStatus } from './queues';
 /**
  * Reads for the registrations.
  *
- * An Anmeldung (`registrations`, 0096) is what one person sent at once; its
+ * An Anmeldung (`registrations`, 0097) is what one person sent at once; its
  * lines are the courses (`course_registrations`) and the exam
  * (`exam_registrations`) they chose, each kept as it was sent and with its own
  * outcome. The inbox lists Anmeldungen; a line's page leads to its Anmeldung.
@@ -18,7 +18,7 @@ import { normaliseStatus, type WorkStatus } from './queues';
 
 export type CourseRegistrationDetail = {
   id: string;
-  /** The Anmeldung this line belongs to (0096). */
+  /** The Anmeldung this line belongs to (0097). */
   registrationId: string;
   requestId: string;
   salutation: string;
@@ -60,7 +60,7 @@ export type CourseRegistrationDetail = {
 
 export type ExamRegistrationDetail = {
   id: string;
-  /** The Anmeldung this line belongs to (0096). */
+  /** The Anmeldung this line belongs to (0097). */
   registrationId: string;
   requestId: string;
   salutation: string;
@@ -332,7 +332,7 @@ const EDITABLE = `jsonb_build_object(
 
 /**
  * „Daten bearbeiten" (Rahman, 2026-10-21: „sometimes registrations are incomplete, so the colleagues
- * edit and improve that"), on the Anmeldung as a whole (0096): every line takes the corrected values —
+ * edit and improve that"), on the Anmeldung as a whole (0097): every line takes the corrected values —
  * the stay only the course lines, which hold it. What the visitor sent is kept once per line, on the
  * first edit (`original`), and shown beside it. Its person follows while no colleague has acted on them
  * yet (off the register): a booking then starts from the corrected name and address.
@@ -400,7 +400,7 @@ export async function editRegistration(registrationId: string, input: Registrati
   return { ok: true };
 }
 
-// ------------------------------------------------------------------ the Anmeldung (0096)
+// ------------------------------------------------------------------ the Anmeldung (0097)
 
 /** Who sent the Anmeldung, from its first line (a course before the exam). */
 const SENDER = `CROSS JOIN LATERAL (
@@ -803,7 +803,7 @@ export async function registrationOfLine(kind: 'course' | 'exam', lineId: string
 /**
  * „Absagen" on a line — the learner no longer wants that course, or CASA cannot offer it — and its undo.
  * A booked line is not declined here: its booking is cancelled on the booking. The Anmeldung follows
- * its lines (0096's trigger): closed once every line is booked, queued or declined.
+ * its lines (0097's trigger): closed once every line is booked, queued or declined.
  */
 export async function setLineDeclined(
   registrationId: string,

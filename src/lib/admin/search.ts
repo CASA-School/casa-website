@@ -573,7 +573,7 @@ async function rooms(ask: Ask, { t, lang }: Ctx): Promise<Found[]> {
 }
 
 /**
- * An Anmeldung (0096) as one row: who sent it and its first line's course or exam (`label`), found by
+ * An Anmeldung (0097) as one row: who sent it and its first line's course or exam (`label`), found by
  * any of its lines (`lines`).
  */
 const REGISTRATIONS = `(

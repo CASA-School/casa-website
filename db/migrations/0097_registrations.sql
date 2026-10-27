@@ -1,4 +1,4 @@
--- 0096 — One Anmeldung per submission (Rahman, 2026-10-27).
+-- 0097 — One Anmeldung per submission (Rahman, 2026-10-27).
 --
 -- Meike's test registration — the intensive course from A1 to C1 and telc B2, sent at once — arrived
 -- as six course registrations and one exam registration, each with its own status, owner, notes and
@@ -163,9 +163,9 @@ CREATE TRIGGER exam_registrations_settle
   AFTER UPDATE OF status ON exam_registrations FOR EACH ROW
   WHEN (OLD.status IS DISTINCT FROM NEW.status) EXECUTE FUNCTION settle_registration();
 
--- Notes on the Anmeldung itself.
+-- Notes on the Anmeldung itself; and on an exam sitting, which 0096 (PR #170) allows, so the list holds both.
 ALTER TABLE staff_notes DROP CONSTRAINT IF EXISTS staff_notes_entity_check;
 ALTER TABLE staff_notes ADD CONSTRAINT staff_notes_entity_check CHECK (
   entity = ANY (ARRAY['enquiry', 'course_registration', 'exam_registration', 'career_application', 'placement_attempt', 'booking', 'person', 'offer', 'group_visit',
-                      'accommodation', 'organisation', 'course', 'registration'])
+                      'accommodation', 'organisation', 'course', 'exam_session', 'registration'])
 );

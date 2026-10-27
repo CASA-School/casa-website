@@ -84,7 +84,7 @@ test.describe('a booking from a registration', () => {
   });
 
   test('the wish opens the wizard, the stay is eight weeks, and the booking can be paid and changed', async ({ page }) => {
-    // The line's old address opens its Anmeldung (0096), where the line's own „Buchen" opens the wizard.
+    // The line's old address opens its Anmeldung (0097), where the line's own „Buchen" opens the wizard.
     await page.goto(`/admin/registrations/course/${registrationId}`);
     await expect(page).toHaveURL(/\/admin\/registrations\/[0-9a-f-]{36}#line-/);
     await expect(page.locator('main')).toContainText('A2 komplett (A2.1 + A2.2) · 8 Wochen');

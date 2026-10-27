@@ -21,7 +21,7 @@ test.describe('inboxes', () => {
   let token = '';
   let tokenHash = '';
   const ids = { course: '', exam: '', application: '' };
-  // Each line written alone is an Anmeldung of its own (0096): the inbox lists those.
+  // Each line written alone is an Anmeldung of its own (0097): the inbox lists those.
   const anmeldung = { course: '', exam: '' };
 
   test.beforeAll(async () => {

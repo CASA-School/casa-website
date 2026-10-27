@@ -13,7 +13,7 @@ import { startLevelPlaces } from './waitlist';
 import { toDateInputValue } from '../dates';
 
 /**
- * „Alle buchen" on an Anmeldung (0096, Rahman 2026-10-27): every line a colleague ticks becomes its own
+ * „Alle buchen" on an Anmeldung (0097, Rahman 2026-10-27): every line a colleague ticks becomes its own
  * booking — one per level, as SchoolMan books follow-on levels, each pointing at its line — and the exam
  * its exam booking. What a booking costs is decided as the wizard decides it (`priceSelection`): the
  * enrolment fee on the first course only, the stay around each course's own dates, so consecutive levels
