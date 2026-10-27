@@ -20,11 +20,16 @@ import { pick, say } from '@/lib/cms/copy';
  *
  * SO: real names and real published responsibilities, and nothing else.
  *
- * - Photographs only of real colleagues who agreed (2026-10-07: CASA supplied
- *   portraits for most of the team). The six synthetic images that once sat in
- *   public/media/casa/team/ are gone: a made-up face beside a real colleague's
- *   name is never acceptable. Without a portrait the card shows one of the
- *   Bremer Stadtmusikanten (components/signatures/team-placeholder.tsx).
+ * - Photographs only of real colleagues who agreed. The portraits are CASA's
+ *   own team shoot of 2026-09-10, chosen and named by Rahman (2026-10-27) and
+ *   only resized for the web: public/media/casa/team/. The six synthetic images
+ *   that once sat there are gone: a made-up face beside a real colleague's name
+ *   is never acceptable. Without a portrait the card shows one of the Bremer
+ *   Stadtmusikanten (components/signatures/team-placeholder.tsx). A colleague
+ *   may stand in with a picture of their own choosing (Müzeyyen's seagull);
+ *   its `alt` then says what it shows.
+ * - Teachers who were photographed appear under „Lehrkräfte" (2026-10-27),
+ *   their surname initial from the workspace's staff register.
  * - Staff appear by their full name. Teachers appear by their first name and
  *   the initial of their last name („Vorname N."), as the teachers asked; that
  *   is for teachers only (Rahman, 2026-10-08).
@@ -61,8 +66,9 @@ type TeamMemberSource = {
   /**
    * A portrait in public/media/casa/team/, only with the person's consent.
    * `position` is the CSS object-position that keeps the face in the square crop.
+   * `alt` only for a picture that is not their portrait.
    */
-  photo?: { file: string; position?: string };
+  photo?: { file: string; position?: string; alt?: { en: string; de: string } };
   /** The job title CASA prints. German is the source; EN is our translation. */
   title: { en: string; de: string };
   /** Directory filter group. Ours, for navigation — not a CASA job grade. */
@@ -96,6 +102,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'claudia-groene',
     name: 'Claudia Gröne',
+    photo: { file: 'claudia-groene.webp' },
     title: { en: 'Director of Studies', de: 'Studienleitung' },
     group: 'leadership',
   },
@@ -117,6 +124,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'meike-grosse-hundrup',
     name: 'Meike Große Hundrup',
+    photo: { file: 'meike-grosse-hundrup.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -127,6 +135,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'tanja-langenickel',
     name: 'Tanja Langenickel',
+    photo: { file: 'tanja-langenickel.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -137,6 +146,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
+    photo: { file: 'natalia-sostres.webp' },
     title: { en: 'Head of Office', de: 'Büroleitung' },
     group: 'office',
     areas: {
@@ -147,6 +157,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'mareike-thomeczek',
     name: 'Mareike Thomeczek',
+    photo: { file: 'mareike-thomeczek.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -157,6 +168,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'alissa-trouillet',
     name: 'Alissa Trouillet',
+    photo: { file: 'alissa-trouillet.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
     group: 'courses',
     areas: {
@@ -173,6 +185,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'ina-eismann',
     name: 'Ina Eismann',
+    photo: { file: 'ina-eismann.webp' },
     title: { en: 'Accounts', de: 'Buchhaltung' },
     group: 'office',
     areas: {
@@ -185,6 +198,67 @@ const TEAM: TeamMemberSource[] = [
     name: 'Ilka Ahrens',
     title: { en: 'Resource management', de: 'Ressourcenmanagement' },
     group: 'office',
+  },
+  // Teachers with a portrait from the 2026 team shoot (Rahman, 2026-10-27).
+  {
+    id: 'alina-baldowski',
+    name: 'Alina Baldowski',
+    shortName: 'Alina B.',
+    photo: { file: 'alina-baldowski.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'christian-hetzner',
+    name: 'Christian Hetzner',
+    shortName: 'Christian H.',
+    photo: { file: 'christian-hetzner.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'helmut-kehlenbeck',
+    name: 'Helmut Kehlenbeck',
+    shortName: 'Helmut K.',
+    photo: { file: 'helmut-kehlenbeck.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'maria-alexeew',
+    name: 'Maria Alexeew',
+    shortName: 'Maria A.',
+    photo: { file: 'maria-alexeew.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'mikis-weber',
+    name: 'Mikis Weber',
+    shortName: 'Mikis W.',
+    photo: { file: 'mikis-weber.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'muezeyyen-ege',
+    name: 'Müzeyyen Ege',
+    shortName: 'Müzeyyen E.',
+    photo: {
+      file: 'muezeyyen-ege.webp',
+      position: 'center 62%',
+      alt: { de: 'Eine Plüschmöwe auf einer Holzbank', en: 'A toy seagull on a wooden bench' },
+    },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
+  },
+  {
+    id: 'stella-dreifke',
+    name: 'Stella Dreifke',
+    shortName: 'Stella D.',
+    photo: { file: 'stella-dreifke.webp' },
+    title: { en: 'Teacher', de: 'Lehrkraft' },
+    group: 'teachers',
   },
   // The Bundesfreiwilligendienst volunteers, names from Rahman 2026-10-01
   // (Lara Nobmann and Ilona Sher have left).
@@ -228,7 +302,9 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
     photo: member.photo
       ? {
           src: `/media/casa/team/${member.photo.file}`,
-          alt: say(locale, 'Porträt von {name}', 'Portrait of {name}', { name }),
+          alt: member.photo.alt
+            ? pick(locale, member.photo.alt)
+            : say(locale, 'Porträt von {name}', 'Portrait of {name}', { name }),
           position: member.photo.position,
         }
       : undefined,

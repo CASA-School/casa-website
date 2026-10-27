@@ -2703,6 +2703,10 @@
     "de": "Eine Person erklärt einer anderen am Tisch ein Arbeitsblatt",
     "text": "Una persona le explica a otra una hoja de ejercicios en la mesa"
   },
+  "t.eine-plueschmoewe-auf-einer.1skdwce": {
+    "de": "Eine Plüschmöwe auf einer Holzbank",
+    "text": "Una gaviota de peluche sobre un banco de madera"
+  },
   "t.eine-rallye-in-teams.k28rg9": {
     "de": "Eine Rallye in Teams durch die Altstadt, der Klassiker für den ersten Tag.",
     "text": "Una búsqueda del tesoro por equipos en el casco antiguo, el clásico del primer día."
@@ -4738,6 +4742,10 @@
   "t.lehrkraefte.1p4nbuo": {
     "de": "Lehrkräfte",
     "text": "Profesorado"
+  },
+  "t.lehrkraft.1q992jh": {
+    "de": "Lehrkraft",
+    "text": "Docente"
   },
   "t.lehrmaterial.n7vctv": {
     "de": "Lehrmaterial",

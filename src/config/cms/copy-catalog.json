@@ -7635,6 +7635,18 @@
    "/team"
   ]
  },
+ "t.eine-plueschmoewe-auf-einer.1skdwce": {
+  "de": "Eine Plüschmöwe auf einer Holzbank",
+  "en": "A toy seagull on a wooden bench",
+  "files": [
+   "src/config/content/team-spotlights.ts"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses/[slug]",
+   "/exams/[code]"
+  ]
+ },
  "t.eine-rallye-in-teams.k28rg9": {
   "de": "Eine Rallye in Teams durch die Altstadt, der Klassiker für den ersten Tag.",
   "en": "A team scavenger hunt through the old town, the classic first-day activity.",
@@ -13324,6 +13336,18 @@
  "t.lehrkraefte.1p4nbuo": {
   "de": "Lehrkräfte",
   "en": "Teachers",
+  "files": [
+   "src/config/content/team-spotlights.ts"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses/[slug]",
+   "/exams/[code]"
+  ]
+ },
+ "t.lehrkraft.1q992jh": {
+  "de": "Lehrkraft",
+  "en": "Teacher",
   "files": [
    "src/config/content/team-spotlights.ts"
   ],
