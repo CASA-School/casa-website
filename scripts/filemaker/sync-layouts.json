@@ -1187,6 +1187,7 @@
    "_ID_Homeland",
    "_ID_Institution",
    "_ID_Management",
+   "_ID_StaffMember",
    "_ID_Status_Family",
    "_ID_Student",
    "__ID_Person"
@@ -1209,7 +1210,8 @@
    "_ID_Management": "Number",
    "_ID_Status_Family": "Number",
    "_ID_Student": "Number",
-   "__ID_Person": "Number"
+   "__ID_Person": "Number",
+   "_ID_StaffMember": "Number"
   }
  },
  "Phone": {

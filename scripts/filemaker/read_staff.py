@@ -54,6 +54,17 @@ staff = [s for s in table('StaffMember', '__ID_StaffMember', '_ID_Person', '_ID_
                           '_ID_CourseTypeReference', '_ID_WeekDay', '_ID_DayTimeReference')
          if first(s['_ID_ActiveStaff']) == '1']
 staff_ids = {s['__ID_StaffMember'] for s in staff}
+# Newer colleagues are linked the other way round: their staff row has no person, their person names the staff
+# row (`Person::_ID_StaffMember`) — seven of them, whose birth date, salutation and contact data had stayed
+# behind (2026-10-27, Rahman: Meike Große Hundrup's record half empty while SchoolMan has it all).
+person_of = {}
+for pid, sid in zip(column('Person', '__ID_Person'), column('Person', '_ID_StaffMember')):
+    for s_id in ids(sid):
+        if s_id in staff_ids and pid.strip():
+            person_of.setdefault(s_id, pid.strip())
+for s in staff:
+    if not first(s['_ID_Person']) and s['__ID_StaffMember'] in person_of:
+        s['_ID_Person'] = person_of[s['__ID_StaffMember']]
 person_ids = {first(s['_ID_Person']) for s in staff if first(s['_ID_Person'])}
 
 
@@ -69,7 +80,7 @@ def mine(row):
     return None
 
 
-persons = {p['__ID_Person']: p for p in table('Person', '__ID_Person', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'DateOfBirth',
+persons = {p['__ID_Person']: p for p in table('Person', '__ID_Person', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'DateOfBirth', '_ID_Homeland',
                                                'BirthPlace', 'CountryBirth_1', 'NumberTaxe', 'NumberHealthInsurance', 'NumberAgeInsurance') if p['__ID_Person'] in person_ids}
 emails = [r for r in table('Email', '_ID_Person', '_ID_StaffMember', 'Email', '_ID_Use', 'TimeStampOfCreation') if mine(r)]
 phones = [r for r in table('Phone', '_ID_Person', '_ID_StaffMember', 'Phone', 'AreaCode', '_ID_Use', 'TimeStampOfCreation') if mine(r)]
@@ -102,6 +113,18 @@ if '--stats' in sys.argv:
           '· with number', sum(bool(r['LicenseNumber'].strip()) for r in licences), '· ended', sum(bool(iso(r['ZEndDate'])) and iso(r['ZEndDate']) < today for r in licences))
     sys.exit(0)
 
+# Nationality: the person's flag (`_ID_Homeland`), „DE - Deutschland", as for learners.
+flags = {r['__ID_Flag'].strip(): r for r in table('Flag', '__ID_Flag', 'CountryLong_1', 'Country_1')}
+
+
+def nationality(flag_id):
+    f = flags.get(flag_id)
+    if not f:
+        return None
+    m = re.match(r'\s*([A-Z]{2})\s*-', f['CountryLong_1'] or '')
+    return m.group(1) if m else (f['Country_1'].strip() or None)
+
+
 out = []
 for s in staff:
     sid = s['__ID_StaffMember']
@@ -117,7 +140,7 @@ for s in staff:
         'teaching': {'active': first(s['_ID_ActiveTeacher']) == '1', 'kinds': ids(s['_ID_CourseTypeReference']),
                      'weekdays': ids(s['_ID_WeekDay']), 'dayparts': ids(s['_ID_DayTimeReference'])},
         'shortName': s['TeacherFirstName.Surname.Short'].strip() or None,
-        # Six colleagues have no person in SchoolMan: their names are only on the staff row, in its search fields.
+        # A colleague with no person either way: the name is only on the staff row, in its search fields.
         'firstName': p.get('ZFirstName', '').strip() if p else split_name(s['SearchFieldTeacherFirstName'], s['SearchFieldTeacherSurName'])[0],
         'lastName': p.get('ZSurName', '').strip() if p else split_name(s['SearchFieldTeacherFirstName'], s['SearchFieldTeacherSurName'])[1],
         'secondLastName': p.get('ZSurName2', '').strip() or None,
@@ -126,6 +149,7 @@ for s in staff:
         'birthDate': iso(p.get('DateOfBirth')),
         'birthPlace': p.get('BirthPlace', '').strip() or None,
         'birthCountry': p.get('CountryBirth_1', '').strip() or None,
+        'nationality': nationality(first(p.get('_ID_Homeland'))),
         'taxId': p.get('NumberTaxe', '').strip() or None,
         'healthNumber': p.get('NumberHealthInsurance', '').strip() or None,
         'pensionNumber': p.get('NumberAgeInsurance', '').strip() or None,
