@@ -23,6 +23,7 @@ export const BRIDGE_STEPS = [
   { name: 'attendance', reader: 'read_attendance.py', importer: 'import-attendance.mjs' },
   { name: 'intake', reader: 'read_intake.py', importer: 'import-intake.mjs' },
   { name: 'letters-extra', reader: 'read_letters_extra.py', importer: 'import-letters-extra.mjs' },
+  { name: 'history', reader: 'read_history.py', importer: 'import-history.mjs' },
   { name: 'rest', reader: 'read_rest.py', importer: 'import-rest.mjs' },
   { name: 'day', reader: 'read_day.py', importer: 'import-day.mjs' },
 ];

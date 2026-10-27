@@ -7,6 +7,7 @@ import { Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor, type ActivityEntry } from '@/lib/admin/activity';
 import type { StaffUser } from '@/lib/admin/auth';
+import { invoicesOf } from '@/lib/admin/bookings';
 import { recordHref } from '@/lib/admin/record-href';
 import { requireModule } from '@/lib/admin/guard';
 import type { T } from '@/lib/admin/i18n';
@@ -36,7 +37,7 @@ export default async function Page({
   const individual = record.draft.kind === 'individual';
   const { t, lang } = await getI18n();
   const canWrite = canAccess(user, 'offers', 'edit');
-  const [options, priceList, texts, catalogue, history, notes, activity] = await Promise.all([
+  const [options, priceList, texts, catalogue, history, notes, activity, invoices] = await Promise.all([
     editorOptions(),
     priceListOptions(lang),
     offerTexts(),
@@ -44,8 +45,26 @@ export default async function Page({
     individual && record.meta.personId ? learnerHistory(record.meta.personId) : Promise.resolve(null),
     listNotes('offer', id),
     activityFor('offer', id),
+    // The invoices SchoolMan made from it (0094).
+    canAccess(user, 'bookings') ? invoicesOf({ offerId: id }) : Promise.resolve([]),
   ]);
   const own = offerEvents(record, activity, t);
+  for (const i of invoices) {
+    if (!i.issuedOn) continue;
+    own.events.push({
+      id: `invoice-${i.id}`,
+      at: new Date(`${i.issuedOn}T12:00:00Z`),
+      icon: Icon.statement,
+      who: i.letterId ? (
+        <Link href={`/admin/letters/${i.letterId}`} className={link}>
+          {t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}
+        </Link>
+      ) : (
+        t(`Rechnung ${i.number}`, `Invoice ${i.number}`)
+      ),
+      what: i.cancelled ? t('gestellt, Nummer storniert', 'issued, number cancelled') : t('gestellt', 'issued'),
+    });
+  }
   // An accepted offer to a learner leads to their booking: the person's wizard, at the offer's course.
   const bookHref = canAccess(user, 'bookings', 'edit') && canAccess(user, 'people') ? offerBookingHref({ ...record.meta, draft: record.draft }) : null;
   const letterId = canWrite && record.meta.status !== 'draft' ? await latestOfferLetterId(id) : null;

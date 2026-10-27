@@ -47,6 +47,8 @@ export const LETTER_KINDS = [
   /** Several bookings of one learner in one letter (0035). */
   'learner_confirmation',
   ...REGISTRATION_LETTER_KINDS,
+  /** A certificate of participation SchoolMan sent as a PDF (0094): its day and how it went, no text. */
+  'participation_certificate',
   /** A letter SchoolMan wrote that is none of the above (0055): kept as it was, never written here. */
   'schoolman',
 ] as const;

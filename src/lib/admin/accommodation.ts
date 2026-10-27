@@ -732,18 +732,48 @@ export async function roomTypes(): Promise<{ code: string; name: Bilingual }[]> 
   return rows.map((r) => ({ code: r.code, name: { de: r.name_de, en: r.name_en } }));
 }
 
-export type PlacePayout = { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null; note: string | null };
+export type PlacePayout = {
+  id: string;
+  paidOn: string | null;
+  amount: number;
+  bookingId: string | null;
+  bookingNumber: string | null;
+  personName: string | null;
+  note: string | null;
+  /** The days the rent covers, as typed on the payout (0094). */
+  period: { from: string; to: string } | null;
+};
 
 /** The rent paid to a place (0063, SchoolMan's `PaymentOut`), the latest first. */
 export async function placePayouts(id: string): Promise<PlacePayout[]> {
-  const rows = await query<{ id: string; paid_on: string | null; amount: string; booking_id: string | null; number: string | null; person_name: string | null; note: string | null }>(
+  const rows = await query<{
+    id: string;
+    paid_on: string | null;
+    amount: string;
+    booking_id: string | null;
+    number: string | null;
+    person_name: string | null;
+    note: string | null;
+    period_start: string | null;
+    period_end: string | null;
+  }>(
     `SELECT p.id, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on, p.amount, b.id AS booking_id, b.number,
-            btrim(pe.first_name || ' ' || coalesce(pe.last_name, '')) AS person_name, p.note
+            btrim(pe.first_name || ' ' || coalesce(pe.last_name, '')) AS person_name, p.note,
+            to_char(p.period_start, 'YYYY-MM-DD') AS period_start, to_char(p.period_end, 'YYYY-MM-DD') AS period_end
        FROM payouts p LEFT JOIN bookings b ON b.id = p.booking_id LEFT JOIN people pe ON pe.id = b.person_id
       WHERE p.accommodation_id = $1
       ORDER BY p.paid_on DESC NULLS LAST, p.id`,
     [id]
   );
-  return rows.map((r) => ({ id: r.id, paidOn: r.paid_on, amount: Number(r.amount), bookingId: r.booking_id, bookingNumber: r.number, personName: r.person_name, note: r.note }));
+  return rows.map((r) => ({
+    id: r.id,
+    paidOn: r.paid_on,
+    amount: Number(r.amount),
+    bookingId: r.booking_id,
+    bookingNumber: r.number,
+    personName: r.person_name,
+    note: r.note,
+    period: r.period_start && r.period_end ? { from: r.period_start, to: r.period_end } : null,
+  }));
 }
 

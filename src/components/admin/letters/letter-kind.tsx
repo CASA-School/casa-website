@@ -35,6 +35,7 @@ export const LETTER_KIND_LOOK: Record<LetterKind, { icon: ReactNode; tint: Tint 
   registration_test_request: { icon: Icon.placement, tint: 'blue' },
   registration_deposit_request: { icon: Icon.money, tint: 'green' },
   registration_later_course: { icon: Icon.calendar, tint: 'sun' },
+  participation_certificate: { icon: Icon.award, tint: 'ink' },
   schoolman: { icon: Icon.mail, tint: 'ink' },
 };
 

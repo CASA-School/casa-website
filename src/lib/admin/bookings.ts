@@ -219,6 +219,8 @@ export type BookingCharge = {
   createdAt: Date;
   /** A book line: whether the books are handed out, when and by whom (0087); null for other lines. */
   books: { handedOut: boolean; at: Date | null; by: string | null } | null;
+  /** One of a reversal pair SchoolMan marked: the line reversed, or its „Storno" copy below zero (0094). */
+  reversed: boolean;
 };
 
 export type Payment = {
@@ -228,7 +230,10 @@ export type Payment = {
   receivedAt: Date;
   subject: string;
   reference: string | null;
+  /** Who booked it: the workspace account, or the colleague SchoolMan names (0094). */
   recordedByName: string | null;
+  /** The cost line it settles, in its words (0094). */
+  forCharge: string | null;
   voidedAt: Date | null;
   voidReason: string | null;
   /** A carry-over's other side: the booking the credit went to (amount below zero) or came from. */
@@ -687,9 +692,22 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
         ORDER BY bp.start_date`,
       [id]
     ),
-    query<{ id: string; kind: ChargeKind; description: string; amount: string; created_at: Date; handed_out: boolean; handed_out_at: Date | null; handed_out_by: string | null }>(
-      `SELECT c.id, c.kind, c.description, c.amount, c.created_at, c.handed_out, c.handed_out_at, u.name AS handed_out_by
-         FROM booking_charges c LEFT JOIN staff_users u ON u.id = c.handed_out_by
+    query<{
+      id: string;
+      kind: ChargeKind;
+      description: string;
+      amount: string;
+      created_at: Date;
+      handed_out: boolean;
+      handed_out_at: Date | null;
+      handed_out_by: string | null;
+      reversed: boolean;
+    }>(
+      // A book line names its book (0094) where its own words do not already.
+      `SELECT c.id, c.kind,
+              CASE WHEN m.id IS NOT NULL AND position(lower(m.title) IN lower(c.description)) = 0 THEN c.description || ' · ' || m.title ELSE c.description END AS description,
+              c.amount, c.created_at, c.handed_out, c.handed_out_at, u.name AS handed_out_by, c.reversed
+         FROM booking_charges c LEFT JOIN staff_users u ON u.id = c.handed_out_by LEFT JOIN materials m ON m.id = c.material_id
         WHERE c.booking_id = $1 ORDER BY c.created_at`,
       [id]
     ),
@@ -701,18 +719,23 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       subject: string;
       reference: string | null;
       recorded_by_name: string | null;
+      for_charge: string | null;
       voided_at: Date | null;
       void_reason: string | null;
       counterpart_id: string | null;
       counterpart_course: string | null;
       counterpart_start: Date | null;
     }>(
+      // Who booked it here, else the colleague SchoolMan names; the cost line it settles (0094).
       `SELECT pm.id, pm.amount, pm.method, pm.received_at, pm.subject, pm.reference,
-              u.name AS recorded_by_name, pm.voided_at, pm.void_reason,
+              coalesce(u.name, nullif(trim(concat_ws(' ', sp.first_name, sp.last_name)), '')) AS recorded_by_name,
+              (SELECT c.description FROM booking_charges c WHERE c.id = pm.charge_id) AS for_charge,
+              pm.voided_at, pm.void_reason,
               cb.id AS counterpart_id, coalesce(ct.name, cet.name) AS counterpart_course,
               (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = cb.id) AS counterpart_start
          FROM payments pm
          LEFT JOIN staff_users u ON u.id = pm.recorded_by
+         LEFT JOIN staff_members sm ON sm.id = pm.recorded_by_staff_id LEFT JOIN people sp ON sp.id = sm.person_id
          LEFT JOIN bookings cb ON cb.id = pm.counterpart_booking_id
          LEFT JOIN course_types ct ON ct.id = cb.course_type_id
          LEFT JOIN exam_sessions ces ON ces.id = cb.exam_session_id
@@ -784,6 +807,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       amount: Number(c.amount),
       createdAt: c.created_at,
       books: c.kind === 'books' ? { handedOut: c.handed_out, at: c.handed_out_at, by: c.handed_out_by } : null,
+      reversed: c.reversed,
     })),
     payments: payments.map((p) => ({
       id: p.id,
@@ -793,6 +817,7 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       subject: p.subject,
       reference: p.reference,
       recordedByName: p.recorded_by_name,
+      forCharge: p.for_charge,
       voidedAt: p.voided_at,
       voidReason: p.void_reason,
       counterpart: p.counterpart_id
@@ -1590,17 +1615,31 @@ export async function completeFollowUp(bookingId: string, followUpId: string, ac
 // ------------------------------------------------- the rest of SchoolMan's ledger (0063)
 
 export type LedgerExtras = {
-  instalments: { id: string; label: string | null; dueOn: string | null; amount: number; paid: boolean | null }[];
+  /** `paidOn`: the day of the payment that paid it, where SchoolMan links one (0094). */
+  instalments: { id: string; label: string | null; dueOn: string | null; amount: number; paid: boolean | null; paidOn: string | null }[];
   commissions: { id: string; agency: string | null; agencyId: string | null; description: string | null; baseAmount: number | null; percentage: number | null; amount: number; paid: boolean | null }[];
-  payouts: { id: string; kind: 'host_rent' | 'agency_commission' | 'agency_direct' | 'other'; to: string | null; toHref: string | null; amount: number; paidOn: string | null; note: string | null }[];
-  invoices: { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null }[];
+  /** `period`: the days a rent payout covers (0094). */
+  payouts: {
+    id: string;
+    kind: 'host_rent' | 'agency_commission' | 'agency_direct' | 'other';
+    to: string | null;
+    toHref: string | null;
+    amount: number;
+    paidOn: string | null;
+    period: { from: string; to: string } | null;
+    note: string | null;
+  }[];
+  /** `cancelled`: its number was cancelled; `letterId`: the letter that is the invoice (0094). */
+  invoices: { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null; cancelled: boolean; letterId: string | null }[];
 };
 
 /** A booking's payment plan, its agency's commission, the money paid out for it and its invoices, read as SchoolMan has them. */
 export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtras> {
   const [instalments, commissions, payouts, invoices] = await Promise.all([
-    query<{ id: string; label: string | null; due_on: string | null; amount: string; paid: boolean | null }>(
-      `SELECT id, label, to_char(due_on, 'YYYY-MM-DD') AS due_on, amount, paid FROM booking_instalments WHERE booking_id = $1 ORDER BY position, due_on NULLS LAST, id`,
+    query<{ id: string; label: string | null; due_on: string | null; amount: string; paid: boolean | null; paid_on: string | null }>(
+      `SELECT i.id, i.label, to_char(i.due_on, 'YYYY-MM-DD') AS due_on, i.amount, i.paid,
+              (SELECT to_char(min(p.received_at), 'YYYY-MM-DD') FROM payments p WHERE p.instalment_id = i.id AND p.voided_at IS NULL) AS paid_on
+         FROM booking_instalments i WHERE i.booking_id = $1 ORDER BY i.position, i.due_on NULLS LAST, i.id`,
       [bookingId]
     ),
     query<{ id: string; agency: string | null; agency_id: string | null; description: string | null; base_amount: string | null; percentage: string | null; amount: string; paid: boolean | null }>(
@@ -1609,22 +1648,36 @@ export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtr
         WHERE c.booking_id = $1 ORDER BY c.created_at, c.id`,
       [bookingId]
     ),
-    query<{ id: string; kind: LedgerExtras['payouts'][number]['kind']; place_id: string | null; place: string | null; org_id: string | null; org: string | null; amount: string; paid_on: string | null; note: string | null }>(
-      `SELECT p.id, p.kind, a.id AS place_id, a.name AS place, o.id AS org_id, o.name AS org, p.amount, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on, p.note
+    query<{
+      id: string;
+      kind: LedgerExtras['payouts'][number]['kind'];
+      place_id: string | null;
+      place: string | null;
+      org_id: string | null;
+      org: string | null;
+      amount: string;
+      paid_on: string | null;
+      period_start: string | null;
+      period_end: string | null;
+      note: string | null;
+    }>(
+      `SELECT p.id, p.kind, a.id AS place_id, a.name AS place, o.id AS org_id, o.name AS org, p.amount, to_char(p.paid_on, 'YYYY-MM-DD') AS paid_on,
+              to_char(p.period_start, 'YYYY-MM-DD') AS period_start, to_char(p.period_end, 'YYYY-MM-DD') AS period_end, p.note
          FROM payouts p LEFT JOIN accommodations a ON a.id = p.accommodation_id LEFT JOIN organisations o ON o.id = p.organisation_id
         WHERE p.booking_id = $1 ORDER BY p.paid_on NULLS LAST, p.id`,
       [bookingId]
     ),
-    query<{ id: string; number: string; issued_on: string | null; subject: string | null; amount: string | null }>(
-      `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject,
-              coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount
+    query<{ id: string; number: string; issued_on: string | null; subject: string | null; amount: string | null; cancelled: boolean; letter_id: string | null }>(
+      `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject, i.cancelled,
+              coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount,
+              (SELECT l.id FROM letters l WHERE l.invoice_id = i.id ORDER BY l.sent_at LIMIT 1) AS letter_id
          FROM invoices i WHERE i.booking_id = $1 ORDER BY i.issued_on, i.number`,
       [bookingId]
     ),
   ]);
   const n = (v: string | null) => (v == null ? null : Number(v));
   return {
-    instalments: instalments.map((r) => ({ id: r.id, label: r.label, dueOn: r.due_on, amount: Number(r.amount), paid: r.paid })),
+    instalments: instalments.map((r) => ({ id: r.id, label: r.label, dueOn: r.due_on, amount: Number(r.amount), paid: r.paid, paidOn: r.paid_on })),
     commissions: commissions.map((r) => ({
       id: r.id,
       agency: r.agency,
@@ -1642,10 +1695,34 @@ export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtr
       toHref: r.place_id ? `/admin/accommodation/${r.place_id}` : r.org_id ? `/admin/organisations/${r.org_id}` : null,
       amount: Number(r.amount),
       paidOn: r.paid_on,
+      period: r.period_start && r.period_end ? { from: r.period_start, to: r.period_end } : null,
       note: r.note,
     })),
-    invoices: invoices.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, subject: r.subject, amount: n(r.amount) })),
+    invoices: invoices.map((r) => ({
+      id: r.id,
+      number: r.number,
+      issuedOn: r.issued_on,
+      subject: r.subject,
+      amount: n(r.amount),
+      cancelled: r.cancelled,
+      letterId: r.letter_id,
+    })),
   };
+}
+
+/** An invoice as another record names it: its number, whether it was cancelled, the letter that is it (0094). */
+export type InvoiceRef = { id: string; number: string; issuedOn: string | null; cancelled: boolean; letterId: string | null };
+
+/** The invoices SchoolMan made from an offer, or for a group visit (0094), the oldest first. */
+export async function invoicesOf(about: { offerId: string } | { groupVisitId: string }): Promise<InvoiceRef[]> {
+  const [column, id] = 'offerId' in about ? ['offer_id', about.offerId] : ['group_visit_id', about.groupVisitId];
+  const rows = await query<{ id: string; number: string; issued_on: string | null; cancelled: boolean; letter_id: string | null }>(
+    `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.cancelled,
+            (SELECT l.id FROM letters l WHERE l.invoice_id = i.id ORDER BY l.sent_at LIMIT 1) AS letter_id
+       FROM invoices i WHERE i.${column} = $1 ORDER BY i.issued_on NULLS LAST, i.number`,
+    [id]
+  );
+  return rows.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, cancelled: r.cancelled, letterId: r.letter_id }));
 }
 
 // ------------------------------------------------------- attendance (0064, read only)
@@ -1656,8 +1733,8 @@ export type AttendanceSummary = {
   present: number;
   lateCount: number;
   lateMinutes: number;
-  /** The latest absences, with why. */
-  absences: { day: string; absence: 'ill' | 'excused' | 'unexcused' | null; sickNote: 'certificate' | 'self' | null; comment: string | null }[];
+  /** The latest absences, with why; `reported`: the office logged an absence notice for that day in SchoolMan (0094). */
+  absences: { day: string; absence: 'ill' | 'excused' | 'unexcused' | null; sickNote: 'certificate' | 'self' | null; comment: string | null; reported: boolean }[];
   absentTotal: number;
 };
 
@@ -1793,9 +1870,12 @@ export async function bookingAttendance(bookingId: string): Promise<AttendanceSu
          FROM booking_attendance WHERE booking_id = $1`,
       [bookingId]
     ),
-    query<{ day: string; absence: AttendanceSummary['absences'][number]['absence']; sick_note: AttendanceSummary['absences'][number]['sickNote']; comment: string | null }>(
-      `SELECT to_char(day, 'YYYY-MM-DD') AS day, absence, sick_note, comment FROM booking_attendance
-        WHERE booking_id = $1 AND present = false ORDER BY day DESC LIMIT 8`,
+    query<{ day: string; absence: AttendanceSummary['absences'][number]['absence']; sick_note: AttendanceSummary['absences'][number]['sickNote']; comment: string | null; reported: boolean }>(
+      `SELECT to_char(a.day, 'YYYY-MM-DD') AS day, a.absence, a.sick_note, a.comment,
+              EXISTS (SELECT 1 FROM staff_activity s WHERE s.action = 'schoolman_log' AND s.entity = 'booking' AND s.entity_id = a.booking_id
+                         AND s.detail->'absence'->>'day' = to_char(a.day, 'YYYY-MM-DD')) AS reported
+         FROM booking_attendance a
+        WHERE a.booking_id = $1 AND a.present = false ORDER BY a.day DESC LIMIT 8`,
       [bookingId]
     ),
   ]);
@@ -1805,7 +1885,7 @@ export async function bookingAttendance(bookingId: string): Promise<AttendanceSu
     present: Number(totals.present),
     lateCount: Number(totals.late_count),
     lateMinutes: Number(totals.late_minutes ?? 0),
-    absences: absences.map((a) => ({ day: a.day, absence: a.absence, sickNote: a.sick_note, comment: a.comment })),
+    absences: absences.map((a) => ({ day: a.day, absence: a.absence, sickNote: a.sick_note, comment: a.comment, reported: a.reported })),
     absentTotal: Number(totals.absent),
   };
 }

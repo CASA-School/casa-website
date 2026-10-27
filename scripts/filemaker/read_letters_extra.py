@@ -7,7 +7,10 @@
   dwelling, move-in and move-out as certified, the stay, the day and who signed it — for the sample's bookings
   (`sample.py`). Its text and subject are empty on every row: these fields are the document.
 - `WorkFlowLetter`: per `Letter`, whether it was e-mailed (`Email_Client`, `EmailSMPT`) or printed (`Print`);
-  the latest says.
+  the latest says. A row with no letter and `_ID_CertificateDone` is a certificate of participation sent as
+  a PDF, for the sample's bookings (0094).
+- `Letter`: what a letter names besides its learner — every booking, the place and stays, the waiting-list
+  entry, the invoice (0094).
 - `Complaint`: a complaint about a learner's booking, for the sample.
 
 The JSON goes to stdout and straight into the importer: nothing is written to a file.
@@ -25,8 +28,12 @@ def table(name, *fields):
     return [dict(zip(fields, row)) for row in zip(*cols)]
 
 
+def ids(value):
+    return [v.strip() for v in (value or '').split('\n') if v.strip()]
+
+
 def first(value):
-    found = [v.strip() for v in (value or '').split('\n') if v.strip()]
+    found = ids(value)
     return found[0] if found else ''
 
 
@@ -69,9 +76,28 @@ for r, body in zip(table('StatementLandlord', *S), column_chunked('StatementLand
 
 VIA = {'Email_Client': 'email', 'EmailSMPT': 'email', 'EmailClient': 'email', 'Print': 'print'}
 sent_via = {}
-for letter, form, created in zip(column('WorkFlowLetter', '_ID_Letter'), column('WorkFlowLetter', 'FormCommunication'), column('WorkFlowLetter', 'DateOfCreation')):
-    if first(letter) and form.strip() in VIA:
-        sent_via[first(letter)] = VIA[form.strip()]
+certificates = []
+for r in table('WorkFlowLetter', '__ID_WorkFlowLetter', '_ID_Letter', '_ID_Booking', '_ID_CertificateDone', 'FormCommunication', 'DateOfCreation'):
+    letter, form = first(r['_ID_Letter']), r['FormCommunication'].strip()
+    if letter and form in VIA:
+        sent_via[letter] = VIA[form]
+    # A certificate of participation sent as a PDF (0094): no `Letter` row exists for it, only this one.
+    elif not letter and first(r['_ID_CertificateDone']) == '1' and first(r['_ID_Booking']) in ours:
+        certificates.append({'ref': f'WorkFlowLetter:{r["__ID_WorkFlowLetter"].strip()}', 'booking': first(r['_ID_Booking']), 'sent': stamp(r['DateOfCreation']),
+                             'via': VIA.get(form)})
+
+# What a letter names besides its learner (0094): every booking (a letter for several bookings, or to a
+# whole course), the place and stays it is about, the waiting-list entry it answers (the script says which
+# waiting-list letter), and the invoice it is. The importer sets them on the letters that came across.
+LETTER_LINKS = ['__ID_Letter', '_ID_Booking', '_ID_Accommodation', '_ID_DateAccommodation', '_ID_WaitingRoom', '_ID_SerialNumberInvoice', 'ScriptName']
+links = []
+for r in table('Letter', *LETTER_LINKS):
+    named = ids(r['_ID_Booking'])
+    link = {'ref': r['__ID_Letter'].strip(), 'bookings': named if len(named) > 1 else [], 'place': first(r['_ID_Accommodation']) or None,
+            'stays': ids(r['_ID_DateAccommodation']), 'waiting': first(r['_ID_WaitingRoom']) or None, 'invoice': first(r['_ID_SerialNumberInvoice']) or None,
+            'script': r['ScriptName'].strip() or None}
+    if link['bookings'] or link['place'] or link['stays'] or link['waiting'] or link['invoice']:
+        links.append(link)
 
 complaints = []
 for r in table('Complaint', '__ID_Complaint', '_ID_Booking', '_ID_Person', 'ComplaintReference_1', 'Subject', 'Complaint_1', 'Complaint_2', 'CommentNote', 'UserName',
@@ -87,6 +113,9 @@ if '--stats' in sys.argv:
     print('Wohnungsgeberbestätigungen', len(statements), '· with a place', sum(1 for s in statements if s['place']), '· a stay', sum(1 for s in statements if s['stay']),
           '· move-out', sum(1 for s in statements if s['moveOut']), '· signed by', sum(1 for s in statements if s['signer']), '· letters with how they went', len(sent_via),
           dict(collections.Counter(sent_via.values())), '· complaints', len(complaints))
+    print('certificates of participation', len(certificates), dict(collections.Counter(c['via'] for c in certificates)), '· letters naming more:', len(links),
+          '· several bookings', sum(1 for x in links if x['bookings']), '· a place or stay', sum(1 for x in links if x['place'] or x['stays']),
+          '· a waiting-list entry', sum(1 for x in links if x['waiting']), '· an invoice', sum(1 for x in links if x['invoice']))
     sys.exit(0)
 
-json.dump({'statements': statements, 'sentVia': sent_via, 'complaints': complaints}, sys.stdout, ensure_ascii=False)
+json.dump({'statements': statements, 'sentVia': sent_via, 'complaints': complaints, 'certificates': certificates, 'links': links}, sys.stdout, ensure_ascii=False)

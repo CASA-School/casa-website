@@ -15,15 +15,18 @@
  * - A commission term keeps SchoolMan's number: updated, and dropped when SchoolMan dropped it.
  * - A sample booking that names an agency is paid by it, else one that names a company by that
  *   company (`payer_organisation_id`); a company course gets its company (`courses.organisation_id`);
- *   a letter that came across and names it, its organisation (`letters.organisation_id`).
+ *   a letter that came across and names it or went to it, its organisation (`letters.organisation_id`).
  * - (2026-10-27, 0092) A company that commissions courses or takes interns gets that relation where it has
  *   none; the main contact is marked where nobody marked one here; the note on its own e-mail address; its
  *   own bank accounts, each keeping SchoolMan's number.
+ * - Its history keeps each line's kind, whether a colleague typed it, and the invoice it is about; a line
+ *   about an invoice alone is the history of the party it bills (0094).
  */
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
 import { changes, unordered } from './bridge-changes.mjs';
+import { historyProcesses, logDetail } from './history-line.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -73,7 +76,9 @@ try {
   const coursesHere = await here(
     `SELECT filemaker_course_id AS k FROM courses WHERE filemaker_course_id IS NOT NULL UNION SELECT unnest(filemaker_group_ids) FROM courses`
   );
-  const vocabulary = unordered(chargeTypes);
+  // The kinds of a history line (0094) name what each line is.
+  const processes = await historyProcesses(client);
+  const vocabulary = [unordered(chargeTypes), unordered(processes)];
 
   // The agency first: a booking naming both is paid through the agency.
   for (const p of [...parties].sort((a, b) => Number(a.kind === 'company') - Number(b.kind === 'company'))) {
@@ -204,10 +209,10 @@ try {
       count.log += (
         await client.query(
           `INSERT INTO staff_activity (staff_name, entity, entity_id, action, detail, created_at)
-           SELECT coalesce(v.author, 'SchoolMan'), 'organisation', $1, 'schoolman_log', jsonb_build_object('text', v.text, 'ref', v.ref),
+           SELECT coalesce(v.author, 'SchoolMan'), 'organisation', $1, 'schoolman_log', v.detail,
                   coalesce(v.at::timestamp AT TIME ZONE 'Europe/Berlin', timezone('utc', now()))
-             FROM unnest($2::text[], $3::text[], $4::text[], $5::text[]) AS v(author, text, ref, at)`,
-          [orgId, p.log.map((w) => w.author), p.log.map((w) => w.text), p.log.map((w) => w.ref), p.log.map((w) => w.at)]
+             FROM unnest($2::text[], $3::jsonb[], $4::text[]) AS v(author, detail, at)`,
+          [orgId, p.log.map((w) => w.author), p.log.map((w) => JSON.stringify(logDetail(w, processes))), p.log.map((w) => w.at)]
         )
       ).rowCount;
     }

@@ -18,7 +18,7 @@ import { groupReservations } from '@/lib/admin/accommodation';
 import { RESERVATION_ACCEPTS_LABELS } from '@/lib/admin/accommodation-labels';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
-import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
+import { bookingLight, bookingLightLabel, invoicesOf } from '@/lib/admin/bookings';
 import { GROUP_STATUS_LABELS, type GroupStatus } from '@/lib/admin/group-labels';
 import { getGroup, groupCourses, groupDeletable, groupFigures, groupOffers, groupOptions, groupParticipants, groupProgramme, type GroupParticipant } from '@/lib/admin/groups';
 import { requireModule } from '@/lib/admin/guard';
@@ -65,7 +65,7 @@ export default async function GroupPage({
   const seesOffers = canAccess(user, 'offers');
   const seesAccommodation = canAccess(user, 'accommodation');
 
-  const [figures, participants, courses, offers, reservations, programme, notes, activity, options, deletable] = await Promise.all([
+  const [figures, participants, courses, offers, reservations, programme, notes, activity, options, deletable, invoices] = await Promise.all([
     seesBookings ? groupFigures(id) : Promise.resolve(null),
     seesBookings ? groupParticipants(id) : Promise.resolve([]),
     seesCourses ? groupCourses(id) : Promise.resolve([]),
@@ -76,6 +76,8 @@ export default async function GroupPage({
     activityFor('group_visit', id),
     canEdit ? groupOptions([group.organisationId, group.agencyId, group.courseTypeId]) : Promise.resolve(null),
     canDelete ? groupDeletable(id) : Promise.resolve(false),
+    // The invoices SchoolMan wrote for the visit (0094).
+    seesBookings ? invoicesOf({ groupVisitId: id }) : Promise.resolve([]),
   ]);
   const open = figures ? figures.charged - figures.paid : 0;
 
@@ -186,6 +188,29 @@ export default async function GroupPage({
                   { label: t('Niveau', 'Level'), value: group.level },
                   { label: t('Aufenthalt', 'Stay'), value: range(group.arrival, group.departure, lang) },
                   { label: t('Unterricht', 'Lessons'), value: range(group.courseFrom, group.courseTo, lang) },
+                  ...(invoices.length
+                    ? [
+                        {
+                          label: t('Rechnung', 'Invoice'),
+                          value: (
+                            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              {invoices.map((i) => (
+                                <span key={i.id} className="inline-flex items-center gap-1.5">
+                                  {i.letterId ? (
+                                    <Link href={`/admin/letters/${i.letterId}`} className="hover:underline">
+                                      {i.number}
+                                    </Link>
+                                  ) : (
+                                    i.number
+                                  )}
+                                  {i.cancelled ? <Badge tone="danger">{t('storniert', 'cancelled')}</Badge> : null}
+                                </span>
+                              ))}
+                            </span>
+                          ),
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </Card>

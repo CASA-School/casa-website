@@ -747,18 +747,47 @@ export async function removeCommission(organisationId: string, termId: string, a
 
 // ------------------------------------------------- from SchoolMan's ledger (0063)
 
-export type OrganisationInvoice = { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null; bookingId: string | null };
+export type OrganisationInvoice = {
+  id: string;
+  number: string;
+  issuedOn: string | null;
+  subject: string | null;
+  amount: number | null;
+  bookingId: string | null;
+  /** Its number was cancelled in SchoolMan; the letter that is the invoice (0094). */
+  cancelled: boolean;
+  letterId: string | null;
+};
 
 /** The invoices to an organisation, the latest first; its total is SchoolMan's figure, else its charges'. */
 export async function organisationInvoices(organisationId: string): Promise<OrganisationInvoice[]> {
-  const rows = await query<{ id: string; number: string; issued_on: string | null; subject: string | null; amount: string | null; booking_id: string | null }>(
-    `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject, i.booking_id,
-            coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount
+  const rows = await query<{
+    id: string;
+    number: string;
+    issued_on: string | null;
+    subject: string | null;
+    amount: string | null;
+    booking_id: string | null;
+    cancelled: boolean;
+    letter_id: string | null;
+  }>(
+    `SELECT i.id, i.number, to_char(i.issued_on, 'YYYY-MM-DD') AS issued_on, i.subject, i.booking_id, i.cancelled,
+            coalesce(i.amount, (SELECT sum(c.amount) FROM booking_charges c WHERE c.invoice_number = i.number)) AS amount,
+            (SELECT l.id FROM letters l WHERE l.invoice_id = i.id ORDER BY l.sent_at LIMIT 1) AS letter_id
        FROM invoices i WHERE i.organisation_id = $1
       ORDER BY i.issued_on DESC NULLS LAST, i.number DESC`,
     [organisationId]
   );
-  return rows.map((r) => ({ id: r.id, number: r.number, issuedOn: r.issued_on, subject: r.subject, amount: r.amount == null ? null : Number(r.amount), bookingId: r.booking_id }));
+  return rows.map((r) => ({
+    id: r.id,
+    number: r.number,
+    issuedOn: r.issued_on,
+    subject: r.subject,
+    amount: r.amount == null ? null : Number(r.amount),
+    bookingId: r.booking_id,
+    cancelled: r.cancelled,
+    letterId: r.letter_id,
+  }));
 }
 
 export type OrganisationPayout = { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null };

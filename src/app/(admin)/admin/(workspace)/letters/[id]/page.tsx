@@ -40,6 +40,10 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
     }
   }
   const when = found.sentAt.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
+  // A SchoolMan letter's copies, as it went (0094).
+  const copies = [found.cc ? t(`Kopie an ${found.cc}`, `Copy to ${found.cc}`) : null, found.bcc ? t(`Blindkopie an ${found.bcc}`, `Blind copy to ${found.bcc}`) : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <SentLetter
@@ -48,13 +52,15 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
       recipientName={found.recipientName}
       sentLine={
         t(`Gesendet am ${when}${found.sentByName ? ` von ${found.sentByName}` : ''}`, `Sent on ${when}${found.sentByName ? ` by ${found.sentByName}` : ''}`) +
-        (found.sentVia === 'email' ? t(' · per E-Mail', ' · by email') : found.sentVia === 'print' ? t(' · gedruckt', ' · printed') : '')
+        (found.sentVia === 'email' ? t(' · per E-Mail', ' · by email') : found.sentVia === 'print' ? t(' · gedruckt', ' · printed') : '') +
+        (copies ? ` · ${copies}` : '')
       }
       back={back}
       justSent={sent === '1'}
       mailHref={canAccess(user, letterModule(found.kind), 'edit') ? `/admin/letters/mail?ids=${found.id}` : null}
       about={
-        // The learner it went to, when the way back leads elsewhere (their booking, an offer).
+        // The learner it went to, when the way back leads elsewhere (their booking, an offer); a letter to a whole
+        // course, the bookings it names (0094).
         found.personId && back.href !== `/admin/people/${found.personId}?tab=letters` && canAccess(user, 'people') ? (
           <>
             {t('An ', 'To ')}
@@ -62,6 +68,8 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
               {found.recipientName}
             </RecordLink>
           </>
+        ) : !found.personId && found.bookingsNamed > 1 ? (
+          t(`An die Teilnehmenden von ${found.bookingsNamed} Buchungen`, `To the learners of ${found.bookingsNamed} bookings`)
         ) : null
       }
     />

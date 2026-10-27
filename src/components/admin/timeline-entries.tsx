@@ -9,11 +9,14 @@ import { Icon } from './icons';
 import { useWsLang } from './lang';
 import { SidePanel } from './side-panel';
 
-/** What an entry on a record's line of time is: the team's own words, SchoolMan's log, or a change made here. */
-export type TimelineKind = 'note' | 'schoolman' | 'change';
+/**
+ * What an entry on a record's line of time is: the team's own words, a line of SchoolMan's history by its kind
+ * (Buchhaltung, Lernentwicklung … 0094), or a change made here; `order` places it among the panel's choices.
+ */
+export type TimelineFacet = { key: string; label: string; order: number };
 
-/** One entry, drawn on the server; the kind, time and plain text are what the panel filters and searches by. */
-export type TimelineRow = { key: string; kind: TimelineKind; at: string; search: string; node: ReactNode };
+/** One entry, drawn on the server; its kind, time and plain text are what the panel filters and searches by. */
+export type TimelineRow = { key: string; facet: TimelineFacet; at: string; search: string; node: ReactNode };
 
 /** Entries the card shows; the rest are a click away in the panel. */
 const SHOWN = 5;
@@ -64,23 +67,22 @@ export function TimelineEntries({ rows, title }: { rows: TimelineRow[]; title: s
 /** The whole line of time: the kinds as a segmented control, a search, and the entries under their month. */
 function History({ rows }: { rows: TimelineRow[] }) {
   const { t, lang } = useWsLang();
-  const [kind, setKind] = useState<TimelineKind | 'all'>('all');
+  const [kind, setKind] = useState<string>('all');
   const [query, setQuery] = useState('');
 
+  // The kinds the entries are of, each with how many, in their order.
   const kinds = useMemo(() => {
-    const count = (k: TimelineKind) => rows.filter((r) => r.kind === k).length;
-    return (
-      [
-        { key: 'note', label: t('Notizen', 'Notes'), n: count('note') },
-        { key: 'schoolman', label: 'SchoolMan', n: count('schoolman') },
-        { key: 'change', label: t('Änderungen', 'Changes'), n: count('change') },
-      ] as const
-    ).filter((k) => k.n > 0);
-  }, [rows, t]);
+    const seen = new Map<string, TimelineFacet & { n: number }>();
+    for (const r of rows) {
+      const k = seen.get(r.facet.key);
+      seen.set(r.facet.key, k ? { ...k, n: k.n + 1 } : { ...r.facet, n: 1 });
+    }
+    return [...seen.values()].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+  }, [rows]);
 
   const months = useMemo(() => {
     const words = query.trim().toLocaleLowerCase('de').split(/\s+/).filter(Boolean);
-    const shown = rows.filter((r) => (kind === 'all' || r.kind === kind) && words.every((w) => r.search.includes(w)));
+    const shown = rows.filter((r) => (kind === 'all' || r.facet.key === kind) && words.every((w) => r.search.includes(w)));
     const groups: { label: string; rows: TimelineRow[] }[] = [];
     for (const row of shown) {
       const label = new Date(row.at).toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
@@ -90,7 +92,7 @@ function History({ rows }: { rows: TimelineRow[] }) {
     return groups;
   }, [rows, kind, query, lang]);
 
-  const choice = (key: TimelineKind | 'all', label: string, n: number) => (
+  const choice = (key: string, label: string, n: number) => (
     <button
       key={key}
       type="button"
