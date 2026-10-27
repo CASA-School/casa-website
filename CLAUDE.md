@@ -153,6 +153,7 @@ conclude nothing had come in.
 | `FORM_DELIVERY_MODE` | `live` sends to the real recipients; anything else is test mode (all mail to `admin@casa-bremen.de`, no webhooks) |
 | `FORM_MAIL_FROM`, `FORM_MAIL_IDENTITY_CLIENT_ID` | Sender mailbox and managed identity for lead notification mail via Microsoft Graph |
 | `FORM_RECIPIENT_<FORM>` | Per-form recipient in live mode (`CONTACT`, `GROUPS`, `COURSE`, `EXAM`, `CAREERS`, `PLACEMENT`, `APPOINTMENT`). The interest list (German for Medical's popup, `/api/interest`) uses `CONTACT` |
+| `SCHOOLMAN_SYNC_KEY` | Signs what the SchoolMan sync service sends to `/api/schoolman/sync`; without it the endpoint does not exist (docs/FILEMAKER_BRIDGE.md §9) |
 | `CASA_ENABLE_PLACEMENT_TEST` | Opens CASA's own placement test (runner, result page, `/api/placement/*`). Unset: open in development, closed in production. The public `/placement-test` page always shows the Klett tests |
 | `FORM_REPLY_TO_CAREERS` | Management mailbox that receives replies to an application's confirmation; live, no application confirmation is sent without it |
 | `NEXT_PUBLIC_SITE_URL` | Origin for canonical, hreflang, sitemap and JSON-LD URLs; default `https://casa-bremen.de`. Inlined at build time, so it only takes effect when passed into the image build (`az acr build --build-arg NEXT_PUBLIC_SITE_URL=...`) |

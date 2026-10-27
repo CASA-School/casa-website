@@ -5,6 +5,8 @@ Mini). Nothing here writes: AppleScript `cell … of every record` reads a whole
 column, and no script, field or record is ever set. Values stay in memory —
 callers print counts, never a person's data (docs/schoolman/README.md, Method).
 """
+import json
+import os
 import subprocess
 import time
 
@@ -27,8 +29,30 @@ def _run(script: str) -> str:
         time.sleep(5 * (attempt + 1))
 
 
+# `FM_MIRROR=<columns.json>`: the readers run on the workspace's copy of SchoolMan instead of FileMaker Pro
+# (scripts/filemaker/mirror-export.mjs, kept current by the sync service; docs/FILEMAKER_BRIDGE.md §9).
+_MIRROR = None
+
+
+def _mirror():
+    global _MIRROR
+    if _MIRROR is None and os.environ.get('FM_MIRROR'):
+        with open(os.environ['FM_MIRROR'], encoding='utf-8') as f:
+            _MIRROR = json.load(f)
+    return _MIRROR
+
+
+def _from_mirror(table: str, field: str) -> list[str]:
+    try:
+        return _mirror()[table][field]
+    except KeyError:
+        raise RuntimeError(f'{table}::{field} is not on Sync_{table} (scripts/filemaker/sync-layouts.json)') from None
+
+
 def column(table: str, field: str) -> list[str]:
     """Every value of one stored field, in record order; empty for missing."""
+    if _mirror() is not None:
+        return _from_mirror(table, field)
     out = _run(f'''
 with timeout of 900 seconds
   tell application "FileMaker Pro"
@@ -44,12 +68,16 @@ return vals as text
 
 
 def count(table: str) -> int:
+    if _mirror() is not None:
+        return len(next(iter(_mirror()[table].values()), []))
     return int(_run(f'tell application "FileMaker Pro" to tell document "{DOCUMENT}" to count of records of table "{table}"'))
 
 
 def column_chunked(table: str, field: str, size: int = 500) -> list[str]:
     """`column` for a long text field (a letter's body), read in ranges of records: all at once is
     more than AppleScript hands back (error -1741)."""
+    if _mirror() is not None:
+        return _from_mirror(table, field)
     total, out = count(table), []
     for start in range(1, total + 1, size):
         end = min(start + size - 1, total)

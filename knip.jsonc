@@ -38,6 +38,13 @@
     "scripts/filemaker/bridge-unpack.mjs",
     "scripts/filemaker/bridge-steps.mjs",
     "scripts/filemaker/bridge-changes.mjs",
+    // The bridge from the workspace's copy of SchoolMan, run by infra/azure/schoolman-job.sh, and the
+    // sync service on the office network that keeps the copy (docs/FILEMAKER_BRIDGE.md §9, 2026-10-27).
+    "scripts/filemaker/bridge-mirror.mjs",
+    "scripts/filemaker/bridge-run.mjs",
+    "scripts/filemaker/mirror-export.mjs",
+    "scripts/schoolman-sync/sync.mjs",
+    "scripts/schoolman-sync/signature.mjs",
     // The Tagesplan's tasks, desks and shifts, from scripts/filemaker/read_day.py through a pipe
     // (docs/ADMIN_WORKSPACE.md §Tagesplan).
     "scripts/filemaker/import-day.mjs",

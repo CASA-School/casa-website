@@ -175,6 +175,22 @@ for r in table('Comment', '__ID_Comment', '_ID_Person', '_ID_Booking', 'Subject'
     if pid and body:
         notes_of[pid].append({'ref': f'Comment:{r["__ID_Comment"].strip()}', 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
                               'at': stamp(r['TimeStampOfCreation']), 'body': body})
+def undotted(text):
+    """A result typed as text into SchoolMan's number field `Result` („88.54%", „24.67 / 40"): the Data API hands
+    such text back without its dots („8854%", „2467 / 40"; the file's thousands separator), FileMaker Pro as
+    typed. The point goes back where it makes the largest value that still fits — at most 100 before „%", at
+    most the total after „/" — so both sources read alike (2026-10-27, the sync service)."""
+    def fit(n, bound):
+        if int(n) <= bound:
+            return n
+        for i in range(1, len(n)):
+            if float(f'{n[:-i]}.{n[-i:]}') <= bound:
+                return f'{n[:-i]}.{n[-i:]}'
+        return n
+    text = re.sub(r'(?<![\d.,])(\d+)(\s*%)', lambda m: fit(m.group(1), 100) + m.group(2), text)
+    return re.sub(r'(?<![\d.,])(\d+)(\s*/\s*)(\d+)', lambda m: fit(m.group(1), max(int(m.group(3)), 1)) + m.group(2) + m.group(3), text)
+
+
 # A test (`TestStudent` holds placement and progress tests alike, 0066): which, when, the level reached
 # (`LevelShort`: A1 … C1, B1+), the result (a percentage, mostly), the tester's comment.
 tests_of = collections.defaultdict(list)
@@ -183,7 +199,7 @@ for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', '
     pid = owner(r)
     if not pid:
         continue
-    result = r['Result'].strip()
+    result = undotted(r['Result'].strip())
     pct = re.match(r'^\s*(\d{1,3})(?:[.,]\d+)?\s*%?\s*$', result)
     tests_of[pid].append({'ref': r['__ID_TestStudent'].strip(), 'booking': first(r['_ID_Booking']) or None, 'test': r['TestReference'].strip() or None,
                           'day': iso(r['DateOfTest']), 'level': r['LevelShort'].strip() or None,

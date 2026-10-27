@@ -605,7 +605,57 @@ open in FileMaker Pro and `az` signed in:
 **Local test.** `BRIDGE_KEY=<64 hex> node scripts/filemaker/bridge-pack.mjs --file <sealed.bin>`, then
 `DATABASE_URL=… BRIDGE_KEY=… node scripts/filemaker/bridge-unpack.mjs --file <sealed.bin>`.
 
-## 9. Files consulted
+## 9. The sync service: SchoolMan over the Data API (2026-10-27)
+
+Rahman: the WorkspaceSync account was the whole idea — a faster, better link than reading SchoolMan through
+FileMaker Pro on his laptop, which needs the laptop on, SchoolMan open and an hour or more whenever the
+learners' step is rewritten. The sync service replaces the reading; the importers stay as they are.
+
+```
+SchoolMan (FMS, 10.0.60.10)                   the workspace's database (Azure)
+  68 Sync_<Table> layouts  ──Data API──►  sync service  ──HTTPS, signed──►  /api/schoolman/sync
+  (base-table fields only,                (office network; read-only        │
+   hidden from staff menus)                by code, WorkspaceSync)          ▼
+                                                                schoolman_records (0090)
+                                                                            │  every 5 min, when it changed
+                                                                            ▼
+                                       bridge-mirror.mjs: mirror-export → read_*.py (FM_MIRROR) → import-*.mjs
+```
+
+**The layouts.** One `Sync_<Table>` per table the readers use — 68 tables, 641 fields, the list in
+`scripts/filemaker/sync-layouts.json` (docs/schoolman/sync-layouts.md). Each holds that table's own fields
+and nothing else, bound by the field's id, is left out of the staff's layout menus, and is never edited for
+daily work, so the sync does not break when a staff screen changes. Made on 2026-10-27 by script in
+FileMaker Pro on Rahman's Mac (new layout → paste the fields as XML2 → copy back and compare every binding
+→ hide → save), with Rahman's go. A field the readers start using is added to the list and to its layout
+the same way.
+
+**The service** (`scripts/schoolman-sync/sync.mjs`). Signs in as WorkspaceSync and only ever GETs and
+`_find`s on the Sync_ layouts. Every minute it asks each table with a change time for what changed since
+two minutes before the newest it has seen; tables with a change date only every five minutes, for that
+day; the eight without either whole every half hour. At 02:15 (after SchoolMan's night jobs) it reads every
+table whole and sends the complete list of record ids, so records deleted in SchoolMan go from the copy. It
+sends only records whose `modId` moved since it last sent them, 500 per request, signed with
+`SCHOOLMAN_SYNC_KEY` (HMAC over time and body; five minutes' grace). The password and the key come from the
+environment or, on a Mac, the Keychain (`casa-workspacesync`, `casa-schoolman-sync-key`); the server's
+certificate names another machine, so it is pinned by its fingerprint (`FM_CERT_SHA256`). The log holds
+counts, never a value. It runs on Rahman's Mac until the container on the office server (CT 103) exists;
+the Mac must be on, FileMaker Pro need not be open.
+
+**The copy** (`schoolman_records`, migration 0090). One row per SchoolMan record — the Data API's record id,
+its modification count and the layout's fields as JSON; `updated_at` moves only when the fields did.
+`/api/schoolman/sync` answers 404 without a key configured, 401 to anything unsigned, and refuses a
+complete list shorter than half of what is kept (a read cut short is not SchoolMan emptied).
+
+**The bridge from the copy** (`scripts/filemaker/bridge-mirror.mjs`, the scheduled job
+`caj-casa-website-schoolman` from `infra/azure/schoolman-job.sh`, every five minutes). Ends at once when
+nothing in the copy changed since its last good run; two never overlap (an advisory lock). Otherwise it
+turns the copy back into the columns AppleScript gives (`mirror-export.mjs`: dates DD.MM.YYYY, decimal
+commas, SchoolMan's record order), runs every `read_*.py` on them unchanged (`FM_MIRROR`), and each
+importer as in a run from a bundle. Its runs are `bridge_runs` with source `schoolman-copy`; „Stand" is
+when the service last sent. `bridge.sh` keeps working as before and is the way back.
+
+## 10. Files consulted
 
 - `casa-google-business-audit/FILEMAKER_ARCHITECTURE.md`,
   `bridge/README.md`, `bridge/SYNC_HANDOFF.md`, `bridge/live_api_sync.py`,

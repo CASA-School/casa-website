@@ -20,7 +20,21 @@
    "_ID_Smoker",
    "_ID_WashingMachine",
    "__ID_Accommodation"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "DateOfCreation": "Date",
+   "_ID_AccommodationTypeOffer": "Number",
+   "_ID_Active": "Number",
+   "_ID_Management": "Number",
+   "_ID_Person": "Number",
+   "_ID_Pet": "Number",
+   "_ID_Quality": "Number",
+   "_ID_SchoolFlatShare": "Number",
+   "_ID_Smoker": "Number",
+   "_ID_WashingMachine": "Number",
+   "__ID_Accommodation": "Number"
+  }
  },
  "ActivityReference": {
   "layout": "Sync_ActivityReference",
@@ -31,7 +45,11 @@
    "ActivityReference_1",
    "DateOfChange",
    "__ID_ActivityReference"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "__ID_ActivityReference": "Number"
+  }
  },
  "Address": {
   "layout": "Sync_Address",
@@ -54,7 +72,20 @@
    "_ID_Person",
    "_ID_StaffMember",
    "__ID_Address"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "ZPostCode": "Number",
+   "_ID_Accommodation": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_Address": "Number"
+  }
  },
  "Agency": {
   "layout": "Sync_Agency",
@@ -69,7 +100,14 @@
    "_ID_Institution",
    "_ID_Management",
    "__ID_Agency"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "_ID_Active": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "__ID_Agency": "Number"
+  }
  },
  "Agreement": {
   "layout": "Sync_Agreement",
@@ -94,7 +132,14 @@
    "_ID_Booking",
    "_ID_Person",
    "__ID_Agreement"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "DateOfCreation": "Date",
+   "_ID_Booking": "Number",
+   "_ID_Person": "Number",
+   "__ID_Agreement": "Number"
+  }
  },
  "AnimalAtHome": {
   "layout": "Sync_AnimalAtHome",
@@ -106,7 +151,12 @@
    "TimestampOfChange",
    "_ID_Accommodation",
    "__ID_AnimalAtHome"
-  ]
+  ],
+  "types": {
+   "TimestampOfChange": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "__ID_AnimalAtHome": "Number"
+  }
  },
  "BankAccount": {
   "layout": "Sync_BankAccount",
@@ -124,7 +174,14 @@
    "_ID_Person",
    "_ID_StaffMember",
    "__ID_BankAccount"
-  ]
+  ],
+  "types": {
+   "TimestampOfChange": "TimeStamp",
+   "TimestampOfCreation": "TimeStamp",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_BankAccount": "Number"
+  }
  },
  "Booking": {
   "layout": "Sync_Booking",
@@ -147,7 +204,24 @@
    "_ID_Student",
    "_ID_VisaRequired",
    "__ID_Booking"
-  ]
+  ],
+  "types": {
+   "DateOfCreation": "Date",
+   "FinalNote": "Number",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_CourseTypeReference": "Number",
+   "_ID_EnrolmentDone": "Number",
+   "_ID_Exam": "Number",
+   "_ID_Group": "Number",
+   "_ID_PaymentThird": "Number",
+   "_ID_Person": "Number",
+   "_ID_Student": "Number",
+   "_ID_VisaRequired": "Number",
+   "__ID_Booking": "Number"
+  }
  },
  "Classroom": {
   "layout": "Sync_Classroom",
@@ -159,7 +233,11 @@
    "DateOfChange",
    "NumberRoom.Text",
    "__ID_Classroom"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "__ID_Classroom": "Number"
+  }
  },
  "CleaningDetail": {
   "layout": "Sync_CleaningDetail",
@@ -173,7 +251,11 @@
    "_ID_Accommodation",
    "_ID_CleaningJobReference",
    "__ID_CleaningDetail"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "__ID_CleaningDetail": "Number"
+  }
  },
  "Comment": {
   "layout": "Sync_Comment",
@@ -193,7 +275,16 @@
    "_ID_Offer",
    "_ID_Person",
    "__ID_Comment"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Group": "Number",
+   "_ID_Person": "Number",
+   "__ID_Comment": "Number"
+  }
  },
  "Commission": {
   "layout": "Sync_Commission",
@@ -212,7 +303,19 @@
    "_ID_CostDetail",
    "_ID_PaymentCommission",
    "__ID_Commission"
-  ]
+  ],
+  "types": {
+   "Commission": "Number",
+   "CostGross": "Number",
+   "DateOfChange": "TimeStamp",
+   "Percentage": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_CostDetail": "Number",
+   "_ID_PaymentCommission": "Number",
+   "__ID_Commission": "Number"
+  }
  },
  "CommissionDetail": {
   "layout": "Sync_CommissionDetail",
@@ -227,7 +330,15 @@
    "_ID_Booking",
    "_ID_CostDetailReference",
    "__ID_CommissionDetail"
-  ]
+  ],
+  "types": {
+   "Percentage": "Number",
+   "TimestampOfchange": "TimeStamp",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_CostDetailReference": "Number",
+   "__ID_CommissionDetail": "Number"
+  }
  },
  "Complaint": {
   "layout": "Sync_Complaint",
@@ -246,7 +357,14 @@
    "_ID_Booking",
    "_ID_Person",
    "__ID_Complaint"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Booking": "Number",
+   "_ID_Person": "Number",
+   "__ID_Complaint": "Number"
+  }
  },
  "Corporate": {
   "layout": "Sync_Corporate",
@@ -259,7 +377,13 @@
    "_ID_Active",
    "_ID_Management",
    "__ID_Corporate"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "_ID_Active": "Number",
+   "_ID_Management": "Number",
+   "__ID_Corporate": "Number"
+  }
  },
  "CostDetail": {
   "layout": "Sync_CostDetail",
@@ -279,7 +403,19 @@
    "_ID_ProductDelivered",
    "_ID_SerialNumberInvoice",
    "__ID_CostDetail"
-  ]
+  ],
+  "types": {
+   "CostGross": "Number",
+   "CostGrossUnit": "Number",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "Unit": "Number",
+   "_ID_Booking": "Number",
+   "_ID_CostDetailReference": "Number",
+   "_ID_ProductDelivered": "Number",
+   "_ID_SerialNumberInvoice": "Number",
+   "__ID_CostDetail": "Number"
+  }
  },
  "CostDetailSample": {
   "layout": "Sync_CostDetailSample",
@@ -298,7 +434,16 @@
    "_ID_Offer",
    "_ID_Sort",
    "__ID_CostDetailSample"
-  ]
+  ],
+  "types": {
+   "CostGrossUnit": "Number",
+   "DateOfChange": "TimeStamp",
+   "Unit": "Number",
+   "_ID_CostDetailReference": "Number",
+   "_ID_Offer": "Number",
+   "_ID_Sort": "Number",
+   "__ID_CostDetailSample": "Number"
+  }
  },
  "Course": {
   "layout": "Sync_Course",
@@ -321,7 +466,21 @@
    "_ID_DayTimeReference",
    "_ID_Group",
    "__ID_Course"
-  ]
+  ],
+  "types": {
+   "CapStudent": "Number",
+   "CoursePrice": "Number",
+   "DateOfChange": "Date",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Active": "Number",
+   "_ID_Bookable": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_CourseTypeReference": "Number",
+   "_ID_DayTimeReference": "Number",
+   "_ID_Group": "Number",
+   "__ID_Course": "Number"
+  }
  },
  "DateAccommodation": {
   "layout": "Sync_DateAccommodation",
@@ -341,7 +500,21 @@
    "_ID_EnrolmentDone",
    "_ID_Room",
    "__ID_DateAccommodation"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Accommodation": "Number",
+   "_ID_AccommodationCatering": "Number",
+   "_ID_AccommodationRoom": "Number",
+   "_ID_AccommodationType": "Number",
+   "_ID_Booking": "Number",
+   "_ID_DepartureConfirmed": "Number",
+   "_ID_EnrolmentDone": "Number",
+   "_ID_Room": "Number",
+   "__ID_DateAccommodation": "Number"
+  }
  },
  "DateBooking": {
   "layout": "Sync_DateBooking",
@@ -357,7 +530,36 @@
    "_ID_Booking",
    "_ID_Course",
    "__ID_DateBooking"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "DateOfCreation": "Date",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Booking": "Number",
+   "_ID_Course": "Number",
+   "__ID_DateBooking": "Number"
+  }
+ },
+ "DateCourse": {
+  "layout": "Sync_DateCourse",
+  "key": "__ID_DateCourse",
+  "change": null,
+  "changeKind": "none",
+  "fields": [
+   "DateOfCreation",
+   "ZEndDate",
+   "ZStartDate",
+   "_ID_Course",
+   "__ID_DateCourse"
+  ],
+  "types": {
+   "DateOfCreation": "TimeStamp",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Course": "Number",
+   "__ID_DateCourse": "Number"
+  }
  },
  "DateOffer": {
   "layout": "Sync_DateOffer",
@@ -371,7 +573,15 @@
    "_ID_Offer",
    "_ID_TypeOfferReference",
    "__ID_DateOffer"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Offer": "Number",
+   "_ID_TypeOfferReference": "Number",
+   "__ID_DateOffer": "Number"
+  }
  },
  "DatePlacement": {
   "layout": "Sync_DatePlacement",
@@ -388,7 +598,17 @@
    "__ID_DatePlacement",
    "max_NumberStudent",
    "min_NumberStudent"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Group": "Number",
+   "_ID_Management": "Number",
+   "__ID_DatePlacement": "Number",
+   "max_NumberStudent": "Number",
+   "min_NumberStudent": "Number"
+  }
  },
  "DateRent": {
   "layout": "Sync_DateRent",
@@ -406,7 +626,18 @@
    "__ID_DateRent",
    "max_NumberStudent",
    "min_NumberStudent"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Accommodation": "Number",
+   "_ID_Group": "Number",
+   "_ID_Room": "Number",
+   "__ID_DateRent": "Number",
+   "max_NumberStudent": "Number",
+   "min_NumberStudent": "Number"
+  }
  },
  "DateTargetWorkTime": {
   "layout": "Sync_DateTargetWorkTime",
@@ -423,7 +654,18 @@
    "_ID_StaffMember",
    "_ID_StatusSalarylReference",
    "__ID_DateTargetWorkTime"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "TargetWorkTime.Teaching.Week": "Number",
+   "TargetWorkTime.Week": "Number",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "_ID_StatusSalarylReference": "Number",
+   "__ID_DateTargetWorkTime": "Number"
+  }
  },
  "DateValidity": {
   "layout": "Sync_DateValidity",
@@ -438,7 +680,16 @@
    "_ID_Person",
    "_ID_StaffMember",
    "__ID_DateValidity"
-  ]
+  ],
+  "types": {
+   "LicenseNumber": "Number",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_LicenseReference": "Number",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_DateValidity": "Number"
+  }
  },
  "DayTime": {
   "layout": "Sync_DayTime",
@@ -451,7 +702,14 @@
    "TimeStampOfChange",
    "_ID_Course",
    "__ID_DayTime"
-  ]
+  ],
+  "types": {
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "TimeStampOfChange": "TimeStamp",
+   "_ID_Course": "Number",
+   "__ID_DayTime": "Number"
+  }
  },
  "Editorial": {
   "layout": "Sync_Editorial",
@@ -463,7 +721,12 @@
    "InstitutionEditorial",
    "_ID_Management",
    "__ID_Editorial"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "_ID_Management": "Number",
+   "__ID_Editorial": "Number"
+  }
  },
  "Email": {
   "layout": "Sync_Email",
@@ -483,7 +746,20 @@
    "_ID_StaffMember",
    "_ID_Use",
    "__ID_Email"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "_ID_Use": "Number",
+   "__ID_Email": "Number"
+  }
  },
  "Exam": {
   "layout": "Sync_Exam",
@@ -496,7 +772,13 @@
    "NumberPlace",
    "_ID_ExamReference",
    "__ID_Exam"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "NumberPlace": "Number",
+   "_ID_ExamReference": "Number",
+   "__ID_Exam": "Number"
+  }
  },
  "Flag": {
   "layout": "Sync_Flag",
@@ -507,7 +789,10 @@
    "CountryLong_1",
    "Country_1",
    "__ID_Flag"
-  ]
+  ],
+  "types": {
+   "__ID_Flag": "Number"
+  }
  },
  "Group": {
   "layout": "Sync_Group",
@@ -536,7 +821,25 @@
    "_ID_Platform",
    "_ID_StatusGroup",
    "__ID_Group"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "NumberStudent": "Number",
+   "NumberTeacher": "Number",
+   "TimeStampOfCreation": "TimeStamp",
+   "ZEndDateAcco": "Date",
+   "ZEndDateTuition": "Date",
+   "ZStartDateAcco": "Date",
+   "ZStartDateTuition": "Date",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Country": "Number",
+   "_ID_CourseTypeReference": "Number",
+   "_ID_Level": "Number",
+   "_ID_Platform": "Number",
+   "_ID_StatusGroup": "Number",
+   "__ID_Group": "Number"
+  }
  },
  "Instalment": {
   "layout": "Sync_Instalment",
@@ -552,7 +855,16 @@
    "_ID_Booking",
    "_ID_PaymentDone",
    "__ID_Instalment"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "TimeStamp",
+   "Instalment": "Number",
+   "OrdinalNumber": "Number",
+   "Z_DatePaymentDue": "Date",
+   "_ID_Booking": "Number",
+   "_ID_PaymentDone": "Number",
+   "__ID_Instalment": "Number"
+  }
  },
  "Institution": {
   "layout": "Sync_Institution",
@@ -566,7 +878,14 @@
    "_ID_Corporate",
    "_ID_Management",
    "__ID_Institution"
-  ]
+  ],
+  "types": {
+   "TimestampChange": "TimeStamp",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Management": "Number",
+   "__ID_Institution": "Number"
+  }
  },
  "Invoice": {
   "layout": "Sync_Invoice",
@@ -585,7 +904,18 @@
    "_ID_Person",
    "_ID_SerialNumberInvoice",
    "__ID_Invoice"
-  ]
+  ],
+  "types": {
+   "Amount": "Number",
+   "DateOfCreation": "Date",
+   "TimeStampOfChange": "TimeStamp",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Person": "Number",
+   "_ID_SerialNumberInvoice": "Number",
+   "__ID_Invoice": "Number"
+  }
  },
  "Key": {
   "layout": "Sync_Key",
@@ -600,7 +930,15 @@
    "_ID_KeyTypeReference",
    "_ID_StaffMember",
    "__ID_Key"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "KeyNumber": "Number",
+   "_ID_Active": "Number",
+   "_ID_KeyTypeReference": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_Key": "Number"
+  }
  },
  "KeyTypeReference": {
   "layout": "Sync_KeyTypeReference",
@@ -611,7 +949,11 @@
    "DateOfChange",
    "KeyTypeReference_1",
    "__ID_KeyTypeReference"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "__ID_KeyTypeReference": "Number"
+  }
  },
  "Letter": {
   "layout": "Sync_Letter",
@@ -635,7 +977,18 @@
    "_ID_Offer",
    "_ID_Person",
    "__ID_Letter"
-  ]
+  ],
+  "types": {
+   "DateOfEmission": "Date",
+   "Date_LetterSent": "Date",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Offer": "Number",
+   "_ID_Person": "Number",
+   "__ID_Letter": "Number"
+  }
  },
  "Management": {
   "layout": "Sync_Management",
@@ -646,7 +999,12 @@
    "TimeStampOfChange",
    "_ID_StatusManagementReference",
    "__ID_Management"
-  ]
+  ],
+  "types": {
+   "TimeStampOfChange": "TimeStamp",
+   "_ID_StatusManagementReference": "Number",
+   "__ID_Management": "Number"
+  }
  },
  "Offer": {
   "layout": "Sync_Offer",
@@ -670,7 +1028,22 @@
    "_ID_Person",
    "_ID_PreBooking",
    "__ID_Offer"
-  ]
+  ],
+  "types": {
+   "DateOfCreation": "Date",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_ActiveTemplate": "Number",
+   "_ID_Address": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Group": "Number",
+   "_ID_Invoice": "Number",
+   "_ID_Person": "Number",
+   "_ID_PreBooking": "Number",
+   "__ID_Offer": "Number"
+  }
  },
  "Order": {
   "layout": "Sync_Order",
@@ -684,7 +1057,13 @@
    "_ID_Editorial",
    "_ID_OrderDone",
    "__ID_Order"
-  ]
+  ],
+  "types": {
+   "DateOfEmission": "Date",
+   "_ID_Editorial": "Number",
+   "_ID_OrderDone": "Number",
+   "__ID_Order": "Number"
+  }
  },
  "OrderDetail": {
   "layout": "Sync_OrderDetail",
@@ -699,7 +1078,15 @@
    "_ID_BookReference",
    "_ID_Order",
    "__ID_OrderDetail"
-  ]
+  ],
+  "types": {
+   "CostNet": "Number",
+   "CostNetUnit": "Number",
+   "Unit": "Number",
+   "_ID_BookReference": "Number",
+   "_ID_Order": "Number",
+   "__ID_OrderDetail": "Number"
+  }
  },
  "PaymentIn": {
   "layout": "Sync_PaymentIn",
@@ -716,9 +1103,20 @@
    "TimeStampOfChange",
    "TimeStampOfCreation",
    "_ID_Booking",
+   "_ID_CostDetailReference",
    "_ID_MethodPayment",
    "__ID_PaymentIn"
-  ]
+  ],
+  "types": {
+   "DateOfPayment": "Date",
+   "PaymentIn": "Number",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Booking": "Number",
+   "_ID_CostDetailReference": "Number",
+   "_ID_MethodPayment": "Number",
+   "__ID_PaymentIn": "Number"
+  }
  },
  "PaymentOut": {
   "layout": "Sync_PaymentOut",
@@ -742,7 +1140,21 @@
    "_ID_DateAccommodation",
    "_ID_PaymentOutReference",
    "__ID_PaymentOut"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "DatePaymentOut": "Date",
+   "PaymentOut": "Number",
+   "TimeStampOfCreation": "TimeStamp",
+   "ZSingleDatePayment": "Date",
+   "_ID_Accommodation": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_DateAccommodation": "Number",
+   "_ID_PaymentOutReference": "Number",
+   "__ID_PaymentOut": "Number"
+  }
  },
  "Person": {
   "layout": "Sync_Person",
@@ -778,7 +1190,27 @@
    "_ID_Status_Family",
    "_ID_Student",
    "__ID_Person"
-  ]
+  ],
+  "types": {
+   "DateOfBirth": "Date",
+   "DateOfCreation": "Date",
+   "NumberAgeInsurance": "Number",
+   "NumberHealthInsurance": "Number",
+   "NumberTaxe": "Number",
+   "TimestampChange": "TimeStamp",
+   "TimestampCreation": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Client": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_GenderReference": "Number",
+   "_ID_Homeland": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "_ID_Status_Family": "Number",
+   "_ID_Student": "Number",
+   "__ID_Person": "Number"
+  }
  },
  "Phone": {
   "layout": "Sync_Phone",
@@ -799,7 +1231,22 @@
    "_ID_StaffMember",
    "_ID_Use",
    "__ID_Phone"
-  ]
+  ],
+  "types": {
+   "AreaCode": "Number",
+   "Phone": "Number",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "_ID_Agency": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "_ID_Person": "Number",
+   "_ID_StaffMember": "Number",
+   "_ID_Use": "Number",
+   "__ID_Phone": "Number"
+  }
  },
  "PreBooking": {
   "layout": "Sync_PreBooking",
@@ -821,7 +1268,22 @@
    "_ID_StatusPreBooking",
    "_ID_VisaRequired",
    "__ID_PreBooking"
-  ]
+  ],
+  "types": {
+   "DateOfCreation": "Date",
+   "Timestamp.Change": "TimeStamp",
+   "Timestamp.Creation": "TimeStamp",
+   "_ID_Booking": "Number",
+   "_ID_Course": "Number",
+   "_ID_CourseTypeReference": "Number",
+   "_ID_DayTimeReference": "Number",
+   "_ID_Level": "Number",
+   "_ID_LevelStepReference": "Number",
+   "_ID_Person": "Number",
+   "_ID_StatusPreBooking": "Number",
+   "_ID_VisaRequired": "Number",
+   "__ID_PreBooking": "Number"
+  }
  },
  "Purview": {
   "layout": "Sync_Purview",
@@ -837,7 +1299,17 @@
    "_ID_PurviewReference",
    "_ID_StaffMember",
    "__ID_Purview"
-  ]
+  ],
+  "types": {
+   "DateChange": "Date",
+   "Z_EndDate": "Date",
+   "Z_StartDate": "Date",
+   "_ID_Active": "Number",
+   "_ID_Person": "Number",
+   "_ID_PurviewReference": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_Purview": "Number"
+  }
  },
  "Room": {
   "layout": "Sync_Room",
@@ -852,7 +1324,14 @@
    "_ID_Accommodation",
    "_ID_TypeRoom",
    "__ID_Room"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "NumberPerson": "Number",
+   "_ID_Accommodation": "Number",
+   "_ID_TypeRoom": "Number",
+   "__ID_Room": "Number"
+  }
  },
  "ServiceDetail": {
   "layout": "Sync_ServiceDetail",
@@ -867,7 +1346,13 @@
    "_ID_ServiceDetailReference",
    "_ID_ServiceDetailSpecificationReference",
    "__ID_ServiceDetail"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "TimeStamp",
+   "_ID_Group": "Number",
+   "_ID_ServiceDetailSpecificationReference": "Number",
+   "__ID_ServiceDetail": "Number"
+  }
  },
  "ServiceDetailReference": {
   "layout": "Sync_ServiceDetailReference",
@@ -878,7 +1363,11 @@
    "DateOfChange",
    "ServiceDetailReference_1",
    "__ID_ServiceDetailReference"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "TimeStamp",
+   "__ID_ServiceDetailReference": "Number"
+  }
  },
  "ServiceDetailSpecificationReference": {
   "layout": "Sync_ServiceDetailSpecificationReference",
@@ -889,7 +1378,11 @@
    "DateOfChange",
    "ServiceDetailSpecificationReference_1",
    "__ID_ServiceDetailSpecificationReference"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "TimeStamp",
+   "__ID_ServiceDetailSpecificationReference": "Number"
+  }
  },
  "SingleDateActivity": {
   "layout": "Sync_SingleDateActivity",
@@ -905,7 +1398,15 @@
    "_ID_ActivityReference",
    "_ID_Group",
    "__ID_SingleDateActivity"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "HourStart": "Time",
+   "ZSingleDate": "Date",
+   "_ID_ActivityReference": "Number",
+   "_ID_Group": "Number",
+   "__ID_SingleDateActivity": "Number"
+  }
  },
  "SingleDateControl": {
   "layout": "Sync_SingleDateControl",
@@ -920,7 +1421,14 @@
    "ZSingleDate",
    "_ID_Booking",
    "__ID_SingleDateControl"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "TimeStampOfCreation": "TimeStamp",
+   "ZSingleDate": "Date",
+   "_ID_Booking": "Number",
+   "__ID_SingleDateControl": "Number"
+  }
  },
  "SingleDateCourse": {
   "layout": "Sync_SingleDateCourse",
@@ -940,7 +1448,21 @@
    "_ID_PersonSubstituted",
    "_ID_StaffMember",
    "__ID_SingleDateCourse"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "NumberLesson": "Number",
+   "ZSingleDateCourse": "Date",
+   "_ID_Classroom": "Number",
+   "_ID_Course": "Number",
+   "_ID_Holiday": "Number",
+   "_ID_Particularity": "Number",
+   "_ID_PersonSubstituted": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_SingleDateCourse": "Number"
+  }
  },
  "SingleDateExam": {
   "layout": "Sync_SingleDateExam",
@@ -956,7 +1478,17 @@
    "_ID_PartExamReference",
    "_ID_StaffMember",
    "__ID_SingleDateExamReference"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "ZSingleDate": "Date",
+   "_ID_Exam": "Number",
+   "_ID_PartExamReference": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_SingleDateExamReference": "Number"
+  }
  },
  "SingleDateOccupancy": {
   "layout": "Sync_SingleDateOccupancy",
@@ -969,7 +1501,14 @@
    "_ID_ClassroomSubstituted",
    "_ID_SingleDateCourse",
    "__ID_SingleDateOccupancy"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "_ID_Classroom": "Number",
+   "_ID_ClassroomSubstituted": "Number",
+   "_ID_SingleDateCourse": "Number",
+   "__ID_SingleDateOccupancy": "Number"
+  }
  },
  "SingleDateStudent": {
   "layout": "Sync_SingleDateStudent",
@@ -989,7 +1528,20 @@
    "_ID_Presence",
    "_ID_SingleDateCourse",
    "__ID_SingleDateStudent"
-  ]
+  ],
+  "types": {
+   "DelayMinute": "Number",
+   "NumberLesson": "Number",
+   "TimeStampOfChange": "TimeStamp",
+   "ZSingleDateStudent": "Date",
+   "_ID_Absence": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Excuse": "Number",
+   "_ID_IllnessDetail": "Number",
+   "_ID_Presence": "Number",
+   "_ID_SingleDateCourse": "Number",
+   "__ID_SingleDateStudent": "Number"
+  }
  },
  "SingleDayStaff": {
   "layout": "Sync_SingleDayStaff",
@@ -1008,7 +1560,19 @@
    "_ID_StaffMember",
    "__ID_SingleDayStaff"
   ],
-  "never": "cal_*"
+  "never": "cal_*",
+  "types": {
+   "DateOfChange": "Date",
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "ZSingleDay": "Date",
+   "_ID_Absence": "Number",
+   "_ID_AbsenceDetail": "Number",
+   "_ID_Holiday": "Number",
+   "_ID_Illness": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_SingleDayStaff": "Number"
+  }
  },
  "SingleMonthStaff": {
   "layout": "Sync_SingleMonthStaff",
@@ -1026,7 +1590,19 @@
    "_ID_Approved",
    "_ID_StaffMember",
    "__ID_SingleMonthStaff"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "MonthSingleDay": "Number",
+   "StaticBalanceHolidayRunning": "Number",
+   "StaticBalanceWorkMonth": "Number",
+   "StaticBalanceWorkRunning": "Number",
+   "YearSingleDay": "Number",
+   "ZStartDate": "Date",
+   "_ID_Approved": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_SingleMonthStaff": "Number"
+  }
  },
  "SingleWeekCleaning": {
   "layout": "Sync_SingleWeekCleaning",
@@ -1041,7 +1617,14 @@
    "_ID_CleaningJobReference",
    "_ID_Room",
    "__ID_SingleWeekCleaning"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "ZEndDate": "Date",
+   "ZStartDate": "Date",
+   "_ID_CleaningJobReference": "Number",
+   "__ID_SingleWeekCleaning": "Number"
+  }
  },
  "SingleYearStaff": {
   "layout": "Sync_SingleYearStaff",
@@ -1051,12 +1634,25 @@
   "fields": [
    "DateOfChange",
    "NumberDayHolidayYear",
+   "OverhangHoliday",
+   "OverhangWorkDay",
    "RemainingHoliday",
    "StaticBalanceWorkRunning",
    "YearSingleDay",
    "_ID_StaffMember",
    "__ID_SingleYearStaff"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "NumberDayHolidayYear": "Number",
+   "OverhangHoliday": "Number",
+   "OverhangWorkDay": "Number",
+   "RemainingHoliday": "Number",
+   "StaticBalanceWorkRunning": "Number",
+   "YearSingleDay": "Number",
+   "_ID_StaffMember": "Number",
+   "__ID_SingleYearStaff": "Number"
+  }
  },
  "StaffMember": {
   "layout": "Sync_StaffMember",
@@ -1078,7 +1674,19 @@
    "_ID_WeekDay",
    "__ID_StaffMember"
   ],
-  "never": "CommentsOnTeacher"
+  "never": "CommentsOnTeacher",
+  "types": {
+   "DateOfChange": "Date",
+   "_ID_ActiveAdministration": "Number",
+   "_ID_ActiveStaff": "Number",
+   "_ID_ActiveTeacher": "Number",
+   "_ID_CourseTypeReference": "Number",
+   "_ID_DayTimeReference": "Number",
+   "_ID_Person": "Number",
+   "_ID_ShiftReception": "Number",
+   "_ID_WeekDay": "Number",
+   "__ID_StaffMember": "Number"
+  }
  },
  "StatementLandlord": {
   "layout": "Sync_StatementLandlord",
@@ -1096,7 +1704,14 @@
    "_ID_Accommodation",
    "_ID_Booking",
    "__ID_StatementLandlord"
-  ]
+  ],
+  "types": {
+   "DateOfEmission": "Date",
+   "TimeStampOfCreation": "TimeStamp",
+   "_ID_Accommodation": "Number",
+   "_ID_Booking": "Number",
+   "__ID_StatementLandlord": "Number"
+  }
  },
  "TestStudent": {
   "layout": "Sync_TestStudent",
@@ -1115,7 +1730,16 @@
    "_ID_Booking",
    "_ID_Person",
    "__ID_TestStudent"
-  ]
+  ],
+  "types": {
+   "DateOfChange": "Date",
+   "DateOfCreation": "Date",
+   "DateOfTest": "Date",
+   "Result": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Person": "Number",
+   "__ID_TestStudent": "Number"
+  }
  },
  "WaitingRoom": {
   "layout": "Sync_WaitingRoom",
@@ -1132,7 +1756,17 @@
    "_ID_Person",
    "_ID_PreBooking",
    "__ID_WaitingRoom"
-  ]
+  ],
+  "types": {
+   "DateOfCreation": "Date",
+   "Timestamp.Change": "TimeStamp",
+   "Timestamp.Creation": "TimeStamp",
+   "_ID_Booking": "Number",
+   "_ID_Course": "Number",
+   "_ID_Person": "Number",
+   "_ID_PreBooking": "Number",
+   "__ID_WaitingRoom": "Number"
+  }
  },
  "WeekDay": {
   "layout": "Sync_WeekDay",
@@ -1148,7 +1782,17 @@
    "_ID_StaffMember",
    "_ID_WeekDayReference",
    "__ID_WeekDay"
-  ]
+  ],
+  "types": {
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "NumberLesson": "Number",
+   "_ID_ClassRoom": "Number",
+   "_ID_Course": "Number",
+   "_ID_StaffMember": "Number",
+   "_ID_WeekDayReference": "Number",
+   "__ID_WeekDay": "Number"
+  }
  },
  "WorkFlow": {
   "layout": "Sync_WorkFlow",
@@ -1165,14 +1809,36 @@
    "UserName",
    "Workflow_1",
    "ZSingleDayCalendar",
+   "_ID_Agency",
    "_ID_Booking",
    "_ID_Completed",
+   "_ID_Corporate",
    "_ID_Group",
+   "_ID_Institution",
+   "_ID_Management",
    "_ID_Offer",
    "_ID_Person",
    "_ID_PublicCalendar",
    "__ID_Workflow"
-  ]
+  ],
+  "types": {
+   "HourEnd": "Time",
+   "HourStart": "Time",
+   "TimeStampOfChange": "TimeStamp",
+   "TimeStampOfCreation": "TimeStamp",
+   "ZSingleDayCalendar": "Date",
+   "_ID_Agency": "Number",
+   "_ID_Booking": "Number",
+   "_ID_Completed": "Number",
+   "_ID_Corporate": "Number",
+   "_ID_Group": "Number",
+   "_ID_Institution": "Number",
+   "_ID_Management": "Number",
+   "_ID_Offer": "Number",
+   "_ID_Person": "Number",
+   "_ID_PublicCalendar": "Number",
+   "__ID_Workflow": "Number"
+  }
  },
  "WorkFlowLetter": {
   "layout": "Sync_WorkFlowLetter",
@@ -1184,6 +1850,11 @@
    "FormCommunication",
    "_ID_Letter",
    "__ID_WorkFlowLetter"
-  ]
+  ],
+  "types": {
+   "DateOfCreation": "TimeStamp",
+   "_ID_Letter": "Number",
+   "__ID_WorkFlowLetter": "Number"
+  }
  }
 }
