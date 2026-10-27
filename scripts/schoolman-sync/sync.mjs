@@ -218,7 +218,9 @@ const fromFm = (v) => {
 function changedSince(table) {
   const { change, changeKind } = LAYOUTS[table];
   const last = state.tables[table]?.last;
-  if (!change || !last || changeKind === 'none') return null;
+  // The Data API refuses a find on a field whose name has a dot (`Timestamp.Change`: PreBooking, WaitingRoom,
+  // FileMaker 960): those small tables are read whole, every five minutes.
+  if (!change || !last || changeKind === 'none' || !/^\w+$/.test(change)) return null;
   if (changeKind === 'timestamp') return [{ [change]: `>=${fmStamp(new Date(fromFm(last).getTime() - 120_000))}` }];
   return [{ [change]: `>=${fmDate(fromFm(last))}` }];
 }
@@ -235,7 +237,8 @@ async function round(full) {
     const query = full ? null : changedSince(table);
     const kind = LAYOUTS[table].changeKind;
     const waited = (key, minutes) => Date.now() - Date.parse(state.tables[table]?.[key] ?? 0) < minutes * 60_000;
-    if (!full && !query && waited('complete', 30)) continue;
+    const findable = /^\w+$/.test(LAYOUTS[table].change ?? '');
+    if (!full && !query && waited('complete', findable || !LAYOUTS[table].change ? 30 : 5)) continue;
     if (!full && query && kind === 'date' && waited('asked', 5)) continue;
     if (state.tables[table]) state.tables[table].asked = new Date().toISOString();
     try {
