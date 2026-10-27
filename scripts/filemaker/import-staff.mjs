@@ -16,7 +16,7 @@
  * filled where it is empty — except the names of the people Kursplanung's list made from one
  * "full name", which SchoolMan has split properly. Kursplanung's planning rules are never touched.
  *
- * - person: names, salutation (Frau/Herr), birth date and place, country of birth; tax, pension and
+ * - person: names, salutation (Frau/Herr), birth date and place, country of birth, nationality; tax, pension and
  *   health-insurance numbers (`person_private`); bank accounts; e-mail, phone, home address
  * - roles from `Purview` that have not ended, Unterricht for an active teacher, and Verwaltung for a
  *   colleague SchoolMan marks as active in the office with no office task named
@@ -138,9 +138,9 @@ try {
     await client.query(
       `UPDATE people SET salutation = coalesce(salutation, $2::salutation), second_last_name = coalesce(second_last_name, $3), nickname = coalesce(nickname, $4),
               birth_date = coalesce(birth_date, $5::date), birth_place = coalesce(birth_place, $6), birth_country_code = coalesce(birth_country_code, $7),
-              updated_at = timezone('utc', now())
+              nationality_code = coalesce(nationality_code, (SELECT code FROM countries WHERE code = $8)), updated_at = timezone('utc', now())
         WHERE id = $1`,
-      [personId, SALUTATION[c.gender] ?? null, c.secondLastName, c.nickname, c.birthDate, c.birthPlace, country(c.birthCountry)]
+      [personId, SALUTATION[c.gender] ?? null, c.secondLastName, c.nickname, c.birthDate, c.birthPlace, country(c.birthCountry), c.nationality ?? null]
     );
     if (c.taxId || c.pensionNumber || c.healthNumber) {
       await client.query(
