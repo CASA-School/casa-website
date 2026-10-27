@@ -135,7 +135,8 @@ function LedgerLine({
  * The cost lines as the card shows them (2026-10-20): a charge and its reversal — „Kurspreis · Storno
  * Kurspreis 9 Wochen" at −1.057,50 € against „Kurspreis · 9 Wochen" at 1.057,50 € — are one line,
  * cancelled. A reversal is a line below zero of the same kind and the same amount; when several lines
- * could be the one it reverses, it is the one whose words it repeats. The lines that count come first,
+ * could be the one it reverses, it is the one whose words it repeats. Where SchoolMan marked the pair
+ * (`reversed`, 0094), a marked reversal only cancels a marked line. The lines that count come first,
  * in their order, then the cancelled ones; nothing is hidden, so the total adds up on the card.
  */
 function foldReversals(charges: readonly BookingCharge[]): { line: BookingCharge; reversal: BookingCharge | null }[] {
@@ -155,6 +156,7 @@ function foldReversals(charges: readonly BookingCharge[]): { line: BookingCharge
     let bestShared = -1;
     for (const plus of charges) {
       if (plus.amount <= 0 || plus.kind !== minus.kind || reversalOf.has(plus.id) || Math.abs(plus.amount + minus.amount) > 0.005) continue;
+      if (minus.reversed && !plus.reversed) continue;
       const shared = [...words(plus.description)].filter((w) => own.has(w)).length;
       if (shared > bestShared) {
         best = plus;
@@ -326,11 +328,14 @@ export default async function BookingPage({
       </>
     );
   };
-  // Beside the method's badge: a carry-over's other booking, and the reference.
+  // Beside the method's badge: a carry-over's other booking, else the cost line it settles (0094) and the reference.
   const paymentNote = (p: Payment) => {
     const reference = paymentReference(p.reference);
-    return p.counterpart ? paymentHow(p) : reference;
+    const settles = p.forCharge ? t(`für ${storedWords(p.forCharge, lang)}`, `for ${storedWords(p.forCharge, lang)}`) : null;
+    return p.counterpart ? paymentHow(p) : [settles, reference].filter(Boolean).join(' · ') || null;
   };
+  // Who booked a payment, for its line's tooltip.
+  const bookedBy = (p: Payment) => (p.recordedByName ? t(`gebucht von ${p.recordedByName}`, `booked by ${p.recordedByName}`) : null);
   const paymentWhen = (p: Payment) => (
     <>
       <DateText value={p.receivedAt} compact /> · {paymentHow(p)}
@@ -1044,7 +1049,7 @@ export default async function BookingPage({
                 {received.map((p) => {
                   const subject = storedWords(p.subject, lang);
                   return (
-                    <li key={p.id} title={[subject, paymentReference(p.reference), p.recordedByName].filter(Boolean).join(' · ')}>
+                    <li key={p.id} title={[subject, paymentNote(p), bookedBy(p)].filter((x) => typeof x === 'string' && x).join(' · ')}>
                       <LedgerLine
                         className="min-h-7 py-0.5"
                         withAction={voidsPayments}
@@ -1325,6 +1330,7 @@ export default async function BookingPage({
                                 ? t('unentschuldigt', 'unexcused')
                                 : t('ohne Grund', 'no reason'),
                           a.sickNote === 'certificate' ? t('Attest', "doctor's note") : a.sickNote === 'self' ? t('eigene Krankmeldung', 'own sick note') : null,
+                          a.reported ? t('Abwesenheit gemeldet', 'absence reported') : null,
                           a.comment,
                         ]
                           .filter(Boolean)
@@ -1392,7 +1398,13 @@ export default async function BookingPage({
                       <span className="block text-sm font-semibold text-[var(--casa-ink)]">{i.label ?? t('Rate', 'Instalment')}</span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
                         {[i.dueOn ? t(`fällig ${new Date(`${i.dueOn}T12:00:00Z`).toLocaleDateString('de-DE')}`, `due ${new Date(`${i.dueOn}T12:00:00Z`).toLocaleDateString('en-GB')}`) : null,
-                          i.paid === true ? t('bezahlt', 'paid') : i.paid === false ? t('offen', 'open') : null]
+                          i.paidOn
+                            ? t(`bezahlt am ${new Date(`${i.paidOn}T12:00:00Z`).toLocaleDateString('de-DE')}`, `paid on ${new Date(`${i.paidOn}T12:00:00Z`).toLocaleDateString('en-GB')}`)
+                            : i.paid === true
+                              ? t('bezahlt', 'paid')
+                              : i.paid === false
+                                ? t('offen', 'open')
+                                : null]
                           .filter(Boolean)
                           .join(' · ')}
                       </span>
@@ -1460,7 +1472,13 @@ export default async function BookingPage({
                         ) : null}
                       </span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
-                        {[p.paidOn ? new Date(`${p.paidOn}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : null, p.note?.split('\n')[0]].filter(Boolean).join(' · ')}
+                        {[
+                          p.period ? t(`für ${dayRange(p.period.from, p.period.to, lang)}`, `for ${dayRange(p.period.from, p.period.to, lang)}`) : null,
+                          p.paidOn ? new Date(`${p.paidOn}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : null,
+                          p.note?.split('\n')[0],
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </span>
                     </LedgerLine>
                   </li>
@@ -1473,8 +1491,21 @@ export default async function BookingPage({
               <ul className="-my-1.5 divide-y divide-ws-line-soft">
                 {extras.invoices.map((i) => (
                   <li key={i.id}>
-                    <LedgerLine className="py-2.5" withAction={false} amount={i.amount != null ? money(i.amount, booking.currency) : '—'}>
-                      <span className="block text-sm font-semibold text-[var(--casa-ink)]">{t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}</span>
+                    <LedgerLine
+                      className="py-2.5"
+                      withAction={false}
+                      amount={i.amount != null ? <span className={i.cancelled ? 'text-[var(--casa-muted)] line-through' : undefined}>{money(i.amount, booking.currency)}</span> : '—'}
+                    >
+                      <span className="flex items-center gap-2 text-sm font-semibold text-[var(--casa-ink)]">
+                        {i.letterId ? (
+                          <Link href={`/admin/letters/${i.letterId}`} className="hover:underline">
+                            {t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}
+                          </Link>
+                        ) : (
+                          t(`Rechnung ${i.number}`, `Invoice ${i.number}`)
+                        )}
+                        {i.cancelled ? <Badge tone="danger">{t('storniert', 'cancelled')}</Badge> : null}
+                      </span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">
                         {[i.issuedOn ? new Date(`${i.issuedOn}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : null, i.subject].filter(Boolean).join(' · ')}
                       </span>

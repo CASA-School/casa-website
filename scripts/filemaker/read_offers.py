@@ -162,13 +162,18 @@ for r in table('Comment', '__ID_Comment', '_ID_Offer', '_ID_Person', '_ID_Bookin
     if oid in kept and body and not (first(r['_ID_Person']) or first(r['_ID_Booking']) or first(r['_ID_Group'])):
         notes[oid].append({'ref': f'Comment:{r["__ID_Comment"].strip()}', 'author': r['UserName'].strip() or None, 'at': stamp(r['TimeStampOfCreation']), 'body': body})
 log = collections.defaultdict(list)
-W = ['__ID_Workflow', '_ID_Offer', '_ID_Person', '_ID_Booking', '_ID_Group', 'UserName', 'TimeStampOfCreation']
+W = ['__ID_Workflow', '_ID_Offer', '_ID_Person', '_ID_Booking', '_ID_Group', 'UserName', 'TimeStampOfCreation', '_ID_ProcessReference', '_ID_History',
+     '_ID_SerialNumberInvoice']
 wf = [dict(zip(W, r)) for r in zip(*[column('WorkFlow', f) for f in W])]
 wf_text, wf_comment = column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'CommentWorkflow', 5000)
 for r, line, comment in zip(wf, wf_text, wf_comment):
     oid = first(r['_ID_Offer'])
     if oid in kept and text(line, comment) and not (first(r['_ID_Person']) or first(r['_ID_Booking']) or first(r['_ID_Group'])):
-        log[oid].append({'ref': r['__ID_Workflow'].strip(), 'author': r['UserName'].strip() or None, 'at': stamp(r['TimeStampOfCreation']), 'text': text(line, comment)})
+        # Its kind, whether a colleague typed it, its invoice (0094).
+        process = first(r['_ID_ProcessReference'])
+        log[oid].append({'ref': r['__ID_Workflow'].strip(), 'author': r['UserName'].strip() or None, 'at': stamp(r['TimeStampOfCreation']), 'text': text(line, comment),
+                         'process': process if process.isdigit() else None, 'typed': first(r['_ID_History']) == '1',
+                         'invoice': first(r['_ID_SerialNumberInvoice']) or None})
 
 out = []
 for oid, (o, who) in kept.items():

@@ -12,7 +12,8 @@ Rahman, 2026-10-19: FileMaker's calendar, the screen the team opens first, becom
    wrote it (`UserName`). Only rows on the shared calendar (`_ID_PublicCalendar` = 1): the other rows
    with a calendar day are SchoolMan's database, staff (HHRR) and exam notes, or private ones (2).
    Done when ticked (`_ID_Completed` = 1; 2 is SchoolMan's „no", like every 1/2 flag there) or when the
-   follow-up says „erledigt"/„done"; otherwise open.
+   follow-up says „erledigt"/„done"; otherwise open. Its title (`Subject`) goes before its text, and the
+   colleagues it is for (`_ID_Adressee`, office accounts in `StaffSchool`) come as their register ids (0094).
 2. Who works at reception (front office, `StaffMember._ID_ShiftReception` = 1) and who in the office
    behind it (active administration, `_ID_ActiveAdministration` = 1, not reception). Active staff only.
 3. Reception's usual week: per weekday (1 Monday … 7 Sunday), the most frequent from–to of each
@@ -75,12 +76,14 @@ stats = collections.Counter()
 
 # 1. The calendar's to-dos. The two text fields are long, so they are read in ranges of records.
 since, until = today - timedelta(days=30), today + timedelta(days=180)
-W = ['__ID_Workflow', 'ZSingleDayCalendar', 'HourStart', 'HourEnd', '_ID_Completed', '_ID_PublicCalendar', 'UserName']
+W = ['__ID_Workflow', 'ZSingleDayCalendar', 'HourStart', 'HourEnd', '_ID_Completed', '_ID_PublicCalendar', 'UserName', 'Subject', '_ID_Adressee']
 *cols, texts, follow_ups = steady('WorkFlow', lambda: [column('WorkFlow', f) for f in W]
                                  + [column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'FollowUp', 5000)])
 workflow = [dict(zip(W, row)) for row in zip(*cols)]
 
 flags = {'completed': collections.Counter(), 'public': collections.Counter()}
+# Whom a task is for (`_ID_Adressee`: office accounts — `StaffSchool` —, each a colleague of the register; 0094).
+staff_school = {k.strip(): first(v) for k, v in zip(column('StaffSchool', '__ID_StaffSchool'), column('StaffSchool', '_ID_StaffMember'))}
 tasks = []
 for r, text, follow_up in zip(workflow, texts, follow_ups):
     d = day(r['ZSingleDayCalendar'])
@@ -100,6 +103,11 @@ for r, text, follow_up in zip(workflow, texts, follow_ups):
     if not body:
         stats['skipped: no text'] += 1
         continue
+    # The entry's title („Einstufung", an exam, an institution) goes before its text (0094).
+    subject = r['Subject'].strip()
+    if subject and not body.lower().startswith(subject.lower()):
+        body = f'{subject}: {body}'
+        stats['with a title'] += 1
     if len(body) > BODY_MAX:
         body = body[:BODY_MAX - 1].rstrip() + '…'
         stats['text shortened'] += 1
@@ -111,8 +119,9 @@ for r, text, follow_up in zip(workflow, texts, follow_ups):
     done = completed == '1' or followed_done
     if followed_done and completed != '1':
         stats['done by follow-up only'] += 1
+    addressees = [staff_school[x] for x in re.split(r'[\s,;]+', r['_ID_Adressee']) if staff_school.get(x)]
     tasks.append({'id': first(r['__ID_Workflow']), 'date': d.isoformat(), 'start': start, 'end': end, 'body': body,
-                  'status': 'done' if done else 'open', 'author': r['UserName'].strip() or None})
+                  'status': 'done' if done else 'open', 'author': r['UserName'].strip() or None, 'for': addressees})
 
 # 2. Front office and back office. SchoolMan's flags are 1 yes, 2 no, empty unset.
 S = ['__ID_StaffMember', '_ID_ShiftReception', '_ID_ActiveAdministration', '_ID_ActiveStaff']
@@ -149,7 +158,7 @@ if '--stats' in sys.argv:
     print('tasks', since, '…', until, '·', ', '.join(f'{k} {v}' for k, v in stats.items()))
     print('  to import', len(tasks), '· done', status['done'], '· open', status['open'], '· ahead', sum(t['date'] >= today.isoformat() for t in tasks),
           '· with a start', sum(bool(t['start']) for t in tasks), '· with an end', sum(bool(t['end']) for t in tasks),
-          '· authors', len({t['author'] for t in tasks if t['author']}), '· no author', sum(not t['author'] for t in tasks))
+          '· authors', len({t['author'] for t in tasks if t['author']}), '· no author', sum(not t['author'] for t in tasks), '· for a colleague', sum(bool(t['for']) for t in tasks))
     print('  _ID_Completed in range', dict(flags['completed']), '· _ID_PublicCalendar in range', dict(flags['public']))
     print('desks', dict(collections.Counter(d['desk'] for d in desks)))
     print('shifts', len(shifts), 'weekday shifts for', len({s['staff'] for s in shifts}), 'of', len(front), 'reception colleagues',

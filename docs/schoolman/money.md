@@ -90,9 +90,38 @@ booking (Rahman, 2026-10-16) — 4,836 payments are recorded that way.
 it to another booking of the same learner as two linked payment lines, minus and plus, voided
 together (`docs/ADMIN_WORKSPACE.md` §Lists 20).
 
-TODO (not yet checked in SchoolMan): whether a carry-over there also leaves a minus line on the
-booking the money came from, and whether anything links the two — the bridge needs to know before it
-reads one.
+Checked 2026-10-27 (completeness review): a carry-over in SchoolMan is two hand-typed payments with
+method 7, minus on the source booking and plus on the target (1,101 / 1,120 since 2025), and nothing links
+them. Both come across as payments; pairing them (by learner, amount and day) into `transfer_id` /
+`counterpart_booking_id` is not done — it would be an inference, not a SchoolMan fact.
+
+## Completeness (2026-10-27, migration 0094)
+
+What the completeness review found SchoolMan holds on its own money records, and the bridge now reads:
+
+- **A payment** names the charge it settles (`PaymentIn._ID_CostDetail` → `payments.charge_id`; shown as
+  „für …" on the payment line), the instalment it paid (`_ID_Instalment` → `payments.instalment_id`; „bezahlt
+  am …" on the instalment) and the office account that booked it (`_ID_StaffSchool`; `StaffSchool` names the
+  colleague of the register → `payments.recorded_by_staff_id`; „gebucht von …" on the line). The charge's own
+  flag `_ID_CostDetailSet` is a stale copy and is not read.
+- **A charge** names its book (`_ID_BookReference` → `booking_charges.material_id`) and whether it is one of a
+  reversal pair (`_ID_CancellationSet`, or the sub-label „Storno" of `CostDetailReferenceComment` →
+  `booking_charges.reversed`): the booking page folds a marked pair only with each other. A „Storno" line's
+  `TimeStampOfCreation` is `Get(CurrentTime)` — the year 1 —, so its day comes from `DateOfCreation` (3,806
+  lines repaired locally; 50 more sit on bookings outside the sample and are repaired when their learner is read).
+- **A payout** keeps the period a rent covers (`ZStartDate`/`ZEndDate`) and how it was paid by its method number,
+  not the label copied beside it. The 1,799 older payouts with no kind are classified by their own facts
+  (`scripts/filemaker/payout_kind.py`: an agency → commission; a host's place or stay, balance „no", or charge
+  type 3 → rent; charge type 16 counting in the balance → a refund to the learner). The refunds are payments below
+  zero on the learner's account, as kind 3 always was. **This changes balances of 2019–2024 bookings**: measured
+  locally, 161 bookings in the workspace change — 78 credits close, 75 bookings that were settled now show an
+  amount owing (mostly 2023) — to be checked with finance against SchoolMan's `Balance.Gross`, which subtracts
+  kind-3 refunds only.
+- **An invoice** says whether its number was cancelled (`_ID_Reversal`), the offer it was made from and the group
+  visit it is for, and bills the party (`_ID_Management`) or its institution when it names no agency or company.
+  The booking's and the organisation's invoices say „storniert"; the offer and the group show theirs.
+
+Left for Rahman: the bank account a payout went to (`PaymentOut._ID_BankAccount`).
 
 ## Open questions
 

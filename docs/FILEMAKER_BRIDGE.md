@@ -532,6 +532,8 @@ phase I will tell you to run it"). It goes nightly once the email tests are done
 - an organisation's history (2026-10-26): SchoolMan's work-log lines that name it (`WorkFlow` by
   `_ID_Corporate`, `_ID_Agency`, `_ID_Institution`, `_ID_Management`), about itself or about a learner the
   workspace holds, shown in „Notizen und Verlauf" on its page (notes on organisations: 0089);
+- the history and notes no other step reads for their record (2026-10-27, 0094; `read_history.py`): a place's
+  work-log lines, a class's notes, and the kinds of history line SchoolMan adds;
 - the Tagesplan's tasks.
 
 Each importer is idempotent, so a run changes only what differs. The window moves with the date.

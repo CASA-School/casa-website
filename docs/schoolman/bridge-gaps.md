@@ -107,7 +107,7 @@ weekday plan.
 
 | SchoolMan | Filled · since 2025 | What it is for | Verdict |
 | --- | ---: | --- | --- |
-| `Comment` rows with `_ID_Course` | 764 · 380 | Notes on a course. This is 54% of all `Comment` rows, and the bridge reads none of them. | **needed for daily work.** Course notes are where the office writes problems. |
+| `Comment` rows with `_ID_Course` | 764 · 380 | Notes on a course. This is 54% of all `Comment` rows. | **across since 0094**: notes on the course page („Notizen“), 133 on 75 courses locally (`read_history.py`) |
 | `Course.CommentOnCourse` | 63 · 62 | The teacher's course note, written from the Klassenbuch | useful later (with the Klassenbuch bridge) |
 | `WorkFlow` lines with `_ID_Course` | 63,478 · 26,102 | The course log. Lines that also name a learner come across; lines on the course alone do not. Overlap not measured. | useful later |
 | `Course._ID_Exam` | 97 · 25 | Links an exam-prep course to its sitting | useful later (Exams) |
@@ -137,7 +137,7 @@ lesson day the workspace has.
 | Gap | Count | Verdict |
 | --- | ---: | --- |
 | Attendance of learners outside the sample | ~35,000 rows (70,732 − 35,380) | leave in SchoolMan. It is the Klassenbuch's (decided). |
-| Absence notices kept in the work log (`WorkFlow._ID_Absence`, `SingleDateAbsence`, `NumberMinute`, `_ID_Excuse`) | 818 · 421 | useful later. The text comes with the learner's history, but the absence date and minutes do not. |
+| Absence notices kept in the work log (`WorkFlow._ID_Absence`, `SingleDateAbsence`, `NumberMinute`, `_ID_Excuse`) | 818 · 421 | **across since 0094**: day, lessons, minutes and excused on the history line (591 locally); „Abwesenheit gemeldet“ on the booking's attendance day |
 | 24,967 imported rows that point at a lesson day the workspace lacks | — | These follow from "past courses" (§3) |
 
 ---
@@ -171,15 +171,15 @@ charges (268).
 
 | SchoolMan field | Filled · since 2025 | What it is for | Verdict |
 | --- | ---: | --- | --- |
-| `PaymentIn._ID_CostDetail` | 20,245 · 13,439 | Which charge a payment settles. Receipts list it. | **needed for daily work** (receipts, open items per line) |
-| `PaymentIn._ID_Instalment` | 1,045 · 221 | Which instalment a payment paid | useful later. "Paid" on the instalment comes across. |
-| `PaymentIn._ID_StaffSchool` | 50,336 · 18,870 (41 values) | Unknown: the receiving account or cash box, or the colleague. To confirm (money.md). | **ask finance.** It may be the key to matching with DATEV. |
+| `PaymentIn._ID_CostDetail` | 20,245 · 13,439 | Which charge a payment settles. Receipts list it. | **across since 0094** (`payments.charge_id`, 15,252 locally; „für …“ on the payment line) |
+| `PaymentIn._ID_Instalment` | 1,045 · 221 | Which instalment a payment paid | **across since 0094** (`payments.instalment_id`, 484 locally; „bezahlt am …“ on the instalment) |
+| `PaymentIn._ID_StaffSchool` | 50,336 · 18,870 (41 values) | The office account that booked it; `StaffSchool` names its colleague (completeness review 2026-10-27) | **across since 0094** (`payments.recorded_by_staff_id`, 28,927 locally, 10 colleagues) |
 | `CostDetail._ID_Course` | 48,156 · 17,501 | Which course or period a charge belongs to. It matters on bookings with several periods. | useful later |
 | `CostDetail._ID_ProductDelivered` | in use (1 / 2) | Books handed out: red until the learner has them, green after | **across since 0087** (`booking_charges.handed_out`) |
-| `CostDetail._ID_BookReference` | 33,080 · 12,031 (41 books) | Which book a book charge is for. The line's label comes across; the link to materials and orders does not. | useful later (book stock and orders) |
-| `CostDetail._ID_CostDetailReferenceComment`, `_ID_CancellationSet` | 14,715 · 4,915 / 32,857 · 9,192 | A standard sub-label of the charge, and a cancellation-set flag *(?)* | leave in SchoolMan until confirmed |
-| `PaymentOut.ZStartDate`/`ZEndDate`, `_ID_BankAccount`, `_ID_MethodPayment`, `_ID_Person` | 1,276 · 1,112 / 3,342 · 2,659 / 3,954 · 1,748 / 5,589 · 2,107 | For rent to a host: the period it covers, the account, the method and the payee | useful later (finance) |
-| `Invoice._ID_Reversal`, `_ID_Group`, `_ID_Offer`, `_ID_Institution`/`_ID_Management` | 26 / 6 / 22 / 214 | Cancellation invoices, group invoices (groups.md: not across) and invoices to other parties | useful later (finance + DATEV) |
+| `CostDetail._ID_BookReference` | 33,080 · 12,031 (41 books) | Which book a book charge is for | **across since 0094** (`booking_charges.material_id`, 13,876 locally) |
+| `CostDetail._ID_CostDetailReferenceComment`, `_ID_CancellationSet` | 14,715 · 4,915 / 32,857 · 9,192 | A standard sub-label of the charge („Storno“ marks the reversing copy), and the reversal pair (original and copy) | **across since 0094** (`booking_charges.reversed`, 12,772 locally; the sub-label is the comment's source where a line has none). A „Storno“ line's day comes from `DateOfCreation` (its timestamp is the year 1) |
+| `PaymentOut.ZStartDate`/`ZEndDate`, `_ID_BankAccount`, `_ID_MethodPayment`, `_ID_Person` | 1,276 · 1,112 / 3,342 · 2,659 / 3,954 · 1,748 / 5,589 · 2,107 | For rent to a host: the period it covers, the account, the method and the payee | **period and method across since 0094** (1,170 periods locally); `_ID_BankAccount` is Rahman's decision; `_ID_Person` is the booking's learner (a copy) |
+| `Invoice._ID_Reversal`, `_ID_Group`, `_ID_Offer`, `_ID_Institution`/`_ID_Management` | 26 / 6 / 22 / 214 | Cancelled invoice numbers, group invoices and invoices to other parties | **across since 0094** (`invoices.cancelled` 25, `group_visit_id` 5, `offer_id` 14 locally; the party or institution billed) |
 
 **Rows left out by the rules (run 3)**
 
@@ -201,8 +201,8 @@ payer on 1,169 bookings and 2,321 letters linked.
 | --- | ---: | --- |
 | `Comment` rows on a party (`_ID_Management` 515 · 170, `_ID_Corporate` 89 · 45, `_ID_Agency` 14 · 8) | 618 · 223 | useful later, **after a screen**. These are notes on parties, and `Management`'s own comments hold credentials, so this text must be checked before any import. |
 | `WorkFlow` lines on a company (`_ID_Corporate`) | 13,049 · 5,399 | useful later. Lines that also name a sample booking come across; the company's own log does not. |
-| Letters to parties (`Letter._ID_Management`) | 1,642 · 1,640 | useful later. Only those on agencies and companies of the sample are linked. |
 | `Management._ID_ContactPerson`, `Agency._ID_ContactAgent` | 99 · 62 / 34 · 5 | **done *(0092)*:** `organisation_contacts.is_main` (59 marked). |
+| Letters to parties (`Letter._ID_Management`) | 1,642 · 1,640 | Letters that came across are linked to the party they went to (`_ID_Management`, `_ID_Institution`) since 0094; letters to a party alone stay in SchoolMan. |
 | `Booking._ID_Contact` (the agency contact on a booking) | 1,563 · 28 | leave in SchoolMan (already "not yet" in organisations.md) |
 | The ~3,576 parties no imported record names | — | leave in SchoolMan. Per-record by design; "which agencies are active" is still open. |
 
@@ -300,11 +300,11 @@ periods, licences, absences from 90 days back to a year ahead (688), reception d
 
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
-| **`WorkFlow._ID_ProcessReference`**: the kind of each history line (accounting 53k, learning progress 25k, accommodation 6k, appointment 3k) | 97,172 · 44,540 | **needed for daily work.** History comes across as one undifferentiated stream, so a colleague cannot show only the money lines or only the learning-progress lines. |
-| `WorkFlow._ID_WorkFlowReference`, `_ID_History` | 50,162 · 27,267 (10 values) / 62,372 · 27,657 | useful later (a second line type and a flag *(?)*) |
+| **`WorkFlow._ID_ProcessReference`**: the kind of each history line (accounting 53k, learning progress 25k, accommodation 6k, appointment 3k) | 97,172 · 44,540 | **across since 0094** (`history_processes`, `staff_activity.detail.process`; 66,732 lines locally). The full history filters by it. |
+| `WorkFlow._ID_WorkFlowReference`, `_ID_History` | 50,162 · 27,267 (10 values) / 62,372 · 27,657 | `_ID_History` (a colleague typed the line) **across since 0094** („hat in SchoolMan notiert“); `_ID_WorkFlowReference` is a copy of the kind |
 | `WorkFlow._ID_Completed` on learner lines (the „Kontrolle" tick, screens.md) *(?)* | 2,073 · 2,057 | useful later. Only the Tagesplan reads it. |
 | Letters not on a sample booking or person: to parties 1,642, at pre-booking/contact/waiting-list stage 2,485 / 1,390 / 1,203, to staff 92 (timesheets 17), to groups 23, host enquiries 73 | — | useful later |
-| `Letter._ID_Signature`, `_ID_PositionSignature` | 2,641 · 2,640 | leave in SchoolMan (who signed; the author comes across) |
+| `Letter._ID_Signature`, `_ID_PositionSignature` | 2,641 · 2,640 | The signer **across since 0094** (on the letter, 2,114 locally); the position is layout |
 | `LetterServices` (letters to publishers) | 252 rows · 46 in 2026 | leave in SchoolMan (book orders came across without them) |
 | Letters before 2025 (`Letter.fmp12`) | — | leave in SchoolMan (out of reach, known) |
 
@@ -340,7 +340,7 @@ reception weekday shifts.
 
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
-| `WorkFlow._ID_Adressee` (whom a calendar task is for) | 176 · 21 | useful later |
+| `WorkFlow._ID_Adressee` (whom a calendar task is for) | 176 · 21 | **across since 0094** (the task's assignee, through `StaffSchool`); the entry's title (`Subject`) stands before its text |
 | `WorkFlow._ID_HighLightCalendar` | 424 · 38 | leave in SchoolMan |
 | Calendar rows that are private, HR or exam notes (`_ID_PublicCalendar` = 2 and the like) | — | leave in SchoolMan (excluded on purpose) |
 | The day's arrivals, departures and exam parts | — | These follow the stays (§10) and exam parts (§5). The day is only as complete as the sample. |
@@ -361,6 +361,9 @@ reception weekday shifts.
 | 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | Read it; offer it as a filter |
 | 9 | **Course notes** and ~~group-reservation notes~~ | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 (**done 2026-10-27**, 0095) | Read them onto the course |
 | 10 | **Payment ↔ charge link and passport number** | `PaymentIn._ID_CostDetail` 20,245; `NumberPassport` 1,262 (decided to come; column exists) | Read both. Passport stays under the restricted module. |
+| 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | **Done 2026-10-27** (0094): read, and a filter in the full history |
+| 9 | **Course notes and group-reservation notes** | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 | Course notes **done 2026-10-27** (0094); reservation notes open |
+| 10 | **Payment ↔ charge link and passport number** | `PaymentIn._ID_CostDetail` 20,245; `NumberPassport` 1,262 (decided to come; column exists) | The link **done 2026-10-27** (0094). Passport: read it; it stays under the restricted module. |
 
 Close behind: show the SchoolMan booking and learner numbers on the booking (stored, not shown);
 `DateBooking._ID_Level`/`_ID_DayTimeReference` for the 1,161 periods without a course.
@@ -392,7 +395,7 @@ Close behind: show the SchoolMan booking and learner numbers on the booking (sto
    leave them?
 9. **Working time, holiday requests and staff training.** Which module takes them, and when (finance
    and the Klassenbuch)?
-10. **Fields to ask the team about:** `PaymentIn._ID_StaffSchool` (41 values, finance),
+10. **Fields to ask the team about:** ~~`PaymentIn._ID_StaffSchool`~~ (answered 2026-10-27: the office account that booked it, read since 0094),
     `Booking._ID_Project`/`_ID_Contractor`/`_ID_LongTerm`, `Course.IncentivePercent`/`Supplement`,
     `Accommodation._ID_Shown`/`_ID_PermanentOffer` (Natalia), and the `SpecialStudent` table.
 

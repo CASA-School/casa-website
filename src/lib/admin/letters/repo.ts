@@ -140,9 +140,17 @@ export async function lettersForRegistration(registrationId: string): Promise<Se
   return (await query<SentRow>(`${SENT} WHERE l.registration_id = $1 ORDER BY l.sent_at DESC`, [registrationId])).map(toSent);
 }
 
-/** A booking's letters, the latest first. */
+/**
+ * A booking's letters, the latest first: its own, and those that name it among several (`letter_bookings`,
+ * 0094) — a confirmation of several bookings, or a SchoolMan letter to the whole course.
+ */
 export async function lettersForBooking(bookingId: string): Promise<SentLetter[]> {
-  return (await query<SentRow>(`${SENT} WHERE l.booking_id = $1 ORDER BY l.sent_at DESC`, [bookingId])).map(toSent);
+  return (
+    await query<SentRow>(
+      `${SENT} WHERE l.booking_id = $1 OR l.id IN (SELECT lb.letter_id FROM letter_bookings lb WHERE lb.booking_id = $1) ORDER BY l.sent_at DESC`,
+      [bookingId]
+    )
+  ).map(toSent);
 }
 
 /** The letters of some waiting-list entries, the latest first. */
@@ -151,24 +159,44 @@ export async function lettersForEntries(entryIds: readonly string[]): Promise<Se
   return (await query<SentRow>(`${SENT} WHERE l.waitlist_entry_id = ANY($1::uuid[]) ORDER BY l.sent_at DESC`, [entryIds])).map(toSent);
 }
 
-/** Every letter to a person, linked records included, the latest first. */
+/**
+ * Every letter to a person, linked records included, the latest first — with the letters to a whole course
+ * that name one of their bookings (0094).
+ */
 export async function lettersForPerson(canonicalPersonId: string): Promise<SentLetter[]> {
   return (
-    await query<SentRow>(`${SENT} WHERE l.person_id IS NOT NULL AND canonical_person_id(l.person_id) = $1 ORDER BY l.sent_at DESC`, [canonicalPersonId])
+    await query<SentRow>(
+      `${SENT}
+        WHERE (l.person_id IS NOT NULL AND canonical_person_id(l.person_id) = $1)
+           OR (l.person_id IS NULL AND l.id IN (SELECT lb.letter_id FROM letter_bookings lb JOIN bookings b ON b.id = lb.booking_id
+                                                 WHERE b.person_id = ANY(person_family($1))))
+        ORDER BY l.sent_at DESC`,
+      [canonicalPersonId]
+    )
   ).map(toSent);
 }
 
-/** One letter as it went out, with what it is about; null when there is none or it cannot be read. */
-export async function getSentLetter(id: string): Promise<(SentLetter & { letter: Letter; email: string | null; recipientName: string }) | null> {
-  const row = await queryFirst<SentRow & { document: unknown; email: string | null; recipient_name: string }>(
+/**
+ * One letter as it went out, with what it is about; null when there is none or it cannot be read. A
+ * SchoolMan letter also says whom it went to in copy and blind copy, and how many bookings it names (0094).
+ */
+export async function getSentLetter(id: string): Promise<
+  | (SentLetter & { letter: Letter; email: string | null; recipientName: string; cc: string | null; bcc: string | null; bookingsNamed: number })
+  | null
+> {
+  const row = await queryFirst<SentRow & { document: unknown; email: string | null; recipient_name: string; cc: string | null; bcc: string | null; named: string }>(
     `SELECT l.id, l.kind, l.version, l.subject, l.sent_at, s.name AS sent_by_name, l.booking_id, l.waitlist_entry_id, l.offer_id,
-            l.registration_id, l.person_id, l.accommodation_id, l.sent_via, l.document, l.email, l.recipient_name
+            l.registration_id, l.person_id, l.accommodation_id, l.sent_via, l.document, l.email, l.recipient_name,
+            l.source->'schoolman'->>'cc' AS cc, l.source->'schoolman'->>'bcc' AS bcc,
+            (SELECT count(*) FROM letter_bookings lb WHERE lb.letter_id = l.id) AS named
        FROM letters l LEFT JOIN staff_users s ON s.id = l.sent_by WHERE l.id = $1`,
     [id]
   );
   if (!row) return null;
   const letter = readLetter(row.document);
-  return letter ? { ...toSent(row), letter, email: row.email, recipientName: row.recipient_name } : null;
+  return letter
+    ? { ...toSent(row), letter, email: row.email, recipientName: row.recipient_name, cc: row.cc, bcc: row.bcc, bookingsNamed: Number(row.named) }
+    : null;
 }
 
 /** The letters sent for an offer, the latest first. */

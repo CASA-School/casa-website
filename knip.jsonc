@@ -174,6 +174,15 @@
     // Removal condition: delete with the last of those imports.
     "scripts/filemaker/letter-document.mjs",
 
+    // SchoolMan's history and notes on the records no other step writes them for (a place's
+    // history, a class's notes, the kinds of history line), from scripts/filemaker/read_history.py
+    // through a pipe (the bridge step `history`, 0094); and a history line's shape, shared by every
+    // import that writes a record's history. Run by hand or by the bridge, never imported by the app.
+    //
+    // Removal condition: delete when the FileMaker bridge is retired.
+    "scripts/filemaker/import-history.mjs",
+    "scripts/filemaker/history-line.mjs",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

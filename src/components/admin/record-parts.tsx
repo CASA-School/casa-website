@@ -1,9 +1,9 @@
 import { isValidElement, type ReactNode } from 'react';
 
 import { addNoteAction, assignAction, updateStatusAction } from '@/app/(admin)/admin/(workspace)/actions';
-import { describeActivity, type ActivityEntry } from '@/lib/admin/activity';
+import { describeActivity, historyAbsence, historyProcesses, type ActivityEntry, type HistoryProcess } from '@/lib/admin/activity';
 import { berlinDay, berlinTime, shortDay } from '@/lib/admin/days';
-import { pick, relativeDays, type WsLang } from '@/lib/admin/i18n';
+import { dayRange, num, pick, relativeDays, translator, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import type { StaffNote } from '@/lib/admin/notes';
 import { normaliseStatus, STATUS_LABELS, type QueueEntity, type WorkStatus } from '@/lib/admin/queues';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { ChoiceMenu } from './choice-menu';
 import { Icon } from './icons';
 import { Avatar } from './list';
-import { TimelineEntries, type TimelineKind, type TimelineRow } from './timeline-entries';
+import { TimelineEntries, type TimelineFacet, type TimelineRow } from './timeline-entries';
 import { ButtonLink, Card } from './ui';
 
 /**
@@ -314,6 +314,8 @@ export async function Timeline({
   canWrite?: boolean;
 }) {
   const { t, lang } = await getI18n();
+  // The kinds of SchoolMan's history lines (0094), when the record has any.
+  const processes = activity.some((entry) => entry.action === 'schoolman_log') ? await historyProcesses() : new Map<string, HistoryProcess>();
   const items: TimelineItem[] = [
     ...notes.map((note) => ({ kind: 'note' as const, at: note.createdAt, note })),
     ...activity.filter((entry) => entry.action !== 'note_added').map((entry) => ({ kind: 'event' as const, at: entry.createdAt, entry })),
@@ -402,11 +404,33 @@ export async function Timeline({
       );
     }
     if (entry.action === 'schoolman_log') {
+      // Its kind, whether a colleague typed it, the invoice it is about, an absence notice (0094).
+      const process = typeof detail.process === 'string' ? processes.get(detail.process) : undefined;
+      const absence = historyAbsence(detail);
+      const what = [
+        detail.typed === true ? t('hat in SchoolMan notiert', 'wrote in SchoolMan') : t('in SchoolMan', 'in SchoolMan'),
+        process ? pick(lang, process.name) : null,
+        typeof detail.invoice === 'string' ? t(`Rechnung ${detail.invoice}`, `invoice ${detail.invoice}`) : null,
+      ]
+        .filter(Boolean)
+        .join(' · ');
       return (
         <li key={key} className="relative flex gap-3">
-          <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{Icon.note}</Mark>
+          <Mark className="bg-white text-[var(--casa-muted)] ring-[#d3dbe6]">{absence ? Icon.calendar : Icon.note}</Mark>
           <div className="min-w-0 flex-1 pt-1">
-            <Meta who={who} what={t('in SchoolMan', 'in SchoolMan')} at={when(item.at)} title={full(item.at)} />
+            <Meta who={who} what={what} at={when(item.at)} title={full(item.at)} />
+            {absence ? (
+              <p className="mt-1 text-[0.8rem] font-semibold text-[var(--casa-ink)]">
+                {[
+                  t('Abwesenheit gemeldet', 'Absence reported'),
+                  absence.day ? dayRange(absence.day, absence.day, lang) : null,
+                  absence.lessons ? t(`${num(lang, absence.lessons)} UE`, `${num(lang, absence.lessons)} lessons`) : absence.minutes ? t(`${num(lang, absence.minutes)} Min.`, `${num(lang, absence.minutes)} min`) : null,
+                  absence.excused === true ? t('entschuldigt', 'excused') : absence.excused === false ? t('unentschuldigt', 'unexcused') : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            ) : null}
             <p data-tl-text className="mt-1 text-[0.82rem] leading-relaxed whitespace-pre-line text-[var(--casa-ink)]">{String(detail.text ?? '')}</p>
           </div>
         </li>
@@ -440,7 +464,7 @@ export async function Timeline({
   };
   const rows: TimelineRow[] = items.map((item, index) => ({
     key: item.kind === 'note' ? `n-${item.note.id}` : item.kind === 'event' ? `e-${item.entry.id}` : item.kind === 'own' ? `r-${item.event.id}` : `o-${index}`,
-    kind: kindOf(item),
+    facet: facetOf(item, processes, lang),
     at: item.at.toISOString(),
     search: searchOf(item, lang).toLocaleLowerCase('de'),
     node: draw(item, index),
@@ -479,11 +503,21 @@ export async function Timeline({
   );
 }
 
-/** Which of the panel's kinds an entry is: the team's words, SchoolMan's log, or a change. */
-function kindOf(item: TimelineItem): TimelineKind {
-  if (item.kind === 'note') return 'note';
-  if (item.kind === 'event' && item.entry.action === 'schoolman_log') return 'schoolman';
-  return 'change';
+/**
+ * Which of the panel's kinds an entry is: the team's words, a line of SchoolMan's history by its kind
+ * (Buchhaltung, Lernentwicklung, Unterkunft, Anfrage … 0094; „SchoolMan" when it names none), or a change.
+ */
+function facetOf(item: TimelineItem, processes: ReadonlyMap<string, HistoryProcess>, lang: WsLang): TimelineFacet {
+  const t = translator(lang);
+  if (item.kind === 'note') return { key: 'note', label: t('Notizen', 'Notes'), order: 0 };
+  if (item.kind === 'event' && item.entry.action === 'schoolman_log') {
+    const process = typeof item.entry.detail?.process === 'string' ? processes.get(item.entry.detail.process) : undefined;
+    if (process) return { key: `sm:${process.code}`, label: pick(lang, process.name), order: 1 + process.position / 1000 };
+    // An absence notice names no kind; it is one of its own.
+    if (historyAbsence(item.entry.detail)) return { key: 'sm:absence', label: t('Abwesenheiten', 'Absences'), order: 1.9 };
+    return { key: 'schoolman', label: 'SchoolMan', order: 2 };
+  }
+  return { key: 'change', label: t('Änderungen', 'Changes'), order: 3 };
 }
 
 /** An entry's words as plain text, for the panel's search. */

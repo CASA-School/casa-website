@@ -41,7 +41,7 @@ const QUEUE_ENTITIES = new Set<string>([
   'career_application',
 ]);
 
-const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer', 'group_visit', 'accommodation', 'organisation']);
+const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer', 'group_visit', 'accommodation', 'organisation', 'course']);
 
 /** Which module owns a record type — the module the actor must hold. */
 const MODULE_FOR: Record<string, WorkspaceModule> = {
@@ -56,6 +56,7 @@ const MODULE_FOR: Record<string, WorkspaceModule> = {
   group_visit: 'groups',
   accommodation: 'accommodation',
   organisation: 'organisations',
+  course: 'catalogue',
 };
 
 /** A uuid, or nothing. Guards the id before it reaches a `uuid` column. */
@@ -137,6 +138,11 @@ export async function addNoteAction(formData: FormData): Promise<void> {
 
   await addNote({ entity: entity as NoteEntity, entityId: id, body, actor });
 
+  // A course's notes show on each of its groups' pages.
+  if (entity === 'course') {
+    revalidatePath(`/admin/catalogue/courses/${id}`, 'layout');
+    return;
+  }
   revalidatePath(
     entity === 'placement_attempt'
       ? `/admin/placement/${id}`

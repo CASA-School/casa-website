@@ -34,6 +34,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fm_read import column, column_chunked  # noqa: E402
+from payout_kind import payout_kind  # noqa: E402
 from sample import sample_persons  # noqa: E402
 
 
@@ -164,18 +165,39 @@ taken = {b['__ID_Booking'].strip() for bs in bookings_of.values() for b in bs}
 # The money of those bookings: charges, payments received, refunds to the learner.
 charges_of = collections.defaultdict(list)
 for r in table('CostDetail', '__ID_CostDetail', '_ID_Booking', '_ID_CostDetailReference', 'CostDetail_1', 'CostGross', 'Unit', 'CostGrossUnit', 'TimeStampOfCreation',
-               'CostDetailComment_1', '_ID_ProductDelivered'):
+               'CostDetailComment_1', '_ID_ProductDelivered', '_ID_BookReference', '_ID_CancellationSet', '_ID_CostDetailReferenceComment', 'DateOfCreation'):
     if first(r['_ID_Booking']) in taken:
         charges_of[first(r['_ID_Booking'])].append(r)
+# A charge's standard sub-label (`CostDetailReferenceComment`: Halbpension, Pick up … Storno): the comment's
+# source where the line has no comment of its own; „Storno" marks the copy that reverses a line.
+sub_labels = {r['__ID_CostDetailReferenceComment'].strip(): r['CostDetailReferenceComment_1'].strip()
+              for r in table('CostDetailReferenceComment', '__ID_CostDetailReferenceComment', 'CostDetailReferenceComment_1')}
+storno = {k for k, v in sub_labels.items() if v.lower() == 'storno'}
+
+
+def charge_created(r):
+    """When the line was written. A reversal („Storno") line has `Get(CurrentTime)` in its timestamp — the
+    year 1 — and its day only in `DateOfCreation` (MakeReversal_CostDetail_Booking): that day at that time."""
+    at = stamp(r['TimeStampOfCreation'])
+    if at and int(at[:4]) < 1900:
+        day = iso(r['DateOfCreation'])
+        return f'{day}T{at[11:]}' if day else None
+    return at or stamp(r['DateOfCreation'])
+
+
+# The office accounts (`StaffSchool`): the colleague of the register (`StaffMember`) each one is.
+staff_school = {r['__ID_StaffSchool'].strip(): first(r['_ID_StaffMember']) for r in table('StaffSchool', '__ID_StaffSchool', '_ID_StaffMember')}
 payments_of = collections.defaultdict(list)
 for r in table('PaymentIn', '__ID_PaymentIn', '_ID_Booking', 'PaymentIn', '_ID_MethodPayment', 'MethodPayment_1', 'DateOfPayment', 'CostDetailReference_1', 'TimeStampOfCreation',
-               'CommentPaymentIn_1', 'CommentPaymentIn_2', '_ID_CostDetailReference'):
+               'CommentPaymentIn_1', 'CommentPaymentIn_2', '_ID_CostDetailReference', '_ID_CostDetail', '_ID_StaffSchool'):
     if first(r['_ID_Booking']) in taken:
         payments_of[first(r['_ID_Booking'])].append(r)
+# A refund to the learner: kind 3, or an older payout without a kind that its own facts make one (payout_kind.py).
 refunds_of = collections.defaultdict(list)
-for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', 'MethodPayment_1', 'DatePaymentOut', 'ZSingleDatePayment', 'TimeStampOfCreation',
-               'PaymentOutComment_1', 'Comment'):
-    if first(r['_ID_Booking']) in taken and first(r['_ID_PaymentOutReference']) == '3':  # 3 Rückzahlung Student
+for r in table('PaymentOut', '__ID_PaymentOut', '_ID_Booking', 'PaymentOut', '_ID_PaymentOutReference', '_ID_MethodPayment', 'DatePaymentOut', 'ZSingleDatePayment',
+               'TimeStampOfCreation', 'PaymentOutComment_1', 'Comment', '_ID_Agency', '_ID_Accommodation', '_ID_DateAccommodation', '_ID_BalanceCount',
+               '_ID_CostDetailReference'):
+    if first(r['_ID_Booking']) in taken and payout_kind(r) == 'refund':
         refunds_of[first(r['_ID_Booking'])].append(r)
 
 
@@ -252,30 +274,70 @@ for r in table('Agreement', '__ID_Agreement', '_ID_Person', '_ID_Booking', 'Type
                           'body': text(r['TypeAgreement_1'] or r['Subject'], r['Agreement_1'], r['Agreement_2'], r['Agreement_3'], r['Agreement_4'], r['Agreement_5'],
                                        r['AgreementComment_1'], tail)})
 
-# The work log, line by line (its text read in ranges: there are more than 100,000).
+# The work log, line by line (its text read in ranges: there are more than 100,000). Each line's kind
+# (`_ID_ProcessReference`: accounting, learning progress, intake …; „De"/„En" on old rows is a language, not
+# a kind), whether a colleague typed it (`_ID_History` 1) or a script wrote it, the invoice it is about, and
+# an absence notice's day, lessons, minutes and whether it was excused (`_ID_Excuse`: 1 yes, 2 no).
+def whole(value):
+    found = re.match(r'\s*(\d+)', first(value))
+    return int(found.group(1)) if found else None
+
+
 log_of = collections.defaultdict(list)
-W = ['__ID_Workflow', '_ID_Person', '_ID_Booking', 'UserName', 'TimeStampOfCreation']
+W = ['__ID_Workflow', '_ID_Person', '_ID_Booking', 'UserName', 'TimeStampOfCreation', '_ID_ProcessReference', '_ID_History', '_ID_SerialNumberInvoice', '_ID_Absence',
+     'SingleDateAbsence', 'NumberLesson', 'NumberMinute', '_ID_Excuse']
 wf = [dict(zip(W, r)) for r in zip(*[column('WorkFlow', f) for f in W])]
 wf_text, wf_comment = column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'CommentWorkflow', 5000)
 for r, line, comment in zip(wf, wf_text, wf_comment):
     pid = owner(r)
-    if pid and text(line, comment):
+    process = first(r['_ID_ProcessReference'])
+    # A staff matter (HHRR) is never on a learner.
+    if pid and text(line, comment) and process != '13':
         log_of[pid].append({'ref': r['__ID_Workflow'].strip(), 'booking': first(r['_ID_Booking']) or None, 'author': r['UserName'].strip() or None,
-                            'at': stamp(r['TimeStampOfCreation']), 'text': text(line, comment)})
+                            'at': stamp(r['TimeStampOfCreation']), 'text': text(line, comment),
+                            'process': process if process.isdigit() else None, 'typed': first(r['_ID_History']) == '1',
+                            'invoice': first(r['_ID_SerialNumberInvoice']) or None,
+                            'absence': {'day': iso(r['SingleDateAbsence']), 'lessons': whole(r['NumberLesson']), 'minutes': whole(r['NumberMinute']),
+                                        'excused': {'1': True, '2': False}.get(first(r['_ID_Excuse']))} if first(r['_ID_Absence']) == '1' else None})
 
-# The letters, with what they said.
+# The letters, with what they said. A letter may name several bookings (`_ID_Booking` is a list): a
+# confirmation or visa letter for several of a learner's bookings, or a letter to a whole course — a room
+# change, the course start, an exam invitation — with every learner's booking and no person. Such a letter
+# is the learner's who comes first among those here, on their booking; `read_letters_extra.py` puts it on
+# every booking it names. The second text block (`FreeField_2`) is a confirmation's totals; on a receipt for
+# several payments it only repeats the booking numbers.
 letters_of = collections.defaultdict(list)
 L = ['__ID_Letter', '_ID_Person', '_ID_Booking', 'ScriptName', 'ScriptParameter', 'Subject', 'AddressHeader', 'Email', 'Date_LetterSent', 'DateOfEmission',
-     'TimeStampOfCreation', 'UserName']
+     'TimeStampOfCreation', 'UserName', '_ID_Signature', 'Email.Copy', 'Email.BlindCopy', '_ID_DateAccommodation']
 lt = [dict(zip(L, r)) for r in zip(*[column('Letter', f) for f in L])]
-for r, body in zip(lt, column_chunked('Letter', 'FreeField', 1000)):
-    pid = owner(r)
+
+
+def letter_owner(r):
+    """The chosen person the letter names, else the person of the first booking it names that is a chosen person's."""
+    for pid in ids(r.get('_ID_Person')):
+        if pid in persons:
+            return pid, False
+    for bid in ids(r.get('_ID_Booking')):
+        b = bookings.get(bid)
+        if b and first(b['_ID_Person']) in persons:
+            return first(b['_ID_Person']), not ids(r.get('_ID_Person')) and len(ids(r.get('_ID_Booking'))) > 1
+    return None, False
+
+
+for r, body, totals in zip(lt, column_chunked('Letter', 'FreeField', 1000), column_chunked('Letter', 'FreeField_2', 1000)):
+    pid, course_wide = letter_owner(r)
     if pid:
-        letters_of[pid].append({'ref': r['__ID_Letter'].strip(), 'booking': first(r['_ID_Booking']) or None, 'script': r['ScriptName'].strip() or None,
+        named = ids(r['_ID_Booking'])
+        own = [b for b in named if b in bookings and first(bookings[b]['_ID_Person']) == pid]
+        script = r['ScriptName'].strip()
+        letters_of[pid].append({'ref': r['__ID_Letter'].strip(), 'booking': (own or named or [None])[0], 'script': script or None,
                                 'lang': 'en' if r['ScriptParameter'].strip() in ('En', '2') else 'de', 'subject': r['Subject'].strip() or None,
                                 'header': r['AddressHeader'].strip() or None, 'email': r['Email'].strip() or None,
                                 'sent': stamp(r['Date_LetterSent']) or stamp(r['DateOfEmission']) or stamp(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None,
-                                'text': body})
+                                'text': body if script.startswith('ReceiptMultiplePaymentIn') or not totals.strip() else f'{body}\n\n{totals.strip()}',
+                                'courseWide': course_wide, 'signer': first(r['_ID_Signature']) or None,
+                                'cc': r['Email.Copy'].strip() or None, 'bcc': r['Email.BlindCopy'].strip() or None,
+                                'stays': ids(r['_ID_DateAccommodation'])})
 
 # The sittings of their exam bookings: which exam, which day, how many places.
 def short_day(value):
@@ -367,20 +429,26 @@ for pid, p in persons.items():
             'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate'])}
                         for r in periods_of[b['__ID_Booking'].strip()]],
             'charges': [{'id': r['__ID_CostDetail'].strip(), 'ref': first(r['_ID_CostDetailReference']) or None, 'label': r['CostDetail_1'].strip() or None,
-                         'comment': r['CostDetailComment_1'].strip() or None,
-                         'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': stamp(r['TimeStampOfCreation']),
+                         'comment': r['CostDetailComment_1'].strip() or sub_labels.get(first(r['_ID_CostDetailReferenceComment'])) or None,
+                         'amount': amount(r['CostGross']), 'units': amount(r['Unit']), 'unitAmount': amount(r['CostGrossUnit']), 'created': charge_created(r),
                          # Books handed out (red/green in SchoolMan): 1 yes, 2 not yet (0087).
-                         'delivered': first(r['_ID_ProductDelivered']) == '1'}
+                         'delivered': first(r['_ID_ProductDelivered']) == '1',
+                         # The book a book line is for, and whether the line is one of a reversal pair (0094).
+                         'book': first(r['_ID_BookReference']) or None,
+                         'reversed': first(r['_ID_CancellationSet']) == '1' or first(r['_ID_CostDetailReferenceComment']) in storno}
                         for r in charges_of[b['__ID_Booking'].strip()]],
             'payments': [{'id': f"PaymentIn:{r['__ID_PaymentIn'].strip()}", 'amount': amount(r['PaymentIn']), 'method': first(r['_ID_MethodPayment']) or None,
                           'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DateOfPayment']), 'for': r['CostDetailReference_1'].strip() or None,
                           # The charge type it pays, only where the label copy is empty (mapping review §4).
                           **({} if r['CostDetailReference_1'].strip() else {'ref': first(r['_ID_CostDetailReference']) or None}),
                           'comment': text(r['CommentPaymentIn_1'], r['CommentPaymentIn_2']) or None,
-                          'created': stamp(r['TimeStampOfCreation'])} for r in payments_of[b['__ID_Booking'].strip()]]
+                          'created': stamp(r['TimeStampOfCreation']),
+                          # The charge it settles, and the colleague who booked it (their office account's StaffMember, 0094).
+                          'charge': first(r['_ID_CostDetail']) or None, 'staff': staff_school.get(first(r['_ID_StaffSchool'])) or None}
+                         for r in payments_of[b['__ID_Booking'].strip()]]
                         # A refund paid back to the learner is money out of their account: a payment below zero.
-                        + [{'id': f"PaymentOut:{r['__ID_PaymentOut'].strip()}", 'amount': -abs(amount(r['PaymentOut']) or 0), 'method': None,
-                            'methodLabel': r['MethodPayment_1'].strip() or None, 'date': iso(r['DatePaymentOut']) or iso(r['ZSingleDatePayment']), 'for': 'Rückzahlung',
+                        + [{'id': f"PaymentOut:{r['__ID_PaymentOut'].strip()}", 'amount': -abs(amount(r['PaymentOut']) or 0), 'method': first(r['_ID_MethodPayment']) or None,
+                            'methodLabel': None, 'date': iso(r['DatePaymentOut']) or iso(r['ZSingleDatePayment']), 'for': 'Rückzahlung',
                             'comment': text(r['Comment'], r['PaymentOutComment_1']) or None,
                             'created': stamp(r['TimeStampOfCreation'])} for r in refunds_of[b['__ID_Booking'].strip()]],
         } for b in bookings_of[pid]],
@@ -406,6 +474,15 @@ if '--stats' in sys.argv:
     st = [s for b in all_b for s in b['stays']]
     print('exam bookings', sum(bool(b['exam']) for b in all_b), 'by exam kind', collections.Counter((b['exam'] or {}).get('ref') for b in all_b if b['exam']).most_common(),
           '· stays', len(st), 'on', sum(bool(b['stays']) for b in all_b), 'bookings · in a CASA flat', sum(s['flat'] for s in st))
+    print('charges: on a book', sum(bool(c['book']) for c in ch), '· of a reversal pair', sum(c['reversed'] for c in ch),
+          '· day from DateOfCreation', sum(1 for b in all_b for r in charges_of[b['id']] if (stamp(r['TimeStampOfCreation']) or '9')[:4] < '1900'),
+          '· payments naming a charge', sum(bool(p.get('charge')) for p in pa), '· booked by a colleague', sum(bool(p.get('staff')) for p in pa))
+    lg = [w for x in out for w in x['log']]
+    print('log: with a kind', sum(bool(w['process']) for w in lg), dict(collections.Counter(w['process'] for w in lg).most_common(8)), '· typed', sum(w['typed'] for w in lg),
+          '· on an invoice', sum(bool(w['invoice']) for w in lg), '· absence notices', sum(bool(w['absence']) for w in lg))
+    lt_ = [l for x in out for l in x['letters']]
+    print('letters: to a whole course', sum(l['courseWide'] for l in lt_), '· signed', sum(bool(l['signer']) for l in lt_), '· cc', sum(bool(l['cc']) for l in lt_),
+          '· bcc', sum(bool(l['bcc']) for l in lt_), '· naming a stay', sum(bool(l['stays']) for l in lt_))
     print('notes', sum(len(x['notes']) for x in out), '· log lines', sum(len(x['log']) for x in out), '· letters', sum(len(x['letters']) for x in out),
           '(with text', sum(bool(l['text'].strip()) for x in out for l in x['letters']), ') · bank accounts', sum(len(x['banks']) for x in out))
     print('with e-mail', sum(bool(x['emails']) for x in out), '· phone', sum(bool(x['phones']) for x in out), '· address', sum(bool(x['addresses']) for x in out),

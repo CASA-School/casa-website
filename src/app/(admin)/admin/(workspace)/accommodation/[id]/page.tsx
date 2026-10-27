@@ -456,7 +456,25 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   );
 }
 
-function MoneyRows({ rows, lang, linked }: { rows: readonly { id: string; paidOn: string | null; amount: number; bookingId: string | null; bookingNumber: string | null; personName: string | null; note?: string | null }[]; lang: WsLang; linked: boolean }) {
+function MoneyRows({
+  rows,
+  lang,
+  linked,
+}: {
+  rows: readonly {
+    id: string;
+    paidOn: string | null;
+    amount: number;
+    bookingId: string | null;
+    bookingNumber: string | null;
+    personName: string | null;
+    note?: string | null;
+    /** The days a rent payout covers (0094). */
+    period?: { from: string; to: string } | null;
+  }[];
+  lang: WsLang;
+  linked: boolean;
+}) {
   const day = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB') : '—');
   return (
     <ul className="divide-y divide-ws-line-soft">
@@ -466,7 +484,12 @@ function MoneyRows({ rows, lang, linked }: { rows: readonly { id: string; paidOn
             <span className="w-24 shrink-0 text-[0.82rem] text-[var(--casa-muted)] tabular-nums">{day(r.paidOn)}</span>
             <span className="min-w-0 flex-1 truncate text-[0.86rem]">
               <span className="font-semibold text-[var(--casa-ink)]">{r.personName ?? '—'}</span>
-              <span className="text-[var(--casa-muted)]">{[r.bookingNumber, r.note?.split('\n')[0]].filter(Boolean).map((x) => ` · ${x}`).join('')}</span>
+              <span className="text-[var(--casa-muted)]">
+                {[r.period ? dayRange(r.period.from, r.period.to, lang) : null, r.bookingNumber, r.note?.split('\n')[0]]
+                  .filter(Boolean)
+                  .map((x) => ` · ${x}`)
+                  .join('')}
+              </span>
             </span>
             <span className="shrink-0 text-[0.86rem] font-semibold tabular-nums">{euros(r.amount)}</span>
           </>

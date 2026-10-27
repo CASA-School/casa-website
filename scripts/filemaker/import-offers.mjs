@@ -27,6 +27,7 @@ import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
 import { changes } from './bridge-changes.mjs';
+import { historyProcesses, logDetail } from './history-line.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -92,6 +93,8 @@ const statuses = {};
 
 try {
   await client.query('BEGIN');
+  // The kinds of a history line (0094).
+  const processes = await historyProcesses(client);
   const valid = new Set((await client.query(`SELECT code FROM countries`)).rows.map((r) => r.code.trim()));
   const chargeTypes = new Map((await client.query(`SELECT code, filemaker_id FROM charge_types WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [Number(r.filemaker_id), r.code]));
   const chargeType = (ref) => chargeTypes.get(Number(String(ref ?? '').replace(',', '.'))) ?? 'additional_costs';
@@ -297,7 +300,7 @@ try {
       await client.query(
         `INSERT INTO staff_activity (staff_name, entity, entity_id, action, detail, created_at)
          VALUES ($1, 'offer', $2, 'schoolman_log', $3::jsonb, coalesce($4::timestamp AT TIME ZONE 'Europe/Berlin', now()))`,
-        [w.author ?? 'SchoolMan', offerId, JSON.stringify({ text: w.text.slice(0, 4000), ref: w.ref }), w.at]
+        [w.author ?? 'SchoolMan', offerId, JSON.stringify(logDetail(w, processes)), w.at]
       );
       count.log++;
     }

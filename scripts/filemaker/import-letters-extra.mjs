@@ -11,6 +11,12 @@
  *   the Wohnungsgeber, the dwelling, move-in and move-out — so the letter is built from them, signed by the
  *   colleague who issued it (`sent_by` when they have an account here); a re-run updates it.
  * - How a letter went (`letters.sent_via`, e-mail or print) is set on the letters that came across.
+ * - A certificate of participation SchoolMan sent as a PDF is a letter of its booking (0094), with its day and
+ *   how it went; SchoolMan kept no text of it.
+ * - What a letter that came across names besides its learner (0094): every booking (`letter_bookings` — a
+ *   letter for several bookings, or to a whole course, shows on each), the place it went to or is about
+ *   (directly or through a stay), the invoice it is, and the waiting-list entry a waiting-list letter answers
+ *   (its kind by the script that wrote it). Run after the intake, which brings the entries.
  * - A complaint is a note on its booking, else on the learner, under its SchoolMan author.
  */
 import { connect } from '../db/client.mjs';
@@ -45,9 +51,15 @@ async function readStdin() {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-const { statements, sentVia, complaints } = await readStdin();
+const { statements, sentVia, complaints, certificates = [], links = [] } = await readStdin();
 const client = await connect();
-const count = { statements: 0, updated: 0, via: 0, complaints: 0, notHere: 0 };
+const count = { statements: 0, updated: 0, via: 0, complaints: 0, notHere: 0, certificates: 0, linked: 0, bookingLinks: 0, places: 0, invoices: 0, waitlist: 0 };
+// A waiting-list letter's kind, by the script that wrote it (0094).
+const WAITLIST_KIND = [
+  [/^ConfirmationWaitingList/, 'waitlist_confirmation'],
+  [/^FreePlaceWaitingList/, 'waitlist_place_free'],
+  [/^Maybenexttime/, 'waitlist_no_place'],
+];
 
 try {
   await client.query('BEGIN');
@@ -130,6 +142,84 @@ try {
     )
   ).rowCount;
 
+  // A certificate of participation SchoolMan sent as a PDF (0094): a letter of its booking with its day and how
+  // it went, and no text — SchoolMan kept none.
+  const ofBooking = await client.query(
+    `SELECT b.filemaker_booking_id AS k, b.id, b.person_id, trim(concat_ws(' ', p.first_name, p.last_name)) AS name
+       FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.filemaker_booking_id IS NOT NULL`
+  );
+  const bookingRows = new Map(ofBooking.rows.map((r) => [String(r.k), r]));
+  for (const c of [...certificates].sort((a, b) => String(a.sent ?? '').localeCompare(String(b.sent ?? '')))) {
+    const b = bookingRows.get(c.booking);
+    if (!b) {
+      count.notHere++;
+      continue;
+    }
+    if (changed.same(`certificate:${c.ref}`, [c, b.id, b.person_id, b.name])) continue;
+    const doc = letterDocument({ subject: 'Teilnahmebescheinigung', sent: c.sent, lang: 'de', text: '', header: b.name }, 'participation_certificate');
+    const known = (await client.query(`SELECT id FROM letters WHERE filemaker_letter_id = $1`, [c.ref])).rows[0];
+    if (known) {
+      await client.query(`UPDATE letters SET booking_id = $2, person_id = $3, recipient_name = $4, document = $5::jsonb, sent_via = $6 WHERE id = $1`, [
+        known.id,
+        b.id,
+        b.person_id,
+        b.name,
+        JSON.stringify(doc),
+        c.via,
+      ]);
+    } else {
+      const version = (await client.query(`SELECT coalesce(max(version), 0) + 1 AS v FROM letters WHERE booking_id = $1 AND kind = 'participation_certificate'`, [b.id]))
+        .rows[0].v;
+      await client.query(
+        `INSERT INTO letters (kind, version, language, booking_id, person_id, recipient_name, subject, document, sent_at, sent_via, filemaker_letter_id)
+         VALUES ('participation_certificate', $1, 'de', $2, $3, $4, 'Teilnahmebescheinigung', $5::jsonb, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()), $7, $8)`,
+        [version, b.id, b.person_id, b.name, JSON.stringify(doc), c.sent, c.via, c.ref]
+      );
+    }
+    count.certificates++;
+  }
+
+  // What a letter names besides its learner (0094): every booking, its place, its invoice, its waiting-list entry.
+  const letterRows = new Map(
+    (await client.query(`SELECT filemaker_letter_id AS k, id, kind, booking_id, waitlist_entry_id FROM letters WHERE filemaker_letter_id IS NOT NULL`)).rows.map((r) => [
+      String(r.k),
+      r,
+    ])
+  );
+  const stayPlaces = await map(`SELECT filemaker_id AS k, accommodation_id AS v FROM booking_stays WHERE filemaker_id IS NOT NULL AND accommodation_id IS NOT NULL`);
+  const invoices = await map(`SELECT DISTINCT ON (number) number AS k, id AS v FROM invoices ORDER BY number, issued_on DESC NULLS LAST`);
+  const entries = await map(`SELECT filemaker_id AS k, id AS v FROM waitlist_entries WHERE filemaker_id IS NOT NULL`);
+  for (const x of links) {
+    const letter = letterRows.get(x.ref);
+    if (!letter || letter.kind === 'offer') continue;
+    const bookingIds = [...new Set(x.bookings.map((b) => bookings.get(b)).filter(Boolean))];
+    const placeId = (x.place && places.get(x.place)) || x.stays.map((s) => stayPlaces.get(s)).find(Boolean) || null;
+    const invoiceId = x.invoice ? (invoices.get(x.invoice) ?? null) : null;
+    const waitlistKind = WAITLIST_KIND.find(([re]) => re.test(x.script ?? ''))?.[1] ?? null;
+    const entryId = x.waiting && waitlistKind && !letter.booking_id ? (entries.get(x.waiting) ?? null) : null;
+    if (changed.same(`links:${x.ref}`, [x, letter.id, bookingIds, placeId, invoiceId, entryId])) continue;
+    count.linked++;
+    // The place it went to or is about, and the invoice it is.
+    count.places += (
+      await client.query(`UPDATE letters SET accommodation_id = $2 WHERE id = $1 AND $2::uuid IS NOT NULL AND accommodation_id IS DISTINCT FROM $2`, [letter.id, placeId])
+    ).rowCount;
+    count.invoices += (await client.query(`UPDATE letters SET invoice_id = $2 WHERE id = $1 AND invoice_id IS DISTINCT FROM $2`, [letter.id, invoiceId])).rowCount;
+    // Every booking it names: one letter, on each of them.
+    await client.query(`DELETE FROM letter_bookings WHERE letter_id = $1 AND NOT (booking_id = ANY($2::uuid[]))`, [letter.id, bookingIds]);
+    count.bookingLinks += (
+      await client.query(`INSERT INTO letter_bookings (letter_id, booking_id) SELECT $1, unnest($2::uuid[]) ON CONFLICT DO NOTHING`, [letter.id, bookingIds])
+    ).rowCount;
+    // A waiting-list letter is its entry's, under its kind (the entry came with the intake).
+    if (entryId && (letter.kind === 'schoolman' || letter.waitlist_entry_id !== entryId)) {
+      const version = (
+        await client.query(`SELECT coalesce(max(version), 0) + 1 AS v FROM letters WHERE waitlist_entry_id = $1 AND kind = $2 AND id <> $3`, [entryId, waitlistKind, letter.id])
+      ).rows[0].v;
+      count.waitlist += (
+        await client.query(`UPDATE letters SET kind = $2, waitlist_entry_id = $3, version = $4 WHERE id = $1 AND booking_id IS NULL`, [letter.id, waitlistKind, entryId, version])
+      ).rowCount;
+    }
+  }
+
   for (const c of complaints) {
     const bookingId = c.booking ? (bookings.get(c.booking) ?? null) : null;
     const personId = c.person ? (persons.get(c.person) ?? null) : null;
@@ -158,5 +248,7 @@ try {
 }
 
 console.log(
-  `${count.statements} Wohnungsgeberbestätigungen new, ${count.updated} updated · ${count.via} letters told how they went · ${count.complaints} complaints · ${count.notHere} not here · ${count.unchanged ?? 0} as last time`
+  `${count.statements} Wohnungsgeberbestätigungen new, ${count.updated} updated · ${count.via} letters told how they went · ${count.certificates} certificates of participation · ` +
+    `${count.linked} letters with more named: ${count.bookingLinks} booking links, ${count.places} places, ${count.invoices} invoices, ${count.waitlist} on their waiting-list entry · ` +
+    `${count.complaints} complaints · ${count.notHere} not here · ${count.unchanged ?? 0} as last time`
 );

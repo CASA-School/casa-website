@@ -269,12 +269,13 @@ for r in table('CommissionDetail', '__ID_CommissionDetail', '_ID_Agency', '_ID_B
     commissions[id(p)].append({'id': r['__ID_CommissionDetail'].strip(), 'percentage': value * 100 if 0 < value <= 1 else value,
                                'chargeRef': first(r['_ID_CostDetailReference']) or None, 'note': r['CommentPercentage'].strip() or None})
 
-# The letters that name it (the importer links those that came across with the learners).
+# The letters that name it (the importer links those that came across with the learners): as their agency or
+# company, else as the party a letter went to (`_ID_Management`, `_ID_Institution`; 0094).
 letters_of = collections.defaultdict(list)
-for lid, agency, corp in zip(column('Letter', '__ID_Letter'), column('Letter', '_ID_Agency'), column('Letter', '_ID_Corporate')):
-    p = owner.get(('_ID_Agency', first(agency))) or owner.get(('_ID_Corporate', first(corp)))
+for r in table('Letter', '__ID_Letter', *LINKS):
+    p = party_of(r, ('_ID_Agency', '_ID_Corporate', '_ID_Management', '_ID_Institution'))
     if p:
-        letters_of[id(p)].append(lid.strip())
+        letters_of[id(p)].append(r['__ID_Letter'].strip())
 
 # Its history (2026-10-26, mapping review §8): the work-log lines that name it, about itself or about a
 # learner the workspace holds. A line about someone it does not hold stays in SchoolMan.
@@ -287,16 +288,22 @@ def moment(value):
     return f'{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}T{hh:02d}:{mm:02d}:{ss:02d}'
 
 
+# A line that names only an invoice (a reminder about an invoice to an institution) is the history of the party
+# the invoice bills (0094). Each line keeps its kind, whether a colleague typed it, and its invoice.
+invoice_party = {first(r['_ID_SerialNumberInvoice']): r for r in table('Invoice', '_ID_SerialNumberInvoice', *LINKS) if first(r['_ID_SerialNumberInvoice'])}
 log_of = collections.defaultdict(list)
-wf = table('WorkFlow', '__ID_Workflow', '_ID_Person', '_ID_Booking', *LINKS, 'UserName', 'TimeStampOfCreation')
+wf = table('WorkFlow', '__ID_Workflow', '_ID_Person', '_ID_Booking', *LINKS, 'UserName', 'TimeStampOfCreation', '_ID_ProcessReference', '_ID_History', '_ID_SerialNumberInvoice')
 for r, line, comment in zip(wf, column_chunked('WorkFlow', 'Workflow_1', 5000), column_chunked('WorkFlow', 'CommentWorkflow', 5000)):
-    p = party_of(r)
+    invoice = first(r['_ID_SerialNumberInvoice'])
+    p = party_of(r) or (party_of(invoice_party[invoice]) if invoice in invoice_party and not first(r['_ID_Person']) and not first(r['_ID_Booking']) else None)
     if not p:
         continue
     person = first(r['_ID_Person']) or first(bookings.get(first(r['_ID_Booking']), {}).get('_ID_Person'))
     body = '\n'.join(x.strip() for x in (line, comment) if x and x.strip())
+    process = first(r['_ID_ProcessReference'])
     if body and (not person or person in chosen):
-        log_of[id(p)].append({'ref': r['__ID_Workflow'].strip(), 'at': moment(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None, 'text': body[:4000]})
+        log_of[id(p)].append({'ref': r['__ID_Workflow'].strip(), 'at': moment(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None, 'text': body[:4000],
+                              'process': process if process.isdigit() else None, 'typed': first(r['_ID_History']) == '1', 'invoice': invoice or None})
 
 out = []
 for p in parties:

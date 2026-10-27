@@ -9,7 +9,7 @@
  * differs, so a re-run changes nothing (the `set_updated_at` triggers would otherwise stamp every row).
  *
  * - A to-do keeps SchoolMan's number (`filemaker_id`); a re-run brings its day, times, text and author
- *   up to date. Its status is the workspace's once read across: SchoolMan can only mark a task done,
+ *   up to date. Its title stands before its text, and the colleague it is for is its assignee (0094). Its status is the workspace's once read across: SchoolMan can only mark a task done,
  *   never reopen it, and never one a colleague closed here (`done_by`). A task written here is never
  *   touched, and nothing is deleted.
  * - A desk is set to SchoolMan's front or back where it differs; a colleague SchoolMan gives neither
@@ -43,21 +43,36 @@ const count = {
 
 try {
   await client.query('BEGIN');
+  // Whom a task is for (0094): the first colleague it names who has a workspace account; any other it names
+  // is written under its text.
+  const colleagues = new Map(
+    (
+      await client.query(
+        `SELECT m.filemaker_staff_id::text AS fm, m.staff_user_id, trim(concat_ws(' ', p.first_name, p.last_name)) AS name
+           FROM staff_members m JOIN people p ON p.id = m.person_id WHERE m.filemaker_staff_id IS NOT NULL`
+      )
+    ).rows.map((r) => [r.fm, r])
+  );
   for (const t of data.tasks) {
+    const named = (t.for ?? []).map((fm) => colleagues.get(fm)).filter(Boolean);
+    const assignee = named.find((c) => c.staff_user_id) ?? null;
+    const others = named.filter((c) => c !== assignee).map((c) => c.name);
+    const body = others.length ? `${t.body}\nAuch für: ${others.join(', ')}`.slice(0, 2000) : t.body;
     // xmax = 0 only on a freshly inserted row; an update that the WHERE turns down returns no row.
     const result = await client.query(
-      `INSERT INTO day_tasks (on_date, starts_at, ends_at, body, status, author_name, filemaker_id, done_at)
-       VALUES ($1::date, $2::time, $3::time, $4, $5, $6, $7, CASE WHEN $5 = 'done' THEN now() END)
+      `INSERT INTO day_tasks (on_date, starts_at, ends_at, body, status, author_name, filemaker_id, done_at, assignee_id)
+       VALUES ($1::date, $2::time, $3::time, $4, $5, $6, $7, CASE WHEN $5 = 'done' THEN now() END, $8)
        ON CONFLICT (filemaker_id) WHERE filemaker_id IS NOT NULL DO UPDATE SET
          on_date = EXCLUDED.on_date, starts_at = EXCLUDED.starts_at, ends_at = EXCLUDED.ends_at,
-         body = EXCLUDED.body, author_name = EXCLUDED.author_name,
+         body = EXCLUDED.body, author_name = EXCLUDED.author_name, assignee_id = coalesce(EXCLUDED.assignee_id, day_tasks.assignee_id),
          status = CASE WHEN day_tasks.done_by IS NULL AND EXCLUDED.status = 'done' THEN 'done' ELSE day_tasks.status END,
          done_at = CASE WHEN day_tasks.done_by IS NULL AND EXCLUDED.status = 'done' AND day_tasks.status <> 'done' THEN now() ELSE day_tasks.done_at END
        WHERE (day_tasks.on_date, day_tasks.starts_at, day_tasks.ends_at, day_tasks.body, day_tasks.author_name)
                IS DISTINCT FROM (EXCLUDED.on_date, EXCLUDED.starts_at, EXCLUDED.ends_at, EXCLUDED.body, EXCLUDED.author_name)
+          OR (EXCLUDED.assignee_id IS NOT NULL AND day_tasks.assignee_id IS DISTINCT FROM EXCLUDED.assignee_id)
           OR (day_tasks.done_by IS NULL AND EXCLUDED.status = 'done' AND day_tasks.status <> 'done')
        RETURNING (xmax = 0) AS inserted`,
-      [t.date, t.start, t.end, t.body, t.status, t.author, t.id]
+      [t.date, t.start, t.end, body, t.status, t.author, t.id, assignee?.staff_user_id ?? null]
     );
     if (!result.rowCount) count.unchanged++;
     else if (result.rows[0].inserted) count.inserted++;

@@ -119,6 +119,32 @@ export async function activityFor(
   }));
 }
 
+/** A kind of SchoolMan history line (0094): accounting, learning progress, accommodation, an enquiry … */
+export type HistoryProcess = { code: string; name: { de: string; en: string }; position: number };
+
+/** The kinds of SchoolMan history line, by code. */
+export async function historyProcesses(): Promise<Map<string, HistoryProcess>> {
+  const rows = await query<{ code: string; name_de: string; name_en: string; position: number }>(
+    `SELECT code, name_de, name_en, position FROM history_processes ORDER BY position, code`
+  );
+  return new Map(rows.map((r) => [r.code, { code: r.code, name: { de: r.name_de, en: r.name_en }, position: r.position }]));
+}
+
+/** An absence notice a SchoolMan history line records (0094): the day, its lessons and minutes, whether it was excused. */
+export type HistoryAbsence = { day: string | null; lessons: number | null; minutes: number | null; excused: boolean | null };
+
+export function historyAbsence(detail: Record<string, unknown> | null): HistoryAbsence | null {
+  const a = detail?.absence;
+  if (!a || typeof a !== 'object') return null;
+  const v = a as Record<string, unknown>;
+  return {
+    day: typeof v.day === 'string' ? v.day : null,
+    lessons: typeof v.lessons === 'number' ? v.lessons : null,
+    minutes: typeof v.minutes === 'number' ? v.minutes : null,
+    excused: typeof v.excused === 'boolean' ? v.excused : null,
+  };
+}
+
 const KNOWN_QUEUES = new Set<string>([
   'enquiry',
   'course_registration',
@@ -170,6 +196,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   offer: { noun: 'Angebot', gender: 'n' },
   room: { noun: 'Raum', gender: 'm' },
   organisation: { noun: 'Organisation', gender: 'f' },
+  course: { noun: 'Kurs', gender: 'm' },
 };
 
 const ARTICLES_DE = {
@@ -645,6 +672,10 @@ export function activityHref(entry: ActivityEntry): string | null {
 
   if (entry.entity === 'course_instance' && entry.entityId) {
     return `/admin/catalogue/${entry.entityId}`;
+  }
+
+  if (entry.entity === 'course' && entry.entityId) {
+    return `/admin/catalogue/courses/${entry.entityId}`;
   }
 
   if (entry.entity === 'offer' && entry.entityId && entry.action !== 'offer_deleted') {

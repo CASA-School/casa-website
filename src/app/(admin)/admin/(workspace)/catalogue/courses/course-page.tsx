@@ -15,10 +15,12 @@ import { MoreInPanel } from '@/components/admin/more-in-panel';
 import { RecordLink } from '@/components/admin/record-link';
 import { PersonPicker } from '@/components/admin/person-picker';
 import { dayRange } from '@/components/admin/list';
-import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
+import { MetaItem, MetaLine, Stat, StatBar, Timeline } from '@/components/admin/record-parts';
 import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { Badge, Button, ButtonLink, Card, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
+import { activityFor } from '@/lib/admin/activity';
+import { listNotes } from '@/lib/admin/notes';
 import { recordHrefFor } from '@/lib/admin/record-href';
 import type { StaffUser } from '@/lib/admin/auth';
 import { SESSION_LABELS } from '@/lib/admin/catalogue';
@@ -74,13 +76,17 @@ export async function CoursePage({
 
   const mayTeach = canAccess(user, 'kursplanung', 'edit');
   const mayPlan = canAccess(user, 'rooms', 'edit');
-  const [days, plans, choices, row, edit, rooms] = await Promise.all([
+  const mayNote = canAccess(user, 'catalogue', 'edit');
+  const [days, plans, choices, row, edit, rooms, notes, activity] = await Promise.all([
     listCourseDays(id),
     weekPlans(course),
     mayTeach || mayPlan ? courseDayChoices(id) : Promise.resolve({ teachers: [], rooms: [], taken: new Map(), away: new Map() }),
     courseListRow(id, today),
     mayPlan ? courseForEdit(id) : Promise.resolve(null),
     mayPlan ? listBookableRooms() : Promise.resolve([]),
+    // The class's notes: SchoolMan's (0094) and the team's own.
+    listNotes('course', id),
+    activityFor('course', id),
   ]);
   if (!row) notFound();
   // The groups as the list shows them (an empty begun group left out); a number that is not one of
@@ -138,6 +144,7 @@ export async function CoursePage({
     { id: 'days', label: t('Kurstage', 'Lesson days'), icon: Icon.calendar, count: shown.length },
     { id: 'plan', label: t('Wochenplan', 'Weekly plan'), icon: Icon.clock },
     ...(canAccess(user, 'bookings') ? [{ id: 'learners', label: t('Teilnehmende', 'Learners'), icon: Icon.people, count: learnersNow }] : []),
+    ...(notes.length || mayNote ? [{ id: 'notes', label: t('Notizen', 'Notes'), icon: Icon.note, count: notes.length }] : []),
   ];
 
   return (
@@ -430,6 +437,14 @@ export async function CoursePage({
                 </div>
               ) : null}
             </Card>
+          </div>
+        </RecordTabPanel>
+      ) : null}
+
+      {notes.length || mayNote ? (
+        <RecordTabPanel id="notes">
+          <div className="max-w-3xl">
+            <Timeline canWrite={mayNote} entity="course" id={id} notes={notes} activity={activity} />
           </div>
         </RecordTabPanel>
       ) : null}

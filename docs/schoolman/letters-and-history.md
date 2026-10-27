@@ -108,3 +108,40 @@ nobody else has access to them.
   → printed; the latest says): `letters.sent_via` on 7,012 letters, shown on the letter's page beside its day.
 - **Complaints** (`Complaint`, 2 for the sample) are notes on the booking, else the learner.
 
+
+## Completeness (2026-10-27, migration 0094)
+
+What the completeness review found SchoolMan holds on its letters, history and notes, and the bridge now reads
+(counts from the local test run on the copy of 2026-10-27):
+
+- **A letter that names several bookings** (`Letter._ID_Booking` is a list on 6,513 letters) is one letter, shown
+  on every booking it names (`letter_bookings`, 42,080 links on 6,045 letters). A letter to a whole course — a room
+  change, the course start, an exam invitation, with no person — is no one learner's: `person_id` is empty, its
+  first booking here holds it, and the person page shows it through their bookings (1,062 such letters; they had
+  sat on one learner each). The letter page says „An die Teilnehmenden von n Buchungen".
+- **Its text**: a confirmation's second block (`FreeField_2`: Gesamtbetrag, Kommission, Nettobetrag) follows the
+  first; on a receipt for several payments that block only repeats the booking numbers and is left out.
+- **Whom and what it names**: the place it went to or is about (`_ID_Accommodation`, or a stay's place;
+  `letters.accommodation_id`, 1,248 set), the party it went to (`_ID_Management`, `_ID_Institution` →
+  `letters.organisation_id`, through the organisations step), the stays (`source.schoolman.stays`), the invoice it
+  is (`_ID_SerialNumberInvoice` → `letters.invoice_id`, 274), and the waiting-list entry a waiting-list letter
+  answers (`_ID_WaitingRoom`; its kind by the script — confirmation, place free, no place; 147 on their entry).
+- **As it went**: who signed it (`_ID_Signature`, from the register, on the letter; 2,114), its copies and blind
+  copies (`Email.Copy`, `Email.BlindCopy` → `source.schoolman.cc`/`bcc`, on the letter page).
+- **Certificates of participation** SchoolMan sent as a PDF (`WorkFlowLetter._ID_CertificateDone`, no `Letter`
+  row): a letter of kind `participation_certificate` on the booking with its day and how it went (1,758).
+- **The history**: each line's kind (`_ID_ProcessReference` → `history_processes`, `detail.process`; „De"/„En" on
+  old rows is a language and is read as none), whether a colleague typed it (`_ID_History` → „hat in SchoolMan
+  notiert"), the invoice it is about, and an absence notice's day, lessons, minutes and „excused" (591, „Abwesenheit
+  gemeldet" on the booking's attendance day). The full history filters by kind. A staff matter (HHRR) is never put
+  on a learner. Lines about an invoice alone go on the organisation it bills; lines that name a place to stay go
+  on the place too (`read_history.py`, 1,037 lines on 97 places), as on an organisation only when their learner is
+  here.
+- **Notes on a course** (`Comment._ID_Course`, nothing else named): the course page's „Notizen" (133 on 75 courses).
+- **The Tagesplan**: a calendar entry's title (`Subject`) stands before its text; whom it is for (`_ID_Adressee`,
+  through `StaffSchool`) is its assignee.
+
+Not brought, by decision: notes on parties (`Comment._ID_Management` …, including the host notes made on a host's
+party) — SchoolMan keeps credentials in some, decision 7 of `bridge-gaps.md`. Rahman decides: letters and notes about
+colleagues (`Letter._ID_StaffMember`, `_ID_SingleMonthStaff`, `Comment._ID_StaffMember`), the document links (`Url`),
+the office handbook (`Emanuel`, `Medium`).

@@ -19,6 +19,7 @@
  *   (`schoolman_log`, read afresh each run).
  */
 import { connect } from '../db/client.mjs';
+import { historyProcesses, logDetail } from './history-line.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -32,6 +33,8 @@ const count = { read: groups.length, made: 0, updated: 0, keptHere: 0, organisat
 
 try {
   await client.query('BEGIN');
+  // The kinds of a history line (0094).
+  const processes = await historyProcesses(client);
   const valid = new Set((await client.query(`SELECT code FROM countries`)).rows.map((r) => r.code.trim()));
   const types = new Map((await client.query(`SELECT id, filemaker_id::text AS fm FROM course_types WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.id]));
   const organisationOf = async (layout, recordId) =>
@@ -142,7 +145,7 @@ try {
       await client.query(
         `INSERT INTO staff_activity (staff_name, entity, entity_id, action, detail, created_at)
          VALUES ($1, 'group_visit', $2, 'schoolman_log', $3::jsonb, coalesce($4::timestamp AT TIME ZONE 'Europe/Berlin', now()))`,
-        [w.author ?? 'SchoolMan', visitId, JSON.stringify({ text: w.text.slice(0, 4000), ref: w.ref }), w.at]
+        [w.author ?? 'SchoolMan', visitId, JSON.stringify(logDetail(w, processes)), w.at]
       );
       count.log++;
     }

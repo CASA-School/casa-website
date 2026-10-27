@@ -486,9 +486,16 @@ export default async function OrganisationPage({
               {invoices.map((i) => (
                 <Row
                   key={i.id}
-                  href={i.bookingId ? `/admin/bookings/${i.bookingId}` : `/admin/organisations/${id}?tab=invoices`}
+                  href={
+                    i.letterId && canAccess(user, 'bookings')
+                      ? `/admin/letters/${i.letterId}`
+                      : i.bookingId
+                        ? `/admin/bookings/${i.bookingId}`
+                        : `/admin/organisations/${id}?tab=invoices`
+                  }
                   icon={<IconChip icon={Icon.statement} tint="blue" />}
                   title={t(`Rechnung ${i.number}`, `Invoice ${i.number}`)}
+                  state={i.cancelled ? <Badge tone="danger">{t('storniert', 'cancelled')}</Badge> : undefined}
                   detail={[i.issuedOn ? dayRange(i.issuedOn, i.issuedOn, lang) : null, i.subject].filter(Boolean).join(' · ') || null}
                   end={i.amount != null ? euros(i.amount) : null}
                 />
