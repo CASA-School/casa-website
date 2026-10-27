@@ -69,7 +69,11 @@ npm run admin:seed   # creates the first staff workspace account (an owner, the 
 npm run admin:password  # new password for ADMIN_EMAIL when no owner can sign in
 npm run admin:check  # loads every /admin screen with a real session; catches bad SQL
 npm run db:azure -- migrate   # migrations + seeds on the Azure database, run as a job inside Azure
-npm run bridge:azure # SchoolMan's current data into the live workspace, run on request (docs/FILEMAKER_BRIDGE.md §8)
+npm run bridge:azure # SchoolMan's current data into the live workspace, the old way, through FileMaker Pro (docs/FILEMAKER_BRIDGE.md §8)
+node scripts/schoolman-sync/sync.mjs --full   # SchoolMan into the copy, all of it (the service does this by itself)
+node scripts/filemaker/bridge-mirror.mjs      # the bridge from the copy (the Azure job runs it every five minutes)
+node scripts/filemaker/layouts/verify_layouts.mjs   # every Sync_ layout read once as WorkspaceSync
+./infra/azure/schoolman-job.sh [--off]        # the scheduled job: make or update it, or remove it
 npm run cms:extract  # refreshes the website editor's catalog of the site's copy
 npm run cms:translations  # the six prepared languages: status, `-- todo`, `-- merge` (docs/TRANSLATIONS.md)
 npm run placement:port  # re-ports the placement item bank from its source markdown
@@ -358,9 +362,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 ## Hard rules
 
 1. **No FileMaker, no dashboard row-level data ON THE PUBLIC SITE.** The
-   FileMaker bridge is still unbuilt and is a separate piece of work; the staff
-   workspace at `/admin` carries a `filemaker_links` table for it (0007) and
-   writes nothing there yet. **Public pages** may use only reviewed,
+   SchoolMan sync feeds the staff workspace only (docs/schoolman/MIGRATION.md);
+   nothing of it reaches the public site. **Public pages** may use only reviewed,
    public-safe *aggregate* metrics — never a row from any operational table,
    including the workspace's own. Current approved values (2026-06-17 sync):
    `30,000+ learners supported`, `150+ countries represented`,
@@ -438,6 +441,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/ADMIN_WORKSPACE.md` | **Read before touching `/admin`.** The staff workspace: architecture, security model, roles, the placement review surface, design layer, schema, local setup |
 | `docs/ADMIN_I18N.md` | **Read before writing any workspace text.** German by default, English on request: the API, what is and is not translated, and the glossary |
 | `docs/CATALOGUE_AND_PRICING.md` | **Read before adding a product, a type or a price.** FileMaker's 99 reference tables and where its prices really live (typed per row, and inside a script); the `rates` model that replaces them |
+| `docs/schoolman/MIGRATION.md` | **Read first for anything that moves SchoolMan data.** What runs (sync → copy → bridge), what comes across (90 layouts, 902 fields) and what deliberately not, open decisions, the runbook, how to add a field or table, every pitfall met |
 | `docs/FILEMAKER_BRIDGE.md` | **Read before connecting anything to FileMaker.** How the two existing bridges work, what `SchoolMan` looks like inside, and the design for the registrations bridge with its open decisions |
 | `docs/schoolman/` | **Read before building anything that touches FileMaker data.** The study of SchoolMan: one page per area (people, organisations, intake, bookings, courses and attendance, money, accommodation, letters, staff) with live counts, how records are made, what holds facts and what is copy; the direction (a parallel system, a read-only bridge per record, modules one at a time); the read-only profiler in `scripts/filemaker/` |
 | `docs/FILEMAKER_LESSONS.md` | **Read before adding any table or column to the workspace.** FileMaker's measured defects — duplicate identities, free-text results, stored accumulators, status-as-default — and the rule the new system follows for each |
@@ -492,17 +496,17 @@ is still valid.
   app**: the day-one test's printed QR posters open `neu.casa-bremen.de/test` (docs/ENTRY_TEST.md). Rahman's owner account
   exists on the Azure database (`db-job.sh owner`); everyone else is added from the
   Team screen.
-- **No FileMaker bridge yet — but it is designed.** `docs/FILEMAKER_BRIDGE.md`
-  (2026-09-08). Migration 0007 replaced the per-queue `external_ref` text column
-  with a `filemaker_links` table and a person register; nothing writes links yet. **The shared Data API credential (`FileMaker SRV`) is the owner's own
-  `[Full Access]` account — use it for reads only, never a write or a script call.** Key
-  facts for anyone picking this up: FileMaker already has the
-  intake pipeline (`Contact → PreBooking → WaitingRoom → Booking`, with `TestStudent`
-  for placement); the bridge should create Contact+PreBooking pairs and **never**
-  write `Booking` directly; the Data API can write through `[Full Access]`/`Reduced`
-  accounts today, so a dedicated `WebIntake` account with its own privilege set is a
-  precondition, not a nicety; FileMaker is LAN-only, so the push must run on-prem.
-  Blocked on the decisions in that document's §7.
+- **SchoolMan comes across through the real-time sync (live 2026-10-27).** Read
+  `docs/schoolman/MIGRATION.md` first. 90 `Sync_<Table>` layouts in SchoolMan (902 fields, hidden from the
+  staff's menus) are read over the Data API as `WorkspaceSync` by the sync service on Rahman's Mac
+  (`scripts/schoolman-sync`, launchd) into a copy in the workspace's database (`schoolman_records`,
+  `/api/schoolman/sync`, `SCHOOLMAN_SYNC_KEY`); the Azure job `caj-casa-website-schoolman` runs the bridge's
+  steps from that copy every five minutes (`infra/azure/schoolman-job.sh`). The service reads only — GET and
+  `_find`, never a write or a script call, whatever the account may do. **Writing into SchoolMan** is still
+  designed only (`docs/FILEMAKER_BRIDGE.md` §7): FileMaker's intake pipeline is `Contact → PreBooking →
+  WaitingRoom → Booking`; a write bridge creates Contact+PreBooking pairs and never `Booking`, through its own
+  account with its own privilege set, on-prem. Changing a SchoolMan layout needs Rahman's go; a migration that
+  ALTERs a table the bridge writes needs the job paused around the release (MIGRATION.md §5).
 - **The website's database exists (2026-10-09).** `psql-casa-website-f8d745`, Postgres 17,
   B1ms, Belgium Central, in its own subnet of the private data network (no public access, like
   the student app's). The site connects as `casa_web` through the Container App secret

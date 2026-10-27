@@ -1,0 +1,87 @@
+## Booking (22488 rows, 6850 since 2025): 66 fields
+   _ID_Platform (6849), _ID_StatusStudent (6817), _ID_Editable (6815), _ID_CourseLanguage (6631), ScheduleBookingClassBook (6603), ScheduleBookingInvoice_1 (6524), ScheduleBookingShort_1 (6453), ScheduleBookingShort_2 (6453), _ID_Level (6049), _ID_DayTimeReference (6043), _ID_Course (6028), ScheduleBooking_1 (5980), ScheduleBooking_2 (5980), _ID_PriceCourseSet (5846), _ID_Prolongation (5747), ScheduleBookingLong_1 (5645), ScheduleBookingLong_2 (5645), count_Absence (5034), count_AbsenceRate (5034), count_Illness (5034), count_Excuse (5034), count_UnExcuse (5034), count_Presence (5034), count_PresenceRate (5034), _ID_VeryFirstBooking (4898), _ID_VeryLastBooking (4897), count_ID_Agreement (4842), _ID_InternationalAirport (4689), write_PresenceSymbol (4435), _ID_Client (4336), _ID_LongTerm (3928), _ID_Selected (3528), count_ID_SingleDateStudent (3215), count_Delay (2573), VeryLastBooking (2376), count_DelayUnit (2360), _ID_Welcome (2244), VeryFirstBooking (1712), _ID_Project (1346), _ID_CentralStation (1265), List_Agreement (1149), _ID_MissingItemReference (1133), _ID_Contractor (878), _ID_ExamReference (796), _ID_LevelStep (734), _ID_ShownUp (501), _ID_Success (500), _ID_NationalAirport (415), _ID_LearningAgreement (405), _ID_ScheduleCheck (211), Balance.Com.Number (209), Balance.Gross.Number (202), Balance.Net.Number (202), _ID_Local (156), _ID_ApplicationInternet (65), _ID_Selection (53), _DurationWeek (42), _ID_BusStop (36), _ID_PriceAccommodationSet (30), _ID_Responsibility (30), _ID_Contact (28), _ID_Clearing (12), _ID_WaitingRoom (10), CommentOnBooking (4), _ID_Test (2), _ID_CourseStartMailSent (2)
+## Letter (33218 rows, 33216 since 2025): 37 fields
+   _ID_LetterSent (28642), _ID_EmailSent (28421), _ID_Student (27814), Provenience (27735), _ID_Platform (21964), _ID_Client (18040), _ID_InternationalAirport (16510), _ID_Course (12319), Email.All (6911), FreeField_2 (2827), _ID_Signature (2640), _ID_PositionSignature (2602), _ID_PreBooking (2485), _ID_Management (1640), _ID_CourseType (1616), _ID_Contact (1390), _ID_DateAccommodation (1385), _ID_Accommodation (1369), _ID_CentralStation (1233), _ID_WaitingRoom (1203), _ID_NationalAirport (715), _ID_Address (665), _ID_Email (505), Email.BlindCopy (505), _ID_SerialNumberInvoice (480), _ID_Agreement (453), _ID_Exam (403), _ID_Institution (220), _ID_StaffMember (92), _ID_EnquiryHost (73), _ID_Level (36), Email.Copy (28), _ID_Group (23), _ID_SingleMonthStaff (17), _ID_Existent (4), _ID_TimeMachine (2), _ID_WeekOfCourse (1)
+## Course (1331 rows, 444 since 2025): 35 fields
+   _ID_PlatformReference (440), _ID_Level (440), _ID_WeekDone (439), ScheduleCourse_1 (439), ScheduleCourse_2 (439), ScheduleCourseShort_1 (439), ScheduleCourseShort_2 (439), _ID_WeekDayNumber (437), _ID_SingleDatesDone (437), _ID_Location (426), ScheduleCourse_ClassBook (421), ScheduleCourse_UltraShort (383), ScheduleCourseLong_1 (322), ScheduleCourseLong_2 (322), _ID_StaffMember (307), _ID_ClassRoom (286), _ID_CourseCourseStartMailSent (274), List_ID_Student (239), countIDBookDelivered.yes (229), countIDBookDelivered.no (229), CapGroup (202), IncentivePercent (87), _ID_LevelStepReference (76), CommentOnCourse (62), Supplement (57), _ID_Incentive (48), _ID_Exam (25), NumberLessonToDo (5), CourseTitle_1 (4), WeekDayTime_1 (3), WeekDayTime_2 (3), _ID_TypeTeachingReference (2), TextField (2), _ID_NoteBookDone (2), Url (1)
+## WorkFlow (109875 rows, 45076 since 2025): 35 fields
+   _ID_ProcessReference (44540), _ID_Student (38939), _ID_Platform (35954), _ID_InternationalAirport (28758), _ID_Client (27946), _ID_History (27657), _ID_WorkFlowReference (27267), _ID_Course (26102), _ID_SingleDateControl (6980), _ID_PreBooking (5770), _ID_Selected (4029), _ID_CentralStation (3157), _ID_Active (2339), _ID_NationalAirport (675), Origen (625), _ID_SerialNumberInvoice (464), _ID_DateAccommodation (443), _ID_Absence (421), SingleDateAbsence (421), NumberMinute (421), _ID_Excuse (420), Subject (305), NumberLesson (203), _ID_Accommodation (147), _ID_BusStop (53), _ID_HighLightCalendar (38), _ID_Adressee (21), _ID_CourseLanguage (16), _ID_Internship (15), _ID_CourseTypeReference (14), _ID_Provider (14), _ID_StaffMember (5), _ID_Exam (5), _ID_Editorial (4), _ID_Relation (1)
+## Offer (397 rows, 164 since 2025): 22 fields
+   DateOfEmission (164), _ID_CourseTypeReference (95), _ID_CourseLanguage (94), _ID_Level (85), _ID_DayTimeReference (76), _ID_Institution (75), _ID_Email (70), _ID_Contact (69), _ID_Course (55), _ID_Phone (51), _ID_Management (41), EmailAll (41), _ID_LevelStepReference (34), _ID_AccommodationCatering (16), _ID_AccommodationType (15), _ID_AccommodationRoom (15), _ID_Platform (8), _ID_Client (8), Provenience (8), _ID_CentralStation (6), _ID_Template (5), _ID_WaitingRoom (1)
+## CostDetail (79482 rows, 25284 since 2025): 21 fields
+   _ID_Provider (25284), _ID_Platform (25258), _ID_Person (22067), _ID_Student (17839), _ID_Course (17501), _ID_InternationalAirport (16559), _ID_Client (16061), _ID_BookReference (12031), _ID_CourseTypeReference (11099), _ID_Selected (9862), _ID_CancellationSet (9192), _ID_CostDetailReferenceComment (4915), _ID_Level (4762), _ID_LevelStep (4422), _ID_CostDetailSet (3027), _ID_Corporate (2564), _ID_CentralStation (1931), _ID_NationalAirport (538), _ID_Group (134), _ID_Management (21), _ID_Institution (21)
+## PaymentIn (51523 rows, 18939 since 2025): 18 fields
+   _ID_Platform (18937), _ID_StaffSchool (18870), _ID_Provider (17440), _ID_Person (15677), _ID_CostDetail (13439), _ID_InternationalAirport (13067), _ID_Client (11382), _ID_Course (11382), _ID_Selected (10970), _ID_CourseTypeReference (4171), _ID_Level (4167), _ID_CentralStation (1881), _ID_Agency (1184), _ID_EnrolmentDone (844), _ID_NationalAirport (367), _ID_Instalment (221), _ID_Corporate (203), _ID_SerialNumberInvoice (2)
+## TestStudent (5940 rows, 2239 since 2025): 18 fields
+   _ID_LevelSchool (2131), _ID_PreBooking (1633), _ID_TestReference (1274), _ID_Student (1016), _ID_Test (647), _ID_Platform (606), _ID_Course (597), _ID_InternationalAirport (493), _ID_Client (186), _ID_CentralStation (91), _ID_Level (12), ZSingleDateTest (12), _ID_CourseTypeReference (7), _ID_StaffMember (2), _ID_NationalAirport (1), _ID_Selected (1), Point (1), _ID_Success (1)
+## PreBooking (6082 rows, 2556 since 2025): 17 fields
+   _ID_Address (2126), _ID_Contact (1889), _ID_Phone (1887), _ID_Student (1767), _ID_Platform (1151), _ID_WaitingRoom (1057), _ID_Local (996), _ID_Client (852), _ID_Email (608), _ID_ExamReference (456), _ID_Exam (448), _ID_Institution (16), _ID_MissingItem (13), _ID_Recommendation_min (4), _ID_Responsibility (3), _ID_Project (1), _ID_Recommendation_max (1)
+## Management (3771 rows, 161 since 2025): 16 fields
+   _ID_Provider (161), _ID_Active (133), _ID_Corporate (78), _ID_ContactPerson (62), _ID_Accommodation (31), _ID_AccommodationTypeOffer (31), _ID_AccommodationCateringOffer (29), _ID_AccommodationRoomOffer (29), _ID_StaffMember (16), HeaderManagement.Text (11), _ID_Agency (9), _ID_Internship (6), _ID_StatementLandlord (3), CommentManagement (1), _ID_Person (1), _ID_Contractor (1)
+## PaymentOut (6348 rows, 2866 since 2025): 16 fields
+   _ID_Provider (2866), _ID_BalanceCount (2866), _ID_Course (2808), _ID_BankAccount (2659), _ID_Person (2107), _ID_MethodPayment (1748), _ID_CostDetailReference (1747), _ID_CourseTypeReference (1118), ZStartDate (1112), ZEndDate (1112), _ID_Platform (657), _ID_Client (371), _ID_Selected (5), _ID_StaffSchool (5), HeaderPaymentOut (1), Email (1)
+## Comment (1413 rows, 585 since 2025): 14 fields
+   _ID_Course (380), _ID_Management (170), _ID_Corporate (45), _ID_Agency (8), _ID_Platform (4), _ID_Student (4), _ID_Client (4), _ID_InternationalAirport (4), _ID_StaffMember (3), _ID_Editorial (3), _ID_Internship (2), _ID_Institution (1), _ID_Contact (1), _ID_Provider (1)
+## DateOffer (5026 rows, 1504 since 2025): 14 fields
+   _ID_Person (1447), _ID_PreBooking (1441), _ID_AccommodationRoom (151), _ID_AccommodationCatering (146), _ID_AccommodationType (60), _ID_Group (45), _ID_CourseTypeReference (43), _ID_Platform (42), _ID_CourseLanguageReference (41), _ID_Corporate (32), _ID_Contact (10), _ID_Active (9), _ID_Agency (4), _ID_WaitingRoom (1)
+## Contact (5072 rows, 1850 since 2025) — NOT SYNCED: 13 fields
+   Timestamp.Change (1850), Timestamp.Creation (1850), _ID_PreBooking (1850), _ID_Person (1836), _ID_Student (1082), _ID_Client (845), _ID_TypeContactReference (537), _ID_Booking (29), _ID_CourseLanguage (28), _ID_Email (28), _ID_Phone (26), _ID_Address (25), _ID_Institution (15)
+## DateAccommodation (2465 rows, 1052 since 2025): 13 fields
+   _ID_Platform (1051), _ID_Person (1051), _ID_InternationalAirport (1015), _ID_Course (994), StatusAccommodation (638), _ID_StatusAccommodation (583), _ID_Client (458), _ID_Agency (442), _ID_Group (234), _ID_AccommodationEnquiry (75), _ID_Corporate (56), _ID_BusStop (36), _ID_DepartureStatement (8)
+## StaffMember (82 rows, 18 since 2025): 13 fields
+   _ID_Management (18), _adjustDateStart (16), _adjustDateEnd (16), Login (15), _ID_Empty (10), _ID_PurviewReference (10), _ID_Level (9), _ID_TimeSheet (9), _ID_StatusSalaryReference (5), MonthNumber (3), List_CourseNext (3), List_ID_CourseNext (3), _ID_SignatureActive (2)
+## BankAccount (1945 rows, 459 since 2025): 12 fields
+   _ID_Provider (403), _ID_Student (400), _ID_Client (290), _ID_Agency (138), AddressBank (60), _ID_Management (57), AddressAccountOwner (54), _ID_Accommodation (38), Comment (31), _ID_Country (10), _ID_WrongPerson (3), _ID_Corporate (2)
+## WorkFlowLetter (18965 rows, 18965 since 2025): 12 fields
+   _ID_Provider (18965), _ID_Person (17864), _ID_Booking (17355), _ID_Student (16327), _ID_FileExistent (13777), Email (13650), _ID_Platform (11464), _ID_Client (8692), _ID_Print (3123), _ID_EmailSent (2058), _ID_CertificateDone (2058), _ID_LetterServices (10)
+## Agreement (664 rows, 422 since 2025): 10 fields
+   _ID_Course (422), _ID_Student (422), _ID_Level (422), _ID_InternationalAirport (419), _ID_TextModule (406), _ID_StaffMember (313), _ID_LengthDuration (309), _ID_Client (293), _ID_StaffSchool (252), _ID_Recommendation (179)
+## DateBooking (20206 rows, 6055 since 2025): 10 fields
+   _ID_Person (6055), _ID_Platform (6053), _ID_Level (6051), _ID_DayTimeReference (5816), _ID_Client (3828), _ID_Empty (3461), _ID_Corporate (1249), _ID_Agency (1047), _ID_Project (704), _ID_Group (237)
+## InternationalAirport (15176 rows, 4743 since 2025) — NOT SYNCED: 10 fields
+   Today (4743), TimeStampCreation (4743), TimeStampChange (4743), _ID_Booking (4741), _ID_Person (4737), _ID_Student (4735), _ID_Client (2812), _ID_CourseType (89), _ID_Contact (17), _ID_Gender (3)
+## Invoice (1335 rows, 442 since 2025): 10 fields
+   _ID_Provider (442), _ID_Address (432), _ID_Email (393), _ID_Student (334), _ID_Phone (263), _ID_Management (106), _ID_Institution (106), _ID_Reversal (26), _ID_Offer (8), _ID_Group (6)
+## Person (15514 rows, 2899 since 2025): 10 fields
+   EnumerateNationality (784), _ID_Mothertongue (418), NumberPassport (414), _ID_CountryBirth (387), _ID_Selected (45), _ID_Salutation (30), _ID_Internship (6), YearOfBirth (1), _ID_Editorial (1), ValueFind (1)
+## Phone (14608 rows, 2517 since 2025): 10 fields
+   _ID_Student (1822), _ID_Client (957), _ID_Selected (18), _ID_Internship (10), CommentUse (5), _ID_Contact (3), _ID_Contractor (2), _ID_Editorial (1), _ID_Public (1), _ID_WhatsAppInUse (1)
+## StatementLandlord (752 rows, 262 since 2025): 9 fields
+   _ID_Student (262), Location_Emission (262), _ID_Person (262), _ID_DateAccommodation (262), ZStartDate (262), ZEndDate (262), _ID_StaffMember (232), _ID_Client (150), _ID_Signature (37)
+## CentralStation (4927 rows, 1266 since 2025) — NOT SYNCED: 8 fields
+   _ID_Student (1266), _ID_Booking (1266), _ID_Person (1266), _ID_Client (1010), _ID_CourseType (96), _ID_Contact (11), _ID_Course (10), _ID_WaitingRoom (5)
+## Exam (134 rows, 37 since 2025): 8 fields
+   _ID_Level (35), _ID_LanguageReference (35), _ID_Active (34), _ID_Bookable (25), Schedule_1 (9), ScheduleShort_1 (9), _ID_StaffMember (1), _adjust_IDPurviewReference (1)
+## Instalment (4128 rows, 1307 since 2025): 8 fields
+   _ID_Student (1307), _ID_Platform (1307), _ID_Person (1307), _ID_InternationalAirport (965), _ID_Client (881), _ID_Course (364), _ID_CentralStation (314), _ID_CostDetail (37)
+## Email (13983 rows, 2881 since 2025): 7 fields
+   _ID_Provider (2678), _ID_Student (1975), _ID_Client (960), _ID_Selected (69), CommentUseMail (32), _ID_Internship (9), _ID_Contractor (2)
+## Address (12944 rows, 2512 since 2025): 6 fields
+   _ID_Provider (2363), _ID_Student (812), _ID_Client (136), _ID_Selected (33), Quarter (15), _ID_Internship (6)
+## DatePlacement (10 rows, 5 since 2025): 5 fields
+   _ID_Internship (5), Comment (5), _ID_DateOffer (5), _ID_BusStop (1), _ID_Selected (1)
+## DateRent (543 rows, 247 since 2025): 5 fields
+   _ID_Management (247), Comment (188), _ID_Session (127), _ID_DateOffer (120), _ID_Selection (3)
+## Institution (1914 rows, 133 since 2025): 5 fields
+   _ID_Provider (133), _ID_Contact (21), _ID_Internship (6), _ID_Accommodation (5), _ID_Contractor (1)
+## WaitingRoom (1959 rows, 1074 since 2025): 5 fields
+   _ID_Student (675), _ID_Email (586), _ID_Address (586), _ID_Phone (555), _ID_CourseLanguage (543)
+## Accommodation (142 rows, 38 since 2025): 4 fields
+   _ID_Shown (38), _ID_Animal (31), _ID_PermanentOffer (13), _ID_FlatShare (3)
+## NationalAirport (2361 rows, 801 since 2025) — NOT SYNCED: 4 fields
+   _ID_Booking (801), _ID_Person (801), _ID_Student (796), _ID_Client (508)
+## Room (416 rows, 15 since 2025): 4 fields
+   _ID_Management (15), _ID_InternalRoom (15), _ID_Empty (15), _adjustOneDay.In (1)
+## SingleDateActivity (31 rows, 5 since 2025): 3 fields
+   _ID_Corporate (5), _ID_Platform (5), _ID_CourseLanguage (5)
+## Agency (120 rows, 9 since 2025): 2 fields
+   _ID_ContactAgent (5), _ID_PaymentCommission (2)
+## Commission (4869 rows, 1774 since 2025): 2 fields
+   _ID_CostDetailReference (1773), _ID_Client (565)
+## Internship (56 rows, 6 since 2025) — NOT SYNCED: 2 fields
+   _ID_Management (6), _ID_Active (5)
+## Corporate (788 rows, 85 since 2025): 1 fields
+   _ID_Provider (85)
+## ID_Student (7055 rows, 2020 since 2025) — NOT SYNCED: 1 fields
+   _ID_Client (889)
+Counter({'fields': 541, 'tables': 43})

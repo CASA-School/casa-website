@@ -1,0 +1,155 @@
+InternationalAirport	15104 records	39 fields	profiled
+AdminWork	14453 records	59 fields	profiled
+WeekOfCourse	10401 records	122 fields	not profiled
+SingleDateHoliday	8961 records	36 fields	profiled
+SingleWeekStaff	7452 records	82 fields	not profiled
+ID_Student	7032 records	19 fields	profiled
+SingleDayOccupancyClassroom	5616 records	78 fields	not profiled
+Contact	5043 records	75 fields	profiled
+CentralStation	4924 records	54 fields	profiled
+SingleDayCalendar	4748 records	96 fields	not profiled
+Log	3022 records	15 fields	not profiled
+NationalAirport	2347 records	38 fields	profiled
+DateStaffAtWork	1869 records	35 fields	not profiled
+WeekDayWorkTime	1329 records	57 fields	profiled
+DateHoliday	1090 records	56 fields	profiled
+SingleDateTransfer	978 records	44 fields	not profiled
+Source	913 records	37 fields	profiled
+SingleWeekCalendar	776 records	66 fields	not profiled
+Item	679 records	25 fields	not profiled
+OperationField	553 records	25 fields	not profiled
+JunkMall	479 records	30 fields	not profiled
+PlaceHolder	336 records	29 fields	not profiled
+LayoutNavigation	328 records	35 fields	not profiled
+LetterServices	250 records	45 fields	profiled
+LevelStep	200 records	78 fields	profiled
+SalaryDetail	189 records	60 fields	not profiled
+Hades	171 records	27 fields	not profiled
+SingleMonthCalendar	168 records	34 fields	not profiled
+Medium	129 records	50 fields	not profiled
+Session	115 records	87 fields	profiled
+Url	103 records	50 fields	not profiled
+Emanuel	93 records	61 fields	not profiled
+SelectionDetail	85 records	19 fields	not profiled
+Shift	59 records	52 fields	not profiled
+Internship	56 records	27 fields	profiled
+SpecialStudent	53 records	21 fields	not profiled
+Script	52 records	38 fields	not profiled
+BookInUse	49 records	41 fields	not profiled
+CodeNumber	48 records	36 fields	not profiled
+HealthTest	44 records	22 fields	not profiled
+SpecialAccommodation	36 records	14 fields	not profiled
+BusStop	36 records	51 fields	profiled
+BookReference	36 records	44 fields	not profiled
+CostDetailReference	34 records	33 fields	not profiled
+CostDetailReferenceComment	29 records	27 fields	not profiled
+TrainingStaffMember	26 records	34 fields	not profiled
+ColourDetail	25 records	30 fields	not profiled
+PlatformReference	24 records	13 fields	not profiled
+SelectionReference	23 records	10 fields	not profiled
+LanguageSkillReference.EuropeanFrame	20 records	14 fields	not profiled
+SimpleCalculator	18 records	44 fields	not profiled
+Signature	18 records	24 fields	not profiled
+SpecialDetailStudentReference	17 records	17 fields	not profiled
+Provider	17 records	35 fields	not profiled
+CleaningJobReference	17 records	19 fields	not profiled
+PurviewReference	16 records	16 fields	not profiled
+LanguageReference	16 records	21 fields	not profiled
+StatusManagementReference	15 records	13 fields	not profiled
+ProcessReference	14 records	15 fields	not profiled
+CourseTypeReference	14 records	29 fields	not profiled
+LevelStepReference	13 records	12 fields	not profiled
+Colour	13 records	30 fields	not profiled
+StaffSchool	12 records	26 fields	not profiled
+MonthNameReference	12 records	11 fields	not profiled
+YearOfCalendar	11 records	35 fields	not profiled
+TestReference	11 records	15 fields	not profiled
+Device	11 records	23 fields	not profiled
+WorkPlaceReference	10 records	17 fields	not profiled
+SpecialAccommoReference	10 records	8 fields	not profiled
+SalaryDetailReference	10 records	15 fields	not profiled
+MissingItemReference	10 records	19 fields	not profiled
+LevelReferenceSchool	10 records	22 fields	not profiled
+CountryGroup	10 records	15 fields	not profiled
+TypeWorkReference	9 records	9 fields	not profiled
+TextModule	9 records	32 fields	not profiled
+SourceReference	9 records	7 fields	not profiled
+HobbyReference	9 records	13 fields	not profiled
+DenominationReference	9 records	23 fields	not profiled
+WorkFlowReference	8 records	9 fields	not profiled
+UseReference	8 records	7 fields	not profiled
+StatusFamilyReference	8 records	16 fields	not profiled
+LocationReference	8 records	15 fields	not profiled
+LanguageBoard	8 records	26 fields	not profiled
+CodeNumberReference	8 records	15 fields	not profiled
+TrainingReference	7 records	13 fields	not profiled
+Touch	7 records	41 fields	not profiled
+TandemPartner	7 records	24 fields	not profiled
+Segment	7 records	26 fields	not profiled
+QualityReference	7 records	12 fields	not profiled
+LicenseReference	7 records	17 fields	not profiled
+HolidayReference	7 records	9 fields	not profiled
+DecisionReference	7 records	139 fields	not profiled
+DayNameReference	7 records	8 fields	not profiled
+CourseTypeDetailReference	7 records	20 fields	not profiled
+WeekDayShift	6 records	49 fields	not profiled
+MethodPaymentReference	6 records	13 fields	not profiled
+MailAccount	6 records	16 fields	not profiled
+LevelReferenceEuropeanFrame	6 records	15 fields	not profiled
+LanguageSkill.School	6 records	17 fields	not profiled
+CostTypeReference	6 records	14 fields	not profiled
+AccommodationTypeReference	6 records	21 fields	not profiled
+UrlReference	5 records	13 fields	not profiled
+TypeCorporateReference	5 records	11 fields	not profiled
+TypeActivityReference	5 records	13 fields	not profiled
+TouchReference	5 records	13 fields	not profiled
+StatusSalaryReference	5 records	11 fields	not profiled
+Start	5 records	38 fields	not profiled
+SequenceReference	5 records	12 fields	not profiled
+OccupancyReference	5 records	23 fields	not profiled
+HealthTestReference	5 records	11 fields	not profiled
+Floor	5 records	23 fields	not profiled
+ExamReference	5 records	15 fields	not profiled
+DateAbsence	5 records	49 fields	not profiled
+CourseDetailReference	5 records	19 fields	not profiled
+AnimalReference	5 records	19 fields	not profiled
+AccommodationCateringReference	5 records	16 fields	not profiled
+TypeContactReference	4 records	9 fields	not profiled
+TypeBedReference	4 records	5 fields	not profiled
+TypeAddressReference	4 records	6 fields	not profiled
+SpecialStudentReference	4 records	13 fields	not profiled
+SkillReference	4 records	9 fields	not profiled
+SingleDateTraining	4 records	40 fields	not profiled
+ScriptReference	4 records	26 fields	not profiled
+MethodCommunicationReference	4 records	14 fields	not profiled
+Logo	4 records	10 fields	not profiled
+AccommodationRoomReference	4 records	12 fields	not profiled
+TypeTeachingReference	3 records	12 fields	not profiled
+TypeRoomReference	3 records	9 fields	not profiled
+TypeOfferReference	3 records	10 fields	not profiled
+TypeInternshipReference	3 records	11 fields	not profiled
+TypeFoodReference	3 records	7 fields	not profiled
+TransferReference	3 records	8 fields	not profiled
+TimeStepReference	3 records	17 fields	not profiled
+SingleDateControlReference	3 records	16 fields	not profiled
+ShiftReference	3 records	29 fields	not profiled
+Project	3 records	45 fields	not profiled
+PaymentOutReference	3 records	28 fields	not profiled
+PaymentDetailReference	3 records	22 fields	not profiled
+PartExamReference	3 records	23 fields	not profiled
+MediumReference	3 records	12 fields	not profiled
+IllnessReference	3 records	12 fields	not profiled
+GenderReference	3 records	22 fields	profiled
+EvaluationReference	3 records	24 fields	not profiled
+DeviceReference	3 records	11 fields	not profiled
+Department	3 records	38 fields	not profiled
+DayTimeReference	3 records	11 fields	not profiled
+Contractor	3 records	38 fields	not profiled
+ComplaintReference	3 records	26 fields	not profiled
+SchoolDetailReference	2 records	63 fields	not profiled
+SalutationReference	2 records	14 fields	not profiled
+EvaluationDetail	2 records	45 fields	not profiled
+CurrencyReference	2 records	8 fields	not profiled
+PersonalTalk	1 records	31 fields	not profiled
+Graphic	1 records	48 fields	not profiled
+GlobalValue	1 records	30 fields	not profiled
