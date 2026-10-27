@@ -2656,7 +2656,7 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
 | `POST /api/careers/apply` | `career_applications` + `career_application_files` (pre-existing) |
 | `/placement-test` | `placement_attempts` (pre-existing) |
 
-**One Anmeldung, several lines (2026-10-05; the Anmeldung since 0096,
+**One Anmeldung, several lines (2026-10-05; the Anmeldung since 0097,
 2026-10-27).** The public form takes up to three courses, a learning path (one
 intensive term per whole level, "A2 bis B2") and an exam. `storeRegistration` in
 `src/lib/admin/intake.ts` writes them in one transaction: one person, one
@@ -2666,7 +2666,7 @@ with its own `request_id`. The Anmeldung's reference is the first line's request
 id. The person's flags (duplicate candidate, unmatched nationality or birth date)
 go on the first line only.
 
-Before 0096 the lines were the records: Meike's test (A1 → C1 and telc B2) was
+Before 0097 the lines were the records: Meike's test (A1 → C1 and telc B2) was
 six course registrations and one exam registration, each with its own status,
 owner, notes and letters, and nothing on screen tied them together. Now:
 
@@ -2680,7 +2680,7 @@ owner, notes and letters, and nothing on screen tied them together. Now:
   waiting list, a later course offered by letter, declined (`status`
   `declined`), or open. A line's old address redirects to its Anmeldung at the
   line (`#line-<id>`), so every link to a line still works.
-- **The Anmeldung follows its lines** (0096's trigger `settle_registration`): „In
+- **The Anmeldung follows its lines** (0097's trigger `settle_registration`): „In
   Arbeit" once one line is settled, „Erledigt" once every line is booked,
   queued or declined — whichever path settled it. A colleague can still set the
   status by hand. A line written without an Anmeldung (a script, a test) gets
@@ -2799,7 +2799,7 @@ Tables from 0006:
 | `staff_users` | Local accounts. Case-insensitive unique email via a functional index |
 | `staff_sessions` | Server-side sessions, token hashed |
 | `enquiries` | Contact submissions, including the organiser brief as `jsonb` |
-| `registrations` | The Anmeldung (0096): what one person sent at once — status, owner, language, when |
+| `registrations` | The Anmeldung (0097): what one person sent at once — status, owner, language, when |
 | `course_registrations` | Its course lines, as the public wizard sent them |
 | `exam_registrations` | Its exam line — separate table, the two forms ask genuinely different questions |
 | `placement_reviews` | One row per attempt: a teacher's decision |

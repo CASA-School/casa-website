@@ -35,7 +35,7 @@ function preview(item: RegistrationListItem, lang: WsLang): string | null {
 }
 
 /**
- * Anmeldungen (0096, 2026-10-27): the inbox (`InboxScreen`, shared with enquiries and applications), one
+ * Anmeldungen (0097, 2026-10-27): the inbox (`InboxScreen`, shared with enquiries and applications), one
  * row per person's registration — the courses as a path, „Intensive German A1 → C1 + telc Deutsch B2",
  * when they run, a room if one is needed, and how many of its lines are settled while it is under way.
  */

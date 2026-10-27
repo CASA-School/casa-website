@@ -97,7 +97,7 @@ const testDate = (
   )
 ).rows[0]?.d;
 
-// An Anmeldung, the one with the most lines (0096): its page reads every line's outcome and places.
+// An Anmeldung, the one with the most lines (0097): its page reads every line's outcome and places.
 const anmeldung = await firstId(`SELECT g.id FROM registrations g
   ORDER BY (SELECT count(*) FROM course_registrations c WHERE c.registration_id = g.id) + (SELECT count(*) FROM exam_registrations e WHERE e.registration_id = g.id) DESC, g.submitted_at DESC LIMIT 1`);
 
@@ -128,7 +128,7 @@ const routes = [
   '/admin/registrations?view=history',
   anmeldung && `/admin/registrations/${anmeldung}`,
   anmeldung && `/admin/registrations/${anmeldung}?book=${courseReg}`,
-  // A line's own address (`/admin/registrations/course/<id>`) is a redirect to its Anmeldung since 0096.
+  // A line's own address (`/admin/registrations/course/<id>`) is a redirect to its Anmeldung since 0097.
   '/admin/placement',
   attempt && `/admin/placement/${attempt}`,
   '/admin/people',

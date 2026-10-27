@@ -6,7 +6,7 @@ import pg from 'pg';
 import { openCoursesAroundToday } from './support/open-courses';
 
 /**
- * One Anmeldung, worked as one (0096, 2026-10-27): Meike's test sent the intensive course from A1 to C1
+ * One Anmeldung, worked as one (0097, 2026-10-27): Meike's test sent the intensive course from A1 to C1
  * and telc B2 at once and the workspace showed seven records. Here a path A1 → C1 (A1 with a start, C1
  * without a date yet) and an exam without a sitting are one row in the inbox and one page; „1 Position
  * buchen" books A1, C1 is named as having no date, and declining the rest closes the Anmeldung by itself.

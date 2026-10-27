@@ -24,7 +24,7 @@ function registrationId(formData: FormData): string {
 }
 
 /**
- * „Daten bearbeiten" on an Anmeldung (0076, 0096): a colleague completes or corrects what was sent, on
+ * „Daten bearbeiten" on an Anmeldung (0076, 0097): a colleague completes or corrects what was sent, on
  * every line at once; the visitor's own values are kept beside it. A server action is a public endpoint,
  * so it asks for `registrations` at `edit` itself (CLAUDE.md hard rule 7).
  */

@@ -57,7 +57,7 @@ export const STATUS_TONES: Record<WorkStatus, 'accent' | 'neutral' | 'positive' 
 
 export type QueueEntity =
   | 'enquiry'
-  /** The Anmeldung (0096): what one person sent at once. Its course and exam lines below. */
+  /** The Anmeldung (0097): what one person sent at once. Its course and exam lines below. */
   | 'registration'
   | 'course_registration'
   | 'exam_registration'

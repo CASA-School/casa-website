@@ -5,7 +5,7 @@ import { isUuid } from '@/lib/admin/ids';
 import { registrationOfLine } from '@/lib/admin/registrations';
 
 /**
- * A course line's old address (before 0096): a booking, a letter, a flag or a search still links here.
+ * A course line's old address (before 0097): a booking, a letter, a flag or a search still links here.
  * Each line is part of an Anmeldung now, shown on its page at the line.
  */
 export default async function CourseRegistrationPage({ params }: { params: Promise<{ id: string }> }) {

@@ -537,7 +537,7 @@ export async function personTimeline(canonicalId: string, lang: WsLang): Promise
               left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at, NULL::int AS lines
          FROM enquiries e WHERE e.person_id = ANY(person_family($1)) AND e.deleted_at IS NULL
        UNION ALL
-       -- An Anmeldung (0096) once, named by its first line, with how many lines it holds.
+       -- An Anmeldung (0097) once, named by its first line, with how many lines it holds.
        SELECT CASE WHEN l.rank = 0 THEN 'course' ELSE 'exam' END, g.id, l.label, l.option, g.status::text, g.submitted_at,
               ((SELECT count(*) FROM course_registrations WHERE registration_id = g.id)
                + (SELECT count(*) FROM exam_registrations WHERE registration_id = g.id))::int

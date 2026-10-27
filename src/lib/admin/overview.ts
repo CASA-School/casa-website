@@ -31,7 +31,7 @@ export async function getOverviewCounts(): Promise<OverviewCounts> {
         WHERE status IN ('new', 'in_progress', 'waiting') AND deleted_at IS NULL) AS "enquiriesOpen",
       (SELECT count(*) FROM enquiries
         WHERE status = 'new' AND deleted_at IS NULL)                 AS "enquiriesNew",
-      -- One Anmeldung is one registration, however many lines it holds (0096): by what it holds.
+      -- One Anmeldung is one registration, however many lines it holds (0097): by what it holds.
       (SELECT count(*) FROM registrations g
         WHERE status IN ('new', 'in_progress', 'waiting')
           AND EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id)) AS "courseRegistrationsOpen",
@@ -157,7 +157,7 @@ export async function getRecentInbound(
               e.submitted_at AS at
          FROM enquiries e WHERE e.deleted_at IS NULL
        UNION ALL
-       -- An Anmeldung (0096), named by its first line: a course before the exam.
+       -- An Anmeldung (0097), named by its first line: a course before the exam.
        SELECT g.id,
               CASE WHEN l.rank = 0 THEN 'course' ELSE 'exam' END,
               trim(concat(l.first_name, ' ', l.last_name)),

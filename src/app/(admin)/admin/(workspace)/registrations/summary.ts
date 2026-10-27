@@ -1,5 +1,5 @@
 /**
- * An Anmeldung in a few words, and what its lines say together (0096, 2026-10-27).
+ * An Anmeldung in a few words, and what its lines say together (0097, 2026-10-27).
  *
  * Meike's test — the intensive course from A1 to C1 and telc B2 — read „Intensivkurse, Intensivkurse,
  * …" six times over. A path through the levels of one course is that path: „Intensive German A1 → C1

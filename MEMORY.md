@@ -2796,7 +2796,7 @@ between records. Typical queries answer in 4–40 ms of server time on the full 
 Meike tested the live form with the intensive course from A1 to C1 and telc B2: the form split the
 path into six course registrations, plus one exam registration, and the workspace showed seven
 records, each with its own status, owner, notes and letters. Rahman: „she is one person with
-multiple booking … I want a more advanced logic". Migration 0096 adds `registrations`, the
+multiple booking … I want a more advanced logic". Migration 0097 adds `registrations`, the
 Anmeldung: one status, owner, note thread and reply for what a person sent at once, with the course
 and exam rows as its lines, each keeping its own outcome (booked, waiting list, later course,
 declined). The inbox lists one row per Anmeldung, courses and exams together, a path read as

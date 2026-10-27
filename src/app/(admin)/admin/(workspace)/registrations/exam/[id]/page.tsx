@@ -4,7 +4,7 @@ import { requireModule } from '@/lib/admin/guard';
 import { isUuid } from '@/lib/admin/ids';
 import { registrationOfLine } from '@/lib/admin/registrations';
 
-/** An exam line's old address (before 0096): its Anmeldung's page, at the line. */
+/** An exam line's old address (before 0097): its Anmeldung's page, at the line. */
 export default async function ExamRegistrationPage({ params }: { params: Promise<{ id: string }> }) {
   const [{ id }] = await Promise.all([params, requireModule('registrations')]);
   const registration = isUuid(id) ? await registrationOfLine('exam', id) : null;

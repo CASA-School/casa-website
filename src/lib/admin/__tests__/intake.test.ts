@@ -100,7 +100,7 @@ describe('registration intake foreign keys', () => {
   });
 });
 
-describe('one Anmeldung, several lines (0096)', () => {
+describe('one Anmeldung, several lines (0097)', () => {
   it('stores one person, one Anmeldung, a line per course with its own request id, and the exam, and flags the person once', async () => {
     const stored = await storeRegistration({
       registrant: { ...person, nationality: 'Atlantis' },
