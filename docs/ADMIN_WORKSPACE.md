@@ -1050,7 +1050,7 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
 
     **The tabs carry the counts, so nothing repeats them (Rahman, 2026-10-18: "avoid redundancies").** A
     counts line above a list says only what its tabs do not: the sum owed on Buchungen, the learners this
-    week on Kurse, the sittings and entries on Prüfungen (which have no tabs). Teilnehmende, Angebote,
+    week on Kurse, the entries into the sittings ahead and the next deadline on Prüfungen. Teilnehmende, Angebote,
     Wartelisten, Einstufungstests and Mitarbeitende have none; Teilnehmende keeps its line of open flags,
     each a link to its work list. Where the counts line said „469 im Kurs" over a tab „Im Kurs 186", the
     two had to be read together to be understood — a count is said once, by the tab. The lists as they
@@ -1069,7 +1069,7 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     | Organisationen | Alle · Agenturen · Firmen · Schulen & Behörden · Weitere · Inaktiv | |
     | Kurse | Intensiv · Abend · Weitere · Kursarten | Aktuell / Vergangen |
     | Wartelisten | Platz frei · Wartend · Angeboten · Kurs begonnen · Abgeschlossen | |
-    | Prüfungen | — (coming sittings, then the past) | |
+    | Prüfungen | Kommend · Entwürfe · Ergebnisse offen · Vergangen · Abgesagt · Alle | a „Filter" panel: the exam, the month, the places (free, full, with a waiting list), who examines (or nobody yet), the report to telc; search by exam, day or a candidate's name |
     | Mitarbeitende | Aktiv · Unterricht · Büro · Ehemalige | |
     | Aktivität | — (by day) | chips: Alle · each colleague in the feed |
     | Räume | In Nutzung · Inaktiv | |
@@ -1372,9 +1372,9 @@ are the body. Offers (`(workspace)/offers/page.tsx`) is the reference.
     taken (as the seat bars count them) and the next start; for exams the
     sittings ahead, the entries and the next registration deadline, amber in
     its last week. A course type's format is stored as free words („Intensive
-    Block", „evening") and is read through a bilingual map. The exam list keeps
-    the last fortnight's sittings for what follows them, greyed and marked
-    „Vorbei".
+    Block", „evening") and is read through a bilingual map. The exam list has
+    views of its own since 2026-10-27 (§Exams, „The module brought to the
+    standard").
 23. **The management screens (2026-10-15).** Aktivität reads as the record
     pages' timeline does: a section per day as the inboxes read, each change
     with its mark (`activityIcon`: by what it did, else by what it was done
@@ -2337,6 +2337,58 @@ the next deadline leave out past and cancelled sittings.
 (only the two telc exams are); a full sitting still shows on the public form,
 where a registration becomes a waiting-list place.
 
+### The module brought to the standard (2026-10-27, migration 0096)
+
+Rahman: „it doesn't look so advanced and doesn't have all the necessary functionalities, including the
+email interface and other advanced sidebars and proper filters that we have applied in other parts of our
+system". Walked end to end against Buchungen, the Tagesplan, Offers and the record pages, what a colleague
+could not do here: reach any sitting before last fortnight (65 sat since 2022 were on no screen), tell the
+drafts from the offered, find the sittings whose results are due, narrow the list (exam, month, places,
+examiner) or find a sitting by a candidate; write to everyone booked or to the examiners; see a
+candidate's money, contact and letters without leaving the page; see what was sent for a sitting or what
+was changed on it, or leave a note. The sitting was one long page with five buttons on every queue row.
+
+- **The list** (`catalogue/exams/page.tsx`, reads in `src/lib/admin/exam-list.ts`): views Kommend ·
+  Entwürfe · Ergebnisse offen (sat in the last four months, a candidate without a whole result) ·
+  Vergangen · Abgesagt · Alle, counted in the tabs under the filters in force; the „Filter" side panel
+  (`exam-filters.tsx`) as on Buchungen — exam, month, places (free, full, with a waiting list), who
+  examines (or nobody yet), not everyone reported to telc — each in force a label with its ×; the search
+  finds the exam, the day („13.11.2026") or a candidate by name (`people.search_name`, `ws_fold`). A row:
+  the exam (a new website registration under it), the day, the deadline with the days left, the places as
+  a bar with who waits, the report to telc (when it is near), the examiners' initials („Noch offen" in
+  amber within a month); its step as a button — „Liste für telc" in the deadline's last fortnight,
+  „Ergebnisse eintragen" once sat — and „…" for its tabs, the telc list, the letters, the mail to everyone
+  or to the examiners. On a phone the step goes into „…" (`RowActions compact`). Past and results views
+  show candidates and results instead of the deadline and places. The line above says only the entries
+  into the sittings ahead and the next deadline.
+- **A sitting is a record in tabs** (`[id]/page.tsx`, rows and side panels in `[id]/sitting-parts.tsx`).
+  The head: the exam, the day and hours, the deadline with the days left, the preparation course linked;
+  „Bearbeiten" and „Buchen" (primary unless a place waits to be offered). The bar: booked against the
+  places — a click changes the places (`Popover`, `setSittingValueAction`, never below the booked) —,
+  free and waiting until the day, reported to telc before it and the results after it, the parts when not
+  all sit the whole exam, the examiners linked, and „Website: Angeboten / Entwurf", changed the same way.
+  Tabs: **Teilnehmende** (new website registrations first; each candidate one line — tick for telc, the
+  booking's colour, what is owed, telc's state or the result — kept whole with a search; the name opens
+  the candidate at the side: the booking and its colour, Berechnet/Bezahlt/Offen with „Zahlung erfassen",
+  telc and what is missing, the result, the exam letters, e-mail and phone, „Zur Buchung"; the cancelled
+  in „Storniert"); **Warteliste** (place, name, since, the one step as a button — „Platz anbieten", or
+  „Buchen" once offered — and the rest at the side: book straight away, take back the offer, letter,
+  e-mail, move, off the list); **Prüfende** (the name opens the examiner: task, licence on the day,
+  e-mail and phone, their other sittings, „Austragen" behind a confirmation now); **Briefe & E-Mails** (per
+  kind how many candidates have it, with „Schreiben" for the letters to all; the mails sent from here;
+  every exam letter sent, the newest eight and „Alle Briefe"); **Notizen und Verlauf** (`Timeline` on
+  `exam_session`: the sitting's changes and the team's notes — 0096 lets `staff_notes` hold them).
+- **Mail** (§Mail): `mailHref('exam_sitting', id)` writes to everyone booked (Bcc, „Hallo zusammen,",
+  those without an address named), `mailHref('exam_examiners', id)` to the examiners with a first line
+  about the day and the candidates; one candidate or examiner through `person` / `staff`. Sent mails are
+  kept in `workspace_mails` and noted on the sitting's history. Letters to all: „Speichern und per E-Mail
+  senden" goes straight to the letters' mail screen, „Speichern und drucken" to print (docs/LETTERS.md).
+- **Rights** are the module's as before: the candidates, letters, results and telc list `bookings`
+  (`edit` to change); the sitting, its places, website state, examiners and notes `catalogue` at `edit`;
+  cancel and delete at `full`; mail to the examiners `catalogue` or `staff`.
+- The telc list and the results page are in the workspace's table with a bar (complete rows, reported;
+  results entered); a gap in the telc list links to the person's details.
+
 ## Staff (2026-10-17, migration 0039)
 
 Rahman: "we need to build courses and staff so we could assign teachers to courses
@@ -2532,7 +2584,8 @@ for a colleague's own mail about a record: „Antworten" on an enquiry, a course
 application; „E-Mail an …" / „E-Mail schreiben" on Buchungen, Teilnehmende and the waiting list; every
 address shown on a learner, a colleague, an organisation (and its contacts), a host or a flat's guest;
 the Tagesplan's „E-Mail an alle" to a class (Bcc) and „E-Mail an die Lehrkraft" with the class list in
-the text. `mailHref(kind, id, { subject, address, back })` builds the link; the server reads the record
+the text; an exam sitting's „E-Mail an alle" to everyone booked (Bcc, `exam_sitting`, `bookings`) and „E-Mail
+an die Prüfenden" (`exam_examiners`, `catalogue` or `staff`), both noted on the sitting's history (2026-10-27). `mailHref(kind, id, { subject, address, back })` builds the link; the server reads the record
 again for recipients, language and greeting („Hallo Anna," / „Hello Anna," / „Hallo zusammen,") and
 checks the right per kind (`MAIL_MODULES`: a learner is written to from Teilnehmende, Buchungen,
 Unterkünfte or the Kurse alike; without `edit` only „Im Mailprogramm öffnen" is offered). The mail looks

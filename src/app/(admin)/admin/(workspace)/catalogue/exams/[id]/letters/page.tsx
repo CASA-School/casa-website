@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { issueSittingLettersAction } from '../../actions';
+import { Icon } from '@/components/admin/icons';
+import { RecordLink } from '@/components/admin/record-link';
+import { MetaItem, MetaLine } from '@/components/admin/record-parts';
 import { LetterKindIcon } from '@/components/admin/letters/letter-kind';
 import { LetterSheet } from '@/components/admin/letters/letter-sheet';
 import { Badge, Button, Card, Field, RecordHeader, Select } from '@/components/admin/ui';
@@ -46,13 +49,19 @@ export default async function SittingLettersPage({
   return (
     <>
       <RecordHeader
-        backHref={back}
+        backHref={`${back}?tab=letters`}
         backLabel={sitting.examName}
         title={t('Briefe an alle', 'Letters to all')}
         subtitle={
-          <span className="text-[0.98rem] font-semibold text-[#2b3546]">
-            {`${sitting.examName} · ${new Date(sitting.startsAt).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}`}
-          </span>
+          <MetaLine>
+            <MetaItem icon={Icon.award}>
+              <RecordLink href={back}>{sitting.examName}</RecordLink>
+            </MetaItem>
+            <MetaItem icon={Icon.calendar}>
+              {new Date(sitting.startsAt).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })}
+            </MetaItem>
+            <MetaItem icon={Icon.people}>{rows.length === 1 ? t('1 Teilnehmende/r', '1 candidate') : t(`${rows.length} Teilnehmende`, `${rows.length} candidates`)}</MetaItem>
+          </MetaLine>
         }
       />
 
@@ -95,7 +104,7 @@ export default async function SittingLettersPage({
           )}
         </div>
 
-        <Card title={t('Empfänger', 'Recipients')} bleed>
+        <Card title={t('Empfänger', 'Recipients')} icon={Icon.people} tint="blue" bleed>
           {rows.length ? (
             <form action={issueSittingLettersAction}>
               <input type="hidden" name="sittingId" value={id} />
@@ -135,8 +144,13 @@ export default async function SittingLettersPage({
                     ))}
                   </Select>
                 </Field>
-                <Button type="submit" className="w-full">
-                  {t('Als gesendet speichern', 'Save as sent')}
+                {/* Kept on each booking as sent; then on to the mail screen (a PDF each), or all of them to print. */}
+                <Button type="submit" name="then" value="mail" className="w-full">
+                  {Icon.mail}
+                  {t('Speichern und per E-Mail senden', 'Save and send by e-mail')}
+                </Button>
+                <Button type="submit" name="then" value="print" variant="secondary" className="w-full">
+                  {t('Speichern und drucken', 'Save and print')}
                 </Button>
               </div>
             </form>

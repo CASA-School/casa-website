@@ -52,7 +52,11 @@ export default async function MailPage({
             ? t(`Antwort an ${draft.title}`, `Reply to ${draft.title}`)
             : draft.about === 'teacher_list'
               ? t(`Teilnehmerliste an ${draft.recipients[0]?.name ?? 'die Lehrkraft'}`, `Class list to ${draft.recipients[0]?.name ?? 'the teacher'}`)
-              : t(`E-Mail an ${draft.title}`, `E-mail to ${draft.title}`)
+              : draft.about === 'exam_sitting'
+                ? t('E-Mail an alle Teilnehmenden', 'E-mail to every candidate')
+                : draft.about === 'exam_examiners'
+                  ? t('E-Mail an die Prüfenden', 'E-mail to the examiners')
+                  : t(`E-Mail an ${draft.title}`, `E-mail to ${draft.title}`)
         }
         description={
           <>

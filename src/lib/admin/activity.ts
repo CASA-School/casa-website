@@ -389,6 +389,10 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t(`hat ${acc} abgesagt`, `cancelled ${subject}`);
     case 'sitting_deleted':
       return t(`hat ${acc} gelöscht`, `deleted ${subject}`);
+    case 'examiner_assigned':
+      return t('hat eine Prüferin oder einen Prüfer eingetragen', 'added an examiner');
+    case 'examiner_unassigned':
+      return t('hat eine Prüferin oder einen Prüfer ausgetragen', 'took an examiner off');
     case 'exam_results_saved': {
       const n = Number(entry.detail?.count ?? 0);
       return t(n === 1 ? 'hat 1 Prüfungsergebnis eingetragen' : `hat ${n} Prüfungsergebnisse eingetragen`, n === 1 ? 'entered 1 exam result' : `entered ${n} exam results`);

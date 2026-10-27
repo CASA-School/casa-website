@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { Floating } from './floating';
 import { useWsLang } from './lang';
 
 /**
@@ -22,6 +23,7 @@ export function Popover({
   children,
   width = 300,
   disabled,
+  floating = false,
 }: {
   /** The panel's heading, and the trigger's accessible name. */
   label: string;
@@ -29,16 +31,23 @@ export function Popover({
   children: ReactNode;
   width?: number;
   disabled?: boolean;
+  /**
+   * Drawn above the page (`Floating`) instead of inside it, for a value in a frame that hides its overflow —
+   * a record's head (an exam sitting's places, 2026-10-27). The panel's form must be inside the panel.
+   */
+  floating?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { t } = useWsLang();
   const [up, setUp] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent) => {
-      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrap.current && !wrap.current.contains(target) && !panel.current?.contains(target)) setOpen(false);
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
@@ -73,7 +82,18 @@ export function Popover({
       >
         {trigger}
       </button>
-      {open ? (
+      {open && floating ? (
+        <Floating anchor={wrap} panelRef={panel} role="dialog" label={label} estimate={200} gap={6}>
+          <div
+            style={{ width }}
+            onSubmitCapture={() => setTimeout(() => setOpen(false), 0)}
+            className="casa-ws-dialog max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]"
+          >
+            <p className="border-b border-ws-line-soft px-3.5 py-2.5 text-xs font-bold text-[var(--casa-muted)]">{label}</p>
+            <div className="max-h-[min(60vh,420px)] overflow-y-auto p-1.5">{children}</div>
+          </div>
+        </Floating>
+      ) : open ? (
         <div
           role="dialog"
           aria-label={label}

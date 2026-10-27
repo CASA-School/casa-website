@@ -90,20 +90,32 @@ export async function staffSittings(staffId: string): Promise<ExaminerSitting[]>
 }
 
 /** Who examines a sitting, and whether each one's licence holds on the day. */
-export type SittingExaminer = { staffId: string; name: string; shortName: string; part: ExamParts; licensed: boolean };
+export type SittingExaminer = {
+  staffId: string;
+  name: string;
+  shortName: string;
+  part: ExamParts;
+  licensed: boolean;
+  /** How to reach them (2026-10-27, the examiner at the side): their own address, else their account's. */
+  email: string | null;
+  phone: string | null;
+};
 
 export async function sittingExaminers(sittingId: string): Promise<SittingExaminer[]> {
-  const rows = await query<{ staff_member_id: string; name: string; short_name: string; part: ExamParts; licensed: boolean }>(
+  const rows = await query<{ staff_member_id: string; name: string; short_name: string; part: ExamParts; licensed: boolean; email: string | null; phone: string | null }>(
     `SELECT x.staff_member_id, concat_ws(' ', p.first_name, p.last_name) AS name, m.short_name, x.part,
-            EXISTS (SELECT 1 FROM staff_licences l WHERE l.staff_member_id = x.staff_member_id AND l.exam_type_id = s.exam_type_id AND ${VALID_ON(SITTING_DAY)}) AS licensed
+            EXISTS (SELECT 1 FROM staff_licences l WHERE l.staff_member_id = x.staff_member_id AND l.exam_type_id = s.exam_type_id AND ${VALID_ON(SITTING_DAY)}) AS licensed,
+            coalesce((SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1), u.email) AS email,
+            (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone
        FROM exam_session_examiners x
        JOIN exam_sessions s ON s.id = x.exam_session_id
        JOIN staff_members m ON m.id = x.staff_member_id JOIN people p ON p.id = m.person_id
+       LEFT JOIN staff_users u ON u.id = m.staff_user_id
       WHERE x.exam_session_id = $1
       ORDER BY CASE x.part WHEN 'full' THEN 0 WHEN 'oral' THEN 1 ELSE 2 END, p.last_name, p.first_name`,
     [sittingId]
   );
-  return rows.map((r) => ({ staffId: r.staff_member_id, name: r.name, shortName: r.short_name, part: r.part, licensed: r.licensed }));
+  return rows.map((r) => ({ staffId: r.staff_member_id, name: r.name, shortName: r.short_name, part: r.part, licensed: r.licensed, email: r.email, phone: r.phone }));
 }
 
 /**

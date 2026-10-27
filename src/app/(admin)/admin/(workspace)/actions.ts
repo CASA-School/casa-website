@@ -41,7 +41,7 @@ const QUEUE_ENTITIES = new Set<string>([
   'career_application',
 ]);
 
-const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer', 'group_visit', 'accommodation', 'organisation', 'course']);
+const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer', 'group_visit', 'accommodation', 'organisation', 'course', 'exam_session']);
 
 /** Which module owns a record type — the module the actor must hold. */
 const MODULE_FOR: Record<string, WorkspaceModule> = {
@@ -57,6 +57,8 @@ const MODULE_FOR: Record<string, WorkspaceModule> = {
   accommodation: 'accommodation',
   organisation: 'organisations',
   course: 'catalogue',
+  /** An exam sitting (0096): its notes are the catalogue's, as the sitting is. */
+  exam_session: 'catalogue',
 };
 
 /** A uuid, or nothing. Guards the id before it reaches a `uuid` column. */
@@ -138,6 +140,10 @@ export async function addNoteAction(formData: FormData): Promise<void> {
 
   await addNote({ entity: entity as NoteEntity, entityId: id, body, actor });
 
+  if (entity === 'exam_session') {
+    revalidatePath(`/admin/catalogue/exams/${id}`);
+    return;
+  }
   // A course's notes show on each of its groups' pages.
   if (entity === 'course') {
     revalidatePath(`/admin/catalogue/courses/${id}`, 'layout');

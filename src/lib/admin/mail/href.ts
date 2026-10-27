@@ -18,7 +18,11 @@ export type MailAbout =
   | 'exam_registration'
   | 'application'
   | 'class'
-  | 'teacher_list';
+  | 'teacher_list'
+  /** Everyone booked into an exam sitting, in Bcc (2026-10-27). */
+  | 'exam_sitting'
+  /** Who examines or supervises a sitting. */
+  | 'exam_examiners';
 
 /**
  * The rights a mail about each kind of record is written with: the first one the colleague has. A learner
@@ -36,6 +40,8 @@ export const MAIL_MODULES: Record<MailAbout, readonly WorkspaceModule[]> = {
   application: ['applications'],
   class: ['day'],
   teacher_list: ['day'],
+  exam_sitting: ['bookings'],
+  exam_examiners: ['catalogue', 'staff'],
 };
 
 export const isMailAbout = (value: string): value is MailAbout => value in MAIL_MODULES;

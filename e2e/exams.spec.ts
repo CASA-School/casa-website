@@ -80,6 +80,7 @@ test.describe('exam bookings', () => {
       [...people, sittingId].filter(Boolean),
     ]);
     if (sittingId) await client.query(`DELETE FROM waitlist_entries WHERE exam_session_id = $1`, [sittingId]);
+    if (sittingId) await client.query(`DELETE FROM staff_notes WHERE entity = 'exam_session' AND entity_id = $1`, [sittingId]);
     await client.query(`DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE person_id = ANY($1::uuid[]))`, [people]);
     await client.query(`DELETE FROM bookings WHERE person_id = ANY($1::uuid[])`, [people]);
     if (sittingId) await client.query(`DELETE FROM exam_sessions WHERE id = $1`, [sittingId]);
@@ -150,9 +151,10 @@ test.describe('exam bookings', () => {
     const filed = await client.query<{ filed: boolean }>(`SELECT exam_filed_at IS NOT NULL AS filed FROM bookings WHERE id = $1`, [bookingId]);
     expect(filed.rows[0].filed).toBe(true);
 
-    await page.getByRole('button', { name: 'Bearbeiten' }).click();
-    await page.getByRole('dialog').getByRole('spinbutton', { name: 'Plätze' }).fill('2');
-    await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+    // The places are changed on the head's figure (2026-10-27): a small panel, the rest of the sitting kept.
+    await page.getByRole('button', { name: 'Plätze: ändern' }).click();
+    await page.getByRole('dialog', { name: 'Plätze' }).getByRole('spinbutton', { name: 'Plätze' }).fill('2');
+    await page.getByRole('dialog', { name: 'Plätze' }).getByRole('button', { name: 'Speichern' }).click();
     const banner = page.getByRole('status');
     await expect(banner).toContainText('1 Platz frei');
     await expect(banner).toContainText('Ben Prüfungstest');
@@ -197,19 +199,56 @@ test.describe('exam bookings', () => {
     await expect(wizard.getByRole('button').filter({ hasText: day }).first()).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('the list counts the sittings ahead, and the last fortnight’s stand under „Vorbei“', async ({ page }) => {
+  test('the list: what is coming, the results due and the past are views of their own; the search and the filters narrow them', async ({ page }) => {
+    const link = (id: string) => page.locator(`table a[href="/admin/catalogue/exams/${id}"]`);
     await page.goto('/admin/catalogue/exams');
-    const rows = page.locator('table tbody tr');
-    const texts = await rows.allInnerTexts();
-    const past = texts.findIndex((text) => /^\s*Vorbei\s*\d+\s*$/.test(text));
-    expect(past).toBeGreaterThan(0);
-    const pastRow = await rows.filter({ has: page.locator(`a[href="/admin/catalogue/exams/${pastId}"]`) }).first().evaluate((tr) => [...tr.parentElement!.children].indexOf(tr));
-    const aheadRow = await rows.filter({ has: page.locator(`a[href="/admin/catalogue/exams/${sittingId}"]`) }).first().evaluate((tr) => [...tr.parentElement!.children].indexOf(tr));
-    expect(pastRow).toBeGreaterThan(past);
-    expect(aheadRow).toBeLessThan(past);
-    // „n kommende Termine": the rows above „Vorbei", without the month headings and a cancelled one.
-    const ahead = texts.slice(0, past).filter((text) => /\d{2}:\d{2}/.test(text) && !/Abgesagt/.test(text)).length;
-    await expect(page.locator('main')).toContainText(new RegExp(`${ahead}\\s*kommender? Termin`));
+    await expect(link(sittingId)).toHaveCount(1);
+    await expect(link(pastId)).toHaveCount(0);
+    // The tab counts what it holds: every sitting ahead that the website offers.
+    const ahead = await client.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM exam_sessions WHERE status = 'scheduled' AND (starts_at AT TIME ZONE 'Europe/Berlin')::date >= (now() AT TIME ZONE 'Europe/Berlin')::date`
+    );
+    await expect(page.getByRole('link', { name: new RegExp(`^Kommend\\s*${ahead.rows[0].n}$`) })).toBeVisible();
+    // Sat ten days ago with a candidate and no result yet: its results are due, and it is in the past.
+    await page.getByRole('link', { name: /^Ergebnisse offen/ }).click();
+    await expect(link(pastId)).toHaveCount(1);
+    await expect(link(sittingId)).toHaveCount(0);
+    await page.getByRole('link', { name: /^Vergangen/ }).click();
+    await expect(link(pastId)).toHaveCount(1);
+    // A candidate's name finds the sittings they are booked into.
+    await page.goto(`/admin/catalogue/exams?view=all&q=${encodeURIComponent('Ana Prüfungstest')}`);
+    await expect(link(sittingId)).toHaveCount(1);
+    await expect(link(pastId)).toHaveCount(1);
+    // The filters at the side: someone waits for the e2e sitting, so it is not under „full".
+    await page.getByRole('button', { name: /^Filter/ }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Mit Warteliste' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Anwenden' }).click();
+    await expect(page).toHaveURL(/places=waiting/);
+    await expect(link(sittingId)).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'Filter „Mit Warteliste" entfernen' })).toBeVisible();
+    await page.goto(`/admin/catalogue/exams?view=all&places=full&q=${encodeURIComponent('Ana Prüfungstest')}`);
+    await expect(link(sittingId)).toHaveCount(0);
+  });
+
+  test('a sitting is a record in tabs: a candidate at the side, a mail to everyone booked, a note', async ({ page }) => {
+    await page.goto(`/admin/catalogue/exams/${sittingId}`);
+    await page.getByRole('button', { name: 'Ana Prüfungstest', exact: true }).click();
+    const panel = page.getByRole('dialog');
+    await expect(panel).toContainText('Zahlung');
+    await expect(panel.getByRole('link', { name: 'Zur Buchung' })).toHaveAttribute('href', `/admin/bookings/${bookingId}`);
+    await page.keyboard.press('Escape');
+
+    await page.getByRole('link', { name: 'E-Mail an alle' }).click();
+    await expect(page).toHaveURL(/\/admin\/mail\?to=exam_sitting%3A/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('E-Mail an alle Teilnehmenden');
+    await expect(page.locator('main')).toContainText('ana@example.com');
+
+    await page.goto(`/admin/catalogue/exams/${sittingId}?tab=history`);
+    await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Raum 3 für die mündliche Prüfung');
+    await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();
+    await expect(page.locator('main')).toContainText('Raum 3 für die mündliche Prüfung');
+    const { rows } = await client.query<{ n: number }>(`SELECT count(*)::int AS n FROM staff_notes WHERE entity = 'exam_session' AND entity_id = $1`, [sittingId]);
+    expect(rows[0].n).toBe(1);
   });
 
   test('a sitting with a candidate is not called off', async ({ page }) => {
@@ -270,7 +309,7 @@ test.describe('exam bookings', () => {
 
     await page.goto(`/admin/catalogue/exams/${pastId}/letters?kind=participation`);
     await expect(page.locator('article').first()).toContainText('an der Prüfung telc Deutsch B2 teilgenommen hat (schriftlicher und mündlicher Teil)');
-    await page.getByRole('button', { name: 'Als gesendet speichern' }).click();
+    await page.getByRole('button', { name: 'Speichern und drucken' }).click();
     await expect(page).toHaveURL(new RegExp(`/admin/catalogue/exams/${pastId}/letters/print\\?ids=`));
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('1 Brief gespeichert');
     const { rows } = await client.query<{ kind: string }>(`SELECT kind FROM letters WHERE booking_id = $1`, [pastBookingId]);

@@ -219,8 +219,10 @@ like any booking's, and not the course's (`lettersFor`, checked again on the ser
 | `exam_participation` (participation, 0038) | `Confirmation.ParticiptionExam_Booking` | third person, no salutation: took part in the exam on the day, in the parts the candidate came to. SchoolMan certified participation nothing recorded; here only once the result is entered, never for a candidate who did not come |
 
 The invitation, the result and the participation also go to every candidate of a sitting at once
-(„Briefe an alle", `letters/exam-bulk.ts`): one letter each, in their language, kept on their booking,
-printed together a page each.
+(„Briefe an alle", `letters/exam-bulk.ts`): one letter each, in their language, kept on their booking.
+Since 2026-10-27 the page has two ways out: „Speichern und per E-Mail senden" (the primary) goes straight
+to the mail screen with every candidate's own letter as a PDF, „Speichern und drucken" to all of them
+together, a page each. The sitting's „Briefe & E-Mails" tab says per kind how many candidates have it.
 
 The receipt, the reminder, the overview and the cancellation are the booking letters there are; they
 show the exam where a course's would be, and the reminder's deadline is the exam's. An exam's queue
