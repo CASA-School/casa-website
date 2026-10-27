@@ -22,12 +22,14 @@ import { DateFormField } from '@/components/admin/date-picker';
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { MoreInPanel } from '@/components/admin/more-in-panel';
+import { RecordLink } from '@/components/admin/record-link';
 import { RecordTabLink, RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/components/admin/record-tabs';
 import { MetaItem, MetaLine, Stat, StatBar, Timeline, type TimelineEvent } from '@/components/admin/record-parts';
 import { dayRange } from '@/components/admin/list';
 import { Badge, Button, Card, DateText, DetailList, Field, Input, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
+import { recordHref, recordHrefFor } from '@/lib/admin/record-href';
 import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_TONES,
@@ -374,9 +376,9 @@ export default async function BookingPage({
               {exam.filedByName ? ` · ${exam.filedByName}` : ''}
             </span>
           ) : (
-            <Link href={`/admin/catalogue/exams/${exam.sessionId}`} className="font-medium text-[#9a5b00] hover:underline">
+            <RecordLink href={recordHrefFor(user, 'exam', exam.sessionId)} className="font-medium text-[#9a5b00]">
               {t('Noch nicht', 'Not yet')}
-            </Link>
+            </RecordLink>
           ),
         }
       : null,
@@ -405,7 +407,7 @@ export default async function BookingPage({
           ),
         }
       : null,
-    exam?.sourceRegistrationId
+    exam?.sourceRegistrationId && canAccess(user, 'registrations')
       ? {
           label: t('Aus der Anmeldung', 'From registration'),
           value: (
@@ -442,7 +444,7 @@ export default async function BookingPage({
           ),
         }
       : null,
-    booking.sourceRegistrationId
+    booking.sourceRegistrationId && canAccess(user, 'registrations')
       ? {
           label: t('Aus der Anmeldung', 'From registration'),
           value: (
@@ -604,7 +606,9 @@ export default async function BookingPage({
       <RecordHeader
         backHref="/admin/bookings"
         backLabel={t('Buchungen', 'Bookings')}
-        title={booking.personName}
+        // The learner's name opens the learner.
+        title={<RecordLink href={recordHrefFor(user, 'person', booking.personId)} tone="plain">{booking.personName}</RecordLink>}
+        trailLabel={`${booking.personName} · ${booking.number}`}
         avatar={booking.personName}
         status={
           <>
@@ -640,7 +644,12 @@ export default async function BookingPage({
               {exam && exam.parts !== 'full' ? <span className="font-medium text-[var(--casa-muted)]"> · {pick(lang, EXAM_PARTS_LABELS[exam.parts])}</span> : null}
               {/* How much of the level: „A2.1–A2.2" for a whole level, as the letters say it. */}
               {booking.levelRange ? <span className="font-medium text-[var(--casa-muted)]"> · {booking.levelRange}</span> : null}
-              {singleCohortTitle ? <span className="font-medium text-[var(--casa-muted)]"> · {singleCohortTitle}</span> : null}
+              {singleCohortTitle ? (
+                <span className="font-medium text-[var(--casa-muted)]">
+                  {' · '}
+                  <RecordLink href={recordHrefFor(user, 'start', single?.courseInstanceId)}>{singleCohortTitle}</RecordLink>
+                </span>
+              ) : null}
               {/* The number a learner writes on a transfer and finance matches payments by. */}
               <span className="ml-2 text-[0.84rem] font-semibold text-[var(--casa-muted)] tabular-nums">{booking.number}</span>
               {/* SchoolMan's own number (0052): on its receipts, so finance and learners still quote it (2026-10-21). */}
@@ -654,11 +663,11 @@ export default async function BookingPage({
               {exam ? (
                 // An exam's day is its sitting's, with the time it begins; the sitting has its own page.
                 <MetaItem icon={Icon.calendar}>
-                  <Link href={`/admin/catalogue/exams/${exam.sessionId}`} className="hover:text-[var(--casa-ink)] hover:underline">
+                  <RecordLink href={recordHrefFor(user, 'exam', exam.sessionId)}>
                     {new Date(exam.startsAt).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     {' · '}
                     {new Date(exam.startsAt).toLocaleTimeString(wsLocale(lang), { hour: '2-digit', minute: '2-digit' })}
-                  </Link>
+                  </RecordLink>
                 </MetaItem>
               ) : (
                 <MetaItem icon={Icon.calendar}>
@@ -714,11 +723,13 @@ export default async function BookingPage({
                   )}
                 </MetaItem>
               ) : null}
-              <MetaItem icon={Icon.people}>
-                <Link href={`/admin/people/${booking.personId}`} className="font-semibold text-[var(--fm-navy)] hover:underline">
-                  {t('Zur Person', 'Student page')}
-                </Link>
-              </MetaItem>
+              {canAccess(user, 'people') ? (
+                <MetaItem icon={Icon.people}>
+                  <RecordLink href={recordHrefFor(user, 'person', booking.personId)} tone="strong">
+                    {t('Zur Person', 'Student page')}
+                  </RecordLink>
+                </MetaItem>
+              ) : null}
             </MetaLine>
           </>
         }
@@ -799,8 +810,11 @@ export default async function BookingPage({
                       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
                         <div className="min-w-0">
                           <p className={cn('font-extrabold text-[var(--casa-ink)]', focus ? 'text-[1rem]' : 'text-[0.9rem]')}>
-                            {c.typeName ?? t('Kurs', 'Course')}
-                            {c.levelCode ? ` · ${c.levelCode}` : ''}
+                            {/* The class opens on its own page, its group's when it has several. */}
+                            <RecordLink href={recordHrefFor(user, 'course', c.courseId, { group: c.groupIndex ?? 1 })}>
+                              {c.typeName ?? t('Kurs', 'Course')}
+                              {c.levelCode ? ` · ${c.levelCode}` : ''}
+                            </RecordLink>
                             {c.number ? <span className="ml-2 text-[0.78rem] font-semibold text-[var(--casa-muted)] tabular-nums">#{c.number}</span> : null}
                           </p>
                           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.84rem] text-[var(--casa-ink)]">
@@ -827,7 +841,7 @@ export default async function BookingPage({
                               ? c.week.teachers.map((w, i) => (
                                   <span key={w.name}>
                                     {i ? ', ' : ''}
-                                    {w.name}
+                                    <RecordLink href={recordHrefFor(user, 'staff', w.id)}>{w.name}</RecordLink>
                                     {c.week!.teachers.length > 1 ? <span className="font-normal text-[var(--casa-muted)]"> ({dayRun(w.days, lang)})</span> : null}
                                     {w.substitute ? <span className="font-normal text-[#8a5a00]"> · {t('Vertretung', 'cover')}</span> : null}
                                   </span>
@@ -835,7 +849,16 @@ export default async function BookingPage({
                               : '—'}
                           </dd>
                           <dt className="text-[var(--casa-muted)]">{t('Raum', 'Room')}</dt>
-                          <dd className="font-semibold text-[var(--casa-ink)]">{c.week?.rooms.length ? c.week.rooms.join(', ') : '—'}</dd>
+                          <dd className="font-semibold text-[var(--casa-ink)]">
+                            {c.week?.rooms.length
+                              ? c.week.rooms.map((room, i) => (
+                                  <span key={room.id}>
+                                    {i ? ', ' : ''}
+                                    <RecordLink href={recordHrefFor(user, 'room', room.id)}>{room.name}</RecordLink>
+                                  </span>
+                                ))
+                              : '—'}
+                          </dd>
                           {c.courseInstanceId ? (
                             <>
                               <dt className="pt-1 text-[var(--casa-muted)]">{t('Niveau', 'Level')}</dt>
@@ -844,8 +867,12 @@ export default async function BookingPage({
                           ) : null}
                         </dl>
                       ) : null}
-                      {focus && c.courseInstanceId && canAccess(user, 'catalogue') ? (
-                        <Link href={`/admin/catalogue/${c.courseInstanceId}`} className="mt-2.5 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]">
+                      {focus && (c.courseId || c.courseInstanceId) && canAccess(user, 'catalogue') ? (
+                        // The class itself (its days, teachers, learners); a period not yet in a class, its start.
+                        <Link
+                          href={c.courseId ? recordHref('course', c.courseId, { group: c.groupIndex ?? 1 }) : recordHref('start', c.courseInstanceId!)}
+                          className="mt-2.5 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                        >
                           {t('Zum Kurs', 'Open the course')} {Icon.chevronRight}
                         </Link>
                       ) : null}
@@ -1144,7 +1171,11 @@ export default async function BookingPage({
                   <p className="text-[0.95rem] leading-snug font-bold text-[var(--casa-ink)]">{org.name}</p>
                 )
               ) : (
-                <p className="text-[0.95rem] leading-snug font-bold text-[var(--casa-ink)]">{extras.commissions[0]?.agency ?? '—'}</p>
+                <p className="text-[0.95rem] leading-snug font-bold text-[var(--casa-ink)]">
+                  <RecordLink href={recordHrefFor(user, 'organisation', extras.commissions[0]?.agencyId)} tone="strong">
+                    {extras.commissions[0]?.agency ?? '—'}
+                  </RecordLink>
+                </p>
               )}
               <dl className="mt-3 grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[0.84rem]">
                 {org ? (

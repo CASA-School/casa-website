@@ -206,7 +206,7 @@ export type DayLesson = {
    * Everyone who teaches the group in the day's week, in the order of their first day there, with their days
    * (Rahman, 2026-10-22: the panel named only the day's teacher). By the board's name, „Vorname N.".
    */
-  weekTeachers: { name: string; dates: string[]; substitute: boolean }[];
+  weekTeachers: { id: string; name: string; dates: string[]; substitute: boolean }[];
 };
 
 /** Another group of a merge, as the class panel and the plans name it. */
@@ -283,8 +283,8 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       )
     : [];
   const week = courseIds.length
-    ? await query<{ course_id: string; group_index: number; on_date: string; name: string; is_substitute: boolean }>(
-        `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, sm.short_name AS name, d.is_substitute
+    ? await query<{ course_id: string; group_index: number; on_date: string; id: string; name: string; is_substitute: boolean }>(
+        `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, sm.id, sm.short_name AS name, d.is_substitute
            FROM course_days d JOIN staff_members sm ON sm.id = d.teacher_id
           WHERE d.course_id = ANY($1::uuid[]) AND NOT d.cancelled
             AND d.on_date BETWEEN date_trunc('week', $2::date)::date AND date_trunc('week', $2::date)::date + 4
@@ -293,10 +293,10 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
       )
     : [];
   const weekOf = (courseId: string, groupIndex: number) => {
-    const by = new Map<string, { name: string; dates: string[]; substitute: boolean }>();
+    const by = new Map<string, { id: string; name: string; dates: string[]; substitute: boolean }>();
     for (const w of week) {
       if (w.course_id !== courseId || w.group_index !== groupIndex) continue;
-      const seen = by.get(w.name) ?? { name: w.name, dates: [], substitute: true };
+      const seen = by.get(w.name) ?? { id: w.id, name: w.name, dates: [], substitute: true };
       by.set(w.name, { ...seen, dates: [...seen.dates, w.on_date], substitute: seen.substitute && w.is_substitute });
     }
     return [...by.values()];

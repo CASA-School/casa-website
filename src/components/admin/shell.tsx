@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 
 import { CommandSearch } from './command-search';
+import { createItems, pageShortcuts } from './command-shortcuts';
+import { NavTrail } from './nav-trail';
 import { LangSwitch } from './lang-switch';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
@@ -67,9 +69,15 @@ export async function WorkspaceShell({
     ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: t('Räume', 'Rooms') }] : []),
   ];
   const placementReview = canAccess(user, 'placement') && placementTestSwitchedOn();
+  // What the search palette offers besides records: the pages this colleague may open, „Neu".
+  const pages = pageShortcuts(user, t);
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
+      {/* The pages of this visit, for the way back above a record; and „recently opened". */}
+      <Suspense fallback={null}>
+        <NavTrail colleague={user.id} pages={pages.map(({ href, label }) => ({ href, label }))} />
+      </Suspense>
       <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_45%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
         <div className="flex h-full flex-col overflow-x-hidden">
           <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
@@ -84,7 +92,7 @@ export async function WorkspaceShell({
             </Link>
             <span className="flex items-center gap-1 lg:hidden">
               <LangSwitch />
-              <CommandSearch variant="rail-icon" />
+              <CommandSearch variant="rail-icon" pages={pages} creates={createItems(user, t)} />
               <AccountMenu
                 tone="rail"
                 name={user.name}
@@ -309,7 +317,7 @@ export async function WorkspaceShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar user={user} roleText={roleText} siteHref={siteHref} signOutAction={signOutAction} focus={focus} />
+        <TopBar user={user} roleText={roleText} siteHref={siteHref} signOutAction={signOutAction} pages={pages} focus={focus} />
         <main
           className={cn(
             'flex-1 bg-ws-canvas',

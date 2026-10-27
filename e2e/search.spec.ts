@@ -106,6 +106,34 @@ test.describe('workspace search', () => {
     }
   });
 
+  test('a name typed without its accents, and a booking number typed loosely, find the record (2026-10-27)', async ({ page }) => {
+    const accented = (
+      await client.query<{ id: string; first_name: string; last_name: string }>(
+        `SELECT p.id, p.first_name, p.last_name FROM people p
+          WHERE p.deleted_at IS NULL AND p.merged_into IS NULL AND p.listed AND p.last_name ~ '[äöüÄÖÜéèşŞçÇ]' AND length(p.last_name) > 3
+            AND NOT EXISTS (SELECT 1 FROM staff_members s WHERE s.person_id = p.id)
+          ORDER BY p.created_by <> 'migration-schoolman', p.updated_at DESC LIMIT 1`
+      )
+    ).rows[0];
+    const booking = (await client.query<{ id: string; year: number; seq: number }>(`SELECT id, number_year AS year, number_seq AS seq FROM bookings WHERE deleted_at IS NULL ORDER BY filemaker_booking_id IS NULL, updated_at DESC LIMIT 1`)).rows[0];
+    test.skip(!accented && !booking, 'no accented name and no booking');
+    await page.goto('/admin', { waitUntil: 'networkidle' });
+    await page.keyboard.press('ControlOrMeta+k');
+    const box = page.getByRole('textbox', { name: 'Search the workspace' });
+    const results = page.getByRole('listbox', { name: 'Results' });
+    if (accented) {
+      const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+      await box.fill(`${plain(accented.first_name)} ${plain(accented.last_name)}`.toLowerCase());
+      await expect(results.locator(`a[href="/admin/people/${accented.id}"]`)).toBeVisible();
+    }
+    if (booking) {
+      await box.fill(`b ${booking.year} ${booking.seq}`);
+      await expect(results.getByText('Bookings', { exact: true })).toBeVisible();
+      await box.press('Enter');
+      await expect(page).toHaveURL(new RegExp(`/admin/bookings/${booking.id}$`));
+    }
+  });
+
   test('a colleague is found under Staff and opens on their staff page', async ({ page }) => {
     test.skip(!colleague, 'no colleague on the staff register');
     await page.goto('/admin', { waitUntil: 'networkidle' });

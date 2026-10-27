@@ -28,7 +28,9 @@ export default async function DayCoursesPage({ searchParams }: { searchParams: P
   return (
     <>
       <DayHeader view="courses" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={tests} t={t} lang={lang} />
-      <CoursesTable day={day} lessons={lessons} editing={choices ? { choices, canTeacher, canRoom, back } : undefined} />
+      <CoursesTable day={day} lessons={lessons} editing={choices ? { choices, canTeacher, canRoom, back } : undefined}
+        opens={{ staff: canAccess(user, 'staff'), rooms: canAccess(user, 'rooms'), catalogue: canAccess(user, 'catalogue') }}
+      />
     </>
   );
 }

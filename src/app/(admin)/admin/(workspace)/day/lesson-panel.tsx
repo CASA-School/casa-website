@@ -8,6 +8,7 @@ import { ConfirmSubmit } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
 import { Avatar } from '@/components/admin/list';
+import { RecordLink } from '@/components/admin/record-link';
 import { MenuSelect, type MenuOption } from '@/components/admin/menu-select';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button } from '@/components/admin/ui';
@@ -16,6 +17,7 @@ import { MERGE_REASONS, MERGE_REASON_LABELS, SESSION_LABELS, type MergeReason } 
 import { pick, type T, type WsLang } from '@/lib/admin/i18n';
 import { WEEKDAY_LABELS, WEEKDAYS } from '@/lib/admin/kursplanung/types';
 import { weekdayOf } from '@/lib/admin/kursplanung/weeks';
+import { recordHref } from '@/lib/admin/record-href';
 import { cn } from '@/lib/utils';
 import { mailHref } from '@/lib/admin/mail/href';
 
@@ -37,8 +39,22 @@ export const shortName = (name: string | null) => {
  * email to all, its page. Shared by „Kurse" and „Raumplan".
  */
 export type LessonEditing = { choices: LessonChoices; canTeacher: boolean; canRoom: boolean; lessons: DayLesson[]; back: string };
+/** Which records the colleague may open from the panel: the teacher, the room, the course. */
+export type LessonOpens = { staff: boolean; rooms: boolean; catalogue: boolean };
 
-export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLesson | null; day: string; editing?: LessonEditing; onClose: () => void }) {
+export function LessonPanel({
+  lesson,
+  day,
+  editing,
+  opens,
+  onClose,
+}: {
+  lesson: DayLesson | null;
+  day: string;
+  editing?: LessonEditing;
+  opens?: LessonOpens;
+  onClose: () => void;
+}) {
   const { t, lang } = useWsLang();
   const l = lesson;
   const emails = l ? [...new Set(l.learners.map((p) => p.email).filter((e): e is string => Boolean(e)))] : [];
@@ -76,12 +92,14 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
                 {t(`E-Mail an alle (${emails.length})`, `Email all (${emails.length})`)}
               </Link>
             ) : null}
+            {opens?.catalogue === false ? null : (
             <Link
               href={courseHref(l)}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[0.84rem] font-semibold text-[var(--casa-accent-text)] transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
             >
               {t('Zum Kurs', 'Open the course')}
             </Link>
+            )}
           </span>
         ) : null
       }
@@ -124,7 +142,7 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
           ) : null}
           <dl className="grid grid-cols-2 gap-x-4 gap-y-4 px-6 py-5">
             <Fact label={t('Raum', 'Room')}>
-              {l.roomName ?? (l.joins.length ? l.joins.map((h) => h.roomName ?? '—').join(', ') : '—')}
+              {l.roomName ? <RecordLink href={opens?.rooms && l.roomId ? recordHref('room', l.roomId) : null}>{l.roomName}</RecordLink> : (l.joins.length ? l.joins.map((h) => h.roomName ?? '—').join(', ') : '—')}
               {l.floor !== null ? <span className="block text-[0.78rem] font-medium text-[var(--casa-muted)]">{floorName(l.floor, t)}</span> : null}
             </Fact>
             <Fact label={l.weekTeachers.length > 1 ? t('Lehrkräfte', 'Teachers') : t('Lehrkraft', 'Teacher')}>
@@ -134,7 +152,7 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
                   const today = w.dates.includes(day);
                   return (
                     <span key={w.name} className={cn('block', !today && 'font-semibold text-[var(--casa-ink-soft,#3d4a5c)]')}>
-                      {w.name}
+                      <RecordLink href={opens?.staff ? recordHref('staff', w.id) : null}>{w.name}</RecordLink>
                       <span className="ml-1.5 text-[0.78rem] font-medium text-[var(--casa-muted)]">
                         {dayRun(w.dates, lang)}
                         {today ? t(' · heute', ' · today') : ''}
@@ -144,7 +162,7 @@ export function LessonPanel({ lesson, day, editing, onClose }: { lesson: DayLess
                   );
                 })
               ) : (
-                l.teacherName ?? (l.joins.length ? l.joins.map((h) => h.teacherName ?? '—').join(', ') : '—')
+                (l.teacherName ? <RecordLink href={opens?.staff && l.teacherId ? recordHref('staff', l.teacherId) : null}>{l.teacherName}</RecordLink> : null) ?? (l.joins.length ? l.joins.map((h) => h.teacherName ?? '—').join(', ') : '—')
               )}
               {l.substitute ? (
                 <span className="mt-0.5 block text-[0.78rem] font-semibold text-[#8a5a00]">

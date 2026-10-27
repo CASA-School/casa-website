@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { SentLetter } from '@/components/admin/letters/sent-letter';
+import { RecordLink } from '@/components/admin/record-link';
 import { canAccess } from '@/lib/admin/access';
 import { queryFirst } from '@/lib/admin/db';
 import { requireModule } from '@/lib/admin/guard';
@@ -8,6 +9,7 @@ import { wsLocale } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { letterModule } from '@/lib/admin/letters/module';
 import { getSentLetter } from '@/lib/admin/letters/repo';
+import { recordHrefFor } from '@/lib/admin/record-href';
 
 /**
  * One letter, as it went out (docs/LETTERS.md). Seen with the right of what it is about: an offer's
@@ -51,6 +53,17 @@ export default async function LetterPage({ params, searchParams }: { params: Pro
       back={back}
       justSent={sent === '1'}
       mailHref={canAccess(user, letterModule(found.kind), 'edit') ? `/admin/letters/mail?ids=${found.id}` : null}
+      about={
+        // The learner it went to, when the way back leads elsewhere (their booking, an offer).
+        found.personId && back.href !== `/admin/people/${found.personId}?tab=letters` && canAccess(user, 'people') ? (
+          <>
+            {t('An ', 'To ')}
+            <RecordLink href={recordHrefFor(user, 'person', found.personId)} tone="strong">
+              {found.recipientName}
+            </RecordLink>
+          </>
+        ) : null
+      }
     />
   );
 }

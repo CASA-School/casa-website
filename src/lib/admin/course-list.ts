@@ -56,6 +56,9 @@ export type CourseGroupRow = {
   room: string | null;
   /** The main teachers — the week's pair, substitutes left out — at most two. */
   teachers: string[];
+  /** Their staff records, in the same order (null where a name has none), for a link to each. */
+  teacherIds: (string | null)[];
+  roomId: string | null;
   places: number;
   weeks: { monday: string; n: number }[];
   now: number | null;
@@ -154,8 +157,19 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
     ),
     // Who taught, where, day by day: the main teachers and the room of each group come from these.
     // A day covered by someone else counts for the teacher it was covered for: still the course's own.
-    query<{ course_id: string; group_index: number; on_date: string; teacher: string | null; substitute: boolean; replaced: string | null; room: string | null }>(
-      `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date,
+    query<{
+      course_id: string;
+      group_index: number;
+      on_date: string;
+      teacher_id: string | null;
+      teacher: string | null;
+      substitute: boolean;
+      replaced_id: string | null;
+      replaced: string | null;
+      room_id: string | null;
+      room: string | null;
+    }>(
+      `SELECT d.course_id, d.group_index, to_char(d.on_date, 'YYYY-MM-DD') AS on_date, d.teacher_id, d.replaced_teacher_id AS replaced_id, d.room_id,
               coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
               d.is_substitute OR d.replaced_teacher_id IS NOT NULL AS substitute,
               coalesce(nullif(trim(rm.short_name), ''), nullif(concat_ws(' ', rp.first_name, left(rp.last_name, 1)), '')) AS replaced,
@@ -168,8 +182,8 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
         ORDER BY d.on_date`,
       [ids]
     ),
-    query<{ course_id: string; group_index: number; teacher: string | null; room: string | null }>(
-      `SELECT w.course_id, w.group_index, coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
+    query<{ course_id: string; group_index: number; teacher_id: string | null; teacher: string | null; room_id: string | null; room: string | null }>(
+      `SELECT w.course_id, w.group_index, w.teacher_id, w.room_id, coalesce(nullif(trim(m.short_name), ''), concat_ws(' ', p.first_name, left(p.last_name, 1))) AS teacher,
               coalesce(r.nickname, r.name) AS room
          FROM course_week_plans w
          LEFT JOIN staff_members m ON m.id = w.teacher_id LEFT JOIN people p ON p.id = m.person_id
@@ -195,6 +209,14 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
   for (const w of plans) push(plansOf, `${w.course_id}|${w.group_index}`, w);
   const numbersOf = new Map(numbers.map((r) => [r.id, r.numbers?.length ? r.numbers : r.number ? [r.number] : []]));
   const thisMonday = mondayOf(today);
+  // The names below are the records' names: each one's record, for the course page's links.
+  const teacherIdOf = new Map<string, string>();
+  const roomIdOf = new Map<string, string>();
+  for (const d of [...days, ...plans]) {
+    if (d.teacher && d.teacher_id) teacherIdOf.set(d.teacher, d.teacher_id);
+    if (d.room && d.room_id) roomIdOf.set(d.room, d.room_id);
+  }
+  for (const d of days) if (d.replaced && d.replaced_id) teacherIdOf.set(d.replaced, d.replaced_id);
   const addDays = (day: string, n: number) => iso(new Date(Date.parse(`${day}T12:00:00Z`) + n * 86_400_000));
   const distinct = (names: (string | null)[]) => [...new Set(names.filter((n): n is string => Boolean(n)))];
   const mostOf = (names: (string | null)[]) => {
@@ -236,7 +258,9 @@ async function rowsFor(starts: StartRow[], today: string, only?: string): Promis
         index: split ? i + 1 : g.groups > 1 ? 0 : 1,
         number: split ? (numbersHere[i] ?? null) : numbersHere.length ? numbersHere.join(' · ') : null,
         room,
+        roomId: room ? (roomIdOf.get(room) ?? null) : null,
         teachers,
+        teacherIds: teachers.map((name) => teacherIdOf.get(name) ?? null),
         places: split ? g.placesPerGroup : g.places,
         weeks: groupWeeks,
         now: split && !perGroupLearners ? null : phase === 'running' && index >= 0 ? (groupWeeks[index]?.n ?? 0) : Math.max(0, ...groupWeeks.map((w) => w.n)),

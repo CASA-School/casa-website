@@ -1591,7 +1591,7 @@ export async function completeFollowUp(bookingId: string, followUpId: string, ac
 
 export type LedgerExtras = {
   instalments: { id: string; label: string | null; dueOn: string | null; amount: number; paid: boolean | null }[];
-  commissions: { id: string; agency: string | null; description: string | null; baseAmount: number | null; percentage: number | null; amount: number; paid: boolean | null }[];
+  commissions: { id: string; agency: string | null; agencyId: string | null; description: string | null; baseAmount: number | null; percentage: number | null; amount: number; paid: boolean | null }[];
   payouts: { id: string; kind: 'host_rent' | 'agency_commission' | 'agency_direct' | 'other'; to: string | null; toHref: string | null; amount: number; paidOn: string | null; note: string | null }[];
   invoices: { id: string; number: string; issuedOn: string | null; subject: string | null; amount: number | null }[];
 };
@@ -1603,8 +1603,8 @@ export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtr
       `SELECT id, label, to_char(due_on, 'YYYY-MM-DD') AS due_on, amount, paid FROM booking_instalments WHERE booking_id = $1 ORDER BY position, due_on NULLS LAST, id`,
       [bookingId]
     ),
-    query<{ id: string; agency: string | null; description: string | null; base_amount: string | null; percentage: string | null; amount: string; paid: boolean | null }>(
-      `SELECT c.id, o.name AS agency, c.description, c.base_amount, c.percentage, c.amount, c.paid
+    query<{ id: string; agency: string | null; agency_id: string | null; description: string | null; base_amount: string | null; percentage: string | null; amount: string; paid: boolean | null }>(
+      `SELECT c.id, o.name AS agency, o.id AS agency_id, c.description, c.base_amount, c.percentage, c.amount, c.paid
          FROM booking_commissions c LEFT JOIN organisations o ON o.id = c.organisation_id
         WHERE c.booking_id = $1 ORDER BY c.created_at, c.id`,
       [bookingId]
@@ -1628,6 +1628,7 @@ export async function bookingLedgerExtras(bookingId: string): Promise<LedgerExtr
     commissions: commissions.map((r) => ({
       id: r.id,
       agency: r.agency,
+      agencyId: r.agency_id,
       description: r.description,
       baseAmount: n(r.base_amount),
       percentage: n(r.percentage),
@@ -1667,6 +1668,8 @@ export type BookingCoursePeriod = {
   endDate: string;
   kind: 'initial' | 'extension';
   courseId: string | null;
+  /** The group of the course the period is in (its own page past the first: `recordHref('course', id, { group })`). */
+  groupIndex: number | null;
   courseInstanceId: string | null;
   typeName: string | null;
   levelCode: string | null;
@@ -1676,7 +1679,11 @@ export type BookingCoursePeriod = {
   /** Where it stands today. */
   when: 'running' | 'upcoming' | 'past';
   /** The class's week — this one while it runs, else its first or its last: the times, the room, who teaches. */
-  week: { times: string | null; rooms: string[]; teachers: { name: string; days: string[]; substitute: boolean }[] } | null;
+  week: {
+    times: string | null;
+    rooms: { id: string; name: string }[];
+    teachers: { id: string | null; name: string; days: string[]; substitute: boolean }[];
+  } | null;
 };
 
 /**
@@ -1719,9 +1726,18 @@ export async function bookingCourses(bookingId: string): Promise<BookingCoursePe
       if (r.course_id) {
         // The week shown: this one while it runs, the first before it starts, the last once it is over.
         const ref = when === 'running' ? today : when === 'upcoming' ? r.start_date : r.end_date;
-        const days = await query<{ on_date: string; times: string | null; room: string | null; teacher: string | null; is_substitute: boolean }>(
+        const days = await query<{
+          on_date: string;
+          times: string | null;
+          room_id: string | null;
+          room: string | null;
+          teacher_id: string | null;
+          teacher: string | null;
+          is_substitute: boolean;
+        }>(
           `SELECT to_char(d.on_date, 'YYYY-MM-DD') AS on_date, to_char(t.starts_at, 'HH24:MI') || '–' || to_char(t.ends_at, 'HH24:MI') AS times,
-                  coalesce(r.nickname, r.name) AS room, coalesce(sm.short_name, trim(concat_ws(' ', tp.first_name, tp.last_name))) AS teacher, d.is_substitute
+                  d.room_id, coalesce(r.nickname, r.name) AS room,
+                  d.teacher_id, coalesce(sm.short_name, trim(concat_ws(' ', tp.first_name, tp.last_name))) AS teacher, d.is_substitute
              FROM course_days d
              JOIN course_day_times t ON t.id = d.id
              LEFT JOIN rooms r ON r.id = d.room_id
@@ -1733,15 +1749,17 @@ export async function bookingCourses(bookingId: string): Promise<BookingCoursePe
           [r.course_id, r.group_index, ref, r.start_date, r.end_date]
         );
         if (days.length) {
-          const teachers = new Map<string, { name: string; days: string[]; substitute: boolean }>();
+          const teachers = new Map<string, { id: string | null; name: string; days: string[]; substitute: boolean }>();
           for (const d of days) {
             if (!d.teacher) continue;
-            const seen = teachers.get(d.teacher) ?? { name: d.teacher, days: [], substitute: true };
+            const seen = teachers.get(d.teacher) ?? { id: d.teacher_id, name: d.teacher, days: [], substitute: true };
             teachers.set(d.teacher, { ...seen, days: [...seen.days, d.on_date], substitute: seen.substitute && d.is_substitute });
           }
+          const rooms = new Map<string, { id: string; name: string }>();
+          for (const d of days) if (d.room_id && d.room && !rooms.has(d.room_id)) rooms.set(d.room_id, { id: d.room_id, name: d.room });
           week = {
             times: days.find((d) => d.times)?.times ?? null,
-            rooms: [...new Set(days.map((d) => d.room).filter((room): room is string => Boolean(room)))],
+            rooms: [...rooms.values()],
             teachers: [...teachers.values()],
           };
         }
@@ -1752,6 +1770,7 @@ export async function bookingCourses(bookingId: string): Promise<BookingCoursePe
         endDate: r.end_date,
         kind: r.kind,
         courseId: r.course_id,
+        groupIndex: r.group_index,
         courseInstanceId: r.course_instance_id,
         typeName: r.type_name,
         levelCode: r.level_code,
