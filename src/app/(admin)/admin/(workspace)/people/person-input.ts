@@ -74,6 +74,8 @@ export async function readBankAccount(formData: FormData): Promise<BankAccountIn
     iban,
     bic: field(formData, 'bic', 11)?.toUpperCase() ?? null,
     bankName: field(formData, 'bankName', 120),
-    note: field(formData, 'note', 200),
+    note: field(formData, 'note', 2000),
+    holderAddress: field(formData, 'holderAddress', 400),
+    bankAddress: field(formData, 'bankAddress', 400),
   };
 }

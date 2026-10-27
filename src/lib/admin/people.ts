@@ -71,7 +71,8 @@ export type Address = {
 export type PersonDetail = PersonSummary & {
   facts: PersonFacts;
   addresses: Address[];
-  emails: { address: string; isPrimary: boolean }[];
+  /** With SchoolMan's note on an address (0092). */
+  emails: { address: string; isPrimary: boolean; note: string | null }[];
   phones: { number: string; isPrimary: boolean }[];
   /** Rows linked INTO this one (duplicates that were resolved to it). */
   linkedDuplicates: PersonSummary[];
@@ -183,8 +184,8 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
         WHERE a.person_id = $1 ORDER BY a.kind = 'local' DESC`,
       [row.id]
     ),
-    query<{ address: string; is_primary: boolean }>(
-      `SELECT DISTINCT ON (e.normalized) e.address, e.is_primary
+    query<{ address: string; is_primary: boolean; note: string | null }>(
+      `SELECT DISTINCT ON (e.normalized) e.address, e.is_primary, e.note
          FROM emails e
         WHERE e.person_id = ANY(person_family($1))
         ORDER BY e.normalized, e.is_primary DESC, e.created_at`,
@@ -228,6 +229,7 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
     emails: emails.map((e) => ({
       address: e.address,
       isPrimary: e.is_primary,
+      note: e.note,
     })),
     phones: phones.map((p) => ({ number: p.number, isPrimary: p.is_primary })),
     linkedDuplicates: dups.map(toSummary),
@@ -906,50 +908,107 @@ export async function saveAddress(personId: string, kind: AddressKind, input: Ad
 // ------------------------------------------------------------ bank details
 
 /**
- * A person's bank accounts (migration 0029) — a learner's, for a refund. Read and written with the
- * module `private_data`, which the team holds; the callers check it. The history says that an
- * account was added, changed or removed, never the number.
+ * A person's bank accounts (migration 0029) — a learner's, for a refund — and since 0092 an
+ * organisation's own. Read and written with the module `private_data`, which the team holds; the
+ * callers check it. The history says that an account was added, changed or removed, never the number.
  *
  * The same migration's `person_private` (tax, pension and health-insurance numbers) is staff data
  * from SchoolMan's employee records, not a learner's: it is shown on the staff pages when they are
  * built, under a right of its own.
  */
-export type BankAccount = { id: string; holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null };
+export type BankAccount = {
+  id: string;
+  holder: string | null;
+  iban: string;
+  bic: string | null;
+  bankName: string | null;
+  note: string | null;
+  /** The holder's and the bank's address, for a transfer abroad (0092). */
+  holderAddress: string | null;
+  bankAddress: string | null;
+};
 
-export type BankAccountInput = { holder: string | null; iban: string; bic: string | null; bankName: string | null; note: string | null };
+export type BankAccountInput = {
+  holder: string | null;
+  iban: string;
+  bic: string | null;
+  bankName: string | null;
+  note: string | null;
+  holderAddress: string | null;
+  bankAddress: string | null;
+};
 
-export async function listBankAccounts(personId: string): Promise<BankAccount[]> {
-  const rows = await query<{ id: string; holder: string | null; iban: string; bic: string | null; bank_name: string | null; note: string | null }>(
-    `SELECT id, holder, iban, bic, bank_name, note FROM bank_accounts WHERE person_id = $1 ORDER BY created_at`,
-    [personId]
+/** Whose account: a person's, or since 0092 an organisation's own. */
+type Owner = { entity: 'person' | 'organisation'; id: string };
+const OWNER_COLUMN = { person: 'person_id', organisation: 'organisation_id' } as const;
+
+async function listAccounts(owner: Owner): Promise<BankAccount[]> {
+  const rows = await query<{
+    id: string;
+    holder: string | null;
+    iban: string;
+    bic: string | null;
+    bank_name: string | null;
+    note: string | null;
+    holder_address: string | null;
+    bank_address: string | null;
+  }>(
+    `SELECT id, holder, iban, bic, bank_name, note, holder_address, bank_address FROM bank_accounts WHERE ${OWNER_COLUMN[owner.entity]} = $1 ORDER BY created_at`,
+    [owner.id]
   );
-  return rows.map((b) => ({ id: b.id, holder: b.holder, iban: b.iban, bic: b.bic, bankName: b.bank_name, note: b.note }));
+  return rows.map((b) => ({
+    id: b.id,
+    holder: b.holder,
+    iban: b.iban,
+    bic: b.bic,
+    bankName: b.bank_name,
+    note: b.note,
+    holderAddress: b.holder_address,
+    bankAddress: b.bank_address,
+  }));
 }
 
 /** The IBAN without spaces, upper case — how banks and DATEV read it. */
 export const normalizeIban = (value: string) => value.replace(/\s+/g, '').toUpperCase();
 
-export async function addBankAccount(personId: string, input: BankAccountInput, actor: StaffUser): Promise<void> {
+async function addAccount(owner: Owner, input: BankAccountInput, actor: StaffUser): Promise<void> {
   await query(
-    `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, note, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-    [personId, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note, actor.id]
+    `INSERT INTO bank_accounts (${OWNER_COLUMN[owner.entity]}, holder, iban, bic, bank_name, note, holder_address, bank_address, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [owner.id, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note, input.holderAddress, input.bankAddress, actor.id]
   );
-  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_added' });
+  await logActivity({ actor, entity: owner.entity, entityId: owner.id, action: 'bank_account_added' });
 }
 
 /** A wrong digit is corrected in place; the history says the account changed, not to what. */
-export async function updateBankAccount(personId: string, accountId: string, input: BankAccountInput, actor: StaffUser): Promise<void> {
+async function updateAccount(owner: Owner, accountId: string, input: BankAccountInput, actor: StaffUser): Promise<void> {
   await query(
-    `UPDATE bank_accounts SET holder = $3, iban = $4, bic = $5, bank_name = $6, note = $7 WHERE id = $1 AND person_id = $2`,
-    [accountId, personId, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note]
+    `UPDATE bank_accounts SET holder = $3, iban = $4, bic = $5, bank_name = $6, note = $7, holder_address = $8, bank_address = $9
+      WHERE id = $1 AND ${OWNER_COLUMN[owner.entity]} = $2`,
+    [accountId, owner.id, input.holder, normalizeIban(input.iban), input.bic, input.bankName, input.note, input.holderAddress, input.bankAddress]
   );
-  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_updated' });
+  await logActivity({ actor, entity: owner.entity, entityId: owner.id, action: 'bank_account_updated' });
 }
 
-export async function removeBankAccount(personId: string, accountId: string, actor: StaffUser): Promise<void> {
-  await query(`DELETE FROM bank_accounts WHERE id = $1 AND person_id = $2`, [accountId, personId]);
-  await logActivity({ actor, entity: 'person', entityId: personId, action: 'bank_account_removed' });
+async function removeAccount(owner: Owner, accountId: string, actor: StaffUser): Promise<void> {
+  await query(`DELETE FROM bank_accounts WHERE id = $1 AND ${OWNER_COLUMN[owner.entity]} = $2`, [accountId, owner.id]);
+  await logActivity({ actor, entity: owner.entity, entityId: owner.id, action: 'bank_account_removed' });
 }
+
+export const listBankAccounts = (personId: string) => listAccounts({ entity: 'person', id: personId });
+export const addBankAccount = (personId: string, input: BankAccountInput, actor: StaffUser) => addAccount({ entity: 'person', id: personId }, input, actor);
+export const updateBankAccount = (personId: string, accountId: string, input: BankAccountInput, actor: StaffUser) =>
+  updateAccount({ entity: 'person', id: personId }, accountId, input, actor);
+export const removeBankAccount = (personId: string, accountId: string, actor: StaffUser) => removeAccount({ entity: 'person', id: personId }, accountId, actor);
+
+/** An organisation's own accounts (0092): an agency's, for its commission. Same module, `private_data`. */
+export const listOrganisationBankAccounts = (organisationId: string) => listAccounts({ entity: 'organisation', id: organisationId });
+export const addOrganisationBankAccount = (organisationId: string, input: BankAccountInput, actor: StaffUser) =>
+  addAccount({ entity: 'organisation', id: organisationId }, input, actor);
+export const updateOrganisationBankAccount = (organisationId: string, accountId: string, input: BankAccountInput, actor: StaffUser) =>
+  updateAccount({ entity: 'organisation', id: organisationId }, accountId, input, actor);
+export const removeOrganisationBankAccount = (organisationId: string, accountId: string, actor: StaffUser) =>
+  removeAccount({ entity: 'organisation', id: organisationId }, accountId, actor);
 
 /**
  * Soft delete: the row stays, marked with who deleted it and when, and every read filters it out;

@@ -103,3 +103,24 @@ And one person id is used by two records. (`docs/FILEMAKER_LESSONS.md` counted 5
 match.) *Proposal:* when the bridge brings a person across and finds a second record for the same
 human, a colleague confirms that they are one; both FileMaker records are then linked to the one
 workspace person (`filemaker_links`), and both histories are kept.
+
+## Completeness review (2026-10-27, migration 0092)
+
+Every `Person`, `Email`, `Address` and `BankAccount` field still in use that the bridge did not read was sorted
+(the review's verdicts, counts only). Brought across now, for the learners the bridge reads and for the staff:
+
+- the **passport number** (`NumberPassport`, decision 1): 474 of the sample's learners; the visa letter prints it;
+- a **birth year** where SchoolMan has no birth date (`YearOfBirth`, 940 people in SchoolMan, none in today's sample);
+- the **mother tongue** from its id (`_ID_Mothertongue` through `LanguageReference`), not the label copy
+  `MotherTongue_1`, which held „011 - Turkish/Türkisch" and „000 - other/andere" (514 such values here, put right
+  by 0092). 14 „andere" is no language: where a colleague typed one over the label („000 - Ukrainisch") it is kept;
+- the **country of birth** and an **address's country** from their `Flag` ids (`_ID_CountryBirth`,
+  `Address._ID_Country`), not the German label copies;
+- a **note on an e-mail address** (`CommentUseMail`) — `emails.note`, shown after the address;
+- a bank account's **comment** and the **holder's and the bank's address** for a transfer abroad (`Comment`,
+  `AddressAccountOwner`, `AddressBank`; 50, 36 and 41 on the sample's accounts).
+
+Checked and left: the 442 accounts of 2019–2022 whose `_ID_Person` names a deleted person cannot be given back
+through `_ID_Student` — that number names no person and no booking in SchoolMan either. The copies on the
+channels (`_ID_Student`, `_ID_Client`), the selection marks and serials (`_ID_Selected`, `_ID_Provider`) are
+plumbing; `_ID_Salutation` is abandoned („du" for everyone). A host's bank account is a decision still open.

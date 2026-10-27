@@ -84,3 +84,19 @@ Not yet: commission per booking (`Commission`, the money module), a booking's co
 
 1. Is `Management` how the team thinks of "a contact" — or is it invisible to them?
 2. Which agencies are active today?
+
+## Completeness review (2026-10-27, migration 0092)
+
+- **Internship hosts** by SchoolMan's `Internship` role (56 rows; only 9 of them carry status 7, which the reader
+  looked for): 53 other parties and 6 companies with the relation „Praktikumsbetrieb" — 59 where there were 13 —
+  each active by the role's own `_ID_Active`.
+- **Commissioning bodies** (`Contractor`, 3: a university, a training provider): their companies with the relation
+  „Auftraggeber" (`commissioning_body`). Linking a booking's `_ID_Contractor` is the bookings' work.
+- Another party's **active flag** from `Management._ID_Active` (2 = no; it had been taken as active always).
+- The **main contact**: `Management._ID_ContactPerson`, else `Agency._ID_ContactAgent`, else
+  `Corporate._ID_Contact_Person` — 59 marked here; 7 of the 8 not marked name a person SchoolMan deleted.
+- The **note on the party's own e-mail address** (`CommentUseMail`, 59) and the address's country by its `Flag` id.
+- The party's **own bank accounts** (an account on its `Management` with no person, host or colleague): 6.
+
+Still open (decisions): what an agency's `_ID_PaymentCommission` (School / Agency) means, `Management.CommentManagement`
+(credentials inside), `_ID_StatementLandlord`. A host's offer, district and main contact are the accommodation's.

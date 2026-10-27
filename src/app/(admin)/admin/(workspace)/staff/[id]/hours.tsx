@@ -3,8 +3,9 @@
 import { useState, type ReactNode } from 'react';
 
 import { useWsLang } from '@/components/admin/lang';
-import { Card } from '@/components/admin/ui';
-import { wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
+import { Badge, Card } from '@/components/admin/ui';
+import { pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
+import { LEAVE_KIND_LABELS } from '@/lib/admin/staff-labels';
 import type { StaffTime, TimeMonth } from '@/lib/admin/staff-time';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +41,10 @@ export function StaffHours({ data }: { data: StaffTime }) {
   const taught = sofar.reduce((sum, m) => sum + (m.units ?? 0), 0);
   const owed = sofar.reduce((sum, m) => sum + (m.contractUnits ?? 0), 0);
   const holidaysUsed = data.holidays !== null && data.holidaysLeft !== null ? data.holidays - data.holidaysLeft : null;
+  // A column only when the year has it (0092): time worked outside the lessons.
+  const hasOther = data.months.some((m) => m.otherWork !== null);
+  const shortDay = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const dayRangeText = (from: string, to: string) => (from === to ? shortDay(from) : `${shortDay(from)} – ${shortDay(to)}`);
 
   return (
     <div className="space-y-4">
@@ -54,7 +59,14 @@ export function StaffHours({ data }: { data: StaffTime }) {
             <Empty t={t} />
           )}
         </Tile>
-        <Tile label={t(`Monate ${data.year}`, `Months of ${data.year}`)} hint={t('Summe der Plus- und Minusstunden', 'Plus and minus hours added up')}>
+        <Tile
+          label={t(`Monate ${data.year}`, `Months of ${data.year}`)}
+          hint={
+            data.carried !== null
+              ? t(`Summe der Plus- und Minusstunden · Übertrag ${hours(data.carried, true)}`, `Plus and minus hours added up · carried over ${hours(data.carried, true)}`)
+              : t('Summe der Plus- und Minusstunden', 'Plus and minus hours added up')
+          }
+        >
           {withSheet.length ? (
             <>
               <Big>{hours(yearBalance, true)}</Big>
@@ -112,6 +124,31 @@ export function StaffHours({ data }: { data: StaffTime }) {
         </Card>
       ) : null}
 
+      {/* The year's leave requests (0092): which kind, when, how many working days — and those not yet approved. */}
+      {data.leave.length ? (
+        <Card title={t('Urlaub und Freistellung', 'Leave')}>
+          <ul className="-my-1 divide-y divide-ws-line-soft">
+            {data.leave.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
+                <span className="min-w-0">
+                  <span className="font-semibold text-[var(--casa-ink)]">{r.kind ? pick(lang, LEAVE_KIND_LABELS[r.kind]) : t('Abwesenheit', 'Time away')}</span>
+                  <span className="ml-2 text-[var(--casa-muted)] tabular-nums">
+                    {dayRangeText(r.from, r.to)}
+                    {r.days ? ` · ${r.days === 1 ? t('1 Tag', '1 day') : t(`${fmt(r.days, lang)} Tage`, `${fmt(r.days, lang)} days`)}` : ''}
+                  </span>
+                  {r.note ? <span className="block text-[0.8rem] text-[var(--casa-muted)]">{r.note}</span> : null}
+                </span>
+                {r.days && r.approved < r.days ? (
+                  <Badge tone="warning">
+                    {r.approved ? t(`${fmt(r.approved, lang)} von ${fmt(r.days, lang)} genehmigt`, `${fmt(r.approved, lang)} of ${fmt(r.days, lang)} approved`) : t('Beantragt', 'Requested')}
+                  </Badge>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
       <details className="group rounded-2xl bg-white ring-1 ring-ws-line ring-inset">
         <summary className="cursor-pointer list-none px-5 py-3.5 text-[0.86rem] font-semibold text-[var(--casa-ink)] outline-none marker:hidden focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40">
           {t('Als Tabelle', 'As a table')}
@@ -126,6 +163,7 @@ export function StaffHours({ data }: { data: StaffTime }) {
                 <th className="px-3 py-2 text-right font-semibold">{t('Plus/Minus', 'Plus/minus')}</th>
                 <th className="px-3 py-2 text-right font-semibold">{t('Saldo', 'Balance')}</th>
                 <th className="px-3 py-2 text-right font-semibold">{t('Urlaub übrig', 'Holiday left')}</th>
+                {hasOther ? <th className="px-3 py-2 text-right font-semibold">{t('Verwaltung', 'Admin')}</th> : null}
                 <th className="px-5 py-2 text-right font-semibold">UE</th>
               </tr>
             </thead>
@@ -134,7 +172,11 @@ export function StaffHours({ data }: { data: StaffTime }) {
                 <tr key={m.month}>
                   <td className="px-5 py-2 font-semibold text-[var(--casa-ink)]">
                     {monthName(m.month, 'long')}
-                    {m.approved ? <span className="ml-1.5 text-[0.72rem] font-medium text-[var(--casa-muted)]">{t('freigegeben', 'approved')}</span> : null}
+                    {m.approved ? (
+                      <span className="ml-1.5 text-[0.72rem] font-medium text-[var(--casa-muted)]">
+                        {m.approvedOn ? t(`freigegeben am ${shortDay(m.approvedOn)}`, `approved ${shortDay(m.approvedOn)}`) : t('freigegeben', 'approved')}
+                      </span>
+                    ) : null}
                     {m.open && m.month === current ? <span className="ml-1.5 text-[0.72rem] font-medium text-[var(--casa-muted)]">{t('läuft', 'running')}</span> : null}
                   </td>
                   <td className="px-3 py-2 text-right">{m.target !== null ? hours(m.target) : '—'}</td>
@@ -142,6 +184,7 @@ export function StaffHours({ data }: { data: StaffTime }) {
                   <td className="px-3 py-2 text-right">{m.balance !== null ? hours(m.balance, true) : '—'}</td>
                   <td className="px-3 py-2 text-right">{m.running !== null ? hours(m.running, true) : '—'}</td>
                   <td className="px-3 py-2 text-right">{m.holidayLeft !== null ? fmt(m.holidayLeft, lang) : '—'}</td>
+                  {hasOther ? <td className="px-3 py-2 text-right">{m.otherWork !== null ? hours(m.otherWork) : '—'}</td> : null}
                   <td className="px-5 py-2 text-right">
                     {m.units !== null ? `${fmt(m.units, lang)}${m.contractUnits ? ` / ${fmt(m.contractUnits, lang)}` : ''}` : '—'}
                   </td>

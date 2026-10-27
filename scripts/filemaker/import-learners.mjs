@@ -41,6 +41,8 @@
  *   own module and a privacy decision). They also fill the booking's accommodation fields, so the
  *   bookings' „Unterkunft" view and the booking page show them.
  * - Bookings without a period (not exams) are left out; what is about one goes on the person.
+ * - The passport number, a birth year where there is no birth date, the mother tongue and the countries by
+ *   SchoolMan's ids, a note on an e-mail address, a bank account's comment and addresses (2026-10-27, 0092).
  */
 import { getCode } from 'country-list';
 
@@ -58,7 +60,8 @@ async function readStdin() {
 const SALUTATION = { 1: 'mr', 2: 'ms', 3: 'mx' };
 const EMAIL_KIND = { 1: 'personal', 2: 'work', 3: 'personal' };
 const EMAIL_SKIP = new Set(['4']); // Agentur: the agency's address, not the learner's
-const PHONE_KIND = { 1: 'home', 2: 'work', 3: 'mobile', 5: 'mobile' };
+// 6 Nottelefon is someone to call in an emergency, never the learner's own first number; 8 WhatsApp (0092).
+const PHONE_KIND = { 1: 'home', 2: 'work', 3: 'mobile', 5: 'mobile', 6: 'emergency', 8: 'whatsapp' };
 const PHONE_SKIP = new Set(['7']); // Fax
 // A charge type's line kind; any other accommodation type is accommodation, the rest „other".
 const KIND = { tuition: 'tuition', enrolment_fee: 'enrolment_fee', books: 'books', exam_fee: 'exam_fee', deposit: 'deposit', discount: 'discount', cancellation: 'cancellation' };
@@ -249,14 +252,21 @@ try {
       country(l.birthCountry) && valid.has(country(l.birthCountry)) ? country(l.birthCountry) : null,
       l.motherTongue,
       l.occupation,
+      // The passport number (Rahman, 2026-10-16) and, where SchoolMan knows no birth date, the year alone (0092).
+      l.passportNumber ?? null,
+      l.birthDate ? null : (l.birthYear ?? null),
     ];
     if (personId) {
       count.peopleKnown++;
+      // A mother tongue that is SchoolMan's generated label („011 - Turkish/Türkisch", which this import once
+      // copied) gives way to the language itself; one a colleague typed stays.
       await client.query(
         `UPDATE people SET salutation = coalesce(salutation, $2::salutation), last_name = coalesce(last_name, $3), birth_date = coalesce(birth_date, $4::date),
                 nationality_code = coalesce(nationality_code, $5), nationality_raw = coalesce(nationality_raw, $6), second_last_name = coalesce(second_last_name, $7),
                 nickname = coalesce(nickname, $8), birth_place = coalesce(birth_place, $9), birth_country_code = coalesce(birth_country_code, $10),
-                mother_tongue = coalesce(mother_tongue, $11), occupation = coalesce(occupation, $12)
+                mother_tongue = CASE WHEN mother_tongue IS NULL OR mother_tongue ~ '^\\d{3} - ' THEN $11 ELSE mother_tongue END, occupation = coalesce(occupation, $12),
+                passport_number = coalesce(passport_number, $13),
+                birth_year = CASE WHEN coalesce(birth_date, $4::date) IS NULL THEN coalesce(birth_year, $14) ELSE birth_year END
           WHERE id = $1`,
         [personId, ...facts]
       );
@@ -264,8 +274,8 @@ try {
       personId = (
         await client.query(
           `INSERT INTO people (salutation, last_name, birth_date, nationality_code, nationality_raw, second_last_name, nickname, birth_place, birth_country_code,
-                               mother_tongue, occupation, first_name, created_by, created_at)
-           VALUES ($1::salutation, $2, $3::date, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'migration-schoolman', coalesce($13::timestamp AT TIME ZONE 'Europe/Berlin', now()))
+                               mother_tongue, occupation, passport_number, birth_year, first_name, created_by, created_at)
+           VALUES ($1::salutation, $2, $3::date, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'migration-schoolman', coalesce($15::timestamp AT TIME ZONE 'Europe/Berlin', now()))
            RETURNING id`,
           [...facts, l.firstName, l.created]
         )
@@ -304,19 +314,22 @@ try {
     // Contact: the newest first, primary only where the person has none yet.
     const has = (await client.query(`SELECT (SELECT count(*) FROM emails WHERE person_id = $1)::int AS e, (SELECT count(*) FROM phones WHERE person_id = $1)::int AS p`, [personId])).rows[0];
     for (const [i, e] of newest(l.emails.filter((e) => !EMAIL_SKIP.has(e.use))).entries()) {
+      // An address already here gets SchoolMan's note on it (`CommentUseMail`, 0092) where it has none.
       const r = await client.query(
-        `INSERT INTO emails (person_id, address, normalized, kind, is_primary, created_at) VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
-         ON CONFLICT (person_id, normalized) DO NOTHING`,
-        [personId, e.address, normalizeEmail(e.address), EMAIL_KIND[e.use] ?? 'personal', !has.e && i === 0, e.created]
+        `INSERT INTO emails (person_id, address, normalized, kind, is_primary, created_at, note) VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()), $7)
+         ON CONFLICT (person_id, normalized) DO UPDATE SET note = EXCLUDED.note WHERE emails.note IS NULL AND EXCLUDED.note IS NOT NULL
+         RETURNING (xmax = 0) AS inserted`,
+        [personId, e.address, normalizeEmail(e.address), EMAIL_KIND[e.use] ?? 'personal', !has.e && i === 0, e.created, e.note ?? null]
       );
-      count.emails += r.rowCount;
+      count.emails += r.rows.filter((x) => x.inserted).length;
     }
-    const mobileFirst = newest(l.phones.filter((p) => !PHONE_SKIP.has(p.use) && normalizePhone(p.number))).sort((a, b) => Number(PHONE_KIND[b.use] === 'mobile') - Number(PHONE_KIND[a.use] === 'mobile'));
+    const rank = (p) => (PHONE_KIND[p.use] === 'mobile' ? 0 : PHONE_KIND[p.use] === 'emergency' ? 2 : 1);
+    const mobileFirst = newest(l.phones.filter((p) => !PHONE_SKIP.has(p.use) && normalizePhone(p.number))).sort((a, b) => rank(a) - rank(b));
     for (const [i, p] of mobileFirst.entries()) {
       const r = await client.query(
         `INSERT INTO phones (person_id, number, normalized, kind, is_primary, created_at) VALUES ($1, $2, $3, $4, $5, coalesce($6::timestamp AT TIME ZONE 'Europe/Berlin', now()))
          ON CONFLICT (person_id, normalized) DO NOTHING`,
-        [personId, p.number, normalizePhone(p.number), PHONE_KIND[p.use] ?? 'mobile', !has.p && i === 0, p.created]
+        [personId, p.number, normalizePhone(p.number), PHONE_KIND[p.use] ?? 'mobile', !has.p && i === 0 && PHONE_KIND[p.use] !== 'emergency', p.created]
       );
       count.phones += r.rowCount;
     }
@@ -628,10 +641,13 @@ try {
       const iban = a.iban.replace(/\s+/g, '').toUpperCase();
       const twin = (await client.query(`SELECT 1 FROM bank_accounts WHERE person_id = $1 AND replace(upper(iban), ' ', '') = $2 AND filemaker_ref IS DISTINCT FROM $3`, [personId, iban, a.ref])).rows.length;
       if (twin) continue;
+      // Its comment and the holder's and the bank's address (0092): a colleague's own entry wins.
       await client.query(
-        `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, filemaker_ref) VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (filemaker_ref) WHERE filemaker_ref IS NOT NULL DO UPDATE SET holder = EXCLUDED.holder, iban = EXCLUDED.iban, bic = EXCLUDED.bic, bank_name = EXCLUDED.bank_name`,
-        [personId, a.holder, iban, a.bic, a.bank, a.ref]
+        `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, filemaker_ref, note, holder_address, bank_address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT (filemaker_ref) WHERE filemaker_ref IS NOT NULL DO UPDATE SET holder = EXCLUDED.holder, iban = EXCLUDED.iban, bic = EXCLUDED.bic, bank_name = EXCLUDED.bank_name,
+           note = coalesce(bank_accounts.note, EXCLUDED.note), holder_address = coalesce(bank_accounts.holder_address, EXCLUDED.holder_address),
+           bank_address = coalesce(bank_accounts.bank_address, EXCLUDED.bank_address)`,
+        [personId, a.holder, iban, a.bic, a.bank, a.ref, a.note ?? null, a.holderAddress ?? null, a.bankAddress ?? null]
       );
       count.banks++;
     }

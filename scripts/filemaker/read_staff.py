@@ -7,6 +7,11 @@ Rahman, 2026-10-17: the 56 colleagues SchoolMan marks as active staff, with ever
 contact, address, roles, contracts and hours, examiner licences, and the tax and insurance numbers
 and bank details (which only `staff_private` sees in the workspace). Nothing else leaves FileMaker.
 
+2026-10-27 (completeness review, 0092): the levels a teacher teaches (`_ID_Level`), whether they keep a time
+sheet (`_ID_TimeSheet`), their trainings (`TrainingStaffMember` with its session `SingleDateTraining`), a note on
+an e-mail address, a bank account's comment and addresses, and the countries by their `Flag` ids instead of
+SchoolMan's label copies.
+
 The JSON goes to stdout and straight into the importer: no personal data is written to a file.
 `--stats` prints counts and the vocabularies' ids only.
 """
@@ -50,8 +55,9 @@ def first(value):
 
 staff = [s for s in table('StaffMember', '__ID_StaffMember', '_ID_Person', '_ID_ActiveStaff', '_ID_ActiveTeacher', '_ID_ActiveAdministration', 'TeacherFirstName.Surname.Short',
                           'SearchFieldTeacherFirstName', 'SearchFieldTeacherSurName',
-                          # The internal section (2026-10-22): course types taught, weekdays, times of day.
-                          '_ID_CourseTypeReference', '_ID_WeekDay', '_ID_DayTimeReference')
+                          # The internal section (2026-10-22): course types taught, weekdays, times of day; the levels and the
+                          # time sheet (2026-10-27).
+                          '_ID_CourseTypeReference', '_ID_WeekDay', '_ID_DayTimeReference', '_ID_Level', '_ID_TimeSheet')
          if first(s['_ID_ActiveStaff']) == '1']
 staff_ids = {s['__ID_StaffMember'] for s in staff}
 # Newer colleagues are linked the other way round: their staff row has no person, their person names the staff
@@ -81,11 +87,18 @@ def mine(row):
 
 
 persons = {p['__ID_Person']: p for p in table('Person', '__ID_Person', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'DateOfBirth', '_ID_Homeland',
-                                               'BirthPlace', 'CountryBirth_1', 'NumberTaxe', 'NumberHealthInsurance', 'NumberAgeInsurance') if p['__ID_Person'] in person_ids}
-emails = [r for r in table('Email', '_ID_Person', '_ID_StaffMember', 'Email', '_ID_Use', 'TimeStampOfCreation') if mine(r)]
+                                               'BirthPlace', '_ID_CountryBirth', 'NumberTaxe', 'NumberHealthInsurance', 'NumberAgeInsurance') if p['__ID_Person'] in person_ids}
+emails = [r for r in table('Email', '_ID_Person', '_ID_StaffMember', 'Email', '_ID_Use', 'TimeStampOfCreation', 'CommentUseMail') if mine(r)]
 phones = [r for r in table('Phone', '_ID_Person', '_ID_StaffMember', 'Phone', 'AreaCode', '_ID_Use', 'TimeStampOfCreation') if mine(r)]
-addresses = [r for r in table('Address', '_ID_Person', '_ID_StaffMember', 'Street', 'HouseNumber', 'ZPostCode', 'City', 'ZCountry_1', 'TimeStampOfCreation') if mine(r)]
-banks = [r for r in table('BankAccount', '_ID_Person', '_ID_StaffMember', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation') if mine(r)]
+addresses = [r for r in table('Address', '_ID_Person', '_ID_StaffMember', 'Street', 'HouseNumber', 'ZPostCode', 'City', '_ID_Country', 'TimeStampOfCreation') if mine(r)]
+banks = [r for r in table('BankAccount', '_ID_Person', '_ID_StaffMember', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation',
+                          'Comment', 'AddressAccountOwner', 'AddressBank') if mine(r)]
+# Trainings (SchoolMan keeps them since 2026): the colleague's row, its session's title and hours, the kind on
+# either (`TrainingReference`).
+sessions = {r['__ID_SingleDateTraining'].strip(): r for r in table('SingleDateTraining', '__ID_SingleDateTraining', '_ID_TrainningReference', 'ZSingleDateTraining',
+                                                                      'HourStart', 'HourEnd', 'TitleTraining')}
+trainings = [r for r in table('TrainingStaffMember', '__ID_TrainingStaffMember', '_ID_StaffMember', '_ID_SingleDateTrainning', '_ID_TrainningReference',
+                              'ZSingleDateTraining') if mine(r)]
 purviews = [r for r in table('Purview', '_ID_StaffMember', '_ID_Person', '_ID_PurviewReference', '_ID_Active', 'Z_StartDate', 'Z_EndDate') if mine(r)]
 contracts = [r for r in table('DateTargetWorkTime', '_ID_StaffMember', '_ID_Person', 'ZStartDate', 'ZEndDate', 'TargetWorkTime.Week', 'TargetWorkTime.Teaching.Week', '_ID_StatusSalarylReference') if mine(r)]
 licences = [r for r in table('DateValidity', '_ID_StaffMember', '_ID_Person', '_ID_LicenseReference', 'LicenseNumber', 'ZStartDate', 'ZEndDate') if first(r['_ID_LicenseReference']) and mine(r)]
@@ -111,6 +124,9 @@ if '--stats' in sys.argv:
     print('running contracts per person', collections.Counter(per.values()).most_common())
     print('licences', len(licences), 'for', len({mine(r) for r in licences}), '· kinds', collections.Counter(first(r['_ID_LicenseReference']) for r in licences).most_common(),
           '· with number', sum(bool(r['LicenseNumber'].strip()) for r in licences), '· ended', sum(bool(iso(r['ZEndDate'])) and iso(r['ZEndDate']) < today for r in licences))
+    print('levels', collections.Counter(x for s in staff for x in ids(s['_ID_Level'])).most_common(), '· time sheet', collections.Counter(first(s['_ID_TimeSheet']) for s in staff).most_common(),
+          '· trainings', len(trainings), 'for', len({mine(r) for r in trainings}), '· e-mail notes', sum(bool(r['CommentUseMail'].strip()) for r in emails),
+          '· bank notes', sum(bool(r['Comment'].strip()) for r in banks))
     sys.exit(0)
 
 # Nationality: the person's flag (`_ID_Homeland`), „DE - Deutschland", as for learners.
@@ -138,7 +154,11 @@ for s in staff:
         # SchoolMan's codes as they are: course types (1 Intensivkurs, 2 Abendkurs …), weekdays (2 Monday … 6
         # Friday), times of day (2 vormittags, 4 nachmittags, 5 abends); import-staff.mjs names them.
         'teaching': {'active': first(s['_ID_ActiveTeacher']) == '1', 'kinds': ids(s['_ID_CourseTypeReference']),
-                     'weekdays': ids(s['_ID_WeekDay']), 'dayparts': ids(s['_ID_DayTimeReference'])},
+                     'weekdays': ids(s['_ID_WeekDay']), 'dayparts': ids(s['_ID_DayTimeReference']),
+                     # `LevelReferenceSchool`: 1 A1 … 5 C1, 3,5 B1+, 6 TestDaF, 7 C1 Hochschule, 8 SK, 9 ND.
+                     'levels': ids(s['_ID_Level'])},
+        # Keeps a time sheet (1 yes, 2 no; empty unknown).
+        'timeSheet': {'1': True, '2': False}.get(first(s['_ID_TimeSheet'])),
         'shortName': s['TeacherFirstName.Surname.Short'].strip() or None,
         # A colleague with no person either way: the name is only on the staff row, in its search fields.
         'firstName': p.get('ZFirstName', '').strip() if p else split_name(s['SearchFieldTeacherFirstName'], s['SearchFieldTeacherSurName'])[0],
@@ -148,17 +168,25 @@ for s in staff:
         'gender': first(p.get('_ID_GenderReference')) or None,
         'birthDate': iso(p.get('DateOfBirth')),
         'birthPlace': p.get('BirthPlace', '').strip() or None,
-        'birthCountry': p.get('CountryBirth_1', '').strip() or None,
+        'birthCountry': nationality(first(p.get('_ID_CountryBirth'))),
         'nationality': nationality(first(p.get('_ID_Homeland'))),
         'taxId': p.get('NumberTaxe', '').strip() or None,
         'healthNumber': p.get('NumberHealthInsurance', '').strip() or None,
         'pensionNumber': p.get('NumberAgeInsurance', '').strip() or None,
-        'emails': [{'address': r['Email'].strip(), 'use': first(r['_ID_Use']), 'created': iso(r['TimeStampOfCreation'])} for r in rows(emails) if r['Email'].strip()],
+        'emails': [{'address': r['Email'].strip(), 'use': first(r['_ID_Use']), 'created': iso(r['TimeStampOfCreation']), 'note': r['CommentUseMail'].strip() or None}
+                   for r in rows(emails) if r['Email'].strip()],
         'phones': [{'number': ' '.join(x for x in (r['AreaCode'].strip(), r['Phone'].strip()) if x), 'use': first(r['_ID_Use']), 'created': iso(r['TimeStampOfCreation'])} for r in rows(phones) if r['Phone'].strip()],
         'addresses': [{'street': ' '.join(x for x in (r['Street'].strip(), r['HouseNumber'].strip()) if x), 'postcode': r['ZPostCode'].strip(), 'city': r['City'].strip(),
-                       'country': r['ZCountry_1'].strip(), 'created': iso(r['TimeStampOfCreation'])} for r in rows(addresses)],
+                       'country': nationality(first(r['_ID_Country'])), 'created': iso(r['TimeStampOfCreation'])} for r in rows(addresses)],
         'banks': [{'holder': r['AccountOwner'].strip(), 'iban': r['IBAN.Text'].strip(), 'bic': (r['SWIFT.Text'] or r['BIC']).strip(), 'bank': r['BankName'].strip(),
+                   'note': r['Comment'].strip() or None, 'holderAddress': r['AddressAccountOwner'].strip() or None, 'bankAddress': r['AddressBank'].strip() or None,
                    'created': iso(r['TimestampOfCreation'])} for r in rows(banks) if r['IBAN.Text'].strip()],
+        'trainings': [{'ref': r['__ID_TrainingStaffMember'].strip(),
+                       'kind': first(r['_ID_TrainningReference']) or first(sessions.get(first(r['_ID_SingleDateTrainning']), {}).get('_ID_TrainningReference')) or None,
+                       'title': sessions.get(first(r['_ID_SingleDateTrainning']), {}).get('TitleTraining', '').strip() or None,
+                       'date': iso(r['ZSingleDateTraining']) or iso(sessions.get(first(r['_ID_SingleDateTrainning']), {}).get('ZSingleDateTraining')),
+                       'from': sessions.get(first(r['_ID_SingleDateTrainning']), {}).get('HourStart', '').strip() or None,
+                       'to': sessions.get(first(r['_ID_SingleDateTrainning']), {}).get('HourEnd', '').strip() or None} for r in rows(trainings)],
         'roles': [{'ref': first(r['_ID_PurviewReference']), 'active': first(r['_ID_Active']), 'from': iso(r['Z_StartDate']), 'to': iso(r['Z_EndDate'])} for r in rows(purviews)],
         'contracts': [{'kind': first(r['_ID_StatusSalarylReference']), 'from': iso(r['ZStartDate']), 'to': iso(r['ZEndDate']),
                        'hours': r['TargetWorkTime.Week'].strip(), 'units': r['TargetWorkTime.Teaching.Week'].strip()} for r in rows(contracts)],

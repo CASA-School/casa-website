@@ -6,7 +6,7 @@ import { query, queryFirst, withTransaction } from './db';
 import { normalizeEmail, normalizePhone } from './normalize';
 import type { Bilingual } from './i18n';
 import { ABSENCE_REASONS, LEVELS, WEEKDAYS, type AbsenceReason, type Level, type Shift, type Weekday } from './kursplanung/types';
-import { COURSE_KINDS, type ContractKind, type CourseKind, type StaffView } from './staff-labels';
+import { COURSE_KINDS, type ContractKind, type CourseKind, type StaffView, type TrainingKind } from './staff-labels';
 
 /**
  * The staff register (2026-10-17, migration 0039; docs/ADMIN_WORKSPACE.md §Staff): everyone who works
@@ -546,4 +546,16 @@ export async function staffKeys(staffId: string): Promise<StaffKey[]> {
     [staffId]
   );
   return rows.map((r) => ({ id: r.id, number: r.number, kind: r.kind, isActive: r.is_active, note: r.note }));
+}
+
+export type StaffTraining = { id: string; kind: TrainingKind | null; title: string | null; date: string | null; from: string | null; to: string | null };
+
+/** A colleague's trainings (0092, SchoolMan's `TrainingStaffMember`): first aid, data protection, examiner training … newest first. */
+export async function staffTrainings(staffId: string): Promise<StaffTraining[]> {
+  const rows = await query<{ id: string; kind: TrainingKind | null; title: string | null; on_date: string | null; starts_at: string | null; ends_at: string | null }>(
+    `SELECT id, kind, title, to_char(on_date, 'YYYY-MM-DD') AS on_date, to_char(starts_at, 'HH24:MI') AS starts_at, to_char(ends_at, 'HH24:MI') AS ends_at
+       FROM staff_trainings WHERE staff_member_id = $1 ORDER BY on_date DESC NULLS LAST, kind, id`,
+    [staffId]
+  );
+  return rows.map((r) => ({ id: r.id, kind: r.kind, title: r.title, date: r.on_date, from: r.starts_at, to: r.ends_at }));
 }
