@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { RecordFoot } from '../../bookings/record-foot';
 import { AddressForm, BankAccountForm, PersonForm } from '../../people/person-form';
+import { BankAddresses } from '../../people/bank-addresses';
 import {
   addStaffBankAccountAction,
   deleteStaffAction,
@@ -32,20 +33,21 @@ import { counted, num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i
 import { getI18n } from '@/lib/admin/i18n.server';
 import { ABSENCE_LABELS, WEEKDAY_LABELS } from '@/lib/admin/kursplanung/types';
 import { getPerson, listBankAccounts, listCountries } from '@/lib/admin/people';
-import { CONTRACT_KIND_LABELS, COURSE_KIND_LABELS } from '@/lib/admin/staff-labels';
+import { CONTRACT_KIND_LABELS, COURSE_KIND_LABELS, TRAINING_KIND_LABELS } from '@/lib/admin/staff-labels';
 import {
   getStaffMember,
   staffContracts,
   staffKeys,
   staffHrNumbers,
   staffRoles,
+  staffTrainings,
   unlinkedAccounts,
   upcomingAbsences,
   upcomingTeaching,
   type TeachingDay,
 } from '@/lib/admin/staff-members';
 import { staffDesk } from '@/lib/admin/day-plan';
-import { staffTime } from '@/lib/admin/staff-time';
+import { staffTargetWeek, staffTime } from '@/lib/admin/staff-time';
 import { StaffHours } from './hours';
 import { DESK_LABELS } from '@/lib/admin/day-plan-labels';
 import { mailHref } from '@/lib/admin/mail/href';
@@ -98,7 +100,7 @@ export default async function StaffMemberPage({
   const teaches = member.roles.includes('teaching');
   const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
 
-  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk, time] = await Promise.all([
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk, time, trainings, targetWeek] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
     upcomingTeaching(id, weeks * 7),
@@ -115,6 +117,9 @@ export default async function StaffMemberPage({
     staffDesk(id),
     // Working time is HR's: with `staff_private`, like the contract (Rahman, 2026-10-22).
     seesPrivate ? staffTime(id, year) : Promise.resolve(null),
+    staffTrainings(id),
+    // The target week of the contract period (0092), with the contract: `staff_private`.
+    seesPrivate ? staffTargetWeek(id) : Promise.resolve(null),
   ]);
   if (!person) notFound();
   const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
@@ -136,7 +141,8 @@ export default async function StaffMemberPage({
     ...(examines || licences.length || sittings.length ? [{ id: 'exams', label: t('Prüfungen', 'Exams'), icon: Icon.award }] : []),
     { id: 'details', label: t('Persönliche Daten', 'Personal details'), icon: Icon.person },
     ...(keys.length ? [{ id: 'keys', label: t('Schlüssel', 'Keys'), icon: Icon.lock, count: keys.filter((k) => k.isActive).length }] : []),
-    ...(seesPrivate && (time?.hasSheet || contracts.length || teaching.length) ? [{ id: 'hours', label: t('Stunden', 'Hours'), icon: Icon.clock }] : []),
+    ...(trainings.length ? [{ id: 'trainings', label: t('Schulungen', 'Trainings'), icon: Icon.award, count: trainings.length }] : []),
+    ...(seesPrivate && (time?.hasSheet || time?.leave.length || contracts.length || teaching.length) ? [{ id: 'hours', label: t('Stunden', 'Hours'), icon: Icon.clock }] : []),
     ...(seesPrivate ? [{ id: 'contracts', label: t('Vertrag', 'Contract'), icon: Icon.registrations, count: contracts.length }] : []),
     ...(seesPrivate ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
   ];
@@ -512,6 +518,28 @@ export default async function StaffMemberPage({
         </RecordTabPanel>
       ) : null}
 
+      {/* Trainings (0092, SchoolMan's since 2026): what, when; kept in SchoolMan for now. */}
+      {trainings.length ? (
+        <RecordTabPanel id="trainings">
+          <Card bleed>
+            <ul className="divide-y divide-ws-line-soft">
+              {trainings.map((tr) => (
+                <li key={tr.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-[0.86rem]">
+                  <span className="min-w-0">
+                    <span className="font-semibold text-[var(--casa-ink)]">{tr.kind ? pick(lang, TRAINING_KIND_LABELS[tr.kind]) : (tr.title ?? t('Schulung', 'Training'))}</span>
+                    {tr.kind && tr.title ? <span className="text-[var(--casa-muted)]"> · {tr.title}</span> : null}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-[var(--casa-muted)]">
+                    {tr.date ? full(tr.date) : '—'}
+                    {tr.from && tr.to ? ` · ${tr.from}–${tr.to}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
       <RecordTabPanel id="details">
         <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
           <Card
@@ -532,7 +560,15 @@ export default async function StaffMemberPage({
                 { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
                 { label: t('Nationalität', 'Nationality'), value: person.nationalityName ?? person.nationalityRaw },
                 { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
-                { label: t('E-Mail', 'Email'), value: email?.address ?? null },
+                {
+                  label: t('E-Mail', 'Email'),
+                  value: email ? (
+                    <>
+                      {email.address}
+                      {email.note ? <span className="text-[var(--casa-muted)]"> · {email.note}</span> : null}
+                    </>
+                  ) : null,
+                },
                 { label: t('Telefon', 'Phone'), value: phone?.number ?? null },
               ]}
             />
@@ -641,26 +677,54 @@ export default async function StaffMemberPage({
                 <p className="text-sm text-[var(--casa-muted)]">{t('Noch kein Vertrag eingetragen.', 'No contract recorded yet.')}</p>
               )}
             </Card>
-            <Card
-              title={t('Steuer und Versicherung', 'Tax and insurance')}
-              icon={Icon.lock}
-              tint="ink"
-              actions={
-                editsPrivate && hr ? (
-                  <FormDialog icon={Icon.lock} tint="ink" trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
-                    <HrNumbersForm staffId={id} numbers={hr} />
-                  </FormDialog>
-                ) : undefined
-              }
-            >
-              <DetailList
-                items={[
-                  { label: t('Steuer-ID', 'Tax ID'), value: hr?.taxId ? <span className="font-mono">{hr.taxId}</span> : null },
-                  { label: t('Rentenversicherung', 'Pension insurance'), value: hr?.pensionNumber ? <span className="font-mono">{hr.pensionNumber}</span> : null },
-                  { label: t('Krankenversicherung', 'Health insurance'), value: hr?.healthNumber ? <span className="font-mono">{hr.healthNumber}</span> : null },
-                ]}
-              />
-            </Card>
+            <div className="space-y-4">
+              <Card
+                title={t('Steuer und Versicherung', 'Tax and insurance')}
+                icon={Icon.lock}
+                tint="ink"
+                actions={
+                  editsPrivate && hr ? (
+                    <FormDialog icon={Icon.lock} tint="ink" trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
+                      <HrNumbersForm staffId={id} numbers={hr} />
+                    </FormDialog>
+                  ) : undefined
+                }
+              >
+                <DetailList
+                  items={[
+                    { label: t('Steuer-ID', 'Tax ID'), value: hr?.taxId ? <span className="font-mono">{hr.taxId}</span> : null },
+                    { label: t('Rentenversicherung', 'Pension insurance'), value: hr?.pensionNumber ? <span className="font-mono">{hr.pensionNumber}</span> : null },
+                    { label: t('Krankenversicherung', 'Health insurance'), value: hr?.healthNumber ? <span className="font-mono">{hr.healthNumber}</span> : null },
+                  ]}
+                />
+              </Card>
+              {/* The target hours per weekday of the contract period running today (0092, SchoolMan's `WeekDayWorkTime`). */}
+              {targetWeek ? (
+                <Card title={t('Sollzeit', 'Target hours')} icon={Icon.clock} tint="blue">
+                  {targetWeek.days.length ? (
+                    <>
+                      <ul className="space-y-1 text-[0.84rem]">
+                        {targetWeek.days.map((d) => (
+                          <li key={d.weekday} className="flex justify-between gap-3">
+                            <span className="text-[var(--casa-muted)]">{pick(lang, WEEKDAY_NAMES[d.weekday])}</span>
+                            <span className="font-semibold text-[var(--casa-ink)] tabular-nums">
+                              {d.hours !== null ? t(`${num(lang, d.hours)} Std.`, `${num(lang, d.hours)} h`) : null}
+                              {d.start && d.end ? <span className="font-normal text-[var(--casa-muted)]"> · {d.start}–{d.end}</span> : null}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-[0.78rem] text-[var(--casa-muted)] tabular-nums">{period(targetWeek.from, targetWeek.to)}</p>
+                    </>
+                  ) : null}
+                  {targetWeek.keepsTimeSheet !== null ? (
+                    <p className={cn('text-[0.84rem] text-[var(--casa-ink)]', targetWeek.days.length && 'mt-3 border-t border-ws-line-soft pt-2.5')}>
+                      {targetWeek.keepsTimeSheet ? t('Führt einen Stundenzettel', 'Keeps a time sheet') : t('Ohne Stundenzettel', 'No time sheet')}
+                    </p>
+                  ) : null}
+                </Card>
+              ) : null}
+            </div>
           </div>
         </RecordTabPanel>
       ) : null}
@@ -685,7 +749,8 @@ export default async function StaffMemberPage({
                   <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                     <span className="min-w-0 text-sm">
                       <span className="block font-mono font-semibold">{b.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
-                      <span className="block text-[0.8rem] text-[var(--casa-muted)]">{[b.holder, b.bankName, b.bic].filter(Boolean).join(' · ')}</span>
+                      <span className="block text-[0.8rem] text-[var(--casa-muted)]">{[b.holder, b.bankName, b.bic, b.note].filter(Boolean).join(' · ')}</span>
+                      <BankAddresses account={b} t={t} />
                     </span>
                     <span className="flex items-center gap-1">
                       {editsPrivate ? (

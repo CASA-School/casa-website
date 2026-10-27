@@ -14,7 +14,7 @@ is about 3% of them. Nothing beyond the sample is imported. The run is
 
 | SchoolMan | For the sample | In the workspace |
 | --- | ---: | --- |
-| `Person`, `Email`, `Phone`, `Address` | 528 people · 543 e-mails · 494 phones · 523 addresses | `people` and their channels (no passport number) |
+| `Person`, `Email`, `Phone`, `Address` | 528 people · 543 e-mails · 494 phones · 523 addresses | `people` and their channels (the passport number since 2026-10-27, 0092) |
 | `Booking` + `DateBooking` | 2,146 bookings · 2,151 periods | `bookings`, `booking_periods` (course, group, step, status, under observation) |
 | `CostDetail`, `PaymentIn`, `PaymentOut` (refunds to the learner) | 8,554 charges · 6,779 payments · 95 refunds | `booking_charges`, `payments`, with their comments |
 | `Booking.FinalNote`, `DateBooking.CommentBooking`, `Comment` | 302 · 130 · 2 | notes on the booking or the person, under their SchoolMan author |

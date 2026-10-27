@@ -4,7 +4,17 @@ import type { ReactNode } from 'react';
 
 import { RecordFoot } from '../../bookings/record-foot';
 import { courseHref } from '../../catalogue/course-href';
-import { deleteOrganisationAction, removeCommissionAction, removeContactAction, setOrganisationActiveAction } from '../actions';
+import {
+  addOrganisationBankAccountAction,
+  deleteOrganisationAction,
+  removeCommissionAction,
+  removeContactAction,
+  removeOrganisationBankAccountAction,
+  setOrganisationActiveAction,
+  updateOrganisationBankAccountAction,
+} from '../actions';
+import { BankAddresses } from '../../people/bank-addresses';
+import { BankAccountForm } from '../../people/person-form';
 import { CommissionForm, ContactForm, EditOrganisationForm } from '../organisation-forms';
 import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog } from '@/components/admin/dialogs';
@@ -50,6 +60,7 @@ import {
 import { toDateInputValue } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
+import { listOrganisationBankAccounts } from '@/lib/admin/people';
 import { mailHref } from '@/lib/admin/mail/href';
 
 const GROUP_TONES: Record<GroupStatus, BadgeTone> = { open: 'accent', confirmed: 'positive', cancelled: 'quiet' };
@@ -100,8 +111,12 @@ export default async function OrganisationPage({
   const seesOffers = canAccess(user, 'offers');
   const seesGroups = canAccess(user, 'groups');
   const isAgency = organisation.kind === 'agency';
+  // Its own bank accounts (0092): the module `private_data`, as a person's.
+  const seesBank = canAccess(user, 'private_data');
+  const editsBank = canEdit && canAccess(user, 'private_data', 'edit');
+  const removesBank = canEdit && canAccess(user, 'private_data', 'full');
 
-  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts, orders, notes, activity] = await Promise.all([
+  const [contacts, terms, figures, bookings, groups, courses, offers, letters, countries, chargeTypes, deletable, invoices, payouts, orders, notes, activity, bank] = await Promise.all([
     organisationContacts(id),
     commissionTerms(id),
     seesBookings ? organisationFigures(id) : Promise.resolve(null),
@@ -119,6 +134,7 @@ export default async function OrganisationPage({
     listNotes('organisation', id),
     // Its history: what colleagues changed here, and SchoolMan's work-log lines about it (the bridge, 2026-10-26).
     activityFor('organisation', id),
+    seesBank ? listOrganisationBankAccounts(id) : Promise.resolve([]),
   ]);
   const seenLetters = letters.items.filter((l) => canAccess(user, letterModule(l.kind)));
   const letterCount = seenLetters.length === letters.items.length ? letters.total : seenLetters.length;
@@ -135,6 +151,8 @@ export default async function OrganisationPage({
     ...(invoices.length ? [{ id: 'invoices', label: t('Rechnungen', 'Invoices'), icon: Icon.statement, count: invoices.length }] : []),
     ...(payouts.length ? [{ id: 'payouts', label: t('Auszahlungen', 'Paid out'), icon: Icon.money, count: payouts.length }] : []),
     ...(orders.length ? [{ id: 'orders', label: t('Bestellungen', 'Orders'), icon: Icon.book, count: orders.length }] : []),
+    // An agency's account is where its commission goes; another organisation shows the tab once it has one.
+    ...(seesBank && (bank.length || (isAgency && editsBank)) ? [{ id: 'bank', label: t('Bankverbindung', 'Bank details'), icon: Icon.money }] : []),
     { id: 'history', label: t('Notizen und Verlauf', 'Notes and history'), icon: Icon.note, count: notes.length },
   ];
   const hidden = <input type="hidden" name="organisationId" value={id} />;
@@ -165,6 +183,7 @@ export default async function OrganisationPage({
                   <Link href={mailHref('organisation', organisation.id)} className="hover:text-[var(--casa-ink)] hover:underline">
                     {organisation.email}
                   </Link>
+                  {organisation.emailNote ? <span> · {organisation.emailNote}</span> : null}
                 </MetaItem>
               ) : null}
               {organisation.phone ? (
@@ -240,6 +259,11 @@ export default async function OrganisationPage({
                           {c.salutation !== 'none' && (c.firstName || c.lastName) ? `${pick(lang, CONTACT_SALUTATION_LABELS[c.salutation])} ` : ''}
                           {c.name}
                           {c.role ? <span className="ml-2 font-normal text-[var(--casa-muted)]">{c.role}</span> : null}
+                          {c.isMain && contacts.length > 1 ? (
+                            <Badge tone="accent" className="ml-2 align-middle">
+                              {t('Hauptkontakt', 'Main contact')}
+                            </Badge>
+                          ) : null}
                         </span>
                         <span className="mt-0.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[0.8rem] text-[var(--casa-muted)]">
                           {c.email && c.email !== c.name ? (
@@ -526,6 +550,55 @@ export default async function OrganisationPage({
                 />
               </div>
             ) : null}
+          </Card>
+        </RecordTabPanel>
+      ) : null}
+
+      {seesBank && (bank.length || (isAgency && editsBank)) ? (
+        <RecordTabPanel id="bank">
+          <Card
+            title={t('Bankverbindung', 'Bank details')}
+            icon={Icon.money}
+            tint="green"
+            actions={
+              editsBank ? (
+                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                  <BankAccountForm holder={organisation.name} action={addOrganisationBankAccountAction} hidden={{ organisationId: id }} />
+                </FormDialog>
+              ) : undefined
+            }
+          >
+            {bank.length ? (
+              <ul className="-my-1 divide-y divide-ws-line-soft">
+                {bank.map((b) => (
+                  <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                    <span className="min-w-0 text-sm">
+                      <span className="block font-mono font-semibold">{b.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
+                      <span className="block text-[0.8rem] text-[var(--casa-muted)]">{[b.holder, b.bankName, b.bic, b.note].filter(Boolean).join(' · ')}</span>
+                      <BankAddresses account={b} t={t} />
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {editsBank ? (
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                          <BankAccountForm holder={organisation.name} account={b} action={updateOrganisationBankAccountAction} hidden={{ organisationId: id }} />
+                        </FormDialog>
+                      ) : null}
+                      {removesBank ? (
+                        <form action={removeOrganisationBankAccountAction}>
+                          {hidden}
+                          <input type="hidden" name="accountId" value={b.id} />
+                          <ConfirmSubmit title={t('Dieses Konto entfernen?', 'Remove this account?')} description={b.iban.replace(/(.{4})/g, '$1 ').trim()} confirmLabel={t('Entfernen', 'Remove')} size="sm" variant="ghost">
+                            {t('Entfernen', 'Remove')}
+                          </ConfirmSubmit>
+                        </form>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-[var(--casa-muted)]">{t('Noch keine Bankverbindung.', 'No bank details yet.')}</p>
+            )}
           </Card>
         </RecordTabPanel>
       ) : null}

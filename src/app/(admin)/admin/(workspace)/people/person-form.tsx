@@ -233,7 +233,8 @@ export async function BankAccountForm({
   action,
   hidden,
 }: {
-  personId: string;
+  /** The person whose account it is; an organisation's form passes its id in `hidden` and its own `action`. */
+  personId?: string;
   holder: string;
   account?: BankAccount;
   action?: (formData: FormData) => void | Promise<void>;
@@ -242,7 +243,7 @@ export async function BankAccountForm({
   const { t } = await getI18n();
   return (
     <form action={action ?? (account ? updateBankAccountAction : addBankAccountAction)} className="space-y-3">
-      <input type="hidden" name="personId" value={personId} />
+      {personId ? <input type="hidden" name="personId" value={personId} /> : null}
       {account ? <input type="hidden" name="accountId" value={account.id} /> : null}
       <Hidden values={hidden} />
       <Field label="IBAN" htmlFor="bank-iban">
@@ -268,8 +269,19 @@ export async function BankAccountForm({
         <Input id="bank-name" name="bankName" maxLength={120} defaultValue={account?.bankName ?? ''} />
       </Field>
       <Field label={t('Notiz', 'Note')} htmlFor="bank-note">
-        <Textarea id="bank-note" name="note" rows={2} maxLength={200} defaultValue={account?.note ?? ''} />
+        <Textarea id="bank-note" name="note" rows={2} maxLength={2000} defaultValue={account?.note ?? ''} />
       </Field>
+      {/* For a transfer abroad: the holder's and the bank's address (0092). */}
+      <OptionalSection requires={['iban']} heading={t('Für eine Überweisung ins Ausland', 'For a transfer abroad')} alwaysOpen={Boolean(account?.holderAddress || account?.bankAddress)}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label={t('Adresse des Kontoinhabers', "Holder's address")} htmlFor="bank-holder-address">
+            <Textarea id="bank-holder-address" name="holderAddress" rows={3} maxLength={400} defaultValue={account?.holderAddress ?? ''} />
+          </Field>
+          <Field label={t('Adresse der Bank', "Bank's address")} htmlFor="bank-address">
+            <Textarea id="bank-address" name="bankAddress" rows={3} maxLength={400} defaultValue={account?.bankAddress ?? ''} />
+          </Field>
+        </div>
+      </OptionalSection>
       <DialogFooter>
         <Button type="submit">{account ? t('Speichern', 'Save') : t('Konto hinzufügen', 'Add account')}</Button>
       </DialogFooter>

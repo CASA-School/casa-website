@@ -1667,6 +1667,16 @@ Since the group visits
 60 companies, 102 contacts in all. A second person at an organisation with an address another contact
 there already has (a shared office mailbox) comes without it.
 
+**Since 2026-10-27 (migration 0092)** a contact can be the organisation's **Hauptkontakt** (one at most; a
+badge in the contacts when there are several, a tick in the contact's dialog; the bridge marks SchoolMan's
+where nobody marked one here); the relation **Auftraggeber** (a company that commissions courses, SchoolMan's
+`Contractor`) joins the list, and „Handwerk und Umbau" says „Builders and trades" in English; every internship
+host comes across (SchoolMan's `Internship` role, with its own active flag: 59 instead of 13), and another
+party's active flag is SchoolMan's; the note on the organisation's own e-mail address follows the address in
+the head; and an organisation can hold its own **bank accounts** (an agency's, for its commission): a tab
+„Bankverbindung" with `private_data`, as a person's, for an agency always and for another organisation once
+it has one.
+
 ## Groups (2026-10-18, migration 0058)
 
 Group visits — a school class, a company's team, an agency's group that comes together — in „Gruppen"
@@ -1923,7 +1933,7 @@ see the workspace work with real data.
 — after the courses and the counts — takes everyone in a course this week or starting one in the next
 four weeks, on a booking not „nein"/„storno" (whole courses, so a course's names match its count), with
 all they have in SchoolMan: the person (names, salutation, birth date, nationality from `Flag`'s ISO
-prefix, birth place and country, mother tongue, occupation; not the passport number), e-mail addresses
+prefix, birth place and country, mother tongue, occupation; the passport number and a birth year alone since 0092), e-mail addresses
 (not the agency's), phones (not fax), the newest address abroad as home and the newest in Germany as
 local, and every booking with its periods and its money. Not attendance (the Klassenbuch's), not exam
 bookings (their own module). One transaction, counts only, nothing personal in a file.
@@ -2450,6 +2460,20 @@ time sheet — finance keeps it there until working time moves — brought by th
 (`read_time.py`: `SingleMonthStaff` balances, `SingleYearStaff` holidays); a month's target and worked
 hours are not stored on it and the daily calculations are too slow to read, so the chart shows the
 month's plus or minus, not the two. The units are the workspace's own lesson days (`staff-time.ts`).
+
+**The rest of the time sheet (2026-10-27, migration 0092).** The completeness review of SchoolMan's staff
+data brought what was still left behind, read by the same step `time`: the hours carried into a year (a
+hint on the months' tile), the day a month was approved („freigegeben am …"), the hours worked outside the
+lessons per month (`staff_work_entries`, SchoolMan's `AdminWork`: a column „Verwaltung" in the table, only
+when the year has any), the leave requests with their kind and the days approved (`staff_leave_requests`,
+`DateHoliday` + `SingleDateHoliday`: a card „Urlaub und Freistellung", a request not wholly approved marked
+„Beantragt" or „3 von 5 genehmigt"), and the target hours per weekday of the contract period running today
+(`staff_target_days`, `WeekDayWorkTime`: a card „Sollzeit" on the tab Vertrag, with whether the colleague
+keeps a time sheet). All of it with `staff_private`. Trainings (`staff_trainings`, SchoolMan's since 2026:
+first aid, IT, examiner training …) are a tab „Schulungen" with `staff`, shown when there is one. The levels a
+teacher teaches (`StaffMember._ID_Level`) are added to Kursplanung's while nobody set the rules by hand.
+Not brought: the month's „comment", which is SchoolMan's own stamp („… aktualisiert – <account>"), and a
+day's `Adjustment`, which the office's adoption copies into `AdminWork`.
 
 ## Mail from the workspace (2026-10-23)
 

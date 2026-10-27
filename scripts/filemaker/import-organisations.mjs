@@ -16,6 +16,9 @@
  * - A sample booking that names an agency is paid by it, else one that names a company by that
  *   company (`payer_organisation_id`); a company course gets its company (`courses.organisation_id`);
  *   a letter that came across and names it, its organisation (`letters.organisation_id`).
+ * - (2026-10-27, 0092) A company that commissions courses or takes interns gets that relation where it has
+ *   none; the main contact is marked where nobody marked one here; the note on its own e-mail address; its
+ *   own bank accounts, each keeping SchoolMan's number.
  */
 import { getCode } from 'country-list';
 
@@ -46,7 +49,7 @@ const country = (name) => {
 
 const parties = await readStdin();
 const client = await connect();
-const count = { log: 0, read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, sharedEmail: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0 };
+const count = { log: 0, read: parties.length, made: 0, known: 0, byName: 0, noName: 0, contacts: 0, sharedEmail: 0, commissions: 0, commissionsRemoved: 0, bookings: 0, courses: 0, letters: 0, main: 0, banks: 0 };
 
 try {
   await client.query('BEGIN');
@@ -99,16 +102,18 @@ try {
       count.known++;
       await client.query(
         `UPDATE organisations SET address = coalesce(address, $2), country_code = coalesce(country_code, $3), email = coalesce(email, $4), phone = coalesce(phone, $5),
-                agreement = coalesce(agreement, $6), is_active = $7, relation = coalesce(relation, $8)
+                agreement = coalesce(agreement, $6), is_active = $7, relation = coalesce(relation, $8),
+                email_note = CASE WHEN email IS NULL OR lower(email) = lower($4) THEN coalesce(email_note, $9) ELSE email_note END
           WHERE id = $1`,
-        [orgId, address, countryCode, p.email, p.phone, p.agreement, p.active, p.relation ?? null]
+        [orgId, address, countryCode, p.email, p.phone, p.agreement, p.active, p.relation ?? p.alsoRelation ?? null, p.emailNote ?? null]
       );
     } else {
       orgId = (
         await client.query(
-          `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, is_active, agreement, relation)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-          [p.name, p.kind, address, countryCode, !countryCode || GERMAN.has(countryCode) ? 'de' : 'en', p.email, p.phone, p.active, p.agreement, p.relation ?? null]
+          `INSERT INTO organisations (name, kind, address, country_code, language, email, phone, is_active, agreement, relation, email_note)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+          [p.name, p.kind, address, countryCode, !countryCode || GERMAN.has(countryCode) ? 'de' : 'en', p.email, p.phone, p.active, p.agreement, p.relation ?? p.alsoRelation ?? null,
+           p.emailNote ?? null]
         )
       ).rows[0].id;
       count.made++;
@@ -140,6 +145,31 @@ try {
         [orgId, SALUTATION[c.gender] ?? 'none', c.firstName, c.lastName, shared ? null : c.email, c.phone, c.role, c.id]
       );
       count.contacts++;
+    }
+    // The main contact, where nobody here has marked one.
+    if (p.main) {
+      count.main += (
+        await client.query(
+          `UPDATE organisation_contacts SET is_main = true
+            WHERE organisation_id = $1 AND filemaker_person_id = $2 AND NOT EXISTS (SELECT 1 FROM organisation_contacts WHERE organisation_id = $1 AND is_main)`,
+          [orgId, p.main]
+        )
+      ).rowCount;
+    }
+
+    // Its own bank accounts (0092), SchoolMan's kept up to date; one the workspace already has under the same IBAN is not doubled.
+    for (const a of p.banks ?? []) {
+      const iban = a.iban.replace(/\s+/g, '').toUpperCase();
+      const twin = (await client.query(`SELECT 1 FROM bank_accounts WHERE organisation_id = $1 AND replace(upper(iban), ' ', '') = $2 AND filemaker_ref IS DISTINCT FROM $3`, [orgId, iban, a.ref])).rowCount;
+      if (twin) continue;
+      await client.query(
+        `INSERT INTO bank_accounts (organisation_id, holder, iban, bic, bank_name, note, holder_address, bank_address, filemaker_ref) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT (filemaker_ref) WHERE filemaker_ref IS NOT NULL DO UPDATE SET holder = EXCLUDED.holder, iban = EXCLUDED.iban, bic = EXCLUDED.bic, bank_name = EXCLUDED.bank_name,
+           note = coalesce(bank_accounts.note, EXCLUDED.note), holder_address = coalesce(bank_accounts.holder_address, EXCLUDED.holder_address),
+           bank_address = coalesce(bank_accounts.bank_address, EXCLUDED.bank_address)`,
+        [orgId, a.holder, iban, a.bic, a.bank, a.note, a.holderAddress, a.bankAddress, a.ref]
+      );
+      count.banks++;
     }
 
     const terms = [];
@@ -204,5 +234,6 @@ try {
 console.log(
   `${count.read} organisations read: ${count.unchanged ?? 0} as last time, ${count.made} new, ${count.known} known (${count.byName} by their name here) · ${count.noName} without a name left out\n` +
     `${count.contacts} contacts (${count.sharedEmail} without an address another contact there has) · ${count.commissions} commission terms (${count.commissionsRemoved} no longer in SchoolMan removed) · ` +
-    `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked · ${count.log} history lines`
+    `${count.bookings} bookings linked to who pays · ${count.courses} company courses linked · ${count.letters} letters linked · ${count.log} history lines · ` +
+    `${count.main} main contacts marked · ${count.banks} bank accounts`
 );

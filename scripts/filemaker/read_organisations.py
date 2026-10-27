@@ -15,6 +15,12 @@ who work there with their job title and their e-mail and phone, an agency's comm
 (`CommissionDetail`), which sample booking each pays, and the letters that name it. Never `Management`'s comments — they hold
 credentials (docs/schoolman/organisations.md).
 
+2026-10-27 (completeness review, 0092): every internship host (SchoolMan's `Internship` role, with its own
+active flag — the status route found 13 of 56), the companies that commission courses (`Contractor`), whether
+another party is still active (`Management._ID_Active`), who the main contact is (`Management._ID_ContactPerson`,
+else `Agency._ID_ContactAgent`, else `Corporate._ID_Contact_Person`), the note on the party's own e-mail
+address, its own bank accounts (no person, no host), and the address's country by its `Flag` id.
+
 The JSON goes to stdout and straight into the importer: nothing is written to a file.
 """
 import collections, json, os, re, sys
@@ -79,12 +85,32 @@ for corp, agency, template in zip(column('Offer', '_ID_Corporate'), column('Offe
     if first(agency):
         agency_ids.add(first(agency))
 
-agencies = {r['__ID_Agency'].strip(): r for r in table('Agency', '__ID_Agency', '_ID_Management', '_ID_Institution', '_ID_Active', 'InstitutionAgency', 'Agreement')}
-corporates = {r['__ID_Corporate'].strip(): r for r in table('Corporate', '__ID_Corporate', '_ID_Management', '_ID_Active', 'HeaderCorporate.Text')}
+agencies = {r['__ID_Agency'].strip(): r for r in table('Agency', '__ID_Agency', '_ID_Management', '_ID_Institution', '_ID_Active', 'InstitutionAgency', 'Agreement',
+                                                       '_ID_ContactAgent')}
+corporates = {r['__ID_Corporate'].strip(): r for r in table('Corporate', '__ID_Corporate', '_ID_Management', '_ID_Active', 'HeaderCorporate.Text', '_ID_Contact_Person')}
+managements = {r['__ID_Management'].strip(): r for r in table('Management', '__ID_Management', '_ID_StatusManagementReference', '_ID_Active', '_ID_ContactPerson')}
+corporate_of_management = {first(c['_ID_Management']): cid for cid, c in corporates.items() if first(c['_ID_Management'])}
+# A company that commissions courses (`Contractor`, „Auftraggeber") comes across with that relation; so does a
+# company that takes interns (the `Internship` role on its party). Every internship host is read below.
+internships = {first(r['_ID_Management']): r for r in table('Internship', '__ID_Internship', '_ID_Management', '_ID_Active') if first(r['_ID_Management'])}
+also_relation = {}
+for corp, active in zip(column('Contractor', '_ID_Corporate'), column('Contractor', '_ID_Active')):
+    if first(corp) in corporates and first(active) != '2':
+        corporate_ids.add(first(corp))
+        also_relation.setdefault(first(corp), 'commissioning_body')
+for mid in internships:
+    if mid in corporate_of_management:
+        corporate_ids.add(corporate_of_management[mid])
+        also_relation.setdefault(corporate_of_management[mid], 'internship')
 institutions = table('Institution', '__ID_Institution', '_ID_Management', '_ID_Corporate', '_ID_Agency', 'Institution')
 inst_by_id = {r['__ID_Institution'].strip(): r for r in institutions}
 inst_of_corp = {first(r['_ID_Corporate']): r for r in institutions if first(r['_ID_Corporate'])}
 inst_of_agency = {first(r['_ID_Agency']): r for r in institutions if first(r['_ID_Agency'])}
+
+def main_contact(management, *older):
+    """The party's main contact person: `Management._ID_ContactPerson` since 2023, else the role's own older field."""
+    return first(managements.get(management or '', {}).get('_ID_ContactPerson')) or next((first(x) for x in older if first(x)), None) or None
+
 
 parties = []
 for aid in sorted(agency_ids):
@@ -94,7 +120,7 @@ for aid in sorted(agency_ids):
     inst = inst_by_id.get(first(a['_ID_Institution'])) or inst_of_agency.get(aid)
     parties.append({'kind': 'agency', 'id': aid, 'management': first(a['_ID_Management']) or None, 'institution': inst['__ID_Institution'].strip() if inst else None,
                     'name': a['InstitutionAgency'].strip() or (inst['Institution'].strip() if inst else ''), 'active': first(a['_ID_Active']) != '2',
-                    'agreement': a['Agreement'].strip() or None})
+                    'agreement': a['Agreement'].strip() or None, 'main': main_contact(first(a['_ID_Management']), a['_ID_ContactAgent'])})
 for cid in sorted(corporate_ids):
     c = corporates.get(cid)
     if not c:
@@ -102,7 +128,8 @@ for cid in sorted(corporate_ids):
     inst = inst_of_corp.get(cid)
     header = [x.strip() for x in (c['HeaderCorporate.Text'] or '').replace('\r', '\n').split('\n') if x.strip()]
     parties.append({'kind': 'company', 'id': cid, 'management': first(c['_ID_Management']) or None, 'institution': inst['__ID_Institution'].strip() if inst else None,
-                    'name': (inst['Institution'].strip() if inst else '') or (header[0] if header else ''), 'active': first(c['_ID_Active']) != '2', 'agreement': None})
+                    'name': (inst['Institution'].strip() if inst else '') or (header[0] if header else ''), 'active': first(c['_ID_Active']) != '2', 'agreement': None,
+                    'main': main_contact(first(c['_ID_Management']), c['_ID_Contact_Person']), 'alsoRelation': also_relation.get(cid)})
 
 # The other parties (2026-10-18, 0061): a `Management` record that is an organisation with a relation to
 # CASA (`_ID_StatusManagementReference`) — it takes interns, sends learners our way, runs an activity,
@@ -119,13 +146,18 @@ inst_of_management = {}
 for r in institutions:
     if first(r['_ID_Management']) and r['Institution'].strip():
         inst_of_management.setdefault(first(r['_ID_Management']), r)
-for mid, status in zip(column('Management', '__ID_Management'), column('Management', '_ID_StatusManagementReference')):
-    mid = mid.strip()
-    relation = next((RELATION[x] for x in ids((status or '').replace('\r', '\n')) if x in RELATION), None)
+for mid, m in managements.items():
+    relation = next((RELATION[x] for x in ids((m['_ID_StatusManagementReference'] or '').replace('\r', '\n')) if x in RELATION), None)
+    # An internship host by its `Internship` role (2026-10-27): 56 parties, of which only 9 carry status 7.
+    internship = internships.get(mid)
+    if internship:
+        relation = 'internship'
     inst = inst_of_management.get(mid)
     if relation and mid not in taken and inst:
+        # Still active: the role's own flag for an internship host, else the party's (`_ID_Active`, 2 = no; empty = yes).
+        active = first((internship or m)['_ID_Active']) != '2'
         parties.append({'kind': KIND_OF.get(relation, 'other'), 'relation': relation, 'id': mid, 'management': mid, 'institution': inst['__ID_Institution'].strip(),
-                        'name': inst['Institution'].strip(), 'active': True, 'agreement': None})
+                        'name': inst['Institution'].strip(), 'active': active, 'agreement': None, 'main': main_contact(mid)})
 
 
 def link_keys(p):
@@ -152,13 +184,14 @@ def party_of(row, fields=('_ID_Agency', '_ID_Corporate', '_ID_Institution', '_ID
 LINKS = ('_ID_Agency', '_ID_Corporate', '_ID_Institution', '_ID_Management')
 own = collections.defaultdict(lambda: {'emails': [], 'phones': [], 'addresses': []})
 person_channels = collections.defaultdict(lambda: {'emails': [], 'phones': []})
-for r in table('Email', '_ID_Person', *LINKS, 'Email', 'TimeStampOfCreation'):
+for r in table('Email', '_ID_Person', *LINKS, 'Email', 'TimeStampOfCreation', 'CommentUseMail'):
     p = party_of(r)
     if r['Email'].strip():
         if first(r['_ID_Person']):
             person_channels[first(r['_ID_Person'])]['emails'].append((stamp(r['TimeStampOfCreation']), r['Email'].strip()))
         elif p:
-            own[id(p)]['emails'].append((stamp(r['TimeStampOfCreation']), r['Email'].strip()))
+            # With the note on it (`CommentUseMail`, 2026-10-27).
+            own[id(p)]['emails'].append((stamp(r['TimeStampOfCreation']), r['Email'].strip(), r['CommentUseMail'].strip() or None))
 for r in table('Phone', '_ID_Person', *LINKS, 'Phone', 'AreaCode', 'TimeStampOfCreation'):
     p = party_of(r)
     number = ' '.join(x for x in (r['AreaCode'].strip(), r['Phone'].strip()) if x)
@@ -167,15 +200,41 @@ for r in table('Phone', '_ID_Person', *LINKS, 'Phone', 'AreaCode', 'TimeStampOfC
             person_channels[first(r['_ID_Person'])]['phones'].append((stamp(r['TimeStampOfCreation']), number))
         elif p:
             own[id(p)]['phones'].append((stamp(r['TimeStampOfCreation']), number))
-for r in table('Address', '_ID_Person', *LINKS, 'Street', 'HouseNumber', 'ZPostCode', 'City', 'ZCountry_1', 'TimeStampOfCreation'):
+# A country by its `Flag` id („EG - Egypt" → EG; else its German name), not the address's label copy.
+flags = {r['__ID_Flag'].strip(): r for r in table('Flag', '__ID_Flag', 'CountryLong_1', 'Country_1')}
+
+
+def country_of(flag_id):
+    f = flags.get(flag_id)
+    if not f:
+        return ''
+    m = re.match(r'\s*([A-Z]{2})\s*-', f['CountryLong_1'] or '')
+    return m.group(1) if m else f['Country_1'].strip()
+
+
+for r in table('Address', '_ID_Person', *LINKS, 'Street', 'HouseNumber', 'ZPostCode', 'City', '_ID_Country', 'TimeStampOfCreation'):
     p = party_of(r)
     if p and not first(r['_ID_Person']) and (r['Street'].strip() or r['City'].strip()):
         own[id(p)]['addresses'].append((stamp(r['TimeStampOfCreation']), {
             'street': ' '.join(x for x in (r['Street'].strip(), r['HouseNumber'].strip()) if x), 'postcode': r['ZPostCode'].strip(),
-            'city': r['City'].strip(), 'country': r['ZCountry_1'].strip()}))
+            'city': r['City'].strip(), 'country': country_of(first(r['_ID_Country']))}))
+
+# The party's own bank accounts: an account on its `Management` with no person (or one SchoolMan deleted) and no
+# host or colleague on it (2026-10-27). A person's account stays the person's.
+person_ids = {x.strip() for x in column('Person', '__ID_Person')}
+banks_of = collections.defaultdict(list)
+for r in table('BankAccount', '__ID_BankAccount', '_ID_Person', '_ID_Management', '_ID_Accommodation', '_ID_StaffMember', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text',
+               'BIC', 'BankName', 'Comment', 'AddressAccountOwner', 'AddressBank'):
+    p = owner.get(('_ID_Management', first(r['_ID_Management'])))
+    if not p or first(r['_ID_Person']) in person_ids or first(r['_ID_Accommodation']) or first(r['_ID_StaffMember']) or not r['IBAN.Text'].strip():
+        continue
+    banks_of[id(p)].append({'ref': r['__ID_BankAccount'].strip(), 'holder': r['AccountOwner'].strip() or None, 'iban': r['IBAN.Text'].strip(),
+                            'bic': (r['SWIFT.Text'] or r['BIC']).strip() or None, 'bank': r['BankName'].strip() or None, 'note': r['Comment'].strip() or None,
+                            'holderAddress': r['AddressAccountOwner'].strip() or None, 'bankAddress': r['AddressBank'].strip() or None})
 
 # The people who work there: `Person` rows linked to the party, with their job title.
 contacts = collections.defaultdict(list)
+main_of = {p['main']: p for p in parties if p.get('main')}
 for r in table('Person', '__ID_Person', '_ID_Agency', '_ID_Corporate', '_ID_Institution', '_ID_Management', 'ZFirstName', 'ZSurName', '_ID_GenderReference',
                'Function'):
     p = party_of(r, ('_ID_Agency', '_ID_Corporate', '_ID_Institution'))
@@ -183,6 +242,8 @@ for r in table('Person', '__ID_Person', '_ID_Agency', '_ID_Corporate', '_ID_Inst
         # Someone at another party, by its `Management` (an agency's or a company's people come by their ids).
         q = party_of(r, ('_ID_Management',))
         p = q if q and q.get('relation') else None
+    # The party's main contact is its contact even when only the party names them (2026-10-27).
+    p = p or main_of.get(r['__ID_Person'].strip())
     if p and (r['ZFirstName'].strip() or r['ZSurName'].strip()):
         pid = r['__ID_Person'].strip()
         ch = person_channels.get(pid, {'emails': [], 'phones': []})
@@ -240,8 +301,11 @@ for r, line, comment in zip(wf, column_chunked('WorkFlow', 'Workflow_1', 5000), 
 out = []
 for p in parties:
     o = own[id(p)]
+    newest_email = max(o['emails'], key=lambda x: (x[0], x[1])) if o['emails'] else None
     out.append({**p,
-                'email': max(o['emails'])[1] if o['emails'] else None,
+                'email': newest_email[1] if newest_email else None,
+                'emailNote': newest_email[2] if newest_email else None,
+                'banks': banks_of[id(p)],
                 'phone': max(o['phones'])[1] if o['phones'] else None,
                 'address': max(o['addresses'], key=lambda x: x[0])[1] if o['addresses'] else None,
                 'contacts': contacts[id(p)],
@@ -265,6 +329,9 @@ if '--stats' in sys.argv:
           '· commission terms', sum(len(p['commissions']) for p in out), f'(+{per_booking} on single bookings)', '· bookings named', sum(len(p['bookings']) for p in out),
           '· courses', sum(len(p['courses']) for p in out), '· letters naming them', sum(len(p['letters']) for p in out),
           '· history lines', sum(len(p['log']) for p in out))
+    print('companies also', dict(collections.Counter(p.get('alsoRelation') for p in out if p.get('alsoRelation'))), '· with a main contact', sum(bool(p['main']) for p in out),
+          '(among its contacts', sum(bool(p['main']) and any(c['id'] == p['main'] for c in p['contacts']) for p in out), ') · e-mail notes', sum(bool(p['emailNote']) for p in out),
+          '· own bank accounts', sum(len(p['banks']) for p in out))
     sys.exit(0)
 
 json.dump(out, sys.stdout, ensure_ascii=False)

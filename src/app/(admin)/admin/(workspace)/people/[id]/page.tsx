@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction, removeBankAccountAction } from '../actions';
 import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
+import { BankAddresses } from '../bank-addresses';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { BookingColour } from '../../bookings/booking-colour';
@@ -639,6 +640,7 @@ export default async function PersonPage({
                             <Link href={mailHref('person', person.id, { address: e.address })} className="font-medium hover:underline">
                               {e.address}
                             </Link>
+                            {e.note ? <span className="text-[var(--casa-muted)]"> · {e.note}</span> : null}
                           </li>
                         ))}
                       </ul>
@@ -852,6 +854,7 @@ export default async function PersonPage({
                     <span className="min-w-0 text-sm">
                       <span className="block font-mono text-[0.9rem] font-semibold tracking-[0.02em]">{account.iban.replace(/(.{4})/g, '$1 ').trim()}</span>
                       <span className="mt-0.5 block text-xs text-[var(--casa-muted)]">{[account.holder, account.bankName, account.bic, account.note].filter(Boolean).join(' · ')}</span>
+                      <BankAddresses account={account} t={t} />
                     </span>
                     <span className="flex items-center gap-1">
                       {editsBank ? (

@@ -24,6 +24,9 @@
  *   with no dated contract yet (Kursplanung's undated employed/freelance row is replaced)
  * - licences from `DateValidity` for the exams the catalogue has (telc B2, telc C1 Hochschule)
  * - a workspace account with the colleague's work address is linked when nobody holds it yet
+ * - (2026-10-27, 0092) the levels they teach, added to the planners' while nobody set their rules by hand;
+ *   whether they keep a time sheet; their trainings; a note on an e-mail address; a bank account's comment
+ *   and addresses
  */
 import { getCode } from 'country-list';
 
@@ -34,6 +37,14 @@ const CONTRACT = { 1: 'employed', 2: 'freelance', 3: 'intern', 4: 'temporary', 5
 const LICENCE = { 3: 'telc_b2', 4: 'telc_c1_hochschule' };
 /** SchoolMan's course types (`CourseTypeReference`) as the workspace's kinds (staff-labels.ts, 0083). */
 const COURSE_KIND = { 1: 'intensive', 2: 'evening', 3: 'summer', 4: 'single', 5: 'closed_group', 7: 'exam_prep', 9: 'junior', 10: 'company', 11: 'special', 12: 'superintensive', 15: 'online', 16: 'extra' };
+/**
+ * SchoolMan's levels taught (`LevelReferenceSchool`) as Kursplanung's: 6 TestDaF is an exam, not a level here;
+ * 8 SK and 9 ND are not known to anyone asked yet and are left out.
+ */
+const LEVEL = { 1: 'A1', 2: 'A2', 3: 'B1', '3,5': 'B1+', 3.5: 'B1+', 4: 'B2', 5: 'C1', 7: 'C1H' };
+const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B1+', 'B2', 'C1', 'C1H'];
+/** SchoolMan's kinds of training (`TrainingReference`). */
+const TRAINING = { 14: 'didactics', 15: 'examiner', 16: 'it', 17: 'first_aid', 18: 'data_protection', 19: 'fire_safety', 20: 'quality' };
 /** SchoolMan's weekdays, 1 Sunday … 7 Saturday. */
 const WEEKDAY = { 2: 'Mo', 3: 'Di', 4: 'Mi', 5: 'Do', 6: 'Fr' };
 const OFFICE = new Set(['management', 'front_office', 'back_office', 'exam_office', 'accommodation', 'host_families', 'house', 'it']);
@@ -64,6 +75,11 @@ const country = (name) => {
   if (/^[A-Za-z]{2}$/.test(text)) return text.toUpperCase();
   return DE_INDEX.get(text.toLowerCase()) ?? getCode(text) ?? null;
 };
+/** `9:00` or `09:00:00` → `09:00`; anything else is no time. */
+const clock = (v) => {
+  const m = /^\s*(\d{1,2}):(\d{2})/.exec(v ?? '');
+  return m && Number(m[1]) < 24 ? `${m[1].padStart(2, '0')}:${m[2]}` : null;
+};
 const addDay = (iso) => new Date(Date.parse(`${iso}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
 const newest = (rows) => [...rows].sort((a, b) => String(b.created ?? '').localeCompare(String(a.created ?? '')));
 
@@ -93,7 +109,7 @@ async function readStdin() {
 
 const colleagues = await readStdin();
 const client = await connect();
-const count = { colleagues: colleagues.length, new: 0, matched: 0, emails: 0, phones: 0, addresses: 0, hr: 0, banks: 0, roles: 0, contracts: 0, licences: 0, licencesSkipped: 0, accounts: 0, namesFixed: 0, planning: 0 };
+const count = { colleagues: colleagues.length, new: 0, matched: 0, emails: 0, phones: 0, addresses: 0, hr: 0, banks: 0, roles: 0, contracts: 0, licences: 0, licencesSkipped: 0, accounts: 0, namesFixed: 0, planning: 0, trainings: 0 };
 
 try {
   await client.query('BEGIN');
@@ -159,11 +175,14 @@ try {
     const hasEmail = (await client.query(`SELECT 1 FROM emails WHERE person_id = $1 AND is_primary`, [personId])).rowCount > 0;
     const emails = newest(c.emails).sort((a, b) => (b.use === '2') - (a.use === '2'));
     for (const [i, e] of emails.entries()) {
+      // An address already here gets SchoolMan's note on it where it has none (0092).
       const r = await client.query(
-        `INSERT INTO emails (person_id, address, normalized, kind, is_primary) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (person_id, normalized) DO NOTHING`,
-        [personId, e.address, normalizeEmail(e.address), EMAIL_KIND[e.use] ?? 'personal', !hasEmail && i === 0]
+        `INSERT INTO emails (person_id, address, normalized, kind, is_primary, note) VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (person_id, normalized) DO UPDATE SET note = EXCLUDED.note WHERE emails.note IS NULL AND EXCLUDED.note IS NOT NULL
+         RETURNING (xmax = 0) AS inserted`,
+        [personId, e.address, normalizeEmail(e.address), EMAIL_KIND[e.use] ?? 'personal', !hasEmail && i === 0, e.note ?? null]
       );
-      count.emails += r.rowCount;
+      count.emails += r.rows.filter((x) => x.inserted).length;
     }
     const hasPhone = (await client.query(`SELECT 1 FROM phones WHERE person_id = $1 AND is_primary`, [personId])).rowCount > 0;
     const phones = newest(c.phones.filter((p) => !p.use || PHONE_KIND[p.use])).sort((a, b) => (b.use === '5') - (a.use === '5'));
@@ -185,15 +204,20 @@ try {
     }
     const known = new Set((await client.query(`SELECT iban FROM bank_accounts WHERE person_id = $1`, [personId])).rows.map((r) => iban(r.iban)));
     for (const b of newest(c.banks)) {
-      if (known.has(iban(b.iban))) continue;
+      if (known.has(iban(b.iban))) {
+        // An account here already: SchoolMan's comment and addresses where it has none (0092).
+        await client.query(
+          `UPDATE bank_accounts SET note = coalesce(note, $3), holder_address = coalesce(holder_address, $4), bank_address = coalesce(bank_address, $5)
+            WHERE person_id = $1 AND replace(upper(iban), ' ', '') = $2 AND (note IS NULL OR holder_address IS NULL OR bank_address IS NULL)`,
+          [personId, iban(b.iban), b.note ?? null, b.holderAddress ?? null, b.bankAddress ?? null]
+        );
+        continue;
+      }
       known.add(iban(b.iban));
-      await client.query(`INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name) VALUES ($1, $2, $3, $4, $5)`, [
-        personId,
-        b.holder || `${c.firstName} ${c.lastName}`.trim(),
-        iban(b.iban),
-        b.bic || null,
-        b.bank || null,
-      ]);
+      await client.query(
+        `INSERT INTO bank_accounts (person_id, holder, iban, bic, bank_name, note, holder_address, bank_address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [personId, b.holder || `${c.firstName} ${c.lastName}`.trim(), iban(b.iban), b.bic || null, b.bank || null, b.note ?? null, b.holderAddress ?? null, b.bankAddress ?? null]
+      );
       count.banks++;
     }
 
@@ -221,16 +245,36 @@ try {
       const kinds = [...new Set(c.teaching.kinds.map((k) => COURSE_KIND[k]).filter(Boolean))];
       const weekdays = Object.keys(WEEKDAY).filter((d) => c.teaching.weekdays.includes(d)).map((d) => WEEKDAY[d]);
       const at = (part) => (c.teaching.dayparts.includes(part) ? weekdays : []);
+      // The levels SchoolMan ticks are added to those the planners' sheet and the lesson days gave
+      // (learn_kursplanung, 0078): only ever added, in the levels' order (2026-10-27).
+      const levels = [...new Set((c.teaching.levels ?? []).map((l) => LEVEL[l]).filter(Boolean))];
       count.planning += (
         await client.query(
           `UPDATE staff_members SET course_kinds = $2, teaching_active = $3, evening_days = $4,
                   morning_days = CASE WHEN $7 THEN $5 ELSE morning_days END,
-                  afternoon_days = CASE WHEN $7 THEN $6 ELSE afternoon_days END
+                  afternoon_days = CASE WHEN $7 THEN $6 ELSE afternoon_days END,
+                  levels = ARRAY(SELECT v FROM unnest($9::text[]) WITH ORDINALITY o(v, n) WHERE v = ANY (levels) OR v = ANY ($8::text[]) ORDER BY n)
             WHERE id = $1 AND planning_set_at IS NULL`,
-          [staff.id, kinds, c.teaching.active, at('5'), at('2'), at('4').filter((d) => d !== 'Fr'), made]
+          [staff.id, kinds, c.teaching.active, at('5'), at('2'), at('4').filter((d) => d !== 'Fr'), made, levels, LEVEL_ORDER]
         )
       ).rowCount;
     }
+    // Whether they keep a time sheet: SchoolMan's while working time is kept there.
+    await client.query(`UPDATE staff_members SET keeps_time_sheet = $2 WHERE id = $1 AND keeps_time_sheet IS DISTINCT FROM $2`, [staff.id, c.timeSheet ?? null]);
+
+    // Their trainings (0092): SchoolMan's own, kept up to date; one SchoolMan no longer has goes.
+    const trainings = [];
+    for (const tr of c.trainings ?? []) {
+      trainings.push(tr.ref);
+      await client.query(
+        `INSERT INTO staff_trainings (staff_member_id, kind, title, on_date, starts_at, ends_at, filemaker_id) VALUES ($1, $2, $3, $4::date, $5::time, $6::time, $7)
+         ON CONFLICT (filemaker_id) DO UPDATE SET staff_member_id = EXCLUDED.staff_member_id, kind = EXCLUDED.kind, title = EXCLUDED.title, on_date = EXCLUDED.on_date,
+           starts_at = EXCLUDED.starts_at, ends_at = EXCLUDED.ends_at`,
+        [staff.id, TRAINING[tr.kind] ?? null, tr.title, tr.date, clock(tr.from), clock(tr.to), tr.ref]
+      );
+      count.trainings++;
+    }
+    await client.query(`DELETE FROM staff_trainings WHERE staff_member_id = $1 AND filemaker_id IS NOT NULL AND NOT (filemaker_id = ANY($2::text[]))`, [staff.id, trainings]);
 
     const roles = new Set(c.roles.filter((r) => ROLE[r.ref] && (!r.to || r.to >= today)).map((r) => ROLE[r.ref]));
     if (c.teacher) roles.add('teaching');
@@ -298,5 +342,5 @@ console.log(
   `${count.colleagues} colleagues: ${count.matched} already in the register, ${count.new} new · names fixed ${count.namesFixed} · ` +
     `${count.emails} emails, ${count.phones} phones, ${count.addresses} addresses · HR numbers for ${count.hr}, ${count.banks} bank accounts · ` +
     `${count.roles} roles, ${count.contracts} contract periods, ${count.licences} licences (${count.licencesSkipped} for exams not in the catalogue) · ${count.accounts} accounts linked · ` +
-    `teaching rules from SchoolMan for ${count.planning}`
+    `teaching rules from SchoolMan for ${count.planning} · ${count.trainings} trainings`
 );

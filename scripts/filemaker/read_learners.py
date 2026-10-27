@@ -17,8 +17,14 @@ comments on payments and charges, and their bank accounts. Whole courses, so a c
 count. Their exam bookings with the sitting (`Exam`: its exam, day and places), and their stays
 (`DateAccommodation`: dates, kind, room type, meals, called off, departure confirmed) — where only as
 a CASA flat's name and room; a host family stays „a host family" (hosts are people who are not
-learners: their own module and a privacy decision first). Not the passport number, not the attendance
-(the Klassenbuch's).
+learners: their own module and a privacy decision first). Not the attendance (the Klassenbuch's).
+
+2026-10-27 (completeness review): the passport number (Rahman, 2026-10-16: it comes along — visa letters and
+telc registration need it), a birth year where the date is unknown, the mother tongue and the country of birth
+and of an address read from their ids (`_ID_Mothertongue` through `LanguageReference`, `_ID_CountryBirth` and
+`Address._ID_Country` through `Flag`) instead of SchoolMan's label copies, a note on an e-mail address, and a
+bank account's comment and its holder's and bank's address.
+
 
 The JSON goes to stdout and straight into the importer: no personal data is written to a file.
 Run the course import and the learner counts first (docs/ADMIN_WORKSPACE.md §Learners from SchoolMan).
@@ -85,7 +91,8 @@ def amount(value):
 chosen = sample_persons(bookings, periods, today)
 
 person_rows = table('Person', '__ID_Person', '_ID_Student', 'ZFirstName', 'ZSurName', 'ZSurName2', 'NickName', '_ID_GenderReference', 'Gender_1', 'DateOfBirth',
-                    '_ID_Homeland', 'BirthPlace', 'CountryBirth_1', 'Occupation', 'MotherTongue_1', 'TimestampCreation', 'DateOfCreation', '_ID_Client')
+                    '_ID_Homeland', 'BirthPlace', '_ID_CountryBirth', 'Occupation', '_ID_Mothertongue', 'MotherTongue_1', 'TimestampCreation', 'DateOfCreation',
+                    '_ID_Client', 'NumberPassport', 'YearOfBirth')
 seen = collections.Counter(r['__ID_Person'].strip() for r in person_rows)
 twice = {k for k, n in seen.items() if n > 1}
 persons = {r['__ID_Person'].strip(): r for r in person_rows if r['__ID_Person'].strip() in chosen and r['__ID_Person'].strip() not in twice}
@@ -102,6 +109,33 @@ def nationality(flag_id):
     return m.group(1) if m else (f['Country_1'].strip() or None)
 
 
+# The mother tongue (`_ID_Mothertongue`, telc's language code): its German name from `LanguageReference` — the
+# name that ends in „sch" where a row has its two names swapped (Czech). 14 is „andere": the language is then
+# what a colleague typed over the generated label („000 - Ukrainisch"), never the label itself
+# („011 - Turkish/Türkisch", the copy the reader once took).
+languages = {}
+for r in table('LanguageReference', '__ID_LanguageReference', '_ID_LanguageReference.telc', 'Language_1', 'Language_2'):
+    de, en = r['Language_1'].strip(), r['Language_2'].strip()
+    name = en if en.endswith('sch') and not de.endswith('sch') else de
+    languages.setdefault(first(r['_ID_LanguageReference.telc']) or first(r['__ID_LanguageReference']), name)
+OTHER_LANGUAGE = '14'
+
+
+def mother_tongue(code, typed):
+    if code and code != OTHER_LANGUAGE and code in languages:
+        return languages[code]
+    text = re.sub(r'^\s*\d{3}\s*-\s*', '', typed or '').strip()
+    if '/' in text:  # a generated label („English/Englisch"): its German half, unless it says „other"
+        text = '' if code == OTHER_LANGUAGE else text.split('/')[-1].strip()
+    return text or None
+
+
+def birth_year(value):
+    """`YearOfBirth` where only the year is known; four digits, else nothing."""
+    text = (value or '').strip()
+    return int(text) if re.fullmatch(r'(19|20)\d{2}', text) else None
+
+
 def owned(rows):
     """Rows of a chosen person, by their person id."""
     out = collections.defaultdict(list)
@@ -113,9 +147,9 @@ def owned(rows):
     return out
 
 
-emails = owned(table('Email', '_ID_Person', 'Email', '_ID_Use', 'TimeStampOfCreation'))
+emails = owned(table('Email', '_ID_Person', 'Email', '_ID_Use', 'TimeStampOfCreation', 'CommentUseMail'))
 phones = owned(table('Phone', '_ID_Person', 'Phone', 'AreaCode', '_ID_Use', 'TimeStampOfCreation'))
-addresses = owned(table('Address', '_ID_Person', 'Street', 'HouseNumber', 'ZPostCode', 'City', 'ZCountry_1', 'TimeStampOfCreation'))
+addresses = owned(table('Address', '_ID_Person', 'Street', 'HouseNumber', 'ZPostCode', 'City', '_ID_Country', 'TimeStampOfCreation'))
 
 periods_of = collections.defaultdict(list)
 for p in periods:
@@ -278,11 +312,16 @@ for r in table('DateAccommodation', '__ID_DateAccommodation', '_ID_Booking', 'ZS
     })
 
 banks_of = collections.defaultdict(list)
-for r in table('BankAccount', '__ID_BankAccount', '_ID_Person', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation'):
+# (The 442 accounts whose `_ID_Person` names a deleted person, 2019–2022, cannot be given back to anyone: their
+# `_ID_Student` names no learner either, on `Person` or on a `Booking` — measured on the copy, 2026-10-27.)
+for r in table('BankAccount', '__ID_BankAccount', '_ID_Person', 'AccountOwner', 'IBAN.Text', 'SWIFT.Text', 'BIC', 'BankName', 'TimestampOfCreation',
+               'Comment', 'AddressAccountOwner', 'AddressBank'):
     pid = owner(r)
     if pid and r['IBAN.Text'].strip():
         banks_of[pid].append({'ref': r['__ID_BankAccount'].strip(), 'holder': r['AccountOwner'].strip() or None, 'iban': r['IBAN.Text'].strip(),
-                              'bic': (r['SWIFT.Text'] or r['BIC']).strip() or None, 'bank': r['BankName'].strip() or None})
+                              'bic': (r['SWIFT.Text'] or r['BIC']).strip() or None, 'bank': r['BankName'].strip() or None,
+                              'note': r['Comment'].strip() or None, 'holderAddress': r['AddressAccountOwner'].strip() or None,
+                              'bankAddress': r['AddressBank'].strip() or None})
 
 out = []
 for pid, p in persons.items():
@@ -299,16 +338,19 @@ for pid, p in persons.items():
         'gender': gender or None,
         'birthDate': iso(p['DateOfBirth']),
         'nationality': nationality(first(p['_ID_Homeland'])),
+        'birthYear': birth_year(p['YearOfBirth']),
         'birthPlace': p['BirthPlace'].strip() or None,
-        'birthCountry': p['CountryBirth_1'].strip() or None,
+        'birthCountry': nationality(first(p['_ID_CountryBirth'])),
         'occupation': p['Occupation'].strip() or None,
-        'motherTongue': p['MotherTongue_1'].strip() or None,
+        'motherTongue': mother_tongue(first(p['_ID_Mothertongue']), p['MotherTongue_1']),
+        'passportNumber': p['NumberPassport'].strip() or None,
         'created': stamp(p['TimestampCreation']) or stamp(p['DateOfCreation']),
-        'emails': [{'address': r['Email'].strip(), 'use': first(r['_ID_Use']), 'created': stamp(r['TimeStampOfCreation'])} for r in emails[pid] if r['Email'].strip()],
+        'emails': [{'address': r['Email'].strip(), 'use': first(r['_ID_Use']), 'created': stamp(r['TimeStampOfCreation']), 'note': r['CommentUseMail'].strip() or None}
+                   for r in emails[pid] if r['Email'].strip()],
         'phones': [{'number': ' '.join(x for x in (r['AreaCode'].strip(), r['Phone'].strip()) if x), 'use': first(r['_ID_Use']), 'created': stamp(r['TimeStampOfCreation'])}
                    for r in phones[pid] if r['Phone'].strip()],
         'addresses': [{'street': ' '.join(x for x in (r['Street'].strip(), r['HouseNumber'].strip()) if x), 'postcode': r['ZPostCode'].strip(), 'city': r['City'].strip(),
-                       'country': r['ZCountry_1'].strip(), 'created': stamp(r['TimeStampOfCreation'])} for r in addresses[pid]],
+                       'country': nationality(first(r['_ID_Country'])), 'created': stamp(r['TimeStampOfCreation'])} for r in addresses[pid]],
         'bookings': [{
             'id': b['__ID_Booking'].strip(),
             'created': stamp(b['TimeStampOfCreation']) or stamp(b['DateOfCreation']),
@@ -368,6 +410,11 @@ if '--stats' in sys.argv:
           '(with text', sum(bool(l['text'].strip()) for x in out for l in x['letters']), ') · bank accounts', sum(len(x['banks']) for x in out))
     print('with e-mail', sum(bool(x['emails']) for x in out), '· phone', sum(bool(x['phones']) for x in out), '· address', sum(bool(x['addresses']) for x in out),
           '· birth date', sum(bool(x['birthDate']) for x in out), '· nationality', sum(bool(x['nationality']) for x in out), '· created', sum(bool(x['created']) for x in out))
+    print('passport', sum(bool(x['passportNumber']) for x in out), '· birth year alone', sum(bool(x['birthYear']) and not x['birthDate'] for x in out),
+          '· mother tongue', sum(bool(x['motherTongue']) for x in out), '· country of birth', sum(bool(x['birthCountry']) for x in out),
+          '· e-mail notes', sum(bool(e['note']) for x in out for e in x['emails']),
+          '· bank notes / holder / bank addresses', sum(bool(b['note']) for x in out for b in x['banks']), sum(bool(b['holderAddress']) for x in out for b in x['banks']),
+          sum(bool(b['bankAddress']) for x in out for b in x['banks']))
     sys.exit(0)
 
 json.dump(out, sys.stdout, ensure_ascii=False)

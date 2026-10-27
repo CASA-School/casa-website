@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { readBankAccount } from '../people/person-input';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -18,6 +19,7 @@ import {
   setOrganisationActive,
   updateOrganisation,
 } from '@/lib/admin/organisations';
+import { addOrganisationBankAccount, removeOrganisationBankAccount, updateOrganisationBankAccount } from '@/lib/admin/people';
 
 /**
  * The organisations module's writes (2026-10-18). Every one asks `requireModule('organisations', …)`
@@ -73,6 +75,8 @@ const ContactSchema = z
     email,
     phone: text(60),
     role: text(120),
+    // The main contact (0092): a checkbox, sent only when ticked.
+    isMain: z.string().transform((v) => v === '1'),
   })
   .refine((c) => c.firstName || c.lastName || c.email, { message: 'contact', path: ['firstName'] });
 
@@ -183,7 +187,7 @@ export async function saveContactAction(formData: FormData): Promise<void> {
   const raw = formData.get('contactId');
   const contactId = raw ? uuid.safeParse(raw) : null;
   if (contactId && !contactId.success) redirect(page(id));
-  const parsed = ContactSchema.safeParse(fields(formData, ['salutation', 'firstName', 'lastName', 'email', 'phone', 'role']));
+  const parsed = ContactSchema.safeParse(fields(formData, ['salutation', 'firstName', 'lastName', 'email', 'phone', 'role', 'isMain']));
   if (!parsed.success) fail(page(id), problem(parsed.error, t));
   const result = await saveContact(id, contactId?.data ?? null, parsed.data, actor);
   if (!result.ok) fail(page(id), pick(lang, result.reason));
@@ -222,4 +226,43 @@ export async function removeCommissionAction(formData: FormData): Promise<void> 
   if (formData.get('confirmed') !== '1' || !termId.success) redirect(page(id));
   await removeCommission(id, termId.data, actor);
   done(page(id));
+}
+
+// ------------------------------------------------------------- bank details
+
+/**
+ * An organisation's own bank account (0092): `private_data` for the account, as a person's — `edit` writes,
+ * `full` removes — and the organisations module to reach the organisation.
+ */
+
+export async function addOrganisationBankAccountAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('private_data', 'edit');
+  await requireModule('organisations', 'edit');
+  const id = organisationId(formData);
+  const input = await readBankAccount(formData);
+  if (typeof input === 'string') fail(page(id), input);
+  await addOrganisationBankAccount(id, input, actor);
+  done(`${page(id)}?tab=bank`);
+}
+
+export async function updateOrganisationBankAccountAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('private_data', 'edit');
+  await requireModule('organisations', 'edit');
+  const id = organisationId(formData);
+  const accountId = uuid.safeParse(formData.get('accountId'));
+  if (!accountId.success) redirect(page(id));
+  const input = await readBankAccount(formData);
+  if (typeof input === 'string') fail(page(id), input);
+  await updateOrganisationBankAccount(id, accountId.data, input, actor);
+  done(`${page(id)}?tab=bank`);
+}
+
+export async function removeOrganisationBankAccountAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('private_data', 'full');
+  await requireModule('organisations', 'edit');
+  const id = organisationId(formData);
+  const accountId = uuid.safeParse(formData.get('accountId'));
+  if (formData.get('confirmed') !== '1' || !accountId.success) redirect(page(id));
+  await removeOrganisationBankAccount(id, accountId.data, actor);
+  done(`${page(id)}?tab=bank`);
 }

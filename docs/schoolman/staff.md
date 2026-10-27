@@ -65,3 +65,29 @@ never read `SingleDayStaff`'s `cal_*` fields, which are calculated and held File
 1. When working time moves, does the Klassenbuch keep the teachers' side and the workspace finance's?
 Decided: staff tax, pension and health-insurance numbers and bank accounts come along with restricted
 access — only the people whose work needs them (`people.md`).
+
+## Completeness review (2026-10-27, migration 0092)
+
+Brought across by the bridge (steps `staff` and `time`), seen in the workspace as docs/ADMIN_WORKSPACE.md §Stunden says:
+
+- the levels a teacher teaches (`_ID_Level`: 1 A1 … 5 C1, 3,5 B1+, 7 C1 Hochschule), added to Kursplanung's while
+  nobody set the rules by hand; 6 TestDaF is an exam, and 8 SK / 9 ND are not known yet — both left out;
+- whether a colleague keeps a time sheet (`_ID_TimeSheet`: 46 yes, 2 no);
+- **trainings** (`TrainingStaffMember`, `SingleDateTraining`, `TrainingReference`): 25, of 17 colleagues;
+- **leave requests** (`DateHoliday`, `SingleDateHoliday`, `HolidayReference`): 920 requests of the register's colleagues,
+  with their kind (Tarifurlaub, Schließzeit, Sonderurlaub …) and the working days approved;
+- the **target hours per weekday** of each contract period (`WeekDayWorkTime`): 1,124 rows;
+- the **time worked outside the lessons** (`AdminWork`, its kind from `TypeWorkReference`, never the free text
+  `TypeWork_1`): 12,062 entries, 155 of them for an exam sitting here;
+- the hours carried into a year (`SingleYearStaff.OverhangWorkTime`; the reader had read `OverhangWorkDay`, empty on
+  every row) and the day a month was approved (`SingleMonthStaff.DateApproval`).
+
+Not brought, with the reason: `SingleMonthStaff.CommentOnMonth` is SchoolMan's own stamp („<month> <year> <date>
+aktualisiert – <account>", all 672); `SingleDayStaff.Adjustment` is the Klassenbuch's correction, which the office's
+adoption copies into `AdminWork` (`SetAdjustment.Loop_SingleDayStaff_SingleMonthStaff`; 382 of 443 found there by
+day and hours), and its `CommentAdjustment` holds the kind of sick note (`ak`/`pk`/`kk`, 477 days) — health data,
+with `IllnessReference` still to be decided; `_ID_LegalHoliday` is the calendar's. The holidays left still count the
+days SchoolMan marks as holiday (`SingleDayStaff._ID_Holiday`): over this year and the two before 3,153 of them are
+approved request days, while 224 approved days are not marked and 152 marked days have no approved request — which
+is right is for finance to say before the count changes. `DateStaffAtWork` stays out (Rahman, 2026-10-26).
+`StaffMember.Login` and `MailAccount` hold passwords and are never read.

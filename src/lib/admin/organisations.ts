@@ -152,6 +152,8 @@ export type OrganisationDetail = {
   /** The language CASA writes to them in. */
   language: 'de' | 'en';
   email: string | null;
+  /** SchoolMan's note on its address (0092). */
+  emailNote: string | null;
   phone: string | null;
   agreement: string | null;
   note: string | null;
@@ -171,13 +173,14 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail | 
     country_en: string | null;
     language: 'de' | 'en';
     email: string | null;
+    email_note: string | null;
     phone: string | null;
     agreement: string | null;
     note: string | null;
     created_at: Date;
   }>(
     `SELECT o.id, o.name, o.kind, o.relation, o.is_active, o.address, o.country_code, c.name_de AS country_de, c.name_en AS country_en,
-            o.language, o.email, o.phone, o.agreement, o.note, o.created_at
+            o.language, o.email, o.email_note, o.phone, o.agreement, o.note, o.created_at
        FROM organisations o LEFT JOIN countries c ON c.code = o.country_code
       WHERE o.id = $1`,
     [id]
@@ -194,6 +197,7 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail | 
     country: both(row.country_de, row.country_en),
     language: row.language,
     email: row.email,
+    emailNote: row.email_note,
     phone: row.phone,
     agreement: row.agreement,
     note: row.note,
@@ -212,8 +216,11 @@ export type OrganisationContact = {
   phone: string | null;
   /** Their job title. */
   role: string | null;
+  /** The organisation's main contact (0092): one at most. */
+  isMain: boolean;
 };
 
+/** The main contact first, then by name. */
 export async function organisationContacts(organisationId: string): Promise<OrganisationContact[]> {
   const rows = await query<{
     id: string;
@@ -223,10 +230,11 @@ export async function organisationContacts(organisationId: string): Promise<Orga
     email: string | null;
     phone: string | null;
     role: string | null;
+    is_main: boolean;
   }>(
-    `SELECT id, salutation, first_name, last_name, email, phone, role FROM organisation_contacts
+    `SELECT id, salutation, first_name, last_name, email, phone, role, is_main FROM organisation_contacts
       WHERE organisation_id = $1
-      ORDER BY lower(coalesce(last_name, first_name, email)), lower(coalesce(first_name, '')), id`,
+      ORDER BY is_main DESC, lower(coalesce(last_name, first_name, email)), lower(coalesce(first_name, '')), id`,
     [organisationId]
   );
   return rows.map((r) => ({
@@ -238,6 +246,7 @@ export async function organisationContacts(organisationId: string): Promise<Orga
     email: r.email,
     phone: r.phone,
     role: r.role,
+    isMain: r.is_main,
   }));
 }
 
@@ -652,6 +661,8 @@ export type ContactInput = {
   email: string | null;
   phone: string | null;
   role: string | null;
+  /** The main contact: marking one takes the mark from whoever had it. */
+  isMain: boolean;
 };
 
 const organisationExists = async (id: string) => Boolean(await queryFirst<{ id: string }>(`SELECT id FROM organisations WHERE id = $1`, [id]));
@@ -666,18 +677,25 @@ export async function saveContact(organisationId: string, contactId: string | nu
     );
     if (taken) return refuse('Diese E-Mail-Adresse hat schon ein anderer Kontakt hier.', 'Another contact here already has that email address.');
   }
-  const values = [input.salutation, input.firstName, input.lastName, input.email, input.phone, input.role];
+  const values = [input.salutation, input.firstName, input.lastName, input.email, input.phone, input.role, input.isMain];
+  // One main contact: the mark moves, in the same statement as the save, so the unique index never sees two.
   if (contactId) {
     const rows = await query<{ id: string }>(
-      `UPDATE organisation_contacts SET salutation = $3, first_name = $4, last_name = $5, email = $6, phone = $7, role = $8
-        WHERE id = $1 AND organisation_id = $2 RETURNING id`,
+      `WITH cleared AS (
+         UPDATE organisation_contacts SET is_main = false WHERE $9 AND organisation_id = $2 AND id <> $1 AND is_main RETURNING id
+       )
+       UPDATE organisation_contacts SET salutation = $3, first_name = $4, last_name = $5, email = $6, phone = $7, role = $8, is_main = $9
+        WHERE id = $1 AND organisation_id = $2 AND (SELECT count(*) FROM cleared) >= 0 RETURNING id`,
       [contactId, organisationId, ...values]
     );
     if (!rows.length) return refuse('Diesen Kontakt gibt es nicht mehr.', 'This contact no longer exists.');
   } else {
     await query(
-      `INSERT INTO organisation_contacts (organisation_id, salutation, first_name, last_name, email, phone, role, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      `WITH cleared AS (
+         UPDATE organisation_contacts SET is_main = false WHERE $8 AND organisation_id = $1 AND is_main RETURNING id
+       )
+       INSERT INTO organisation_contacts (organisation_id, salutation, first_name, last_name, email, phone, role, is_main, created_by)
+       SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9 FROM (SELECT count(*) FROM cleared) c`,
       [organisationId, ...values, actor.id]
     );
   }

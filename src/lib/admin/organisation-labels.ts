@@ -35,19 +35,32 @@ export const isOrganisationView = (value: unknown): value is OrganisationView =>
 /**
  * What an organisation is to CASA beyond a client (0061, SchoolMan's `_ID_StatusManagementReference`): it
  * takes interns, sends learners our way, runs an activity, supplies something, publishes the books CASA
- * orders (0068), insures, partners in a tandem, rebuilds, or is the Förderverein.
+ * orders (0068), insures, partners in a tandem, rebuilds, or is the Förderverein — or, a company, commissions
+ * courses (0092, SchoolMan's `Contractor`: a university, a training provider).
  */
-export const ORGANISATION_RELATIONS = ['internship', 'multiplier', 'activity', 'supplier', 'publisher', 'health_insurer', 'tandem_school', 'contractor', 'association'] as const;
+export const ORGANISATION_RELATIONS = [
+  'internship',
+  'commissioning_body',
+  'multiplier',
+  'activity',
+  'supplier',
+  'publisher',
+  'health_insurer',
+  'tandem_school',
+  'contractor',
+  'association',
+] as const;
 export type OrganisationRelation = (typeof ORGANISATION_RELATIONS)[number];
 export const ORGANISATION_RELATION_LABELS: Record<OrganisationRelation, Bilingual> = {
   internship: { de: 'Praktikumsbetrieb', en: 'Internship host' },
+  commissioning_body: { de: 'Auftraggeber', en: 'Commissioning body' },
   multiplier: { de: 'Multiplikator', en: 'Multiplier' },
   activity: { de: 'Ausflüge und Aktivitäten', en: 'Outings and activities' },
   supplier: { de: 'Lieferant oder Dienstleister', en: 'Supplier' },
   publisher: { de: 'Verlag', en: 'Publisher' },
   health_insurer: { de: 'Krankenkasse', en: 'Health insurer' },
   tandem_school: { de: 'Tandem-Schule', en: 'Tandem school' },
-  contractor: { de: 'Handwerk und Umbau', en: 'Contractor' },
+  contractor: { de: 'Handwerk und Umbau', en: 'Builders and trades' },
   association: { de: 'Förderverein', en: 'Support association' },
 };
 

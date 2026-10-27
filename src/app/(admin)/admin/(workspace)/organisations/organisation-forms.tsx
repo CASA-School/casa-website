@@ -192,6 +192,10 @@ export async function ContactForm({ organisationId, contact }: { organisationId:
           <Input id={id('phone')} name="phone" maxLength={60} defaultValue={contact?.phone ?? ''} />
         </Field>
       </div>
+      <label className="flex cursor-pointer items-center gap-2 text-[0.88rem] font-semibold text-[var(--casa-ink)]">
+        <input type="checkbox" name="isMain" value="1" defaultChecked={contact?.isMain ?? false} className="size-4 rounded border-ws-line-firm accent-[var(--casa-accent-surface)]" />
+        {t('Hauptkontakt', 'Main contact')}
+      </label>
       <DialogFooter>
         <Button type="submit">{contact ? t('Speichern', 'Save') : t('Kontakt hinzufügen', 'Add contact')}</Button>
       </DialogFooter>

@@ -20,6 +20,12 @@ history from the work log (8,977 lines on 178 organisations locally; lines about
 not hold stay in SchoolMan). SchoolMan's teacher plan (`DateStaffAtWork`) matched Kursplanung's pairs in 80 of
 90 group-months and was not brought across.
 
+**Since 2026-10-27 (migration 0092, completeness review of people, staff and organisations):** passport numbers,
+a birth year alone, mother tongue and countries by their ids, notes on e-mail addresses, a bank account's comment and
+addresses, an organisation's own accounts, every internship host, the commissioning bodies, the parties' active flags and
+main contacts, the teachers' levels, trainings, leave requests, target hours per weekday and the time worked outside the
+lessons come across (people.md, staff.md, organisations.md §Completeness review). Rows marked *(0092)* below are closed.
+
 **The one gap behind most of the others: the sample.** Everything about learners is cut by `sample.py`:
 a booked period this week or in the next four weeks, plus this year's group participants. Run 3 brought
 673 people of 15,514, 2,338 bookings of 22,488, 2,254 periods of 20,206, 451 stays of 2,465, 9,804
@@ -43,10 +49,10 @@ tongue, occupation, customer number, bank accounts, tests, notes, history, lette
 
 | SchoolMan field | Filled · since 2025 | What the team uses it for | Verdict |
 | --- | ---: | --- | --- |
-| `Person.NumberPassport` | 1,262 · 414 | Passport number for visa letters and telc registration. Rahman decided it comes along (people.md, decision 1) and `people.passport_number` exists (0029). The reader still leaves it out, and learner-transfer.md says "no passport number". | **needed for daily work.** The decision and the code disagree. |
+| `Person.NumberPassport` | 1,262 · 414 | Passport number for visa letters and telc registration. Rahman decided it comes along (people.md, decision 1) and `people.passport_number` exists (0029). | **done *(0092)*:** read and imported (474 in the sample). |
 | `ID_Student` (learner number), `Booking.__ID_Booking` | 7,055 · 2,020 | The SchoolMan learner and booking numbers. They are on receipts, so learners and finance quote them. Both are stored (`filemaker_links`, `bookings.filemaker_booking_id`) but no screen shows them. | **needed for daily work.** The data is there; only the display is missing. |
-| `Email.CommentUseMail`, `Phone.CommentUse` | 367 · 32 / 1,481 · 5 | A note on a channel, e.g. "only WhatsApp" *(?)* | useful later (rarely filled now) |
-| `BankAccount.Comment`, `AddressAccountOwner`, `AddressBank` | 209 · 31 / 65 · 54 / 78 · 60 | Notes on refunds, and the account holder's address for foreign transfers | useful later (with refunds/finance) |
+| `Email.CommentUseMail`, `Phone.CommentUse` | 367 · 32 / 1,481 · 5 | A note on a channel, e.g. "only WhatsApp" *(?)* | e-mail notes **done *(0092)*** (`emails.note`, `organisations.email_note`); `Phone.CommentUse` abandoned (none in 2026) |
+| `BankAccount.Comment`, `AddressAccountOwner`, `AddressBank` | 209 · 31 / 65 · 54 / 78 · 60 | Notes on refunds, and the account holder's address for foreign transfers | **done *(0092)*** (`note`, `holder_address`, `bank_address`) |
 | `SpecialStudent` (table, no profile) | 53 rows · 12 since 2025 | Unknown. Possibly special needs. *(?)* | **ask the team first.** It may hold health data. |
 
 **Rows left out by the rules (run 3)**
@@ -196,7 +202,7 @@ payer on 1,169 bookings and 2,321 letters linked.
 | `Comment` rows on a party (`_ID_Management` 515 · 170, `_ID_Corporate` 89 · 45, `_ID_Agency` 14 · 8) | 618 · 223 | useful later, **after a screen**. These are notes on parties, and `Management`'s own comments hold credentials, so this text must be checked before any import. |
 | `WorkFlow` lines on a company (`_ID_Corporate`) | 13,049 · 5,399 | useful later. Lines that also name a sample booking come across; the company's own log does not. |
 | Letters to parties (`Letter._ID_Management`) | 1,642 · 1,640 | useful later. Only those on agencies and companies of the sample are linked. |
-| `Management._ID_ContactPerson`, `Agency._ID_ContactAgent` | 99 · 62 / 34 · 5 | useful later. The main contact person; all contacts come, but not which one is main. |
+| `Management._ID_ContactPerson`, `Agency._ID_ContactAgent` | 99 · 62 / 34 · 5 | **done *(0092)*:** `organisation_contacts.is_main` (59 marked). |
 | `Booking._ID_Contact` (the agency contact on a booking) | 1,563 · 28 | leave in SchoolMan (already "not yet" in organisations.md) |
 | The ~3,576 parties no imported record names | — | leave in SchoolMan. Per-record by design; "which agencies are active" is still open. |
 
@@ -273,12 +279,12 @@ periods, licences, absences from 90 days back to a year ahead (688), reception d
 
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
-| What a teacher teaches: `StaffMember._ID_Level`, `_ID_CourseTypeReference`, `_ID_DayTimeReference` | 51 / 59 / 36 (9 each since 2025) | useful later. These are the seed for Kursplanung's teacher rules (`levels`, `shifts`), which planners now type by hand. |
+| What a teacher teaches: `StaffMember._ID_Level`, `_ID_CourseTypeReference`, `_ID_DayTimeReference` | 51 / 59 / 36 (9 each since 2025) | course types and times since 0083; levels **done *(0092)*** (added while the planners have not set the rules). |
 | `StaffMember.Login` | 78 · 15 | useful later. The FileMaker account name links a colleague to the Klassenbuch. |
 | `StaffMember._ID_StatusSalaryReference`, `DateTargetWorkTime._ID_StatusSalarylReference` | 58 / 303 | useful later (HR, restricted) |
-| Holiday requests with status: `DateHoliday` 1,094 (231 in 2026), `SingleDateHoliday` 8,978 (3,103 in 2026, `_ID_StatusHoliday`) | — | useful later. Days off come across from `SingleDayStaff`; the request and its approval state do not. |
-| Working time: `WeekDayWorkTime` 1,329, `AdminWork` 14,483 (~3,000 a year), `SingleMonthStaff` 2,810, `SingleYearStaff` 268, `SingleDayStaff` hours and adjustments | — | leave in SchoolMan (finance and Klassenbuch, a later module) |
-| **Staff training:** `TrainingStaffMember` 26, `SingleDateTraining` 4, `TrainingReference` 7, all created in 2026 | 26 / 4 / 7 | useful later. A new area SchoolMan started this year; nothing in the study or the workspace covers it. |
+| Holiday requests with status: `DateHoliday` 1,094 (231 in 2026), `SingleDateHoliday` 8,978 (3,103 in 2026, `_ID_StatusHoliday`) | — | **done *(0092)*:** `staff_leave_requests` (kind, days, days approved). |
+| Working time: `WeekDayWorkTime` 1,329, `AdminWork` 14,483 (~3,000 a year), `SingleMonthStaff` 2,810, `SingleYearStaff` 268, `SingleDayStaff` hours and adjustments | — | **done *(0092)*** for `WeekDayWorkTime` (`staff_target_days`), `AdminWork` (`staff_work_entries`), the hours carried and the approval day; a day's `Adjustment` is copied into `AdminWork` on adoption, the month's comment is SchoolMan's stamp (staff.md). |
+| **Staff training:** `TrainingStaffMember` 26, `SingleDateTraining` 4, `TrainingReference` 7, all created in 2026 | 26 / 4 / 7 | **done *(0092)*:** `staff_trainings`, tab „Schulungen". |
 
 | Left out (run 3) | Why |
 | --- | --- |
@@ -378,7 +384,7 @@ Close behind: show the SchoolMan booking and learner numbers on the booking (sto
 4. **TestDaF and TestAS.** Add them to the exam catalogue (1 booking and 4 licences are dropped), or
    leave them in SchoolMan?
 5. **Teacher confirmations.** Read them from SchoolMan now, or wait for the Klassenbuch bridge?
-6. **Passport number.** people.md says it comes along; learner-transfer.md and the reader say it does
+6. *(answered: people.md decision 1; read since 0092)* **Passport number.** people.md says it comes along; learner-transfer.md and the reader said it does
    not. Which is right?
 7. **Comments on parties** (618 `Comment` rows). Import them after a screen for credentials, or leave
    them in SchoolMan?
