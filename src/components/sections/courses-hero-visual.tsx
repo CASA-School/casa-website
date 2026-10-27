@@ -19,8 +19,8 @@ import { useHeroGlow } from './use-hero-glow';
  * the ground up, the sun drops onto A1 and climbs one step per beat, each step
  * lighting as it lands, and comes to rest on C1. Each step is a link: hovering
  * or focusing it lights the step, the rest of the stair steps back and the
- * caption in the sky says what that level means at CASA (the intensive course
- * page's own learning goal for the level, and how long it takes). On touch the
+ * caption in the sky names the level and how long it takes in the intensive
+ * course; the learning goal per level went (Rahman, 2026-10-27). On touch the
  * first tap shows the caption and the second, or its link, follows it.
  *
  * No telc exams on these steps: they belong to the exams hero. No prices.
@@ -31,9 +31,7 @@ import { useHeroGlow } from './use-hero-glow';
 export type CoursesStaircaseStep = {
   /** 'A1', 'B1+', … — set in the sans face. */
   level: string;
-  /** What a learner can do on this level (the intensive course's learning goal). */
-  focus: string;
-  /** How long the level takes. */
+  /** How long the level takes in the intensive course. */
   fact: string;
   href: string;
   cta: string;
@@ -302,14 +300,14 @@ export function CoursesHeroVisual({ steps, rest, current, label, className }: Co
               {step.level}
             </span>
             <span id={`${id}-step-${i}`} className="sr-only">
-              {`${step.focus} ${step.fact}`}
+              {step.fact}
             </span>
           </Link>
         ))}
       </div>
 
       {/* The caption, in the sky above the low steps: the overview at rest, the chosen
-          level's title and goal otherwise — no link line: the step itself is the link
+          level and its length otherwise — no link line: the step itself is the link
           (Rahman, 2026-10-08). All share one grid cell and cross-fade. */}
       <div aria-hidden="true" className={cn(styles.captions, 'pointer-events-none absolute inset-x-0 top-0 grid sm:inset-x-auto sm:left-[4%] sm:top-[5%] sm:w-[46%]')}>
         <div className={cn(styles.caption, shown !== null && styles.captionOut)}>
@@ -319,7 +317,7 @@ export function CoursesHeroVisual({ steps, rest, current, label, className }: Co
         {steps.map((step, i) => (
           <div key={step.level} className={cn(styles.caption, shown !== i && styles.captionOut)}>
             <p className={styles.level}>{step.level}</p>
-            <p className={styles.focus}>{step.focus}</p>
+            <p className={styles.focus}>{step.fact}</p>
           </div>
         ))}
       </div>

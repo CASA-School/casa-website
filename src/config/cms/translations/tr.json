@@ -231,6 +231,10 @@
     "de": "400 € für 10 Termine",
     "text": "10 oturum için 400 €"
   },
+  "t.8-wochen-im-intensivkurs.nc2zfu": {
+    "de": "8 Wochen im Intensivkurs",
+    "text": "Yoğun kursta 8 hafta"
+  },
   "t.8-wochen-komplettes-niveau.o8zfyy": {
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 hafta (tam seviye)"
@@ -3758,10 +3762,6 @@
   "t.im-ersten-gespraech-erfahren.momb1e": {
     "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
     "text": "İlk görüşmede ekibin neler öğrenmesi gerektiğini ve hangi dil bilgisine sahip olduğunu öğreniriz."
-  },
-  "t.im-intensivkurs-8-wochen.12qzs64": {
-    "de": "Im Intensivkurs 8 Wochen",
-    "text": "Yoğun kursta 8 hafta"
   },
   "t.im-intensivkurs-hast-du.1n5lebh": {
     "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",

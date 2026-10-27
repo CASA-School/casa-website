@@ -281,6 +281,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.8-wochen-im-intensivkurs.nc2zfu": {
+  "de": "8 Wochen im Intensivkurs",
+  "en": "8 weeks in the intensive course",
+  "files": [
+   "src/app/(site)/[locale]/courses/page.tsx"
+  ],
+  "pages": [
+   "/courses"
+  ]
+ },
  "t.8-wochen-komplettes-niveau.o8zfyy": {
   "de": "8 Wochen (komplettes Niveau)",
   "en": "8 weeks (complete level)",
@@ -10538,16 +10548,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.im-intensivkurs-8-wochen.12qzs64": {
-  "de": "Im Intensivkurs 8 Wochen",
-  "en": "8 weeks in the intensive course",
-  "files": [
-   "src/app/(site)/[locale]/courses/page.tsx"
-  ],
-  "pages": [
-   "/courses"
   ]
  },
  "t.im-intensivkurs-hast-du.1n5lebh": {

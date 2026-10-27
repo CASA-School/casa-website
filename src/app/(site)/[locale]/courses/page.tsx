@@ -11,7 +11,6 @@ import {
 import { CourseFormatRows } from '@/components/sections/course-format-rows';
 import { CoursesHeroVisual, type CoursesStaircaseStep } from '@/components/sections/courses-hero-visual';
 import nightHero from '@/components/sections/night-hero.module.css';
-import { getCourseLevelGoals } from '@/config/courses/course-profiles';
 import { localizePracticalFacts } from '@/config/courses/course-practical-facts';
 import { CoursesFormatSelector } from '@/components/signatures';
 import { Container } from '@/components/ui/container';
@@ -367,10 +366,9 @@ export default async function CoursesPage({
   /*
    * THE STAIRCASE'S WORDS, every one already published on this site.
    *
-   * - `focus` is the intensive course page's own learning goal for the level
-   *   (getCourseLevelGoals, the „Lernziele nach Niveaustufen" section), the short
-   *   version a card holds. The full „what you can do" text per level stays on
-   *   the placement page's level overview.
+   * - No learning goal per level any more (Rahman, 2026-10-27: „we don't need
+   *   them"): a step says its level and how long it takes in the intensive
+   *   course. What each level means stays on the placement page's level overview.
    * - `fact`: a whole level takes 8 weeks in the intensive course (one summer course a
    *   year runs 9; the site says 8, Rahman 2026-10-12)
    *   (docs/COURSE_FACTS_SOURCE_OF_TRUTH.md, verified), and B1+ just as long,
@@ -382,11 +380,9 @@ export default async function CoursesPage({
    *   level ranges would also offer it in formats that teach in half levels, so
    *   it links to the intensive course itself.
    */
-  const levelGoals = getCourseLevelGoals('intensive-german', locale).levels;
   const staircaseSteps: CoursesStaircaseStep[] = CEFR_LADDER.map((step) => ({
     level: step,
-    focus: levelGoals.find((goal) => goal.level === step)?.focus ?? '',
-    fact: say(locale, 'Im Intensivkurs 8 Wochen', '8 weeks in the intensive course'),
+    fact: say(locale, '8 Wochen im Intensivkurs', '8 weeks in the intensive course'),
     href: step === 'B1+' ? getCoursePath('intensive-german') : `/courses?level=${encodeURIComponent(step)}#formats`,
     cta:
       step === 'B1+'
@@ -413,8 +409,8 @@ export default async function CoursesPage({
         drawn in code, in place of the classroom photograph (thumbA). Same
         composition as HeroAPhotoLed (HeroSurface + HeroLede) on the night hero,
         as /accommodation and the non-profit page do, with the stair where
-        HeroBleedPhoto would be. Each step says what the level means at CASA and
-        leads to the formats that teach it.
+        HeroBleedPhoto would be. Each step names its level and its length in the
+        intensive course, and leads to the formats that teach it.
       */}
       <HeroSurface themeClassName="hero-theme-plain" archetype="A" breadcrumbs={breadcrumbs} className={`overflow-x-clip ${nightHero.night}`}>
         <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">

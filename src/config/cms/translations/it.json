@@ -231,6 +231,10 @@
     "de": "400 € für 10 Termine",
     "text": "400 € per 10 incontri"
   },
+  "t.8-wochen-im-intensivkurs.nc2zfu": {
+    "de": "8 Wochen im Intensivkurs",
+    "text": "8 settimane nel corso intensivo"
+  },
   "t.8-wochen-komplettes-niveau.o8zfyy": {
     "de": "8 Wochen (komplettes Niveau)",
     "text": "8 settimane (livello completo)"
@@ -3758,10 +3762,6 @@
   "t.im-ersten-gespraech-erfahren.momb1e": {
     "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
     "text": "Nel primo colloquio scopriamo cosa deve imparare il team e quali conoscenze linguistiche ha già."
-  },
-  "t.im-intensivkurs-8-wochen.12qzs64": {
-    "de": "Im Intensivkurs 8 Wochen",
-    "text": "Nel corso intensivo 8 settimane"
   },
   "t.im-intensivkurs-hast-du.1n5lebh": {
     "de": "Im Intensivkurs hast du {course.intensive-german.lessons} Unterrichtseinheiten à 45 Minuten pro Woche. Eine ganze Niveaustufe dauert dort 8 Wochen, die B1+ genauso lange. Im Abendkurs dauert eine halbe Niveaustufe etwa ein Trimester.",
