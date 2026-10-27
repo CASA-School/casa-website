@@ -608,8 +608,8 @@ export async function SubmissionCard({
   const { t, lang } = await getI18n();
   const german = reply.locale === 'de';
   return (
-    <article className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-line px-6 py-4">
+    <article className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-card-line bg-ws-card-head px-6 py-4">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={name || email} />
           <div className="min-w-0 text-[0.84rem]">
@@ -633,7 +633,7 @@ export async function SubmissionCard({
         <h2 className="text-[1.05rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2>
         <div className="mt-3">{children}</div>
       </div>
-      <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3.5">
+      <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-ws-card-head px-6 py-3.5">
         <ButtonLink href={reply.href} variant={reply.primary === false ? 'secondary' : 'primary'}>
           <span aria-hidden="true" className="[&_svg]:size-4">
             {Icon.mail}
@@ -649,15 +649,15 @@ export async function SubmissionCard({
 
 /** A record's figures in its header's bar: the person's level and bookings, a test's confidence. */
 export function StatBar({ children }: { children: ReactNode }) {
-  return <dl className="flex w-full flex-wrap items-center gap-x-7 gap-y-2">{children}</dl>;
+  return <dl className="flex w-full flex-wrap items-center gap-x-8 gap-y-2">{children}</dl>;
 }
 
 /** One figure: its label above, the value under it, a quiet word after the value when it needs one. */
 export function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[0.72rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
-      <dd className="mt-0.5 text-[0.95rem] font-bold text-[var(--casa-ink)] tabular-nums">{children}</dd>
+      <dt className="text-[0.74rem] font-semibold text-[var(--casa-muted)]">{label}</dt>
+      <dd className="mt-0.5 text-[1.05rem] font-extrabold tracking-[-0.01em] text-[var(--casa-ink)] tabular-nums">{children}</dd>
     </div>
   );
 }

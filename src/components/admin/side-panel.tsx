@@ -72,7 +72,7 @@ export function SidePanel({
             width === 'lg' ? 'sm:max-w-[560px]' : 'sm:max-w-[440px]'
           )}
         >
-          <header className="flex items-start gap-3 border-b border-ws-line px-6 pt-5 pb-4">
+          <header className="flex items-start gap-3 border-b border-ws-card-line bg-ws-card-head px-6 pt-5 pb-4 sm:rounded-t-3xl">
             {icon ? <IconChip icon={icon} tint={tint} size="md" /> : null}
             <div className="min-w-0 flex-1 pt-0.5">
               <Primitive.Title className="text-[1.08rem] leading-snug font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</Primitive.Title>
@@ -86,7 +86,7 @@ export function SidePanel({
             </Primitive.Close>
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-          {footer ? <footer className="border-t border-ws-line bg-ws-sunk/40 px-6 py-3.5 sm:rounded-b-3xl">{footer}</footer> : null}
+          {footer ? <footer className="border-t border-ws-line bg-ws-card-head px-6 py-3.5 sm:rounded-b-3xl">{footer}</footer> : null}
         </Primitive.Content>
       </Primitive.Portal>
     </Primitive.Root>

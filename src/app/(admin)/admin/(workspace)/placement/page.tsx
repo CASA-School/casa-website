@@ -79,7 +79,7 @@ export default async function PlacementPage({
         )}
       </p>
 
-      <div className="mb-6 overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+      <div className="mb-6 overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
         <ListBar
           tabs={FILTERS.map((option) => ({ key: option.key, label: pick(lang, option.label), href: hrefFor(option.key), count: counts[option.key] }))}
           active={filter}

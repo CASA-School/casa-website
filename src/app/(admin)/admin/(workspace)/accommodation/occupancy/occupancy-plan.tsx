@@ -160,7 +160,7 @@ export function OccupancyPlan({
   };
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+    <section className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-line px-4 py-3">
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.76rem] font-semibold text-[var(--casa-muted)]" aria-label={t('Legende', 'Legend')}>
           <Legend swatch="border border-[#0f8a7a] bg-[#d9f1ec]">{t('Wohnt hier', 'Living here')}</Legend>

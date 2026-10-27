@@ -16,7 +16,7 @@ export async function DatabaseUnavailable() {
   const { t } = await getI18n();
   return (
     <div className="flex min-h-dvh items-center justify-center bg-ws-canvas px-6 py-16">
-      <div className="w-full max-w-md rounded-3xl border border-ws-line bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+      <div className="w-full max-w-md rounded-3xl border border-ws-card-line bg-white p-6 shadow-ws-card">
         <div className="flex items-center gap-3">
           <IconChip icon={Icon.attention} tint="sun" size="md" />
           <h1 className="text-xl leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">

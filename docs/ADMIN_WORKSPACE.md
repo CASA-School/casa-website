@@ -761,14 +761,28 @@ browser's. The sidebar is white, like the toolbars of the editor and Offers.
 
 The rules, each of which came from a real defect on a real screen.
 
-1. **A section is one white block; the canvas between sections separates
-   them.** A card's header is white with a rule under it. It used to be
-   `--ws-sunk`, which was within 1.01:1 of the page canvas — so the gap above
-   a card and the header of the next card resolved to the same grey and two
-   stacked sections merged into one strip. The surface ladder is now white 1.0
-   → `--ws-sunk` 0.90 → `--ws-canvas` 0.84 in relative luminance, roughly
-   1.08:1 a step, and `--ws-sunk` appears only *inside* a card (table headers,
-   toolbars, a card footer) where it reads as a sub-level.
+1. **A section is one framed block; the canvas between sections separates
+   them, and its head is a band (changed 2026-10-27).** A card's header was
+   once `--ws-sunk`, within 1.01:1 of the page canvas — so the gap above a card
+   and the header of the next card resolved to the same grey and two stacked
+   sections merged into one strip. It then became white with a rule, which
+   fixed that but made the opposite defect (Rahman, 2026-10-27, on a staff
+   record: „create a bit of a contrast … sections more distinct and easy to
+   understand what is where"): measured, the card's edge was 1.11:1 against the
+   canvas and its shadow invisible, so a card was told from the page by its
+   fill alone (1.18:1), and the head's rule (1.30:1) was the weight of the rules
+   between its rows (1.17:1), so a title read as the first row. The Tagesplan,
+   which he named as reading well, marks every head with a band.
+   Now (`globals.css`): the edge is `--ws-card-line` `#d3dae5` (1.20:1 on the
+   canvas) with `--ws-card-shadow`, two soft layers; the head is
+   `--ws-card-head` `#f3f6fa`, halfway between white and the canvas (1.08:1 and
+   1.09:1, so never the page showing through), closed by a rule in the edge's
+   colour, the title at 15px/800. The same band carries a record's facts bar,
+   a side panel's head and foot, a list's group headings (`ListGroup`, as the
+   Kurse table heads each part of the day) and the offers module's `.cardHead`.
+   `--ws-sunk` still appears only *inside* a card (toolbars, a total) where it
+   reads as a sub-level; a section on the canvas is `Card`, or
+   `border-ws-card-line shadow-ws-card` when a screen draws its own.
 2. **A field title is a label, not an eyebrow.** `DetailList` and a
    `Table`'s column heads are 12px sentence case in `--casa-muted`. They were 10.4px bold
    uppercase with letter-spacing — decoration doing a functional job, slower
@@ -854,7 +868,10 @@ Rahman: "now improve the top of the pages and the lists too". A list page's
 head is the title at 28px, tight, with its actions level with it. A record's
 head (`RecordHeader`) is clean white — the tinted wash it had is gone — with
 the person's initials large and tinted beside the name (`avatar`), the status
-as a soft pill, and the facts bar on a faint ground under a hairline. The way
+as a soft pill, and the facts bar on a faint ground under a hairline — since
+2026-10-27 the head band (`--ws-card-head`) under the edge's rule, its figures at
+17px/800, and the open tab in FileMaker's navy over a 3px line (one weight for
+every tab, so choosing one never shifts the rest). The way
 back is a small rounded pill ("← All bookings"). Badges everywhere are soft
 rounded pills with a fine edge instead of solid blocks of colour.
 
@@ -2551,7 +2568,10 @@ a whole working day needs three things the marketing site does not:
    lone white card and disappears behind forty table rows. The workspace has
    three line weights — `--ws-line-firm` for structure, `--ws-line` for
    repetition, `--ws-line-soft` for nested boxes — plus `--ws-sunk` for a
-   recessed band.
+   recessed band. A section on the canvas has its own edge, head and shadow
+   (`--ws-card-line`, `--ws-card-head`, `--ws-card-shadow`; utilities
+   `border-ws-card-line`, `bg-ws-card-head`, `shadow-ws-card`), measured in
+   §Design standards rule 1.
 2. **A ground one step darker.** The site's canvas is 1.02:1 against white,
    which you can measure and cannot see once a card fills the viewport.
 3. **15px body, not 17px.** A table of names, dates and money at 17px forces

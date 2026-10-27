@@ -51,7 +51,7 @@ export function CoursesTable({ day, lessons, editing }: { day: string; lessons: 
   const count = (s: Session) => lessons.filter((l) => l.session === s).length;
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+    <section className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-line px-4 py-3">
         <div role="group" aria-label={t('Teil des Tages', 'Part of the day')} className="flex flex-wrap gap-1.5">
           <Chip on={session === 'all'} onClick={() => setSession('all')}>

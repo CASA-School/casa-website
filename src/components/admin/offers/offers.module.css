@@ -107,9 +107,10 @@
 .aside { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
 /* a card: one white block on the canvas; the canvas between cards separates them */
-.card { background: #fff; border: 1px solid var(--o-line); border-radius: var(--r-feature); box-shadow: var(--o-card); }
-.cardHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; padding: 10px 16px; border-bottom: 1px solid var(--o-line); border-radius: var(--r-feature) var(--r-feature) 0 0; }
-.cardHead h2 { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; }
+/* The workspace's section frame and head band (2026-10-27, globals.css `--ws-card-*`): the same as `Card`. */
+.card { background: #fff; border: 1px solid var(--ws-card-line, var(--o-line)); border-radius: var(--r-feature); box-shadow: var(--ws-card-shadow, var(--o-card)); }
+.cardHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 10px 16px; border-bottom: 1px solid var(--ws-card-line, var(--o-line)); border-radius: var(--r-feature) var(--r-feature) 0 0; background: var(--ws-card-head, #fff); }
+.cardHead h2 { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
 .cardHead > span { margin-left: auto; font-size: 12.5px; color: var(--o-mute); font-weight: 600; text-align: right; }
 .cardHeadWarn { background: #fffaf0; }
 .cardBody { padding: 14px 16px 16px; }

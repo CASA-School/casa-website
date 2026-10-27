@@ -472,11 +472,11 @@ function LevelCard({
     <section
       id={`level-${key}`}
       className={cn(
-        'scroll-mt-24 overflow-hidden rounded-3xl border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]',
-        focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-line'
+        'scroll-mt-24 overflow-hidden rounded-3xl border bg-white shadow-ws-card',
+        focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-card-line'
       )}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-line px-5 py-3.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-card-line bg-ws-card-head px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
           <span
             className={cn(

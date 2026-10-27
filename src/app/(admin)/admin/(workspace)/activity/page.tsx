@@ -148,7 +148,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
       ) : null}
 
       {entries.length === 0 ? (
-        <div className="rounded-3xl border border-ws-line bg-white">
+        <div className="rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
           <ListEmpty title={t('Noch wurde nichts bearbeitet', 'Nothing has been worked yet')} />
         </div>
       ) : (
@@ -161,7 +161,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
                   {dayEntries.length === 1 ? t('1 Änderung', '1 change') : t(`${dayEntries.length} Änderungen`, `${dayEntries.length} changes`)}
                 </span>
               </header>
-              <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+              <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
                 {runsOf(dayEntries, lang).map(({ entry, count, earliest }) => {
                   const href = activityHref(entry);
                   const time = clock(entry.createdAt, lang);
