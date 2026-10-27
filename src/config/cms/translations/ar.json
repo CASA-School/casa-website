@@ -4935,6 +4935,10 @@
     "de": "Mehr Sprachpraxis",
     "text": "ممارسة لغوية أكثر"
   },
+  "t.mehr-ueber.abxion": {
+    "de": "Mehr über {name}",
+    "text": "المزيد عن {name}"
+  },
   "t.mehr-zu-den-niveaustufen.1wk02ex": {
     "de": "Mehr zu den Niveaustufen",
     "text": "المزيد عن المستويات"
@@ -6430,6 +6434,10 @@
   "t.sprachen-kann-man-einfacher.gsh5cx": {
     "de": "Sprachen kann man einfacher lernen, wenn man sie hört. Hier sind einige Podcasts, die ihr auf dem Weg zu CASA und/oder in eurer Freizeit hören könnt:",
     "text": "تعلّم اللغات أسهل حين تسمعها. إليك بعض البودكاستات التي يمكنك الاستماع إليها في طريقك إلى CASA أو في وقت فراغك:"
+  },
+  "t.sprachen.16mtoq9": {
+    "de": "Sprachen",
+    "text": "اللغات"
   },
   "t.sprachlernen-waechst-durch-austa.1q7wyi1": {
     "de": "Sprachlernen wächst durch Austausch in der Community.",
@@ -8586,6 +8594,10 @@
   "t.zusammenleben.19fagq3": {
     "de": "Zusammenleben",
     "text": "العيش المشترك"
+  },
+  "t.zustaendig-fuer.1bh2kxw": {
+    "de": "Zuständig für",
+    "text": "مجالات المسؤولية"
   },
   "t.zustand-bei-uebergabe.1wp7ors": {
     "de": "Zustand bei Übergabe",

@@ -13850,6 +13850,22 @@
   ],
   "pages": []
  },
+ "t.mehr-ueber.abxion": {
+  "de": "Mehr über {name}",
+  "en": "More about {name}",
+  "files": [
+   "src/components/signatures/team-directory.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.mehr-zu-den-niveaustufen.1wk02ex": {
   "de": "Mehr zu den Niveaustufen",
   "en": "More about the levels",
@@ -16804,7 +16820,8 @@
    "src/components/courses/interest-dialog.tsx",
    "src/components/courses/special-course-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx",
-   "src/components/gruppen/gruppen-package-dialog.tsx"
+   "src/components/gruppen/gruppen-package-dialog.tsx",
+   "src/components/signatures/team-directory.tsx"
   ],
   "pages": [
    "/",
@@ -17774,6 +17791,22 @@
   ],
   "pages": [
    "/news"
+  ]
+ },
+ "t.sprachen.16mtoq9": {
+  "de": "Sprachen",
+  "en": "Languages",
+  "files": [
+   "src/components/signatures/team-directory.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.sprachlernen-waechst-durch-austa.1q7wyi1": {
@@ -23864,6 +23897,22 @@
   ],
   "pages": [
    "/accommodation/[type]"
+  ]
+ },
+ "t.zustaendig-fuer.1bh2kxw": {
+  "de": "Zuständig für",
+  "en": "Looks after",
+  "files": [
+   "src/components/signatures/team-directory.tsx"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.zustand-bei-uebergabe.1wp7ors": {

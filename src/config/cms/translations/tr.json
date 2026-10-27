@@ -4935,6 +4935,10 @@
     "de": "Mehr Sprachpraxis",
     "text": "Daha fazla dil pratiği"
   },
+  "t.mehr-ueber.abxion": {
+    "de": "Mehr über {name}",
+    "text": "{name} hakkında daha fazla"
+  },
   "t.mehr-zu-den-niveaustufen.1wk02ex": {
     "de": "Mehr zu den Niveaustufen",
     "text": "Seviyeler hakkında daha fazlası"
@@ -6430,6 +6434,10 @@
   "t.sprachen-kann-man-einfacher.gsh5cx": {
     "de": "Sprachen kann man einfacher lernen, wenn man sie hört. Hier sind einige Podcasts, die ihr auf dem Weg zu CASA und/oder in eurer Freizeit hören könnt:",
     "text": "Dilleri duyarak öğrenmek daha kolaydır. CASA'ya gelirken ve/veya boş zamanınızda dinleyebileceğiniz birkaç podcast:"
+  },
+  "t.sprachen.16mtoq9": {
+    "de": "Sprachen",
+    "text": "Diller"
   },
   "t.sprachlernen-waechst-durch-austa.1q7wyi1": {
     "de": "Sprachlernen wächst durch Austausch in der Community.",
@@ -8586,6 +8594,10 @@
   "t.zusammenleben.19fagq3": {
     "de": "Zusammenleben",
     "text": "Birlikte yaşam"
+  },
+  "t.zustaendig-fuer.1bh2kxw": {
+    "de": "Zuständig für",
+    "text": "Sorumlu olduğu alanlar"
   },
   "t.zustand-bei-uebergabe.1wp7ors": {
     "de": "Zustand bei Übergabe",

@@ -133,6 +133,9 @@ export type CulturalProgramItem = {
  * `photo` stays in the type for when real portraits arrive with consent. Until
  * then it is absent and the directory renders a monogram. Do not point it at the
  * synthetic images in public/media/casa/team/ (CLAUDE.md hard rule 3).
+ *
+ * `bio` and `languages` are what a colleague chose to say about themselves
+ * (2026-10-27), shown when their card is opened. Most will have neither.
  */
 /** The Bremer Stadtmusikanten, the team page's stand-ins for a missing photo. */
 export type TeamPlaceholderAnimal = 'hahn' | 'katze' | 'hund' | 'esel';
@@ -149,7 +152,10 @@ export type TeamSpotlight = {
   areas?: string;
   focus?: string;
   highlight?: string;
-  bio?: string;
+  /** One entry per paragraph, in the colleague's own words. */
+  bio?: string[];
+  /** The languages they speak, e.g. "German, Spanish, Catalan". */
+  languages?: string;
   photo?: {
     src: string;
     alt: string;
