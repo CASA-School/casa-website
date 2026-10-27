@@ -28,8 +28,9 @@ import { courseDayChoices, courseInfo, hours, listCourseDays, weekPlans, type Co
 import { courseListRow, nextJoinMonday } from '@/lib/admin/course-list';
 import { roomChoice } from '@/lib/admin/course-starts';
 import { courseForEdit, courseLearners, type CourseLearner } from '@/lib/admin/courses';
-import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
+import { num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { listNotes } from '@/lib/admin/notes';
 import { listCountries } from '@/lib/admin/people';
 import { ABSENCE_LABELS, isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
@@ -173,6 +174,17 @@ export async function CoursePage({
                 <MetaItem icon={Icon.clock}>
                   {session ? <SessionMark session={session} lang={lang} className="mr-1.5" /> : null}
                   {[session ? pick(lang, SESSION_LABELS[session]) : null, dayList(course.days, lang), course.time?.replace('-', '–')].filter(Boolean).join(' · ')}
+                </MetaItem>
+              ) : null}
+              {/* Where it runs and, for an exam preparation, the sitting it leads to (SchoolMan, 0093). */}
+              {course.location ? (
+                <MetaItem icon={Icon.home}>{PLACE_LABELS[course.location.short] ? pick(lang, PLACE_LABELS[course.location.short]) : course.location.name}</MetaItem>
+              ) : null}
+              {course.exam ? (
+                <MetaItem icon={Icon.award}>
+                  <RecordLink href={recordHrefFor(user, 'exam', course.exam.id)}>
+                    {course.exam.name} · {course.exam.startsAt.toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Berlin' })}
+                  </RecordLink>
                 </MetaItem>
               ) : null}
             </MetaLine>
@@ -451,6 +463,14 @@ export async function CoursePage({
     </RecordTabs>
   );
 }
+
+/** SchoolMan's places that are not an address (`LocationReference`), by their short name. */
+const PLACE_LABELS: Record<string, Bilingual> = {
+  InPre: { de: 'Beim Kunden', en: 'At the client' },
+  InOn: { de: 'Online beim Kunden', en: 'Online, for a client' },
+  OnGr: { de: 'Online-Gruppe', en: 'Online group' },
+  OnOn: { de: 'Online einzeln', en: 'One-to-one online' },
+};
 
 const Dash = () => <span className="font-semibold text-[var(--casa-text-subtle)]">—</span>;
 

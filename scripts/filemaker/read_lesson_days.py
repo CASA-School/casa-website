@@ -18,6 +18,10 @@ often, only on its room-calendar row.
 
 The last eight months come along too (2026-10-22), the same window as the course import: who taught a
 class in its earlier levels is what Kursplanung's three-levels rule reads.
+
+CASA's closures as SchoolMan's calendar keeps them (2026-10-27, 0093): a day of `SingleDayCalendar` with
+`_ID_Holiday` 1 that is not a legal holiday is a closure day; a closure runs over the weekends and legal
+holidays inside it and begins and ends on a weekday.
 """
 import collections, json, os, re, sys
 from datetime import date, timedelta
@@ -92,11 +96,43 @@ for r in (dict(zip(F, v)) for v in zip(*[column('SingleDateCourse', f) for f in 
                  'lessons': lessons(r['NumberLesson']), 'teacher': first(r['_ID_StaffMember']) or None, 'replaced': first(r['_ID_PersonSubstituted']) or None,
                  'room': first(r['_ID_Classroom']) or room, 'replacedRoom': replaced_room, 'mark': MARK.get(first(r['_ID_Particularity']))})
 
+
+def closures_of(rows):
+    """SchoolMan's calendar days → closure ranges (`from`, `to`), weekdays at both ends."""
+    kind = {}
+    for r in rows:
+        on = iso(r['ZSingleDayCalendar'])
+        if not on:
+            continue
+        legal, holiday = first(r['_ID_LegalHoliday']) == '1', first(r['_ID_Holiday']) == '1'
+        kind[on] = 'closed' if holiday and not legal else 'legal' if legal else 'open'
+    out, run = [], []
+
+    def close():
+        days = [d for d in run if date.fromisoformat(d).weekday() < 5]
+        if days and any(kind[d] == 'closed' for d in days):
+            out.append({'from': days[0], 'to': days[-1]})
+
+    for on in sorted(kind):
+        if kind[on] == 'open' and date.fromisoformat(on).weekday() < 5:
+            close()
+            run = []
+        else:
+            run.append(on)
+    close()
+    return out
+
+
+closures = closures_of({'ZSingleDayCalendar': d, '_ID_Holiday': h, '_ID_LegalHoliday': l}
+                       for d, h, l in zip(column('SingleDayCalendar', 'ZSingleDayCalendar'), column('SingleDayCalendar', '_ID_Holiday'),
+                                          column('SingleDayCalendar', '_ID_LegalHoliday')))
+
 if '--stats' in sys.argv:
+    print('closures', len(closures), '· from', closures[0]['from'] if closures else None, '· to', closures[-1]['to'] if closures else None)
     print('courses running or ahead', len(live), '· with a weekly plan', len({p['course'] for p in plans}), '· plan rows', len(plans))
     print('lesson days', len(days), '· in a closure, left out', closed, '· marks', collections.Counter(d['mark'] for d in days).most_common())
     print('with a teacher', sum(bool(d['teacher']) for d in days), '· replaced', sum(bool(d['replaced']) for d in days),
           '· with a room', sum(bool(d['room']) for d in days), '· room replaced', sum(bool(d['replacedRoom']) for d in days))
     sys.exit(0)
 
-json.dump({'classrooms': classrooms, 'plans': plans, 'days': days, 'closed': closed}, sys.stdout, ensure_ascii=False)
+json.dump({'classrooms': classrooms, 'plans': plans, 'days': days, 'closed': closed, 'closures': closures}, sys.stdout, ensure_ascii=False)

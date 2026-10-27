@@ -412,6 +412,17 @@ const toExamEntry = (r: ExamEntryRow): ExamWaitlistEntry => ({
   bookingId: r.booking_id,
 });
 
+/** The exam preparation courses that lead to a sitting (SchoolMan's `Course._ID_Exam`, 0093), the first first. */
+export async function sittingPreparations(sittingId: string): Promise<{ id: string; startDate: string }[]> {
+  return query<{ id: string; startDate: string }>(
+    `SELECT c.id, to_char(i.start_date, 'YYYY-MM-DD') AS "startDate"
+       FROM courses c JOIN course_instances i ON i.id = c.course_instance_id
+      WHERE c.exam_session_id = $1 AND c.status <> 'cancelled'
+      ORDER BY i.start_date, c.id`,
+    [sittingId]
+  );
+}
+
 /** A sitting's queue: the open entries in order, then the closed ones, latest first. */
 export async function sittingEntries(sittingId: string): Promise<ExamWaitlistEntry[]> {
   const rows = await query<ExamEntryRow>(

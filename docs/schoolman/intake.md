@@ -78,6 +78,27 @@ list (`source` „Aus SchoolMan", `filemaker_id`): booked when it became a booki
 begun, else waiting. Only 2 of the sample's rows name a course, both before the workspace's twelve months.
 `Contact` is the pre-booking's twin and adds nothing; `Source` is unused since 2023.
 
+**Made whole (2026-10-27, mapping-completeness review; migration 0093 for the closures and course facts).**
+- *The waiting list.* A `WaitingRoom` row's person, booking and course are its pre-booking's where the row
+  has none (369 rows since 2025 name no person, 205 not the booking they became), and a pre-booking that
+  names an exam sitting (`PreBooking._ID_Exam`) and no course waits for that sitting: an entry on the
+  sitting's list (`waitlist_entries.exam_session_id`; the sitting found or made as a draft, as a learner's
+  exam booking's is). Booked when SchoolMan says it became a booking, closed once the course or sitting is
+  past. Measured on the copy of 2026-10-27: 837 rows of the sample's people (604 for a course, 233 for an
+  exam; 540 before); 390 entries here (222 for an exam; 333 booked, 51 closed, 6 waiting), up from 149;
+  449 rows wait for a course before the workspace's courses or an exam it does not offer. A colleague's
+  offer or closing here stands until SchoolMan says the learner is booked.
+- *What the enquirer asked for*, in the pre-booking's note: the exam (`_ID_Exam`, else `_ID_ExamReference`),
+  whether they are in Germany or abroad (`_ID_Local`), how they got in touch (`Contact._ID_TypeContactReference`,
+  a number or the label typed before: „Email" → e-mail, „Besuch im Büro" → office), and the course dates and
+  stay they wished for (`DateOffer` rows on the pre-booking: kind 1 a course period, 2 a stay with its kind,
+  room and meals; rows from 2022–23 without a kind are course periods). A stay wished for fills the booking
+  it became where that booking has no stay and no wish of its own (26 locally).
+- *Still outside:* the waiting list of people the sample does not take — 17 open rows ahead (3 for a
+  course, 14 for an exam) of 17 people with no booking in its window; and 53 rows that name neither a
+  course nor an exam (their wish is in the pre-booking's note). Widening `sample.py` to „everyone with an
+  unbooked waiting-list row whose course or sitting is ahead" is Rahman's call (bridge-gaps decision 1).
+
 ## For the bridge
 
 - The intake history is mostly links and default statuses. Reading it across would bring little

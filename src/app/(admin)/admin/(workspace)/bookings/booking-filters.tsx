@@ -27,8 +27,10 @@ export function BookingFilters({
   year,
   payer,
   typeId,
+  programme,
   years,
   types,
+  programmes,
   payers,
   canTotals,
 }: {
@@ -37,8 +39,11 @@ export function BookingFilters({
   year?: number;
   payer?: string;
   typeId?: string;
+  /** The university's programme (0093); offered only when bookings are in one. */
+  programme?: string;
   years: readonly number[];
   types: readonly { id: string; name: string }[];
+  programmes: readonly { code: string; name: string }[];
   payers: readonly { value: string; label: string }[];
   canTotals: boolean;
 }) {
@@ -48,7 +53,7 @@ export function BookingFilters({
   const [totals, setTotals] = useState<Totals | null>(null);
   const [failed, setFailed] = useState(false);
   const [counting, startCounting] = useTransition();
-  const active = [year, payer, typeId].filter(Boolean).length;
+  const active = [year, payer, typeId, programme].filter(Boolean).length;
 
   const href = (extra: Record<string, string | undefined>) => {
     const query = new URLSearchParams(Object.entries({ ...base, ...extra }).filter((e): e is [string, string] => Boolean(e[1]))).toString();
@@ -58,7 +63,7 @@ export function BookingFilters({
     startCounting(async () => {
       try {
         setFailed(false);
-        setTotals(await bookingTotalsAction({ payer, typeId, payerId: base.org }));
+        setTotals(await bookingTotalsAction({ payer, typeId, programme, payerId: base.org }));
       } catch {
         setFailed(true);
       }
@@ -81,7 +86,7 @@ export function BookingFilters({
       tint="blue"
       footer={
         <span className="flex w-full items-center justify-between gap-2">
-          <Link href={href({ year: undefined, payer: undefined, type: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
+          <Link href={href({ year: undefined, payer: undefined, type: undefined, programme: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
             {t('Zurücksetzen', 'Reset')}
           </Link>
           <Button type="submit" form="booking-filters" size="md">
@@ -135,6 +140,19 @@ export function BookingFilters({
             <option value="exam">{t('Prüfungen', 'Exams')}</option>
           </Select>
         </label>
+        {programmes.length ? (
+          <label className="block">
+            <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Programm', 'Programme')}</span>
+            <Select name="programme" defaultValue={programme ?? ''}>
+              <option value="">{t('Alle Programme', 'All programmes')}</option>
+              {programmes.map((p) => (
+                <option key={p.code} value={p.code}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
+          </label>
+        ) : null}
       </form>
 
       {canTotals ? (
@@ -154,7 +172,7 @@ export function BookingFilters({
                   .map((y) => (
                     <li key={y.year}>
                       <Link
-                        href={href({ year: String(y.year), payer, type: typeId, filter: 'unclear' })}
+                        href={href({ year: String(y.year), payer, type: typeId, programme, filter: 'unclear' })}
                         onClick={() => setOpen(false)}
                         className="flex items-baseline justify-between gap-3 px-3.5 py-2.5 text-[0.86rem] transition-colors hover:bg-[var(--ws-row-hover)]"
                       >

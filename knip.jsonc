@@ -38,6 +38,9 @@
     "scripts/filemaker/bridge-unpack.mjs",
     "scripts/filemaker/bridge-steps.mjs",
     "scripts/filemaker/bridge-changes.mjs",
+    // How SchoolMan's exam sittings are found or made, shared by the learners', exams' and intake's
+    // importers (2026-10-27), which are themselves ignored above and below.
+    "scripts/filemaker/exam-sittings.mjs",
     // The bridge from the workspace's copy of SchoolMan, run by infra/azure/schoolman-job.sh, and the
     // sync service on the office network that keeps the copy (docs/FILEMAKER_BRIDGE.md §9, 2026-10-27).
     "scripts/filemaker/bridge-mirror.mjs",

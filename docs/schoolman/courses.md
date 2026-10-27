@@ -48,9 +48,30 @@ carries copies of the teacher's name and the learner's gender.
 
 `LevelStepReference` is a stale text copy and does not say the level: of the courses running or
 ahead, an evening B2 course reads `B2.1` or `A1.1` alike, an intensive start's six courses `A1.1`
-six times. The level is `LevelShort` (the band: an intensive course runs it from the first half)
-and, for an evening term, `LevelShown` — the step `_ID_LevelStepReference` points at (`A2.2`).
+six times. The level is the band (`_ID_Level`, `LevelReferenceSchool`: an intensive course runs it from
+the first half) and, for an evening term, the step `_ID_LevelStepReference` points at (`A2.2`, matched on
+`levels.filemaker_level_step_id`). `LevelShort` and `LevelShown` are their text copies; since 2026-10-27
+the reader takes the numbers (the same level on every course of the copy).
 A level with parallel groups appears as two or three courses, or as one with 28 or 42 places.
+
+## Also brought across (2026-10-27, migration 0093)
+
+- **Where it runs** (`_ID_Location`: Dobben, in-house, in-house online, an online group, one-to-one online):
+  `courses.location_id` → `locations` (184 courses), on the course's head.
+- **The sitting an exam preparation leads to** (`_ID_Exam`, on the preparation courses only):
+  `courses.exam_session_id` (22), set by the exams step; the course names the sitting, the sitting its
+  preparation.
+- **The teacher's note** (`CommentOnCourse`, written by the Klassenbuch): a note on the course (63), in the
+  course page's „Notizen".
+- **An older title** (`Supplement`, a module's name or a company's, on a one-to-one course a person's) where
+  `CourseTitle` is empty — on the workspace's course only, never on the website (3).
+- **Every exam sitting ahead** (20), not only those a learner of the sample booked: linked to the same exam
+  that day here (4) or made as a draft with SchoolMan's places (2).
+- **CASA's closures** as SchoolMan's calendar keeps them (`SingleDayCalendar._ID_Holiday` without the legal
+  holidays): `school_closures`, 15 ranges from Easter 2022 to the turn of 2030, weekends and legal holidays
+  inside them included. 2026's two match `src/config/school-closures.ts` exactly; SchoolMan also has Easter
+  2027 (22.–29.03.; 30.03.–02.04. are marked „nein"), Christmas 2027 and Easter 2028. The website and the
+  workspace still read the config: who keeps the closures is Rahman's decision.
 
 ## In the workspace today
 

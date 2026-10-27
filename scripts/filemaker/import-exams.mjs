@@ -9,8 +9,12 @@
  * - A sitting takes the real hours of its parts — unless a colleague created or changed it here.
  * - The examiners of its parts come across (`exam_session_examiners`, written, oral or the whole exam);
  *   one a colleague added here is never changed or removed.
+ * - Every sitting ahead comes across (2026-10-27, 0093), not only those a learner of the sample booked:
+ *   linked to the same exam that day here, else made as a draft with SchoolMan's places (exam-sittings.mjs).
+ * - An exam preparation course leads to its sitting (`courses.exam_session_id`, from `Course._ID_Exam`).
  */
 import { connect } from '../db/client.mjs';
+import { examSittings } from './exam-sittings.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -20,10 +24,19 @@ async function readStdin() {
 
 const exams = await readStdin();
 const client = await connect();
-const count = { read: exams.length, timed: 0, examiners: 0, examinersGone: 0, keptHere: 0, notHere: 0, unknownExaminer: 0 };
+const count = { read: exams.length, timed: 0, examiners: 0, examinersGone: 0, keptHere: 0, notHere: 0, unknownExaminer: 0, ahead: 0, linked: 0, made: 0, preparations: 0 };
+const today = new Date().toISOString().slice(0, 10);
 
 try {
   await client.query('BEGIN');
+  // Every sitting ahead, whether or not a learner here booked it.
+  const sitting = await examSittings(client);
+  for (const e of exams) {
+    if (e.day < today) continue;
+    if (await sitting.sittingFor({ id: e.exam, ref: e.ref, day: e.day, places: e.places, from: e.from, to: e.to })) count.ahead++;
+  }
+  count.linked = sitting.count.linked;
+  count.made = sitting.count.made;
   const sittings = new Map(
     (
       await client.query(
@@ -70,6 +83,18 @@ try {
       ])
     ).rowCount;
   }
+  // The exam preparations that lead to a sitting.
+  for (const e of exams) {
+    const s = sittings.get(e.exam);
+    if (!s || !e.courses.length) continue;
+    count.preparations += (
+      await client.query(
+        `UPDATE courses SET exam_session_id = $1
+          WHERE (filemaker_course_id = ANY($2::text[]) OR filemaker_group_ids && $2::text[]) AND exam_session_id IS DISTINCT FROM $1`,
+        [s.id, e.courses]
+      )
+    ).rowCount;
+  }
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
   await client.query('ROLLBACK');
@@ -81,5 +106,6 @@ try {
 
 console.log(
   `${count.read} exams with parts read: ${count.timed} sittings given their real hours, ${count.keptHere} changed here (hours kept) · ` +
-    `${count.examiners} examiners written, ${count.examinersGone} no longer in SchoolMan removed · ${count.notHere} without a sitting here · ${count.unknownExaminer} examiners not here`
+    `${count.examiners} examiners written, ${count.examinersGone} no longer in SchoolMan removed · ${count.notHere} without a sitting here · ${count.unknownExaminer} examiners not here\n` +
+    `${count.ahead} sittings ahead (${count.linked} linked to one here, ${count.made} made as drafts) · ${count.preparations} preparation courses linked to their sitting`
 );

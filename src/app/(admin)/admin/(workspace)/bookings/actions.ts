@@ -767,11 +767,13 @@ export async function saveLetterStandardAction(input: { kind: string; language: 
  * just written there but calculated only if requested"), from the bookings filter panel. The totals are
  * finance's and management's: whoever holds the price list (`prices`).
  */
-export async function bookingTotalsAction(input: { payer?: string; typeId?: string; payerId?: string }): Promise<BookingYear[]> {
+export async function bookingTotalsAction(input: { payer?: string; typeId?: string; programme?: string; payerId?: string }): Promise<BookingYear[]> {
   const user = await requireModule('bookings');
   if (!canAccess(user, 'prices', 'view')) throw new Error('Not allowed');
   const payer = (['self', 'agency', 'company'] as const).find((p) => p === input.payer);
   const typeId = input.typeId === 'exam' || isUuid(input.typeId ?? '') ? input.typeId : undefined;
   const payerId = isUuid(input.payerId ?? '') ? input.payerId : undefined;
-  return bookingYears({ payer, typeId, payerId });
+  // A programme's code (0093): letters and an underscore only, checked against the vocabulary by the query itself.
+  const programme = /^[a-z_]{1,40}$/.test(input.programme ?? '') ? input.programme : undefined;
+  return bookingYears({ payer, typeId, payerId, programme });
 }

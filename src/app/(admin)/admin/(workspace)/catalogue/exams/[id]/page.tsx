@@ -14,6 +14,7 @@ import { BookingLightDot } from '@/components/admin/booking-light';
 import { ConfirmSubmit, FormDialog, DialogFooter } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { PersonPicker } from '@/components/admin/person-picker';
+import { RecordLink } from '@/components/admin/record-link';
 import { MetaItem, MetaLine, Stat, StatBar } from '@/components/admin/record-parts';
 import { Badge, Button, Card, Field, Input, RecordHeader } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
@@ -29,6 +30,7 @@ import {
   sittingDefaults,
   sittingEntries,
   sittingForEdit,
+  sittingPreparations,
   sittingRegistrations,
   TELC_FIELD_LABELS,
   type ExamSitting,
@@ -36,6 +38,7 @@ import {
   type SittingCandidate,
 } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
+import { recordHrefFor } from '@/lib/admin/record-href';
 import { listCountries } from '@/lib/admin/people';
 import { capitalise, num, pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -65,7 +68,7 @@ export default async function ExamSittingPage({ params, searchParams }: { params
   const handles = canAccess(user, 'bookings', 'edit');
   const plans = canAccess(user, 'catalogue', 'edit');
   const ends = canAccess(user, 'catalogue', 'full');
-  const [candidates, entries, registrations, exams, form, examiners, choices] = await Promise.all([
+  const [candidates, entries, registrations, exams, form, examiners, choices, preparations] = await Promise.all([
     seesBookings ? sittingCandidates(id) : Promise.resolve([]),
     sittingEntries(id),
     canAccess(user, 'registrations') ? sittingRegistrations(id) : Promise.resolve([]),
@@ -73,6 +76,7 @@ export default async function ExamSittingPage({ params, searchParams }: { params
     plans ? sittingForEdit(id) : Promise.resolve(null),
     sittingExaminers(id),
     plans ? examinerChoices(id) : Promise.resolve([]),
+    sittingPreparations(id),
   ]);
   const seesStaff = canAccess(user, 'staff');
   // „Buchen": a learner found by name, or a new one, then the booking wizard at this sitting.
@@ -127,6 +131,20 @@ export default async function ExamSittingPage({ params, searchParams }: { params
                           ? ` · ${daysLeft === 1 ? t('noch 1 Tag', '1 day left') : t(`noch ${daysLeft} Tage`, `${daysLeft} days left`)}`
                           : ''}
                 </span>
+              </MetaItem>
+            ) : null}
+            {/* The exam preparation that leads to it (SchoolMan, 0093). */}
+            {preparations.length ? (
+              <MetaItem icon={Icon.catalogue}>
+                {preparations.map((c, i) => (
+                  <span key={c.id}>
+                    {i ? ', ' : ''}
+                    <RecordLink href={recordHrefFor(user, 'course', c.id)}>
+                      {t('Vorbereitung', 'Preparation')} {t('ab', 'from')}{' '}
+                      {new Date(`${c.startDate}T12:00:00`).toLocaleDateString(wsLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </RecordLink>
+                  </span>
+                ))}
               </MetaItem>
             ) : null}
           </MetaLine>

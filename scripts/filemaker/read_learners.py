@@ -72,8 +72,15 @@ today = date.today()
 
 bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking', '_ID_Person', '_ID_Student', '_ID_EnrolmentDone', '_ID_VisaRequired', '_ID_Agency',
                                                          '_ID_Corporate', '_ID_Exam', '_ID_CourseTypeReference', '_ID_Group', 'TimeStampOfCreation', 'DateOfCreation',
-                                                         '_ID_PaymentThird') if b['__ID_Booking'].strip()}
-periods = table('DateBooking', '__ID_DateBooking', '_ID_Booking', '_ID_Course', 'ZStartDate', 'ZEndDate')
+                                                         '_ID_PaymentThird', '_ID_Success', '_ID_Project', '_ID_LevelConfirmed', '_ID_LevelApproved')
+            if b['__ID_Booking'].strip()}
+# A period's own level band and part of the day (0093), for a period whose course is not in the workspace.
+periods = table('DateBooking', '__ID_DateBooking', '_ID_Booking', '_ID_Course', 'ZStartDate', 'ZEndDate', '_ID_Level', '_ID_DayTimeReference')
+# SchoolMan's level bands (`LevelReferenceSchool`); 6 TestDaF, 7 C1 Hochschule, 8 special course, 9 not defined.
+BAND = {'1': 'A1', '2': 'A2', '3': 'B1', '3,5': 'B1+', '3.5': 'B1+', '4': 'B2', '5': 'C1', '6': 'TD', '7': 'CH', '8': 'SK', '9': 'ND'}
+# The kinds of test (`TestReference`), by the number on the test or, entered on the pre-booking screen, `_ID_Test`.
+TEST_KIND = {'1': 'Telc B2', '2': 'OnlineTest Kontext', '3': 'OnlineTest Aspekte neu', '4': 'OnlineTest Netzwerk neu', '5': 'Niveauabschluss', '6': 'Grammatiktest',
+             '7': 'Schriftlicher Ausdruck', '8': 'Mündlicher Ausdruck', '9': 'Lektionsabschluss', '10': 'Halbstufenabschluss', '11': 'Freier Test'}
 
 
 def amount(value):
@@ -216,10 +223,14 @@ def owner(r):
 
 notes_of = collections.defaultdict(list)
 # A booking's final note and a period's comment: on the booking, by nobody named.
-for r in table('Booking', '__ID_Booking', 'FinalNote', 'TimeStampOfChange'):
+for r in table('Booking', '__ID_Booking', 'FinalNote', 'CommentOnBooking', 'TimeStampOfChange'):
     bid = r['__ID_Booking'].strip()
     if bid in taken and r['FinalNote'].strip():
         notes_of[first(bookings[bid]['_ID_Person'])].append({'ref': f'Booking.FinalNote:{bid}', 'booking': bid, 'author': None, 'at': stamp(r['TimeStampOfChange']), 'body': r['FinalNote'].strip()})
+    # The teacher's note on the booking, written by the Klassenbuch (0093).
+    if bid in taken and r['CommentOnBooking'].strip():
+        notes_of[first(bookings[bid]['_ID_Person'])].append({'ref': f'Booking.CommentOnBooking:{bid}', 'booking': bid, 'author': 'Klassenbuch', 'at': stamp(r['TimeStampOfChange']),
+                                                             'body': r['CommentOnBooking'].strip()})
 for r in table('DateBooking', '__ID_DateBooking', '_ID_Booking', 'CommentBooking', 'DateOfCreation'):
     bid = first(r['_ID_Booking'])
     if bid in taken and r['CommentBooking'].strip():
@@ -247,18 +258,33 @@ def undotted(text):
     return re.sub(r'(?<![\d.,])(\d+)(\s*/\s*)(\d+)', lambda m: fit(m.group(1), max(int(m.group(3)), 1)) + m.group(2) + m.group(3), text)
 
 
-# A test (`TestStudent` holds placement and progress tests alike, 0066): which, when, the level reached
-# (`LevelShort`: A1 … C1, B1+), the result (a percentage, mostly), the tester's comment.
+def tested_in(pid, course, day):
+    """The person's own booking with a period on the course a test was taken in, the one running that day first.
+    `TestStudent._ID_Booking` is no guide: a Replace Field Contents in SchoolMan pointed 2,000 tests at one
+    booking that no longer exists (mapping review 2026-10-27 §6)."""
+    found = [(p, b['__ID_Booking'].strip()) for b in bookings_of.get(pid, []) for p in periods_of[b['__ID_Booking'].strip()] if course and first(p['_ID_Course']) == course]
+    found.sort(key=lambda x: (not (day and iso(x[0]['ZStartDate']) and iso(x[0]['ZStartDate']) <= day <= (iso(x[0]['ZEndDate']) or '')), -int(x[1]) if x[1].isdigit() else 0))
+    return found[0][1] if found else None
+
+
+# A test (`TestStudent` holds placement and progress tests alike, 0066): which, when, the level reached, the
+# result (a percentage, mostly), the tester's comment. Its kind and level by their numbers (0093) — the text
+# copies only for old tests without one —, its booking through the course it was taken in.
 tests_of = collections.defaultdict(list)
-for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', 'TestReference', 'DateOfTest', 'Result', 'LevelShort', 'CommentTest', 'User',
-               'DateOfCreation'):
+for r in table('TestStudent', '__ID_TestStudent', '_ID_Person', '_ID_Booking', '_ID_Course', '_ID_TestReference', '_ID_Test', 'TestReference', 'DateOfTest', 'Result',
+               '_ID_LevelSchool', 'LevelShort', 'CommentTest', 'User', 'DateOfCreation'):
     pid = owner(r)
     if not pid:
         continue
     result = undotted(r['Result'].strip())
     pct = re.match(r'^\s*(\d{1,3})(?:[.,]\d+)?\s*%?\s*$', result)
-    tests_of[pid].append({'ref': r['__ID_TestStudent'].strip(), 'booking': first(r['_ID_Booking']) or None, 'test': r['TestReference'].strip() or None,
-                          'day': iso(r['DateOfTest']), 'level': r['LevelShort'].strip() or None,
+    kind = TEST_KIND.get(first(r['_ID_TestReference'])) or TEST_KIND.get(first(r['_ID_Test']))
+    level = BAND.get(first(r['_ID_LevelSchool']))
+    tests_of[pid].append({'ref': r['__ID_TestStudent'].strip(),
+                          'booking': tested_in(pid, first(r['_ID_Course']), iso(r['DateOfTest'])) or first(r['_ID_Booking']) or None,
+                          'test': kind or (None if first(r['_ID_TestReference']) or first(r['_ID_Test']) else r['TestReference'].strip() or None),
+                          'day': iso(r['DateOfTest']),
+                          'level': level or (None if first(r['_ID_LevelSchool']) else r['LevelShort'].strip() or None),
                           'score': int(pct.group(1)) if pct and int(pct.group(1)) <= 100 else None, 'result': None if pct else (result or None),
                           'comment': r['CommentTest'].strip() or None, 'author': r['User'].strip() or None, 'created': stamp(r['DateOfCreation'])})
 # A learning agreement: its kind, its texts, the recommendation, the level and how long.
@@ -350,6 +376,21 @@ def short_day(value):
 
 
 exams = {r['__ID_Exam'].strip(): r for r in table('Exam', '__ID_Exam', '_ID_ExamReference', 'Exam.ZSingleDate_OneLine', 'NumberPlace')}
+# Its day and hours from its parts (`SingleDateExam`), the source of the one-line copy on `Exam` (0093).
+exam_parts = collections.defaultdict(list)
+for e, on, start, end in zip(column('SingleDateExam', '_ID_Exam'), column('SingleDateExam', 'ZSingleDate'), column('SingleDateExam', 'HourStart'), column('SingleDateExam', 'HourEnd')):
+    if first(e) and iso(on):
+        exam_parts[first(e)].append((iso(on), re.match(r'\s*(\d{1,2}):(\d{2})', start or ''), re.match(r'\s*(\d{1,2}):(\d{2})', end or '')))
+
+
+def exam_of(eid):
+    """SchoolMan's exam as a sitting: its kind, first day, hours and places."""
+    e, parts = exams.get(eid, {}), exam_parts.get(eid, [])
+    starts = [f'{int(m.group(1)):02d}:{m.group(2)}' for _, m, _ in parts if m]
+    ends = [f'{int(m.group(1)):02d}:{m.group(2)}' for _, _, m in parts if m]
+    return {'id': eid, 'ref': first(e.get('_ID_ExamReference')) or None,
+            'day': min(p[0] for p in parts) if parts else short_day(e.get('Exam.ZSingleDate_OneLine')),
+            'from': min(starts) if starts else None, 'to': max(ends) if ends else None, 'places': e.get('NumberPlace', '').strip() or None}
 
 # Their stays; a place and a room by name only when it is one of CASA's own flats.
 places = {r['__ID_Accommodation'].strip(): r for r in table('Accommodation', '__ID_Accommodation', '_ID_SchoolFlatShare', 'SearchfieldAccommodation.Institution')}
@@ -421,12 +462,17 @@ for pid, p in persons.items():
             # A company pays unless SchoolMan's „Zahlung durch Dritte" (`_ID_PaymentThird`, shown only with a
             # company) says Nein (2): then the learner owes, the company is only theirs (2026-10-21).
             'payer': 'agency' if first(b['_ID_Agency']) else 'company' if first(b['_ID_Corporate']) and first(b['_ID_PaymentThird']) != '2' else 'self',
-            'exam': {'id': first(b['_ID_Exam']), 'ref': first(exams.get(first(b['_ID_Exam']), {}).get('_ID_ExamReference')) or None,
-                     'day': short_day(exams.get(first(b['_ID_Exam']), {}).get('Exam.ZSingleDate_OneLine')),
-                     'places': exams.get(first(b['_ID_Exam']), {}).get('NumberPlace', '').strip() or None} if first(b['_ID_Exam']) else None,
+            # The teacher's answers and the course's result (0093): 1 yes / mit Erfolg, 2 no / ohne Erfolg.
+            'levelConfirmed': first(b['_ID_LevelConfirmed']) or None,
+            'levelApproved': first(b['_ID_LevelApproved']) or None,
+            'success': first(b['_ID_Success']) or None,
+            # The university's programme (`Project`, 0093).
+            'programme': first(b['_ID_Project']) or None,
+            'exam': exam_of(first(b['_ID_Exam'])) if first(b['_ID_Exam']) else None,
             'stays': stays_of[b['__ID_Booking'].strip()],
             'type': first(b['_ID_CourseTypeReference']) or None,
-            'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate'])}
+            'periods': [{'id': r['__ID_DateBooking'].strip(), 'course': first(r['_ID_Course']) or None, 'start': iso(r['ZStartDate']), 'end': iso(r['ZEndDate']),
+                         'band': BAND.get(first(r['_ID_Level'])), 'daytime': first(r['_ID_DayTimeReference']) or None}
                         for r in periods_of[b['__ID_Booking'].strip()]],
             'charges': [{'id': r['__ID_CostDetail'].strip(), 'ref': first(r['_ID_CostDetailReference']) or None, 'label': r['CostDetail_1'].strip() or None,
                          'comment': r['CostDetailComment_1'].strip() or sub_labels.get(first(r['_ID_CostDetailReferenceComment'])) or None,

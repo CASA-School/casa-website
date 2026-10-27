@@ -25,6 +25,18 @@ a birth year alone, mother tongue and countries by their ids, notes on e-mail ad
 addresses, an organisation's own accounts, every internship host, the commissioning bodies, the parties' active flags and
 main contacts, the teachers' levels, trainings, leave requests, target hours per weekday and the time worked outside the
 lessons come across (people.md, staff.md, organisations.md §Completeness review). Rows marked *(0092)* below are closed.
+**Since 2026-10-27** (mapping completeness, bookings · courses · tests · intake · exams · offers; migration
+0093): the waiting list is whole — a row's person, booking and course through its pre-booking, and exam waits
+on their sitting (149 → 390 entries locally, 222 of them for an exam); every exam sitting ahead comes across
+(20; 2 made as drafts); the teacher's level answers, the course's result and the university's programme are on
+the booking; a period whose course is not here keeps its level band and part of the day; tests take their kind,
+level and booking from their numbers and their course; courses their level from numbers, their place, their
+exam sitting, the teacher's note and an older title; the pre-booking's note says the exam, Inland/Ausland, how
+they got in touch and the dates and stay wished for; offers made from a party's screen and the date on an offer
+letter; CASA's closures from SchoolMan's calendar (`school_closures`). Still Rahman's: learning agreements (a
+note or a table), „Erschienen", the teacher bonus, „gesperrt" on a sitting, the term plan, stored files and ID
+numbers, who keeps the closures — and the sample, which still leaves out 17 open waits of people with no
+booking in it.
 
 **The one gap behind most of the others: the sample.** Everything about learners is cut by `sample.py`:
 a booked period this week or in the next four weeks, plus this year's group participants. Run 3 brought
@@ -76,8 +88,8 @@ InternationalAirport).
 
 | SchoolMan field | Filled · since 2025 | What it is for | Verdict |
 | --- | ---: | --- | --- |
-| `Booking._ID_LevelConfirmed`*, `_ID_LevelApproved`* | 7,542 · 6,783 / 4,652 · 4,390 | Whether the teacher confirmed the level, set from the Klassenbuch (klassenbuch.md). The workspace shows „Niveau nicht bestätigt" although SchoolMan already holds the teacher's answer. | **needed for daily work.** It decides the next course. |
-| `Booking._ID_Success`, `_ID_ShownUp` | 1,981 · 500 / 4,217 · 501 | Whether the course went with or without success, and whether the learner showed up. They drive the certificate and the show-up letters. | **needed for daily work** |
+| `Booking._ID_LevelConfirmed`*, `_ID_LevelApproved`* | 7,542 · 6,783 / 4,652 · 4,390 | Whether the teacher confirmed the level, set from the Klassenbuch (klassenbuch.md). | **Across since 2026-10-27** (yes/no; 4 is also the auto-entered default and stays empty). |
+| `Booking._ID_Success`, `_ID_ShownUp` | 1,981 · 500 / 4,217 · 501 | Whether the course went with or without success, and whether the learner showed up. They drive the certificate and the show-up letters. | `_ID_Success` **across since 2026-10-27** (`course_result`); `_ID_ShownUp` is Rahman's decision (hand-set, or from attendance) |
 | `Booking._ID_MissingItemReference` | 2,754 · 1,133 (155 combinations) | Which documents are still missing. The missing-information letter (757 sent in 2026) is written from it. | **needed for daily work** |
 | `Booking._ID_VisaPaymentDone`* | 20,835 · 6,850 | The visa payment arrived. The receipt script sets it once more than 200 € is paid. | leave in SchoolMan. Compute it from the payments, never import a stale flag. |
 | `Booking._ID_Prolongation`, `_ID_LongTerm`, `_ID_Welcome` | 18,779 · 5,747 / 8,295 · 3,928 / 5,059 · 2,244 | Follow-on booking, long-term learner *(?)*, welcome done *(?)* | useful later. Prolongation partly follows from the periods. |
@@ -322,7 +334,7 @@ sample's people.
 
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
-| **The waiting list: 0 entries imported.** `WaitingRoom._ID_Course` has been empty since 2023 (0 since 2025), and the importer only makes an entry when that field names a course. The course is on the pre-booking: `PreBooking._ID_Course` 3,138 · 1,329, `PreBooking._ID_WaitingRoom` 1,953 · 1,057. | 575 joined a waiting list in 2026 | **needed for daily work.** The workspace's waiting list is the signal for a parallel group (Rahman, 2026-10-16), and it is empty. Map it through the pre-booking. |
+| **The waiting list** (made whole 2026-10-27: person, booking and course through the pre-booking, exam waits on their sitting; 390 entries locally). Before: **0 entries imported.** `WaitingRoom._ID_Course` has been empty since 2023 (0 since 2025), and the importer only makes an entry when that field names a course. The course is on the pre-booking: `PreBooking._ID_Course` 3,138 · 1,329, `PreBooking._ID_WaitingRoom` 1,953 · 1,057. | 575 joined a waiting list in 2026 | **needed for daily work.** The workspace's waiting list is the signal for a parallel group (Rahman, 2026-10-16), and it is empty. Map it through the pre-booking. |
 | Pre-bookings and tests of people outside the sample (people who enquired or were tested but have not booked into the window) | 1,209 pre-bookings and 911 tests in 2026 | useful later. New intake already lands in the workspace. |
 | `Contact._ID_TypeContactReference` (how they got in touch) | 1,014 · 537 | useful later (marketing; values mixed) |
 | `PreBooking._ID_Local`, `_ID_Platform` | 1,377 · 996 / 1,776 · 1,151 | leave in SchoolMan (inland or abroad, and the business line; the note covers it) |
@@ -358,9 +370,6 @@ reception weekday shifts.
 | 5 | ~~**Host offer and pets read from fields abandoned in 2024**~~ | Offer fields 128/122/95 on `Management`; `_ID_Animal` 90 | **Done 2026-10-27 (0095)** |
 | 6 | **Exam sittings are incomplete**: external candidates, the oral and written part days, and the examiners | `SingleDateExam` 270; `exam_session_examiners` empty | **Parts and examiners done 2026-10-26** (`read_exams.py`: real hours on 76 sittings, 55 examiners); external candidates still open |
 | 7 | **Follow-ups outside the sample** | 5,759 not brought | Follows #1 |
-| 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | Read it; offer it as a filter |
-| 9 | **Course notes** and ~~group-reservation notes~~ | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 (**done 2026-10-27**, 0095) | Read them onto the course |
-| 10 | **Payment ↔ charge link and passport number** | `PaymentIn._ID_CostDetail` 20,245; `NumberPassport` 1,262 (decided to come; column exists) | Read both. Passport stays under the restricted module. |
 | 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | **Done 2026-10-27** (0094): read, and a filter in the full history |
 | 9 | **Course notes and group-reservation notes** | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 | Course notes **done 2026-10-27** (0094); reservation notes open |
 | 10 | **Payment ↔ charge link and passport number** | `PaymentIn._ID_CostDetail` 20,245; `NumberPassport` 1,262 (decided to come; column exists) | The link **done 2026-10-27** (0094). Passport: read it; it stays under the restricted module. |

@@ -8,6 +8,7 @@ import { Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import {
   BOOKING_STATUS_LABELS,
+  bookingProgrammeChoices,
   bookingTypeChoices,
   bookingYearList,
   PAYER_LABELS,
@@ -142,7 +143,11 @@ export default async function BookingsPage({
   const payer = (['self', 'agency', 'company'] as const).find((p) => p === rawPayerKind) as Payer | undefined;
   const rawType = firstParam(params.type);
   const typeId = rawType === 'exam' || (rawType && isUuid(rawType)) ? rawType : undefined;
-  const narrow = { payerId, year, payer, typeId };
+  // The university's programme (0093): which of its programmes it invoices.
+  const programmes = await bookingProgrammeChoices();
+  const rawProgramme = firstParam(params.programme);
+  const programme = programmes.find((p) => p.code === rawProgramme)?.code;
+  const narrow = { payerId, year, payer, typeId, programme };
 
   const [{ items, total }, counts, payerName, { t, lang }, user, years, types] = await Promise.all([
     listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page), ...narrow }),
@@ -218,7 +223,7 @@ export default async function BookingsPage({
   // The total gives way first on a narrower screen: the balance is the figure the team acts on.
   const hideLg = 'hidden lg:table-cell';
   // A view's address keeps the filters; `without` drops one of them, for its label's ×.
-  const query = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org') =>
+  const query = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org' | 'programme') =>
     new URLSearchParams(
       Object.entries({
         filter: key === 'current' ? undefined : key,
@@ -226,9 +231,10 @@ export default async function BookingsPage({
         year: without === 'year' || !year ? undefined : String(year),
         payer: without === 'payer' ? undefined : payer,
         type: without === 'type' ? undefined : typeId,
+        programme: without === 'programme' ? undefined : programme,
       }).filter((e): e is [string, string] => Boolean(e[1]))
     ).toString();
-  const href = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org') => {
+  const href = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org' | 'programme') => {
     const q = query(key, without);
     return `/admin/bookings${q ? `?${q}` : ''}`;
   };
@@ -237,7 +243,8 @@ export default async function BookingsPage({
     year ? { key: 'year' as const, label: String(year) } : null,
     payer ? { key: 'payer' as const, label: pick(lang, PAYER_LABELS[payer]) } : null,
     typeName ? { key: 'type' as const, label: typeName } : null,
-  ].filter((c): c is { key: 'org' | 'year' | 'payer' | 'type'; label: string } => c !== null);
+    programme ? { key: 'programme' as const, label: programmes.find((p) => p.code === programme)?.name ?? programme } : null,
+  ].filter((c): c is { key: 'org' | 'year' | 'payer' | 'type' | 'programme'; label: string } => c !== null);
 
   return (
     <>
@@ -269,7 +276,7 @@ export default async function BookingsPage({
             action: '/admin/bookings',
             value: search,
             placeholder: t('Name, Buchungsnummer (auch SchoolMan) oder Kurs', 'Name, booking number (SchoolMan too) or course'),
-            keep: { filter: filter === 'current' ? undefined : filter, org: payerId, year: year ? String(year) : undefined, payer, type: typeId },
+            keep: { filter: filter === 'current' ? undefined : filter, org: payerId, year: year ? String(year) : undefined, payer, type: typeId, programme },
           }}
           end={
             <BookingFilters
@@ -277,8 +284,10 @@ export default async function BookingsPage({
               year={year}
               payer={payer}
               typeId={typeId}
+              programme={programme}
               years={years}
               types={types}
+              programmes={programmes}
               payers={(['self', 'agency', 'company'] as const).map((value) => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
               canTotals={canAccess(user, 'prices', 'view')}
             />
