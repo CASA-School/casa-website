@@ -6,7 +6,8 @@
  * Run after the learners, whose exam bookings link the sittings (`filemaker_exam_id`). One transaction;
  * prints counts only.
  *
- * - A sitting takes the real hours of its parts — unless a colleague created or changed it here.
+ * - A sitting takes the real hours of its parts and SchoolMan's places (`Exam::NumberPlace`, Rahman 2026-10-27:
+ *   telc B2 of 13.11. had 28 here and 21, full, in SchoolMan) — unless a colleague created or changed it here.
  * - The examiners of its parts come across (`exam_session_examiners`, written, oral or the whole exam);
  *   one a colleague added here is never changed or removed.
  * - Every sitting ahead comes across (2026-10-27, 0093), not only those a learner of the sample booked:
@@ -24,7 +25,7 @@ async function readStdin() {
 
 const exams = await readStdin();
 const client = await connect();
-const count = { read: exams.length, timed: 0, examiners: 0, examinersGone: 0, keptHere: 0, notHere: 0, unknownExaminer: 0, ahead: 0, linked: 0, made: 0, preparations: 0 };
+const count = { read: exams.length, timed: 0, places: 0, examiners: 0, examinersGone: 0, keptHere: 0, notHere: 0, unknownExaminer: 0, ahead: 0, linked: 0, made: 0, preparations: 0 };
 const today = new Date().toISOString().slice(0, 10);
 
 try {
@@ -48,11 +49,18 @@ try {
   );
   const staff = new Map((await client.query(`SELECT filemaker_staff_id::text AS k, id FROM staff_members WHERE filemaker_staff_id IS NOT NULL`)).rows.map((r) => [r.k, r.id]));
 
+  const done = new Set();
   for (const e of exams) {
     const sitting = sittings.get(e.exam);
     if (!sitting) {
       count.notHere++;
       continue;
+    }
+    if (!sitting.changed_here && Number(e.places) > 0 && !done.has(sitting.id)) {
+      done.add(sitting.id);
+      count.places += (
+        await client.query(`UPDATE exam_sessions SET capacity = $2 WHERE id = $1 AND capacity IS DISTINCT FROM $2`, [sitting.id, Math.round(Number(e.places))])
+      ).rowCount;
     }
     if (sitting.changed_here) count.keptHere++;
     else if (e.from && e.to && e.to > e.from) {
@@ -105,7 +113,7 @@ try {
 }
 
 console.log(
-  `${count.read} exams with parts read: ${count.timed} sittings given their real hours, ${count.keptHere} changed here (hours kept) · ` +
+  `${count.read} exams with parts read: ${count.timed} sittings given their real hours, ${count.places} their places, ${count.keptHere} changed here (kept) · ` +
     `${count.examiners} examiners written, ${count.examinersGone} no longer in SchoolMan removed · ${count.notHere} without a sitting here · ${count.unknownExaminer} examiners not here\n` +
     `${count.ahead} sittings ahead (${count.linked} linked to one here, ${count.made} made as drafts) · ${count.preparations} preparation courses linked to their sitting`
 );
