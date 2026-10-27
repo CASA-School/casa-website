@@ -1,16 +1,10 @@
 """Build the team portraits (public/media/casa/team/) from CASA's 2026-09-10 team shoot.
 
 Each portrait is the colleague's own photograph — the file Rahman named after them, or the frame he
-chose (Meike: IMG_0342, 2026-10-27) — cropped where a recipe says so, resized, and graded the way
-build_reel.py grades the site's photographs (Codex's warm editorial pass, 2026-10-08): the white
-balance measured on the picture's own light neutrals — there a white wall, here a white collar or a
-pale background — then warmed, the tone curve to EDITORIAL_TONE, and EDITORIAL_CHROMA. Global light and
-colour only; nothing is retouched, moved or generated (CLAUDE.md hard rules 3 and 4).
-
-WARMTH. The first grade put the shared warm shift on top of the camera's own colour, so whites went
-yellow (b* +7 to +12; a white blouse read cream). The site's photographs end with their whites near
-neutral, b* about +1 (from -4 to +6, measured on the published files 2026-10-27). Each portrait is
-neutralised on its own light neutrals and then warmed until its whites reach WHITE_B, the same place.
+chose (Meike: IMG_0342, 2026-10-27) — cropped where a recipe says so and resized, in the camera's own
+colour. No grade: two were tried on 2026-10-27, build_reel.py's warm editorial pass and then the same
+pass neutralised on each photo's whites, and Rahman kept the original colours („it is better").
+Nothing is retouched, moved or generated (CLAUDE.md hard rules 3 and 4).
 
 SHARPNESS. The first set (1000px, WebP quality 82) went through the image server, which re-encoded it
 at quality 75 and lost about half its fine detail: skin read plastic, hair soft. Even at quality 90 the
@@ -32,16 +26,13 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from build_reel import EDITORIAL_CHROMA, EDITORIAL_TONE, correct, load, warm
+from build_reel import load
 
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = Path.home() / 'Downloads/CASA Team Photos 2026'
 OUT = REPO / 'public/media/casa/team'
 WIDTH = 800
 QUALITY = 88
-
-# Where a portrait's whites end, as on the site's photographs (b* of the light near-neutral pixels).
-WHITE_B = 2.5
 
 # slug: the original, and a box (x, y, width, height in the upright original) where the frame needs one.
 PORTRAITS = {
@@ -64,36 +55,6 @@ PORTRAITS = {
 }
 
 
-def whites(rgb: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """The light near-neutral pixels (L* over 60, chroma under 14) and their Lab values."""
-    lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB)
-    mask = (lab[..., 0] > 60) & (np.hypot(lab[..., 1], lab[..., 2]) < 14)
-    return mask, lab
-
-
-def grade(small: np.ndarray) -> np.ndarray:
-    """Neutral on its own whites, then warmed until they read as the site's do (WHITE_B)."""
-    mask, _ = whites(small)
-    neutral = small[mask].mean(axis=0) if mask.sum() > 500 else np.ones(3, np.float32)
-    gains = neutral[1] / neutral
-
-    def graded(strength: float) -> np.ndarray:
-        r, g, b = warm((1.0, 1.0, 1.0))
-        wb = gains * np.array([r ** strength, g, b ** strength], np.float32)
-        return correct(small, {'wb': tuple(wb), 'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA})
-
-    low, high = 0.0, 1.5
-    for _ in range(12):
-        mid = (low + high) / 2
-        out = graded(mid).astype(np.float32) / 255.0
-        mask, lab = whites(out)
-        if not mask.any() or lab[..., 2][mask].mean() > WHITE_B:
-            high = mid
-        else:
-            low = mid
-    return graded(low)
-
-
 def render(recipe: dict) -> np.ndarray:
     rgb = load(SOURCE / recipe['file'])
     h, w = rgb.shape[:2]
@@ -102,10 +63,8 @@ def render(recipe: dict) -> np.ndarray:
         if x0 < 0 or y0 < 0 or x0 + bw > w or y0 + bh > h:
             raise SystemExit(f"{recipe['file']}: box {recipe['box']} does not fit {w}x{h}")
         rgb = rgb[y0:y0 + bh, x0:x0 + bw]
-    # Resized first (only ever down), then graded: the grade is global, so the order changes nothing visible.
     size = (WIDTH, round(rgb.shape[0] * WIDTH / rgb.shape[1]))
-    small = cv2.resize(rgb, size, interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
-    return grade(small)
+    return cv2.resize(rgb, size, interpolation=cv2.INTER_AREA)
 
 
 def main() -> None:
@@ -126,7 +85,7 @@ def main() -> None:
             for row, image in enumerate((before, after)):
                 thumb = image.resize((tile, round(tile * image.height / image.width)), Image.LANCZOS)
                 canvas.paste(thumb, (10 + i * (tile + 10), 10 + row * (round(tile * 1.5) + 10)))
-        path = REPO / 'output/team-photos/grade-before-after.jpg'
+        path = REPO / 'output/team-photos/before-after.jpg'
         path.parent.mkdir(parents=True, exist_ok=True)
         canvas.save(path, quality=88)
         print(path)
