@@ -28,8 +28,11 @@ import { pick, say } from '@/lib/cms/copy';
  * - Staff appear by their full name. Teachers appear by their first name and
  *   the initial of their last name („Vorname N."), as the teachers asked; that
  *   is for teachers only (Rahman, 2026-10-08).
- * - No bios and no "focus" prose. CASA publishes a role and a list of areas.
- *   Anything past that would be fiction about a named person.
+ * - No bios and no "focus" prose of our own. CASA publishes a role and a list
+ *   of areas; anything past that would be fiction about a named person. A bio
+ *   is the colleague's own text (2026-10-27): only what they wrote or approved,
+ *   and none at all for those who would rather not. Every card opens the same
+ *   popup, so a card without a bio looks no different from one with.
  * - No social links. Only one staff email is published anywhere on the site
  *   (i.eismann@casa-bremen.de, as the group-programme contact), and it already
  *   lives in config/courses/course-profiles.ts where it is actually used.
@@ -66,6 +69,13 @@ type TeamMemberSource = {
   group: 'leadership' | 'courses' | 'office' | 'teachers' | 'volunteer';
   /** Published responsibilities, verbatim in intent. */
   areas?: { en: string; de: string };
+  /**
+   * In the colleague's own words, one entry per paragraph; only what they wrote
+   * or approved. Shown when their card is opened.
+   */
+  bio?: Array<{ en: string; de: string }>;
+  /** The languages they speak, if they want it said. */
+  languages?: { en: string; de: string };
 };
 
 const GROUP_LABELS: Record<TeamMemberSource['group'], Record<ContentLocale, string>> = {
@@ -213,6 +223,8 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
     title: pick(locale, member.title),
     role: pick(locale, GROUP_LABELS[member.group]),
     areas: (member.areas ? pick(locale, member.areas) : undefined),
+    bio: member.bio?.map((paragraph) => pick(locale, paragraph)),
+    languages: member.languages ? pick(locale, member.languages) : undefined,
     photo: member.photo
       ? {
           src: `/media/casa/team/${member.photo.file}`,
