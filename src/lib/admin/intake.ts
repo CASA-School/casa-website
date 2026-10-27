@@ -315,9 +315,25 @@ type StayInput = {
   notes: string;
 };
 
-/** One course_registrations row for a person created in the same transaction. Null when the request id exists. */
+/**
+ * The Anmeldung (0096): what one person sent at once, with its lines below. Its reference is the first
+ * line's request id; null when that exists already, i.e. a retried submission.
+ */
+async function insertRegistration(client: PoolClient, person: CreatedPerson, requestId: string, locale: 'en' | 'de', now: Date): Promise<string | null> {
+  const { rows } = await client.query<{ id: string }>(
+    `INSERT INTO registrations (request_id, person_id, locale, submitted_at)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (request_id) DO NOTHING
+     RETURNING id`,
+    [requestId, person.personId, locale, now]
+  );
+  return rows[0]?.id ?? null;
+}
+
+/** One course_registrations row, a line of the Anmeldung, for a person created in the same transaction. Null when the request id exists. */
 async function insertCourseRow(
   client: PoolClient,
+  registrationId: string,
   person: CreatedPerson,
   registrant: RegistrantInput,
   stay: StayInput,
@@ -332,13 +348,13 @@ async function insertCourseRow(
         nationality_raw, nationality_code, birth_date_raw, birth_date,
         declared_level_raw, declared_level_code, visa_required,
         accommodation_required, accommodation_type, allergies, notes,
-        locale, person_id, submitted_at)
+        locale, person_id, submitted_at, registration_id)
      VALUES ($1,
              (SELECT id FROM course_types WHERE id = $2::uuid),
              (SELECT id FROM course_instances WHERE id = $3::uuid),
              $4, $5, $6::salutation, $7, $8, $9, $10,
              $11, $12, $13, $14::date, $15, $16, $17, $18, $19::accommodation_type, $20, $21,
-             $22, $23, $24)
+             $22, $23, $24, $25)
      ON CONFLICT (request_id) DO NOTHING
      RETURNING id`,
     [
@@ -373,6 +389,7 @@ async function insertCourseRow(
       locale,
       person.personId,
       now,
+      registrationId,
     ]
   );
   return rows[0]?.id ?? null;
@@ -388,9 +405,10 @@ type ExamRowInput = {
   officialNameConfirmed: boolean;
 };
 
-/** One exam_registrations row for a person created in the same transaction. Null when the request id exists. */
+/** One exam_registrations row, a line of the Anmeldung, for a person created in the same transaction. Null when the request id exists. */
 async function insertExamRow(
   client: PoolClient,
+  registrationId: string,
   person: CreatedPerson,
   registrant: RegistrantInput,
   exam: ExamRowInput,
@@ -402,12 +420,12 @@ async function insertExamRow(
        (request_id, exam_type_id, exam_session_id, exam_type_label, exam_session_label,
         registration_type, salutation, first_name, last_name, email, phone,
         nationality_raw, nationality_code, birth_date_raw, birth_date,
-        official_name_confirmed, locale, person_id, submitted_at)
+        official_name_confirmed, locale, person_id, submitted_at, registration_id)
      VALUES ($1,
              (SELECT id FROM exam_types WHERE id = $2::uuid),
              (SELECT id FROM exam_sessions WHERE id = $3::uuid),
              $4, $5, $6, $7::salutation, $8, $9, $10, $11,
-             $12, $13, $14, $15::date, $16, $17, $18, $19)
+             $12, $13, $14, $15::date, $16, $17, $18, $19, $20)
      ON CONFLICT (request_id) DO NOTHING
      RETURNING id`,
     [
@@ -433,6 +451,7 @@ async function insertExamRow(
       locale,
       person.personId,
       now,
+      registrationId,
     ]
   );
   return rows[0]?.id ?? null;
@@ -472,16 +491,15 @@ export async function storeCourseRegistration(input: RegistrantInput & StayInput
 }
 
 /**
- * One registration as the learner sent it (2026-10-05): one person, a row in
- * the course queue per course, and a row in the exam queue for an exam booked
- * with them, all in one transaction, each row with its own request id. The rows
- * belong together through the person they share; the learner's reference is
- * the first course's request id.
+ * One registration as the learner sent it: one person, one Anmeldung (0096,
+ * 2026-10-27), and below it a line per course and a line for an exam booked
+ * with them, all in one transaction, each line with its own request id. The
+ * learner's reference is the first line's request id, which is also the
+ * Anmeldung's.
  *
  * The person's own flags (a possible duplicate, an unmatched nationality or
- * birth date) go on the first course and on the exam, which another colleague
- * may work; further courses carry only their level's flag, so one person is
- * not flagged three times in one queue.
+ * birth date) go on the first line only, so one person is flagged once; the
+ * other lines carry only their level's flag.
  */
 export async function storeRegistration(input: {
   registrant: RegistrantInput;
@@ -496,11 +514,15 @@ export async function storeRegistration(input: {
       const now = new Date();
       const person = await createPerson(client, registrantPerson(input.registrant, now));
       const exec = execOn(client);
+      const reference = input.courses[0]?.requestId ?? input.exam?.requestId;
+      if (!reference) return;
+      // The first line's request id is the submission's: already stored means a retry.
+      const registrationId = await insertRegistration(client, person, reference, input.locale, now);
+      if (!registrationId) throw new Duplicate();
 
       for (const [index, course] of input.courses.entries()) {
-        const id = await insertCourseRow(client, person, input.registrant, input.stay, course, input.locale, now);
+        const id = await insertCourseRow(client, registrationId, person, input.registrant, input.stay, course, input.locale, now);
         if (!id) {
-          // The first row's request id is the submission's: already stored means a retry.
           if (index === 0) throw new Duplicate();
           continue;
         }
@@ -512,8 +534,8 @@ export async function storeRegistration(input: {
       }
 
       if (input.exam) {
-        const id = await insertExamRow(client, person, input.registrant, input.exam, input.locale, now);
-        if (id) await raiseIntakeFlags(exec, 'exam_registration', id, personFacts(person, input.registrant));
+        const id = await insertExamRow(client, registrationId, person, input.registrant, input.exam, input.locale, now);
+        if (id) await raiseIntakeFlags(exec, 'exam_registration', id, input.courses.length ? { candidates: [] } : personFacts(person, input.registrant));
       }
     });
     return true;
@@ -529,7 +551,9 @@ export async function storeExamRegistration(input: RegistrantInput & ExamRowInpu
     await withTransaction(async (client) => {
       const now = new Date();
       const person = await createPerson(client, registrantPerson(input, now));
-      const id = await insertExamRow(client, person, input, input, input.locale, now);
+      const registrationId = await insertRegistration(client, person, input.requestId, input.locale, now);
+      if (!registrationId) throw new Duplicate();
+      const id = await insertExamRow(client, registrationId, person, input, input, input.locale, now);
       if (!id) throw new Duplicate();
       await raiseIntakeFlags(execOn(client), 'exam_registration', id, personFacts(person, input));
     });

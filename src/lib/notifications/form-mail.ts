@@ -537,6 +537,29 @@ function registrationParts(p: Payload) {
   return { courses, exam };
 }
 
+/** A level as the learner chose it, „A1 komplett · 8 Wochen" → „A1"; null when none was given. */
+const levelOf = (value: unknown) => text(value)?.split(/\s/)[0] ?? null;
+
+/**
+ * The courses of a registration in a subject line: a path through the levels of one course reads as
+ * that path, „Intensivkurse A1 → C1" (Rahman, 2026-10-27: not „Intensivkurse, Intensivkurse, …").
+ */
+function courseRuns(courses: Record<string, unknown>[]): string {
+  const runs: { label: string; levels: string[] }[] = [];
+  for (const item of courses) {
+    const label = text(item.courseTypeLabel);
+    if (!label) continue;
+    const level = levelOf(item.level);
+    const last = runs.at(-1);
+    if (last && last.label === label) {
+      if (level) last.levels.push(level);
+    } else runs.push({ label, levels: level ? [level] : [] });
+  }
+  return runs
+    .map((run) => (run.levels.length > 1 ? `${run.label} ${run.levels[0]} → ${run.levels.at(-1)}` : run.label))
+    .join(', ');
+}
+
 function courseMail(p: Payload, locale: Locale, c: Copy): Mail {
   const name = fullName(p) ?? c.name;
   const course = text(p.courseTypeLabel);
@@ -565,7 +588,7 @@ function courseMail(p: Payload, locale: Locale, c: Copy): Mail {
         ],
       }];
   // "Kursanmeldung: Maria Rossi – Intensivkurse, Spezialkurse + telc Deutsch B2"; one course reads as before.
-  const courseNames = courses.length > 1 ? courses.map((item) => text(item.courseTypeLabel)).filter(Boolean).join(', ') : course;
+  const courseNames = courses.length > 1 ? courseRuns(courses) : course;
   return {
     subject: `${c.courseKind}: ${[fullName(p), courseNames].filter(Boolean).join(' – ')}${examName ? ` + ${examName}` : ''}`,
     kindLabel: c.courseKind,

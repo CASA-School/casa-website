@@ -57,6 +57,8 @@ export const STATUS_TONES: Record<WorkStatus, 'accent' | 'neutral' | 'positive' 
 
 export type QueueEntity =
   | 'enquiry'
+  /** The Anmeldung (0096): what one person sent at once. Its course and exam lines below. */
+  | 'registration'
   | 'course_registration'
   | 'exam_registration'
   | 'career_application';
@@ -81,6 +83,12 @@ const ENTITIES: Record<QueueEntity, EntitySpec> = {
     table: 'enquiries',
     path: '/admin/enquiries',
     singular: { de: 'Anfrage', en: 'Enquiry' },
+    statusColumn: 'enum',
+  },
+  registration: {
+    table: 'registrations',
+    path: '/admin/registrations',
+    singular: { de: 'Anmeldung', en: 'Registration' },
     statusColumn: 'enum',
   },
   course_registration: {

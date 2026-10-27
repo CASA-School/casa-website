@@ -147,6 +147,7 @@ export function historyAbsence(detail: Record<string, unknown> | null): HistoryA
 
 const KNOWN_QUEUES = new Set<string>([
   'enquiry',
+  'registration',
   'course_registration',
   'exam_registration',
   'career_application',
@@ -185,6 +186,7 @@ const subjectOf = (entity: string) => {
  */
 const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   enquiry: { noun: 'Anfrage', gender: 'f' },
+  registration: { noun: 'Anmeldung', gender: 'f' },
   course_registration: { noun: 'Kursanmeldung', gender: 'f' },
   exam_registration: { noun: 'Prüfungsanmeldung', gender: 'f' },
   career_application: { noun: 'Bewerbung', gender: 'f' },
@@ -420,6 +422,14 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat die Anfrage gelöscht', 'deleted the enquiry');
     case 'registration_edited':
       return t('hat die Angaben der Anmeldung bearbeitet', 'edited the registration'); 
+    case 'registration_line_declined':
+      return t(`hat „${String(entry.detail?.label ?? '')}" abgesagt`, `declined “${String(entry.detail?.label ?? '')}”`);
+    case 'registration_line_reopened':
+      return t(`hat „${String(entry.detail?.label ?? '')}" wieder geöffnet`, `reopened “${String(entry.detail?.label ?? '')}”`);
+    case 'registration_booked': {
+      const count = Number(entry.detail?.count ?? 0);
+      return count === 1 ? t('hat 1 Buchung aus der Anmeldung angelegt', 'created 1 booking from the registration') : t(`hat ${count} Buchungen aus der Anmeldung angelegt`, `created ${count} bookings from the registration`);
+    }
     case 'flag_resolved':
       return t(`hat einen Hinweis zu ${dat} erledigt`, `cleared a flag on ${subject}`);
     case 'review_attached_to_person':

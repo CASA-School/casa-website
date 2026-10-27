@@ -572,7 +572,7 @@ retention period (Open items).
 
 | Group | Holds |
 | --- | --- |
-| **Inbox** | Enquiries, Registrations (→ Courses, Exams) — what the public site sent, waiting to be worked |
+| **Inbox** | Enquiries, Registrations — what the public site sent, waiting to be worked |
 | **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers sit in the frame like the rest since 2026-10-17 (docs/OFFERS.md) |
 | **Management** | Applications, Activity, Team, Settings (→ Prices, Lists, Rooms) |
 
@@ -2651,20 +2651,51 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
 | Public route | Table |
 | --- | --- |
 | `POST /api/contact` | `enquiries` |
-| `POST /api/registration/course` | `course_registrations`, and `exam_registrations` for an exam booked with the courses |
-| `POST /api/registration/exam` | `exam_registrations` |
+| `POST /api/registration/course` | one `registrations` row (the Anmeldung), its `course_registrations` lines, and an `exam_registrations` line for an exam booked with the courses |
+| `POST /api/registration/exam` | one `registrations` row and its `exam_registrations` line |
 | `POST /api/careers/apply` | `career_applications` + `career_application_files` (pre-existing) |
 | `/placement-test` | `placement_attempts` (pre-existing) |
 
-**One course registration, several rows (2026-10-05).** The public form takes
-up to three courses, a learning path (one intensive term per whole level, "A2
-bis B2") and an exam. `storeRegistration` in `src/lib/admin/intake.ts` writes
-them in one transaction: one person, a `course_registrations` row per course or
-path term, an `exam_registrations` row for the exam, each with its own
-`request_id`. The rows belong together through the `person_id` they share; the
-learner's reference is the first course's. The person's flags (duplicate
-candidate, unmatched nationality or birth date) go on the first course and on
-the exam only, so one person is not flagged three times in one queue.
+**One Anmeldung, several lines (2026-10-05; the Anmeldung since 0096,
+2026-10-27).** The public form takes up to three courses, a learning path (one
+intensive term per whole level, "A2 bis B2") and an exam. `storeRegistration` in
+`src/lib/admin/intake.ts` writes them in one transaction: one person, one
+`registrations` row — the **Anmeldung** — and below it a `course_registrations`
+line per course or path term and an `exam_registrations` line for the exam, each
+with its own `request_id`. The Anmeldung's reference is the first line's request
+id. The person's flags (duplicate candidate, unmatched nationality or birth date)
+go on the first line only.
+
+Before 0096 the lines were the records: Meike's test (A1 → C1 and telc B2) was
+six course registrations and one exam registration, each with its own status,
+owner, notes and letters, and nothing on screen tied them together. Now:
+
+- **The Anmeldung carries the work**: one status, one owner, one note thread,
+  one reply (`registration` is a queue entity, `/admin/registrations/<id>`).
+  The inbox lists Anmeldungen, courses and exams together (the Kurs | Prüfung
+  tabs went); a path reads as one, „Intensive German A1 → C1 + telc Deutsch B2"
+  (`registrations/summary.ts`).
+- **A line keeps what was sent and its own outcome**: booked (its booking,
+  `bookings.source_registration_id` / `source_exam_registration_id`), on a
+  waiting list, a later course offered by letter, declined (`status`
+  `declined`), or open. A line's old address redirects to its Anmeldung at the
+  line (`#line-<id>`), so every link to a line still works.
+- **The Anmeldung follows its lines** (0096's trigger `settle_registration`): „In
+  Arbeit" once one line is settled, „Erledigt" once every line is booked,
+  queued or declined — whichever path settled it. A colleague can still set the
+  status by hand. A line written without an Anmeldung (a script, a test) gets
+  one of its own; an Anmeldung goes with its last line.
+- **„Alle buchen"** (`lib/admin/registration-booking.ts`) books every ticked
+  open line at once, one booking per level as SchoolMan books follow-on levels:
+  the enrolment fee on the first course only, the stay around each course's own
+  dates (consecutive levels read as one stay), priced by `priceSelection` as the
+  wizard prices. A line with no date or a full level is left open and named. A
+  line's own „Buchen" opens the wizard (books, other stay dates).
+- **What the lines say together** is said once, under „Hinweise": an exam
+  before the course of its level ends, a level with no date yet, more than a
+  weekend between two levels, two levels that overlap.
+- **One confirmation**: once lines are booked, „Bestätigung schreiben" opens the
+  learner's confirmation of several bookings with exactly those ticked.
 `declared_level_raw` holds what the learner chose ("A1 komplett (A1.1 + A1.2) ·
 8 Wochen"), `declared_level_code` the half level it starts at. A path term the
 catalogue lists no date for yet is stored without an instance and with the
@@ -2768,8 +2799,9 @@ Tables from 0006:
 | `staff_users` | Local accounts. Case-insensitive unique email via a functional index |
 | `staff_sessions` | Server-side sessions, token hashed |
 | `enquiries` | Contact submissions, including the organiser brief as `jsonb` |
-| `course_registrations` | The public wizard's output |
-| `exam_registrations` | Separate table — the two forms ask genuinely different questions |
+| `registrations` | The Anmeldung (0096): what one person sent at once — status, owner, language, when |
+| `course_registrations` | Its course lines, as the public wizard sent them |
+| `exam_registrations` | Its exam line — separate table, the two forms ask genuinely different questions |
 | `placement_reviews` | One row per attempt: a teacher's decision |
 | `staff_notes` | Polymorphic by `(entity, entity_id)`, constrained to five entity names |
 | `staff_activity` | Who changed what. `staff_name` denormalised so the trail survives a deleted account |

@@ -43,6 +43,16 @@ describe('public form notifications', () => {
     expect(mail.subject).toContain('Kursanmeldung: Maria Rossi – Intensivkurse, Spezialkurse + telc Deutsch B2');
   });
 
+  it('names a path through the levels of one course as that path in the subject', async () => {
+    const level = (code: string, dates: string) => ({ courseTypeLabel: 'Intensivkurse', courseInstanceLabel: `${dates} | Vormittags | CASA Am Dobben`, level: `${code} komplett · 8 Wochen` });
+    const path = {
+      ...twoCoursesAndAnExam,
+      courses: [level('A1', '04.01.2027 – 26.02.2027'), level('A2', '01.03.2027 – 30.04.2027'), level('B1', '03.05.2027 – 25.06.2027'), level('C1', 'Termin wird noch festgelegt')],
+    };
+    const mail = (await sentMessage('course', path)).message;
+    expect(mail.subject).toContain('Kursanmeldung: Maria Rossi – Intensivkurse A1 → C1 + telc Deutsch B2');
+  });
+
   it('defaults every form to the test inbox even if production recipients exist', () => {
     vi.stubEnv('FORM_DELIVERY_MODE', '');
     const kinds: FormKind[] = ['contact', 'groups', 'course', 'exam', 'careers', 'placement', 'appointment', 'interest'];

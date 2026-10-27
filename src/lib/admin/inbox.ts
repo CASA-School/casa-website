@@ -39,6 +39,7 @@ const WORK = { new: ['new'], inProgress: ['in_progress'], waiting: ['waiting'], 
 // An allowlist, like queues.ts: a table name is interpolated, so it only ever comes from here.
 const SPECS: Record<QueueEntity, Spec> = {
   enquiry: { table: 'enquiries', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK, live: (a) => `${a}.deleted_at IS NULL` },
+  registration: { table: 'registrations', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
   course_registration: { table: 'course_registrations', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
   exam_registration: { table: 'exam_registrations', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
   career_application: {

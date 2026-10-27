@@ -22,6 +22,7 @@ export type RecordKind =
   | 'place'
   | 'room'
   | 'enquiry'
+  | 'registration'
   | 'course_registration'
   | 'exam_registration'
   | 'application';
@@ -39,6 +40,7 @@ const PATHS: Record<RecordKind, string> = {
   place: '/admin/accommodation',
   room: '/admin/settings/rooms',
   enquiry: '/admin/enquiries',
+  registration: '/admin/registrations',
   course_registration: '/admin/registrations/course',
   exam_registration: '/admin/registrations/exam',
   application: '/admin/applications',
@@ -58,6 +60,7 @@ export const RECORD_MODULE: Record<RecordKind, WorkspaceModule> = {
   place: 'accommodation',
   room: 'rooms',
   enquiry: 'enquiries',
+  registration: 'registrations',
   course_registration: 'registrations',
   exam_registration: 'registrations',
   application: 'applications',
@@ -86,7 +89,7 @@ export function recordHrefFor(
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 /** Most specific first: `/admin/catalogue/courses/…` before `/admin/catalogue/…`. */
 const ROUTES: [RecordKind, RegExp][] = (
-  ['course', 'exam', 'course_registration', 'exam_registration', 'room', 'start', 'person', 'booking', 'staff', 'organisation', 'group', 'offer', 'place', 'enquiry', 'application'] as const
+  ['course', 'exam', 'course_registration', 'exam_registration', 'registration', 'room', 'start', 'person', 'booking', 'staff', 'organisation', 'group', 'offer', 'place', 'enquiry', 'application'] as const
 ).map((kind) => [kind, new RegExp(`^${PATHS[kind]}/(${UUID})(?:/\\d+)?/?$`, 'i')]);
 
 /** The record a workspace address shows, if it shows one: what „recently opened" remembers. */

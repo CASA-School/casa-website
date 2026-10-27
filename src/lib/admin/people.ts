@@ -273,8 +273,7 @@ const FAMILY = `(CASE WHEN EXISTS (SELECT 1 FROM people m WHERE m.merged_into = 
 /** Open cases under a person (theirs and the rows linked into them): enquiries, registrations, offers in play. */
 const OPEN_CASES = `(
   (SELECT count(*) FROM enquiries e WHERE e.person_id IS NOT NULL AND e.person_id = ANY(${FAMILY}) AND e.deleted_at IS NULL AND e.status IN ('new', 'in_progress', 'waiting'))
-  + (SELECT count(*) FROM course_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
-  + (SELECT count(*) FROM exam_registrations r WHERE r.person_id IS NOT NULL AND r.person_id = ANY(${FAMILY}) AND r.status IN ('new', 'in_progress', 'waiting'))
+  + (SELECT count(*) FROM registrations g WHERE g.person_id IS NOT NULL AND g.person_id = ANY(${FAMILY}) AND g.status IN ('new', 'in_progress', 'waiting'))
   + (SELECT count(*) FROM offers o WHERE o.deleted_at IS NULL AND o.person_id IS NOT NULL AND o.person_id = ANY(${FAMILY}) AND o.status IN ('draft', 'sent'))
 )`;
 
@@ -531,30 +530,36 @@ export async function personTimeline(canonicalId: string, lang: WsLang): Promise
     detail: string | null;
     status: string | null;
     at: Date;
+    lines: number | null;
   }>(
-    `SELECT kind, id, title, detail, status, at FROM (
+    `SELECT kind, id, title, detail, status, at, lines FROM (
        SELECT 'enquiry'::text AS kind, e.id, e.topic AS title,
-              left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at
+              left(e.message, 140) AS detail, e.status::text, e.submitted_at AS at, NULL::int AS lines
          FROM enquiries e WHERE e.person_id = ANY(person_family($1)) AND e.deleted_at IS NULL
        UNION ALL
-       SELECT 'course', r.id, r.course_type_label,
-              r.course_instance_label, r.status::text, r.submitted_at
-         FROM course_registrations r WHERE r.person_id = ANY(person_family($1))
-       UNION ALL
-       SELECT 'exam', r.id, r.exam_type_label,
-              r.exam_session_label, r.status::text, r.submitted_at
-         FROM exam_registrations r WHERE r.person_id = ANY(person_family($1))
+       -- An Anmeldung (0096) once, named by its first line, with how many lines it holds.
+       SELECT CASE WHEN l.rank = 0 THEN 'course' ELSE 'exam' END, g.id, l.label, l.option, g.status::text, g.submitted_at,
+              ((SELECT count(*) FROM course_registrations WHERE registration_id = g.id)
+               + (SELECT count(*) FROM exam_registrations WHERE registration_id = g.id))::int
+         FROM registrations g
+         CROSS JOIN LATERAL (
+           SELECT course_type_label AS label, course_instance_label AS option, 0 AS rank FROM course_registrations WHERE registration_id = g.id
+           UNION ALL
+           SELECT exam_type_label, exam_session_label, 1 FROM exam_registrations WHERE registration_id = g.id
+           ORDER BY rank LIMIT 1
+         ) l
+        WHERE g.person_id = ANY(person_family($1))
        UNION ALL
        SELECT 'review', rv.attempt_id, rv.confirmed_level,
-              rv.note, NULL, rv.decided_at
+              rv.note, NULL, rv.decided_at, NULL
          FROM placement_reviews rv WHERE rv.person_id = ANY(person_family($1))
      ) t ORDER BY at DESC`,
     [canonicalId]
   );
   const href: Record<TimelineItem['kind'], string> = {
     enquiry: '/admin/enquiries',
-    course: '/admin/registrations/course',
-    exam: '/admin/registrations/exam',
+    course: '/admin/registrations',
+    exam: '/admin/registrations',
     review: '/admin/placement',
   };
   const en = lang === 'en';
@@ -565,7 +570,10 @@ export async function personTimeline(canonicalId: string, lang: WsLang): Promise
     if (r.kind === 'review') return `${en ? 'Placement confirmed' : 'Einstufung bestätigt:'} ${r.title ?? ''}`.trim();
     return r.title ?? '';
   };
-  return rows.map((r) => ({ ...r, title: title(r), href: `${href[r.kind]}/${r.id}` }));
+  // An Anmeldung of several lines says so where a single one names its dates.
+  const detail = (r: (typeof rows)[number]): string | null =>
+    r.lines && r.lines > 1 ? (en ? `${r.lines} lines in one registration` : `${r.lines} Positionen in einer Anmeldung`) : r.detail;
+  return rows.map(({ lines: _lines, ...r }) => ({ ...r, title: title({ ...r, lines: _lines }), detail: detail({ ...r, lines: _lines }), href: `${href[r.kind]}/${r.id}` }));
 }
 
 /**

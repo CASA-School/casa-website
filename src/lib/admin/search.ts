@@ -46,8 +46,7 @@ export type SearchKind =
   | 'place'
   | 'room'
   | 'enquiry'
-  | 'course_registration'
-  | 'exam_registration'
+  | 'registration'
   | 'application'
   | 'letter';
 
@@ -64,8 +63,7 @@ export const SEARCH_KINDS: readonly SearchKind[] = [
   'place',
   'room',
   'enquiry',
-  'course_registration',
-  'exam_registration',
+  'registration',
   'application',
   'letter',
 ];
@@ -574,17 +572,33 @@ async function rooms(ask: Ask, { t, lang }: Ctx): Promise<Found[]> {
   }));
 }
 
+/**
+ * An Anmeldung (0096) as one row: who sent it and its first line's course or exam (`label`), found by
+ * any of its lines (`lines`).
+ */
+const REGISTRATIONS = `(
+  SELECT g.id, l.first_name, l.last_name, l.email, l.label, g.status, g.submitted_at,
+         concat_ws(' ', (SELECT string_agg(course_type_label, ' ') FROM course_registrations WHERE registration_id = g.id),
+                        (SELECT string_agg(exam_type_label, ' ') FROM exam_registrations WHERE registration_id = g.id)) AS lines
+    FROM registrations g
+    CROSS JOIN LATERAL (
+      SELECT first_name, last_name, email, course_type_label AS label, 0 AS rank FROM course_registrations WHERE registration_id = g.id
+      UNION ALL
+      SELECT first_name, last_name, email, exam_type_label, 1 FROM exam_registrations WHERE registration_id = g.id
+      ORDER BY rank LIMIT 1
+    ) l
+) anmeldungen`;
+
 /** The inbox's records: few, small tables, found by name, address or topic. */
 async function inbox(
-  kind: 'enquiry' | 'course_registration' | 'exam_registration' | 'application',
+  kind: 'enquiry' | 'registration' | 'application',
   ask: Ask,
   { t, lang }: Ctx
 ): Promise<Found[]> {
   const q = 'q' in ask ? ask.q : null;
-  const source = {
+  const source: { table: string; label: string; hay?: string; at: string; where: string } = {
     enquiry: { table: 'enquiries', label: 'topic', at: 'submitted_at', where: `status <> 'spam' AND deleted_at IS NULL` },
-    course_registration: { table: 'course_registrations', label: 'course_type_label', at: 'submitted_at', where: `status <> 'spam'` },
-    exam_registration: { table: 'exam_registrations', label: 'exam_type_label', at: 'submitted_at', where: `status <> 'spam'` },
+    registration: { table: REGISTRATIONS, label: 'label', hay: 'lines', at: 'submitted_at', where: `status <> 'spam'` },
     application: { table: 'career_applications', label: 'position_title', at: 'created_at', where: 'true' },
   }[kind];
   const rows = await query<{ id: string; first_name: string; last_name: string | null; label: string | null; at: string; folded: string; id_match: IdMatch }>(
@@ -594,7 +608,7 @@ async function inbox(
        FROM ${source.table}
       WHERE ${source.where}
         AND ${either(
-          `(cardinality($1::text[]) > 0 AND ${allWords(`ws_fold(concat_ws(' ', first_name, last_name, email, ${source.label}))`, '$1')})
+          `(cardinality($1::text[]) > 0 AND ${allWords(`ws_fold(concat_ws(' ', first_name, last_name, email, ${source.hay ?? source.label}))`, '$1')})
            OR ($2::text IS NOT NULL AND strpos(lower(email), $2) > 0)`,
           `id = ANY($3::uuid[])`
         )}
@@ -672,8 +686,7 @@ const READERS: Reader[] = [
   { kind: 'place', module: 'accommodation', read: places },
   { kind: 'room', module: 'rooms', read: rooms },
   { kind: 'enquiry', module: 'enquiries', read: (a, c) => inbox('enquiry', a, c) },
-  { kind: 'course_registration', module: 'registrations', read: (a, c) => inbox('course_registration', a, c) },
-  { kind: 'exam_registration', module: 'registrations', read: (a, c) => inbox('exam_registration', a, c) },
+  { kind: 'registration', module: 'registrations', read: (a, c) => inbox('registration', a, c) },
   { kind: 'application', module: 'applications', read: (a, c) => inbox('application', a, c) },
   // Each letter's own module decides; the reader filters by kind.
   { kind: 'letter', module: null, read: letters },

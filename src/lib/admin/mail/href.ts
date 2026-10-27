@@ -14,6 +14,7 @@ export type MailAbout =
   | 'contact'
   | 'accommodation'
   | 'enquiry'
+  | 'registration'
   | 'course_registration'
   | 'exam_registration'
   | 'application'
@@ -35,6 +36,7 @@ export const MAIL_MODULES: Record<MailAbout, readonly WorkspaceModule[]> = {
   contact: ['organisations'],
   accommodation: ['accommodation'],
   enquiry: ['enquiries'],
+  registration: ['registrations'],
   course_registration: ['registrations'],
   exam_registration: ['registrations'],
   application: ['applications'],

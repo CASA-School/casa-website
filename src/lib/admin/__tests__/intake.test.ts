@@ -12,6 +12,7 @@ const client = {
   query: vi.fn(async (sql: string, params: unknown[] = []) => {
     calls.push({ sql, params });
     if (/INSERT INTO people/.test(sql)) return { rows: [{ id: 'person-1' }] };
+    if (/INSERT INTO registrations/.test(sql)) return { rows: [{ id: 'anmeldung-1' }] };
     if (/INSERT INTO (course|exam)_registrations/.test(sql)) return { rows: [{ id: 'registration-1' }] };
     return { rows: [] };
   }),
@@ -99,8 +100,8 @@ describe('registration intake foreign keys', () => {
   });
 });
 
-describe('one registration, several rows (2026-10-05)', () => {
-  it('stores one person, a row per course with its own request id, and the exam, and flags the person once per queue', async () => {
+describe('one Anmeldung, several lines (0096)', () => {
+  it('stores one person, one Anmeldung, a line per course with its own request id, and the exam, and flags the person once', async () => {
     const stored = await storeRegistration({
       registrant: { ...person, nationality: 'Atlantis' },
       stay: { visaRequired: false, accommodationRequired: false, accommodationType: undefined, allergies: '', notes: '' },
@@ -114,17 +115,22 @@ describe('one registration, several rows (2026-10-05)', () => {
 
     expect(stored).toBe(true);
     expect(calls.filter((call) => /INSERT INTO people/.test(call.sql))).toHaveLength(1);
+    // One Anmeldung, under the first line's reference, and every line points at it.
+    const anmeldung = calls.filter((call) => /INSERT INTO registrations/.test(call.sql));
+    expect(anmeldung.map((call) => call.params[0])).toEqual(['r-1']);
+    const lines = calls.filter((call) => /INSERT INTO (course|exam)_registrations/.test(call.sql));
+    expect(lines.map((call) => call.params.at(-1))).toEqual(['anmeldung-1', 'anmeldung-1', 'anmeldung-1']);
     const courseInserts = calls.filter((call) => /INSERT INTO course_registrations/.test(call.sql));
     expect(courseInserts.map((call) => call.params[0])).toEqual(['r-1', 'r-2']);
     expect(courseInserts[0].params.slice(14, 16)).toEqual(['A1 komplett · 8 Wochen', 'A1.1']);
     expect(calls.filter((call) => /INSERT INTO exam_registrations/.test(call.sql)).map((call) => call.params[0])).toEqual(['r-3']);
 
-    // The unmatched nationality: on the first course and on the exam, not on the second course.
+    // The unmatched nationality: once, on the first line.
     const nationality = (flags.raiseFlag.mock.calls as unknown as Array<[{ entity: string; code: string }]>)
       .map(([flag]) => flag)
       .filter((flag) => flag.code === 'nationality_unmatched')
       .map((flag) => flag.entity);
-    expect(nationality).toEqual(['course_registration', 'exam_registration']);
+    expect(nationality).toEqual(['course_registration']);
   });
 });
 

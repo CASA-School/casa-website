@@ -3,25 +3,35 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import type { BookingStatus, Payer } from '@/lib/admin/bookings';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { isUuid } from '@/lib/admin/ids';
-import { editCourseRegistration, type RegistrationEdit } from '@/lib/admin/registrations';
+import { bookRegistration } from '@/lib/admin/registration-booking';
+import { editRegistration, setLineDeclined, type RegistrationEdit } from '@/lib/admin/registrations';
 
 const SALUTATIONS = ['mr', 'ms', 'mx', 'neutral'] as const;
+const STATUSES: readonly BookingStatus[] = ['reserved', 'confirmed'];
+const PAYERS: readonly Payer[] = ['self', 'agency', 'company', 'other'];
+const CODE = /^[a-z_]{2,40}$/;
 const text = (formData: FormData, key: string, max = 200) => String(formData.get(key) ?? '').trim().slice(0, max);
 
+function registrationId(formData: FormData): string {
+  const id = String(formData.get('id') ?? '');
+  if (!isUuid(id)) throw new Error('Invalid id');
+  return id;
+}
+
 /**
- * „Daten bearbeiten" on a course registration (0076, 2026-10-21): a colleague completes or corrects
- * what was sent; the visitor's own values are kept beside it. A server action is a public endpoint, so
- * it asks for `registrations` at `edit` itself (CLAUDE.md hard rule 7).
+ * „Daten bearbeiten" on an Anmeldung (0076, 0096): a colleague completes or corrects what was sent, on
+ * every line at once; the visitor's own values are kept beside it. A server action is a public endpoint,
+ * so it asks for `registrations` at `edit` itself (CLAUDE.md hard rule 7).
  */
 export async function editRegistrationAction(formData: FormData): Promise<void> {
   const actor = await requireModule('registrations', 'edit');
-  const id = String(formData.get('id') ?? '');
-  if (!isUuid(id)) throw new Error('Invalid id');
-  const back = `/admin/registrations/course/${id}`;
+  const id = registrationId(formData);
+  const back = `/admin/registrations/${id}`;
   const { lang } = await getI18n();
   const salutation = text(formData, 'salutation');
   const birthDate = text(formData, 'birthDate', 10);
@@ -43,7 +53,66 @@ export async function editRegistrationAction(formData: FormData): Promise<void> 
   if (!input.firstName || !input.lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) {
     redirect(`${back}?error=${encodeURIComponent(pick(lang, { de: 'Vorname, Nachname und eine gültige E-Mail-Adresse sind nötig.', en: 'First name, last name and a valid email address are needed.' }))}`);
   }
-  const result = await editCourseRegistration(id, input, actor);
+  const result = await editRegistration(id, input, actor);
   revalidatePath('/admin/registrations', 'layout');
   redirect(result.ok ? back : `${back}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+}
+
+/** „Absagen" on one line, confirmed first; „Wieder öffnen" undoes it. Registrations work: `registrations` at `edit`. */
+export async function setLineDeclinedAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const back = `/admin/registrations/${id}`;
+  const lineId = String(formData.get('lineId') ?? '');
+  if (!isUuid(lineId)) throw new Error('Invalid lineId');
+  const kind = formData.get('kind') === 'exam' ? 'exam' : 'course';
+  const declined = formData.get('declined') === '1';
+  if (declined && formData.get('confirmed') !== '1') redirect(back);
+  const result = await setLineDeclined(id, kind, lineId, declined, actor);
+  revalidatePath('/admin/registrations', 'layout');
+  const { lang } = await getI18n();
+  redirect(result.ok ? back : `${back}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+}
+
+/**
+ * „Alle buchen": the ticked lines, one booking each (lib/admin/registration-booking). It books, so it asks
+ * for `bookings` at `edit`, as the booking wizard does.
+ */
+export async function bookRegistrationAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('bookings', 'edit');
+  const id = registrationId(formData);
+  const back = `/admin/registrations/${id}`;
+  const { t, lang } = await getI18n();
+  const lineIds = formData.getAll('lineIds').map(String).filter(isUuid);
+  if (!lineIds.length) redirect(`${back}?error=${encodeURIComponent(t('Wähle mindestens eine Position.', 'Choose at least one line.'))}`);
+  const status = String(formData.get('status') ?? 'reserved');
+  const payer = String(formData.get('payer') ?? 'self');
+  if (!(STATUSES as readonly string[]).includes(status) || !(PAYERS as readonly string[]).includes(payer)) throw new Error('Invalid choice');
+  const typeCode = text(formData, 'accommodationTypeCode', 40);
+  const roomTypeCode = text(formData, 'roomTypeCode', 40);
+  const cateringCode = text(formData, 'cateringCode', 40);
+  const result = await bookRegistration(
+    id,
+    {
+      lineIds,
+      status: status as BookingStatus,
+      payer: payer as Payer,
+      payerName: payer === 'self' ? null : text(formData, 'payerName', 120) || null,
+      includeEnrolmentFee: formData.get('includeEnrolmentFee') === '1',
+      accommodation: CODE.test(typeCode)
+        ? { typeCode, roomTypeCode: CODE.test(roomTypeCode) ? roomTypeCode : null, cateringCode: CODE.test(cateringCode) ? cateringCode : null }
+        : null,
+    },
+    actor
+  );
+  revalidatePath('/admin', 'layout');
+  if (!result) redirect(`${back}?error=${encodeURIComponent(t('Diese Anmeldung hat noch keine Person.', 'This registration has no person yet.'))}`);
+  const skipped = result.skipped.map((s) => `${s.line} (${pick(lang, s.reason)})`).join(', ');
+  const notice = [
+    result.booked === 1 ? t('1 Buchung angelegt.', '1 booking created.') : t(`${result.booked} Buchungen angelegt.`, `${result.booked} bookings created.`),
+    skipped ? t(`Nicht gebucht: ${skipped}.`, `Not booked: ${skipped}.`) : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  redirect(`${back}?${result.skipped.length ? 'error' : 'notice'}=${encodeURIComponent(notice)}`);
 }

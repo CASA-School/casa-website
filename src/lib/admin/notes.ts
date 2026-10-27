@@ -11,6 +11,8 @@ import type { StaffUser } from './auth';
 
 export type NoteEntity =
   | 'enquiry'
+  /** The Anmeldung (0096). */
+  | 'registration'
   | 'course_registration'
   | 'exam_registration'
   | 'career_application'
