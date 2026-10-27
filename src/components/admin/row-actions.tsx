@@ -25,20 +25,38 @@ export type RowAction = {
  * It sits above the row's link (z-20), as the booking colour does, and replaces the row's arrow: „…" says
  * there is more, the rest of the row still opens the record (globals.css, `.ws-row-arrow`).
  */
-export function RowActions({ label, primary, actions }: { label: string; primary?: RowAction | null; actions: readonly RowAction[] }) {
+export function RowActions({
+  label,
+  primary,
+  actions,
+  compact = false,
+}: {
+  label: string;
+  primary?: RowAction | null;
+  actions: readonly RowAction[];
+  /** On a phone the step goes into „…" (first), so the row keeps its width for the name (Prüfungen, 2026-10-27). */
+  compact?: boolean;
+}) {
   if (!primary && !actions.length) return null;
+  const menu: (RowAction & { phoneOnly: boolean })[] = [
+    ...(compact && primary ? [{ ...primary, phoneOnly: true }] : []),
+    ...actions.map((a) => ({ ...a, phoneOnly: false })),
+  ];
   return (
     <span data-row-actions="" className="relative z-20 inline-flex items-center justify-end gap-1">
       {primary ? (
         <ActionLink
           action={primary}
-          className="inline-flex h-7 items-center gap-1.5 rounded-lg bg-white px-2.5 text-[0.78rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] ring-1 ring-ws-line transition-colors ring-inset outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]"
+          className={cn(
+            'inline-flex h-7 items-center gap-1.5 rounded-lg bg-white px-2.5 text-[0.78rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] ring-1 ring-ws-line transition-colors ring-inset outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]',
+            compact && 'max-sm:hidden'
+          )}
         >
           {primary.icon}
           {primary.label}
         </ActionLink>
       ) : null}
-      {actions.length ? (
+      {menu.length ? (
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger
             aria-label={label}
@@ -51,9 +69,9 @@ export function RowActions({ label, primary, actions }: { label: string; primary
             </svg>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={6} className={cn(menuPanel, 'min-w-[14rem]')}>
-            {actions.map((action) => [
+            {menu.map((action) => [
               action.divide ? <DropdownMenuSeparator key={`${action.href}-line`} className="mx-1 my-1 bg-ws-line-soft" /> : null,
-              <DropdownMenuItem key={action.href} asChild className={menuItem}>
+              <DropdownMenuItem key={`${action.href}${action.phoneOnly ? '-phone' : ''}`} asChild className={cn(menuItem, action.phoneOnly && 'sm:hidden')}>
                 <Link href={action.href}>
                   {action.icon}
                   {action.label}

@@ -129,7 +129,8 @@ test.describe('staff register', () => {
 
   test('the oral part takes a licence valid on the day', async ({ page }) => {
     const assign = async () => {
-      await page.goto(`/admin/catalogue/exams/${sittingId}`);
+      // The sitting's examiners have a tab of their own (2026-10-27).
+      await page.goto(`/admin/catalogue/exams/${sittingId}?tab=examiners`);
       await page.getByRole('button', { name: 'Eintragen' }).click();
       const dialog = page.getByRole('dialog');
       await dialog.getByLabel('Person').selectOption({ label: 'Erika Personaltest' });
@@ -148,7 +149,7 @@ test.describe('staff register', () => {
     await expect(page.getByText('E2E-4711')).toBeVisible();
 
     await assign();
-    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/exams/${sittingId}$`));
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/exams/${sittingId}(\\?tab=examiners)?$`));
     await expect(page.locator('main')).toContainText('Mündliche Prüfung');
     await expect(page.locator('main')).not.toContainText('Keine gültige Lizenz');
     await page.goto(`/admin/staff/${staffId}?tab=exams`);

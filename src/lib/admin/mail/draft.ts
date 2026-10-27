@@ -280,6 +280,81 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
         entity: null,
       };
     }
+    case 'exam_sitting':
+    case 'exam_examiners': {
+      // An exam sitting (2026-10-27): to everyone booked into it (Bcc), or to whoever examines it.
+      const s = await queryFirst<{ name: string; day: string; hours: string }>(
+        `SELECT e.name, to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'DD.MM.YYYY') AS day,
+                to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') || '–' || to_char(s.ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') AS hours
+           FROM exam_sessions s JOIN exam_types e ON e.id = s.exam_type_id WHERE s.id = $1`,
+        [id]
+      );
+      if (!s) return null;
+      const title = `${s.name} · ${s.day}`;
+      const href = `/admin/catalogue/exams/${id}`;
+      if (about === 'exam_sitting') {
+        const people = await query<{ name: string; email: string | null }>(
+          `SELECT concat_ws(' ', p.first_name, p.last_name) AS name,
+                  (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+             FROM bookings b JOIN people p ON p.id = canonical_person_id(b.person_id)
+            WHERE b.exam_session_id = $1 AND b.deleted_at IS NULL AND b.status <> 'cancelled'
+            ORDER BY p.last_name, p.first_name`,
+          [id]
+        );
+        return {
+          title,
+          detail: s.hours,
+          href,
+          recipients: unique(people.filter((p) => p.email).map((p) => ({ email: p.email!, name: p.name, group: g('Teilnehmende', 'Candidates'), chosen: true }))),
+          missing: people.filter((p) => !p.email).map((p) => p.name),
+          bcc: true,
+          language: 'de',
+          greet: null,
+          greetAll: true,
+          subject: title,
+          entity: 'exam_session',
+        };
+      }
+      const examiners = await query<{ name: string; first_name: string | null; email: string | null; account_email: string | null }>(
+        `SELECT concat_ws(' ', p.first_name, p.last_name) AS name, p.first_name,
+                (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+                u.email AS account_email
+           FROM exam_session_examiners x JOIN staff_members m ON m.id = x.staff_member_id JOIN people p ON p.id = m.person_id
+           LEFT JOIN staff_users u ON u.id = m.staff_user_id
+          WHERE x.exam_session_id = $1
+          ORDER BY p.last_name, p.first_name`,
+        [id]
+      );
+      const counts = await queryFirst<{ full: number; written: number; oral: number }>(
+        `SELECT count(*) FILTER (WHERE exam_parts = 'full')::int AS full, count(*) FILTER (WHERE exam_parts = 'written')::int AS written,
+                count(*) FILTER (WHERE exam_parts = 'oral')::int AS oral
+           FROM bookings WHERE exam_session_id = $1 AND deleted_at IS NULL AND status <> 'cancelled'`,
+        [id]
+      );
+      const total = (counts?.full ?? 0) + (counts?.written ?? 0) + (counts?.oral ?? 0);
+      const parts = [
+        counts?.written ? `${counts.written} nur schriftlich` : null,
+        counts?.oral ? `${counts.oral} nur mündlich` : null,
+      ].filter(Boolean);
+      return {
+        title,
+        detail: s.hours,
+        href,
+        recipients: unique(
+          examiners
+            .map((x) => ({ email: x.email ?? x.account_email ?? '', name: x.name, group: g('Prüfende', 'Examiners'), chosen: true }))
+            .filter((r) => r.email)
+        ),
+        missing: examiners.filter((x) => !x.email && !x.account_email).map((x) => x.name),
+        bcc: false,
+        language: 'de',
+        greet: examiners.length === 1 ? first(examiners[0].first_name) : null,
+        greetAll: examiners.length > 1,
+        subject: `${s.name} am ${s.day}`,
+        body: `zur Prüfung ${s.name} am ${s.day}, ${s.hours} Uhr: ${total === 1 ? '1 Teilnehmende/r' : `${total} Teilnehmende`}${parts.length ? ` (${parts.join(', ')})` : ''}.`,
+        entity: 'exam_session',
+      };
+    }
   }
 }
 

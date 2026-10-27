@@ -6,9 +6,10 @@ import { redirect } from 'next/navigation';
 import { canAccess } from '@/lib/admin/access';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { assignExaminer, unassignExaminer } from '@/lib/admin/examiners';
-import { cancelSitting, createSitting, deleteSitting, findCandidates, markCollected, saveResults, setFiled, updateSitting, type CandidateMatch, type SittingInput } from '@/lib/admin/exams';
+import { cancelSitting, createSitting, deleteSitting, findCandidates, markCollected, saveResults, setFiled, sittingForEdit, updateSitting, type CandidateMatch, type SittingInput } from '@/lib/admin/exams';
 import { requireModule } from '@/lib/admin/guard';
 import { issueSittingLetters, SITTING_LETTER_KINDS, type SittingLetterKind } from '@/lib/admin/letters/exam-bulk';
+import { MAX_LETTERS } from '@/lib/admin/letter-mail';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
@@ -74,6 +75,30 @@ export async function updateSittingAction(formData: FormData): Promise<void> {
   const back = `/admin/catalogue/exams/${sittingId}`;
   const result = await updateSitting(sittingId, await sittingInput(formData, back), actor);
   if (!result.ok) fail(back, pick((await getI18n()).lang, result.reason));
+  done(back);
+}
+
+/**
+ * One value of the sitting changed from its head (2026-10-27, the offers module's way): its places, or
+ * whether the website offers it. The rest of the sitting stays as it is, through the same rules as the
+ * whole form (never fewer places than booked). A called-off sitting is not changed here.
+ */
+export async function setSittingValueAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('catalogue', 'edit');
+  const sittingId = id(formData, 'sittingId');
+  const back = `/admin/catalogue/exams/${sittingId}`;
+  const { t, lang } = await getI18n();
+  const current = await sittingForEdit(sittingId);
+  if (!current || current.status === 'cancelled') fail(back, t('Dieser Termin lässt sich nicht mehr ändern.', 'This sitting can no longer be changed.'));
+  const input: SittingInput = { ...current };
+  if (formData.has('capacity')) {
+    const capacity = Number(formData.get('capacity'));
+    if (!Number.isInteger(capacity) || capacity < 1 || capacity > 500) fail(back, t('Bitte gib eine Zahl der Plätze an.', 'Give the number of places.'));
+    input.capacity = capacity;
+  }
+  if (formData.has('published')) input.published = formData.get('published') === 'on';
+  const result = await updateSitting(sittingId, input, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
   done(back);
 }
 
@@ -170,6 +195,11 @@ export async function issueSittingLettersAction(formData: FormData): Promise<voi
   const { letterIds } = await issueSittingLetters(sittingId, kind as SittingLetterKind, bookingIds, UUID.test(signature) ? signature : null, actor);
   if (letterIds.length === 0) fail(back, t('Kein Brief konnte gesendet werden.', 'No letter could be sent.'));
   revalidatePath('/admin', 'layout');
+  // On to the mail screen, each candidate their own letter as a PDF (docs/LETTERS.md §Sending); or to print them all.
+  if (formData.get('then') === 'mail' && letterIds.length <= MAX_LETTERS) {
+    const sitting = `/admin/catalogue/exams/${sittingId}?tab=letters`;
+    redirect(`/admin/letters/mail?ids=${letterIds.join(',')}&saved=1&back=${encodeURIComponent(sitting)}`);
+  }
   redirect(`/admin/catalogue/exams/${sittingId}/letters/print?ids=${letterIds.join(',')}`);
 }
 
@@ -186,10 +216,11 @@ export async function assignExaminerAction(formData: FormData): Promise<void> {
   done(back);
 }
 
-/** Takes a colleague off the sitting; nothing is lost, they can be put on again. */
+/** Takes a colleague off the sitting, after the confirmation; nothing is lost, they can be put on again. */
 export async function unassignExaminerAction(formData: FormData): Promise<void> {
   const actor = await requireModule('catalogue', 'edit');
   const sittingId = id(formData, 'sittingId');
+  if (formData.get('confirmed') !== '1') fail(`/admin/catalogue/exams/${sittingId}`, (await getI18n()).t('Bitte bestätige das Austragen.', 'Please confirm.'));
   await unassignExaminer(sittingId, id(formData, 'staffId'), actor);
   done(`/admin/catalogue/exams/${sittingId}`);
 }

@@ -227,6 +227,8 @@ const ACTION_ICON: Record<string, ReactNode> = {
   sitting_deleted: Icon.calendar,
   exam_results_saved: Icon.check,
   exam_result_collected: Icon.check,
+  examiner_assigned: Icon.award,
+  examiner_unassigned: Icon.award,
   bank_account_removed: Icon.money,
   person_linked: Icon.people,
   person_unlinked: Icon.people,

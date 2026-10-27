@@ -202,6 +202,11 @@ export type SittingCandidate = {
   paid: number;
   observationReason: string | null;
   filedAt: Date | null;
+  /** How to reach them: the main address and number (2026-10-27, for the candidate at the side). */
+  email: string | null;
+  phone: string | null;
+  /** The exam letters they have had, latest first (their booking's own and those naming it). */
+  letters: { id: string; kind: string; sentAt: Date }[];
   /** What telc still needs from the person's record. */
   missing: TelcField[];
   /** telc's outcome per part sat, once recorded (0038), and when the result was collected. */
@@ -230,8 +235,17 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
     has_result: boolean;
     collected_at: Date | null;
     collected_note: string | null;
+    email: string | null;
+    phone: string | null;
+    letters: { id: string; kind: string; sent_at: string }[];
   }>(
     `SELECT b.id, b.number, canonical_person_id(b.person_id) AS person_id, p.first_name, p.last_name, b.exam_parts,
+            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone,
+            coalesce((SELECT json_agg(json_build_object('id', l.id, 'kind', l.kind, 'sent_at', l.sent_at) ORDER BY l.sent_at DESC)
+                        FROM letters l
+                       WHERE l.kind IN ('exam_confirmation', 'exam_invitation', 'exam_results', 'exam_participation')
+                         AND (l.booking_id = b.id OR l.id IN (SELECT lb.letter_id FROM letter_bookings lb WHERE lb.booking_id = b.id))), '[]'::json) AS letters,
             r.written, r.oral, r.booking_id IS NOT NULL AS has_result, r.collected_at, r.collected_note,
             b.status::text AS status, b.observation_reason, b.exam_filed_at,
             coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
@@ -257,6 +271,9 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
     paid: Number(r.paid),
     observationReason: r.observation_reason,
     filedAt: r.exam_filed_at,
+    email: r.email,
+    phone: r.phone,
+    letters: r.letters.map((l) => ({ id: l.id, kind: l.kind, sentAt: new Date(l.sent_at) })),
     missing: TELC_FIELDS.filter((f) => !{ birth_date: r.has_birth_date, birth_place: r.has_birth_place, birth_country: r.has_birth_country, mother_tongue: r.has_mother_tongue }[f]),
     result: r.has_result ? { written: r.written, oral: r.oral, collectedAt: r.collected_at, collectedNote: r.collected_note } : null,
   }));
@@ -265,6 +282,8 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
 /** A candidate as telc registers them: SchoolMan's export, read from the person's record. */
 export type TelcRow = {
   bookingId: string;
+  /** Whose record a gap is filled on. */
+  personId: string;
   lastName: string;
   firstName: string;
   salutation: string | null;
@@ -280,6 +299,7 @@ export type TelcRow = {
 export async function telcList(sittingId: string): Promise<TelcRow[]> {
   const rows = await query<{
     id: string;
+    person_id: string;
     last_name: string | null;
     first_name: string;
     salutation: string | null;
@@ -290,7 +310,7 @@ export async function telcList(sittingId: string): Promise<TelcRow[]> {
     email: string | null;
     exam_parts: ExamParts;
   }>(
-    `SELECT b.id, p.last_name, p.first_name, p.salutation::text AS salutation, to_char(p.birth_date, 'DD.MM.YYYY') AS birth_date,
+    `SELECT b.id, p.id AS person_id, p.last_name, p.first_name, p.salutation::text AS salutation, to_char(p.birth_date, 'DD.MM.YYYY') AS birth_date,
             nullif(trim(p.birth_place), '') AS birth_place, c.name_de AS birth_country, nullif(trim(p.mother_tongue), '') AS mother_tongue,
             (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
             b.exam_parts
@@ -303,6 +323,7 @@ export async function telcList(sittingId: string): Promise<TelcRow[]> {
   );
   return rows.map((r) => ({
     bookingId: r.id,
+    personId: r.person_id,
     lastName: r.last_name ?? '',
     firstName: r.first_name,
     salutation: r.salutation,
@@ -431,6 +452,27 @@ export async function sittingEntries(sittingId: string): Promise<ExamWaitlistEnt
     [sittingId]
   );
   return rows.map(toExamEntry);
+}
+
+/** The mails written from the sitting's page (2026-10-27): to everyone booked, or to the examiners, latest first. */
+export type SittingMail = { id: string; to: 'candidates' | 'examiners'; subject: string; recipients: number; sentAt: Date; byName: string | null };
+
+export async function sittingMails(sittingId: string): Promise<SittingMail[]> {
+  const rows = await query<{ id: string; about_kind: string; subject: string; recipients: number; sent_at: Date; by_name: string | null }>(
+    `SELECT m.id, m.about_kind, m.subject, cardinality(m.recipients) AS recipients, m.sent_at, u.name AS by_name
+       FROM workspace_mails m LEFT JOIN staff_users u ON u.id = m.sent_by
+      WHERE m.about_kind IN ('exam_sitting', 'exam_examiners') AND m.about_id = $1
+      ORDER BY m.sent_at DESC LIMIT 50`,
+    [sittingId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    to: r.about_kind === 'exam_examiners' ? 'examiners' : 'candidates',
+    subject: r.subject,
+    recipients: r.recipients,
+    sentAt: r.sent_at,
+    byName: r.by_name,
+  }));
 }
 
 /** The sittings a person is or was waiting for, linked records included, the open ones first. */
