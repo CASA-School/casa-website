@@ -48,12 +48,17 @@
  * - Bookings without a period (not exams) are left out; what is about one goes on the person.
  * - The passport number, a birth year where there is no birth date, the mother tongue and the countries by
  *   SchoolMan's ids, a note on an e-mail address, a bank account's comment and addresses (2026-10-27, 0092).
+ * - What teachers and the office say about a booking (2026-10-27, 0093): the teacher's answers on the level
+ *   (yes or no; SchoolMan's „unsure" is also its default and stays empty), the course's result, the
+ *   university's programme, the Klassenbuch's note. A period whose course is not here keeps its level band
+ *   and part of the day. A test goes on the booking of the course it was taken in.
  */
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
 import { changes, unordered } from './bridge-changes.mjs';
 import { historyProcesses, logDetail } from './history-line.mjs';
+import { examSittings } from './exam-sittings.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -91,8 +96,10 @@ const LETTER_KIND = [
   [/^(Cancel|Deactivate)/, 'cancellation_confirmation'],
   [/^Confirmation\.Exam/, 'exam_confirmation'],
 ];
-// SchoolMan's exam references → our exam types.
-const EXAM_TYPE = { 3: 'telc_b2', 4: 'telc_c1_hochschule' };
+// The teacher's answers (0093): SchoolMan's 4 is also its auto-entered default, so only yes and no come.
+const TEACHER_ANSWER = { 1: 'yes', 2: 'no' };
+// The level bands a period keeps without a course (0093); TestDaF, C1 Hochschule and special courses are not bands.
+const BANDS = new Set(['A1', 'A2', 'B1', 'B1+', 'B2', 'C1']);
 const letterKind = (script) => LETTER_KIND.find(([re]) => re.test(script ?? ''))?.[1] ?? 'schoolman';
 const normalizeEmail = (v) => v.normalize('NFKC').trim().toLowerCase();
 const normalizePhone = (v) => {
@@ -137,51 +144,14 @@ try {
   const typeOfCharge = (ref) => chargeType.get(ref ?? '') ?? chargeByCode.get(CHARGE_EXTRA[ref] ?? '') ?? null;
   const method = (p) => METHOD_BY_LABEL[(p.methodLabel ?? '').trim().toLowerCase()] ?? METHOD_BY_ID[p.method] ?? 'transfer';
 
-  // Exam types by SchoolMan's reference, with the hours their sittings are held at.
-  for (const [ref, code] of Object.entries(EXAM_TYPE)) await client.query(`UPDATE exam_types SET filemaker_id = $1 WHERE code = $2 AND filemaker_id IS NULL`, [Number(ref), code]);
-  const examTypes = new Map(
-    (
-      await client.query(
-        `SELECT t.id, t.code,
-                coalesce((SELECT to_char(s.starts_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') FROM exam_sessions s WHERE s.exam_type_id = t.id ORDER BY s.starts_at LIMIT 1), '09:00') AS starts,
-                coalesce((SELECT to_char(s.ends_at AT TIME ZONE 'Europe/Berlin', 'HH24:MI') FROM exam_sessions s WHERE s.exam_type_id = t.id ORDER BY s.starts_at LIMIT 1), '17:00') AS ends
-           FROM exam_types t`
-      )
-    ).rows.map((r) => [r.code, r])
-  );
-  /**
-   * The sitting an exam booking is on: SchoolMan's own, else the same exam that day here, else made — as
-   * a draft, so a date only SchoolMan knows never appears on the website until someone publishes it.
-   */
-  async function sittingFor(exam) {
-    const type = examTypes.get(EXAM_TYPE[exam.ref] ?? '');
-    if (!type || !exam.day) return null;
-    const known = (await client.query(`SELECT id FROM exam_sessions WHERE filemaker_exam_id = $1`, [exam.id])).rows[0];
-    if (known) return { id: known.id, day: exam.day };
-    const same = (
-      await client.query(
-        `UPDATE exam_sessions SET filemaker_exam_id = $1
-          WHERE id = (SELECT id FROM exam_sessions WHERE exam_type_id = $2 AND (starts_at AT TIME ZONE 'Europe/Berlin')::date = $3::date AND filemaker_exam_id IS NULL
-                       ORDER BY starts_at LIMIT 1)
-          RETURNING id`,
-        [exam.id, type.id, exam.day]
-      )
-    ).rows[0];
-    if (same) {
-      count.sittingsLinked++;
-      return { id: same.id, day: exam.day };
-    }
-    const made = (
-      await client.query(
-        `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, capacity, status, filemaker_exam_id)
-         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5, 'draft', $6)
-         RETURNING id`,
-        [type.id, exam.day, type.starts, type.ends, Number(exam.places) > 0 ? Number(exam.places) : 20, exam.id]
-      )
-    ).rows[0];
-    count.sittingsMade++;
-    return { id: made.id, day: exam.day };
-  }
+  // The sitting an exam booking is on (exam-sittings.mjs): SchoolMan's own, else the same exam that day
+  // here, else made as a draft.
+  const sittings = await examSittings(client);
+  const { types: examTypes, sittingFor } = sittings;
+  // The university's programmes (0093) by SchoolMan's `Project` number.
+  const programmes = new Map((await client.query(`SELECT code, filemaker_id::text AS fm FROM programmes WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.code]));
+  // Day times by SchoolMan's number, for a period whose course is not here (0093).
+  const dayTimes = new Map((await client.query(`SELECT code, filemaker_id::text AS fm FROM day_times WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.code]));
 
   // The stays' vocabularies by SchoolMan's ids.
   const byFilemaker = async (table) => new Map((await client.query(`SELECT code, filemaker_id::int::text AS fm FROM ${table} WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.fm, r.code]));
@@ -401,6 +371,14 @@ try {
       if (sitting) count.examBookings++;
       const status = b.enrolment === '2' || b.enrolment === '3' ? 'cancelled' : over ? 'completed' : 'confirmed';
       const observed = b.enrolment === '4' && status === 'confirmed';
+      // What teachers and the office say about it in SchoolMan (0093): the level right, the next level, the
+      // course's result, the university's programme.
+      const said = [
+        TEACHER_ANSWER[b.levelConfirmed] ?? null,
+        TEACHER_ANSWER[b.levelApproved] ?? null,
+        b.success === '1' ? 'passed' : b.success === '2' ? 'not_passed' : null,
+        programmes.get(b.programme ?? '') ?? null,
+      ];
       const existing = (await client.query(`SELECT id FROM bookings WHERE filemaker_booking_id = $1`, [b.id])).rows[0];
       let bookingId = existing?.id;
       if (existing) {
@@ -411,9 +389,10 @@ try {
                   payer_organisation_id = CASE WHEN $5 = 'self' THEN NULL ELSE payer_organisation_id END,
                   observation_reason = CASE WHEN observed_by IS NOT NULL THEN observation_reason WHEN $6 THEN 'other' ELSE NULL END,
                   observed_at = CASE WHEN observed_by IS NOT NULL THEN observed_at WHEN $6 THEN coalesce(observed_at, now()) ELSE NULL END,
-                  exam_session_id = $7, exam_parts = CASE WHEN $7::uuid IS NULL THEN NULL ELSE coalesce(exam_parts, 'full') END
+                  exam_session_id = $7, exam_parts = CASE WHEN $7::uuid IS NULL THEN NULL ELSE coalesce(exam_parts, 'full') END,
+                  level_confirmed = $8, level_approved = $9, course_result = $10, programme_code = $11
             WHERE id = $1`,
-          [bookingId, status, typeId, b.visa, b.payer, observed, sitting?.id ?? null]
+          [bookingId, status, typeId, b.visa, b.payer, observed, sitting?.id ?? null, ...said]
         );
         count.bookingsUpdated++;
       } else {
@@ -424,11 +403,12 @@ try {
         bookingId = (
           await client.query(
             `INSERT INTO bookings (person_id, course_type_id, status, payer, visa_required, observation_reason, observed_at, filemaker_booking_id,
-                                   number_year, number_seq, created_at, cancelled_at, exam_session_id, exam_parts)
+                                   number_year, number_seq, created_at, cancelled_at, exam_session_id, exam_parts, level_confirmed, level_approved, course_result, programme_code)
              VALUES ($1, $2, $3::booking_status, $4, $5, $6, $7, $8, $9, $10, coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()),
-                     CASE WHEN $3 = 'cancelled' THEN coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()) END, $12, CASE WHEN $12::uuid IS NOT NULL THEN 'full' END)
+                     CASE WHEN $3 = 'cancelled' THEN coalesce($11::timestamp AT TIME ZONE 'Europe/Berlin', now()) END, $12, CASE WHEN $12::uuid IS NOT NULL THEN 'full' END,
+                     $13, $14, $15, $16)
              RETURNING id`,
-            [personId, typeId, status, b.payer, b.visa, observed ? 'other' : null, observed ? new Date() : null, b.id, year, seq, b.created, sitting?.id ?? null]
+            [personId, typeId, status, b.payer, b.visa, observed ? 'other' : null, observed ? new Date() : null, b.id, year, seq, b.created, sitting?.id ?? null, ...said]
           )
         ).rows[0].id;
         count.bookingsNew++;
@@ -440,14 +420,28 @@ try {
         if (!course) count.periodsNoCourse++;
         seen.push(p.id);
         const r = await client.query(
-          `INSERT INTO booking_periods (booking_id, course_instance_id, course_id, start_date, end_date, kind, level_code, filemaker_date_booking_id, group_index)
-           VALUES ($1, $2, $3, $4::date, $5::date, $6, $7, $8, $9)
+          // A period whose course is not here keeps SchoolMan's level band and part of the day (0093).
+          `INSERT INTO booking_periods (booking_id, course_instance_id, course_id, start_date, end_date, kind, level_code, filemaker_date_booking_id, group_index,
+                                       level_band, day_time_code)
+           VALUES ($1, $2, $3, $4::date, $5::date, $6, $7, $8, $9, $10, $11)
            ON CONFLICT (filemaker_date_booking_id) WHERE filemaker_date_booking_id IS NOT NULL DO UPDATE
              SET booking_id = EXCLUDED.booking_id, course_instance_id = EXCLUDED.course_instance_id, course_id = EXCLUDED.course_id,
                  start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date, kind = EXCLUDED.kind, level_code = EXCLUDED.level_code,
-                 group_index = EXCLUDED.group_index
+                 group_index = EXCLUDED.group_index, level_band = EXCLUDED.level_band, day_time_code = EXCLUDED.day_time_code
            RETURNING (xmax = 0) AS inserted`,
-          [bookingId, course?.course_instance_id ?? null, course?.id ?? null, p.start, p.end, i === 0 ? 'initial' : 'extension', course ? step(course, p.start) : null, p.id, course?.group ?? null]
+          [
+            bookingId,
+            course?.course_instance_id ?? null,
+            course?.id ?? null,
+            p.start,
+            p.end,
+            i === 0 ? 'initial' : 'extension',
+            course ? step(course, p.start) : null,
+            p.id,
+            course?.group ?? null,
+            !course && BANDS.has(p.band) ? p.band : null,
+            course ? null : (dayTimes.get(p.daytime ?? '') ?? null),
+          ]
         );
         if (r.rows[0].inserted) count.periodsNew++;
         else count.periodsUpdated++;
@@ -717,6 +711,8 @@ try {
       count.banks++;
     }
   }
+  count.sittingsLinked = sittings.count.linked;
+  count.sittingsMade = sittings.count.made;
   count.unchanged = changed.unchanged;
   await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');

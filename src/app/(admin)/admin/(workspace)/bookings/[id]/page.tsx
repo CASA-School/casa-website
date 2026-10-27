@@ -46,6 +46,7 @@ import {
   type ChargeKind,
   type Payment,
   type PaymentMethod,
+  type TeacherAnswer,
   listCohortOptions,
   PAYER_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -71,12 +72,24 @@ import { bookingLetterContext } from '@/lib/admin/letters/booking-context';
 import { BOOKING_LETTER_KEYS, LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import { lettersForBooking } from '@/lib/admin/letters/repo';
 import { suggestBookingLetters } from '@/lib/admin/letters/suggest';
-import { num, pick, wsLocale, type WsLang } from '@/lib/admin/i18n';
+import { num, pick, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 import { owesMoney } from '@/lib/admin/open-money';
 
 /** The order of the account's charges: the course and its fees, the books, the stay, the deposit, the rest, then what comes off. */
+/** The teacher's answers on a booking, from the Klassenbuch through SchoolMan (0093). */
+const LEVEL_CONFIRMED: Record<TeacherAnswer, Bilingual> = {
+  yes: { de: 'Bestätigt', en: 'Confirmed' },
+  no: { de: 'Passt nicht', en: 'Not right' },
+  unsure: { de: 'Unsicher', en: 'Unsure' },
+};
+const LEVEL_APPROVED: Record<TeacherAnswer, Bilingual> = {
+  yes: { de: 'Freigegeben', en: 'Approved' },
+  no: { de: 'Nicht freigegeben', en: 'Not approved' },
+  unsure: { de: 'Unsicher', en: 'Unsure' },
+};
+
 const CHARGE_ORDER: ChargeKind[] = ['tuition', 'enrolment_fee', 'exam_fee', 'books', 'accommodation', 'deposit', 'other', 'discount', 'cancellation'];
 
 /** How a payment came, as a badge: what was paid at the desk (cash, card) stands out from a transfer. */
@@ -370,6 +383,22 @@ export default async function BookingPage({
             </RecordTabLink>
           ),
         }
+      : null,
+    // The teacher's answers from the Klassenbuch and the course's result, as SchoolMan has them (0093).
+    booking.levelConfirmed
+      ? {
+          label: t('Niveau', 'Level'),
+          value: pick(lang, LEVEL_CONFIRMED[booking.levelConfirmed]),
+        }
+      : null,
+    booking.levelApproved
+      ? {
+          label: t('Nächstes Niveau', 'Next level'),
+          value: pick(lang, LEVEL_APPROVED[booking.levelApproved]),
+        }
+      : null,
+    booking.courseResult
+      ? { label: t('Kursergebnis', 'Course result'), value: booking.courseResult === 'passed' ? t('Mit Erfolg', 'Passed') : t('Ohne Erfolg', 'Not passed') }
       : null,
     // An exam candidate is reported to telc before the deadline; the sitting's page marks it.
     exam && open
@@ -717,6 +746,12 @@ export default async function BookingPage({
                   ''
                 )}
               </MetaItem>
+              {/* The university's programme it is invoiced under (0093). */}
+              {booking.programme ? (
+                <MetaItem icon={Icon.flag}>
+                  {t('Programm', 'Programme')} {booking.programme}
+                </MetaItem>
+              ) : null}
               {booking.groupVisit ? (
                 <MetaItem icon={Icon.group}>
                   {canAccess(user, 'groups') ? (
@@ -817,8 +852,8 @@ export default async function BookingPage({
                           <p className={cn('font-extrabold text-[var(--casa-ink)]', focus ? 'text-[1rem]' : 'text-[0.9rem]')}>
                             {/* The class opens on its own page, its group's when it has several. */}
                             <RecordLink href={recordHrefFor(user, 'course', c.courseId, { group: c.groupIndex ?? 1 })}>
-                              {c.typeName ?? t('Kurs', 'Course')}
-                              {c.levelCode ? ` · ${c.levelCode}` : ''}
+                              {c.typeName ?? booking.courseTypeName ?? t('Kurs', 'Course')}
+                              {c.levelCode ? ` · ${c.levelCode}` : c.levelBand ? ` · ${c.levelBand}` : ''}
                             </RecordLink>
                             {c.number ? <span className="ml-2 text-[0.78rem] font-semibold text-[var(--casa-muted)] tabular-nums">#{c.number}</span> : null}
                           </p>
@@ -881,7 +916,8 @@ export default async function BookingPage({
                           {t('Zum Kurs', 'Open the course')} {Icon.chevronRight}
                         </Link>
                       ) : null}
-                      {!c.courseId && !c.courseInstanceId ? <Badge tone="warning" className="mt-2">{t('Noch kein Termin', 'No cohort yet')}</Badge> : null}
+                      {/* A period that is over and whose course SchoolMan has from before the workspace's is no cohort to find. */}
+                      {!c.courseId && !c.courseInstanceId && c.when !== 'past' ? <Badge tone="warning" className="mt-2">{t('Noch kein Termin', 'No cohort yet')}</Badge> : null}
                       {canFull && courses.length > 1 ? (
                         // One of several periods taken off the booking, asked once more.
                         <form action={removePeriodAction} className="mt-2 flex justify-end">

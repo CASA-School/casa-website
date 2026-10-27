@@ -12,6 +12,8 @@
  *   number and only the teacher and room it lacks.
  * A day's hours and lessons are its own only where they differ from the plan's. An intensive course's
  * board groups are made (0047), so Kursplanung shows its days, and learns from them (0078).
+ * CASA's closures as SchoolMan's calendar has them go to `school_closures` (2026-10-27, 0093), as SchoolMan
+ * has them now; one entered here (`source` office) is never touched.
  */
 import { connect } from '../db/client.mjs';
 import { changes } from './bridge-changes.mjs';
@@ -22,9 +24,9 @@ async function readStdin() {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-const { classrooms, plans, days, closed } = await readStdin();
+const { classrooms, plans, days, closed, closures = [] } = await readStdin();
 const client = await connect();
-const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0, learnt: 0, unchanged: 0, differed: 0, taken: 0 };
+const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0, learnt: 0, unchanged: 0, differed: 0, taken: 0, closures: 0, closuresGone: 0 };
 
 try {
   await client.query('BEGIN');
@@ -225,6 +227,19 @@ try {
     count.inserted += made.rowCount ?? 0;
     if (!made.rowCount) count.taken++;
   }
+  // SchoolMan's closures, as it has them now.
+  for (const c of closures) {
+    count.closures += (
+      await client.query(
+        `INSERT INTO school_closures (starts_on, ends_on, source) VALUES ($1::date, $2::date, 'schoolman')
+         ON CONFLICT (starts_on) DO UPDATE SET ends_on = EXCLUDED.ends_on WHERE school_closures.source = 'schoolman' AND school_closures.ends_on IS DISTINCT FROM EXCLUDED.ends_on`,
+        [c.from, c.to]
+      )
+    ).rowCount;
+  }
+  count.closuresGone = (
+    await client.query(`DELETE FROM school_closures WHERE source = 'schoolman' AND NOT (starts_on = ANY($1::date[]))`, [closures.map((c) => c.from)])
+  ).rowCount;
   await client.query(`SELECT link_course_days()`);
   // Kursplanung learns from these days: the levels, weekdays and shifts a teacher really teaches, and
   // the pair of a group without one (0078; only ever added).
@@ -244,5 +259,6 @@ console.log(
     `${count.matched} on a day here already, ${count.kept} changed here and kept · ${count.plans} weekly-plan rows · ` +
     `skipped: ${count.noCourse} of a course not here, ${count.taken} on a date another of SchoolMan's days has · ` +
     `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked · ` +
-    `${count.learnt} Kursplanung rules or pairs learnt · re-planned in SchoolMan: ${count.relinked ?? 0} days renumbered, ${count.removed ?? 0} future days gone`
+    `${count.learnt} Kursplanung rules or pairs learnt · re-planned in SchoolMan: ${count.relinked ?? 0} days renumbered, ${count.removed ?? 0} future days gone · ` +
+    `closures: ${closures.length} read, ${count.closures} written, ${count.closuresGone} no longer in SchoolMan removed`
 );

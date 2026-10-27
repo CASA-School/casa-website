@@ -289,7 +289,16 @@ export type BookingDetail = BookingListItem & {
   charges: BookingCharge[];
   payments: Payment[];
   balance: number;
+  /** The teacher's answers from the Klassenbuch, through SchoolMan (0093): the level right, the next level. */
+  levelConfirmed: TeacherAnswer | null;
+  levelApproved: TeacherAnswer | null;
+  /** The course's result (SchoolMan's „mit Erfolg" / „ohne Erfolg", 0093). */
+  courseResult: 'passed' | 'not_passed' | null;
+  /** The university's programme the booking is in (0093). */
+  programme: string | null;
 };
+
+export type TeacherAnswer = 'yes' | 'no' | 'unsure';
 
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
@@ -503,11 +512,15 @@ export async function listBookings({
  * What the bookings list is narrowed to (2026-10-21, the filter panel): the organisation that pays (from
  * its page), the year (`BOOKING_YEAR`), who pays, and the course type — `exam` for the exam bookings.
  */
-export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string };
+export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string; programme?: string };
 
 /** The narrowing as SQL on `b`, its values pushed onto `params`. */
-function narrowed({ payerId, year, payer, typeId }: BookingNarrow, params: unknown[]): string {
+function narrowed({ payerId, year, payer, typeId, programme }: BookingNarrow, params: unknown[]): string {
   let sql = '';
+  if (programme) {
+    params.push(programme);
+    sql += ` AND b.programme_code = $${params.length}`;
+  }
   if (payerId) {
     params.push(payerId);
     sql += ` AND b.payer_organisation_id = $${params.length}`;
@@ -560,6 +573,14 @@ export async function bookingTypeChoices(): Promise<{ id: string; name: string }
     `SELECT id, coalesce(nullif(trim(name_de), ''), name) AS name FROM course_types
       WHERE id IN (SELECT DISTINCT course_type_id FROM bookings WHERE course_type_id IS NOT NULL AND deleted_at IS NULL)
       ORDER BY position NULLS LAST, name`
+  );
+}
+
+/** The university's programmes bookings are in (0093), for the filter: none, and the filter has no choice. */
+export async function bookingProgrammeChoices(): Promise<{ code: string; name: string }[]> {
+  return query<{ code: string; name: string }>(
+    `SELECT code, name FROM programmes WHERE code IN (SELECT DISTINCT programme_code FROM bookings WHERE programme_code IS NOT NULL AND deleted_at IS NULL)
+      ORDER BY position, name`
   );
 }
 
@@ -639,6 +660,10 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
       has_result: boolean;
       collected_at: Date | null;
       collected_note: string | null;
+      level_confirmed: TeacherAnswer | null;
+      level_approved: TeacherAnswer | null;
+      course_result: 'passed' | 'not_passed' | null;
+      programme_name: string | null;
     }
   >(
     `${LIST.replace(
@@ -654,7 +679,8 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
          es.exam_type_id, es.starts_at AS exam_starts_at, es.ends_at AS exam_ends_at, es.registration_deadline AS exam_deadline,
          b.exam_filed_at, (SELECT name FROM staff_users WHERE id = b.exam_filed_by) AS exam_filed_by_name,
          b.source_exam_registration_id,
-         er.written AS result_written, er.oral AS result_oral, er.booking_id IS NOT NULL AS has_result, er.collected_at, er.collected_note
+         er.written AS result_written, er.oral AS result_oral, er.booking_id IS NOT NULL AS has_result, er.collected_at, er.collected_note,
+         b.level_confirmed, b.level_approved, b.course_result, (SELECT pr.name FROM programmes pr WHERE pr.code = b.programme_code) AS programme_name
     FROM bookings b
     LEFT JOIN exam_results er ON er.booking_id = b.id
     LEFT JOIN organisations po ON po.id = b.payer_organisation_id
@@ -825,6 +851,10 @@ export async function getBooking(id: string): Promise<BookingDetail | null> {
         : null,
     })),
     balance: item.charged - item.paid,
+    levelConfirmed: row.level_confirmed,
+    levelApproved: row.level_approved,
+    courseResult: row.course_result,
+    programme: row.programme_name,
   };
 }
 
@@ -1750,6 +1780,8 @@ export type BookingCoursePeriod = {
   courseInstanceId: string | null;
   typeName: string | null;
   levelCode: string | null;
+  /** A period whose course is not here: SchoolMan's level band for it (0093). */
+  levelBand: string | null;
   session: Session | null;
   /** SchoolMan's number of the group: „#4771". */
   number: string | null;
@@ -1779,13 +1811,15 @@ export async function bookingCourses(bookingId: string): Promise<BookingCoursePe
     course_instance_id: string | null;
     type_name: string | null;
     level_code: string | null;
+    level_band: string | null;
     session: string | null;
     number: string | null;
   }>(
-    `SELECT bp.id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.kind,
+    // A period whose course is not here keeps SchoolMan's level band and part of the day (0093).
+    `SELECT bp.id, to_char(bp.start_date, 'YYYY-MM-DD') AS start_date, to_char(bp.end_date, 'YYYY-MM-DD') AS end_date, bp.kind, bp.level_band,
             bp.course_id, bp.group_index, coalesce(c.course_instance_id, bp.course_instance_id) AS course_instance_id,
             coalesce(nullif(trim(ty.name_de), ''), ty.name) AS type_name, coalesce(bp.level_code, c.level_code) AS level_code,
-            coalesce(c.session, i.session) AS session,
+            coalesce(c.session, i.session, bp.day_time_code) AS session,
             coalesce(c.filemaker_group_ids[coalesce(bp.group_index, 1)], c.filemaker_course_id) AS number
        FROM booking_periods bp
        LEFT JOIN courses c ON c.id = bp.course_id
@@ -1851,6 +1885,7 @@ export async function bookingCourses(bookingId: string): Promise<BookingCoursePe
         courseInstanceId: r.course_instance_id,
         typeName: r.type_name,
         levelCode: r.level_code,
+        levelBand: r.level_band,
         // A course without its part of the day stored: the class's own times say it.
         session: isSession(r.session) ? r.session : sessionAt(week?.times),
         number: r.number,

@@ -48,6 +48,10 @@ export type CourseInfo = {
   cancelled: boolean;
   /** SchoolMan's course numbers, group by group. */
   numbers: string[];
+  /** Where it runs (0093): Dobben, in-house, an online group, one-to-one online — SchoolMan's place and its short name. */
+  location: { name: string; short: string } | null;
+  /** The sitting an exam preparation leads to (0093). */
+  exam: { id: string; name: string; startsAt: Date } | null;
 };
 
 export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
@@ -72,13 +76,22 @@ export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
     status: string;
     numbers: string[] | null;
     number: string | null;
+    location: string | null;
+    location_short: string | null;
+    exam_session_id: string | null;
+    exam_name: string | null;
+    exam_starts_at: Date | null;
   }>(
     `SELECT c.id, c.course_instance_id, c.level_code, c.title, t.slug, coalesce(t.name_de, t.name) AS type_name, t.format,
             to_char(i.start_date, 'YYYY-MM-DD') AS start_date, to_char(i.end_date, 'YYYY-MM-DD') AS end_date,
             coalesce(c.session, i.session) AS session, i.schedule, c.groups, c.room_id, coalesce(r.nickname, r.name) AS room_name,
-            t.lessons_per_week, c.places_per_group, c.bookable, c.status, c.filemaker_group_ids AS numbers, c.filemaker_course_id AS number
+            t.lessons_per_week, c.places_per_group, c.bookable, c.status, c.filemaker_group_ids AS numbers, c.filemaker_course_id AS number,
+            l.name AS location, l.short_name AS location_short, c.exam_session_id, et.name AS exam_name, es.starts_at AS exam_starts_at
        FROM courses c JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types t ON t.id = i.course_type_id
        LEFT JOIN rooms r ON r.id = c.room_id
+       LEFT JOIN locations l ON l.id = c.location_id
+       LEFT JOIN exam_sessions es ON es.id = c.exam_session_id
+       LEFT JOIN exam_types et ON et.id = es.exam_type_id
       WHERE c.id = $1`,
     [courseId]
   );
@@ -117,6 +130,8 @@ export async function courseInfo(courseId: string): Promise<CourseInfo | null> {
     bookable: r.bookable,
     cancelled: r.status === 'cancelled',
     numbers: r.numbers?.length ? r.numbers : r.number ? [r.number] : [],
+    location: r.location && r.location_short ? { name: r.location, short: r.location_short } : null,
+    exam: r.exam_session_id && r.exam_name && r.exam_starts_at ? { id: r.exam_session_id, name: r.exam_name, startsAt: r.exam_starts_at } : null,
   };
 }
 

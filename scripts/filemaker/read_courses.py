@@ -35,10 +35,15 @@ def hhmm(value):
     return f'{int(m.group(1)):02d}:{m.group(2)}' if m else None
 
 
-# `LevelStepReference` is a stale text copy (an evening B2 course reads `B2.1` or `A1.1` alike): the level
-# is `LevelShort` (the band) and, for an evening course, `LevelShown` — the step its link points at.
-F = ['__ID_Course', '_ID_CourseTypeReference', 'ZStartDate', 'ZEndDate', '_ID_DayTimeReference', 'LevelShown', 'LevelShort',
-     'CourseTitle', 'CapStudent', 'CoursePrice', '_ID_Bookable', '_ID_Active']
+# The level by its numbers (2026-10-27, 0093): the band (`_ID_Level`, `LevelReferenceSchool`) and, for an evening
+# course, the step it teaches (`_ID_LevelStepReference`, `LevelStepReference`, matched on
+# `levels.filemaker_level_step_id` in the importer). `LevelShort` and `LevelShown` are their text copies.
+BAND = {'1': 'A1', '2': 'A2', '3': 'B1', '3,5': 'B1+', '3.5': 'B1+', '4': 'B2', '5': 'C1', '6': 'TD', '7': 'CH', '8': 'SK', '9': 'ND'}
+# Where it runs (`_ID_Location`, `LocationReference`), the teacher's note (`CommentOnCourse`, written by the
+# Klassenbuch) and an older title (`Supplement`), used where `CourseTitle` is empty — in the workspace only:
+# on a one-to-one course it can name the learner.
+F = ['__ID_Course', '_ID_CourseTypeReference', 'ZStartDate', 'ZEndDate', '_ID_DayTimeReference', '_ID_LevelStepReference', '_ID_Level',
+     'CourseTitle', 'Supplement', 'CapStudent', 'CoursePrice', '_ID_Bookable', '_ID_Active', '_ID_Location', 'CommentOnCourse', 'DateOfChange']
 rows = [dict(zip(F, r)) for r in zip(*[column('Course', f) for f in F])]
 # `Course::ZStartDate`/`ZEndDate` are copies made when the course was; its periods (`DateCourse`) are the
 # source (mapping review 2026-10-26 §4). A course's dates are its periods' first and last day where it has them.
@@ -70,9 +75,13 @@ out = [{
     'start': iso(r['ZStartDate']),
     'end': iso(r['ZEndDate']),
     'daytime': first(r['_ID_DayTimeReference']),
-    'step': r['LevelShown'].strip() or None,
-    'band': r['LevelShort'].strip() or None,
+    'step': first(r['_ID_LevelStepReference']) or None,
+    'band': BAND.get(first(r['_ID_Level'])),
     'title': r['CourseTitle'].strip() or None,
+    'supplement': r['Supplement'].strip() or None,
+    'location': first(r['_ID_Location']) or None,
+    'note': r['CommentOnCourse'].strip() or None,
+    'changed': iso(r['DateOfChange']),
     'places': r['CapStudent'].strip() or None,
     'price': r['CoursePrice'].strip() or None,
     'bookable': first(r['_ID_Bookable']) == '1',

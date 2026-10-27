@@ -22,6 +22,9 @@
  * - The letters that went out are its versions, their frozen text as the letter (kind `offer`; one the
  *   learners' import brought becomes the offer's, and that import leaves it alone from then on); the
  *   comments are notes on it, the work log its history (`schoolman_log`, read afresh each run).
+ * - Since 2026-10-27: an offer made from a party's own screen goes to that party (`Management`, else
+ *   `Institution`, through `filemaker_links`), and one that is no draft but has no letter here is dated by
+ *   the date on its letter in SchoolMan (`DateOfEmission`).
  */
 import { getCode } from 'country-list';
 
@@ -104,7 +107,8 @@ try {
     (
       await client.query(
         `SELECT entity, source_layout, source_record_id, entity_id FROM filemaker_links
-          WHERE source_database = 'SchoolMan' AND ((entity = 'organisation' AND source_layout IN ('Agency', 'Corporate')) OR (entity = 'person' AND source_layout = 'Person'))`
+          WHERE source_database = 'SchoolMan'
+            AND ((entity = 'organisation' AND source_layout IN ('Agency', 'Corporate', 'Management', 'Institution')) OR (entity = 'person' AND source_layout = 'Person'))`
       )
     ).rows.map((r) => [`${r.entity}|${r.source_layout}|${r.source_record_id}`, r.entity_id])
   );
@@ -141,7 +145,9 @@ try {
         ? linked('organisation', 'Agency', o.agency)
         : o.recipient === 'company'
           ? linked('organisation', 'Corporate', o.company)
-          : null;
+          : o.recipient === 'party'
+            ? (linked('organisation', 'Management', o.management) ?? linked('organisation', 'Institution', o.institution))
+            : null;
     const personId = o.recipient === 'learner' ? linked('person', 'Person', o.person) : null;
     const organisation = organisationId ? (organisations.get(organisationId) ?? null) : null;
     const person = personId ? (people.get(personId) ?? null) : null;
@@ -163,7 +169,7 @@ try {
     const lines = o.lines.slice(0, 60).map((l) => manualLine(l, language, chargeType(l.ref)));
     const status = outcome(o, newestOfGroup);
     statuses[status] = (statuses[status] ?? 0) + 1;
-    const sentAt = lastLetter?.sent ?? null;
+    const sentAt = lastLetter?.sent ?? (status !== 'draft' && o.emitted ? `${o.emitted}T12:00:00` : null);
     const decided = ['accepted', 'declined', 'withdrawn', 'lapsed'].includes(status);
     const recipientName = organisation?.name ?? [person?.first_name, person?.last_name].filter(Boolean).join(' ') ?? '';
     const address = o.address ? [o.address.street, [o.address.postcode, o.address.city].filter(Boolean).join(' ')].filter(Boolean).join('\n') || null : null;

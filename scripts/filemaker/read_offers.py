@@ -13,6 +13,9 @@ the line type, the label and its detail in the letter's language, the quantity a
 letters that went out with their frozen text, its comments and work log, and what became of it as far as
 SchoolMan says (an invoice; the group's state). The answers are worked out in import-offers.mjs.
 
+Since 2026-10-27 an offer made from a party's own screen (`_ID_Management`, `_ID_Institution`) is that party's
+when nothing else names its recipient, and the date on the letter (`DateOfEmission`) comes with every offer.
+
 The JSON goes to stdout and straight into the importer: nothing is written to a file.
 """
 import collections, json, os, re, sys
@@ -85,7 +88,7 @@ persons = {p['__ID_Person'].strip(): p for p in table('Person', '__ID_Person', '
 addresses = {a['__ID_Address'].strip(): a for a in table('Address', '__ID_Address', 'Street', 'HouseNumber', 'ZPostCode', 'City', 'ZCountry_1')}
 
 O = ['__ID_Offer', '_ID_ActiveTemplate', '_ID_Group', '_ID_Agency', '_ID_Corporate', '_ID_Person', '_ID_Booking', '_ID_PreBooking', '_ID_Address', 'Email', 'Subject',
-     '_ID_Invoice', 'UserName', 'TimeStampOfCreation', 'DateOfCreation']
+     '_ID_Invoice', 'UserName', 'TimeStampOfCreation', 'DateOfCreation', '_ID_Management', '_ID_Institution', 'DateOfEmission']
 offers = [o for o in table('Offer', *O) if o['__ID_Offer'].strip()]
 
 skipped = collections.Counter()
@@ -100,8 +103,11 @@ def recipient(o):
     if first(o['_ID_Corporate']):
         return 'company'
     pid = first(o['_ID_Person']) or first(bookings.get(first(o['_ID_Booking']), {}).get('_ID_Person')) or prebookings.get(first(o['_ID_PreBooking']), '')
-    if pid:
-        return 'learner' if pid in chosen else None
+    if pid in chosen:
+        return 'learner'
+    # Made from a party's own screen (`NewOffer_Management`): the party, its person the contact.
+    if first(o['_ID_Management']) or first(o['_ID_Institution']):
+        return 'party'
     return None
 
 
@@ -193,6 +199,8 @@ for oid, (o, who) in kept.items():
         'escorts': people(g['NumberTeacher']) if g else None,
         'agency': first(o['_ID_Agency']) or None,
         'company': first(o['_ID_Corporate']) or None,
+        'management': first(o['_ID_Management']) or None,
+        'institution': first(o['_ID_Institution']) or None,
         'person': learner,
         'contact': {'firstName': contact['ZFirstName'].strip() or None, 'lastName': contact['ZSurName'].strip() or None,
                     'gender': first(contact['_ID_GenderReference']) or None} if contact else None,
@@ -203,6 +211,8 @@ for oid, (o, who) in kept.items():
         'arrival': span[0],
         'departure': span[1],
         'invoiced': bool(first(o['_ID_Invoice'])),
+        # The date on the offer letter: when no letter of it is known, the day it went out.
+        'emitted': iso(o['DateOfEmission']),
         'created': stamp(o['TimeStampOfCreation']) or stamp(o['DateOfCreation']),
         'createdBy': o['UserName'].strip() or None,
         'lines': lines[oid],

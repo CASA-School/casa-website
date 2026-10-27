@@ -33,10 +33,14 @@ one answer the module did not have: „Ohne Antwort" (`lapsed`), now also one a 
 | SchoolMan | Why not |
 | --- | --- |
 | Offers to learners outside the sample (174) | Beyond the sample |
-| Offers naming no recipient, or a party that is not an agency or a company (19) | No one to file them under |
+| Offers naming no recipient (13) | No one to file them under. Since 2026-10-27 an offer made from a party's own screen (`_ID_Management`, else `_ID_Institution`) goes to that party when nothing else names its recipient (6 read, 5 whose party is here) |
 | Templates (6, `_ID_ActiveTemplate`) | The workspace's templates are its packages and „Like last time" |
-| `DateOffer` on a pre-booking or a group (the asked-for periods) | A group's dates are on the visit; the pre-booking's wishes come with the intake, which is not mapped |
+| `DateOffer` on a group (the asked-for periods) | A group's dates are on the visit. A pre-booking's wishes come with the intake since 2026-10-27 (intake.md) |
 | Letters before 2024 | In `Letter.fmp12`, not in reach |
+
+**The date on the letter** (`DateOfEmission`, 2026-10-27): an offer that is no draft and has no letter here
+(149, from before the letters reached SchoolMan) takes it as the day it went out. The first run that brings
+it stamps those offers „changed today" once (the offers table's `updated_at` trigger).
 
 ## Found on the way
 

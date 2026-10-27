@@ -121,6 +121,31 @@ The business line belongs on the course type, not in a table per line.
 - The booking that is running now is the one the team needs first; history can stay in SchoolMan
   until someone asks for it.
 
+## Brought across (2026-10-27, migration 0093)
+
+The mapping-completeness review found these on the booking and its periods, and the bridge reads them:
+
+- **The teacher's answers** the Klassenbuch writes (`_ID_LevelConfirmed`, `_ID_LevelApproved`): yes or no
+  (`bookings.level_confirmed`, `level_approved`). Their 4 („unsure") is also SchoolMan's auto-entered
+  default on every booking, so it cannot be told from a teacher's answer and stays empty; 3 (older rows)
+  means nothing known. Locally: level confirmed yes 81, no 10; next level approved 87, not 197.
+- **The course's result** (`_ID_Success`, „mit Erfolg" / „ohne Erfolg"; it decides Teilnahmezertifikat or
+  Teilnahmebescheinigung): `bookings.course_result`, 271 passed, 827 not.
+- **The university's programme** (`_ID_Project`: 1 HereStudies, 2 Prime, 3 in touch — SchoolMan's `Project`,
+  all on the university's contract; 2118–2120 are dead ids): the vocabulary `programmes` and
+  `bookings.programme_code` (1,462 HereStudies, 901 Prime). The booking's head names it beside the payer;
+  Buchungen can be filtered by it.
+- **The Klassenbuch's note on a booking** (`CommentOnBooking`, 4): a note by „Klassenbuch".
+- **A period whose course is not here** (a past course, or a start the workspace lacks) keeps SchoolMan's
+  level band and part of the day (`DateBooking._ID_Level`, `_ID_DayTimeReference`;
+  `booking_periods.level_band`, `day_time_code`): 6,855 and 6,967 of 7,949 such periods.
+- **An exam booking's day** comes from its parts (`SingleDateExam`), not from the one-line copy on `Exam`.
+- **Tests** (`TestStudent`): the kind by its number (`_ID_TestReference`, else `_ID_Test` when it was entered
+  on the pre-booking screen; the 11 kinds of `TestReference`), the level by `_ID_LevelSchool`; the text copies
+  only for old tests without a number. A test goes on the learner's booking of the course it was taken in
+  (`_ID_Course`): `TestStudent._ID_Booking` is no guide — a Replace Field Contents pointed 2,000 tests at one
+  booking that no longer exists.
+
 ## Learning agreements
 
 A learning agreement (`Agreement`) is made when a learner has trouble in a course — the level is below
@@ -128,3 +153,8 @@ the course's, they come late, they are often absent. Today the teacher writes it
 learner sign it, and someone in the office types it into SchoolMan and sends it (Rahman, 2026-10-16).
 **The plan:** the teacher creates it in the Klassenbuch and sends it to the learner; once the workspace
 has a bridge to the Klassenbuch, it shows the agreement on the learner's page (`klassenbuch.md`).
+
+Today an agreement comes across as a note on its booking. SchoolMan also holds its course, the teacher who
+made it, the office colleague, the trial weeks and the recommendation as numbers (`_ID_Course`,
+`_ID_StaffMember`, `_ID_StaffSchool`, `_ID_LengthDuration`, `_ID_Recommendation`). Whether they go into that
+note or into a table of agreements of their own is Rahman's decision (review 2026-10-27, G8).
