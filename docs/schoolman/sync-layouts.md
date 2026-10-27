@@ -11,6 +11,14 @@ once against SchoolMan with its reads recorded (2026-10-26): 634 fields in 67 ta
 with its own key (`__ID_…`) and its change field. No `SingleDayStaff::cal_*` field and no
 `StaffMember::CommentsOnTeacher` is read, and none may be put on a layout.
 
+**Completed 2026-10-27 (afternoon), Rahman: „map everything properly … if you need more layouts and ids, add them":**
+90 layouts, 902 fields. A review of every SchoolMan field in use on recent records that no reader read (541 in
+43 tables) and of every table no layout covered (155) sorted each into facts to bring, copies, plumbing and
+decisions (scratch reviews by area: people and staff, bookings and courses, money and letters,
+accommodation). The facts' fields were added to 33 layouts and 21 tables got their own (internships,
+contacts, holiday requests, trainings, projects, sessions, the calendar, office work times, the references
+they name). `StaffMember::Login` and `MailAccount` hold passwords and are never put on a layout.
+
 **Built 2026-10-27, with Rahman's go:** all 69 layouts, 653 fields — the first list, plus the fields
 the readers took up on 2026-10-26 (`DateCourse` with its start, end and course; `PaymentIn::
 _ID_CostDetailReference`; `WorkFlow`'s links to agency, company, institution and management) and the
