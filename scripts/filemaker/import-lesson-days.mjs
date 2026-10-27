@@ -24,7 +24,7 @@ async function readStdin() {
 
 const { classrooms, plans, days, closed } = await readStdin();
 const client = await connect();
-const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0, learnt: 0 };
+const count = { days: days.length, inserted: 0, updated: 0, matched: 0, kept: 0, noCourse: 0, plans: 0, unknownTeacher: 0, unknownRoom: 0, merges: 0, learnt: 0, unchanged: 0, differed: 0, taken: 0 };
 
 try {
   await client.query('BEGIN');
@@ -124,6 +124,21 @@ try {
       [read, [...new Set([...courses.values()].map((t) => t.course))]]
     )
   ).rowCount;
+  // What each of SchoolMan's days says here now. A day is passed over only when SchoolMan's is as last time
+  // and ours still says the same: a day renumbered above keeps the teacher and room it had, and a day whose
+  // writing was refused once had its fingerprint kept all the same — both had left days wrong (2026-10-27,
+  // Birte Klaila and Mariella Baier swapped on A2.1 and C1.1).
+  const held = new Map(
+    (
+      await client.query(
+        `SELECT filemaker_id, changed_by IS NOT NULL AS kept,
+                json_build_array(teacher_id, replaced_teacher_id, room_id, replaced_room_id, to_char(starts_at, 'HH24:MI'), to_char(ends_at, 'HH24:MI'),
+                                 lessons::float8, is_substitute, cancelled, merged, note) AS says
+           FROM course_days WHERE filemaker_id = ANY($1::text[])`,
+        [read]
+      )
+    ).rows.map((r) => [r.filemaker_id, r])
+  );
 
   for (const d of days) {
     const target = courses.get(d.course);
@@ -163,7 +178,16 @@ try {
       values.merged,
       values.note,
     ];
-    if (changed.same(d.id, [d, target, fields])) continue;
+    const here = held.get(d.id);
+    if (changed.same(d.id, [d, target, fields])) {
+      // A day's lessons are kept to one decimal here: SchoolMan's 1.33 is 1.3.
+      const says = fields.map((v, i) => (i === 6 && v !== null ? Math.round(v * 10) / 10 : v));
+      if (here && (here.kept || JSON.stringify(here.says) === JSON.stringify(says))) {
+        count.unchanged++;
+        continue;
+      }
+      if (here) count.differed++;
+    }
 
     // Read before: updated while nobody here has changed it.
     const before = (await client.query(`SELECT changed_by FROM course_days WHERE filemaker_id = $1`, [d.id])).rows[0];
@@ -199,12 +223,12 @@ try {
       [target.course, target.group, d.date, ...fields, d.id]
     );
     count.inserted += made.rowCount ?? 0;
+    if (!made.rowCount) count.taken++;
   }
   await client.query(`SELECT link_course_days()`);
   // Kursplanung learns from these days: the levels, weekdays and shifts a teacher really teaches, and
   // the pair of a group without one (0078; only ever added).
   count.learnt = (await client.query(`SELECT learn_kursplanung() AS n`)).rows[0].n;
-  count.unchanged = changed.unchanged;
   await changed.save();
   await client.query(process.argv.includes('--dry-run') ? 'ROLLBACK' : 'COMMIT');
 } catch (error) {
@@ -216,8 +240,9 @@ try {
 }
 
 console.log(
-  `${count.days} lesson days read (${closed} in a closure left out): ${count.unchanged ?? 0} as last time, ${count.inserted} new, ${count.updated} updated, ${count.matched} on a day here already, ` +
-    `${count.kept} changed here and kept · ${count.plans} weekly-plan rows · skipped: ${count.noCourse} of a course not here · ` +
+  `${count.days} lesson days read (${closed} in a closure left out): ${count.unchanged} as last time, ${count.inserted} new, ${count.updated} updated (${count.differed} as last time in SchoolMan, not here), ` +
+    `${count.matched} on a day here already, ${count.kept} changed here and kept · ${count.plans} weekly-plan rows · ` +
+    `skipped: ${count.noCourse} of a course not here, ${count.taken} on a date another of SchoolMan's days has · ` +
     `unknown: ${count.unknownTeacher} teacher, ${count.unknownRoom} room references · ${count.merges} merges linked · ` +
     `${count.learnt} Kursplanung rules or pairs learnt · re-planned in SchoolMan: ${count.relinked ?? 0} days renumbered, ${count.removed ?? 0} future days gone`
 );

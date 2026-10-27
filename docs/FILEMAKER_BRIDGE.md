@@ -557,6 +557,14 @@ the steps that are small anyway (staff, courses and their counts, absences, grou
 `bridge.sh --full` (`BRIDGE_FULL=1`) writes every record, as before. The first run after the table exists
 is a full one, and so is a step's first run after it starts keeping fingerprints.
 
+A fingerprint says SchoolMan has not changed, not that the workspace still says what SchoolMan says.
+Lesson days learnt that the hard way (2026-10-27): a re-planned course's renumbered days kept their old
+teachers, and a day whose writing was refused once still had its fingerprint kept, so Birte Klaila and
+Mariella Baier stood swapped on two classes while SchoolMan was right. The lesson-days step therefore also
+reads what each day holds here and passes a day over only when both agree; anything that sets a day apart
+from SchoolMan — a renumbering, a database function, a hand edit without `changed_by` — is set right on the
+next run.
+
 A run is started without `--local-first` since 2026-10-26 (Rahman): the bundle goes straight to Azure, the
 Mac's own database is not filled with learners, and the run is two minutes shorter.
 
