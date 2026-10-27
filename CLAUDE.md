@@ -370,7 +370,8 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    the quote-to-person relationship are explicitly verified.
 3. **Team portraits are real colleagues, with consent** (`public/media/casa/team/`,
    CASA's 2026-09-10 team shoot, named by Rahman on 2026-10-27). Only a photo
-   CASA supplied for that person, only resized; anyone without one keeps a Bremer
+   CASA supplied for that person, cropped, resized and given the site's warm grade by
+   `scripts/media/build_team_portraits.py`; anyone without one keeps a Bremer
    Stadtmusikanten stand-in. Never a synthetic or generated face beside a real name.
 4. **Photo edits stay source-faithful** — crop, resize, light exposure/color
    correction only. No generative editing (expansion, relighting, retouching by an

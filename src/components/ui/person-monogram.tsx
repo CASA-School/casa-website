@@ -74,6 +74,7 @@ export function PersonMonogram({
           alt=""
           fill
           sizes="112px"
+          quality={90}
           className="scale-[1.8] object-cover"
           style={{ objectPosition: photo.position ?? 'center 25%', transformOrigin: '50% 36%' }}
         />
