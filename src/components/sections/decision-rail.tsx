@@ -1,4 +1,5 @@
 import { AppointmentDialog } from '@/components/gruppen/appointment-dialog';
+import type { ResolvedContact } from '@/config/content/contacts';
 import type { ContentLocale } from '@/lib/content/types';
 
 import { PersonMonogram } from '@/components/ui/person-monogram';
@@ -30,7 +31,7 @@ type DecisionRailProps = {
    * site. `email` is a published inbox — CASA prints names and roles but only
    * one individual mailbox, so the role address is the honest route.
    */
-  contact?: { name: string; role: string; booking: boolean; appointment?: 'groups' } | null;
+  contact?: ResolvedContact | null;
   /**
    * One action under the facts, for a page whose next step is not a
    * registration window: German for Medical's interest list, whose link opens
@@ -113,8 +114,8 @@ export function DecisionRail({
           card and answered nothing they had come back for.
 
           So the card now ends on a face, a name, a role and an address. The
-          avatar is initials rather than a photograph, and stays that way until
-          real portraits exist with consent — see ui/person-monogram.
+          avatar is the colleague's portrait from the team page, or their
+          initials until one is on file — see ui/person-monogram.
         */}
         {contact ? (
           <div className="border-t border-[color:var(--casa-sand)] px-6 py-5">
@@ -131,7 +132,7 @@ export function DecisionRail({
               With it the name wraps instead, which is what should happen.
             */}
             <div className="mt-3 flex items-center gap-3">
-              <PersonMonogram name={contact.name} size="sm" />
+              <PersonMonogram name={contact.name} photo={contact.photo} size="sm" />
               <div className="min-w-0">
                 <p className="break-words text-sm font-bold leading-snug text-[var(--casa-ink)]">{contact.name}</p>
                 <p className="mt-0.5 break-words text-xs leading-snug text-[var(--casa-muted)]">{contact.role}</p>

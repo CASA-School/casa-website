@@ -318,13 +318,21 @@ function toSpotlight(member: TeamMemberSource, locale: ContentLocale): TeamSpotl
  * config/content/contacts.ts assigns people to surfaces by id and reads the
  * spelling from here. `Natàlia Sostres` and `Meike Große Hundrup` are the reason
  * this exists: a second hand-typed copy of either name is a spelling that
- * eventually disagrees with this one.
+ * eventually disagrees with this one. The portrait comes along for the
+ * contact's avatar, the same photo as on the team page.
  */
-export function teamContactById(id: string): { name: string; title: { en: string; de: string } } | undefined {
+export function teamContactById(
+  id: string,
+): { name: string; title: { en: string; de: string }; photo?: { src: string; position?: string } } | undefined {
   const member = TEAM.find((entry) => entry.id === id);
+  if (!member) return undefined;
 
   // The public name, as on the team page.
-  return member ? { name: publicName(member), title: member.title } : undefined;
+  return {
+    name: publicName(member),
+    title: member.title,
+    photo: member.photo ? { src: `/media/casa/team/${member.photo.file}`, position: member.photo.position } : undefined,
+  };
 }
 
 export const teamSpotlightsByLocale: Record<ContentLocale, TeamSpotlight[]> = {

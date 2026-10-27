@@ -172,15 +172,23 @@ export const OFFICE_CONTACT = {
   email: 'info@casa-bremen.de',
 } as const;
 
-/** What a card is given: no address, and whether to offer a call. */
-export type ResolvedContact = { name: string; role: string; booking: boolean; appointment?: 'groups' };
+/** What a card is given: no address, whether to offer a call, and their portrait when there is one. */
+export type ResolvedContact = {
+  name: string;
+  role: string;
+  booking: boolean;
+  appointment?: 'groups';
+  photo?: { src: string; position?: string };
+};
 
 /** Resolves a key to the name on the verified roster plus this surface's role. */
 export function getCasaContact(key: CasaContactKey, locale: ContentLocale): ResolvedContact {
   const entry = CONTACTS[key];
+  const member = teamContactById(entry.teamId);
 
   return {
-    name: teamContactById(entry.teamId)?.name ?? OFFICE_CONTACT.name,
+    name: member?.name ?? OFFICE_CONTACT.name,
+    ...(member?.photo ? { photo: member.photo } : {}),
     role: pick(locale, entry.role),
     booking: (entry as CasaContact).booking === true,
     ...(key === 'groups' ? { appointment: 'groups' as const } : {}),
