@@ -8,7 +8,7 @@
  *   DATABASE_URL=… node scripts/filemaker/bridge-mirror.mjs [--only learners,money] [--always]
  */
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,6 +53,17 @@ async function bridge() {
   ).rows;
   if (!newest) {
     console.log('the copy of SchoolMan is empty: the sync service has not sent anything yet');
+    return;
+  }
+  // Only on a whole copy: while the first read is still arriving, a learner can be here without their
+  // bookings, and the importers would take what is missing for deleted in SchoolMan.
+  const tables = Object.keys(JSON.parse(readFileSync(path.join(HERE, 'sync-layouts.json'), 'utf8')));
+  const whole = new Set(
+    (await lock.query(`SELECT source_table FROM schoolman_sync_tables WHERE last_complete_at IS NOT NULL`)).rows.map((r) => r.source_table)
+  );
+  const missing = tables.filter((t) => !whole.has(t));
+  if (missing.length) {
+    console.log(`the copy is not whole yet: ${missing.length} of ${tables.length} tables not read completely (${missing.slice(0, 5).join(', ')}…)`);
     return;
   }
   if (last && newest <= last && !process.argv.includes('--always')) {
