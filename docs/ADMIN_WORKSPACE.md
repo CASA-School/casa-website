@@ -1779,10 +1779,14 @@ someone of the family. A row: the name, the host and the town; the rooms; who st
 arrival. „Neue Unterkunft" asks for the name and kind; how to reach it opens once both are in.
 
 **A place's page.** The head: name, kind, the host, phone, e-mail, address; Zimmer, Wohnen jetzt,
-Nächste Anreise. Tabs: **Übersicht** (the house; the family, added, changed and removed in a dialog; notes
-and history with SchoolMan's comments), **Zimmer** (each with who is in it today, or „frei"), **Belegung**
-(the stays now and coming, then the latest 30 earlier, each to its booking), **Gruppen** (beds held for
-group visits, each to its group). A booking's page links its stay to the place; a group's page has an
+Nächste Anreise. Tabs: **Übersicht** (the house — smoker, pets and which, washing machine, what the host
+offers: Unterkunftsart, Verpflegung, Zimmerarten, the Wohnungsgeber —; the family, added, changed and removed
+in a dialog; notes and history with SchoolMan's comments), **Zimmer** (each with its number in the place,
+„Zimmer 3 · klein" when its name does not say it, and who is in it today, or „frei"), **Belegung** (the stays
+now and coming, then the latest 30 earlier, each to its booking), **Reservierungen** (beds held for a group
+visit, each to its group, or for the learners of a course term — „Kurs · Vormittag" —, with whom the host
+takes: Mädchen oder Frauen, Jungen oder Männer, egal wer, Betreuer; 0095), **Briefe** (the
+Wohnungsgeberbestätigungen, each also on its booking and learner). A booking's page links its stay to the place; a group's page has an
 Unterkünfte tab with the beds held for it.
 
 **Aufenthalte.** The accommodation colleague's work list (docs/schoolman/accommodation.md §The work

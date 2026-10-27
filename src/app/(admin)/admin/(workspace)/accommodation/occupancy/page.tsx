@@ -31,7 +31,7 @@ export default async function OccupancyPage({ searchParams }: { searchParams: Pr
   const canPlace = canAccess(user, 'accommodation', 'edit');
   // Learners still without a room: those whose stay runs into these weeks or the next two months.
   const [{ flats, stays, holds }, placeable, duties] = await Promise.all([
-    flatOccupancy(from, to),
+    flatOccupancy(from, to, lang),
     canPlace ? placeableStays(from, plus(to, 60)) : Promise.resolve([]),
     allFlatDuties(),
   ]);

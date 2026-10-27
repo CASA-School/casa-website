@@ -8,6 +8,7 @@ import { Icon } from '@/components/admin/icons';
 import { Avatar, euros } from '@/components/admin/list';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button, Select } from '@/components/admin/ui';
+import { reservationTitle } from '@/lib/admin/accommodation-labels';
 import { weekPlan } from '@/lib/admin/cleaning-plan';
 import { pick, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import type { OccupancyFlat, OccupancyHold, OccupancyRoom, OccupancyStay, PlaceableStay } from '@/lib/admin/occupancy';
@@ -76,7 +77,7 @@ export function StayPanel({
       onOpenChange={(o) => !o && onClose()}
       icon={stay ? Icon.home : Icon.group}
       tint={stay ? 'ink' : 'sun'}
-      title={stay ? stay.name : (hold?.groupName ?? t('Für eine Gruppe reserviert', 'Held for a group'))}
+      title={stay ? stay.name : hold && (hold.groupName || hold.purpose === 'course_term') ? reservationTitle(lang, hold) : t('Für eine Gruppe reserviert', 'Held for a group')}
       subtitle={where}
       footer={
         stay ? (

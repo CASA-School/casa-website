@@ -15,6 +15,7 @@ import { RecordTabList, RecordTabPanel, RecordTabs, type RecordTab } from '@/com
 import { Badge, Card, DateText, DetailList, IconChip, RecordHeader, type BadgeTone } from '@/components/admin/ui';
 import { SearchableRows } from '@/components/admin/more-in-panel';
 import { groupReservations } from '@/lib/admin/accommodation';
+import { RESERVATION_ACCEPTS_LABELS } from '@/lib/admin/accommodation-labels';
 import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import { bookingLight, bookingLightLabel } from '@/lib/admin/bookings';
@@ -269,6 +270,7 @@ export default async function GroupPage({
                   detail={[
                     dayRange(r.from, r.to, lang),
                     r.minPeople || r.maxPeople ? t(`${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} Personen`, `${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} people`) : null,
+                    r.accepts ? pick(lang, RESERVATION_ACCEPTS_LABELS[r.accepts]) : null,
                     r.roomName,
                     r.note,
                   ]

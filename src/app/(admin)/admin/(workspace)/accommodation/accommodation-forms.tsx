@@ -3,9 +3,9 @@ import { PlaceStayFields } from './place-stay-fields';
 import { DialogFooter } from '@/components/admin/dialogs';
 import { OptionalSection } from '@/components/admin/optional-section';
 import { Button, Field, Input, Select, Textarea } from '@/components/admin/ui';
-import type { PlaceDetail, PlaceMember, PlaceRoom, placementChoices } from '@/lib/admin/accommodation';
+import type { OfferKind, PlaceDetail, PlaceMember, PlaceRoom, offerChoices, placementChoices } from '@/lib/admin/accommodation';
 import { ACCOMMODATION_KIND_LABELS, ACCOMMODATION_KINDS, MEMBER_ROLE_LABELS, MEMBER_ROLES } from '@/lib/admin/accommodation-labels';
-import { pick, type Bilingual } from '@/lib/admin/i18n';
+import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 
 /**
@@ -14,6 +14,21 @@ import { getI18n } from '@/lib/admin/i18n.server';
  */
 
 const yesNoValue = (v: boolean | null | undefined) => (v === true ? 'yes' : v === false ? 'no' : '');
+const box = 'size-4 rounded border-ws-line-firm accent-[var(--casa-accent-surface)]';
+
+/** What a host offers, as ticks: the vocabulary's choices, the place's ticked. */
+function OfferTicks({ name, options, checked, lang }: { name: string; options: readonly { code: string; name: Bilingual }[]; checked: readonly string[]; lang: WsLang }) {
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
+      {options.map((o) => (
+        <label key={o.code} className="flex cursor-pointer items-center gap-2 text-[0.86rem]">
+          <input type="checkbox" name={name} value={o.code} defaultChecked={checked.includes(o.code)} className={box} />
+          {pick(lang, o.name)}
+        </label>
+      ))}
+    </div>
+  );
+}
 
 async function YesNo({ id, name, label, value }: { id: string; name: string; label: string; value: boolean | null | undefined }) {
   const { t } = await getI18n();
@@ -92,8 +107,15 @@ export async function NewPlaceForm() {
   );
 }
 
-export async function EditPlaceForm({ place }: { place: PlaceDetail }) {
-  const { t } = await getI18n();
+const OFFER_FIELDS: Record<OfferKind, string> = { types: 'offeredTypes', catering: 'offeredCatering', rooms: 'offeredRoomTypes' };
+
+export async function EditPlaceForm({ place, offers }: { place: PlaceDetail; offers: Awaited<ReturnType<typeof offerChoices>> }) {
+  const { t, lang } = await getI18n();
+  const offerLabels: Record<OfferKind, string> = {
+    types: t('Unterkunftsart', 'Accommodation type'),
+    catering: t('Verpflegung', 'Catering'),
+    rooms: t('Zimmerarten', 'Room types'),
+  };
   return (
     <form action={updatePlaceAction} className="space-y-4">
       <input type="hidden" name="placeId" value={place.id} />
@@ -109,10 +131,19 @@ export async function EditPlaceForm({ place }: { place: PlaceDetail }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <YesNo id="place-edit-smoker" name="smoker" label={t('Raucherhaushalt', 'Smoking household')} value={place.smoker} />
         <YesNo id="place-edit-washing" name="washingMachine" label={t('Waschmaschine', 'Washing machine')} value={place.washingMachine} />
-        <Field label={t('Haustiere', 'Pets')} htmlFor="place-edit-pets">
-          <Input id="place-edit-pets" name="pets" maxLength={200} defaultValue={place.pets ?? ''} />
-        </Field>
+        <YesNo id="place-edit-has-pets" name="hasPets" label={t('Haustiere', 'Pets')} value={place.hasPets} />
       </div>
+      <Field label={t('Welche Tiere', 'Which animals')} htmlFor="place-edit-pets">
+        <Input id="place-edit-pets" name="pets" maxLength={200} defaultValue={place.pets ?? ''} />
+      </Field>
+      {(Object.keys(OFFER_FIELDS) as OfferKind[]).map((kind) => (
+        <Field key={kind} label={offerLabels[kind]}>
+          <OfferTicks name={OFFER_FIELDS[kind]} options={offers[kind]} checked={place.offers[kind].codes} lang={lang} />
+        </Field>
+      ))}
+      <Field label={t('Wohnungsgeber', 'Landlord')} htmlFor="place-edit-landlord">
+        <Textarea id="place-edit-landlord" name="landlord" rows={3} maxLength={500} defaultValue={place.landlord ?? ''} />
+      </Field>
       <Field label={t('Beschreibung (Deutsch)', 'Description (German)')} htmlFor="place-edit-de">
         <Textarea id="place-edit-de" name="descriptionDe" rows={3} maxLength={4000} defaultValue={place.descriptionDe ?? ''} />
       </Field>
@@ -136,7 +167,10 @@ export async function RoomForm({ placeId, room, types }: { placeId: string; room
     <form action={saveRoomAction} className="space-y-3">
       <input type="hidden" name="placeId" value={placeId} />
       {room ? <input type="hidden" name="roomId" value={room.id} /> : null}
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_6rem]">
+      <div className="grid gap-3 sm:grid-cols-[5rem_minmax(0,1fr)_11rem_6rem]">
+        <Field label={t('Nummer', 'Number')} htmlFor={id('number')}>
+          <Input id={id('number')} name="number" inputMode="numeric" maxLength={2} defaultValue={room?.number ?? ''} />
+        </Field>
         <Field label={t('Name', 'Name')} htmlFor={id('name')}>
           <Input id={id('name')} name="name" maxLength={80} defaultValue={room?.name ?? ''} autoFocus={!room} />
         </Field>

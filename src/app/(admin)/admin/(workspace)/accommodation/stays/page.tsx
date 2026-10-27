@@ -32,7 +32,7 @@ export default async function StaysPage({ searchParams }: { searchParams: Promis
   // every place, so it is not on every row of the longer lists).
   const canEdit = canAccess(user, 'accommodation', 'edit') && (view === 'arriving' || view === 'unplaced');
   const seesBookings = canAccess(user, 'bookings');
-  const [stays, counts, choices] = await Promise.all([listStays({ view, kind, search }), stayCounts(), canEdit ? placementChoices() : Promise.resolve([])]);
+  const [stays, counts, choices] = await Promise.all([listStays({ view, kind, search }), stayCounts(), canEdit ? placementChoices(lang) : Promise.resolve([])]);
   const query = (v: StayView, k: AccommodationKind | undefined) => {
     const q = new URLSearchParams();
     if (v !== 'now') q.set('view', v);

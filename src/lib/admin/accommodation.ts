@@ -1,10 +1,19 @@
 import 'server-only';
 
-import type { AccommodationKind, MemberRole, PlaceView, StayView } from './accommodation-labels';
+import {
+  roomLabel,
+  type AccommodationKind,
+  type MemberRole,
+  type PlaceView,
+  type ReservationAccepts,
+  type ReservationPurpose,
+  type StayView,
+} from './accommodation-labels';
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
+import type { Session } from './day-plan-labels';
 import { query, queryFirst, withTransaction } from './db';
-import type { Bilingual } from './i18n';
+import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
  * Accommodation (2026-10-18, migration 0060; docs/ADMIN_WORKSPACE.md §Accommodation): the places learners
@@ -130,14 +139,33 @@ export type PlaceDetail = {
   descriptionDe: string | null;
   descriptionEn: string | null;
   smoker: boolean | null;
+  /** Whether pets live there (0095); `pets` says which. */
+  hasPets: boolean | null;
   pets: string | null;
   washingMachine: boolean | null;
   rating: number | null;
+  /** The Wohnungsgeber, as on the Wohnungsgeberbestätigung: name and address, a line each (0095). */
+  landlord: string | null;
+  /** What the host offers (0095): vocabulary codes, and their names in the vocabulary's order. */
+  offers: Record<OfferKind, { codes: string[]; names: Bilingual[] }>;
   isActive: boolean;
   note: string | null;
   fromSchoolMan: boolean;
   createdAt: Date;
 };
+
+/** What a host offers: kinds of accommodation, meals, kinds of room (0095) — each a vocabulary's codes. */
+export type OfferKind = 'types' | 'catering' | 'rooms';
+const OFFER_VOCABULARY: Record<OfferKind, { table: string; column: string }> = {
+  types: { table: 'accommodation_types', column: 'offered_types' },
+  catering: { table: 'catering_options', column: 'offered_catering' },
+  rooms: { table: 'accommodation_room_types', column: 'offered_room_types' },
+};
+const offerNames = (kind: OfferKind) =>
+  `(SELECT coalesce(json_agg(json_build_object('code', v.code, 'de', v.name_de, 'en', v.name_en) ORDER BY v.position, v.code), '[]')
+      FROM ${OFFER_VOCABULARY[kind].table} v WHERE v.code = ANY(a.${OFFER_VOCABULARY[kind].column})) AS offers_${kind}`;
+type OfferRow = { code: string; de: string | null; en: string | null }[];
+const toOffer = (rows: OfferRow) => ({ codes: rows.map((r) => r.code), names: rows.map((r) => ({ de: r.de ?? r.en ?? r.code, en: r.en ?? r.de ?? r.code })) });
 
 export async function getPlace(id: string): Promise<PlaceDetail | null> {
   const r = await queryFirst<{
@@ -151,17 +179,23 @@ export async function getPlace(id: string): Promise<PlaceDetail | null> {
     description_de: string | null;
     description_en: string | null;
     smoker: boolean | null;
+    has_pets: boolean | null;
     pets: string | null;
     washing_machine: boolean | null;
     rating: number | null;
+    landlord: string | null;
+    offers_types: OfferRow;
+    offers_catering: OfferRow;
+    offers_rooms: OfferRow;
     is_active: boolean;
     note: string | null;
     from_schoolman: boolean;
     created_at: Date;
   }>(
-    `SELECT id, name, kind, contact_name, email, phone, address, description_de, description_en, smoker, pets, washing_machine, rating, is_active, note,
-            filemaker_id IS NOT NULL AS from_schoolman, created_at
-       FROM accommodations WHERE id = $1`,
+    `SELECT a.id, a.name, a.kind, a.contact_name, a.email, a.phone, a.address, a.description_de, a.description_en, a.smoker, a.has_pets, a.pets, a.washing_machine,
+            a.rating, a.landlord, ${offerNames('types')}, ${offerNames('catering')}, ${offerNames('rooms')}, a.is_active, a.note,
+            a.filemaker_id IS NOT NULL AS from_schoolman, a.created_at
+       FROM accommodations a WHERE a.id = $1`,
     [id]
   );
   if (!r) return null;
@@ -176,14 +210,27 @@ export async function getPlace(id: string): Promise<PlaceDetail | null> {
     descriptionDe: r.description_de,
     descriptionEn: r.description_en,
     smoker: r.smoker,
+    hasPets: r.has_pets,
     pets: r.pets,
     washingMachine: r.washing_machine,
     rating: r.rating,
+    landlord: r.landlord,
+    offers: { types: toOffer(r.offers_types), catering: toOffer(r.offers_catering), rooms: toOffer(r.offers_rooms) },
     isActive: r.is_active,
     note: r.note,
     fromSchoolMan: r.from_schoolman,
     createdAt: r.created_at,
   };
+}
+
+/** The choices of what a host offers, for the place's form: each vocabulary in its order. */
+export async function offerChoices(): Promise<Record<OfferKind, { code: string; name: Bilingual }[]>> {
+  const read = async (kind: OfferKind) =>
+    (await query<{ code: string; name_de: string | null; name_en: string | null }>(`SELECT code, name_de, name_en FROM ${OFFER_VOCABULARY[kind].table} ORDER BY position, code`)).map(
+      (r) => ({ code: r.code, name: { de: r.name_de ?? r.name_en ?? r.code, en: r.name_en ?? r.name_de ?? r.code } })
+    );
+  const [types, catering, rooms] = await Promise.all([read('types'), read('catering'), read('rooms')]);
+  return { types, catering, rooms };
 }
 
 export type PlaceMember = { id: string; firstName: string | null; lastName: string | null; name: string; role: MemberRole };
@@ -201,6 +248,8 @@ export async function placeMembers(id: string): Promise<PlaceMember[]> {
 export type PlaceRoom = {
   id: string;
   name: string | null;
+  /** Its number in the place (0095): „Zimmernummer in der Wohngemeinschaft". */
+  number: number | null;
   roomTypeCode: string | null;
   roomType: Bilingual | null;
   beds: number | null;
@@ -214,6 +263,7 @@ export async function placeRooms(id: string): Promise<PlaceRoom[]> {
   const rows = await query<{
     id: string;
     name: string | null;
+    number: number | null;
     room_type_code: string | null;
     type_de: string | null;
     type_en: string | null;
@@ -222,18 +272,19 @@ export async function placeRooms(id: string): Promise<PlaceRoom[]> {
     is_active: boolean;
     occupants: { name: string; until: string }[] | null;
   }>(
-    `SELECT r.id, r.name, r.room_type_code, t.name_de AS type_de, t.name_en AS type_en, r.beds, r.note, r.is_active,
+    `SELECT r.id, r.name, r.number, r.room_type_code, t.name_de AS type_de, t.name_en AS type_en, r.beds, r.note, r.is_active,
             (SELECT json_agg(json_build_object('name', btrim(p.first_name || ' ' || coalesce(p.last_name, '')), 'until', s.ends_on) ORDER BY s.ends_on)
                FROM booking_stays s JOIN bookings b ON b.id = s.booking_id JOIN people p ON p.id = b.person_id
               WHERE s.room_id = r.id AND s.starts_on <= current_date AND s.ends_on >= current_date AND ${LIVE_STAY('s')}) AS occupants
        FROM accommodation_rooms r LEFT JOIN accommodation_room_types t ON t.code = r.room_type_code
       WHERE r.accommodation_id = $1
-      ORDER BY r.is_active DESC, lower(coalesce(r.name, '')), r.id`,
+      ORDER BY r.is_active DESC, r.number NULLS LAST, lower(coalesce(r.name, '')), r.id`,
     [id]
   );
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
+    number: r.number,
     roomTypeCode: r.room_type_code,
     roomType: r.type_de || r.type_en ? { de: r.type_de ?? r.type_en ?? '', en: r.type_en ?? r.type_de ?? '' } : null,
     beds: r.beds,
@@ -287,6 +338,11 @@ export type Reservation = {
   id: string;
   placeId: string;
   placeName: string;
+  /** For a group visit, or for the learners of a course term and its part of the day (0095). */
+  purpose: ReservationPurpose;
+  courseSession: Session | null;
+  /** Whom the host takes for these beds. */
+  accepts: ReservationAccepts | null;
   groupId: string | null;
   groupName: string | null;
   from: string;
@@ -297,7 +353,7 @@ export type Reservation = {
   note: string | null;
 };
 
-const RESERVATIONS = `SELECT v.id, v.accommodation_id, a.name AS place_name, v.group_visit_id, g.name AS group_name,
+const RESERVATIONS = `SELECT v.id, v.accommodation_id, a.name AS place_name, v.purpose, v.course_session, v.accepts, v.group_visit_id, g.name AS group_name,
          to_char(v.starts_on, 'YYYY-MM-DD') AS from_day, to_char(v.ends_on, 'YYYY-MM-DD') AS to_day, v.min_people, v.max_people, r.name AS room_name, v.note
     FROM accommodation_reservations v
     JOIN accommodations a ON a.id = v.accommodation_id
@@ -308,6 +364,9 @@ type ReservationRow = {
   id: string;
   accommodation_id: string;
   place_name: string;
+  purpose: ReservationPurpose;
+  course_session: Session | null;
+  accepts: ReservationAccepts | null;
   group_visit_id: string | null;
   group_name: string | null;
   from_day: string;
@@ -321,6 +380,9 @@ const toReservation = (r: ReservationRow): Reservation => ({
   id: r.id,
   placeId: r.accommodation_id,
   placeName: r.place_name,
+  purpose: r.purpose,
+  courseSession: r.course_session,
+  accepts: r.accepts,
   groupId: r.group_visit_id,
   groupName: r.group_name,
   from: r.from_day,
@@ -331,7 +393,7 @@ const toReservation = (r: ReservationRow): Reservation => ({
   note: r.note,
 });
 
-/** The beds held at a place for groups, the latest first. */
+/** The beds held at a place — for groups and for course terms — the latest first. */
 export async function placeReservations(id: string): Promise<Reservation[]> {
   return (await query<ReservationRow>(`${RESERVATIONS} WHERE v.accommodation_id = $1 ORDER BY v.starts_on DESC, v.id`, [id])).map(toReservation);
 }
@@ -450,10 +512,16 @@ export async function stayCounts(): Promise<Record<StayView, number>> {
 }
 
 /** The places and their rooms a stay can be placed in: the active ones, CASA's flats first. */
-export async function placementChoices(): Promise<{ id: string; name: string; kind: AccommodationKind; rooms: { id: string; name: string }[] }[]> {
-  const rows = await query<{ id: string; name: string; kind: AccommodationKind; rooms: { id: string; name: string | null; type: string | null }[] | null }>(
+export async function placementChoices(lang: WsLang): Promise<{ id: string; name: string; kind: AccommodationKind; rooms: { id: string; name: string }[] }[]> {
+  const rows = await query<{
+    id: string;
+    name: string;
+    kind: AccommodationKind;
+    rooms: { id: string; name: string | null; number: number | null; type: string | null }[] | null;
+  }>(
     `SELECT a.id, a.name, a.kind,
-            (SELECT json_agg(json_build_object('id', r.id, 'name', r.name, 'type', t.name_de) ORDER BY lower(coalesce(r.name, '')), r.id)
+            (SELECT json_agg(json_build_object('id', r.id, 'name', r.name, 'number', r.number, 'type', t.name_de)
+                    ORDER BY r.number NULLS LAST, lower(coalesce(r.name, '')), r.id)
                FROM accommodation_rooms r LEFT JOIN accommodation_room_types t ON t.code = r.room_type_code
               WHERE r.accommodation_id = a.id AND r.is_active) AS rooms
        FROM accommodations a WHERE a.is_active
@@ -463,7 +531,7 @@ export async function placementChoices(): Promise<{ id: string; name: string; ki
     id: r.id,
     name: r.name,
     kind: r.kind,
-    rooms: (r.rooms ?? []).map((room, i) => ({ id: room.id, name: room.name || room.type || `Zimmer ${i + 1}` })),
+    rooms: (r.rooms ?? []).map((room, i) => ({ id: room.id, name: roomLabel(lang, room) || room.type || pick(lang, { de: `Zimmer ${i + 1}`, en: `Room ${i + 1}` }) })),
   }));
 }
 
@@ -479,8 +547,11 @@ export type PlaceInput = {
   descriptionDe: string | null;
   descriptionEn: string | null;
   smoker: boolean | null;
+  hasPets: boolean | null;
   pets: string | null;
   washingMachine: boolean | null;
+  landlord: string | null;
+  offers: Record<OfferKind, string[]>;
   note: string | null;
 };
 
@@ -497,12 +568,22 @@ const placeValues = (i: PlaceInput) => [
   i.pets,
   i.washingMachine,
   i.note,
+  i.hasPets,
+  i.landlord,
+  i.offers.types,
+  i.offers.catering,
+  i.offers.rooms,
 ];
+
+/** The codes of a vocabulary among those asked for, in its order: nothing else is ever stored. */
+const offered = (kind: OfferKind, param: number) =>
+  `ARRAY(SELECT v.code FROM ${OFFER_VOCABULARY[kind].table} v WHERE v.code = ANY($${param}::text[]) ORDER BY v.position, v.code)`;
 
 export async function createPlace(input: PlaceInput, actor: StaffUser): Promise<string> {
   const row = await queryFirst<{ id: string }>(
-    `INSERT INTO accommodations (name, kind, contact_name, email, phone, address, description_de, description_en, smoker, pets, washing_machine, note, created_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+    `INSERT INTO accommodations (name, kind, contact_name, email, phone, address, description_de, description_en, smoker, pets, washing_machine, note, has_pets, landlord,
+                                 offered_types, offered_catering, offered_room_types, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, ${offered('types', 15)}, ${offered('catering', 16)}, ${offered('rooms', 17)}, $18) RETURNING id`,
     [...placeValues(input), actor.id]
   );
   await logActivity({ actor, entity: 'accommodation', entityId: row!.id, action: 'accommodation_created' });
@@ -512,7 +593,8 @@ export async function createPlace(input: PlaceInput, actor: StaffUser): Promise<
 export async function updatePlace(id: string, input: PlaceInput, actor: StaffUser): Promise<Result> {
   const rows = await query<{ id: string }>(
     `UPDATE accommodations SET name = $2, kind = $3, contact_name = $4, email = $5, phone = $6, address = $7, description_de = $8, description_en = $9,
-            smoker = $10, pets = $11, washing_machine = $12, note = $13, updated_at = timezone('utc', now())
+            smoker = $10, pets = $11, washing_machine = $12, note = $13, has_pets = $14, landlord = $15, offered_types = ${offered('types', 16)},
+            offered_catering = ${offered('catering', 17)}, offered_room_types = ${offered('rooms', 18)}, updated_at = timezone('utc', now())
       WHERE id = $1 RETURNING id`,
     [id, ...placeValues(input)]
   );
@@ -562,22 +644,23 @@ export async function deletePlace(id: string, actor: StaffUser): Promise<Result>
 
 const placeExists = async (id: string) => Boolean(await queryFirst<{ id: string }>(`SELECT id FROM accommodations WHERE id = $1`, [id]));
 
-export type RoomInput = { name: string | null; roomTypeCode: string | null; beds: number | null; note: string | null; isActive: boolean };
+export type RoomInput = { name: string | null; number: number | null; roomTypeCode: string | null; beds: number | null; note: string | null; isActive: boolean };
 
 export async function saveRoom(placeId: string, roomId: string | null, input: RoomInput, actor: StaffUser): Promise<Result> {
   if (!(await placeExists(placeId))) return GONE;
-  const values = [input.name, input.roomTypeCode, input.beds, input.note, input.isActive];
+  const values = [input.name, input.roomTypeCode, input.beds, input.note, input.isActive, input.number];
   if (roomId) {
     const rows = await query<{ id: string }>(
-      `UPDATE accommodation_rooms SET name = $3, room_type_code = (SELECT code FROM accommodation_room_types WHERE code = $4), beds = $5, note = $6, is_active = $7
+      `UPDATE accommodation_rooms SET name = $3, room_type_code = (SELECT code FROM accommodation_room_types WHERE code = $4), beds = $5, note = $6, is_active = $7,
+              number = $8
         WHERE id = $1 AND accommodation_id = $2 RETURNING id`,
       [roomId, placeId, ...values]
     );
     if (!rows.length) return refuse('Dieses Zimmer gibt es nicht mehr.', 'This room no longer exists.');
   } else {
     await query(
-      `INSERT INTO accommodation_rooms (accommodation_id, name, room_type_code, beds, note, is_active)
-       VALUES ($1, $2, (SELECT code FROM accommodation_room_types WHERE code = $3), $4, $5, $6)`,
+      `INSERT INTO accommodation_rooms (accommodation_id, name, room_type_code, beds, note, is_active, number)
+       VALUES ($1, $2, (SELECT code FROM accommodation_room_types WHERE code = $3), $4, $5, $6, $7)`,
       [placeId, ...values]
     );
   }

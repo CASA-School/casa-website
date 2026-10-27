@@ -214,8 +214,8 @@ payer on 1,169 bookings and 2,321 letters linked.
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
 | Participants of earlier years' groups | 712 group bookings in all; 82 came across | leave in SchoolMan (history; many are minors) |
-| `DateRent.Comment` | 349 · 188 | **needed for daily work.** The accommodation colleague's note on a group's bed reservation. |
-| `DateRent._ID_Management`, `_ID_Session`, `_ID_DateOffer` | 543 · 247 / 143 · 127 / 203 · 120 | useful later (the place comes across; these are links) |
+| ~~`DateRent.Comment`~~ | 349 · 188 | **Done 2026-10-27 (0095):** whom the host takes (`accepts`), the rest as the note. |
+| `DateRent._ID_Management`, ~~`_ID_Session`~~, `_ID_DateOffer` | 543 · 247 / 143 · 127 / 203 · 120 | `_ID_Session` **done 2026-10-27 (0095)**: beds held for an intensive-course term and its part of the day. The other two are copies (the place, the group's offer line). |
 | Group stays (`DateAccommodation._ID_Group`) outside the sample | 700 · 234 | useful later. This year's are in. |
 | Group letters (`Letter._ID_Group`) 23; group invoices 6 | — | useful later (groups.md already lists them) |
 
@@ -252,11 +252,11 @@ stays.
 | Gap | Filled · since 2025 | Verdict |
 | --- | ---: | --- |
 | **Stays outside the sample** | 2,465 in all, 510 new in 2026; 451 came across | **needed for daily work.** Natalia's lists ("arriving soon", "no place yet"), the WG-Belegung and the hosts' rent all miss everyone who arrives more than four weeks out. |
-| **What a host offers: type, meals, room.** Read from `Accommodation._ID_AccommodationTypeOffer` (60 filled, last used 2024). Since 2024 it lives on `Management._ID_AccommodationTypeOffer` / `_CateringOffer` / `_RoomOffer` (128 · 31 / 122 · 29 / 95 · 29). | — | **needed for daily work.** The reader reads an abandoned field, so newer hosts arrive without what they offer. |
-| **Pets.** Read from `Accommodation._ID_Pet` (26, last used 2024) with `AnimalAtHome` (29). The field in use is `_ID_Animal` (90 · 31). | — | **needed for daily work** (matching learners with allergies). Same pattern as the host offers. |
+| ~~**What a host offers: type, meals, room.**~~ | — | **Done 2026-10-27 (0095):** from `Management`'s offers, else the place's own; 121 / 121 / 95 places. Types 3, 4, 5 wait for their keys. |
+| ~~**Pets.**~~ | — | **Done 2026-10-27 (0095):** `has_pets` from `_ID_Animal`, else `_ID_Pet`; 31 yes, 64 no. |
 | `Accommodation._ID_Shown`, `_ID_PermanentOffer` | 141 · 38 / 37 · 13 | Listed or bookable, and permanently available *(?)* | useful later. **Ask Natalia.** |
 | `DateAccommodation._ID_Agency`, `_ID_AccommodationEnquiry` | 1,097 · 442 / 110 · 75 | The agency that arranged the stay, and the enquiry to a host | useful later |
-| `Room._ID_InternalRoom` | 199 · 15 | Unknown *(?)* | leave in SchoolMan |
+| ~~`Room._ID_InternalRoom`~~ | 199 · 15 | The room's number in the place, on the check-in letters | **Done 2026-10-27 (0095):** `accommodation_rooms.number`, 76 rooms |
 | Letters to hosts and rent payouts for stays outside the sample | 752 letters (130 came across) | Follows the sample decision |
 | `Letter._ID_EnquiryHost` (letters asking a host) | 73 · 73 | useful later |
 
@@ -349,11 +349,11 @@ reception weekday shifts.
 | 2 | **Teacher's level confirmation, success and show-up** are not read | `_ID_LevelConfirmed` 7,542, `_ID_LevelApproved` 4,652, `_ID_Success` 1,981, `_ID_ShownUp` 4,217 | Read them onto the booking. The Klassenbuch already writes them into SchoolMan. |
 | 3 | **Waiting list empty**: the bridge looks for the course in the wrong place | 0 imported; 575 joined in 2026 | Take the course from `PreBooking._ID_Course` through `PreBooking._ID_WaitingRoom` |
 | 4 | **Missing documents per booking** | `_ID_MissingItemReference` 2,754 (1,133 since 2025) | Read the list; the missing-information letter needs it |
-| 5 | **Host offer and pets read from fields abandoned in 2024** | Offer fields 128/122/95 on `Management`; `_ID_Animal` 90 | Change two lines in `read_accommodation.py` |
+| 5 | ~~**Host offer and pets read from fields abandoned in 2024**~~ | Offer fields 128/122/95 on `Management`; `_ID_Animal` 90 | **Done 2026-10-27 (0095)** |
 | 6 | **Exam sittings are incomplete**: external candidates, the oral and written part days, and the examiners | `SingleDateExam` 270; `exam_session_examiners` empty | **Parts and examiners done 2026-10-26** (`read_exams.py`: real hours on 76 sittings, 55 examiners); external candidates still open |
 | 7 | **Follow-ups outside the sample** | 5,759 not brought | Follows #1 |
 | 8 | **The kind of each history line** | `_ID_ProcessReference` on 97,172 lines | Read it; offer it as a filter |
-| 9 | **Course notes and group-reservation notes** | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 | Read them onto the course and the reservation |
+| 9 | **Course notes** and ~~group-reservation notes~~ | `Comment` on courses 764 (380 since 2025); `DateRent.Comment` 349 (**done 2026-10-27**, 0095) | Read them onto the course |
 | 10 | **Payment ↔ charge link and passport number** | `PaymentIn._ID_CostDetail` 20,245; `NumberPassport` 1,262 (decided to come; column exists) | Read both. Passport stays under the restricted module. |
 
 Close behind: show the SchoolMan booking and learner numbers on the booking (stored, not shown);
