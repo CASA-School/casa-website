@@ -30,7 +30,6 @@ import { roomChoice } from '@/lib/admin/course-starts';
 import { courseForEdit, courseLearners, type CourseLearner } from '@/lib/admin/courses';
 import { num, pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { listNotes } from '@/lib/admin/notes';
 import { listCountries } from '@/lib/admin/people';
 import { ABSENCE_LABELS, isAbsenceReason } from '@/lib/admin/kursplanung/types';
 import { isoWeek } from '@/lib/admin/kursplanung/weeks';
