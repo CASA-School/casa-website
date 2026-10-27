@@ -5,6 +5,8 @@
  * a step that fails remembers nothing. A record that depends on something here (its booking, its course)
  * puts that in the fingerprint, so it is written again the run that something arrives. Never a value a
  * step of the run itself changes (a sitting's hours, a count): it would make every record look changed.
+ * Nor the order of rows a query returns without ORDER BY: a release re-applies the seeds, which moves
+ * rows, and every learner had looked changed after one (2026-10-27) — `unordered` is for vocabularies.
  *
  * `BRIDGE_FULL=1` (or `--full`) writes every record, as every run did before. Without the table (a
  * database not yet migrated) every record is written and nothing is remembered.
@@ -13,6 +15,9 @@ import { createHash } from 'node:crypto';
 
 const fingerprint = (value) => createHash('sha256').update(JSON.stringify(value)).digest('base64url').slice(0, 22);
 const BATCH = 5000;
+
+/** A vocabulary's rows or a Map's entries, in an order that does not depend on how the database stores them. */
+export const unordered = (rows) => [...rows].map((r) => JSON.stringify(r)).sort();
 
 export async function changes(client, step) {
   const full = process.env.BRIDGE_FULL === '1' || process.argv.includes('--full');

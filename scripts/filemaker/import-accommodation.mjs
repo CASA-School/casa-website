@@ -16,7 +16,7 @@
  * - The comments on a place become its notes, under their SchoolMan author.
  */
 import { connect } from '../db/client.mjs';
-import { changes } from './bridge-changes.mjs';
+import { changes, unordered } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -35,7 +35,7 @@ try {
   // A place as it was last time, its reservations' groups here as they were, is passed over (0088).
   const changed = await changes(client, 'accommodation');
   const groupsHere = new Set((await client.query(`SELECT filemaker_group_id::text AS k FROM group_visits WHERE filemaker_group_id IS NOT NULL`)).rows.map((r) => r.k));
-  const vocabulary = [...roomTypes];
+  const vocabulary = unordered(roomTypes);
 
   for (const p of places) {
     if (changed.same(p.id, [p, vocabulary, p.reservations.map((r) => groupsHere.has(String(r.group)))])) continue;
