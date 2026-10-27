@@ -2703,6 +2703,10 @@
     "de": "Eine Person erklärt einer anderen am Tisch ein Arbeitsblatt",
     "text": "Один человек объясняет другому рабочий лист за столом"
   },
+  "t.eine-plueschmoewe-auf-einer.1skdwce": {
+    "de": "Eine Plüschmöwe auf einer Holzbank",
+    "text": "Плюшевая чайка на деревянной скамейке"
+  },
   "t.eine-rallye-in-teams.k28rg9": {
     "de": "Eine Rallye in Teams durch die Altstadt, der Klassiker für den ersten Tag.",
     "text": "Командный квест по Старому городу — классика для первого дня."
@@ -4738,6 +4742,10 @@
   "t.lehrkraefte.1p4nbuo": {
     "de": "Lehrkräfte",
     "text": "Преподаватели"
+  },
+  "t.lehrkraft.1q992jh": {
+    "de": "Lehrkraft",
+    "text": "Преподаватель"
   },
   "t.lehrmaterial.n7vctv": {
     "de": "Lehrmaterial",

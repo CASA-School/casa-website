@@ -367,9 +367,10 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    `40+ staff/teachers` (confirmed by Rahman, 2026-10-09).
 2. **No person-specific portraits with named testimonials** unless the identity and
    the quote-to-person relationship are explicitly verified.
-3. **Team portraits are synthetic placeholders** for layout only
-   (`public/media/casa/team/`). They must be replaced with verified real staff
-   portraits before launch. Do not present them as real staff.
+3. **Team portraits are real colleagues, with consent** (`public/media/casa/team/`,
+   CASA's 2026-09-10 team shoot, named by Rahman on 2026-10-27). Only a photo
+   CASA supplied for that person, only resized; anyone without one keeps a Bremer
+   Stadtmusikanten stand-in. Never a synthetic or generated face beside a real name.
 4. **Photo edits stay source-faithful** — crop, resize, light exposure/color
    correction only. No generative editing (expansion, relighting, retouching by an
    image model). The homepage hero photograph (and the retired reel's crops) are built and

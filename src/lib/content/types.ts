@@ -130,9 +130,8 @@ export type CulturalProgramItem = {
  * responsibilities and nothing else — and a required field is an instruction to
  * make something up when there is nothing to put in it.
  *
- * `photo` stays in the type for when real portraits arrive with consent. Until
- * then it is absent and the directory renders a monogram. Do not point it at the
- * synthetic images in public/media/casa/team/ (CLAUDE.md hard rule 3).
+ * `photo` is a real portrait CASA supplied, with consent (CLAUDE.md hard rule 3);
+ * without one the directory draws a Bremer Stadtmusikanten stand-in.
  *
  * `bio` and `languages` are what a colleague chose to say about themselves
  * (2026-10-27), shown when their card is opened. Most will have neither.
