@@ -44,8 +44,8 @@ export function EntryTestCard({
 }) {
   const { t, lang } = useWsLang();
   return (
-    <section className="mb-6 overflow-hidden rounded-2xl border border-ws-line bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-      <header className="flex items-center gap-2.5 border-b border-ws-line-soft px-5 py-3.5">
+    <section className="mb-6 overflow-hidden rounded-2xl border border-ws-card-line bg-white shadow-ws-card">
+      <header className="flex items-center gap-2.5 border-b border-ws-card-line bg-ws-card-head px-5 py-3.5">
         <IconChip icon={Icon.placement} tint="blue" />
         <h2 className="text-[0.95rem] font-extrabold text-[var(--casa-ink)]">{heading ?? t('Einstufungstest', 'Placement test')}</h2>
         <span className="ml-auto flex items-center gap-2">

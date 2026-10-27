@@ -161,9 +161,11 @@ export function RecordTabList({ label }: { label: string }) {
             onClick={() => select(tab.id)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              'group relative inline-flex h-12 shrink-0 items-center gap-2 px-3 text-[0.86rem] font-semibold whitespace-nowrap transition-colors',
-              'rounded-t-lg outline-none focus-visible:bg-[#f4f7fb] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 focus-visible:ring-inset',
-              selected ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)] hover:text-[var(--casa-ink)]'
+              'group relative inline-flex h-12 shrink-0 items-center gap-2 px-3 text-[0.875rem] font-semibold whitespace-nowrap transition-colors',
+              'rounded-t-lg outline-none focus-visible:bg-ws-card-head focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30 focus-visible:ring-inset',
+              // The open tab in FileMaker's navy over its line, the others lit on hover: navigation, not a row of
+              // labels (2026-10-27). One weight for all, so choosing a tab never shifts the ones after it.
+              selected ? 'text-[var(--fm-navy)]' : 'text-[var(--casa-muted)] hover:bg-ws-card-head hover:text-[var(--casa-ink)]'
             )}
           >
             {tab.icon ? (
@@ -183,14 +185,14 @@ export function RecordTabList({ label }: { label: string }) {
               </span>
             ) : null}
             {/* Without the sliding line (before it is measured), the open tab carries its own. */}
-            {selected && !line ? <span aria-hidden="true" className="absolute inset-x-2 bottom-0 h-[2.5px] rounded-full bg-[var(--fm-navy)]" /> : null}
+            {selected && !line ? <span aria-hidden="true" className="absolute inset-x-2 bottom-0 h-[3px] rounded-full bg-[var(--fm-navy)]" /> : null}
           </button>
         );
       })}
       {line ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-0 h-[2.5px] rounded-full bg-[var(--fm-navy)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          className="pointer-events-none absolute bottom-0 left-0 h-[3px] rounded-full bg-[var(--fm-navy)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
           style={{ width: line.width - 16, transform: `translateX(${line.left + 8}px)` }}
         />
       ) : null}

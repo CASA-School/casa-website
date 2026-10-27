@@ -31,12 +31,13 @@ import { cn } from '@/lib/utils';
  *
  * TWO RULES THIS FILE ENFORCES FOR EVERY SCREEN
  *
- * 1. A SECTION IS ONE WHITE BLOCK, and the canvas between sections is what
- *    separates them. A card's header is therefore white with a rule under it,
- *    not a grey band: a grey header the same value as the page gap made two
- *    stacked cards read as one continuous strip. The only recessed band inside
- *    a card is a table header or a toolbar (`--ws-sunk`), which then reads
- *    unambiguously as a sub-level rather than as the page showing through.
+ * 1. A SECTION IS ONE FRAMED BLOCK, and the canvas between sections is what
+ *    separates them. A card's head is a band of the navy's palest tint
+ *    (`--ws-card-head`) with a rule under it — lighter than the canvas by a
+ *    measured step, so it never reads as the page showing through: a grey
+ *    header the same value as the page gap once made two stacked cards read
+ *    as one continuous strip. The edge is `--ws-card-line` with a soft shadow
+ *    (`--ws-card-shadow`), firm enough to see on the canvas (2026-10-27).
  *
  * 2. A FIELD TITLE IS A LABEL, NOT AN EYEBROW. Field names in `DetailList` and
  *    a `Table`'s column heads are 12px sentence case in
@@ -163,7 +164,8 @@ export function IconChip({ icon, tint = 'ink', size = 'sm' }: { icon: ReactNode;
   );
 }
 
-const cardShadow = 'shadow-[0_1px_2px_rgba(15,23,42,0.05)]';
+/** A section's frame on the canvas: the firmer edge and the soft two-layer shadow (globals.css). */
+const cardFrame = 'border border-ws-card-line bg-white shadow-ws-card';
 
 /**
  * A link dressed as a button: a page to go to, an address to write to, a file
@@ -205,10 +207,11 @@ export function ButtonLink({
 }
 
 /**
- * A card: one white block on the canvas, 8px, with a 1px border and the
- * faintest contact shadow — the border does the separating. Its header is
- * white with a rule under it: the title in the sans at 800, an icon chip when
- * the card has a subject, and the card's actions on the right.
+ * A card: one white block on the canvas, 8px, framed by `--ws-card-line` and a
+ * soft shadow. Its head is a band (`--ws-card-head`) with a rule under it: the
+ * title in the sans at 800, an icon chip when the card has a subject, and the
+ * card's actions on the right — so a title reads as the head of what follows,
+ * not as its first row (2026-10-27).
  *
  * `overflow="visible"` for a card whose controls open a panel over what
  * follows (the record rail); every other card clips, so a table's rows keep
@@ -241,18 +244,18 @@ export function Card({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-ws-line bg-white',
+        'rounded-3xl',
+        cardFrame,
         overflow === 'hidden' ? 'overflow-hidden' : '',
-        cardShadow,
         className
       )}
     >
       {title || actions ? (
-        <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-3 rounded-t-3xl border-b border-ws-line px-4 py-2.5">
+        <header className="flex min-h-[52px] flex-wrap items-center justify-between gap-3 rounded-t-3xl border-b border-ws-card-line bg-ws-card-head px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-2.5">
             {icon ? <IconChip icon={icon} tint={tint} /> : null}
             <div className="min-w-0">
-              {title ? <h2 className="text-sm leading-tight font-extrabold text-[var(--casa-ink)]">{title}</h2> : null}
+              {title ? <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2> : null}
               {description ? (
                 <p className="mt-0.5 max-w-prose text-xs leading-relaxed text-[var(--casa-text-subtle)]">{description}</p>
               ) : null}
@@ -265,7 +268,7 @@ export function Card({
       <div className={bleed ? '' : 'px-4 py-4'}>{children}</div>
 
       {footer ? (
-        <footer className="rounded-b-3xl border-t border-ws-line-soft bg-[#f8fafc] px-4 py-2.5">{footer}</footer>
+        <footer className="rounded-b-3xl border-t border-ws-line bg-ws-card-head px-4 py-2.5">{footer}</footer>
       ) : null}
     </section>
   );
@@ -344,10 +347,10 @@ const FACT_COLUMNS: Record<number, string> = {
 
 /**
  * A record's head, the offer page's way: a framed card with the record's
- * name over a soft tint, what it is under it, its status and actions on the
- * right — and under that a bar of its facts, each a label, a value and a line,
- * so the five things a colleague looks for are read before anything is
- * scrolled.
+ * name on white, what it is under it, its status and actions on the right —
+ * under that a bar of its facts on the head band (`--ws-card-head`), each a
+ * label, a value and a line, so the five things a colleague looks for are read
+ * before anything is scrolled — and the record's tabs on its lower edge.
  */
 export function RecordHeader({
   backHref,
@@ -376,9 +379,9 @@ export function RecordHeader({
   tabs?: ReactNode;
 }) {
   return (
-    <header className="mb-4">
+    <header className="mb-5">
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
-      <section className={cn('overflow-hidden rounded-3xl border border-ws-line bg-white', cardShadow)}>
+      <section className={cn('overflow-hidden rounded-3xl', cardFrame)}>
         {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}
         <div className="flex flex-wrap items-start gap-4 px-6 pt-6 pb-5">
           {avatar ? <Avatar name={avatar} size="lg" /> : null}
@@ -393,7 +396,7 @@ export function RecordHeader({
           {actions ? <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
         {facts.length ? (
-          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-line-soft bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
+          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-card-line bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
             {facts.map((fact) => {
               const body = (
                 <>
@@ -401,7 +404,7 @@ export function RecordHeader({
                     {fact.icon ? <IconChip icon={fact.icon} tint={fact.tint} /> : null}
                     {fact.label}
                   </dt>
-                  <dd className="truncate text-[0.95rem] font-bold text-[var(--casa-ink)]">
+                  <dd className="truncate text-[1.05rem] font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">
                     {fact.value === null || fact.value === undefined || fact.value === '' ? (
                       <span className="font-semibold text-[var(--casa-text-subtle)]">—</span>
                     ) : (
@@ -412,11 +415,11 @@ export function RecordHeader({
                 </>
               );
               return fact.href ? (
-                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-[#fbfcfe] px-5 py-3.5 transition-colors hover:bg-[#f4f7fb]">
+                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-ws-card-head px-5 py-3.5 transition-colors hover:bg-ws-sunk">
                   {body}
                 </Link>
               ) : (
-                <div key={fact.label} className="min-w-0 bg-[#fbfcfe] px-5 py-3.5">
+                <div key={fact.label} className="min-w-0 bg-ws-card-head px-5 py-3.5">
                   {body}
                 </div>
               );
@@ -424,9 +427,9 @@ export function RecordHeader({
           </dl>
         ) : null}
         {bar ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-line bg-[#f4f6f9] px-6 py-3">{bar}</div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-card-line bg-ws-card-head px-6 py-3.5">{bar}</div>
         ) : null}
-        {tabs ? <div className="border-t border-ws-line px-3">{tabs}</div> : null}
+        {tabs ? <div className="border-t border-ws-line bg-white px-3">{tabs}</div> : null}
       </section>
     </header>
   );
@@ -495,9 +498,9 @@ export function EmptyState({
  * A table, the body of a list (list.tsx has the rest: the bar of views and
  * search, groups, initials, status).
  *
- * The column heads are quiet labels on white with a rule under them: a band
- * under the list's bar stacked two greys on top of each other. Rows are
- * separated by the soft line, the first and last columns sit 20px in, and the
+ * The column heads are quiet labels on a band of CASA's warm cream (`--ws-head`,
+ * as on the Tagesplan's Kurse and Raumplan), every other row a breath of it
+ * (globals.css `.ws-table`); the first and last columns sit 20px in, and the
  * card around the table frames it.
  */
 export function Table({

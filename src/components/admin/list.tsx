@@ -17,14 +17,17 @@ import { cn } from '@/lib/utils';
 
 export { ListBar, type ListTab } from './list-bar';
 
-/** A group of rows inside a `Table`: what they have in common, and how many. */
+/**
+ * A group of rows inside a `Table`: what they have in common, and how many — on the head band
+ * (`--ws-card-head`), as the Tagesplan's Kurse heads each part of the day with a band (2026-10-27).
+ */
 export function ListGroup({ label, count, span }: { label: string; count?: number; span: number }) {
   return (
     <tr data-group>
-      <th colSpan={span} scope="colgroup" className="border-t border-ws-line bg-white px-5 pt-4 pb-2 text-left text-xs font-bold text-[var(--casa-ink)]">
+      <th colSpan={span} scope="colgroup" className="border-y border-ws-line bg-ws-card-head px-5 py-2.5 text-left text-[0.8rem] font-extrabold text-[var(--casa-ink)]">
         {label}
         {count ? (
-          <span className="ml-2 inline-flex min-w-5 justify-center rounded-full bg-[var(--ws-head)] px-1.5 py-px text-[0.68rem] font-semibold tabular-nums">
+          <span className="ml-2 inline-flex min-w-5 justify-center rounded-full bg-white px-1.5 py-px text-[0.68rem] font-bold text-[var(--casa-muted)] tabular-nums ring-1 ring-ws-line ring-inset">
             {count}
           </span>
         ) : null}

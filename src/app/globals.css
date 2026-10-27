@@ -117,6 +117,9 @@
   --color-ws-line: var(--ws-line);
   --color-ws-line-firm: var(--ws-line-firm);
   --color-ws-line-soft: var(--ws-line-soft);
+  --color-ws-card-line: var(--ws-card-line);
+  --color-ws-card-head: var(--ws-card-head);
+  --shadow-ws-card: var(--ws-card-shadow);
   --color-ws-panel: var(--ws-panel);
   --color-ws-panel-raised: var(--ws-panel-raised);
   --color-ws-panel-line: var(--ws-panel-line);
@@ -931,6 +934,30 @@ h3 {
    * and `--casa-text-subtle` still clears AA on the canvas at 4.7:1.
    */
   --ws-canvas: #e8edf4;
+
+  /*
+   * A section on the canvas, and its head (2026-10-27, Rahman: „a bit of a
+   * contrast … sections more distinct and easy to understand what is where").
+   *
+   * Measured before: a card's edge (`--ws-line`) was 1.11:1 against the canvas
+   * and its shadow 5% black over 2px, so a card was told from the page by its
+   * white fill alone (1.18:1); its header was white with a 1px rule (1.30:1),
+   * the same weight as the rules between its rows (1.17:1), so a title read as
+   * the first row. The Tagesplan, which reads well, marks every head with a
+   * band — the cream column heads, the tinted band of each part of the day.
+   *
+   * Now: the edge is a step firmer (1.20:1 on the canvas, 1.41:1 on white) with
+   * a soft two-layer shadow, and a card's head is a band of the navy's palest
+   * tint — 1.08:1 under white, 1.09:1 over the canvas, halfway between the two,
+   * so it never reads as the page showing through (rule 1, docs/ADMIN_WORKSPACE.md
+   * §Design standards) — closed by a rule in the edge's colour (1.30:1).
+   * For comparison, the Tagesplan's cream column head is 1.12:1 under white.
+   * The same band carries a record's facts bar, a side panel's head and a list's
+   * group headings: one surface for "the head of what follows".
+   */
+  --ws-card-line: #d3dae5;
+  --ws-card-head: #f3f6fa;
+  --ws-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 8px -3px rgba(15, 23, 42, 0.08);
 
   /* Lists: the head is a band of CASA's warm cream (the site's `--casa-warm-soft`
      family, quieter), and every other row a breath of it, so a long list reads
