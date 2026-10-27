@@ -8,7 +8,9 @@
 #   ./infra/azure/schoolman-job.sh --off    remove it (the copy stays; bridge.sh still works)
 #
 # Run it again after a change to scripts/filemaker or db/: it builds the image for this checkout, as
-# db-job.sh does, under the same tag.
+# db-job.sh does, under the same tag. Two hours a run at most: a run that has to write every learner
+# again (after a change to their fingerprint) takes about 55 minutes, and the first one was cut off at
+# 55 (2026-10-27); the other runs end after a minute or two, or at once when nothing changed.
 set -euo pipefail
 
 RG=rg-casa-website-prod
@@ -44,11 +46,11 @@ fi
 DB_URL=$(az containerapp secret show -n "$APP" -g "$RG" --secret-name database-url --query value -o tsv)
 if az containerapp job show -n "$JOB" -g "$RG" -o none 2>/dev/null; then
   az containerapp job secret set -n "$JOB" -g "$RG" --secrets "database-url=$DB_URL" -o none
-  az containerapp job update -n "$JOB" -g "$RG" --image "$IMAGE" -o none
+  az containerapp job update -n "$JOB" -g "$RG" --image "$IMAGE" --replica-timeout 7200 -o none
   echo "==> $JOB now runs $TAG"
 else
   az containerapp job create -n "$JOB" -g "$RG" --environment "$ENV_ID" \
-    --trigger-type Schedule --cron-expression "*/5 * * * *" --replica-timeout 3300 --replica-retry-limit 0 \
+    --trigger-type Schedule --cron-expression "*/5 * * * *" --replica-timeout 7200 --replica-retry-limit 0 \
     --parallelism 1 --replica-completion-count 1 \
     --image "$IMAGE" --registry-server "$ACR.azurecr.io" --registry-identity "$IDENTITY" \
     --mi-user-assigned "$IDENTITY" --container-name db --cpu 1.0 --memory 2Gi \
