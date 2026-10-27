@@ -15,7 +15,13 @@ Since 2026-10-26 everyone with a booking that runs this week or later, however f
 with a booking set to „nein" or „storno" whose period ran in the last four weeks or later. A learner moved
 to a course months ahead, or cancelled, used to fall out of the sample and keep their old place in the
 workspace: the start day's B1.1 showed 17 learners where SchoolMan had 15.
+
+Since 2026-10-27 (Rahman: „bring them all") also everyone the periods miss: a booking for an exam — it has
+no period — whose sitting is in 2024 or later (taken) or ran in the last four weeks or later (not taken), and
+everyone with an open place on the waiting list (no booking yet) from the last twelve months. The telc B2
+sitting of 13.11. showed 7 booked where SchoolMan had 21, and „Platz anbieten" could have offered a full date.
 """
+import functools
 import re
 from datetime import date, timedelta
 
@@ -53,4 +59,32 @@ def sample_persons(bookings, periods, today=None):
             continue
         if e >= monday or (_first(b.get('_ID_Group')) and e >= new_year) or s[:4] in HISTORY_YEARS:
             chosen.add(_first(b['_ID_Person']))
+    return chosen | _missed_by_periods(today)
+
+
+@functools.lru_cache(maxsize=1)
+def _missed_by_periods(today):
+    """Exam bookings and open waiting-list places: read once per reader, from SchoolMan or its copy."""
+    from fm_read import column  # the readers put scripts/filemaker on the path first
+
+    since = (today - timedelta(days=today.weekday() + 28)).isoformat()
+    year_ago = (today - timedelta(days=365)).isoformat()
+    sitting = {}
+    for exam, day in zip(column('SingleDateExam', '_ID_Exam'), column('SingleDateExam', 'ZSingleDate')):
+        on = _iso(day)
+        if _first(exam) and on and on > sitting.get(_first(exam), ''):
+            sitting[_first(exam)] = on
+    chosen = set()
+    for person, exam, done in zip(column('Booking', '_ID_Person'), column('Booking', '_ID_Exam'), column('Booking', '_ID_EnrolmentDone')):
+        on = sitting.get(_first(exam))
+        if not (_first(person) and on):
+            continue
+        if (on >= since) if _first(done) in NOT_TAKEN else (on >= since or on[:4] >= HISTORY_YEARS[0]):
+            chosen.add(_first(person))
+    pre_person = dict(zip((_first(v) for v in column('PreBooking', '__ID_PreBooking')), (_first(v) for v in column('PreBooking', '_ID_Person'))))
+    for person, pre, booking, made in zip(column('WaitingRoom', '_ID_Person'), column('WaitingRoom', '_ID_PreBooking'),
+                                          column('WaitingRoom', '_ID_Booking'), column('WaitingRoom', 'DateOfCreation')):
+        who = _first(person) or pre_person.get(_first(pre), '')
+        if who and not _first(booking) and (_iso(made) or '') >= year_ago:
+            chosen.add(who)
     return chosen

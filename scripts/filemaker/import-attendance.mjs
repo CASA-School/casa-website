@@ -24,7 +24,9 @@ try {
   await client.query('BEGIN');
   const bookings = new Map((await client.query(`SELECT filemaker_booking_id AS k, id AS v FROM bookings WHERE filemaker_booking_id IS NOT NULL`)).rows.map((r) => [r.k, r.v]));
   const days = new Map((await client.query(`SELECT filemaker_id AS k, id AS v FROM course_days WHERE filemaker_id IS NOT NULL`)).rows.map((r) => [r.k, r.v]));
-  const kept = rows.filter((r) => bookings.has(r.booking));
+  // SchoolMan holds a few attendance rows twice under one number: the last one counts, as in a row-by-row run
+  // (one batch may not update the same row twice). They surfaced with the exam and waiting-list learners (2026-10-27).
+  const kept = [...new Map(rows.filter((r) => bookings.has(r.booking)).map((r) => [r.id, r])).values()];
   count.notHere = rows.length - kept.length;
   for (let i = 0; i < kept.length; i += BATCH) {
     const part = kept.slice(i, i + BATCH);
