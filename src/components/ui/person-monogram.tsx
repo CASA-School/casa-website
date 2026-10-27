@@ -1,33 +1,34 @@
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 
 /**
- * A colleague's initials, standing in for a portrait.
+ * A colleague's avatar: their portrait, or their initials until one is on file.
  *
- * CASA publishes twelve real colleagues and no photographs of them. The only
- * images on hand are synthetic portraits generated for six people who do not
- * exist, and `public/media/casa/team/` is empty — see CLAUDE.md hard rule 3 and
- * the header of config/content/team-spotlights.ts. Putting a generated face
- * beside a real colleague's name would be a worse misrepresentation than the
- * invented staff this replaced, so every surface that wants an avatar shows
- * initials and waits for real portraits taken with consent.
+ * The portraits are CASA's own 2026 team shoot, the same photos as on the team
+ * page (CLAUDE.md hard rule 3); a colleague without one keeps their initials,
+ * never a stand-in face.
  *
  * Lifted out of signatures/team-directory.tsx, which had this as a private
  * component. The decision rail needed the same avatar, and two implementations
- * of "what a person looks like when we have no photograph" would drift — the
- * directory and the rail now render the same mark from the same code.
+ * of "what a person looks like" would drift.
  *
- * `aria-hidden`: the name is always rendered as text next to it, so announcing
- * "I E" adds nothing and interrupts the name.
+ * `aria-hidden` and an empty alt: the name is always rendered as text next to
+ * it, so announcing the initials or "portrait of …" adds nothing and interrupts
+ * the name.
  *
- * WHEN REAL PORTRAITS ARRIVE: give this an optional `src` and render the
- * photograph in place of the initials. Nothing at the call sites changes.
+ * The portraits are head-and-shoulders at 2:3, so in a small circle the face
+ * would be a third of its width. The photo is drawn 1.8 times larger around the
+ * face, which sits at about the same height in every frame of the shoot.
  */
 export function PersonMonogram({
   name,
+  photo,
   className,
   size = 'md',
 }: {
   name: string;
+  photo?: { src: string; position?: string };
   className?: string;
   /** `sm` for the decision rail's inline row, `lg` for the team directory tile. */
   size?: 'sm' | 'md' | 'lg';
@@ -62,12 +63,23 @@ export function PersonMonogram({
     <span
       aria-hidden
       className={cn(
-        'flex shrink-0 items-center justify-center bg-[var(--casa-warm-soft)] font-bold tracking-tight text-[var(--casa-accent-text)]',
+        'relative flex shrink-0 items-center justify-center overflow-hidden bg-[var(--casa-warm-soft)] font-bold tracking-tight text-[var(--casa-accent-text)]',
         sizeClass,
         className
       )}
     >
-      {initials}
+      {photo ? (
+        <Image
+          src={photo.src}
+          alt=""
+          fill
+          sizes="112px"
+          className="scale-[1.8] object-cover"
+          style={{ objectPosition: photo.position ?? 'center 25%', transformOrigin: '50% 36%' }}
+        />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
