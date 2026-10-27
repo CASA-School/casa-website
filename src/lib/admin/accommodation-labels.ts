@@ -1,8 +1,10 @@
-import type { Bilingual } from './i18n';
+import { SESSION_LABELS, type Session } from './day-plan-labels';
+import { pick, type Bilingual, type WsLang } from './i18n';
 
 /**
  * The accommodation module's words (2026-10-18, migration 0060), client-safe: the kinds of place, a
- * family member's role, the views of the places and of the stays.
+ * family member's role, the views of the places and of the stays, what beds are held for and whom the host
+ * takes for them (0095), and a room's name.
  */
 
 export const ACCOMMODATION_KINDS = ['host_family', 'casa_flat', 'other'] as const;
@@ -54,3 +56,35 @@ export const STAY_VIEW_LABELS: Record<StayView, Bilingual> = {
   unplaced: { de: 'Noch ohne Unterkunft', en: 'No place yet' },
 };
 export const isStayView = (value: unknown): value is StayView => (STAY_VIEWS as readonly unknown[]).includes(value);
+
+/** Beds held at a place (0095): for a group visit, or for the learners of an intensive-course term. */
+export type ReservationPurpose = 'group_visit' | 'course_term';
+
+/** Whom the host takes for the beds held (SchoolMan's „Mädchen", „Jungs", „egal", „Betreuer"). */
+export const RESERVATION_ACCEPTS = ['female', 'male', 'any', 'group_leader'] as const;
+export type ReservationAccepts = (typeof RESERVATION_ACCEPTS)[number];
+export const RESERVATION_ACCEPTS_LABELS: Record<ReservationAccepts, Bilingual> = {
+  female: { de: 'Mädchen oder Frauen', en: 'Girls or women' },
+  male: { de: 'Jungen oder Männer', en: 'Boys or men' },
+  any: { de: 'Egal wer', en: 'Anyone' },
+  group_leader: { de: 'Betreuer oder Betreuerin', en: 'Group leader' },
+};
+
+/** What beds are held for: the group's name, or „Kurs · Vormittag" for a course term. */
+export function reservationTitle(lang: WsLang, r: { purpose: ReservationPurpose; courseSession: Session | null; groupName: string | null }): string {
+  if (r.purpose === 'course_term') {
+    const course = pick(lang, { de: 'Kurs', en: 'Course' });
+    return r.courseSession ? `${course} · ${pick(lang, SESSION_LABELS[r.courseSession])}` : course;
+  }
+  return r.groupName ?? pick(lang, { de: 'Gruppe', en: 'Group' });
+}
+
+/**
+ * A room as it is named: its name, with its number in the place (`accommodation_rooms.number`, 0095) when
+ * the name does not already say it — „Zimmer 3 · klein" — or „Zimmer 3" when it has no name.
+ */
+export function roomLabel(lang: WsLang, room: { name: string | null; number: number | null }): string | null {
+  if (room.number == null || (room.name && new RegExp(`(^|\\D)0*${room.number}(\\D|$)`).test(room.name))) return room.name;
+  const numbered = pick(lang, { de: `Zimmer ${room.number}`, en: `Room ${room.number}` });
+  return room.name ? `${numbered} · ${room.name}` : numbered;
+}

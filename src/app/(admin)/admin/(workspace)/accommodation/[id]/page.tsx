@@ -18,6 +18,7 @@ import { activityFor } from '@/lib/admin/activity';
 import { canAccess } from '@/lib/admin/access';
 import {
   getPlace,
+  offerChoices,
   placeDeletable,
   placeMembers,
   placePayouts,
@@ -27,7 +28,7 @@ import {
   roomTypes,
   type PlaceStay,
 } from '@/lib/admin/accommodation';
-import { ACCOMMODATION_KIND_LABELS, MEMBER_ROLE_LABELS } from '@/lib/admin/accommodation-labels';
+import { ACCOMMODATION_KIND_LABELS, MEMBER_ROLE_LABELS, RESERVATION_ACCEPTS_LABELS, reservationTitle, roomLabel } from '@/lib/admin/accommodation-labels';
 import { cleaningTemplates, flatCleaning } from '@/lib/admin/cleaning';
 import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
@@ -45,8 +46,9 @@ const yesNo = (v: boolean | null, t: T) => (v === true ? t('Ja', 'Yes') : v === 
  * One place (2026-10-18, migration 0060; docs/ADMIN_WORKSPACE.md §Accommodation), in the record pages'
  * tabs. The head: the name, what it is, whether it is still used, how to reach it, and the figures —
  * rooms, who stays there today, who comes next. Übersicht holds the house (smoker, pets, washing machine,
- * the descriptions), the family, and what has been said about it; then the rooms with who is in them
- * today, the stays there, and the beds held for groups.
+ * what the host offers, the Wohnungsgeber, the descriptions), the family, and what has been said about it;
+ * then the rooms with who is in them today, the stays there, and the beds held — for a group or for the
+ * learners of a course term, with whom the host takes.
  */
 export default async function PlacePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; error?: string }> }) {
   const [{ id }, { tab, error }, user] = await Promise.all([params, searchParams, requireModule('accommodation')]);
@@ -62,7 +64,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const today = berlinDay(new Date());
   const plus = (iso: string, n: number) => new Date(Date.parse(`${iso}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 
-  const [members, rooms, stays, reservations, payouts, letters, cleaning, templates, notes, activity, types, deletable] = await Promise.all([
+  const [members, rooms, stays, reservations, payouts, letters, cleaning, templates, notes, activity, types, deletable, offers] = await Promise.all([
     placeMembers(id),
     placeRooms(id),
     placeStays(id),
@@ -75,6 +77,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     activityFor('accommodation', id),
     canEdit ? roomTypes() : Promise.resolve([]),
     canDelete ? placeDeletable(id) : Promise.resolve(false),
+    canEdit ? offerChoices() : Promise.resolve(null),
   ]);
   const stayingNow = stays.current.filter((s) => s.from <= today);
   const coming = stays.current.filter((s) => s.from > today);
@@ -86,7 +89,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     { id: 'rooms', label: t('Zimmer', 'Rooms'), icon: Icon.home, count: rooms.length },
     ...(stays.current.length + stays.earlierTotal ? [{ id: 'stays', label: t('Belegung', 'Stays'), icon: Icon.people, count: stays.current.length + stays.earlierTotal }] : []),
-    ...(reservations.length ? [{ id: 'groups', label: t('Gruppen', 'Groups'), icon: Icon.group, count: reservations.length }] : []),
+    ...(reservations.length ? [{ id: 'groups', label: t('Reservierungen', 'Reservations'), icon: Icon.calendar, count: reservations.length }] : []),
     ...(payouts.length ? [{ id: 'rent', label: t('Miete', 'Rent'), icon: Icon.money, count: payouts.length }] : []),
     ...(letters.length ? [{ id: 'letters', label: t('Briefe', 'Letters'), icon: Icon.mail, count: letters.length }] : []),
     ...(cleaning ? [{ id: 'cleaning', label: t('Putzplan', 'Cleaning'), icon: Icon.calendar, count: cleaning.duties.length || undefined }] : []),
@@ -94,6 +97,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
   const thisYear = String(new Date().getFullYear());
   const rentThisYear = payouts.filter((p) => p.paidOn?.startsWith(thisYear)).reduce((s, p) => s + p.amount, 0);
   const hidden = <input type="hidden" name="placeId" value={id} />;
+  const offered = (names: readonly { de: string; en: string }[]) => (names.length ? names.map((n) => pick(lang, n)).join(', ') : null);
   const muted = (text: string) => <span className="font-semibold text-[var(--casa-muted)]">{text}</span>;
 
   return (
@@ -138,9 +142,9 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
           </>
         }
         actions={
-          canEdit ? (
+          canEdit && offers ? (
             <FormDialog icon={Icon.home} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={place.name} width="lg">
-              <EditPlaceForm place={place} />
+              <EditPlaceForm place={place} offers={offers} />
             </FormDialog>
           ) : null
         }
@@ -167,9 +171,13 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
               <DetailList
                 items={[
                   { label: t('Raucherhaushalt', 'Smoking household'), value: yesNo(place.smoker, t) },
-                  { label: t('Haustiere', 'Pets'), value: place.pets },
+                  { label: t('Haustiere', 'Pets'), value: [yesNo(place.hasPets, t), place.pets].filter(Boolean).join(' · ') || null },
                   { label: t('Waschmaschine', 'Washing machine'), value: yesNo(place.washingMachine, t) },
                   { label: t('Bewertung in SchoolMan', 'Grade in SchoolMan'), value: place.rating ? `${place.rating} / 6` : null },
+                  { label: t('Unterkunftsart', 'Accommodation type'), value: offered(place.offers.types.names) },
+                  { label: t('Verpflegung', 'Catering'), value: offered(place.offers.catering.names) },
+                  { label: t('Zimmerarten', 'Room types'), value: offered(place.offers.rooms.names) },
+                  ...(place.landlord ? [{ label: t('Wohnungsgeber', 'Landlord'), value: <span className="whitespace-pre-line">{place.landlord}</span> }] : []),
                   ...(place.descriptionDe ? [{ label: t('Beschreibung', 'Description'), value: <span className="whitespace-pre-line">{place.descriptionDe}</span>, wide: true }] : []),
                   ...(place.descriptionEn
                     ? [{ label: t('Beschreibung (Englisch)', 'Description (English)'), value: <span className="whitespace-pre-line">{place.descriptionEn}</span>, wide: true }]
@@ -253,7 +261,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
           {rooms.length ? (
             <ul className="divide-y divide-ws-line-soft">
               {rooms.map((r, i) => {
-                const label = r.name || (r.roomType ? pick(lang, r.roomType) : t(`Zimmer ${i + 1}`, `Room ${i + 1}`));
+                const label = roomLabel(lang, r) || (r.roomType ? pick(lang, r.roomType) : t(`Zimmer ${i + 1}`, `Room ${i + 1}`));
                 return (
                   <li key={r.id} className={cn('flex flex-wrap items-center justify-between gap-3 px-4 py-3', !r.isActive && 'opacity-60')}>
                     <span className="min-w-0">
@@ -344,13 +352,14 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
               {reservations.map((r) => {
                 const body = (
                   <>
-                    <IconChip icon={Icon.group} tint="green" />
+                    {r.purpose === 'course_term' ? <IconChip icon={Icon.calendar} tint="blue" /> : <IconChip icon={Icon.group} tint="green" />}
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{r.groupName ?? t('Gruppe', 'Group')}</span>
+                      <span className="block truncate text-[0.88rem] font-semibold text-[var(--casa-ink)]">{reservationTitle(lang, r)}</span>
                       <span className="mt-0.5 block truncate text-[0.78rem] text-[var(--casa-muted)]">
                         {[
                           dayRange(r.from, r.to, lang),
                           r.minPeople || r.maxPeople ? t(`${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} Personen`, `${r.minPeople ?? '?'}–${r.maxPeople ?? '?'} people`) : null,
+                          r.accepts ? pick(lang, RESERVATION_ACCEPTS_LABELS[r.accepts]) : null,
                           r.roomName,
                           r.note,
                         ]

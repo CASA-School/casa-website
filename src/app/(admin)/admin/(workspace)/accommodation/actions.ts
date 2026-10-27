@@ -57,13 +57,27 @@ const PlaceSchema = z.object({
   descriptionDe: text(4000),
   descriptionEn: text(4000),
   smoker: yesNo,
+  hasPets: yesNo,
   pets: text(200),
   washingMachine: yesNo,
+  landlord: text(500),
   note: text(2000),
 });
 
+/** What a host offers, ticked: codes of the vocabularies, which the write takes through them — nothing else is kept (0095). */
+const OfferCodes = z.array(z.string().trim().min(1).max(40)).max(20);
+const offers = (formData: FormData) => {
+  const codes = (name: string) => OfferCodes.safeParse(formData.getAll(name)).data ?? [];
+  return { types: codes('offeredTypes'), catering: codes('offeredCatering'), rooms: codes('offeredRoomTypes') };
+};
+
 const RoomSchema = z.object({
   name: text(80),
+  number: z
+    .string()
+    .trim()
+    .refine((v) => !v || (/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= 99), 'number')
+    .transform((v) => (v ? Number(v) : null)),
   roomTypeCode: text(40),
   beds: z
     .string()
@@ -89,6 +103,8 @@ function problem(error: z.ZodError, t: T): string {
       return t('Diese E-Mail-Adresse sieht nicht richtig aus.', 'That email address does not look right.');
     case 'beds':
       return t('Die Zahl der Betten ist eine ganze Zahl bis 20.', 'The number of beds is a whole number up to 20.');
+    case 'number':
+      return t('Die Zimmernummer ist eine ganze Zahl von 1 bis 99.', 'The room number is a whole number from 1 to 99.');
     case 'long':
       return t('Ein Eintrag ist zu lang.', 'An entry is too long.');
     default:
@@ -113,14 +129,14 @@ function placeId(formData: FormData): string {
   return parsed.data;
 }
 
-const PLACE_FIELDS = ['name', 'kind', 'contactName', 'email', 'phone', 'address', 'descriptionDe', 'descriptionEn', 'smoker', 'pets', 'washingMachine', 'note'] as const;
+const PLACE_FIELDS = ['name', 'kind', 'contactName', 'email', 'phone', 'address', 'descriptionDe', 'descriptionEn', 'smoker', 'hasPets', 'pets', 'washingMachine', 'landlord', 'note'] as const;
 
 export async function createPlaceAction(formData: FormData): Promise<void> {
   const actor = await requireModule('accommodation', 'edit');
   const { t } = await getI18n();
   const parsed = PlaceSchema.safeParse(fields(formData, PLACE_FIELDS));
   if (!parsed.success) fail('/admin/accommodation', problem(parsed.error, t));
-  done(page(await createPlace(parsed.data, actor)));
+  done(page(await createPlace({ ...parsed.data, offers: offers(formData) }, actor)));
 }
 
 export async function updatePlaceAction(formData: FormData): Promise<void> {
@@ -129,7 +145,7 @@ export async function updatePlaceAction(formData: FormData): Promise<void> {
   const { t, lang } = await getI18n();
   const parsed = PlaceSchema.safeParse(fields(formData, PLACE_FIELDS));
   if (!parsed.success) fail(page(id), problem(parsed.error, t));
-  const result = await updatePlace(id, parsed.data, actor);
+  const result = await updatePlace(id, { ...parsed.data, offers: offers(formData) }, actor);
   if (!result.ok) fail('/admin/accommodation', pick(lang, result.reason));
   done(page(id));
 }
@@ -159,7 +175,7 @@ export async function saveRoomAction(formData: FormData): Promise<void> {
   const raw = formData.get('roomId');
   const roomId = raw ? uuid.safeParse(raw) : null;
   if (roomId && !roomId.success) redirect(page(id));
-  const parsed = RoomSchema.safeParse(fields(formData, ['name', 'roomTypeCode', 'beds', 'note', 'isActive']));
+  const parsed = RoomSchema.safeParse(fields(formData, ['name', 'number', 'roomTypeCode', 'beds', 'note', 'isActive']));
   if (!parsed.success) fail(`${page(id)}?tab=rooms`, problem(parsed.error, t));
   const result = await saveRoom(id, roomId?.data ?? null, parsed.data, actor);
   if (!result.ok) fail(`${page(id)}?tab=rooms`, pick(lang, result.reason));

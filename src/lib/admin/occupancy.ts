@@ -1,7 +1,9 @@
 import 'server-only';
 
+import { roomLabel, type ReservationPurpose } from './accommodation-labels';
+import type { Session } from './day-plan-labels';
 import { query } from './db';
-import type { Bilingual } from './i18n';
+import type { Bilingual, WsLang } from './i18n';
 
 /**
  * The CASA flats' occupancy (Rahman, 2026-10-19: "a similar interface [to the Raumplan] for CASA WGs,
@@ -10,7 +12,7 @@ import type { Bilingual } from './i18n';
  * (`accommodation.ts`), which is where a stay is placed.
  */
 
-export type OccupancyRoom = { id: string; name: string; type: Bilingual | null; beds: number | null; active: boolean };
+export type OccupancyRoom = { id: string; name: string; number: number | null; type: Bilingual | null; beds: number | null; active: boolean };
 export type OccupancyFlat = { id: string; name: string; address: string | null; rooms: OccupancyRoom[] };
 
 export type OccupancyStay = {
@@ -31,19 +33,42 @@ export type OccupancyStay = {
   deposit: number | null;
 };
 
-export type OccupancyHold = { id: string; flatId: string; roomId: string | null; from: string; to: string; groupId: string | null; groupName: string | null; people: number | null };
+export type OccupancyHold = {
+  id: string;
+  flatId: string;
+  roomId: string | null;
+  from: string;
+  to: string;
+  /** Held for a group, or for the learners of a course term and its part of the day (0095). */
+  purpose: ReservationPurpose;
+  courseSession: Session | null;
+  groupId: string | null;
+  groupName: string | null;
+  people: number | null;
+};
 
-export async function flatOccupancy(from: string, to: string): Promise<{ flats: OccupancyFlat[]; stays: OccupancyStay[]; holds: OccupancyHold[] }> {
+export async function flatOccupancy(from: string, to: string, lang: WsLang): Promise<{ flats: OccupancyFlat[]; stays: OccupancyStay[]; holds: OccupancyHold[] }> {
   const [rooms, stays, holds] = await Promise.all([
-    query<{ flat_id: string; flat: string; address: string | null; room_id: string | null; room: string | null; type_de: string | null; type_en: string | null; beds: number | null; active: boolean | null }>(
-      `SELECT a.id AS flat_id, a.name AS flat, a.address, r.id AS room_id, r.name AS room, t.name_de AS type_de, t.name_en AS type_en, r.beds, r.is_active AS active
+    query<{
+      flat_id: string;
+      flat: string;
+      address: string | null;
+      room_id: string | null;
+      room: string | null;
+      number: number | null;
+      type_de: string | null;
+      type_en: string | null;
+      beds: number | null;
+      active: boolean | null;
+    }>(
+      `SELECT a.id AS flat_id, a.name AS flat, a.address, r.id AS room_id, r.name AS room, r.number, t.name_de AS type_de, t.name_en AS type_en, r.beds, r.is_active AS active
          FROM accommodations a
          LEFT JOIN accommodation_rooms r ON r.accommodation_id = a.id
               AND (r.is_active OR EXISTS (SELECT 1 FROM booking_stays s WHERE s.room_id = r.id AND NOT s.cancelled AND s.starts_on <= $2::date AND s.ends_on >= $1::date))
          LEFT JOIN accommodation_room_types t ON t.code = r.room_type_code
         WHERE a.kind = 'casa_flat'
           AND (a.is_active OR EXISTS (SELECT 1 FROM booking_stays s WHERE s.accommodation_id = a.id AND NOT s.cancelled AND s.starts_on <= $2::date AND s.ends_on >= $1::date))
-        ORDER BY a.name, r.name NULLS LAST`,
+        ORDER BY a.name, r.number NULLS LAST, r.name NULLS LAST`,
       [from, to]
     ),
     query<{
@@ -79,9 +104,20 @@ export async function flatOccupancy(from: string, to: string): Promise<{ flats: 
         ORDER BY s.starts_on, p.last_name`,
       [from, to]
     ),
-    query<{ id: string; flat_id: string; room_id: string | null; starts_on: string; ends_on: string; group_id: string | null; group_name: string | null; people: number | null }>(
+    query<{
+      id: string;
+      flat_id: string;
+      room_id: string | null;
+      starts_on: string;
+      ends_on: string;
+      purpose: ReservationPurpose;
+      course_session: Session | null;
+      group_id: string | null;
+      group_name: string | null;
+      people: number | null;
+    }>(
       `SELECT r.id, r.accommodation_id AS flat_id, r.room_id, to_char(r.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(r.ends_on, 'YYYY-MM-DD') AS ends_on,
-              g.id AS group_id, g.name AS group_name, coalesce(r.max_people, r.min_people) AS people
+              r.purpose, r.course_session, g.id AS group_id, g.name AS group_name, coalesce(r.max_people, r.min_people) AS people
          FROM accommodation_reservations r
          JOIN accommodations a ON a.id = r.accommodation_id AND a.kind = 'casa_flat'
          LEFT JOIN group_visits g ON g.id = r.group_visit_id
@@ -97,7 +133,8 @@ export async function flatOccupancy(from: string, to: string): Promise<{ flats: 
     if (r.room_id) {
       flat.rooms.push({
         id: r.room_id,
-        name: r.room ?? '—',
+        name: roomLabel(lang, { name: r.room, number: r.number }) ?? '—',
+        number: r.number,
         type: r.type_de || r.type_en ? { de: r.type_de ?? r.type_en ?? '', en: r.type_en ?? r.type_de ?? '' } : null,
         beds: r.beds,
         active: r.active ?? true,
@@ -139,7 +176,18 @@ export async function flatOccupancy(from: string, to: string): Promise<{ flats: 
   return {
     flats: [...flats.values()],
     stays: joined.sort((a, b) => a.from.localeCompare(b.from)),
-    holds: holds.map((h) => ({ id: h.id, flatId: h.flat_id, roomId: h.room_id, from: h.starts_on, to: h.ends_on, groupId: h.group_id, groupName: h.group_name, people: h.people })),
+    holds: holds.map((h) => ({
+      id: h.id,
+      flatId: h.flat_id,
+      roomId: h.room_id,
+      from: h.starts_on,
+      to: h.ends_on,
+      purpose: h.purpose,
+      courseSession: h.course_session,
+      groupId: h.group_id,
+      groupName: h.group_name,
+      people: h.people,
+    })),
   };
 }
 

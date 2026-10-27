@@ -5,6 +5,7 @@ import { useMemo, useState, type MouseEvent, type ReactNode } from 'react';
 import { between, FlatPanel, fmt, FreeBedPanel, StayPanel, type FlatDuties, type FreeBed, type Item } from './occupancy-panels';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
+import { reservationTitle } from '@/lib/admin/accommodation-labels';
 import { pick, type WsLang } from '@/lib/admin/i18n';
 import type { OccupancyFlat, OccupancyHold, OccupancyRoom, OccupancyStay, PlaceableStay } from '@/lib/admin/occupancy';
 import { cn } from '@/lib/utils';
@@ -76,7 +77,7 @@ export function OccupancyPlan({
     const right = b > last ? 100 : ((between(from, b) + 0.5) / DAYS) * 100;
     return { left, width: Math.max(1.6, right - left), cutLeft: a < from, cutRight: b > last };
   };
-  const hit = (i: Item) => !needle || (i.kind === 'stay' ? i.stay.name.toLowerCase().includes(needle) : (i.hold.groupName ?? '').toLowerCase().includes(needle));
+  const hit = (i: Item) => !needle || (i.kind === 'stay' ? i.stay.name.toLowerCase().includes(needle) : reservationTitle(lang, i.hold).toLowerCase().includes(needle));
 
   // Each item on the first line of its room still free when it arrives; a room shows a line per bed at least.
   const lanes = (items: Item[], beds: number | null) => {
@@ -104,7 +105,7 @@ export function OccupancyPlan({
     const s = span(itemFrom(item), itemTo(item));
     const stay = item.kind === 'stay' ? item.stay : null;
     const state = stay ? (stay.to <= today ? 'gone' : stay.from > today ? 'coming' : 'here') : 'hold';
-    const label = stay ? stay.name : item.kind === 'hold' ? (item.hold.groupName ?? t('Gruppe', 'Group')) : '';
+    const label = stay ? stay.name : item.kind === 'hold' ? reservationTitle(lang, item.hold) : '';
     return (
       <button
         key={stay ? stay.id : item.kind === 'hold' ? item.hold.id : ''}

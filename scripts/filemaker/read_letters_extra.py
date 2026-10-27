@@ -3,8 +3,9 @@
     python3 -I scripts/filemaker/read_letters_extra.py --stats    # counts only
     python3 -I scripts/filemaker/read_letters_extra.py | node scripts/filemaker/import-letters-extra.mjs [--dry-run]
 
-- `StatementLandlord`: a letter to a host about a learner's stay — its text, subject, address, day, who — for the
-  sample's bookings (`sample.py`).
+- `StatementLandlord`: the Wohnungsgeberbestätigung SchoolMan sends a learner for a stay — the Wohnungsgeber, the
+  dwelling, move-in and move-out as certified, the stay, the day and who signed it — for the sample's bookings
+  (`sample.py`). Its text and subject are empty on every row: these fields are the document.
 - `WorkFlowLetter`: per `Letter`, whether it was e-mailed (`Email_Client`, `EmailSMPT`) or printed (`Print`);
   the latest says.
 - `Complaint`: a complaint about a learner's booking, for the sample.
@@ -45,13 +46,25 @@ bookings = {b['__ID_Booking'].strip(): b for b in table('Booking', '__ID_Booking
 chosen = sample_persons(bookings, table('DateBooking', '_ID_Booking', 'ZStartDate', 'ZEndDate'), date.today())
 ours = {bid for bid, b in bookings.items() if first(b['_ID_Person']) in chosen}
 
-S = ['__ID_StatementLandlord', '_ID_Accommodation', '_ID_Booking', 'Subject', 'HeaderLandlord', 'HeaderAccommodation', 'DateOfEmission', 'TimeStampOfCreation', 'UserName']
+# Who signed a Wohnungsgeberbestätigung: SchoolMan's staff number, and the name its search field holds forward.
+signers = {s.strip(): n.strip() for s, n in zip(column('StaffMember', '__ID_StaffMember'), column('StaffMember', 'SearchFieldTeacherFirstName')) if s.strip()}
+
+
+def lines(value):
+    return [x.strip() for x in (value or '').split('\n') if x.strip()]
+
+
+S = ['__ID_StatementLandlord', '_ID_Accommodation', '_ID_Booking', '_ID_DateAccommodation', 'Subject', 'HeaderLandlord', 'HeaderAccommodation', 'ZStartDate', 'ZEndDate',
+     '_ID_StaffMember', 'DateOfEmission', 'TimeStampOfCreation', 'UserName']
 statements = []
 for r, body in zip(table('StatementLandlord', *S), column_chunked('StatementLandlord', 'FreeField', 500)):
     if first(r['_ID_Booking']) not in ours:
         continue
+    signer = first(r['_ID_StaffMember'])
     statements.append({'ref': f'StatementLandlord:{r["__ID_StatementLandlord"].strip()}', 'place': first(r['_ID_Accommodation']) or None, 'booking': first(r['_ID_Booking']),
-                       'subject': r['Subject'].strip() or None, 'header': r['HeaderLandlord'].strip() or r['HeaderAccommodation'].strip() or None,
+                       'stay': first(r['_ID_DateAccommodation']) or None, 'subject': r['Subject'].strip() or None, 'landlord': lines(r['HeaderLandlord']),
+                       'dwelling': lines(r['HeaderAccommodation']), 'moveIn': (stamp(r['ZStartDate']) or '')[:10] or None, 'moveOut': (stamp(r['ZEndDate']) or '')[:10] or None,
+                       'signer': signer or None, 'signerName': signers.get(signer) or None,
                        'sent': stamp(r['DateOfEmission']) or stamp(r['TimeStampOfCreation']), 'author': r['UserName'].strip() or None, 'text': body, 'lang': 'de'})
 
 VIA = {'Email_Client': 'email', 'EmailSMPT': 'email', 'EmailClient': 'email', 'Print': 'print'}
@@ -71,7 +84,8 @@ for r in table('Complaint', '__ID_Complaint', '_ID_Booking', '_ID_Person', 'Comp
                            'at': stamp(r['TimeStampOfCreation']), 'body': body})
 
 if '--stats' in sys.argv:
-    print('letters to hosts', len(statements), '· with a place', sum(1 for s in statements if s['place']), '· letters with how they went', len(sent_via),
+    print('Wohnungsgeberbestätigungen', len(statements), '· with a place', sum(1 for s in statements if s['place']), '· a stay', sum(1 for s in statements if s['stay']),
+          '· move-out', sum(1 for s in statements if s['moveOut']), '· signed by', sum(1 for s in statements if s['signer']), '· letters with how they went', len(sent_via),
           dict(collections.Counter(sent_via.values())), '· complaints', len(complaints))
     sys.exit(0)
 
