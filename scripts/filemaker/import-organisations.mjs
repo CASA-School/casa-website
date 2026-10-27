@@ -20,7 +20,7 @@
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
-import { changes } from './bridge-changes.mjs';
+import { changes, unordered } from './bridge-changes.mjs';
 
 async function readStdin() {
   const chunks = [];
@@ -70,7 +70,7 @@ try {
   const coursesHere = await here(
     `SELECT filemaker_course_id AS k FROM courses WHERE filemaker_course_id IS NOT NULL UNION SELECT unnest(filemaker_group_ids) FROM courses`
   );
-  const vocabulary = [...chargeTypes];
+  const vocabulary = unordered(chargeTypes);
 
   // The agency first: a booking naming both is paid through the agency.
   for (const p of [...parties].sort((a, b) => Number(a.kind === 'company') - Number(b.kind === 'company'))) {

@@ -45,7 +45,7 @@
 import { getCode } from 'country-list';
 
 import { connect } from '../db/client.mjs';
-import { changes } from './bridge-changes.mjs';
+import { changes, unordered } from './bridge-changes.mjs';
 
 import { letterDocument } from './letter-document.mjs';
 
@@ -211,9 +211,9 @@ try {
   const changed = await changes(client, 'learners');
   // Only what names things, never a value the run itself changes: the exam types' usual hours come from
   // their first sitting, which the exams step corrects, and had made every learner look changed (2026-10-26).
-  const vocabularies = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes].map(([code, t]) => [code, t.id]), [...stayTypes], [...roomTypes], [...caterings]];
-  // The fingerprint before 2026-10-26 evening, with the hours: accepted once (bridge-changes.mjs). Remove after one run.
-  const vocabulariesBefore = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes], [...stayTypes], [...roomTypes], [...caterings]];
+  const vocabularies = [[...valid].sort(), unordered(types), unordered(chargeTypes.rows), unordered([...examTypes].map(([code, t]) => [code, t.id])), unordered(stayTypes), unordered(roomTypes), unordered(caterings)];
+  // The fingerprint before 2026-10-27, in the order the database returned the rows: accepted once (bridge-changes.mjs). Remove after one run.
+  const vocabulariesBefore = [[...valid].sort(), [...types], chargeTypes.rows, [...examTypes].map(([code, t]) => [code, t.id]), [...stayTypes], [...roomTypes], [...caterings]];
   const matched = (l) =>
     l.bookings.map((b) => [
       b.exam ? (b.exam.day ?? '') < today : (b.periods ?? []).every((p) => !p.end || p.end < today),
