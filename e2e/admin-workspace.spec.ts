@@ -23,8 +23,8 @@ import { expect, test } from '@playwright/test';
 const GUARDED_PATHS = [
   '/admin',
   '/admin/enquiries',
+  '/admin/registrations',
   '/admin/registrations/course',
-  '/admin/registrations/exam',
   '/admin/placement',
   '/admin/applications',
   '/admin/catalogue',

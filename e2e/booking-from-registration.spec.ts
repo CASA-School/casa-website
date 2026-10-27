@@ -84,11 +84,13 @@ test.describe('a booking from a registration', () => {
   });
 
   test('the wish opens the wizard, the stay is eight weeks, and the booking can be paid and changed', async ({ page }) => {
+    // The line's old address opens its Anmeldung (0096), where the line's own „Buchen" opens the wizard.
     await page.goto(`/admin/registrations/course/${registrationId}`);
+    await expect(page).toHaveURL(/\/admin\/registrations\/[0-9a-f-]{36}#line-/);
     await expect(page.locator('main')).toContainText('A2 komplett (A2.1 + A2.2) · 8 Wochen');
 
     const dialog = page.getByRole('dialog');
-    await page.getByRole('button', { name: 'Buchung anlegen' }).click();
+    await page.locator(`#line-${registrationId}`).getByRole('link', { name: 'Buchen' }).click();
     // The level and how much of it, as they asked.
     await expect(dialog.getByRole('button', { name: /^A2\.1/ })).toBeVisible();
     await expect(dialog.getByRole('button', { name: /^Das ganze A2/ })).toHaveAttribute('aria-pressed', 'true');

@@ -21,6 +21,8 @@ test.describe('inboxes', () => {
   let token = '';
   let tokenHash = '';
   const ids = { course: '', exam: '', application: '' };
+  // Each line written alone is an Anmeldung of its own (0096): the inbox lists those.
+  const anmeldung = { course: '', exam: '' };
 
   test.beforeAll(async () => {
     client = new pg.Client({ connectionString: DATABASE_URL });
@@ -36,22 +38,26 @@ test.describe('inboxes', () => {
        VALUES ($1, $2, now() + interval '10 minutes', 'e2e:inboxes')`,
       [rows[0].id, tokenHash]
     );
-    ids.course = (
-      await client.query<{ id: string }>(
+    const course = (
+      await client.query<{ id: string; registration_id: string }>(
         `INSERT INTO course_registrations (request_id, course_type_label, salutation, first_name, last_name, email, phone, nationality_raw, birth_date_raw, accommodation_required, accommodation_type, locale, source)
          VALUES ($1, 'Intensivkurse', 'ms', 'Kira', 'Prüfkurs', 'kira.pruefkurs@example.com', '+49 151 0000000', 'Deutschland', '2000-01-01', true, 'host', 'de', 'e2e')
-         RETURNING id`,
+         RETURNING id, registration_id`,
         [randomUUID()]
       )
-    ).rows[0].id;
-    ids.exam = (
-      await client.query<{ id: string }>(
+    ).rows[0];
+    ids.course = course.id;
+    anmeldung.course = course.registration_id;
+    const exam = (
+      await client.query<{ id: string; registration_id: string }>(
         `INSERT INTO exam_registrations (request_id, exam_type_label, registration_type, salutation, first_name, last_name, email, phone, nationality_raw, birth_date_raw, locale, source)
          VALUES ($1, 'telc Deutsch B2', 'oral', 'mr', 'Emil', 'Prüfexam', 'emil.pruefexam@example.com', '+49 151 0000001', 'Deutschland', '1999-01-01', 'de', 'e2e')
-         RETURNING id`,
+         RETURNING id, registration_id`,
         [randomUUID()]
       )
-    ).rows[0].id;
+    ).rows[0];
+    ids.exam = exam.id;
+    anmeldung.exam = exam.registration_id;
     ids.application = (
       await client.query<{ id: string }>(
         `INSERT INTO career_applications (position_slug, position_title, locale, first_name, last_name, email, cover_letter, cv_file_name, cv_file_size, source)
@@ -63,7 +69,7 @@ test.describe('inboxes', () => {
 
   test.afterAll(async () => {
     if (!client) return;
-    const all = Object.values(ids).filter(Boolean);
+    const all = [...Object.values(ids), ...Object.values(anmeldung)].filter(Boolean);
     if (all.length) {
       await client.query(`DELETE FROM staff_notes WHERE entity_id = ANY($1::uuid[])`, [all]);
       await client.query(`DELETE FROM staff_activity WHERE entity_id = ANY($1::uuid[])`, [all]);
@@ -83,11 +89,12 @@ test.describe('inboxes', () => {
   });
 
   for (const queue of [
-    { name: 'Kira Prüfkurs', list: '/admin/registrations/course', mark: 'Unterkunft nötig', record: () => `/admin/registrations/course/${ids.course}` },
-    { name: 'Emil Prüfexam', list: '/admin/registrations/exam', mark: 'Nur mündlicher Teil', record: () => `/admin/registrations/exam/${ids.exam}` },
+    // A line's old address leads to its Anmeldung.
+    { name: 'Kira Prüfkurs', list: '/admin/registrations', mark: 'Unterkunft nötig', record: () => `/admin/registrations/course/${ids.course}` },
+    { name: 'Emil Prüfexam', list: '/admin/registrations', mark: 'Nur mündlicher Teil', record: () => `/admin/registrations/${anmeldung.exam}` },
     { name: 'Ava Prüfbewerbung', list: '/admin/applications', mark: 'Lehrkraft für Deutsch als Fremdsprache', record: () => `/admin/applications/${ids.application}` },
   ]) {
-    test(`${queue.list}: under Heute, closed in place, and its page is the shared record`, async ({ page }) => {
+    test(`${queue.list} (${queue.name}): under Heute, closed in place, and its page is the shared record`, async ({ page }) => {
       await page.goto(queue.list);
       const today = page.locator('section', { has: page.getByRole('heading', { name: 'Heute' }) });
       const row = today.getByRole('listitem').filter({ hasText: queue.name });

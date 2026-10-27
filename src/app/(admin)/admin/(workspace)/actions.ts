@@ -36,6 +36,7 @@ import {
 
 const QUEUE_ENTITIES = new Set<string>([
   'enquiry',
+  'registration',
   'course_registration',
   'exam_registration',
   'career_application',
@@ -46,6 +47,7 @@ const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', '
 /** Which module owns a record type — the module the actor must hold. */
 const MODULE_FOR: Record<string, WorkspaceModule> = {
   enquiry: 'enquiries',
+  registration: 'registrations',
   course_registration: 'registrations',
   exam_registration: 'registrations',
   career_application: 'applications',

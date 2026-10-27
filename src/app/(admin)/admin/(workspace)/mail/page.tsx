@@ -10,11 +10,12 @@ import { mailDraft } from '@/lib/admin/mail/draft';
 import type { MailAbout } from '@/lib/admin/mail/href';
 import { graphSender } from '@/lib/notifications/graph-mail.server';
 
-const REPLIES = new Set<MailAbout>(['enquiry', 'course_registration', 'exam_registration', 'application']);
+const REPLIES = new Set<MailAbout>(['enquiry', 'registration', 'course_registration', 'exam_registration', 'application']);
 
 /** What the record under the title is, where its own name would repeat the title. */
 const ABOUT: Partial<Record<MailAbout, Bilingual>> = {
   enquiry: { de: 'Anfrage', en: 'Enquiry' },
+  registration: { de: 'Anmeldung', en: 'Registration' },
   course_registration: { de: 'Kursanmeldung', en: 'Course registration' },
   exam_registration: { de: 'Prüfungsanmeldung', en: 'Exam registration' },
   application: { de: 'Bewerbung', en: 'Application' },

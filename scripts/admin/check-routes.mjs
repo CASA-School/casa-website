@@ -40,11 +40,10 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, examReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup, lessonDay] =
+const [enquiry, courseReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup, lessonDay] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
-    firstId(`SELECT id FROM exam_registrations ORDER BY submitted_at DESC LIMIT 1`),
     // A learner: a colleague's person page sends to their staff page (0039).
     firstId(`SELECT id FROM people p WHERE deleted_at IS NULL AND merged_into IS NULL
               AND NOT EXISTS (SELECT 1 FROM staff_members s WHERE s.person_id = p.id) LIMIT 1`),
@@ -98,6 +97,10 @@ const testDate = (
   )
 ).rows[0]?.d;
 
+// An Anmeldung, the one with the most lines (0096): its page reads every line's outcome and places.
+const anmeldung = await firstId(`SELECT g.id FROM registrations g
+  ORDER BY (SELECT count(*) FROM course_registrations c WHERE c.registration_id = g.id) + (SELECT count(*) FROM exam_registrations e WHERE e.registration_id = g.id) DESC, g.submitted_at DESC LIMIT 1`);
+
 const routes = [
   '/admin',
   '/admin/day',
@@ -121,10 +124,11 @@ const routes = [
   '/admin?date=2026-01-05',
   '/admin/enquiries',
   enquiry && `/admin/enquiries/${enquiry}`,
-  '/admin/registrations/course',
-  courseReg && `/admin/registrations/course/${courseReg}`,
-  '/admin/registrations/exam',
-  examReg && `/admin/registrations/exam/${examReg}`,
+  '/admin/registrations',
+  '/admin/registrations?view=history',
+  anmeldung && `/admin/registrations/${anmeldung}`,
+  anmeldung && `/admin/registrations/${anmeldung}?book=${courseReg}`,
+  // A line's own address (`/admin/registrations/course/<id>`) is a redirect to its Anmeldung since 0096.
   '/admin/placement',
   attempt && `/admin/placement/${attempt}`,
   '/admin/people',

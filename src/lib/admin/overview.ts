@@ -31,10 +31,13 @@ export async function getOverviewCounts(): Promise<OverviewCounts> {
         WHERE status IN ('new', 'in_progress', 'waiting') AND deleted_at IS NULL) AS "enquiriesOpen",
       (SELECT count(*) FROM enquiries
         WHERE status = 'new' AND deleted_at IS NULL)                 AS "enquiriesNew",
-      (SELECT count(*) FROM course_registrations
-        WHERE status IN ('new', 'in_progress', 'waiting'))          AS "courseRegistrationsOpen",
-      (SELECT count(*) FROM exam_registrations
-        WHERE status IN ('new', 'in_progress', 'waiting'))          AS "examRegistrationsOpen",
+      -- One Anmeldung is one registration, however many lines it holds (0096): by what it holds.
+      (SELECT count(*) FROM registrations g
+        WHERE status IN ('new', 'in_progress', 'waiting')
+          AND EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id)) AS "courseRegistrationsOpen",
+      (SELECT count(*) FROM registrations g
+        WHERE status IN ('new', 'in_progress', 'waiting')
+          AND NOT EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id)) AS "examRegistrationsOpen",
       (SELECT count(*) FROM career_applications
         WHERE status IN ('submitted', 'new', 'in_progress', 'waiting', 'interview'))
                                                                      AS "applicationsOpen",
@@ -48,18 +51,14 @@ export async function getOverviewCounts(): Promise<OverviewCounts> {
       -- than one, because "9 enquiries" says nothing without "and 4 last week".
       (
         (SELECT count(*) FROM enquiries WHERE submitted_at > now() - interval '7 days' AND deleted_at IS NULL) +
-        (SELECT count(*) FROM course_registrations WHERE submitted_at > now() - interval '7 days') +
-        (SELECT count(*) FROM exam_registrations WHERE submitted_at > now() - interval '7 days') +
+        (SELECT count(*) FROM registrations WHERE submitted_at > now() - interval '7 days') +
         (SELECT count(*) FROM career_applications WHERE created_at > now() - interval '7 days')
       )                                                              AS "inboundThisWeek",
       (
         (SELECT count(*) FROM enquiries
           WHERE deleted_at IS NULL AND submitted_at > now() - interval '14 days'
             AND submitted_at <= now() - interval '7 days') +
-        (SELECT count(*) FROM course_registrations
-          WHERE submitted_at > now() - interval '14 days'
-            AND submitted_at <= now() - interval '7 days') +
-        (SELECT count(*) FROM exam_registrations
+        (SELECT count(*) FROM registrations
           WHERE submitted_at > now() - interval '14 days'
             AND submitted_at <= now() - interval '7 days') +
         (SELECT count(*) FROM career_applications
@@ -104,9 +103,7 @@ export async function getInboundByDay(days = 14): Promise<InboundDay[]> {
      inbound AS (
        SELECT submitted_at::date AS day FROM enquiries WHERE deleted_at IS NULL
        UNION ALL
-       SELECT submitted_at::date FROM course_registrations
-       UNION ALL
-       SELECT submitted_at::date FROM exam_registrations
+       SELECT submitted_at::date FROM registrations
        UNION ALL
        SELECT created_at::date FROM career_applications
      )
@@ -160,21 +157,20 @@ export async function getRecentInbound(
               e.submitted_at AS at
          FROM enquiries e WHERE e.deleted_at IS NULL
        UNION ALL
-       SELECT r.id,
-              'course',
-              trim(concat(r.first_name, ' ', r.last_name)),
-              coalesce(r.course_type_label, 'Course registration'),
-              r.status::text,
-              r.submitted_at
-         FROM course_registrations r
-       UNION ALL
-       SELECT r.id,
-              'exam',
-              trim(concat(r.first_name, ' ', r.last_name)),
-              coalesce(r.exam_type_label, 'Exam registration'),
-              r.status::text,
-              r.submitted_at
-         FROM exam_registrations r
+       -- An Anmeldung (0096), named by its first line: a course before the exam.
+       SELECT g.id,
+              CASE WHEN l.rank = 0 THEN 'course' ELSE 'exam' END,
+              trim(concat(l.first_name, ' ', l.last_name)),
+              l.label,
+              g.status::text,
+              g.submitted_at
+         FROM registrations g
+         CROSS JOIN LATERAL (
+           SELECT first_name, last_name, coalesce(course_type_label, 'Course registration') AS label, 0 AS rank FROM course_registrations WHERE registration_id = g.id
+           UNION ALL
+           SELECT first_name, last_name, coalesce(exam_type_label, 'Exam registration'), 1 FROM exam_registrations WHERE registration_id = g.id
+           ORDER BY rank LIMIT 1
+         ) l
        UNION ALL
        SELECT a.id,
               'application',
@@ -192,8 +188,8 @@ export async function getRecentInbound(
 
   const hrefFor: Record<RecentInbound['kind'], string> = {
     enquiry: '/admin/enquiries',
-    course: '/admin/registrations/course',
-    exam: '/admin/registrations/exam',
+    course: '/admin/registrations',
+    exam: '/admin/registrations',
     application: '/admin/applications',
   };
 
@@ -245,10 +241,9 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
   type Dates = 'nextExam' | 'pricesSince' | 'plannedTo';
   type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen' | 'waitlistWaiting' | 'waitlistFree';
   // The inboxes are counted as their own screens count them (src/lib/admin/inbox.ts), so a card and its list never disagree.
-  const [enquiries, courses, exams, applications, waitlist] = await Promise.all([
+  const [enquiries, registrations, applications, waitlist] = await Promise.all([
     inboxCounts('enquiry'),
-    inboxCounts('course_registration'),
-    inboxCounts('exam_registration'),
+    inboxCounts('registration'),
     inboxCounts('career_application'),
     waitlistCounts(),
   ]);
@@ -277,8 +272,8 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
   return {
     enquiriesOpen: openCount(enquiries),
     enquiriesNew: enquiries.new,
-    registrationsOpen: openCount(courses) + openCount(exams),
-    registrationsNew: courses.new + exams.new,
+    registrationsOpen: openCount(registrations),
+    registrationsNew: registrations.new,
     students: n(row?.students),
     placementToReview: n(row?.placementToReview),
     bookingsCurrent: n(row?.bookingsCurrent),

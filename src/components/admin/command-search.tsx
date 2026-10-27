@@ -27,8 +27,7 @@ const KINDS: Record<SearchKind, { label: Bilingual; icon: ReactNode }> = {
   place: { label: { de: 'Unterkünfte', en: 'Accommodation' }, icon: Icon.home },
   room: { label: { de: 'Räume', en: 'Rooms' }, icon: Icon.rooms },
   enquiry: { label: { de: 'Anfragen', en: 'Enquiries' }, icon: Icon.enquiries },
-  course_registration: { label: { de: 'Kursanmeldungen', en: 'Course registrations' }, icon: Icon.registrations },
-  exam_registration: { label: { de: 'Prüfungsanmeldungen', en: 'Exam registrations' }, icon: Icon.registrations },
+  registration: { label: { de: 'Anmeldungen', en: 'Registrations' }, icon: Icon.registrations },
   application: { label: { de: 'Bewerbungen', en: 'Job applications' }, icon: Icon.applications },
   letter: { label: { de: 'Briefe', en: 'Letters' }, icon: Icon.mail },
 };

@@ -246,6 +246,7 @@ const ACTION_ICON: Record<string, ReactNode> = {
 /** Failing a mark for what it did, the mark of what it was done to. */
 const ENTITY_ICON: Record<string, ReactNode> = {
   enquiry: Icon.enquiries,
+  registration: Icon.registrations,
   course_registration: Icon.registrations,
   exam_registration: Icon.registrations,
   career_application: Icon.applications,

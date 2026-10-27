@@ -225,7 +225,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
   );
 }
 
-const QUEUES = new Set<string>(['enquiry', 'course_registration', 'exam_registration', 'career_application']);
+const QUEUES = new Set<string>(['enquiry', 'registration', 'course_registration', 'exam_registration', 'career_application']);
 const isQueue = (entity: string): entity is QueueEntity => QUEUES.has(entity);
 
 /**

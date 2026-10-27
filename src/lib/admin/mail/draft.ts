@@ -95,7 +95,22 @@ function oneReader(name: string, addresses: { address: string; is_primary: boole
   return unique(addresses.map((a, i) => ({ email: a.address, name, group, chosen: i === 0 })));
 }
 
-async function inbox(table: 'enquiries' | 'course_registrations' | 'exam_registrations' | 'career_applications', id: string) {
+async function inbox(table: 'registrations' | 'enquiries' | 'course_registrations' | 'exam_registrations' | 'career_applications', id: string) {
+  if (table === 'registrations') {
+    // The Anmeldung (0096): who sent it, from its first line, in the language it was sent in.
+    return queryFirst<{ first_name: string | null; last_name: string | null; email: string; locale: string | null; label: string | null }>(
+      `SELECT l.first_name, l.last_name, l.email, g.locale, l.label
+         FROM registrations g
+         CROSS JOIN LATERAL (
+           SELECT first_name, last_name, email, course_type_label AS label, 0 AS rank FROM course_registrations WHERE registration_id = g.id
+           UNION ALL
+           SELECT first_name, last_name, email, exam_type_label, 1 FROM exam_registrations WHERE registration_id = g.id
+           ORDER BY rank LIMIT 1
+         ) l
+        WHERE g.id = $1`,
+      [id]
+    );
+  }
   const label = { enquiries: 'topic', course_registrations: 'course_type_label', exam_registrations: 'exam_type_label', career_applications: 'position_title' }[table];
   return queryFirst<{ first_name: string | null; last_name: string | null; email: string; locale: string | null; label: string | null }>(
     `SELECT first_name, last_name, email, locale, ${label} AS label FROM ${table} WHERE id = $1${table === 'enquiries' ? ' AND deleted_at IS NULL' : ''}`,
@@ -217,15 +232,16 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
       };
     }
     case 'enquiry':
+    case 'registration':
     case 'course_registration':
     case 'exam_registration':
     case 'application': {
-      const table = ({ enquiry: 'enquiries', course_registration: 'course_registrations', exam_registration: 'exam_registrations', application: 'career_applications' } as const)[about];
+      const table = ({ enquiry: 'enquiries', registration: 'registrations', course_registration: 'course_registrations', exam_registration: 'exam_registrations', application: 'career_applications' } as const)[about];
       const r = await inbox(table, id);
       if (!r) return null;
       const name = fullName(r.first_name, r.last_name) || r.email;
       const language = lang(r.locale);
-      const href = { enquiry: `/admin/enquiries/${id}`, course_registration: `/admin/registrations/course/${id}`, exam_registration: `/admin/registrations/exam/${id}`, application: `/admin/applications/${id}` }[about];
+      const href = { enquiry: `/admin/enquiries/${id}`, registration: `/admin/registrations/${id}`, course_registration: `/admin/registrations/course/${id}`, exam_registration: `/admin/registrations/exam/${id}`, application: `/admin/applications/${id}` }[about];
       return {
         title: name,
         detail: r.label,
@@ -236,7 +252,7 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
         language,
         greet: first(r.first_name),
         subject: about === 'enquiry' && r.label ? `Re: ${r.label}` : '',
-        entity: { enquiry: 'enquiry', course_registration: 'course_registration', exam_registration: 'exam_registration', application: 'career_application' }[about],
+        entity: { enquiry: 'enquiry', registration: 'registration', course_registration: 'course_registration', exam_registration: 'exam_registration', application: 'career_application' }[about],
       };
     }
     case 'class':

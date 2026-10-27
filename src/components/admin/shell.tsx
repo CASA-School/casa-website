@@ -137,16 +137,6 @@ export async function WorkspaceShell({
                     href="/admin/registrations"
                     title={t('Anmeldungen', 'Registrations')}
                     icon={Icon.registrations}
-                    items={[
-                      {
-                        href: '/admin/registrations/course',
-                        label: t('Kurse', 'Courses'),
-                      },
-                      {
-                        href: '/admin/registrations/exam',
-                        label: t('Prüfungen', 'Exams'),
-                      },
-                    ]}
                   >
                     {t('Anmeldungen', 'Registrations')}
                   </NavLink>
