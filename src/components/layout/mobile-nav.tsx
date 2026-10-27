@@ -11,7 +11,7 @@ import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { footerConfig } from '@/config/footer';
 import { iconMap } from '@/config/icon-map';
-import { localizeNavDescription, localizeNavText, navConfig, type NavDropdown, type NavItem } from '@/config/nav';
+import { localizeNavText, navConfig, type NavDropdown, type NavItem } from '@/config/nav';
 import { Link, usePathname } from '@/i18n/navigation';
 import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
@@ -430,9 +430,6 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                     >
                       <span className="min-w-0 flex-1">
                         <span className="block text-base font-semibold">{localizeNavText(dropdown.overview.label, contentLocale, say)}</span>
-                        <span className="mt-0.5 block text-[0.8125rem] text-white/70">
-                          {localizeNavDescription(dropdown.overview.description, contentLocale, say)}
-                        </span>
                       </span>
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none">
                         <ArrowRight className="size-4" aria-hidden />
@@ -475,11 +472,6 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                                   >
                                     {localizeNavText(sub.label, contentLocale, say)}
                                   </span>
-                                  {sub.description ? (
-                                    <span className="mt-0.5 block text-[0.8125rem] leading-snug text-[var(--casa-muted)]">
-                                      {localizeNavDescription(sub.description, contentLocale, say)}
-                                    </span>
-                                  ) : null}
                                 </span>
                                 <ChevronRight className="size-4 shrink-0 text-[var(--casa-text-subtle)] transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                               </Link>

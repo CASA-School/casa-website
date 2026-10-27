@@ -1,13 +1,11 @@
 import { IconKey } from './icon-map';
 import type { Meaning } from '@/config/brand/meaning';
 import type { Say } from '@/lib/cms/copy';
-import { readTags, tagText } from '@/lib/cms/stega';
 import type { ContentLocale } from '@/lib/content/types';
 
 export type NavItem = {
   label: string;
   href: string;
-  description?: string;
   icon?: IconKey;
   badge?: string;
 };
@@ -25,7 +23,7 @@ export type NavDropdown = {
    * phone the trigger opens the dropdown instead of navigating, so without it
    * /courses, /exams and /accommodation had no way in from the menu.
    */
-  overview?: { label: string; description: string };
+  overview?: { label: string };
   /** The logo colour of this part of the school (config/brand/meaning.ts). */
   meaning?: Meaning;
   // Left side categories
@@ -37,90 +35,43 @@ export type NavDropdown = {
   sections: NavSection[];
 };
 
-const NAV_DROPDOWN_DESCRIPTION_MAX_CHARS = 52;
-
-function navDescription(value: string) {
-  const normalized = value.trim();
-  if (normalized.length <= NAV_DROPDOWN_DESCRIPTION_MAX_CHARS) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, NAV_DROPDOWN_DESCRIPTION_MAX_CHARS - 3).trimEnd()}...`;
-}
-
 export const deNavText: Record<string, string> = {
   Courses: 'Kurse',
   'Intensive & part-time': 'Intensiv & berufsbegleitend',
   'Intensive courses': 'Intensivkurse',
-  'You have {course.intensive-german.lessons} lessons a week.': 'Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.',
   'Evening courses': 'Abendkurse',
-  'You learn after work, usually twice a week.': 'Nach Feierabend lernst du meist zweimal pro Woche.',
   'Special courses': 'Spezialkurse',
-  'You practise grammar, writing or speaking.': 'Du übst gezielt Grammatik, Schreiben oder Sprechen.',
   'Professional & specialised': 'Beruflich & spezialisiert',
   'German for nursing and medicine': 'Deutsch für Pflege und Medizin',
-  'For everyday work in hospitals and care.': 'Für den Berufsalltag in Klinik und Pflege.',
-  'Classes for groups': 'Unterricht für Gruppen',
-  'Tailor-made German plus culture programme for visiting groups.': 'Maßgeschneidertes Deutsch plus Kulturprogramm für Gruppen.',
   Bildungszeit: 'Bildungszeit',
-  'Learn German or English on paid training leave.': 'Lerne Deutsch oder Englisch in deiner Bildungszeit.',
   'In-company teaching': 'Firmenunterricht',
-  'We plan the lessons together with your company.': 'Wir planen den Unterricht gemeinsam mit der Firma.',
-  'For Companies': 'Für Firmen',
   'For groups': 'Für Gruppen',
   Accommodation: 'Unterkunft',
   'Accommodation options': 'Wohnoptionen',
   'CASA shared flats': 'CASA-WGs',
-  'You share a flat with other learners.': 'Du wohnst mit anderen Lernenden in einer WG.',
   'Host families': 'Gastfamilien',
-  'With a host family, you speak German every day.': 'In einer Gastfamilie sprichst du jeden Tag Deutsch.',
   'Become a host family': 'Gastfamilie werden',
-  'Host learners from all over the world.': 'Nimm Lernende aus aller Welt bei dir auf.',
   Exams: 'Prüfungen',
   Certificates: 'Zertifikate',
-  'Prepare for the exam and take it with us.': 'Bereite dich vor und mach die Prüfung bei uns.',
-  'For your studies at a German university.': 'Für dein Studium an einer deutschen Hochschule.',
   'Our school': 'Unsere Schule',
   'About us': 'Über uns',
   'Non-profit status': 'Gemeinnützigkeit',
-  'How we use your course fees for the public good.': 'So setzen wir deine Kursgebühren gemeinnützig ein.',
   Team: 'Team',
-  'Meet the people who work at CASA.': 'Lerne die Menschen kennen, die bei CASA arbeiten.',
   'Cooperation partners': 'Kooperationspartner',
-  'Organisations we work with in Bremen and beyond.': 'Mit wem wir in Bremen und anderswo zusammenarbeiten.',
-  'Tandem Program': 'Tandemprogramm',
-  'Practice German through structured exchange partners.': 'Deutsch durch begleiteten Sprachaustausch üben.',
   Opportunities: 'Möglichkeiten',
   'Cost calculator': 'Kostenrechner',
   'Get advice': 'Beratung anfragen',
-  'Ask us about levels, dates, fees or your visa.': 'Frag uns nach Niveau, Terminen, Gebühren oder Visum.',
-  'Estimate what your course and life in Bremen cost.': 'Schätze ab, was Kurs und Leben in Bremen kosten.',
   Careers: 'Karriere',
-  'Vacancies in teaching and administration.': 'Offene Stellen im Unterricht und in der Verwaltung.',
   Resources: 'Ressourcen',
   'News & guides': 'Aktuelles & Praktisches',
   // The German site's address is /aktuelles, as on the old casa-bremen.de.
   News: 'Aktuelles',
-  'What’s new at CASA, every month in our NewsFlash.': 'Jeden Monat Neues aus der Schule im NewsFlash.',
   'Language levels': 'Niveaustufen',
-  'What you can do at each level, A1 to C1.': 'Was du auf jeder Stufe kannst, von A1 bis C1.',
   'Study & life in Germany': 'Studium & Leben in Deutschland',
-  'Tips on applications, housing and daily life.': 'Tipps für Bewerbung, Wohnen und Alltag.',
-  'Study in Germany': 'Studieren in Deutschland',
-  'Learning tips and study pathways': 'Lerntipps und Studienwege',
-  'Living in Germany': 'Leben in Deutschland',
-  'Housing and daily-life guidance': 'Unterkunft und Alltag in Deutschland',
-  'Germany Insights': 'Deutschland verstehen',
-  'Why Germany': 'Warum Deutschland',
-  'Reasons to learn and grow in Germany': 'Gründe für Lernen und Entwicklung in Deutschland',
   'All courses at a glance': 'Alle Kurse im Überblick',
-  'Compare every course format.': 'Alle Kursformate im Vergleich.',
   'Accommodation at a glance': 'Unterkunft im Überblick',
-  'Shared flat or host family in Bremen.': 'CASA-WG oder Gastfamilie in Bremen.',
   'Our exam centre': 'Unser Prüfungszentrum',
-  'telc exams, dates and registration.': 'telc-Prüfungen, Termine und Anmeldung.',
   'About CASA': 'Über CASA',
-  'Who we are and what matters to us.': 'Wer wir sind und was uns wichtig ist.',
 };
 
 /** The menu's words in the page's language; with `say`, the live edits. */
@@ -131,31 +82,12 @@ export function localizeNavText(value: string | undefined, locale: ContentLocale
   return locale === 'de' ? german : value;
 }
 
-/**
- * A dropdown description in the page's language, shortened to the cap AFTER
- * translating it.
- *
- * The config below used to store each description already shortened. The
- * English text is also the key of `deNavText`, so a description over the cap
- * ("Meet teachers and staff guiding each learner journey.", 53 characters) was
- * stored as "…learner jour...", matched no key, and the German menu showed the
- * cut English. The config now holds the full English; the cut happens here.
- */
-export function localizeNavDescription(value: string | undefined, locale: ContentLocale, say?: Say) {
-  const localized = localizeNavText(value, locale, say);
-  if (!localized) return localized;
-  // Cut the text, not its editor tag (src/lib/cms/stega.ts), so it stays clickable.
-  const { clean, keys } = readTags(localized);
-  const cut = navDescription(clean);
-  return keys[0] ? tagText(cut, keys[0]) : cut;
-}
-
 export const navConfig = {
   main: [
     {
       trigger: 'Courses',
       href: '/courses',
-      overview: { label: 'All courses at a glance', description: 'Compare every course format.' },
+      overview: { label: 'All courses at a glance' },
       meaning: 'courses',
       sections: [
         {
@@ -165,19 +97,16 @@ export const navConfig = {
               label: 'Intensive courses',
               href: '/courses/intensive-german',
               icon: 'intensive',
-              description: 'You have {course.intensive-german.lessons} lessons a week.',
             },
             {
               label: 'Evening courses',
               href: '/courses/evening-course',
               icon: 'evening',
-              description: 'You learn after work, usually twice a week.',
             },
             {
               label: 'Special courses',
               href: '/courses/special-courses',
               icon: 'special',
-              description: 'You practise grammar, writing or speaking.',
             },
           ],
         },
@@ -188,13 +117,11 @@ export const navConfig = {
               label: 'German for nursing and medicine',
               href: '/courses/german-for-medical',
               icon: 'medical',
-              description: 'For everyday work in hospitals and care.',
             },
             {
               label: 'Bildungszeit',
               href: '/courses/bildungszeit',
               icon: 'bildungszeit',
-              description: 'Learn German or English on paid training leave.',
             },
             /*
              * Firmenunterricht belongs in this panel, not beside it.
@@ -215,7 +142,6 @@ export const navConfig = {
               label: 'In-company teaching',
               href: '/courses/firmenunterricht',
               icon: 'inCompany',
-              description: 'We plan the lessons together with your company.',
             },
           ],
         },
@@ -243,7 +169,7 @@ export const navConfig = {
     {
       trigger: 'Accommodation',
       href: '/accommodation',
-      overview: { label: 'Accommodation at a glance', description: 'Shared flat or host family in Bremen.' },
+      overview: { label: 'Accommodation at a glance' },
       meaning: 'arrival',
       sections: [
         {
@@ -253,19 +179,16 @@ export const navConfig = {
               label: 'CASA shared flats',
               href: '/accommodation/flat',
               icon: 'flats',
-              description: 'You share a flat with other learners.',
             },
             {
               label: 'Host families',
               href: '/accommodation/host',
               icon: 'hostFamilies',
-              description: 'With a host family, you speak German every day.',
             },
             {
               label: 'Become a host family',
               href: '/accommodation/become-host',
               icon: 'becomeHost',
-              description: 'Host learners from all over the world.',
             },
           ],
         },
@@ -274,7 +197,7 @@ export const navConfig = {
     {
       trigger: 'Exams',
       href: '/exams',
-      overview: { label: 'Our exam centre', description: 'telc exams, dates and registration.' },
+      overview: { label: 'Our exam centre' },
       meaning: 'exams',
       sections: [
         {
@@ -284,13 +207,11 @@ export const navConfig = {
               label: 'telc Deutsch B2',
               href: '/exams/b2',
               icon: 'telcB2',
-              description: 'Prepare for the exam and take it with us.',
             },
             {
               label: 'telc Deutsch C1 Hochschule',
               href: '/exams/c1',
               icon: 'telcC1',
-              description: 'For your studies at a German university.',
             },
           ],
         },
@@ -299,7 +220,7 @@ export const navConfig = {
     {
       trigger: 'Our school',
       href: '/about',
-      overview: { label: 'About CASA', description: 'Who we are and what matters to us.' },
+      overview: { label: 'About CASA' },
       meaning: 'orientation',
       sections: [
         {
@@ -320,19 +241,16 @@ export const navConfig = {
               label: 'Non-profit status',
               href: '/about/nonprofit',
               icon: 'mission',
-              description: 'How we use your course fees for the public good.',
             },
             {
               label: 'Team',
               href: '/team',
               icon: 'team',
-              description: 'Meet the people who work at CASA.',
             },
             {
               label: 'Cooperation partners',
               href: '/partners',
               icon: 'partners',
-              description: 'Organisations we work with in Bremen and beyond.',
             },
           ],
         },
@@ -343,13 +261,11 @@ export const navConfig = {
               label: 'Cost calculator',
               href: '/calculator',
               icon: 'calculator',
-              description: 'Estimate what your course and life in Bremen cost.',
             },
             {
               label: 'Careers',
               href: '/careers',
               icon: 'inCompany',
-              description: 'Vacancies in teaching and administration.',
             },
             /*
              * /contact reached the desktop header only as a second filled
@@ -363,7 +279,6 @@ export const navConfig = {
               label: 'Get advice',
               href: '/contact',
               icon: 'contact',
-              description: 'Ask us about levels, dates, fees or your visa.',
             },
           ],
         },
@@ -382,19 +297,16 @@ export const navConfig = {
               label: 'News',
               href: '/news',
               icon: 'news',
-              description: 'What’s new at CASA, every month in our NewsFlash.',
             },
             {
               label: 'Language levels',
               href: '/courses/levels',
               icon: 'levels',
-              description: 'What you can do at each level, A1 to C1.',
             },
             {
               label: 'Study & life in Germany',
               href: '/resources/study-in-germany',
               icon: 'courses',
-              description: 'Tips on applications, housing and daily life.',
             },
           ],
         },

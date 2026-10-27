@@ -637,7 +637,7 @@ function buildNavPassages(): KbPassage[] {
   return dropdowns.flatMap((dropdown) =>
     dropdown.sections.flatMap((section) =>
       section.items.map((item) => {
-        const content = `${section.title}. ${item.description ?? item.label}.`;
+        const content = `${section.title}. ${item.label}.`;
         const keywords = [dropdown.trigger, section.title, item.label, item.href];
         return {
           id: `nav-en-${item.href}`,
