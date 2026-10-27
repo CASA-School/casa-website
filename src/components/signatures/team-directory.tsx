@@ -28,6 +28,8 @@ function Portrait({ member, sizes, className }: { member: TeamSpotlight; sizes: 
         alt={member.photo.alt}
         fill
         sizes={sizes}
+        // Shown as built: the image server's re-encoding softened faces (scripts/media/build_team_portraits.py).
+        unoptimized
         className={cn('object-cover', className)}
         style={{ objectPosition: member.photo.position ?? 'center 25%' }}
       />

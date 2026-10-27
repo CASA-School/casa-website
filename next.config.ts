@@ -111,9 +111,10 @@ const nextConfig: NextConfig = {
      * the 30 entry the optimizer logs
      * `next-image-unconfigured-qualities` on every halo and serves 75 instead,
      * which is bytes nobody can see. 75 stays because it is Next's default and
-     * every non-halo image relies on it.
+     * every non-halo image relies on it. 90 is for the contact avatars' faces
+     * (2026-10-27): at 75 a face lost half its fine detail, skin and hair read soft.
      */
-    qualities: [30, 75],
+    qualities: [30, 75, 90],
   },
 };
 
