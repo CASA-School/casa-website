@@ -22,6 +22,7 @@ import { pick, relativeDays, wsLocale, type T, type WsLang } from '@/lib/admin/i
 import { LETTER_KIND_LABELS } from '@/lib/admin/letters/booking-letters';
 import type { SentLetter } from '@/lib/admin/letters/repo';
 import type { LetterKind } from '@/lib/admin/letters/types';
+import { canAccess } from '@/lib/admin/access';
 import { mailHref } from '@/lib/admin/mail/href';
 import { owesMoney } from '@/lib/admin/open-money';
 import { recordHrefFor } from '@/lib/admin/record-href';
@@ -218,6 +219,13 @@ function CandidatePanel({
             <ButtonLink href={mailHref('person', c.personId, { subject, address: c.email, back })} variant="secondary">
               {Icon.mail}
               {t('E-Mail', 'E-mail')}
+            </ButtonLink>
+          ) : null}
+          {/* The letter due now for this candidate (confirmation, invitation, results, participation): the booking's own. */}
+          {canAccess(user, 'bookings', 'edit') ? (
+            <ButtonLink href={`/admin/bookings/${c.bookingId}/letter`} variant="secondary">
+              {Icon.note}
+              {t('Brief', 'Letter')}
             </ButtonLink>
           ) : null}
           <ButtonLink href={recordHrefFor(user, 'person', c.personId) ?? `/admin/people/${c.personId}`} variant="ghost">
