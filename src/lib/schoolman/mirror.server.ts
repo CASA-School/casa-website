@@ -9,6 +9,10 @@ export const SYNC_TABLES = new Set(Object.keys(LAYOUTS));
 
 type SyncRecord = { recordId: string; modId: string; fieldData: Record<string, string | number | null> };
 
+/** Postgres stores no NUL character in text, and a few of SchoolMan's letters hold one (2026-10-27). */
+const withoutNul = (data: SyncRecord['fieldData']) =>
+  Object.fromEntries(Object.entries(data).map(([k, v]) => [k, typeof v === 'string' ? v.replaceAll('\u0000', '') : v]));
+
 /**
  * One batch of SchoolMan records into the copy (migration 0090): new ones added, known ones replaced
  * where SchoolMan's fields changed — `updated_at` moves only then, so the bridge can tell.
@@ -23,7 +27,7 @@ export async function keepRecords(table: string, records: SyncRecord[]): Promise
          SET mod_id = EXCLUDED.mod_id, data = EXCLUDED.data, seen_at = timezone('utc', now()),
              updated_at = CASE WHEN schoolman_records.data IS DISTINCT FROM EXCLUDED.data THEN timezone('utc', now()) ELSE schoolman_records.updated_at END
        RETURNING updated_at = timezone('utc', now()) AS changed`,
-      [table, JSON.stringify(records.map((r) => ({ record_id: r.recordId, mod_id: r.modId, data: r.fieldData })))]
+      [table, JSON.stringify(records.map((r) => ({ record_id: r.recordId, mod_id: r.modId, data: withoutNul(r.fieldData) })))]
     );
     await client.query(
       `INSERT INTO schoolman_sync_tables (source_table, records, last_batch_at)
