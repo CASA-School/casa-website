@@ -28,6 +28,7 @@ def payout_kind(row):
         return 'agency_commission'
     if _first(row.get('_ID_Accommodation')) or _first(row.get('_ID_DateAccommodation')) or balance == '2' or charge == '3':
         return 'host_rent'
-    if charge == '16':
-        return 'refund'
+    # A kind-less refund (charge type 16, 2019–2024) stays `other` and off the learner's account, as in SchoolMan,
+    # whose `Booking::Balance.Gross` subtracts named refunds (kind 3) only: counted in, 75 settled bookings showed
+    # money owing (2026-10-27). Finance decides; returning 'refund' here counts them in.
     return 'other'
