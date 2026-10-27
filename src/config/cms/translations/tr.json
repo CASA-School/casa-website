@@ -391,10 +391,6 @@
     "de": "Alle Kurse zeigen",
     "text": "Tüm kursları göster"
   },
-  "t.alle-kursformate-im-vergleich.1sonuha": {
-    "de": "Alle Kursformate im Vergleich.",
-    "text": "Tüm kurs türlerini karşılaştırın."
-  },
   "t.alle-rechte-vorbehalten.19pk4cr": {
     "de": "Alle Rechte vorbehalten.",
     "text": "Tüm hakları saklıdır."
@@ -1011,10 +1007,6 @@
     "de": "Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.",
     "text": "Sınavın görevlerine ister hazırlık kursumuzda ister kendi başınıza hazırlanın."
   },
-  "t.bereite-dich-vor-und.gf61oy": {
-    "de": "Bereite dich vor und mach die Prüfung bei uns.",
-    "text": "Sınava hazırlanın ve sınava bizde girin."
-  },
   "t.bereitet-mich-ein-intensivkurs.13ckuef": {
     "de": "Bereitet mich ein Intensivkurs auf eine telc-Prüfung vor?",
     "text": "Yoğun kurs beni bir telc sınavına hazırlar mı?"
@@ -1390,10 +1382,6 @@
   "t.casa-teilnehmende-eines-gruppenk.oawu9i": {
     "de": "CASA Teilnehmende eines Gruppenkurses gehen gemeinsam durch Bremen",
     "text": "Bir CASA grup kursunun katılımcıları Bremen'de birlikte yürüyor"
-  },
-  "t.casa-wg-oder-gastfamilie.xhk5vk": {
-    "de": "CASA-WG oder Gastfamilie in Bremen.",
-    "text": "Bremen'de CASA paylaşımlı dairesi ya da konukçu aile."
   },
   "t.casa-wg.1tt2319": {
     "de": "CASA-WG",
@@ -2323,10 +2311,6 @@
     "de": "Du lernst neue Menschen und ihre Kultur kennen.",
     "text": "Yeni insanlarla ve onların kültürleriyle tanışırsınız."
   },
-  "t.du-lernst-unterrichtseinheiten-p.9uctu5": {
-    "de": "Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
-    "text": "Haftada {course.intensive-german.lessons} ders saati eğitim alırsınız."
-  },
   "t.du-lernst-vormittags-oder.1xlolv5": {
     "de": "Du lernst vormittags oder nachmittags, je nach Kursstart.",
     "text": "Kursun başlangıç tarihine göre sabah ya da öğleden sonra ders alırsınız."
@@ -2378,10 +2362,6 @@
   "t.du-uebst-gespraeche-das.jk8fdc": {
     "de": "Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.",
     "text": "Mesleğinizdeki konuşmaları, dinlediğini anlamayı ve yazılı belgelemeyi çalışırsınız."
-  },
-  "t.du-uebst-gezielt-grammatik.1ku71eo": {
-    "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
-    "text": "Dilbilgisi, yazma ya da konuşma üzerine odaklanarak çalışırsınız."
   },
   "t.du-verstaendigst-dich-in.1gzvx9i": {
     "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
@@ -2438,10 +2418,6 @@
   "t.du-wohnst-in-einem.51q09q": {
     "de": "Du wohnst in einem eigenen möblierten Zimmer, in dem du alles Nötige findest.",
     "text": "İhtiyacınız olan her şeyin bulunduğu, size ait eşyalı bir odada kalırsınız."
-  },
-  "t.du-wohnst-mit-anderen.pba8mi": {
-    "de": "Du wohnst mit anderen Lernenden in einer WG.",
-    "text": "Diğer öğrencilerle paylaşımlı bir dairede yaşarsınız."
   },
   "t.du.1nb1j9k": {
     "de": "Du",
@@ -2951,6 +2927,10 @@
     "de": "Filter zurücksetzen",
     "text": "Filtreleri sıfırla"
   },
+  "t.finanz-und-ressourcenmanagement.1orkivx": {
+    "de": "Finanz- und Ressourcenmanagement",
+    "text": "Finans ve kaynak yönetimi"
+  },
   "t.finanzierung-nachweisen-und-vers.1ct6lf5": {
     "de": "Finanzierung nachweisen und Versicherung abschließen",
     "text": "Finansmanınızı belgeleyin ve sigorta yaptırın"
@@ -3014,10 +2994,6 @@
   "t.frag-uns-nach-dem.ol4zw3": {
     "de": "Frag uns nach dem nächsten Start",
     "text": "Bir sonraki başlangıcı bize sor"
-  },
-  "t.frag-uns-nach-niveau.teyemn": {
-    "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",
-    "text": "Seviye, tarihler, ücretler ya da vize hakkında bize sorun."
   },
   "t.fragen-wir-helfen-dir.iowcbx": {
     "de": "Fragen? Wir helfen dir gern.",
@@ -3126,14 +3102,6 @@
   "t.fuer-das-visum-in.r8v7gz": {
     "de": "Für das Visum in der Regel ja, meistens mit einem Sperrkonto. Wie hoch der Betrag ist und welche Nachweise anerkannt werden, hängt von deiner Staatsangehörigkeit ab. Nutze deshalb die aktuelle Liste deiner Botschaft.",
     "text": "Vize için genellikle evet, çoğunlukla bir bloke hesapla. Tutarın ne kadar olduğu ve hangi belgelerin kabul edildiği vatandaşlığınıza bağlıdır. Bu yüzden bağlı olduğunuz Alman büyükelçiliğinin güncel listesini kullanın."
-  },
-  "t.fuer-dein-studium-an.ijq24v": {
-    "de": "Für dein Studium an einer deutschen Hochschule.",
-    "text": "Bir Alman üniversitesinde okumak için."
-  },
-  "t.fuer-den-berufsalltag-in.11qmacn": {
-    "de": "Für den Berufsalltag in Klinik und Pflege.",
-    "text": "Hastane ve bakım alanındaki günlük iş hayatı için."
   },
   "t.fuer-die-erfolgreiche-umsetzung.75uxgk": {
     "de": "Für die erfolgreiche Umsetzung eines Firmenkurses ist es wichtig, dass sich die Mitarbeitenden ungefähr auf demselben Sprachniveau befinden.",
@@ -3927,10 +3895,6 @@
     "de": "In einer eigenen Wohnung bist du unabhängig. Dafür brauchst du eine Kaution, einen Einkommensnachweis und Geduld bei der Suche.",
     "text": "Kendi evinizde bağımsız olursunuz. Bunun için depozitoya, gelir belgesine ve ev ararken sabra ihtiyacınız vardır."
   },
-  "t.in-einer-gastfamilie-sprichst.ajyk7w": {
-    "de": "In einer Gastfamilie sprichst du jeden Tag Deutsch.",
-    "text": "Konukçu ailede her gün Almanca konuşursunuz."
-  },
   "t.in-einer-wohngemeinschaft-kurz.1d2oaso": {
     "de": "In einer Wohngemeinschaft, kurz WG, hast du ein eigenes Zimmer und teilst Räume wie die Küche mit anderen.",
     "text": "Kısaca WG denen paylaşımlı dairede (Wohngemeinschaft) size ait bir odanız olur; mutfak gibi alanları başkalarıyla paylaşırsınız."
@@ -4166,10 +4130,6 @@
   "t.jeden-monat-erscheint-unser.145f48w": {
     "de": "Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.",
     "text": "NewsFlash bültenimiz her ay kurslar ve sınavlarla ilgili bilgiler, önemli tarihler ve okuldan haberlerle yayımlanır."
-  },
-  "t.jeden-monat-neues-aus.1pf5kg6": {
-    "de": "Jeden Monat Neues aus der Schule im NewsFlash.",
-    "text": "Her ay NewsFlash'ta okuldan haberler."
   },
   "t.jeder-mensch-bringt-andere.gfucsy": {
     "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
@@ -4603,10 +4563,6 @@
     "de": "Kurse für ",
     "text": "Şu seviye için kurslar: "
   },
-  "t.kurse-pruefungen.1i7dit": {
-    "de": "Kurse & Prüfungen",
-    "text": "Kurslar ve sınavlar"
-  },
   "t.kurse-unterkunft.de2j4e": {
     "de": "Kurse & Unterkunft",
     "text": "Kurslar ve konaklama"
@@ -4779,10 +4735,6 @@
     "de": "Lerne Deutsch mit Menschen aus aller Welt und einem Team, das sich Zeit für dich nimmt.",
     "text": "Dünyanın dört bir yanından insanlarla ve size zaman ayıran bir ekiple Almanca öğrenin."
   },
-  "t.lerne-deutsch-oder-englisch.g0xdu6": {
-    "de": "Lerne Deutsch oder Englisch in deiner Bildungszeit.",
-    "text": "Bildungszeit kapsamında Almanca ya da İngilizce öğrenin."
-  },
   "t.lerne-dich-sicherer-auf.zeguny": {
     "de": "Lerne, dich sicherer auf Deutsch auszudrücken – mündlich und schriftlich",
     "text": "Almancada kendinizi daha güvenle ifade etmeyi öğrenin – sözlü ve yazılı olarak"
@@ -4790,10 +4742,6 @@
   "t.lerne-die-aufgaben-kennen.c97w4a": {
     "de": "Lerne die Aufgaben kennen, übe unter Prüfungsbedingungen und erhalte persönliches Feedback.",
     "text": "Sınavdaki görevleri tanıyın, sınav koşullarında pratik yapın ve kişisel geri bildirim alın."
-  },
-  "t.lerne-die-menschen-kennen.9ndcpx": {
-    "de": "Lerne die Menschen kennen, die bei CASA arbeiten.",
-    "text": "CASA'da çalışan insanlarla tanışın."
   },
   "t.lernen-durch-anwenden.9t49rk": {
     "de": "Lernen durch Anwenden",
@@ -5103,10 +5051,6 @@
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
     "text": "Ön bilginiz varsa ve boş yer bulunuyorsa devam eden bir kursa istediğiniz zaman katılabilirsiniz. Kurs doluysa sizi memnuniyetle bekleme listesine alırız."
   },
-  "t.mit-wem-wir-in.1eb2tsn": {
-    "de": "Mit wem wir in Bremen und anderswo zusammenarbeiten.",
-    "text": "Bremen'de ve başka yerlerde kimlerle çalıştığımız."
-  },
   "t.mit-zwei-intensivkursen-am.1igqgsj": {
     "de": "Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.",
     "text": "Günde iki yoğun kursla tek bir yoğun kursun iki katı ders alırsınız. B1 seviyesinden itibaren katılabilirsiniz."
@@ -5259,10 +5203,6 @@
     "de": "Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.",
     "text": "Rezervasyondan sonra varışınızı ve anahtar teslimini sizinle birlikte konuşuruz."
   },
-  "t.nach-feierabend-lernst-du.ofz4y6": {
-    "de": "Nach Feierabend lernst du meist zweimal pro Woche.",
-    "text": "İş çıkışında, genellikle haftada iki kez ders alırsınız."
-  },
   "t.nach-ruecksprache.10x8e42": {
     "de": "Nach Rücksprache",
     "text": "Görüşme üzerine"
@@ -5399,10 +5339,6 @@
     "de": "nicht vollständig zurückgegeben",
     "text": "eksik iade edildi"
   },
-  "t.nimm-lernende-aus-aller.r2epvm": {
-    "de": "Nimm Lernende aus aller Welt bei dir auf.",
-    "text": "Dünyanın dört bir yanından öğrencileri evinizde ağırlayın."
-  },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",
     "text": "Seviyeler ve seviye tespiti"
@@ -5510,10 +5446,6 @@
   "t.offene-stellen-ansehen.1nisx09": {
     "de": "Offene Stellen ansehen",
     "text": "Açık pozisyonlara göz atın"
-  },
-  "t.offene-stellen-im-unterricht.1lk6eu2": {
-    "de": "Offene Stellen im Unterricht und in der Verwaltung.",
-    "text": "Öğretmenlik ve idari alanda açık pozisyonlar."
   },
   "t.offizielle-quellen.1uh5fyw": {
     "de": "Offizielle Quellen",
@@ -6051,10 +5983,6 @@
     "de": "Samstag",
     "text": "Cumartesi"
   },
-  "t.schaetze-ab-was-kurs.11p7esd": {
-    "de": "Schätze ab, was Kurs und Leben in Bremen kosten.",
-    "text": "Kursun ve Bremen'deki yaşamın maliyetini tahmini olarak hesaplayın."
-  },
   "t.schalte-ab-was-die.121vxot": {
     "de": "Schalte ab, was die Gruppe bereits selbst organisiert hat.",
     "text": "Grubun kendi düzenlediği hizmetleri kapatın."
@@ -6342,10 +6270,6 @@
   "t.so-meldest-du-dich.1lidhna": {
     "de": "So meldest du dich an",
     "text": "Nasıl kaydolabilirsiniz"
-  },
-  "t.so-setzen-wir-deine.1d95gz7": {
-    "de": "So setzen wir deine Kursgebühren gemeinnützig ein.",
-    "text": "Kurs ücretlerinizi kamu yararına nasıl kullandığımız."
   },
   "t.so-wirst-du-gastfamilie.pjgrdb": {
     "de": "So wirst du Gastfamilie",
@@ -6759,10 +6683,6 @@
     "de": "telc Deutsch C1 Hochschulprüfung",
     "text": "telc Deutsch C1 Hochschule sınavı"
   },
-  "t.telc-pruefungen-termine-und.tiqx5r": {
-    "de": "telc-Prüfungen, Termine und Anmeldung.",
-    "text": "telc sınavları, tarihler ve kayıt."
-  },
   "t.telc-pruefungen.14zd129": {
     "de": "telc Prüfungen",
     "text": "telc sınavları"
@@ -6838,10 +6758,6 @@
   "t.tipps-aus-dem-buero.18ed9mx": {
     "de": "Tipps aus dem Büro:",
     "text": "Ofisten ipuçları:"
-  },
-  "t.tipps-fuer-bewerbung-wohnen.13kfbkj": {
-    "de": "Tipps für Bewerbung, Wohnen und Alltag.",
-    "text": "Başvuru, barınma ve günlük yaşam için ipuçları."
   },
   "t.trag-dich-mit-deinem.hkbcaf": {
     "de": "Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.",
@@ -7711,10 +7627,6 @@
     "de": "Was dir ein Tandem bringt",
     "text": "Tandemin size kazandırdıkları"
   },
-  "t.was-du-auf-jeder.1qusc0s": {
-    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
-    "text": "A1'den C1'e kadar her seviyede neler yapabildiğiniz."
-  },
   "t.was-du-erreichen-kannst.og5hiu": {
     "de": "Was du erreichen kannst",
     "text": "Neler başarabilirsiniz"
@@ -7987,10 +7899,6 @@
     "de": "Wer was übernimmt",
     "text": "Kim neyi üstleniyor"
   },
-  "t.wer-wir-sind-und.1scjv5j": {
-    "de": "Wer wir sind und was uns wichtig ist.",
-    "text": "Kim olduğumuz ve neye önem verdiğimiz."
-  },
   "t.wer-wir-sind.1s7or1s": {
     "de": "Wer wir sind",
     "text": "Biz kimiz"
@@ -8210,10 +8118,6 @@
   "t.wir-orientieren-uns-streng.1r8mfh1": {
     "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
     "text": "Avrupa Ortak Dil Referans Çerçevesi'ne (CEFR) sıkı sıkıya bağlıyız. Bu çerçeve, her seviyede neleri anlayabileceğinizi ve söyleyebileceğinizi tanımlar. B1+ ise yoğun kursumuzun B1 ile B2 arasındaki ayrı bir seviyesidir."
-  },
-  "t.wir-planen-den-unterricht.119fu4": {
-    "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
-    "text": "Dersleri şirketle birlikte planlıyoruz."
   },
   "t.wir-pruefen-deine-anmeldung.13aus0z": {
     "de": "Wir prüfen deine Anmeldung",

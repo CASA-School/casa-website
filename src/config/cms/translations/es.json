@@ -391,10 +391,6 @@
     "de": "Alle Kurse zeigen",
     "text": "Mostrar todos los cursos"
   },
-  "t.alle-kursformate-im-vergleich.1sonuha": {
-    "de": "Alle Kursformate im Vergleich.",
-    "text": "Compara todos los formatos de curso."
-  },
   "t.alle-rechte-vorbehalten.19pk4cr": {
     "de": "Alle Rechte vorbehalten.",
     "text": "Todos los derechos reservados."
@@ -1011,10 +1007,6 @@
     "de": "Bereite dich in unserem Vorbereitungskurs oder allein auf die Aufgaben vor.",
     "text": "Prepárate para las tareas en nuestro curso de preparación o por tu cuenta."
   },
-  "t.bereite-dich-vor-und.gf61oy": {
-    "de": "Bereite dich vor und mach die Prüfung bei uns.",
-    "text": "Prepárate y haz el examen con nosotros."
-  },
   "t.bereitet-mich-ein-intensivkurs.13ckuef": {
     "de": "Bereitet mich ein Intensivkurs auf eine telc-Prüfung vor?",
     "text": "¿Un curso intensivo me prepara para un examen telc?"
@@ -1390,10 +1382,6 @@
   "t.casa-teilnehmende-eines-gruppenk.oawu9i": {
     "de": "CASA Teilnehmende eines Gruppenkurses gehen gemeinsam durch Bremen",
     "text": "Participantes de un curso para grupos de CASA pasean juntos por Bremen"
-  },
-  "t.casa-wg-oder-gastfamilie.xhk5vk": {
-    "de": "CASA-WG oder Gastfamilie in Bremen.",
-    "text": "Piso compartido de CASA o familia de acogida en Bremen."
   },
   "t.casa-wg.1tt2319": {
     "de": "CASA-WG",
@@ -2323,10 +2311,6 @@
     "de": "Du lernst neue Menschen und ihre Kultur kennen.",
     "text": "Conoces a personas nuevas y su cultura."
   },
-  "t.du-lernst-unterrichtseinheiten-p.9uctu5": {
-    "de": "Du lernst {course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
-    "text": "Tienes {course.intensive-german.lessons} clases por semana."
-  },
   "t.du-lernst-vormittags-oder.1xlolv5": {
     "de": "Du lernst vormittags oder nachmittags, je nach Kursstart.",
     "text": "Aprendes por la mañana o por la tarde, según la fecha de inicio de tu curso."
@@ -2378,10 +2362,6 @@
   "t.du-uebst-gespraeche-das.jk8fdc": {
     "de": "Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.",
     "text": "Practicas conversaciones, la comprensión auditiva y la documentación escrita en el trabajo."
-  },
-  "t.du-uebst-gezielt-grammatik.1ku71eo": {
-    "de": "Du übst gezielt Grammatik, Schreiben oder Sprechen.",
-    "text": "Te centras en practicar la gramática, la escritura o la expresión oral."
   },
   "t.du-verstaendigst-dich-in.1gzvx9i": {
     "de": "Du verständigst dich in einfachen Alltagssituationen und beschreibst mit einfachen Worten deine Herkunft, deine Ausbildung und deine Umgebung.",
@@ -2438,10 +2418,6 @@
   "t.du-wohnst-in-einem.51q09q": {
     "de": "Du wohnst in einem eigenen möblierten Zimmer, in dem du alles Nötige findest.",
     "text": "Vives en tu propia habitación amueblada, con todo lo necesario."
-  },
-  "t.du-wohnst-mit-anderen.pba8mi": {
-    "de": "Du wohnst mit anderen Lernenden in einer WG.",
-    "text": "Compartes piso con otros estudiantes."
   },
   "t.du.1nb1j9k": {
     "de": "Du",
@@ -2951,6 +2927,10 @@
     "de": "Filter zurücksetzen",
     "text": "Restablecer filtros"
   },
+  "t.finanz-und-ressourcenmanagement.1orkivx": {
+    "de": "Finanz- und Ressourcenmanagement",
+    "text": "Finanzas y gestión de recursos"
+  },
   "t.finanzierung-nachweisen-und-vers.1ct6lf5": {
     "de": "Finanzierung nachweisen und Versicherung abschließen",
     "text": "Demostrar la financiación y contratar un seguro"
@@ -3014,10 +2994,6 @@
   "t.frag-uns-nach-dem.ol4zw3": {
     "de": "Frag uns nach dem nächsten Start",
     "text": "Pregúntanos por el próximo inicio"
-  },
-  "t.frag-uns-nach-niveau.teyemn": {
-    "de": "Frag uns nach Niveau, Terminen, Gebühren oder Visum.",
-    "text": "Pregúntanos por el nivel, las fechas, los precios o el visado."
   },
   "t.fragen-wir-helfen-dir.iowcbx": {
     "de": "Fragen? Wir helfen dir gern.",
@@ -3126,14 +3102,6 @@
   "t.fuer-das-visum-in.r8v7gz": {
     "de": "Für das Visum in der Regel ja, meistens mit einem Sperrkonto. Wie hoch der Betrag ist und welche Nachweise anerkannt werden, hängt von deiner Staatsangehörigkeit ab. Nutze deshalb die aktuelle Liste deiner Botschaft.",
     "text": "Para el visado, por lo general sí, casi siempre con una cuenta bloqueada. El importe y los justificantes aceptados dependen de tu nacionalidad. Por eso, consulta la lista actual de tu embajada."
-  },
-  "t.fuer-dein-studium-an.ijq24v": {
-    "de": "Für dein Studium an einer deutschen Hochschule.",
-    "text": "Para tus estudios en una universidad alemana."
-  },
-  "t.fuer-den-berufsalltag-in.11qmacn": {
-    "de": "Für den Berufsalltag in Klinik und Pflege.",
-    "text": "Para el trabajo diario en hospitales y en el ámbito de los cuidados."
   },
   "t.fuer-die-erfolgreiche-umsetzung.75uxgk": {
     "de": "Für die erfolgreiche Umsetzung eines Firmenkurses ist es wichtig, dass sich die Mitarbeitenden ungefähr auf demselben Sprachniveau befinden.",
@@ -3927,10 +3895,6 @@
     "de": "In einer eigenen Wohnung bist du unabhängig. Dafür brauchst du eine Kaution, einen Einkommensnachweis und Geduld bei der Suche.",
     "text": "En una vivienda propia eres independiente. Para ello necesitas un depósito de garantía, un justificante de ingresos y paciencia durante la búsqueda."
   },
-  "t.in-einer-gastfamilie-sprichst.ajyk7w": {
-    "de": "In einer Gastfamilie sprichst du jeden Tag Deutsch.",
-    "text": "En una familia de acogida hablas alemán todos los días."
-  },
   "t.in-einer-wohngemeinschaft-kurz.1d2oaso": {
     "de": "In einer Wohngemeinschaft, kurz WG, hast du ein eigenes Zimmer und teilst Räume wie die Küche mit anderen.",
     "text": "En un piso compartido (en alemán, Wohngemeinschaft o WG) tienes tu propia habitación y compartes espacios como la cocina con otras personas."
@@ -4166,10 +4130,6 @@
   "t.jeden-monat-erscheint-unser.145f48w": {
     "de": "Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.",
     "text": "Cada mes publicamos nuestro NewsFlash con información sobre cursos y exámenes, fechas importantes y novedades de la escuela."
-  },
-  "t.jeden-monat-neues-aus.1pf5kg6": {
-    "de": "Jeden Monat Neues aus der Schule im NewsFlash.",
-    "text": "Cada mes, novedades de la escuela en el NewsFlash."
   },
   "t.jeder-mensch-bringt-andere.gfucsy": {
     "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
@@ -4603,10 +4563,6 @@
     "de": "Kurse für ",
     "text": "Cursos de nivel "
   },
-  "t.kurse-pruefungen.1i7dit": {
-    "de": "Kurse & Prüfungen",
-    "text": "Cursos y exámenes"
-  },
   "t.kurse-unterkunft.de2j4e": {
     "de": "Kurse & Unterkunft",
     "text": "Cursos y alojamiento"
@@ -4779,10 +4735,6 @@
     "de": "Lerne Deutsch mit Menschen aus aller Welt und einem Team, das sich Zeit für dich nimmt.",
     "text": "Aprende alemán con personas de todo el mundo y con un equipo que se toma tiempo para ti."
   },
-  "t.lerne-deutsch-oder-englisch.g0xdu6": {
-    "de": "Lerne Deutsch oder Englisch in deiner Bildungszeit.",
-    "text": "Aprende alemán o inglés durante tu Bildungszeit."
-  },
   "t.lerne-dich-sicherer-auf.zeguny": {
     "de": "Lerne, dich sicherer auf Deutsch auszudrücken – mündlich und schriftlich",
     "text": "Aprende a expresarte con más seguridad en alemán, de forma oral y escrita"
@@ -4790,10 +4742,6 @@
   "t.lerne-die-aufgaben-kennen.c97w4a": {
     "de": "Lerne die Aufgaben kennen, übe unter Prüfungsbedingungen und erhalte persönliches Feedback.",
     "text": "Conoce las tareas, practica en condiciones de examen y recibe comentarios personalizados."
-  },
-  "t.lerne-die-menschen-kennen.9ndcpx": {
-    "de": "Lerne die Menschen kennen, die bei CASA arbeiten.",
-    "text": "Conoce a las personas que trabajan en CASA."
   },
   "t.lernen-durch-anwenden.9t49rk": {
     "de": "Lernen durch Anwenden",
@@ -5103,10 +5051,6 @@
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
     "text": "Si ya tienes conocimientos previos, puedes incorporarte en cualquier momento a un curso en marcha, siempre que queden plazas libres. Si un curso está completo, con gusto te incluimos en la lista de espera."
   },
-  "t.mit-wem-wir-in.1eb2tsn": {
-    "de": "Mit wem wir in Bremen und anderswo zusammenarbeiten.",
-    "text": "Con quién colaboramos en Bremen y en otros lugares."
-  },
   "t.mit-zwei-intensivkursen-am.1igqgsj": {
     "de": "Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.",
     "text": "Con dos cursos intensivos al día tienes el doble de clases que en un solo curso intensivo. Puedes incorporarte a partir del nivel B1."
@@ -5259,10 +5203,6 @@
     "de": "Nach der Buchung besprechen wir mit dir deine Anreise und die Schlüsselübergabe.",
     "text": "Después de la reserva, hablamos contigo sobre tu llegada y la entrega de las llaves."
   },
-  "t.nach-feierabend-lernst-du.ofz4y6": {
-    "de": "Nach Feierabend lernst du meist zweimal pro Woche.",
-    "text": "Aprendes después del trabajo, normalmente dos veces por semana."
-  },
   "t.nach-ruecksprache.10x8e42": {
     "de": "Nach Rücksprache",
     "text": "Previa consulta"
@@ -5399,10 +5339,6 @@
     "de": "nicht vollständig zurückgegeben",
     "text": "no devueltas en su totalidad"
   },
-  "t.nimm-lernende-aus-aller.r2epvm": {
-    "de": "Nimm Lernende aus aller Welt bei dir auf.",
-    "text": "Acoge en tu casa a estudiantes de todo el mundo."
-  },
   "t.niveau-einstufung.nq99sw": {
     "de": "Niveau & Einstufung",
     "text": "Niveles y prueba de nivel"
@@ -5510,10 +5446,6 @@
   "t.offene-stellen-ansehen.1nisx09": {
     "de": "Offene Stellen ansehen",
     "text": "Ver las vacantes"
-  },
-  "t.offene-stellen-im-unterricht.1lk6eu2": {
-    "de": "Offene Stellen im Unterricht und in der Verwaltung.",
-    "text": "Vacantes en docencia y en administración."
   },
   "t.offizielle-quellen.1uh5fyw": {
     "de": "Offizielle Quellen",
@@ -6051,10 +5983,6 @@
     "de": "Samstag",
     "text": "Sábado"
   },
-  "t.schaetze-ab-was-kurs.11p7esd": {
-    "de": "Schätze ab, was Kurs und Leben in Bremen kosten.",
-    "text": "Calcula cuánto cuestan el curso y la vida en Bremen."
-  },
   "t.schalte-ab-was-die.121vxot": {
     "de": "Schalte ab, was die Gruppe bereits selbst organisiert hat.",
     "text": "Desactiva lo que el grupo ya haya organizado por su cuenta."
@@ -6342,10 +6270,6 @@
   "t.so-meldest-du-dich.1lidhna": {
     "de": "So meldest du dich an",
     "text": "Cómo inscribirte"
-  },
-  "t.so-setzen-wir-deine.1d95gz7": {
-    "de": "So setzen wir deine Kursgebühren gemeinnützig ein.",
-    "text": "Así destinamos lo que pagas por tu curso al bien común."
   },
   "t.so-wirst-du-gastfamilie.pjgrdb": {
     "de": "So wirst du Gastfamilie",
@@ -6759,10 +6683,6 @@
     "de": "telc Deutsch C1 Hochschulprüfung",
     "text": "Examen telc Deutsch C1 Hochschule"
   },
-  "t.telc-pruefungen-termine-und.tiqx5r": {
-    "de": "telc-Prüfungen, Termine und Anmeldung.",
-    "text": "Exámenes telc, fechas e inscripción."
-  },
   "t.telc-pruefungen.14zd129": {
     "de": "telc Prüfungen",
     "text": "Exámenes telc"
@@ -6838,10 +6758,6 @@
   "t.tipps-aus-dem-buero.18ed9mx": {
     "de": "Tipps aus dem Büro:",
     "text": "Consejos de la oficina:"
-  },
-  "t.tipps-fuer-bewerbung-wohnen.13kfbkj": {
-    "de": "Tipps für Bewerbung, Wohnen und Alltag.",
-    "text": "Consejos sobre solicitudes, vivienda y vida diaria."
   },
   "t.trag-dich-mit-deinem.hkbcaf": {
     "de": "Trag dich mit deinem Niveau und deinen freien Zeiten in die Interessentenliste ein. Das ist unverbindlich.",
@@ -7711,10 +7627,6 @@
     "de": "Was dir ein Tandem bringt",
     "text": "Lo que te aporta un tándem"
   },
-  "t.was-du-auf-jeder.1qusc0s": {
-    "de": "Was du auf jeder Stufe kannst, von A1 bis C1.",
-    "text": "Lo que sabes hacer en cada nivel, del A1 al C1."
-  },
   "t.was-du-erreichen-kannst.og5hiu": {
     "de": "Was du erreichen kannst",
     "text": "Lo que puedes lograr"
@@ -7987,10 +7899,6 @@
     "de": "Wer was übernimmt",
     "text": "Quién se encarga de qué"
   },
-  "t.wer-wir-sind-und.1scjv5j": {
-    "de": "Wer wir sind und was uns wichtig ist.",
-    "text": "Quiénes somos y qué es importante para nosotros."
-  },
   "t.wer-wir-sind.1s7or1s": {
     "de": "Wer wir sind",
     "text": "Quiénes somos"
@@ -8210,10 +8118,6 @@
   "t.wir-orientieren-uns-streng.1r8mfh1": {
     "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
     "text": "Seguimos estrictamente el Marco Común Europeo de Referencia para las Lenguas (MCER). Describe lo que puedes entender y decir en cada nivel. El B1+ es un nivel propio de nuestro curso intensivo, entre el B1 y el B2."
-  },
-  "t.wir-planen-den-unterricht.119fu4": {
-    "de": "Wir planen den Unterricht gemeinsam mit der Firma.",
-    "text": "Planificamos las clases junto con la empresa."
   },
   "t.wir-pruefen-deine-anmeldung.13aus0z": {
     "de": "Wir prüfen deine Anmeldung",
