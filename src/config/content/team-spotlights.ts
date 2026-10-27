@@ -73,7 +73,7 @@ type TeamMemberSource = {
   /** The job title CASA prints. German is the source; EN is our translation. */
   title: { en: string; de: string };
   /** Directory filter group. Ours, for navigation — not a CASA job grade. */
-  group: 'leadership' | 'courses' | 'office' | 'teachers' | 'volunteer';
+  group: 'leadership' | 'office' | 'finance' | 'teachers' | 'volunteer';
   /** Published responsibilities, verbatim in intent. */
   areas?: { en: string; de: string };
   /**
@@ -87,8 +87,9 @@ type TeamMemberSource = {
 
 const GROUP_LABELS: Record<TeamMemberSource['group'], Record<ContentLocale, string>> = {
   leadership: { en: 'Leadership', de: 'Leitung' },
-  courses: { en: 'Courses & exams', de: 'Kurse & Prüfungen' },
+  // Rahman, 2026-10-27: the office and course administration are one team; finance and resources another.
   office: { en: 'Office & advice', de: 'Verwaltung & Beratung' },
+  finance: { en: 'Finance & resource management', de: 'Finanz- und Ressourcenmanagement' },
   teachers: { en: 'Teachers', de: 'Lehrkräfte' },
   volunteer: { en: 'Volunteer service', de: 'Bundesfreiwilligendienst' },
 };
@@ -116,34 +117,13 @@ const TEAM: TeamMemberSource[] = [
     group: 'leadership',
   },
   /*
-    The five course and office colleagues, in casa-bremen.de's order and with
+    The five course and office colleagues, one team since 2026-10-27 (Rahman):
+    Natàlia, who leads the office, first, then casa-bremen.de's order, with
     its `areas`, re-checked against the live team page on 2026-10-07. These
     areas had drifted one person along (Tanja carried Meike's, Natàlia Tanja's,
     Mareike Natàlia's), and Alissa carried Mareike's medical courses. They now
     agree with the live page and with config/content/contacts.ts.
   */
-  {
-    id: 'meike-grosse-hundrup',
-    name: 'Meike Große Hundrup',
-    photo: { file: 'meike-grosse-hundrup.webp' },
-    title: { en: 'Course administration', de: 'Kursverwaltung' },
-    group: 'courses',
-    areas: {
-      en: 'Intensive courses, partnerships, in-company teaching',
-      de: 'Intensivkurse, Kooperationen, Firmenunterricht',
-    },
-  },
-  {
-    id: 'tanja-langenickel',
-    name: 'Tanja Langenickel',
-    photo: { file: 'tanja-langenickel.webp' },
-    title: { en: 'Course administration', de: 'Kursverwaltung' },
-    group: 'courses',
-    areas: {
-      en: 'Intensive courses, telc exams',
-      de: 'Intensivkurse, telc Prüfungen',
-    },
-  },
   {
     id: 'natalia-sostres',
     name: 'Natàlia Sostres',
@@ -156,11 +136,33 @@ const TEAM: TeamMemberSource[] = [
     },
   },
   {
+    id: 'meike-grosse-hundrup',
+    name: 'Meike Große Hundrup',
+    photo: { file: 'meike-grosse-hundrup.webp' },
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
+    group: 'office',
+    areas: {
+      en: 'Intensive courses, partnerships, in-company teaching',
+      de: 'Intensivkurse, Kooperationen, Firmenunterricht',
+    },
+  },
+  {
+    id: 'tanja-langenickel',
+    name: 'Tanja Langenickel',
+    photo: { file: 'tanja-langenickel.webp' },
+    title: { en: 'Course administration', de: 'Kursverwaltung' },
+    group: 'office',
+    areas: {
+      en: 'Intensive courses, telc exams',
+      de: 'Intensivkurse, telc Prüfungen',
+    },
+  },
+  {
     id: 'mareike-thomeczek',
     name: 'Mareike Thomeczek',
     photo: { file: 'mareike-thomeczek.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
-    group: 'courses',
+    group: 'office',
     areas: {
       en: 'Intensive courses, German for nursing and medicine, quality management',
       de: 'Intensivkurse, Medizin- und Pflegekurse, Qualitätsmanagement',
@@ -171,7 +173,7 @@ const TEAM: TeamMemberSource[] = [
     name: 'Alissa Trouillet',
     photo: { file: 'alissa-trouillet.webp' },
     title: { en: 'Course administration', de: 'Kursverwaltung' },
-    group: 'courses',
+    group: 'office',
     areas: {
       en: 'Intensive courses, evening courses, special courses, quality management',
       de: 'Intensivkurse, Abendkurse, Spezialkurse, Qualitätsmanagement',
@@ -181,14 +183,14 @@ const TEAM: TeamMemberSource[] = [
     id: 'manuela-meerhoff',
     name: 'Manuela Meerhoff',
     title: { en: 'Accounts', de: 'Buchhaltung' },
-    group: 'office',
+    group: 'finance',
   },
   {
     id: 'ina-eismann',
     name: 'Ina Eismann',
     photo: { file: 'ina-eismann.webp' },
     title: { en: 'Accounts', de: 'Buchhaltung' },
-    group: 'office',
+    group: 'finance',
     areas: {
       en: 'Accounts, and the contact for group course quotes',
       de: 'Buchhaltung und Ansprechpartnerin für Gruppenangebote',
@@ -198,7 +200,7 @@ const TEAM: TeamMemberSource[] = [
     id: 'ilka-ahrens',
     name: 'Ilka Ahrens',
     title: { en: 'Resource management', de: 'Ressourcenmanagement' },
-    group: 'office',
+    group: 'finance',
   },
   // Teachers with a portrait from the 2026 team shoot (Rahman, 2026-10-27).
   {

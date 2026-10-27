@@ -8354,6 +8354,18 @@
    "/courses/[slug]"
   ]
  },
+ "t.finanz-und-ressourcenmanagement.1orkivx": {
+  "de": "Finanz- und Ressourcenmanagement",
+  "en": "Finance & resource management",
+  "files": [
+   "src/config/content/team-spotlights.ts"
+  ],
+  "pages": [
+   "/accommodation/[type]",
+   "/courses/[slug]",
+   "/exams/[code]"
+  ]
+ },
  "t.finanzierung-nachweisen-und-vers.1ct6lf5": {
   "de": "Finanzierung nachweisen und Versicherung abschließen",
   "en": "Prove your funding and arrange insurance",
@@ -12931,18 +12943,6 @@
   ],
   "pages": [
    "/courses"
-  ]
- },
- "t.kurse-pruefungen.1i7dit": {
-  "de": "Kurse & Prüfungen",
-  "en": "Courses & exams",
-  "files": [
-   "src/config/content/team-spotlights.ts"
-  ],
-  "pages": [
-   "/accommodation/[type]",
-   "/courses/[slug]",
-   "/exams/[code]"
   ]
  },
  "t.kurse-unterkunft.de2j4e": {
