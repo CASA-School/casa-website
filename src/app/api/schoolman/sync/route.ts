@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
 import { apiError, apiSuccess } from '@/lib/api/response';
+import { requestBridgeRun } from '@/lib/schoolman/bridge-trigger.server';
 import { SYNC_TABLES, completeTable, keepRecords } from '@/lib/schoolman/mirror.server';
 import { SIGNATURE_HEADER, verify } from '@/lib/schoolman/signature';
 
@@ -37,8 +38,12 @@ export async function POST(request: Request) {
   const { table, records, complete } = parsed.data;
 
   const kept = await keepRecords(table, records);
-  if (!complete) return apiSuccess(kept);
+  if (!complete) {
+    if (kept.changed) await requestBridgeRun();
+    return apiSuccess(kept);
+  }
   const done = await completeTable(table, complete.recordIds);
   if ('refused' in done) return apiError('INCOMPLETE', `Fewer than half of the ${done.refused} records kept: nothing removed.`, 409);
+  if (kept.changed || done.removed) await requestBridgeRun();
   return apiSuccess({ ...kept, ...done });
 }

@@ -29,13 +29,15 @@ export async function keepRecords(table: string, records: SyncRecord[]): Promise
        RETURNING updated_at = timezone('utc', now()) AS changed`,
       [table, JSON.stringify(records.map((r) => ({ record_id: r.recordId, mod_id: r.modId, data: withoutNul(r.fieldData) })))]
     );
+    const changed = result.rows.filter((r) => r.changed).length;
     await client.query(
-      `INSERT INTO schoolman_sync_tables (source_table, records, last_batch_at)
-       VALUES ($1, (SELECT count(*) FROM schoolman_records WHERE source_table = $1), timezone('utc', now()))
-       ON CONFLICT (source_table) DO UPDATE SET records = EXCLUDED.records, last_batch_at = EXCLUDED.last_batch_at`,
-      [table]
+      `INSERT INTO schoolman_sync_tables (source_table, records, last_batch_at, version)
+       VALUES ($1, (SELECT count(*) FROM schoolman_records WHERE source_table = $1), timezone('utc', now()), $2)
+       ON CONFLICT (source_table) DO UPDATE SET records = EXCLUDED.records, last_batch_at = EXCLUDED.last_batch_at,
+         version = schoolman_sync_tables.version + EXCLUDED.version`,
+      [table, changed ? 1 : 0]
     );
-    return { kept: result.rowCount ?? 0, changed: result.rows.filter((r) => r.changed).length };
+    return { kept: result.rowCount ?? 0, changed };
   });
 }
 
@@ -49,10 +51,11 @@ export async function completeTable(table: string, recordIds: string[]): Promise
   return withTransaction(async (client) => {
     const removed = await client.query(`DELETE FROM schoolman_records WHERE source_table = $1 AND NOT (record_id = ANY($2::text[]))`, [table, recordIds]);
     await client.query(
-      `INSERT INTO schoolman_sync_tables (source_table, records, last_complete_at)
-       VALUES ($1, (SELECT count(*) FROM schoolman_records WHERE source_table = $1), timezone('utc', now()))
-       ON CONFLICT (source_table) DO UPDATE SET records = EXCLUDED.records, last_complete_at = EXCLUDED.last_complete_at`,
-      [table]
+      `INSERT INTO schoolman_sync_tables (source_table, records, last_complete_at, version)
+       VALUES ($1, (SELECT count(*) FROM schoolman_records WHERE source_table = $1), timezone('utc', now()), $2)
+       ON CONFLICT (source_table) DO UPDATE SET records = EXCLUDED.records, last_complete_at = EXCLUDED.last_complete_at,
+         version = schoolman_sync_tables.version + EXCLUDED.version`,
+      [table, removed.rowCount ? 1 : 0]
     );
     return { removed: removed.rowCount ?? 0 };
   });

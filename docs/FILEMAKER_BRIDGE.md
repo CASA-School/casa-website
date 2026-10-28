@@ -655,8 +655,9 @@ its modification count and the layout's fields as JSON; `updated_at` moves only 
 `/api/schoolman/sync` answers 404 without a key configured, 401 to anything unsigned, and refuses a
 complete list shorter than half of what is kept (a read cut short is not SchoolMan emptied).
 
-**The bridge from the copy** (`scripts/filemaker/bridge-mirror.mjs`, the scheduled job
-`caj-casa-website-schoolman` from `infra/azure/schoolman-job.sh`, every five minutes). Ends at once when
+**The bridge from the copy** (`scripts/filemaker/bridge-mirror.mjs`, the job `caj-casa-website-schoolman`
+from `infra/azure/schoolman-job.sh`; since 2026-10-28 started by the sync endpoint when the copy changed and
+hourly as a fallback, and running only the steps whose tables changed — docs/schoolman/MIGRATION.md §1). Ends at once when
 nothing in the copy changed since its last good run; two never overlap (an advisory lock). Otherwise it
 turns the copy back into the columns AppleScript gives (`mirror-export.mjs`: dates DD.MM.YYYY, decimal
 commas, SchoolMan's record order), runs every `read_*.py` on them unchanged (`FM_MIRROR`), and each
