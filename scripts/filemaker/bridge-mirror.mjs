@@ -4,14 +4,14 @@
  * each `read_*.py` runs on it unchanged (`FM_MIRROR`), and each importer takes its reader's output as in
  * a run from a bundle. Runs inside Azure as a Container Apps job; two runs never overlap. Counts only.
  *
- * Only what changed (2026-10-28, migration 0099; Rahman: the Azure costs). The sync endpoint starts the
- * job when a batch changed the copy, and the job's hourly start catches anything that start missed. A run
- * does a step when a SchoolMan table it read last time has changed since (each table's `version`), when
+ * Only what changed (2026-10-28, migrations 0099–0100; Rahman: the Azure costs). The sync endpoint starts
+ * the job when the copy changed — at most once in five minutes, and not while a run is going on; what a
+ * run did not see waits for the next start (`pending_since`), which the sync service's tick asks for once a
+ * minute, and the job's hourly start catches a start that never came. A run does a step when a SchoolMan table it read last time has changed since (each table's `version`), when
  * the bridge's code changed, or when an earlier step of the run added or removed records others link to
  * (a booking now here, its attendance with it). The tables a step reads are noted as it reads them
  * (`FM_MIRROR_USED`, fm_read.py), and only those are exported. Once a night every step runs — whatever
- * depends on today's date (who is in the sample, which sittings lie ahead) moves on then. A run that
- * finds the copy moved on while it ran goes round again before it ends.
+ * depends on today's date (who is in the sample, which sittings lie ahead) moves on then.
  *
  *   DATABASE_URL=… node scripts/filemaker/bridge-mirror.mjs [--only learners,money] [--always]
  */
@@ -30,9 +30,6 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const arg = (name) => (process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : undefined);
 const only = arg('--only')?.split(',').map((s) => s.trim()).filter(Boolean);
 const ALL_TABLES = Object.keys(JSON.parse(readFileSync(path.join(HERE, 'sync-layouts.json'), 'utf8')));
-/** Rounds in one run at most; a copy still moving on after them waits for its next start. */
-const ROUNDS = 6;
-
 /** The bridge's code: a step whose readers or importers changed since it last ran runs again. */
 const CODE = createHash('sha256')
   .update(
@@ -67,7 +64,8 @@ if (!(await lock.query(`SELECT pg_try_advisory_lock(hashtext('schoolman-bridge')
   await lock.end();
   process.exit(0);
 }
-await lock.query(`UPDATE schoolman_bridge_state SET running_since = timezone('utc', now())`);
+// What waits is this run's from here on: a change after this line marks the copy waiting again.
+await lock.query(`UPDATE schoolman_bridge_state SET running_since = timezone('utc', now()), pending_since = NULL`);
 
 const linkedCounts = async () =>
   (await lock.query(`SELECT ${LINKED.map((t) => `(SELECT count(*) FROM ${t})`).join(' + ')} AS n`)).rows[0].n;
@@ -85,7 +83,6 @@ async function fullDue() {
 let ok = true;
 async function round(full) {
   const versions = new Map((await lock.query(`SELECT source_table, version::text FROM schoolman_sync_tables`)).rows.map((r) => [r.source_table, r.version]));
-  const sum = [...versions.values()].reduce((a, v) => a + BigInt(v), 0n);
   const [{ sent }] = (await lock.query(`SELECT max(last_batch_at) AS sent FROM schoolman_sync_tables`)).rows;
   const known = new Map((await lock.query(`SELECT step, tables, code FROM schoolman_bridge_steps`)).rows.map((r) => [r.step, r]));
   const work = mkdtempSync(path.join(tmpdir(), 'schoolman-'));
@@ -154,19 +151,6 @@ async function round(full) {
   await lock.query(`INSERT INTO bridge_runs (source, read_at, ok, steps) VALUES ('schoolman-copy', $1, $2, $3::jsonb)`, [sent ?? new Date(), ok, JSON.stringify(done)]);
   if (done.length) printCounts(before, await counts());
   if (ok && full) await lock.query(`UPDATE schoolman_bridge_state SET last_full_at = timezone('utc', now())`);
-  return sum;
-}
-
-/** Ends the run unless the copy moved on since `sum` was read; then the run goes round again. */
-let ended = false;
-async function finish(sum, force) {
-  const result = await lock.query(
-    `UPDATE schoolman_bridge_state SET running_since = NULL, requested_at = NULL
-      WHERE $2 OR (SELECT coalesce(sum(version), 0) FROM schoolman_sync_tables) = $1::numeric RETURNING true`,
-    [sum.toString(), force]
-  );
-  ended = result.rowCount > 0;
-  return ended;
 }
 
 try {
@@ -178,17 +162,16 @@ try {
   if (!held) console.log('the copy of SchoolMan is empty: the sync service has not sent anything yet');
   else if (missing.length) console.log(`the copy is not whole yet: ${missing.length} of ${ALL_TABLES.length} tables not read completely (${missing.slice(0, 5).join(', ')}…)`);
   else {
-    let full = await fullDue();
-    for (let n = 1; ; n++) {
-      const sum = await round(full);
-      full = false;
-      if (!ok || (await finish(sum, n >= ROUNDS))) break;
-      console.log('\nSchoolMan changed during the run: once more');
-    }
+    await round(await fullDue());
     console.log(ok ? '\nbridge run complete' : '\nbridge run FAILED');
   }
 } finally {
-  if (!ended) await finish(0n, true);
+  // A step that failed did not take what it read: the next start (in five minutes) tries again.
+  await lock.query(
+    `UPDATE schoolman_bridge_state SET running_since = NULL,
+       pending_since = CASE WHEN $1 THEN pending_since ELSE coalesce(pending_since, timezone('utc', now())) END`,
+    [ok]
+  );
   await lock.end();
 }
 process.exit(ok ? 0 : 1);

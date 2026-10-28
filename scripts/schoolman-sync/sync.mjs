@@ -152,6 +152,20 @@ async function send(table, batch, complete) {
   throw new Error(`workspace unreachable for ${table}`);
 }
 
+/**
+ * After every round, a signed „tick" with no records (2026-10-28): the workspace starts the bridge job for
+ * changes it held back — at most one start in five minutes — without waiting for the next change.
+ */
+async function tick() {
+  const body = JSON.stringify({ tick: true });
+  const r = await request('POST', TARGET, {
+    headers: { 'Content-Type': 'application/json', 'x-schoolman-signature': sign(secret('SCHOOLMAN_SYNC_KEY', 'casa-schoolman-sync-key'), body) },
+    body,
+    tls: false,
+  }).catch((error) => ({ status: 0, json: { error: { message: error.message } } }));
+  if (r.status !== 200) log(`tick: HTTP ${r.status} ${r.json?.error?.code ?? r.json?.error?.message ?? ''}`);
+}
+
 // What was sent last time, per table and record: its modId. Only records whose modId moved are sent.
 let state = { tables: {} };
 try {
@@ -267,6 +281,7 @@ try {
       const night = now.getHours() === 2 && now.getMinutes() >= 15 && lastNight !== now.toDateString();
       await round(night || !Object.keys(state.tables).length);
       if (night) lastNight = now.toDateString();
+      await tick();
       await new Promise((done) => setTimeout(done, 60_000));
     }
   }

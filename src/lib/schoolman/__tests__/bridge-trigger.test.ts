@@ -26,30 +26,39 @@ describe('starting the SchoolMan bridge when the copy changed', () => {
 
   it('does nothing where the job is not configured', async () => {
     vi.stubEnv('SCHOOLMAN_BRIDGE_JOB', '');
-    expect(await requestBridgeRun()).toBe('off');
+    expect(await requestBridgeRun(true)).toBe('off');
     expect(mocks.query).not.toHaveBeenCalled();
   });
 
-  it('asks Azure for no second run while one is going on or was just asked for', async () => {
-    mocks.query.mockResolvedValueOnce([]);
-    expect(await requestBridgeRun()).toBe('running');
+  it('marks a change as waiting and holds the start while a run goes on or one started in the last five minutes', async () => {
+    mocks.query.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    expect(await requestBridgeRun(true)).toBe('waiting');
+    expect(mocks.query.mock.calls[0][0]).toContain('pending_since = coalesce(pending_since');
+    expect(mocks.query.mock.calls[1][0]).toContain("interval '5 minutes'");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('a tick marks nothing and starts only what waits', async () => {
+    mocks.query.mockResolvedValueOnce([]);
+    expect(await requestBridgeRun(false)).toBe('idle');
+    expect(mocks.query).toHaveBeenCalledTimes(1);
+    expect(mocks.query.mock.calls[0][0]).toContain('pending_since IS NOT NULL');
+  });
+
   it('starts the job with the managed identity', async () => {
-    mocks.query.mockResolvedValueOnce([{ ok: true }]);
+    mocks.query.mockResolvedValueOnce([]).mockResolvedValueOnce([{ ok: true }]);
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 't' }))).mockResolvedValueOnce(new Response('{}', { status: 202 }));
-    expect(await requestBridgeRun()).toBe('started');
+    expect(await requestBridgeRun(true)).toBe('started');
     expect(String(fetchMock.mock.calls[0][0])).toContain('resource=https%3A%2F%2Fmanagement.azure.com%2F');
     expect(fetchMock.mock.calls[1][0]).toBe(`https://management.azure.com${JOB}/start?api-version=2024-03-01`);
     expect(fetchMock.mock.calls[1][1].headers.authorization).toBe('Bearer t');
   });
 
-  it('lets the next batch ask again when the start failed, without throwing', async () => {
+  it('lets the next tick ask again when the start failed, without throwing', async () => {
     mocks.query.mockResolvedValue([{ ok: true }]);
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 't' }))).mockResolvedValueOnce(new Response('', { status: 403 }));
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(await requestBridgeRun()).toBe('failed');
+    expect(await requestBridgeRun(false)).toBe('failed');
     expect(mocks.query).toHaveBeenLastCalledWith('UPDATE schoolman_bridge_state SET requested_at = NULL');
   });
 });

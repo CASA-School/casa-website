@@ -2863,13 +2863,16 @@ Azure had gone from about €1.95 a day to €4.72 (27.10.); the sync job starte
 five starts found nothing, and any change ran all 20 steps on all 90 tables, every reader parsing the whole
 copy (3½ minutes at 1 vCPU / 2 GiB, the learners' reader at 1.2 GB).
 
-- **Started on change** (migration 0099): `/api/schoolman/sync` starts the job after a batch that changed the
-  copy, with the app's managed identity; the custom role „CASA bridge job starter" may start and read that
-  one job, nothing else (Rahman's go, 2026-10-28). The schedule is hourly, as a fallback.
+- **Started on change** (migrations 0099–0100): a batch that changed the copy marks it waiting; the endpoint
+  starts the job with the app's managed identity when something waits, no run goes on and the last start
+  is five minutes old; the sync service's tick once a minute starts what was held back. The custom role
+  „CASA bridge job starter" may start and read that one job, nothing else (Rahman's go, 2026-10-28). The
+  schedule is hourly, as a fallback. (0099 alone went round again while SchoolMan kept changing: 10
+  minutes of back-to-back rounds at 13:16 on the first live morning, each doing the learners.)
 - **Only the steps that changed**: each table of the copy has a `version`; each step's tables are noted as
   its reader reads them; a step runs when one of them moved, when the bridge code changed, or when an
-  earlier step added or removed linked records. Every step once a night. No change lost: the run ends
-  only if the versions' sum is what it was when it read, else goes round again.
+  earlier step added or removed linked records. Every step once a night. A run clears the waiting mark
+  before it reads, so a change during it is the next run's.
 - **One file per field**: a reader loads only the columns it reads (learners 1.2 → 0.87 GB). Locally a run
   with nothing to do takes 0.2 s, a Person change 13 s (5 steps), every step 22 s. Job at 0.75 vCPU / 1.5 GiB.
 - docs/schoolman/MIGRATION.md §1 has the rules.

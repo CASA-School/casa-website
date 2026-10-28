@@ -3,12 +3,13 @@ import 'server-only';
 import { query } from '@/lib/admin/db';
 
 /*
- * The bridge job is started when the copy of SchoolMan changed (2026-10-28, migration 0099), not every five
- * minutes: four of five scheduled starts found nothing to do, and every start costs the job's minimum.
- * The endpoint asks Azure to start `SCHOOLMAN_BRIDGE_JOB` (the job's resource id) with the app's managed
- * identity, which may start that one job and nothing else. No run is asked for while one is going on or
- * one was asked for in the last three minutes: a run that finds the copy moved on while it ran goes round
- * again before it ends (bridge-mirror.mjs), and the job's hourly start catches a start that never came.
+ * The bridge job is started when the copy of SchoolMan changed (2026-10-28, migrations 0099–0100), not
+ * every five minutes: four of five scheduled starts found nothing to do, and every start costs the job's
+ * minimum. A batch that changed the copy marks it as waiting (`pending_since`); the endpoint then asks
+ * Azure to start `SCHOOLMAN_BRIDGE_JOB` (the job's resource id) with the app's managed identity, which
+ * may start that one job and nothing else — when something waits, no run is going on, and the last start
+ * was five minutes ago or more. Changes held back by those rules are started by the sync service's tick
+ * after its next round (once a minute); the job's hourly start catches a start that never came.
  */
 
 const ARM = 'https://management.azure.com';
@@ -32,18 +33,20 @@ async function armToken() {
 }
 
 /**
- * After a batch that changed the copy: starts a bridge run unless one is going on or was just asked
- * for. Never throws — a batch is kept whether or not the start went through.
+ * After a batch (`changed`: it changed the copy) or a tick: starts a bridge run if something waits and the
+ * rules allow it. Never throws — a batch is kept whether or not the start went through.
  */
-export async function requestBridgeRun(): Promise<'started' | 'running' | 'off' | 'failed'> {
+export async function requestBridgeRun(changed: boolean): Promise<'started' | 'waiting' | 'idle' | 'off' | 'failed'> {
   if (!bridgeTriggerConfigured()) return 'off';
+  if (changed) await query(`UPDATE schoolman_bridge_state SET pending_since = coalesce(pending_since, timezone('utc', now()))`);
   const asked = await query<{ ok: boolean }>(
     `UPDATE schoolman_bridge_state SET requested_at = timezone('utc', now())
-      WHERE (running_since IS NULL OR running_since < timezone('utc', now()) - interval '150 minutes')
-        AND (requested_at IS NULL OR requested_at < timezone('utc', now()) - interval '3 minutes')
+      WHERE pending_since IS NOT NULL
+        AND (running_since IS NULL OR running_since < timezone('utc', now()) - interval '150 minutes')
+        AND (requested_at IS NULL OR requested_at < timezone('utc', now()) - interval '5 minutes')
       RETURNING true AS ok`
   );
-  if (!asked.length) return 'running';
+  if (!asked.length) return changed ? 'waiting' : 'idle';
   try {
     const response = await fetch(`${ARM}${process.env.SCHOOLMAN_BRIDGE_JOB}/start?api-version=2024-03-01`, {
       method: 'POST',
@@ -55,7 +58,7 @@ export async function requestBridgeRun(): Promise<'started' | 'running' | 'off' 
     if (!response.ok) throw new Error(`start ${response.status}`);
     return 'started';
   } catch (error) {
-    // The next batch asks again.
+    // The next tick asks again.
     await query(`UPDATE schoolman_bridge_state SET requested_at = NULL`);
     console.error('schoolman bridge: the job could not be started:', (error as Error).message);
     return 'failed';
