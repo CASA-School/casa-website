@@ -2835,12 +2835,19 @@ Rahman, from a handwritten list: the in-person placement has been disorganised �
 asked — so it runs by appointment now: Tuesday to Thursday, 09:30, 10:00, 11:00, 11:30, 12:00, 13:30,
 14:00, 15:00, 15:30, 16:00, 16:30, 17:00 (no 10:30, 12:30, 13:00, 14:30), half an hour, two learners at a
 time. A popup on the placement page books the place at once (no confirming by hand), like Ina's group
-consultations; the learner gets a confirmation, online@ an alert, and the team sees the day in the
-Tagesplan behind a „Termine" button, where they also write in appointments made by phone or at the desk.
+consultations; the learner gets a confirmation, online@ an alert.
 
-- Migration 0098 `placement_appointments`; the times in `src/lib/appointments/placement-schedule.ts`
-  (same-day bookings close two hours ahead); `/api/placement-appointments` books under a per-time lock,
-  never a third person from the website (the team may).
+Then Rahman: „Termine is not only the level test … level test is one type of termin", and an appointment
+is assigned to a colleague from the popup, is theirs („my appointments"), and stays visible to everyone
+so one assigned to a colleague on holiday is covered. So Termine are the team's appointments: a fifth
+tile in the Tagesplan like the others, its panel „Alle | Meine" with whose each is and a red
+„Vertretung nötig" when that colleague is away, and „Meine Termine" on the start page.
+
+- Migration 0098 `appointments` (kind placement / consultation / group_consultation / other, length,
+  `assigned_to`); the placement times in `src/lib/appointments/placement-schedule.ts` (same-day bookings
+  close two hours ahead); `/api/placement-appointments` books under a per-time lock, never a third person
+  from the website (the team may). Ina's website group consultations stay on their enquiries and are listed
+  beside the others.
 - Mail kind `placement-appointment` → `FORM_RECIPIENT_PLACEMENT` (online@); without a database the request
   goes by mail alone and nothing calls it booked (the „unheld" receipt).
 - The calendar of both popups is one component now (`src/components/appointments/slot-picker.tsx`).

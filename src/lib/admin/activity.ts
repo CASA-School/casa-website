@@ -193,7 +193,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   placement_attempt: { noun: 'Einstufungstest', gender: 'm' },
   course_instance: { noun: 'Kurstermin', gender: 'm' },
   exam_session: { noun: 'Prüfungstermin', gender: 'm' },
-  placement_appointment: { noun: 'Einstufungstermin', gender: 'm' },
+  appointment: { noun: 'Termin', gender: 'm' },
   booking: { noun: 'Buchung', gender: 'f' },
   person: { noun: 'Person', gender: 'f' },
   offer: { noun: 'Angebot', gender: 'n' },
@@ -598,19 +598,23 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Aufgabe im Tagesplan geändert', 'changed a task on the day board');
     case 'task_deleted':
       return t('hat eine Aufgabe aus dem Tagesplan genommen', 'took a task off the day board');
-    case 'placement_appointment_created':
-      return t('hat einen Einstufungstermin eingetragen', 'added a placement appointment');
-    case 'placement_appointment_updated':
-      return t('hat einen Einstufungstermin geändert', 'changed a placement appointment');
-    case 'placement_appointment_status': {
+    case 'appointment_created':
+      return t('hat einen Termin eingetragen', 'added an appointment');
+    case 'appointment_updated':
+      return t('hat einen Termin geändert', 'changed an appointment');
+    case 'appointment_assigned': {
+      const to = typeof entry.detail?.to === 'string' ? entry.detail.to : null;
+      return to ? t(`hat einen Termin ${to} zugeteilt`, `gave an appointment to ${to}`) : t('hat einen Termin dem Team gegeben', 'gave an appointment to the team');
+    }
+    case 'appointment_status': {
       const status = String(entry.detail?.status ?? '');
       const word = { booked: ['gebucht', 'booked'], came: ['erschienen', 'attended'], missed: ['nicht gekommen', 'missed'], cancelled: ['abgesagt', 'cancelled'] }[status];
       return word
-        ? t(`hat einen Einstufungstermin auf „${word[0]}" gesetzt`, `marked a placement appointment ${word[1]}`)
-        : t('hat einen Einstufungstermin geändert', 'changed a placement appointment');
+        ? t(`hat einen Termin auf „${word[0]}" gesetzt`, `marked an appointment ${word[1]}`)
+        : t('hat einen Termin geändert', 'changed an appointment');
     }
-    case 'placement_appointment_deleted':
-      return t('hat einen Einstufungstermin gelöscht', 'deleted a placement appointment');
+    case 'appointment_deleted':
+      return t('hat einen Termin gelöscht', 'deleted an appointment');
     case 'prices_changed': {
       const n = Array.isArray(entry.detail?.changes) ? entry.detail.changes.length : 0;
       return t(

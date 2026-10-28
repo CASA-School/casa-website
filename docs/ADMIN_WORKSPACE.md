@@ -1417,7 +1417,7 @@ with its week (KW), a step back and forth, Heute, any date from a calendar, the 
 each day's open tasks, and a segmented control — **Überblick · Kurse · Raumplan** — that keeps the
 day as one moves between them.
 
-- **Überblick** (`/admin/day`). The day's tasks are the page; above them four tiles, each the one
+- **Überblick** (`/admin/day`). The day's tasks are the page; above them five tiles, each the one
   figure that matters and a line under it, each opening a **side panel** (`SidePanel`, a dialog
   sliding in from the right) with the rest:
   - *Im Haus* — reception and the office. A colleague's desk (`staff_members.desk`) and usual week
@@ -1430,6 +1430,23 @@ day as one moves between them.
     same weekdays as on their page, `addAbsence`), because the team does it where it sees the day.
   - *Unterricht* — the day by part, and the lessons of the next two weeks whose teacher is away with
     nobody standing in yet (SchoolMan's ConflictTeacher); the tile is marked red when there are some.
+  - *Termine* (2026-10-28, migration 0098) — the team's appointments (`appointments`): placement
+    tests in person, booked by learners on the placement page (Tuesday to Thursday, twelve times,
+    two places each; docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md §Placement appointments), and
+    consultations, group consultations and any other appointment the team writes in. Rahman: an
+    appointment is assigned to a colleague „from the popup", they see it as theirs, and **everyone
+    sees all of them and whose they are**, so one assigned to a colleague on holiday is covered. The
+    tile: the day's count, „Für dich: n", the assignees' faces, red „Vertretung nötig" when an
+    assignee is away that day (staff register, `staff_members.staff_user_id`). The panel
+    (`appointments-panel.tsx`): „Alle | Meine", the day („Einstufung: x von 24 Plätzen"), then the
+    next two weeks; each row the time and length, the name with its kind, phone and email, whose it
+    is (a menu: a colleague or the team), the absence mark, where it stands (Gebucht, Erschienen,
+    Nicht gekommen, Abgesagt — which gives a placement place back) and „Ändern". „Termin eintragen":
+    kind, whose (yourself by default), day, time, length, with whom; contact and note open once a
+    name is in. Ina's group consultations booked on the website are listed too, assigned to whoever
+    owns their enquiry, and opened there. The start page shows the colleague's own appointments of
+    the week as „Meine Termine" (`/admin/day?termine=mine`). `day` at `edit` writes, `full` deletes;
+    no mail goes from here — a confirmation to someone booked by phone is written on the mail screen.
   - *Geburtstage* — colleagues' birthdays in the next two weeks, day and month only.
 
   *Aufgaben* — SchoolMan's WorkFlow on the calendar, shared by the whole team (`day_tasks`, the day
@@ -1438,16 +1455,6 @@ day as one moves between them.
   Erledigt — not „erledigt" typed into a field, and done keeps who and when. Done tasks fold away
   under „Erledigt"; tasks written here and left open on the fourteen days before are carried onto
   today in their own fold (SchoolMan's never are). Changed and deleted in a dialog.
-- **Termine** (2026-10-28, migration 0098). The placement test in person runs by appointment:
-  Tuesday to Thursday, twelve half-hour times from 09:30 to 17:00, two learners each, booked by the
-  learner in the placement page's popup (docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md §Placement
-  appointments). A pill „Termine" beside the day's views, on all three pages, with the day's count,
-  opens `appointments-panel.tsx`: the plan's day first, then the days of the next two weeks that have
-  bookings, „x von 24 Plätzen", each row the time, the name, phone and email, a menu for where it
-  stands — Gebucht, Erschienen, Nicht gekommen, Abgesagt (which gives the place back) — and „Ändern".
-  „Termin eintragen" in the foot writes in an appointment made by phone or at the desk; the team may
-  book any day and a third person, the website never does. `day` at `edit` writes, `full` deletes.
-  No mail goes from here: a confirmation to someone booked by phone is written on the mail screen.
 - **Kurse** (`/admin/day/courses`). SchoolMan's RoomPlan and TeacherPlan as a table: a band for each
   part of the day in its colour (morning teal, afternoon blue, evening violet — amber is kept for
   cover, red for a missing teacher), then a row per class — time, course and SchoolMan number, room
