@@ -1,4 +1,7 @@
-import { ArrowRight, Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
+import { Icon3D } from '@/components/ui/icon-3d';
+import { contactIcons3d } from '@/config/icons-3d';
 
 import { footerConfig } from '@/config/footer';
 import type { ContentLocale } from '@/lib/content/types';
@@ -51,8 +54,8 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
       <p className="mt-3 text-sm leading-relaxed text-white/80">{body}</p>
 
       <ul className="mt-7 space-y-5 border-t border-white/15 pt-7 text-sm">
-        <li className="flex gap-3">
-          <Phone className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
+        <li data-icon-3d-host className="flex gap-3">
+          <Icon3D icon={contactIcons3d.phone} size="sm" className="-mt-0.5" />
           <a
             href={`tel:${phone.replace(/\s+/g, '')}`}
             className="tap-target font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
@@ -61,8 +64,8 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
           </a>
         </li>
         {email ? (
-          <li className="flex min-w-0 gap-3">
-            <Mail className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
+          <li data-icon-3d-host className="flex min-w-0 gap-3">
+            <Icon3D icon={contactIcons3d.email} size="sm" className="-mt-0.5" />
             <a
               href={email.href}
               className="min-w-0 break-words tap-target font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
@@ -71,8 +74,8 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
             </a>
           </li>
         ) : null}
-        <li className="flex gap-3">
-          <MapPin className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
+        <li data-icon-3d-host className="flex gap-3">
+          <Icon3D icon={contactIcons3d.address} size="sm" className="-mt-0.5" />
           <div className="min-w-0">
             <address className="not-italic leading-relaxed text-white/85">
               {addressLines(locale).map((line) => (
@@ -93,8 +96,8 @@ export function ContactHelpPanel({ locale, title, body }: ContactHelpPanelProps)
             </a>
           </div>
         </li>
-        <li className="flex gap-3">
-          <Clock className="mt-0.5 size-5 shrink-0 text-[var(--casa-sun)]" aria-hidden />
+        <li data-icon-3d-host className="flex gap-3">
+          <Icon3D icon={contactIcons3d.hours} size="sm" className="-mt-0.5" />
           <div className="min-w-0">
             <p className="font-semibold text-white">{say(locale, 'Bürozeiten', 'Office hours')}</p>
             <dl className="mt-1.5 space-y-1 text-white/85">

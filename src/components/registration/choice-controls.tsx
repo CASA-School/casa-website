@@ -10,6 +10,8 @@ import type { ContentLocale } from '@/lib/content/types';
 import { clockRange, formatStart } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { Icon3D } from '@/components/ui/icon-3d';
+import type { Icon3D as Icon3DSpec } from '@/config/icons-3d';
 
 /*
  * The registration forms' choices (2026-10-05): chips for a kind of course or
@@ -29,6 +31,8 @@ type ChoiceChipProps = {
   value: string;
   checked: boolean;
   icon: LucideIcon;
+  /** A 3D icon in place of the badge (config/icons-3d). */
+  icon3d?: Icon3DSpec;
   meaning: Meaning;
   title: string;
   meta?: string;
@@ -36,9 +40,10 @@ type ChoiceChipProps = {
 };
 
 /** One choice as a chip, the contact form's "Worum geht es?": a native radio, so arrow keys move between them. */
-export function ChoiceChip({ name, value, checked, icon: Icon, meaning, title, meta, onSelect }: ChoiceChipProps) {
+export function ChoiceChip({ name, value, checked, icon: Icon, icon3d, meaning, title, meta, onSelect }: ChoiceChipProps) {
   return (
     <label
+      data-icon-3d-host
       className={cn(
         'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-[border-color,background-color,box-shadow] duration-150',
         choiceLook.focus,
@@ -46,7 +51,7 @@ export function ChoiceChip({ name, value, checked, icon: Icon, meaning, title, m
       )}
     >
       <input type="radio" name={name} value={value} checked={checked} onChange={onSelect} className="sr-only" />
-      <IconBadge icon={Icon} meaning={meaning} />
+      {icon3d ? <Icon3D icon={icon3d} /> : <IconBadge icon={Icon} meaning={meaning} />}
       <span className="min-w-0 leading-snug">
         <span className="block text-sm font-semibold text-[var(--casa-ink)]">{title}</span>
         {meta ? <span className="block text-xs text-[var(--casa-muted)]">{meta}</span> : null}

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useFieldArray, useForm, Controller, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, HelpCircle, Home, Loader2, ShieldCheck, UserRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, GraduationCap, HelpCircle, Loader2, ShieldCheck, UserRound, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -47,7 +47,8 @@ import {
   requiresLevelField,
 } from '@/lib/validation/registration-submissions';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
-import { IconBadge } from '@/components/ui/icon-badge';
+import { Icon3D } from '@/components/ui/icon-3d';
+import { formStepIcons3d } from '@/config/icons-3d';
 
 type FormData = CourseFormData;
 type FormSubmissionData = CourseFormSubmission;
@@ -370,6 +371,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={GraduationCap}
+              icon3d={formStepIcons3d.course}
               meaning="courses"
               headingRef={stepHeadingRef}
               title={t('Choose your course', 'Kurs auswählen')}
@@ -417,6 +419,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={UserRound}
+              icon3d={formStepIcons3d.details}
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Personal details', 'Persönliche Angaben')}
@@ -549,7 +552,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
 
             <div className={cn(formTileClassName, 'space-y-3')}>
               <div className="flex items-center gap-3">
-                <IconBadge icon={Home} meaning="arrival" />
+                <Icon3D icon={formStepIcons3d.stay} />
                 <p className="text-sm font-semibold text-[var(--casa-ink)]">
                   {t('Accommodation (optional)', 'Unterkunft (optional)')}
                 </p>
@@ -638,6 +641,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={ShieldCheck}
+              icon3d={formStepIcons3d.review}
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Review and submit', 'Prüfen und absenden')}

@@ -37,6 +37,7 @@ import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationExamCatalog } from '@/lib/content/types';
 import { formatDay } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
+import { examTypeIcons3d, formStepIcons3d } from '@/config/icons-3d';
 import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
@@ -299,6 +300,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={FileCheck2}
+              icon3d={formStepIcons3d.exam}
               meaning="exams"
               headingRef={stepHeadingRef}
               title={t('Choose your exam', 'Prüfung auswählen')}
@@ -317,6 +319,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                     value={examType.id}
                     checked={examType.id === selectedExamTypeId}
                     icon={FileCheck2}
+                    icon3d={examTypeIcons3d[examType.code]}
                     meaning="exams"
                     title={examType.name}
                     onSelect={() => setValue('examTypeId', examType.id, { shouldDirty: true, shouldValidate: true })}
@@ -359,6 +362,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={UserRound}
+              icon3d={formStepIcons3d.details}
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Personal details', 'Persönliche Angaben')}
@@ -485,6 +489,7 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <FormStepHeader
               icon={ShieldCheck}
+              icon3d={formStepIcons3d.review}
               meaning="orientation"
               headingRef={stepHeadingRef}
               title={t('Review and submit', 'Prüfen und absenden')}

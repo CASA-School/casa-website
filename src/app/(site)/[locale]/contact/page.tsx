@@ -7,6 +7,8 @@ import { Breadcrumbs } from '@/components/patterns/breadcrumbs';
 import { serializeJsonLd } from '@/components/seo/json-ld';
 import { Container } from '@/components/ui/container';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { Icon3D } from '@/components/ui/icon-3d';
+import { selfServiceIcons3d } from '@/config/icons-3d';
 import type { Meaning } from '@/config/brand/meaning';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { Link } from '@/i18n/navigation';
@@ -263,7 +265,11 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                           href={item.href}
                           className="group flex items-center gap-3 rounded-lg py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
                         >
-                          <IconBadge icon={Icon} meaning={item.meaning} />
+                          {selfServiceIcons3d[item.href] ? (
+                            <Icon3D icon={selfServiceIcons3d[item.href]} />
+                          ) : (
+                            <IconBadge icon={Icon} meaning={item.meaning} />
+                          )}
                           <span className="min-w-0 flex-1">
                             <span className="block text-sm font-semibold text-[var(--casa-ink)]">{pick(locale, item.label)}</span>
                             <span className="block text-sm text-[var(--casa-muted)]">{pick(locale, item.detail)}</span>

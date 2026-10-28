@@ -53,6 +53,7 @@ import { buildLevelPath, continuationLevels, pathWeeks } from '@/lib/registratio
 import { levelChoiceGroups, soldByLevel } from '@/lib/registration/levels';
 import { daytimeLabel, formatDay, scheduleLine, termRange, weeksLabel } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
+import { courseTypeIcons3d, examTypeIcons3d } from '@/config/icons-3d';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 
 import type { CourseForm } from './course-form-types';
@@ -389,6 +390,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
               value={type.id}
               checked={type.id === typeId}
               icon={courseIcons[type.slug] ?? GraduationCap}
+              icon3d={courseTypeIcons3d[type.slug]}
               meaning="courses"
               title={type.name}
               meta={type.lessons_per_week > 0 ? t(`${type.lessons_per_week} lessons a week`, `${type.lessons_per_week} Unterrichtseinheiten pro Woche`) : undefined}
@@ -583,6 +585,7 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
                   value={type.id}
                   checked={type.id === examTypeId}
                   icon={FileCheck2}
+                  icon3d={examTypeIcons3d[type.code]}
                   meaning="exams"
                   title={type.name}
                   onSelect={() => chooseExam(type.id)}

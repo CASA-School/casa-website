@@ -3,8 +3,14 @@ import Image from 'next/image';
 import type { Icon3D as Icon3DSpec } from '@/config/icons-3d';
 import { cn } from '@/lib/utils';
 
-/** The two sizes of IconBadge, which it stands in for: `md` beside a line of text, `lg` leading a card. */
+/**
+ * IconBadge's two sizes, which it stands in for (`md` beside a line of text, `lg` leading a card),
+ * and two for the place of a bare line icon: `xs` in the footer's contact lines, `sm` in the
+ * contact page's panel.
+ */
 const SIZES = {
+  xs: { box: 'size-5', px: 20 },
+  sm: { box: 'size-6', px: 24 },
   md: { box: 'size-10', px: 40 },
   lg: { box: 'size-12', px: 48 },
 } as const;
