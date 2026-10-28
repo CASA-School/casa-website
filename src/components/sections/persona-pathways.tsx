@@ -156,15 +156,20 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
           const primaryHref = withPersonaContext(pathway.primaryAction.href, pathway.key);
           const meaning = meaningClasses[personaMeaning[pathway.key]];
 
+          /*
+           * The hover belongs to a frame that stays put, and the card lifts inside it. When the card
+           * itself was the hover target, a pointer near its bottom edge was left behind by the 4px
+           * lift, the card dropped back under it and lifted again: a flicker, and the 3D icon
+           * restarting its motion each time (Rahman 2026-10-28).
+           */
           return (
+            <div key={pathway.title} className="group/lift flex" data-icon-3d-host>
             <article
-              key={pathway.title}
               className={cn(
-                'group relative flex min-h-[18.5rem] flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 hover:shadow-[var(--shadow-card)] motion-safe:hover:-translate-y-1 md:p-7',
+                'group relative flex min-h-[18.5rem] w-full flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 group-hover/lift:shadow-[var(--shadow-card)] motion-safe:group-hover/lift:-translate-y-1 md:p-7',
                 meaning.hover
               )}
               data-casa-persona={pathway.key}
-              data-icon-3d-host
             >
               <span
                 className={cn('casa-card-edge', meaning.bar)}
@@ -232,6 +237,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
                 )}
               </div>
             </article>
+            </div>
           );
         })}
       </div>

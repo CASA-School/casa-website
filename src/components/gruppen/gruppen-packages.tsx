@@ -119,12 +119,12 @@ export function GruppenPackages({ locale = 'en' }: { locale?: ContentLocale }) {
           ];
 
           return (
-            <li key={item.slug} id={item.slug} className="scroll-mt-28 md:scroll-mt-32">
+            <li key={item.slug} id={item.slug} className="group/lift scroll-mt-28 md:scroll-mt-32">
               <Dialog>
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="group flex h-full w-full flex-col text-left rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300 motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
+                    className="group flex h-full w-full flex-col text-left rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300 motion-safe:group-hover/lift:-translate-y-1 group-hover/lift:shadow-[var(--shadow-modal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2"
                   >
                 <h3 className="text-3xl font-bold leading-tight text-[var(--casa-accent-text)] sm:text-4xl">
                   {pick(locale, item.animal)}
