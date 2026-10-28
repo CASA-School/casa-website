@@ -51,7 +51,9 @@ import {
 } from '@/lib/validation/contact';
 import { organiserCopy, type OrganiserChoiceField, type OrganiserCopy } from '@/config/forms/organiser-brief-copy';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
+import { Icon3D } from '@/components/ui/icon-3d';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { contactTopicIcons3d } from '@/config/icons-3d';
 
 type ContactInquiryFormCopy = {
   formTitle: string;
@@ -530,6 +532,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                 return (
                   <label
                     key={option.key}
+                    data-icon-3d-host
                     className={cn(
                       'relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border bg-white py-2.5 pl-3 pr-8 text-sm font-semibold leading-snug text-[var(--casa-ink)] transition-[border-color,background-color,box-shadow] duration-150',
                       look.wide && 'col-span-full',
@@ -553,7 +556,11 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
                       }
                       className="sr-only"
                     />
-                    <IconBadge icon={TopicIcon} meaning={look.meaning} />
+                    {contactTopicIcons3d[option.key] ? (
+                      <Icon3D icon={contactTopicIcons3d[option.key]} />
+                    ) : (
+                      <IconBadge icon={TopicIcon} meaning={look.meaning} />
+                    )}
                     <span className="min-w-0">{option.label}</span>
                     {checked ? <CheckCircle2 className="absolute right-2.5 top-2.5 size-4 text-[var(--casa-accent-text)]" aria-hidden /> : null}
                   </label>
