@@ -503,7 +503,8 @@ is still valid.
   staff's menus) are read over the Data API as `WorkspaceSync` by the sync service on Rahman's Mac
   (`scripts/schoolman-sync`, launchd) into a copy in the workspace's database (`schoolman_records`,
   `/api/schoolman/sync`, `SCHOOLMAN_SYNC_KEY`); the Azure job `caj-casa-website-schoolman` runs the bridge's
-  steps from that copy every five minutes (`infra/azure/schoolman-job.sh`). The service reads only — GET and
+  steps from that copy — started by the endpoint when the copy changed, hourly as a fallback, and only the
+  steps whose tables changed, all of them once a night (`infra/azure/schoolman-job.sh`, 0099). The service reads only — GET and
   `_find`, never a write or a script call, whatever the account may do. **Writing into SchoolMan** is still
   designed only (`docs/FILEMAKER_BRIDGE.md` §7): FileMaker's intake pipeline is `Contact → PreBooking →
   WaitingRoom → Booking`; a write bridge creates Contact+PreBooking pairs and never `Booking`, through its own

@@ -2855,3 +2855,21 @@ tile in the Tagesplan like the others, its panel „Alle | Meine" with whose eac
   §15 names the new form. The six languages were re-run.
 - **Next** (Rahman): the Klett test → e-mail → registration chain is the bad part; the level test and the
   registration should connect in the new system.
+
+## 55. The bridge only when SchoolMan changed, and only what changed (2026-10-28)
+
+Rahman: „this is having a higher cost on Microsoft Azure … we need to think more intelligent about this".
+Azure had gone from about €1.95 a day to €4.72 (27.10.); the sync job started every five minutes, four of
+five starts found nothing, and any change ran all 20 steps on all 90 tables, every reader parsing the whole
+copy (3½ minutes at 1 vCPU / 2 GiB, the learners' reader at 1.2 GB).
+
+- **Started on change** (migration 0099): `/api/schoolman/sync` starts the job after a batch that changed the
+  copy, with the app's managed identity; the custom role „CASA bridge job starter" may start and read that
+  one job, nothing else (Rahman's go, 2026-10-28). The schedule is hourly, as a fallback.
+- **Only the steps that changed**: each table of the copy has a `version`; each step's tables are noted as
+  its reader reads them; a step runs when one of them moved, when the bridge code changed, or when an
+  earlier step added or removed linked records. Every step once a night. No change lost: the run ends
+  only if the versions' sum is what it was when it read, else goes round again.
+- **One file per field**: a reader loads only the columns it reads (learners 1.2 → 0.87 GB). Locally a run
+  with nothing to do takes 0.2 s, a Person change 13 s (5 steps), every step 22 s. Job at 0.75 vCPU / 1.5 GiB.
+- docs/schoolman/MIGRATION.md §1 has the rules.

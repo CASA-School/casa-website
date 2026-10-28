@@ -29,24 +29,44 @@ def _run(script: str) -> str:
         time.sleep(5 * (attempt + 1))
 
 
-# `FM_MIRROR=<columns.json>`: the readers run on the workspace's copy of SchoolMan instead of FileMaker Pro
+# `FM_MIRROR=<dir>`: the readers run on the workspace's copy of SchoolMan instead of FileMaker Pro
 # (scripts/filemaker/mirror-export.mjs, kept current by the sync service; docs/FILEMAKER_BRIDGE.md §9).
-_MIRROR = None
+# One file per field, `<dir>/<Table>/<field>.json`, loaded when a reader first asks for it — a reader holds
+# only the columns it reads (2026-10-28). Each table read is noted in `FM_MIRROR_USED`, so the bridge knows
+# which tables a step depends on.
+_COLUMNS: dict = {}
+_USED: set = set()
+
+
+class MirrorMissing(RuntimeError):
+    """A table the bridge did not export for this step: it exports the rest and runs the step again."""
 
 
 def _mirror():
-    global _MIRROR
-    if _MIRROR is None and os.environ.get('FM_MIRROR'):
-        with open(os.environ['FM_MIRROR'], encoding='utf-8') as f:
-            _MIRROR = json.load(f)
-    return _MIRROR
+    return os.environ.get('FM_MIRROR') or None
+
+
+def _table_dir(table: str) -> str:
+    path = os.path.join(os.environ['FM_MIRROR'], table)
+    if not os.path.isdir(path):
+        raise MirrorMissing(f'MIRROR_MISSING {table}')
+    if table not in _USED:
+        _USED.add(table)
+        if os.environ.get('FM_MIRROR_USED'):
+            with open(os.environ['FM_MIRROR_USED'], 'a', encoding='utf-8') as f:
+                f.write(table + '\n')
+    return path
 
 
 def _from_mirror(table: str, field: str) -> list[str]:
-    try:
-        return _mirror()[table][field]
-    except KeyError:
-        raise RuntimeError(f'{table}::{field} is not on Sync_{table} (scripts/filemaker/sync-layouts.json)') from None
+    if (table, field) not in _COLUMNS:
+        from urllib.parse import quote
+        path = os.path.join(_table_dir(table), quote(field, safe='') + '.json')
+        if not os.path.exists(path):
+            raise RuntimeError(f'{table}::{field} is not on Sync_{table} (scripts/filemaker/sync-layouts.json)')
+        with open(path, encoding='utf-8') as f:
+            _COLUMNS[(table, field)] = json.load(f)
+    return _COLUMNS[(table, field)]
 
 
 def column(table: str, field: str) -> list[str]:
@@ -69,7 +89,8 @@ return vals as text
 
 def count(table: str) -> int:
     if _mirror() is not None:
-        return len(next(iter(_mirror()[table].values()), []))
+        with open(os.path.join(_table_dir(table), '#count'), encoding='utf-8') as f:
+            return int(f.read())
     return int(_run(f'tell application "FileMaker Pro" to tell document "{DOCUMENT}" to count of records of table "{table}"'))
 
 

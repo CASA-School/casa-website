@@ -233,11 +233,16 @@ Beside the app (docs/schoolman/MIGRATION.md):
 - **App secret `schoolman-sync-key`**, env `SCHOOLMAN_SYNC_KEY=secretref:schoolman-sync-key` on
   `ca-casa-website`: signs what the sync service sends to `/api/schoolman/sync`. The same key is the Keychain
   item `casa-schoolman-sync-key` on the Mac that runs the service. Rotate both together.
-- **Scheduled job `caj-casa-website-schoolman`** in `rg-casa-website-prod` on `cae-casa-prod`: cron `*/5 * * * *`,
-  1 vCPU / 2 GiB, replica timeout 7200 s, no retries, image `casa-website-db:<tag>` (the database image, with
-  python3 for the readers), command `sh task.sh bridge-mirror`, secret `database-url`. Made and updated by
-  `infra/azure/schoolman-job.sh` (`--off` removes it; `db-job.sh` never touches it — its prefix differs).
-  A release whose migration ALTERs a table the bridge writes runs with the job removed and re-made after.
+- **Job `caj-casa-website-schoolman`** in `rg-casa-website-prod` on `cae-casa-prod`: started by the website when
+  the copy of SchoolMan changed, and by its schedule `7 * * * *` (hourly) as a fallback; 0.75 vCPU / 1.5 GiB (was
+  every five minutes at 1 vCPU / 2 GiB until 2026-10-28, about €1 a day), replica timeout 7200 s, no retries,
+  image `casa-website-db:<tag>` (the database image, with python3 for the readers), command
+  `sh task.sh bridge-mirror`, secret `database-url`. The app's identity `id-casa-website-prod` holds the custom
+  role „CASA bridge job starter" (`Microsoft.App/jobs/read`, `Microsoft.App/jobs/start/action`) on this job
+  only, and the app carries `SCHOOLMAN_BRIDGE_JOB` (the job's resource id). Made and updated by
+  `infra/azure/schoolman-job.sh`, which also defines the role, assigns it and sets the app variable
+  (`--off` removes the job; `db-job.sh` never touches it — its prefix differs). A release whose migration
+  ALTERs a table the bridge writes runs with the job removed and re-made after.
 
 ## Migration order
 

@@ -29,14 +29,43 @@ sync service  scripts/schoolman-sync/sync.mjs      runs under launchd on Rahman'
 POST https://neu.casa-bremen.de/api/schoolman/sync   (src/app/api/schoolman/sync, 404 without a key)
    ▼
 schoolman_records (migration 0090)   one row per SchoolMan record: record id, modId, fields as JSON
+   │  a batch that changed the copy raises its table's `version` (0099) and starts the job (below)
    │
-   │  Azure Container Apps job caj-casa-website-schoolman — every 5 minutes (infra/azure/schoolman-job.sh)
+   │  Azure Container Apps job caj-casa-website-schoolman — started by the endpoint when the copy changed,
+   │  and hourly at :07 as a fallback (infra/azure/schoolman-job.sh; 0.75 vCPU / 1.5 GiB)
    ▼
-bridge-mirror.mjs: mirror-export.mjs (the copy as AppleScript-shaped columns) → every read_*.py (FM_MIRROR)
-                   → every import-*.mjs → the workspace's tables          (20 steps, bridge-steps.mjs)
+bridge-mirror.mjs: the steps whose SchoolMan tables changed → mirror-export.mjs (only their tables, one file
+                   each) → their read_*.py (FM_MIRROR) → their import-*.mjs → the workspace's tables
+                                                                          (20 steps, bridge-steps.mjs)
 ```
 
-- A run with nothing new in the copy ends at once; two runs never overlap (advisory lock); a run waits until
+- **Only what changed (2026-10-28, migration 0099; Rahman: the Azure costs had doubled).** Before, the job
+  started every five minutes — four of five starts found nothing — and any change ran all 20 steps on all
+  90 tables (3½ minutes at 1 vCPU / 2 GiB, every reader parsing the whole copy). Now:
+  - **Started on change.** After a batch that changed the copy, `/api/schoolman/sync` asks Azure to start the
+    job (`src/lib/schoolman/bridge-trigger.server.ts`), with the app's managed identity
+    (`id-casa-website-prod`), whose role „CASA bridge job starter" allows starting and reading that one job
+    and nothing else; the app knows the job by `SCHOOLMAN_BRIDGE_JOB` (its resource id). No start while a
+    run is going on (`schoolman_bridge_state.running_since`) or was asked for in the last three minutes.
+    The hourly schedule catches a start that failed. A start that fails clears the request, so the next
+    batch asks again.
+  - **Only the steps that changed.** Each table of the copy has a `version` that rises with every batch that
+    added, changed or removed a record (a counter, not a time: a batch committed late with an early time
+    would look seen). Each step's reader notes the tables it reads (`FM_MIRROR_USED`, fm_read.py); after a
+    step runs, `schoolman_bridge_steps` keeps those tables with their versions and the bridge code's hash.
+    A run does a step when one of its tables' versions moved, when the bridge's code changed (after a
+    release every step runs once), or when an earlier step of the run added or removed records later
+    steps attach to (people, bookings, courses, lesson days … — a booking now here brings its attendance).
+    Only the tables of the steps that run are exported, one file each, and a reader loads only the tables
+    it asks for; a reader that asks for a table it did not read before gets them all on a second try.
+  - **Every step once a night** (the first run between 02:00 and 06:00 Berlin after 20 hours, or after 30
+    hours whatever the hour): what depends on today's date — who is in the learner sample, which sittings
+    lie ahead — moves on then. `--always` forces it.
+  - **No change lost.** The run notes the sum of the versions before it reads; when it ends, it clears
+    `running_since` only if that sum is unchanged, in one statement, and otherwise goes round again (six
+    rounds at most). A batch that arrives meanwhile either sees the run going on (and the run goes round)
+    or sees it ended (and starts the job).
+- Two runs never overlap (advisory lock); a run waits until
   every table has had one complete read (`schoolman_sync_tables.last_complete_at`), so a half-filled copy can
   never look like deletions. Runs are rows of `bridge_runs` with source `schoolman-copy`; the workspace's
   „SchoolMan · Stand" is the last time the service sent.
@@ -141,7 +170,8 @@ and [bridge-gaps.md](bridge-gaps.md) (updated per item: „across since 009x") s
 | The scheduled job | `infra/azure/schoolman-job.sh` creates it or points it at this checkout's image (builds it like db-job.sh); `--off` removes it. Its logs: Log Analytics, `ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'caj-casa-website-schoolman'` |
 | A release whose migration ALTERs a table the bridge writes (people, letters, staff_notes, bookings …) | stop the running execution, `schoolman-job.sh --off`, `deploy.sh`, `schoolman-job.sh` — an ALTER waits for the bridge's long transaction and blocks every read of that table meanwhile |
 | A release that changes readers/importers only | `deploy.sh` is not needed for the job: `schoolman-job.sh` builds and points the job at the new image |
-| Force a bridge run with nothing new | `node scripts/filemaker/bridge-mirror.mjs --always`; every record written again: `BRIDGE_FULL=1` |
+| Force a bridge run with nothing new | `node scripts/filemaker/bridge-mirror.mjs --always` (every step); every record written again: `BRIDGE_FULL=1`. In Azure: `az containerapp job start -n caj-casa-website-schoolman -g rg-casa-website-prod` runs what changed |
+| Which steps a run did, and why not the rest | the job's log: `== <step>` for each step run, `unchanged, not run: …` for the rest; `schoolman_bridge_steps` holds each step's tables and versions; `schoolman_bridge_state` whether a run is going on and when the last full one was |
 | The old way | `./infra/azure/bridge.sh` with SchoolMan open in FileMaker Pro |
 
 ## 6. Changing what comes across
