@@ -438,7 +438,9 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                     ? 'w-[46rem] max-w-[min(46rem,calc(100vw-2rem),calc(var(--casa-container-max)-5rem))]'
                     : dropdown.trigger === 'Resources'
                       ? 'w-[28rem] max-w-[min(28rem,calc(100vw-2rem),calc(var(--casa-container-max)-5rem))]'
-                      : 'w-[34rem] max-w-[min(34rem,calc(100vw-2rem),calc(var(--casa-container-max)-5rem))]';
+                      : dropdown.trigger === 'Our school'
+                        ? 'w-[42rem] max-w-[min(42rem,calc(100vw-2rem),calc(var(--casa-container-max)-5rem))]'
+                        : 'w-[34rem] max-w-[min(34rem,calc(100vw-2rem),calc(var(--casa-container-max)-5rem))]';
                 const panelShift = dropdownShiftByTrigger[dropdown.trigger] ?? 0;
 
                 return (
@@ -579,9 +581,17 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                           </span>
                                         )}
 
-                                        <p className="text-sm font-semibold text-[var(--casa-ink)] group-hover/item:text-[var(--casa-accent-text)]">
-                                          {localizeNavText(subItem.label, contentLocale, say)}
-                                        </p>
+                                        <div className="min-w-0">
+                                          <p className="text-sm font-semibold text-[var(--casa-ink)] group-hover/item:text-[var(--casa-accent-text)]">
+                                            {localizeNavText(subItem.label, contentLocale, say)}
+                                          </p>
+                                          {/* One line, desktop only (Rahman 2026-10-28): the phone menu names the page alone. */}
+                                          {subItem.description && (
+                                            <p className="mt-0.5 truncate text-xs text-[var(--casa-muted)]">
+                                              {localizeNavText(subItem.description, contentLocale, say)}
+                                            </p>
+                                          )}
+                                        </div>
                                       </Link>
                                     </li>
                                   );
