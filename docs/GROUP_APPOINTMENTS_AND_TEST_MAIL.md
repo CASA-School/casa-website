@@ -108,7 +108,7 @@ is a change there (`docs/PRIVACY_POLICY.md`).
 The placement test in person runs by appointment (Rahman): Tuesday to Thursday, twelve times from
 09:30 to 17:00, half an hour, two learners each (`src/lib/appointments/placement-schedule.ts`). The
 popup on the placement page (`PlacementAppointmentDialog`, sharing the calendar `SlotPicker` with Ina's
-dialog) books the place at once through `/api/placement-appointments` (table `placement_appointments`,
+dialog) books the place at once through `/api/placement-appointments` (table `appointments`, kind `placement`,
 0098): a per-time advisory lock counts the places, a third booking from the website gets 409. The
 learner's receipt (`placement-appointment` in `confirmation-copy.ts`) says the appointment stands and
 where; the staff alert goes to `FORM_RECIPIENT_PLACEMENT` (online@) and names the place (1 or 2 of 2).

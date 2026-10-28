@@ -24,6 +24,7 @@ export function SidePanel({
   triggerClassName,
   triggerLabel,
   open,
+  defaultOpen,
   onOpenChange,
   title,
   subtitle,
@@ -38,6 +39,8 @@ export function SidePanel({
   /** The trigger's accessible name, when its content does not say it plainly. */
   triggerLabel?: string;
   open?: boolean;
+  /** Open on arrival, as from a link that names the panel (`/admin/day?termine=1`). */
+  defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   title: ReactNode;
   subtitle?: ReactNode;
@@ -49,7 +52,7 @@ export function SidePanel({
 }) {
   const { t } = useWsLang();
   return (
-    <Primitive.Root open={open} onOpenChange={onOpenChange}>
+    <Primitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       {trigger ? (
         <Primitive.Trigger aria-label={triggerLabel} className={triggerClassName}>
           {trigger}

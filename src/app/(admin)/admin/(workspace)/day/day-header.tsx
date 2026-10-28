@@ -48,7 +48,6 @@ export function DayHeader({
   lessons,
   flats,
   tests,
-  appointments,
   t,
   lang,
 }: {
@@ -61,8 +60,6 @@ export function DayHeader({
   flats?: boolean;
   /** The day-one tests, only on the first day of an intensive start (Rahman, 2026-10-22). */
   tests?: boolean;
-  /** The placement appointments' panel and its button (appointments-panel.tsx), on every view. */
-  appointments?: React.ReactNode;
   t: T;
   lang: WsLang;
 }) {
@@ -153,7 +150,6 @@ export function DayHeader({
         })}
       </nav>
       <span className="flex flex-wrap gap-2">
-        {appointments}
         {tests ? (
           <Link href="/admin/day/tests" className={pill}>
             {Icon.placement}

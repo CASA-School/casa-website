@@ -3,9 +3,12 @@ import type { ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
+import { KIND_CHIPS, KIND_LABELS } from '@/lib/admin/appointment-labels';
+import { appointmentsFrom, type Appointment } from '@/lib/admin/appointments';
 import { bridgeStatus, bridgeTime } from '@/lib/admin/bridge';
+import { berlinDay } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
-import { num, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
+import { num, pick, wsLocale, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { getOverviewFacts, type OverviewFacts } from '@/lib/admin/overview';
 import { placementTestSwitchedOn } from '@/lib/placement/availability';
@@ -225,7 +228,14 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
 
 export default async function OverviewPage() {
   const user = await requireModule('overview');
-  const [facts, bridge, { t, lang }] = await Promise.all([getOverviewFacts(), bridgeStatus(), getI18n()]);
+  const today = berlinDay(new Date());
+  const [facts, bridge, { t, lang }, mine] = await Promise.all([
+    getOverviewFacts(),
+    bridgeStatus(),
+    getI18n(),
+    // The colleague's own appointments of the coming week (0098), only for those who open the Tagesplan.
+    canAccess(user, 'day') ? appointmentsFrom(today, 6, user.id).then((list) => list.filter((a) => a.status === 'booked')) : Promise.resolve([]),
+  ]);
 
   const now = new Date();
   const hour = now.getHours();
@@ -258,6 +268,8 @@ export default async function OverviewPage() {
         ) : null}
       </header>
 
+      {mine.length ? <MyAppointments appointments={mine} today={today} t={t} lang={lang} /> : null}
+
       <div className="space-y-10">
         {visible.map((group) => (
           <section key={group.label} aria-labelledby={`overview-${group.cards[0].module}`}>
@@ -278,6 +290,54 @@ export default async function OverviewPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * „Meine Termine" (2026-10-28): the appointments assigned to the colleague behind the account, this
+ * week, each opening the Tagesplan's Termine on its day. Shown only when there are some.
+ */
+function MyAppointments({ appointments, today, t, lang }: { appointments: Appointment[]; today: string; t: T; lang: WsLang }) {
+  const tomorrow = new Date(Date.parse(`${today}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+  const when = (date: string) =>
+    date === today
+      ? t('Heute', 'Today')
+      : date === tomorrow
+        ? t('Morgen', 'Tomorrow')
+        : new Date(`${date}T12:00:00Z`).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const shown = appointments.slice(0, 6);
+  return (
+    <section aria-labelledby="overview-mine" className="mb-10">
+      <div className="mb-4 flex items-center gap-3">
+        <h2 id="overview-mine" className="text-[0.8rem] font-semibold tracking-[0.01em] text-[var(--casa-muted)]">
+          {t('Meine Termine', 'My appointments')}
+        </h2>
+        <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-[#d3dbe6] to-transparent" />
+        <Link href="/admin/day?termine=mine" className="text-[0.8rem] font-semibold text-[var(--fm-navy)] hover:underline">
+          {t('Alle Termine', 'All appointments')}
+        </Link>
+      </div>
+      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {shown.map((a) => (
+          <li key={a.id}>
+            <Link
+              href={a.date === today ? '/admin/day?termine=mine' : `/admin/day?date=${a.date}&termine=mine`}
+              className="group flex h-full items-center gap-4 rounded-[18px] border border-[#e1e7ef] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.05)] transition-[transform,box-shadow,border-color] duration-200 outline-none hover:-translate-y-[2px] hover:border-[#cdd6e2] hover:shadow-[0_2px_4px_rgba(16,24,40,0.04),0_16px_32px_-20px_rgba(16,24,40,0.3)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            >
+              <span className="grid w-[4.25rem] shrink-0 justify-items-center rounded-[13px] bg-[#f4f6fa] px-2 py-2 ring-1 ring-[#e3e8f0] ring-inset">
+                <span className="text-[0.7rem] font-semibold text-[var(--casa-muted)]">{when(a.date)}</span>
+                <span className="text-[1.05rem] leading-tight font-extrabold text-[var(--casa-ink)] tabular-nums">{a.time}</span>
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={cn('inline-flex h-5 items-center rounded-md px-1.5 text-[0.68rem] font-bold', KIND_CHIPS[a.kind])}>{pick(lang, KIND_LABELS[a.kind])}</span>
+                <span className="mt-1 block truncate text-[0.92rem] font-bold text-[var(--casa-ink)]">{[a.firstName, a.lastName].filter(Boolean).join(' ')}</span>
+                <span className="block truncate text-[0.78rem] text-[var(--casa-muted)]">{a.phone ?? a.email ?? t(`${a.minutes} Minuten`, `${a.minutes} minutes`)}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

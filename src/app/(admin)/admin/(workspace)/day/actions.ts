@@ -14,14 +14,15 @@ import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { pick } from '@/lib/admin/i18n';
 import { isAbsenceReason } from '@/lib/admin/kursplanung/types';
+import { APPOINTMENT_LENGTHS, isAppointmentKind, isAppointmentStatus } from '@/lib/admin/appointment-labels';
 import {
-  createPlacementAppointment,
-  deletePlacementAppointment,
-  isPlacementStatus,
-  setPlacementStatus,
-  updatePlacementAppointment,
-  type PlacementAppointmentInput,
-} from '@/lib/admin/placement-appointments';
+  assignAppointment,
+  createAppointment,
+  deleteAppointment,
+  setAppointmentStatus,
+  updateAppointment,
+  type AppointmentInput,
+} from '@/lib/admin/appointments';
 import { addAbsence } from '@/lib/admin/staff-members';
 import { isEntryTestId } from '@/lib/entry-test/tests';
 
@@ -328,81 +329,102 @@ export async function enterPaperAction(formData: FormData): Promise<void> {
   revalidatePath('/admin/day');
 }
 
-// ------------------------------------------------------------ Einstufungstermine
+// ------------------------------------------------------------ Termine
 
 /**
- * The „Termine" panel sits on all three views of the day, so its actions go back to the view and day
- * it was opened from, and refresh the whole Tagesplan.
+ * The „Termine" panel opens from its tile on the overview (and with `?termine=1` from the start page),
+ * so its actions go back to the day it was opened on with the panel open, and refresh the Tagesplan
+ * and the start page's „Meine Termine".
  */
 const viewBack = (formData: FormData) => {
   const value = String(formData.get('back') ?? '');
-  return /^\/admin\/day(\/courses|\/rooms)?(\?date=\d{4}-\d{2}-\d{2})?$/.test(value) ? value : back(dayOf(formData));
+  return /^\/admin\/day\?(date=\d{4}-\d{2}-\d{2}&)?termine=(1|mine)$/.test(value) ? value : back(dayOf(formData));
 };
 
 function doneAll(to: string): never {
   revalidatePath('/admin/day', 'layout');
+  revalidatePath('/admin');
   redirect(to);
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-async function placementInput(formData: FormData, from: string): Promise<PlacementAppointmentInput> {
+async function appointmentInput(formData: FormData, from: string): Promise<AppointmentInput> {
   const { t } = await getI18n();
   const line = (name: string, max: number) => String(formData.get(name) ?? '').trim().replace(/\s+/g, ' ').slice(0, max) || null;
+  const kind = String(formData.get('kind') ?? '');
   const date = dayOf(formData, 'date');
   const time = timeOf(formData, 'time');
+  const minutes = Number(formData.get('minutes') ?? 30);
   const firstName = line('firstName', 100);
   const email = line('email', 254);
+  const assignedTo = String(formData.get('assignedTo') ?? '');
+  if (!isAppointmentKind(kind)) fail(from, t('Bitte wähle die Art des Termins.', 'Choose the kind of appointment.'));
   if (!date) fail(from, t('Bitte wähle einen Tag.', 'Choose a day.'));
   if (!time) fail(from, t('Bitte wähle eine Uhrzeit.', 'Choose a time.'));
-  if (!firstName) fail(from, t('Bitte trag den Vornamen ein.', 'Enter the first name.'));
+  if (!firstName) fail(from, t('Bitte trag ein, mit wem der Termin ist.', 'Enter who the appointment is with.'));
   if (email && !EMAIL.test(email)) fail(from, t('Diese E-Mail-Adresse stimmt nicht.', 'This email address is not right.'));
+  if (assignedTo && !UUID.test(assignedTo)) throw new Error('Invalid colleague');
   return {
+    kind,
     date,
     time,
+    minutes: (APPOINTMENT_LENGTHS as readonly number[]).includes(minutes) ? minutes : 30,
     firstName,
     lastName: line('lastName', 100),
     email,
     phone: line('phone', 40),
     note: String(formData.get('note') ?? '').trim().slice(0, 1000) || null,
+    assignedTo: assignedTo || null,
   };
 }
 
-export async function createPlacementAppointmentAction(formData: FormData): Promise<void> {
+export async function createAppointmentAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
   const from = viewBack(formData);
-  const result = await createPlacementAppointment(await placementInput(formData, from), actor);
+  const result = await createAppointment(await appointmentInput(formData, from), actor);
   if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
   doneAll(from);
 }
 
-export async function updatePlacementAppointmentAction(formData: FormData): Promise<void> {
+export async function updateAppointmentAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
   const from = viewBack(formData);
   const id = String(formData.get('appointmentId') ?? '');
   if (!UUID.test(id)) throw new Error('Invalid appointment');
-  const result = await updatePlacementAppointment(id, await placementInput(formData, from), actor);
+  const result = await updateAppointment(id, await appointmentInput(formData, from), actor);
   if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
   doneAll(from);
 }
 
 /** Chosen from the appointment's menu: posted without a redirect, the page revalidates where it stands. */
-export async function setPlacementStatusAction(formData: FormData): Promise<void> {
+export async function setAppointmentStatusAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'edit');
   const id = String(formData.get('appointmentId') ?? '');
   const status = String(formData.get('status') ?? '');
-  if (!UUID.test(id) || !isPlacementStatus(status)) throw new Error('Invalid status');
-  await setPlacementStatus(id, status, actor);
+  if (!UUID.test(id) || !isAppointmentStatus(status)) throw new Error('Invalid status');
+  await setAppointmentStatus(id, status, actor);
   revalidatePath('/admin/day', 'layout');
 }
 
-export async function deletePlacementAppointmentAction(formData: FormData): Promise<void> {
+/** Whose it is, chosen from the row's menu: a colleague's id, or `none` for the team. */
+export async function assignAppointmentAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const id = String(formData.get('appointmentId') ?? '');
+  const to = String(formData.get('assignedTo') ?? '');
+  if (!UUID.test(id) || (to !== 'none' && !UUID.test(to))) throw new Error('Invalid assignment');
+  await assignAppointment(id, to === 'none' ? null : to, actor);
+  revalidatePath('/admin/day', 'layout');
+  revalidatePath('/admin');
+}
+
+export async function deleteAppointmentAction(formData: FormData): Promise<void> {
   const actor = await requireModule('day', 'full');
   const from = viewBack(formData);
   if (formData.get('confirmed') !== '1') redirect(from);
   const id = String(formData.get('appointmentId') ?? '');
   if (!UUID.test(id)) throw new Error('Invalid appointment');
-  const result = await deletePlacementAppointment(id, actor);
+  const result = await deleteAppointment(id, actor);
   if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
   doneAll(from);
 }

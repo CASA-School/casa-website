@@ -6,13 +6,14 @@ import { AppointmentsPanel } from './appointments-panel';
 import { DayHeader, dayLabel, pickDay, viewHref, weekOf } from './day-header';
 import { EntryTestCard } from './entry-test-panel';
 import { EditTaskForm, ReportAbsenceForm } from './forms';
+import { Faces, PanelSection, Quiet, Tile, tileClass } from './panel-parts';
 import { TaskComposer } from './task-composer';
 import { ChoiceMenu } from '@/components/admin/choice-menu';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { Avatar } from '@/components/admin/list';
 import { SidePanel } from '@/components/admin/side-panel';
-import { Button, ButtonLink, Card, IconChip, type Tint } from '@/components/admin/ui';
+import { Button, ButtonLink, Card } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import {
   awayOn,
@@ -41,12 +42,12 @@ import { cn } from '@/lib/utils';
 /**
  * The Tagesplan's overview (Rahman, 2026-10-19): FileMaker's calendar — Cmd+1, the screen the team
  * opens first — without everything laid out at once ("this will make people afraid"). The day's tasks
- * are the page, as they were the first thing a colleague at the desk named; above them, four quiet
- * tiles — who is in, who is away, the lessons, birthdays — each opening a side panel with the rest.
- * Done tasks fold away. The lessons have their own pages, Kurse and Raumplan (docs/ADMIN_WORKSPACE.md
- * §Tagesplan).
+ * are the page, as they were the first thing a colleague at the desk named; above them, five quiet
+ * tiles — who is in, who is away, the lessons, the appointments, birthdays — each opening a side
+ * panel with the rest. Done tasks fold away. The lessons have their own pages, Kurse and Raumplan
+ * (docs/ADMIN_WORKSPACE.md §Tagesplan).
  */
-export default async function DayPage({ searchParams }: { searchParams: Promise<{ date?: string; error?: string }> }) {
+export default async function DayPage({ searchParams }: { searchParams: Promise<{ date?: string; error?: string; termine?: string }> }) {
   const [params, user, { t, lang }] = await Promise.all([searchParams, requireModule('day'), getI18n()]);
   const today = berlinDay(new Date());
   const day = pickDay(params.date, today);
@@ -90,7 +91,6 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
         lessons={lessons.length}
         flats={canAccess(user, 'accommodation')}
         tests={entryTests.length > 0}
-        appointments={<AppointmentsPanel day={day} today={today} view="overview" />}
         t={t}
         lang={lang}
       />
@@ -101,8 +101,8 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
         </p>
       ) : null}
 
-      {/* Four tiles: the figure that matters and a line under it; the rest one click away, at the side. */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Five tiles: the figure that matters and a line under it; the rest one click away, at the side. */}
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <SidePanel
           triggerClassName={tileClass}
           trigger={
@@ -242,6 +242,8 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
           </PanelSection>
         </SidePanel>
 
+        <AppointmentsPanel day={day} today={today} open={params.termine === 'mine' ? 'mine' : params.termine === '1' ? 'all' : null} />
+
         <SidePanel
           triggerClassName={tileClass}
           trigger={
@@ -299,80 +301,6 @@ export default async function DayPage({ searchParams }: { searchParams: Promise<
       </Card>
     </>
   );
-}
-
-const tileClass =
-  'group block h-full w-full rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ws-canvas)]';
-
-/** A tile: what it is, the one figure, a line under it, and — when something needs a look — a mark. */
-function Tile({
-  icon,
-  tint,
-  label,
-  value,
-  detail,
-  alert,
-  children,
-}: {
-  icon: ReactNode;
-  tint: Tint;
-  label: string;
-  value: string;
-  detail?: string;
-  alert?: { tone: 'red' | 'sun'; text: string };
-  children?: ReactNode;
-}) {
-  return (
-    <span className="flex h-full min-h-[8.75rem] flex-col rounded-2xl border border-ws-line bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-[box-shadow,transform] group-hover:-translate-y-px group-hover:shadow-[0_12px_30px_-18px_rgba(15,23,42,0.4)]">
-      <span className="flex items-center gap-2.5">
-        <IconChip icon={icon} tint={tint} />
-        <span className="text-[0.8rem] font-semibold text-[var(--casa-muted)]">{label}</span>
-        <span aria-hidden="true" className="ml-auto text-[var(--casa-text-subtle)] transition-transform group-hover:translate-x-0.5 [&_svg]:size-4">
-          {Icon.chevronRight}
-        </span>
-      </span>
-      <span className="mt-3 text-[1.45rem] leading-none font-extrabold tracking-[-0.02em] text-[var(--casa-ink)] tabular-nums">{value}</span>
-      {detail ? <span className="mt-1.5 truncate text-[0.8rem] text-[var(--casa-muted)]">{detail}</span> : null}
-      <span className="mt-auto flex items-center justify-between gap-2 pt-3">
-        {children ?? <span />}
-        {alert ? (
-          <span className={cn('inline-flex h-6 items-center gap-1.5 rounded-full px-2 text-[0.72rem] font-bold whitespace-nowrap', alert.tone === 'red' ? 'bg-[#fdecec] text-[#9b1c1c]' : 'bg-[#fff2d6] text-[#6e4700]')}>
-            <span aria-hidden="true" className={cn('size-1.5 rounded-full', alert.tone === 'red' ? 'bg-[#d14343]' : 'bg-[#d99a00]')} />
-            {alert.text}
-          </span>
-        ) : null}
-      </span>
-    </span>
-  );
-}
-
-/** Who is in, as faces: the first few, then how many more. */
-function Faces({ names }: { names: string[] }) {
-  if (!names.length) return <span />;
-  const shown = names.slice(0, 5);
-  return (
-    <span className="flex items-center">
-      {shown.map((n, i) => (
-        <span key={`${n}-${i}`} className={cn('rounded-full ring-2 ring-white', i > 0 && '-ml-1.5')}>
-          <Avatar name={n} staff size="sm" />
-        </span>
-      ))}
-      {names.length > shown.length ? <span className="ml-1.5 text-[0.74rem] font-semibold text-[var(--casa-muted)]">+{names.length - shown.length}</span> : null}
-    </span>
-  );
-}
-
-function PanelSection({ title, tone, children }: { title: string; tone?: 'red'; children: ReactNode }) {
-  return (
-    <section className="border-b border-ws-line-soft py-3 last:border-b-0">
-      <h3 className={cn('px-6 pb-1.5 text-[0.76rem] font-bold', tone === 'red' ? 'text-[#b42318]' : 'text-[var(--casa-muted)]')}>{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function Quiet({ children }: { children: ReactNode }) {
-  return <p className="px-6 py-3 text-[0.86rem] text-[var(--casa-muted)]">{children}</p>;
 }
 
 function PersonLine({ name, sub, aside }: { name: string; sub?: string; aside?: ReactNode }) {
