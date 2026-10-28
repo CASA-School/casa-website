@@ -14,6 +14,8 @@ import type { LucideIcon } from 'lucide-react';
 import type { Meaning } from '@/config/brand/meaning';
 import { cn } from '@/lib/utils';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { Icon3D } from '@/components/ui/icon-3d';
+import type { Icon3D as Icon3DSpec } from '@/config/icons-3d';
 
 /** `min-w-0`: in a grid, a long select value would otherwise hold its column open past the card. */
 export const formFieldGroupClassName = 'min-w-0 space-y-2';
@@ -95,6 +97,8 @@ export function RequiredMark() {
 
 type FormStepHeaderProps = {
   icon: LucideIcon;
+  /** A 3D icon in place of the badge (config/icons-3d), which plays its motion as the step appears. */
+  icon3d?: Icon3DSpec;
   /** The logo colour of what the step is about (src/config/brand/meaning.ts). */
   meaning: Meaning;
   title: string;
@@ -105,10 +109,10 @@ type FormStepHeaderProps = {
 };
 
 /** A step's or a form's own heading: the icon in its meaning colour, the title, one line. */
-export function FormStepHeader({ icon: Icon, meaning, title, description, headingRef }: FormStepHeaderProps) {
+export function FormStepHeader({ icon: Icon, icon3d, meaning, title, description, headingRef }: FormStepHeaderProps) {
   return (
-    <div className={cn('flex gap-4', description ? 'items-start' : 'items-center')}>
-      <IconBadge icon={Icon} meaning={meaning} size="lg" />
+    <div data-icon-3d-intro={icon3d ? '' : undefined} className={cn('flex gap-4', description ? 'items-start' : 'items-center')}>
+      {icon3d ? <Icon3D icon={icon3d} size="lg" /> : <IconBadge icon={Icon} meaning={meaning} size="lg" />}
       <div className="min-w-0">
         <h2 ref={headingRef} tabIndex={-1} className="text-xl font-bold tracking-tight text-[var(--casa-ink)] md:text-2xl">
           {title}

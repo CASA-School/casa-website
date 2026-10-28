@@ -53,7 +53,7 @@ import { organiserCopy, type OrganiserChoiceField, type OrganiserCopy } from '@/
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 import { Icon3D } from '@/components/ui/icon-3d';
 import { IconBadge } from '@/components/ui/icon-badge';
-import { contactTopicIcons3d } from '@/config/icons-3d';
+import { contactTopicIcons3d, formStepIcons3d } from '@/config/icons-3d';
 
 type ContactInquiryFormCopy = {
   formTitle: string;
@@ -413,7 +413,7 @@ export function ContactInquiryForm({ locale, topics, initialTopicKey, copy }: Co
       className={formCardClassName}
     >
       <div className="mb-8">
-        <FormStepHeader icon={MessageCircle} meaning="orientation" title={copy.formTitle} description={copy.formBody} />
+        <FormStepHeader icon={MessageCircle} icon3d={formStepIcons3d.message} meaning="orientation" title={copy.formTitle} description={copy.formBody} />
       </div>
 
       {status === 'success' ? (

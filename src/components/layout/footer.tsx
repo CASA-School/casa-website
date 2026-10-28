@@ -7,7 +7,9 @@ import { closureRange, upcomingClosures } from '@/config/school-closures';
 import { bremenDate } from '@/lib/appointments/schedule';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
+import { Facebook, Instagram } from 'lucide-react';
+import { Icon3D } from '@/components/ui/icon-3d';
+import { contactIcons3d } from '@/config/icons-3d';
 import type { ContentLocale } from '@/lib/content/types';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 import { FOOTER_TEXT_DE } from '@/config/footer-text';
@@ -145,8 +147,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
           </p>
 
           <div className="mt-8 space-y-2.5">
-            <div className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+            <div data-icon-3d-host className="flex items-start gap-2.5">
+              <Icon3D icon={contactIcons3d.address} size="xs" />
               <a
                 href={footerConfig.contact.mapsHref}
                 target="_blank"
@@ -156,8 +158,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                 {footerText(footerConfig.contact.address, locale, say)}
               </a>
             </div>
-            <div className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+            <div data-icon-3d-host className="flex items-center gap-2.5">
+              <Icon3D icon={contactIcons3d.phone} size="xs" />
               <a
                 href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                 className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -166,8 +168,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </a>
             </div>
             {footerConfig.contact.emails.map((email) => (
-              <div key={email.label} className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+              <div key={email.label} data-icon-3d-host className="flex items-center gap-2.5">
+                <Icon3D icon={contactIcons3d.email} size="xs" />
                 <a
                   href={email.href}
                   className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -200,8 +202,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
             </p>
 
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+              <div data-icon-3d-host className="flex items-start gap-3">
+                <Icon3D icon={contactIcons3d.address} size="xs" />
                 <a
                   href={footerConfig.contact.mapsHref}
                   target="_blank"
@@ -211,8 +213,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
                   {footerText(footerConfig.contact.address, locale, say)}
                 </a>
               </div>
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+              <div data-icon-3d-host className="flex items-center gap-3">
+                <Icon3D icon={contactIcons3d.phone} size="xs" />
                 <a
                   href={`tel:${footerConfig.contact.phone.replace(/\s+/g, '')}`}
                   className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"
@@ -222,8 +224,8 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
               </div>
               <div className="space-y-2">
                 {footerConfig.contact.emails.map((email) => (
-                  <div key={email.label} className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 shrink-0 text-[var(--casa-sun)]" />
+                  <div key={email.label} data-icon-3d-host className="flex items-center gap-3">
+                    <Icon3D icon={contactIcons3d.email} size="xs" />
                     <a
                       href={email.href}
                       className="text-sm text-[var(--casa-text-subtle)] tap-target transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-sun)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--casa-ink-deep)]"

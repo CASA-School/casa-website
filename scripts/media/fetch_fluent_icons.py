@@ -49,6 +49,12 @@ ICONS = {
     'laptop': 'Laptop',
     'compass': 'Compass',
     'luggage': 'Luggage',
+    'bust-in-silhouette': 'Bust in silhouette',
+    'clipboard': 'Clipboard',
+    'telephone': 'Telephone',
+    'envelope': 'Envelope',
+    'round-pushpin': 'Round pushpin',
+    'alarm-clock': 'Alarm clock',
 }
 
 

@@ -36,8 +36,9 @@ export const menuIcons3d: Record<string, Icon3D> = {
 };
 
 /*
- * The card sets that show 3D icons too (Rahman 2026-10-28): the choices and the features that
- * say what CASA is. Forms, search, buttons and the workspace keep their line icons.
+ * Where else 3D icons stand (Rahman 2026-10-28): the choices and the features that say what CASA
+ * is, the registration forms' choices and step headers, and the school's contact lines. Form
+ * fields, search, buttons, arrows and the workspace keep their line icons.
  */
 
 /** „Unsere Merkmale": the five tiles without a photograph (config/content/school-features). */
@@ -56,6 +57,49 @@ export const personaIcons3d: Record<string, Icon3D> = {
   'exam-candidates': { slug: 'pencil', motion: 'wobble' },
   'housing-onboarding': { slug: 'luggage', motion: 'hop' },
 };
+
+/** The registration forms' kinds of course, by the course type's slug (components/registration/course-choices). */
+export const courseTypeIcons3d: Record<string, Icon3D> = {
+  'intensive-german': { slug: 'books', motion: 'hop' },
+  'evening-german': { slug: 'crescent-moon', motion: 'float' },
+  'special-courses': { slug: 'memo', motion: 'wobble' },
+  'medical-german': { slug: 'stethoscope', motion: 'sway' },
+  bildungszeit: { slug: 'spiral-calendar', motion: 'hop' },
+  'german-for-groups': { slug: 'busts-in-silhouette', motion: 'hop' },
+  'in-company': { slug: 'office-building', motion: 'hop' },
+  'exam-preparation': { slug: 'pencil', motion: 'wobble' },
+};
+
+/** The exams, by the exam type's code: the exam form and the course form's added exam. */
+export const examTypeIcons3d: Record<string, Icon3D> = {
+  telc_b2: { slug: 'pencil', motion: 'wobble' },
+  telc_c1_hochschule: { slug: 'graduation-cap', motion: 'float' },
+};
+
+/** Each form step's header (components/forms/form-styles FormStepHeader) and the course form's stay. */
+export const formStepIcons3d = {
+  course: { slug: 'graduation-cap', motion: 'float' },
+  exam: { slug: 'memo', motion: 'wobble' },
+  details: { slug: 'bust-in-silhouette', motion: 'hop' },
+  review: { slug: 'clipboard', motion: 'wobble' },
+  stay: { slug: 'house-with-garden', motion: 'hop' },
+  message: { slug: 'speech-balloon', motion: 'float' },
+} satisfies Record<string, Icon3D>;
+
+/** The contact page's „Direkt online" links, by link. */
+export const selfServiceIcons3d: Record<string, Icon3D> = {
+  '/registration/course': { slug: 'graduation-cap', motion: 'float' },
+  '/registration/exam': { slug: 'pencil', motion: 'wobble' },
+  '/placement-test': { slug: 'compass', motion: 'wobble' },
+};
+
+/** The school's contact lines: the contact page's dark panel and the footer. */
+export const contactIcons3d = {
+  phone: { slug: 'telephone', motion: 'wobble' },
+  email: { slug: 'envelope', motion: 'float' },
+  address: { slug: 'round-pushpin', motion: 'hop' },
+  hours: { slug: 'alarm-clock', motion: 'wobble' },
+} satisfies Record<string, Icon3D>;
 
 /** The contact form's topics (components/forms/contact-inquiry-form). */
 export const contactTopicIcons3d: Record<string, Icon3D> = {
