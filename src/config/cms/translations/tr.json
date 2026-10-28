@@ -1127,6 +1127,10 @@
     "de": "Bewerbung und Fristen",
     "text": "Başvuru ve son tarihler"
   },
+  "t.bewerbung-wohnen-und-alltag.1xscxfl": {
+    "de": "Bewerbung, Wohnen und Alltag.",
+    "text": "Başvuru, konaklama ve günlük yaşam."
+  },
   "t.bewerbung.sr7o63": {
     "de": "Bewerbung",
     "text": "Başvuru"
@@ -2090,6 +2094,10 @@
   "t.die-meisten-von-uns.cc07zo": {
     "de": "Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen.",
     "text": "Çoğumuz yurt dışında yaşadık ya da çalıştık ve yabancı bir dil öğrenmenin ne demek olduğunu bizzat deneyimledik."
+  },
+  "t.die-menschen-bei-casa.1f77zyg": {
+    "de": "Die Menschen bei CASA.",
+    "text": "CASA'da çalışan insanlar."
   },
   "t.die-miete-bestimmt-dein.1uilvvg": {
     "de": "Die Miete bestimmt dein Monatsbudget. Wie hoch sie ist, hängt von der Stadt ab, in der du wohnst.",
@@ -3155,6 +3163,14 @@
     "de": "Für das Visum in der Regel ja, meistens mit einem Sperrkonto. Wie hoch der Betrag ist und welche Nachweise anerkannt werden, hängt von deiner Staatsangehörigkeit ab. Nutze deshalb die aktuelle Liste deiner Botschaft.",
     "text": "Vize için genellikle evet, çoğunlukla bir bloke hesapla. Tutarın ne kadar olduğu ve hangi belgelerin kabul edildiği vatandaşlığınıza bağlıdır. Bu yüzden bağlı olduğunuz Alman büyükelçiliğinin güncel listesini kullanın."
   },
+  "t.fuer-dein-studium-in.9n0mai": {
+    "de": "Für dein Studium in Deutschland.",
+    "text": "Almanya'daki öğreniminiz için."
+  },
+  "t.fuer-den-alltag-in.11g8ne5": {
+    "de": "Für den Alltag in Klinik und Pflege.",
+    "text": "Klinik ve bakımda günlük iş için."
+  },
   "t.fuer-die-erfolgreiche-umsetzung.75uxgk": {
     "de": "Für die erfolgreiche Umsetzung eines Firmenkurses ist es wichtig, dass sich die Mitarbeitenden ungefähr auf demselben Sprachniveau befinden.",
     "text": "Bir şirket kursunun başarılı olması için çalışanların aşağı yukarı aynı dil seviyesinde olması önemlidir."
@@ -3490,6 +3506,10 @@
   "t.grammatik-kompakt-erfolgreich-au.1nskmx7": {
     "de": "Grammatik kompakt – Erfolgreich auf B1/B2",
     "text": "Kompakt dilbilgisi – B1/B2'de başarı"
+  },
+  "t.grammatik-schreiben-oder-spreche.1hfl8io": {
+    "de": "Grammatik, Schreiben oder Sprechen.",
+    "text": "Dilbilgisi, yazma veya konuşma."
   },
   "t.grammatik-vertiefen-besser-schre.1ccgc3d": {
     "de": "Grammatik vertiefen, besser schreiben oder freier sprechen: Wähle deinen Schwerpunkt.",
@@ -4183,6 +4203,14 @@
     "de": "Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.",
     "text": "NewsFlash bültenimiz her ay kurslar ve sınavlarla ilgili bilgiler, önemli tarihler ve okuldan haberlerle yayımlanır."
   },
+  "t.jeden-monat-neu-im.1fs6w95": {
+    "de": "Jeden Monat neu im NewsFlash.",
+    "text": "Her ay NewsFlash'te yenilikler."
+  },
+  "t.jeden-tag-deutsch-sprechen.1h8tgsj": {
+    "de": "Jeden Tag Deutsch sprechen.",
+    "text": "Her gün Almanca konuşmak."
+  },
   "t.jeder-mensch-bringt-andere.gfucsy": {
     "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
     "text": "Herkesin deneyimleri ve istekleri farklıdır. Yüz yüze bir görüşmeye zaman ayırır ve uzun vadede işinize neyin yarayacağını sizinle birlikte düşünürüz – hem Almanca öğrenirken hem de sonraki adımlarınızda."
@@ -4647,6 +4675,10 @@
     "de": "Kursgebühr",
     "text": "Kurs ücreti"
   },
+  "t.kursgebuehren-fuer-das-gemeinwoh.pzltbv": {
+    "de": "Kursgebühren für das Gemeinwohl.",
+    "text": "Kamu yararına kurs ücretleri."
+  },
   "t.kursgebuehren-im-ueberblick.p7rtvs": {
     "de": "Kursgebühren im Überblick",
     "text": "Kurs ücretlerine genel bakış"
@@ -4814,6 +4846,10 @@
   "t.lernen.1yk27nq": {
     "de": "Lernen",
     "text": "Öğrenim"
+  },
+  "t.lernende-aus-aller-welt.1dcov65": {
+    "de": "Lernende aus aller Welt aufnehmen.",
+    "text": "Tüm dünyadan öğrenci ağırlamak."
   },
   "t.lernende-berichten-ueber-fortsch.1w1iyq5": {
     "de": "Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.",
@@ -5106,6 +5142,10 @@
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
     "text": "Ön bilginiz varsa ve boş yer bulunuyorsa devam eden bir kursa istediğiniz zaman katılabilirsiniz. Kurs doluysa sizi memnuniyetle bekleme listesine alırız."
+  },
+  "t.mit-wem-wir-zusammenarbeiten.sz5z8c": {
+    "de": "Mit wem wir zusammenarbeiten.",
+    "text": "Kimlerle birlikte çalışıyoruz."
   },
   "t.mit-zwei-intensivkursen-am.1igqgsj": {
     "de": "Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.",
@@ -5415,6 +5455,10 @@
     "de": "Niveau prüfen",
     "text": "Seviyeyi kontrol edin"
   },
+  "t.niveau-termine-gebuehren-visum.1vlfe0l": {
+    "de": "Niveau, Termine, Gebühren, Visum.",
+    "text": "Seviye, tarihler, ücretler, vize."
+  },
   "t.niveau.3bshtg": {
     "de": "Niveau",
     "text": "Seviye"
@@ -5510,6 +5554,10 @@
   "t.offene-stellen-ansehen.1nisx09": {
     "de": "Offene Stellen ansehen",
     "text": "Açık pozisyonlara göz atın"
+  },
+  "t.offene-stellen-bei-casa.1cocv7t": {
+    "de": "Offene Stellen bei CASA.",
+    "text": "CASA'da açık pozisyonlar."
   },
   "t.offizielle-quellen.1uh5fyw": {
     "de": "Offizielle Quellen",
@@ -6427,6 +6475,10 @@
     "de": "Sprachen",
     "text": "Diller"
   },
+  "t.sprachkurs-in-deiner-bildungszei.1yb4kzg": {
+    "de": "Sprachkurs in deiner Bildungszeit.",
+    "text": "Bildungszeit kapsamında dil kursu."
+  },
   "t.sprachlernen-waechst-durch-austa.1q7wyi1": {
     "de": "Sprachlernen wächst durch Austausch in der Community.",
     "text": "Dil öğrenimi, topluluk içindeki etkileşimle gelişir."
@@ -7187,6 +7239,10 @@
     "de": "{lessons_per_week} Unterrichtseinheiten pro Woche",
     "text": "Haftada {lessons_per_week} ders saati"
   },
+  "t.unterrichtseinheiten-pro-woche.ca8kz": {
+    "de": "{course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
+    "text": "Haftada {course.intensive-german.lessons} ders saati."
+  },
   "t.unterrichtseinheiten.16h62pz": {
     "de": "Unterrichtseinheiten",
     "text": "ders saati"
@@ -7507,6 +7563,10 @@
     "de": "Vorbereitung im Kurs",
     "text": "Kursta hazırlık"
   },
+  "t.vorbereitung-und-pruefung-bei.g1dl2z": {
+    "de": "Vorbereitung und Prüfung bei uns.",
+    "text": "Hazırlık ve sınav bizde."
+  },
   "t.vorbereitung.1kfa3n7": {
     "de": "Vorbereitung",
     "text": "Hazırlık"
@@ -7703,6 +7763,10 @@
     "de": "Was dir ein Tandem bringt",
     "text": "Tandemin size kazandırdıkları"
   },
+  "t.was-du-auf-jeder.9hro3i": {
+    "de": "Was du auf jeder Stufe kannst.",
+    "text": "Her seviyede neler yapabildiğiniz."
+  },
   "t.was-du-erreichen-kannst.og5hiu": {
     "de": "Was du erreichen kannst",
     "text": "Neler başarabilirsiniz"
@@ -7750,6 +7814,10 @@
   "t.was-kosten-kurs-pruefung.u2utow": {
     "de": "Was kosten Kurs, Prüfung und Unterkunft?",
     "text": "Kurs, sınav ve konaklama ne kadar tutar?"
+  },
+  "t.was-kurs-und-leben.10pz8u9": {
+    "de": "Was Kurs und Leben kosten.",
+    "text": "Kurs ve yaşam masrafları."
   },
   "t.was-moechtest-du-erreichen.12t2y2t": {
     "de": "Was möchtest du erreichen?",
@@ -8195,6 +8263,10 @@
     "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
     "text": "Avrupa Ortak Dil Referans Çerçevesi'ne (CEFR) sıkı sıkıya bağlıyız. Bu çerçeve, her seviyede neleri anlayabileceğinizi ve söyleyebileceğinizi tanımlar. B1+ ise yoğun kursumuzun B1 ile B2 arasındaki ayrı bir seviyesidir."
   },
+  "t.wir-planen-den-kurs.1u8l4pt": {
+    "de": "Wir planen den Kurs mit deiner Firma.",
+    "text": "Kursu şirketinizle birlikte planlıyoruz."
+  },
   "t.wir-pruefen-deine-anmeldung.13aus0z": {
     "de": "Wir prüfen deine Anmeldung",
     "text": "Kaydınızı kontrol ediyoruz"
@@ -8374,6 +8446,10 @@
   "t.wohnen-in-einer-gastfamilie.w42kev": {
     "de": "Wohnen in einer Gastfamilie",
     "text": "Konukçu ailede konaklama"
+  },
+  "t.wohnen-mit-anderen-lernenden.17j2z01": {
+    "de": "Wohnen mit anderen Lernenden.",
+    "text": "Diğer öğrencilerle birlikte yaşamak."
   },
   "t.wohnen-wie-es-zu.198t8br": {
     "de": "Wohnen, wie es zu dir passt",
@@ -8642,6 +8718,10 @@
   "t.zwei-wochen-in-bremen.t2itg8": {
     "de": "Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
     "text": "Bremen'de iki hafta, gerçek anlamda bir konaklamadır. Grubunuz kırk ders saati ders görür, sekiz öğleden sonrayı programla geçirir ve konukçu ailede, akşam yemeği masasında Almancanın kendiliğinden gelmesine yetecek kadar uzun kalır. Tıpkı kedi gibi grup da şehri merakla keşfeder: Botanika'nın seralarından gece bekçisiyle yapılan şehir turuna kadar."
+  },
+  "t.zweimal-pro-woche-nach.hbeyix": {
+    "de": "Zweimal pro Woche nach Feierabend.",
+    "text": "Haftada iki kez, iş çıkışı."
   },
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",

@@ -1127,6 +1127,10 @@
     "de": "Bewerbung und Fristen",
     "text": "التقديم والمواعيد النهائية"
   },
+  "t.bewerbung-wohnen-und-alltag.1xscxfl": {
+    "de": "Bewerbung, Wohnen und Alltag.",
+    "text": "التقديم والسكن والحياة اليومية."
+  },
   "t.bewerbung.sr7o63": {
     "de": "Bewerbung",
     "text": "التقديم"
@@ -2090,6 +2094,10 @@
   "t.die-meisten-von-uns.cc07zo": {
     "de": "Die meisten von uns haben im Ausland gelebt oder gearbeitet und dabei selbst erfahren, was es heißt, eine Fremdsprache zu lernen.",
     "text": "عاش معظمنا أو عمل في الخارج، وعرف بنفسه ماذا يعني تعلّم لغة أجنبية."
+  },
+  "t.die-menschen-bei-casa.1f77zyg": {
+    "de": "Die Menschen bei CASA.",
+    "text": "الأشخاص العاملون في CASA."
   },
   "t.die-miete-bestimmt-dein.1uilvvg": {
     "de": "Die Miete bestimmt dein Monatsbudget. Wie hoch sie ist, hängt von der Stadt ab, in der du wohnst.",
@@ -3155,6 +3163,14 @@
     "de": "Für das Visum in der Regel ja, meistens mit einem Sperrkonto. Wie hoch der Betrag ist und welche Nachweise anerkannt werden, hängt von deiner Staatsangehörigkeit ab. Nutze deshalb die aktuelle Liste deiner Botschaft.",
     "text": "للتأشيرة، نعم في الغالب، وعادةً بحساب مغلق. ويعتمد المبلغ والإثباتات المقبولة على جنسيتك، لذلك استخدم القائمة الحالية لسفارتك."
   },
+  "t.fuer-dein-studium-in.9n0mai": {
+    "de": "Für dein Studium in Deutschland.",
+    "text": "لدراستك في ألمانيا."
+  },
+  "t.fuer-den-alltag-in.11g8ne5": {
+    "de": "Für den Alltag in Klinik und Pflege.",
+    "text": "للعمل اليومي في المستشفيات والرعاية."
+  },
   "t.fuer-die-erfolgreiche-umsetzung.75uxgk": {
     "de": "Für die erfolgreiche Umsetzung eines Firmenkurses ist es wichtig, dass sich die Mitarbeitenden ungefähr auf demselben Sprachniveau befinden.",
     "text": "لكي تنجح دورة الشركة، من المهم أن يكون الموظفون المشاركون في المستوى اللغوي نفسه تقريبًا."
@@ -3490,6 +3506,10 @@
   "t.grammatik-kompakt-erfolgreich-au.1nskmx7": {
     "de": "Grammatik kompakt – Erfolgreich auf B1/B2",
     "text": "القواعد باختصار – النجاح في B1/B2"
+  },
+  "t.grammatik-schreiben-oder-spreche.1hfl8io": {
+    "de": "Grammatik, Schreiben oder Sprechen.",
+    "text": "القواعد أو الكتابة أو المحادثة."
   },
   "t.grammatik-vertiefen-besser-schre.1ccgc3d": {
     "de": "Grammatik vertiefen, besser schreiben oder freier sprechen: Wähle deinen Schwerpunkt.",
@@ -4183,6 +4203,14 @@
     "de": "Jeden Monat erscheint unser NewsFlash mit Informationen zu Kursen und Prüfungen, wichtigen Terminen und Neuem aus der Schule.",
     "text": "تصدر نشرتنا NewsFlash كل شهر، وفيها معلومات عن الدورات والامتحانات، والمواعيد المهمة، وجديد المدرسة."
   },
+  "t.jeden-monat-neu-im.1fs6w95": {
+    "de": "Jeden Monat neu im NewsFlash.",
+    "text": "جديدنا كل شهر في NewsFlash."
+  },
+  "t.jeden-tag-deutsch-sprechen.1h8tgsj": {
+    "de": "Jeden Tag Deutsch sprechen.",
+    "text": "التحدث بالألمانية كل يوم."
+  },
   "t.jeder-mensch-bringt-andere.gfucsy": {
     "de": "Jeder Mensch bringt andere Erfahrungen und Wünsche mit. Wir nehmen uns Zeit für ein persönliches Gespräch und überlegen mit dir, was dir langfristig weiterhilft – beim Deutschlernen und bei deinen nächsten Schritten.",
     "text": "لكل إنسان تجاربه ورغباته المختلفة. ونحن نخصّص وقتًا لحديث شخصي، ونفكّر معك فيما يساعدك على المدى الطويل، في تعلّم الألمانية وفي خطواتك التالية."
@@ -4647,6 +4675,10 @@
     "de": "Kursgebühr",
     "text": "رسوم الدورة"
   },
+  "t.kursgebuehren-fuer-das-gemeinwoh.pzltbv": {
+    "de": "Kursgebühren für das Gemeinwohl.",
+    "text": "رسوم الدورات لخدمة الصالح العام."
+  },
   "t.kursgebuehren-im-ueberblick.p7rtvs": {
     "de": "Kursgebühren im Überblick",
     "text": "رسوم الدورات في لمحة"
@@ -4814,6 +4846,10 @@
   "t.lernen.1yk27nq": {
     "de": "Lernen",
     "text": "التعلّم"
+  },
+  "t.lernende-aus-aller-welt.1dcov65": {
+    "de": "Lernende aus aller Welt aufnehmen.",
+    "text": "استضافة متعلمين من جميع أنحاء العالم."
   },
   "t.lernende-berichten-ueber-fortsch.1w1iyq5": {
     "de": "Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.",
@@ -5106,6 +5142,10 @@
   "t.mit-vorkenntnissen-kannst-du.g0bgqw": {
     "de": "Mit Vorkenntnissen kannst du jederzeit in einen laufenden Kurs einsteigen, wenn noch Plätze frei sind. Ist ein Kurs ausgebucht, setzen wir dich gern auf die Warteliste.",
     "text": "إن كانت لديك معرفة سابقة بالألمانية، يمكنك الانضمام إلى دورة جارية في أي وقت ما دامت فيها أماكن شاغرة. وإذا كانت الدورة مكتملة، يسعدنا أن نضع اسمك على قائمة الانتظار."
+  },
+  "t.mit-wem-wir-zusammenarbeiten.sz5z8c": {
+    "de": "Mit wem wir zusammenarbeiten.",
+    "text": "مع من نتعاون."
   },
   "t.mit-zwei-intensivkursen-am.1igqgsj": {
     "de": "Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.",
@@ -5415,6 +5455,10 @@
     "de": "Niveau prüfen",
     "text": "تحقّق من المستوى"
   },
+  "t.niveau-termine-gebuehren-visum.1vlfe0l": {
+    "de": "Niveau, Termine, Gebühren, Visum.",
+    "text": "المستوى والمواعيد والرسوم والتأشيرة."
+  },
   "t.niveau.3bshtg": {
     "de": "Niveau",
     "text": "المستوى"
@@ -5510,6 +5554,10 @@
   "t.offene-stellen-ansehen.1nisx09": {
     "de": "Offene Stellen ansehen",
     "text": "عرض الوظائف الشاغرة"
+  },
+  "t.offene-stellen-bei-casa.1cocv7t": {
+    "de": "Offene Stellen bei CASA.",
+    "text": "الوظائف الشاغرة في CASA."
   },
   "t.offizielle-quellen.1uh5fyw": {
     "de": "Offizielle Quellen",
@@ -6427,6 +6475,10 @@
     "de": "Sprachen",
     "text": "اللغات"
   },
+  "t.sprachkurs-in-deiner-bildungszei.1yb4kzg": {
+    "de": "Sprachkurs in deiner Bildungszeit.",
+    "text": "دورة لغة في إطار Bildungszeit."
+  },
   "t.sprachlernen-waechst-durch-austa.1q7wyi1": {
     "de": "Sprachlernen wächst durch Austausch in der Community.",
     "text": "ينمو تعلّم اللغة بالتبادل داخل المجتمع."
@@ -7187,6 +7239,10 @@
     "de": "{lessons_per_week} Unterrichtseinheiten pro Woche",
     "text": "{lessons_per_week} حصة دراسية في الأسبوع"
   },
+  "t.unterrichtseinheiten-pro-woche.ca8kz": {
+    "de": "{course.intensive-german.lessons} Unterrichtseinheiten pro Woche.",
+    "text": "{course.intensive-german.lessons} حصة دراسية في الأسبوع."
+  },
   "t.unterrichtseinheiten.16h62pz": {
     "de": "Unterrichtseinheiten",
     "text": "حصة دراسية"
@@ -7507,6 +7563,10 @@
     "de": "Vorbereitung im Kurs",
     "text": "التحضير في الدورة"
   },
+  "t.vorbereitung-und-pruefung-bei.g1dl2z": {
+    "de": "Vorbereitung und Prüfung bei uns.",
+    "text": "التحضير والامتحان لدينا."
+  },
   "t.vorbereitung.1kfa3n7": {
     "de": "Vorbereitung",
     "text": "التحضير"
@@ -7703,6 +7763,10 @@
     "de": "Was dir ein Tandem bringt",
     "text": "ما يقدّمه لك التبادل اللغوي"
   },
+  "t.was-du-auf-jeder.9hro3i": {
+    "de": "Was du auf jeder Stufe kannst.",
+    "text": "ما يمكنك فعله في كل مستوى."
+  },
   "t.was-du-erreichen-kannst.og5hiu": {
     "de": "Was du erreichen kannst",
     "text": "ما يمكنك تحقيقه"
@@ -7750,6 +7814,10 @@
   "t.was-kosten-kurs-pruefung.u2utow": {
     "de": "Was kosten Kurs, Prüfung und Unterkunft?",
     "text": "كم تكلّف الدورة والامتحان والسكن؟"
+  },
+  "t.was-kurs-und-leben.10pz8u9": {
+    "de": "Was Kurs und Leben kosten.",
+    "text": "تكلفة الدورة والمعيشة."
   },
   "t.was-moechtest-du-erreichen.12t2y2t": {
     "de": "Was möchtest du erreichen?",
@@ -8195,6 +8263,10 @@
     "de": "Wir orientieren uns streng am Gemeinsamen Europäischen Referenzrahmen für Sprachen (GER). Er beschreibt, was du auf jeder Stufe verstehen und sagen kannst. Die B1+ ist eine eigene Stufe unseres Intensivkurses zwischen B1 und B2.",
     "text": "نلتزم التزامًا صارمًا بالإطار الأوروبي المرجعي العام للغات، الذي يصف ما تستطيع فهمه وقوله في كل مستوى. أما المستوى B1+ فهو مستوى قائم بذاته في دورتنا المكثفة، يقع بين B1 و B2."
   },
+  "t.wir-planen-den-kurs.1u8l4pt": {
+    "de": "Wir planen den Kurs mit deiner Firma.",
+    "text": "نخطط الدورة مع شركتك."
+  },
   "t.wir-pruefen-deine-anmeldung.13aus0z": {
     "de": "Wir prüfen deine Anmeldung",
     "text": "ندرس طلب تسجيلك"
@@ -8374,6 +8446,10 @@
   "t.wohnen-in-einer-gastfamilie.w42kev": {
     "de": "Wohnen in einer Gastfamilie",
     "text": "السكن لدى عائلة مضيفة"
+  },
+  "t.wohnen-mit-anderen-lernenden.17j2z01": {
+    "de": "Wohnen mit anderen Lernenden.",
+    "text": "السكن مع متعلمين آخرين."
   },
   "t.wohnen-wie-es-zu.198t8br": {
     "de": "Wohnen, wie es zu dir passt",
@@ -8642,6 +8718,10 @@
   "t.zwei-wochen-in-bremen.t2itg8": {
     "de": "Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
     "text": "أسبوعان في بريمن إقامة حقيقية بالفعل. تحظى مجموعتك بأربعين حصة دراسية وبرنامج في ثماني فترات بعد الظهر، وتعيش لدى العائلات المضيفة مدة كافية لتأتي الألمانية على مائدة العشاء من تلقاء نفسها. ومثل القطة، تستكشف المجموعة المدينة بفضول، من البيوت الزجاجية في Botanika إلى الجولة مع الحارس الليلي."
+  },
+  "t.zweimal-pro-woche-nach.hbeyix": {
+    "de": "Zweimal pro Woche nach Feierabend.",
+    "text": "مرتين في الأسبوع بعد العمل."
   },
   "t.zweite-julihaelfte.vu788r": {
     "de": "Zweite Julihälfte",
