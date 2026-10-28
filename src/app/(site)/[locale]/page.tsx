@@ -513,7 +513,8 @@ export default async function HomePage() {
                     key={option.key}
                     id={option.anchorId}
                     className={cn(
-                      'w-[78vw] shrink-0 snap-start scroll-mt-28 sm:w-[46vw] md:scroll-mt-32 xl:w-[24rem]',
+                      // The still frame the card lifts in (persona-pathways.tsx has why).
+                      'group/lift w-[78vw] shrink-0 snap-start scroll-mt-28 sm:w-[46vw] md:scroll-mt-32 xl:w-[24rem]',
                       // Fill the row rather than sitting at a fixed 24rem with
                       // whitespace after them, on the widths where all three fit.
                       'xl:group-data-[scrollable=false]/rail:w-auto xl:group-data-[scrollable=false]/rail:flex-1'
@@ -530,7 +531,7 @@ export default async function HomePage() {
                         */
                         // Red top edge: a course card (src/config/brand/meaning.ts).
                         'group relative flex h-full flex-col overflow-hidden rounded-xl bg-white p-7 shadow-[var(--shadow-card)] transition-all duration-300',
-                        'motion-safe:hover:-translate-y-1 hover:shadow-[var(--shadow-modal)]',
+                        'motion-safe:group-hover/lift:-translate-y-1 group-hover/lift:shadow-[var(--shadow-modal)]',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                       )}
                     >

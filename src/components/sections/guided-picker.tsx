@@ -263,12 +263,12 @@ export function GuidedPicker({
             {items.map((item, index) => (
               <li
                 key={item.id ?? item.href}
-                className="w-[85vw] min-[400px]:w-[78vw] shrink-0 snap-start md:w-auto md:shrink-0 md:snap-align-none"
+                className="group/lift w-[85vw] min-[400px]:w-[78vw] shrink-0 snap-start md:w-auto md:shrink-0 md:snap-align-none"
               >
                 <article
                   id={item.id}
                   className={cn(
-                    "group flex h-full md:min-h-[25rem] flex-col overflow-hidden rounded-xl md:rounded-xl bg-white shadow-[var(--shadow-card)] md:shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:ring-[color:var(--casa-sand)]/75 transition-all md:hover:-translate-y-1 md:hover:ring-[var(--casa-blue)]/35",
+                    "group flex h-full md:min-h-[25rem] flex-col overflow-hidden rounded-xl md:rounded-xl bg-white shadow-[var(--shadow-card)] md:shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70 md:ring-[color:var(--casa-sand)]/75 transition-all md:group-hover/lift:-translate-y-1 md:group-hover/lift:ring-[var(--casa-blue)]/35",
                     item.id ? 'scroll-mt-28 md:scroll-mt-32' : undefined
                   )}
                 >
@@ -477,7 +477,7 @@ export function GuidedPicker({
           )}
         >
           {items.map((item, index) => (
-            <li key={item.id ?? item.href} className={cn(index >= 3 && !showAll ? 'hidden md:block' : '')}>
+            <li key={item.id ?? item.href} className={cn('group/lift', index >= 3 && !showAll ? 'hidden md:block' : '')}>
               {/*
                 ONE LINK, EDGE-TO-EDGE MEDIA.
 
@@ -498,7 +498,7 @@ export function GuidedPicker({
                 aria-label={`${item.title} — ${item.ctaLabel}`}
                 className={cn(
                   'group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card)] ring-1 ring-[color:var(--casa-sand)]/70',
-                  'transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-hero)] hover:ring-[var(--casa-blue)]/35',
+                  'transition-all duration-300 group-hover/lift:-translate-y-1 group-hover/lift:shadow-[var(--shadow-hero)] group-hover/lift:ring-[var(--casa-blue)]/35',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2'
                 )}
               >
