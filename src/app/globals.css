@@ -2342,6 +2342,26 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   animation: casa-icon-sway 900ms ease-in-out both;
 }
 
+/*
+ * The phone menu has no hover: its 3D icons play their motion once as a panel opens, after the
+ * rows have risen in (mobile-nav.tsx, `data-icon-3d-intro`).
+ */
+[data-icon-3d-intro] [data-icon-3d='hop'] > img {
+  animation: casa-icon-hop 650ms cubic-bezier(0.3, 0.7, 0.4, 1) 450ms both;
+}
+
+[data-icon-3d-intro] [data-icon-3d='wobble'] > img {
+  animation: casa-icon-wobble 700ms ease-in-out 450ms both;
+}
+
+[data-icon-3d-intro] [data-icon-3d='float'] > img {
+  animation: casa-icon-float 900ms ease-in-out 450ms both;
+}
+
+[data-icon-3d-intro] [data-icon-3d='sway'] > img {
+  animation: casa-icon-sway 900ms ease-in-out 450ms both;
+}
+
 @keyframes casa-icon-hop {
   0% { transform: translateY(0) scale(1, 1); }
   18% { transform: translateY(0) scale(1.08, 0.9); }

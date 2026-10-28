@@ -1,8 +1,8 @@
 /**
  * The desktop menu's 3D icons (Rahman 2026-10-28, after Airbnb's): one per dropdown item, by
  * its link. The pictures are Microsoft's Fluent Emoji 3D (MIT), fetched and resized by
- * scripts/media/fetch_fluent_icons.py into public/media/icons/3d/. An item without an entry
- * keeps its line icon; the phone menu keeps its line icons.
+ * scripts/media/fetch_fluent_icons.py into public/media/icons/3d/. The phone menu shows them
+ * too (where they play their motion as a panel opens); an item without an entry keeps its line icon.
  *
  * `motion` is what the icon does when its row is hovered or focused (globals.css,
  * `[data-icon-3d]`): `hop` jumps, `wobble` rocks, `float` rises and settles, `sway` bends like a
