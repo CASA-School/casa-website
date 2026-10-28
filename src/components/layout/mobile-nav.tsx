@@ -6,11 +6,13 @@ import { ArrowRight, ChevronLeft, ChevronRight, Mail, Menu, Phone, X } from 'luc
 
 import { footerText } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
+import { Icon3D } from '@/components/ui/icon-3d';
 import { IconBadge } from '@/components/ui/icon-badge';
 import { Logo } from '@/components/ui/logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { footerConfig } from '@/config/footer';
 import { iconMap } from '@/config/icon-map';
+import { menuIcons3d } from '@/config/icons-3d';
 import { localizeNavText, navConfig, type NavDropdown, type NavItem } from '@/config/nav';
 import { Link, usePathname } from '@/i18n/navigation';
 import { localizeHref } from '@/i18n/pathnames';
@@ -447,7 +449,7 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                     <h3 className="px-1 text-[0.9375rem] font-semibold text-[var(--casa-muted)]">
                       {localizeNavText(section.title, contentLocale, say)}
                     </h3>
-                    <ul className="mt-2 overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-card)]">
+                    <ul data-icon-3d-intro className="mt-2 overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-card)]">
                       {section.items.map((sub, itemIndex) => {
                         const Icon = sub.icon ? iconMap[sub.icon] : null;
                         const active = isCurrent(sub.href);
@@ -462,7 +464,12 @@ export function MobileNav({ contentLocale: initialContentLocale }: MobileNavProp
                                 aria-current={active ? 'page' : undefined}
                                 className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-[var(--casa-ground)]/60 focus-visible:bg-[var(--casa-ground)] focus-visible:outline-none active:bg-[var(--casa-ground)]"
                               >
-                                {Icon ? <IconBadge icon={Icon} meaning={dropdown?.meaning ?? 'orientation'} /> : null}
+                                {/* The desktop menu's 3D icons here too (Rahman 2026-10-28); they play their motion as the panel opens. */}
+                                {menuIcons3d[sub.href] ? (
+                                  <Icon3D icon={menuIcons3d[sub.href]} />
+                                ) : Icon ? (
+                                  <IconBadge icon={Icon} meaning={dropdown?.meaning ?? 'orientation'} />
+                                ) : null}
                                 <span className="min-w-0 flex-1">
                                   <span
                                     className={cn(
