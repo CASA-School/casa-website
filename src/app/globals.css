@@ -2027,9 +2027,15 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
     main button.casa-button-outline:hover,
     main a.casa-button-prism:hover,
     main a.casa-button-outline:hover,
-    main a.casa-cta-link:hover {
+    main a.casa-cta-link:not([class*='after:absolute']):hover {
       transform: translateY(-1px);
     }
+    /*
+     * Not a link stretched over its card by `after:absolute` (the „Wo startest du?" cards): a
+     * transform makes the link the box its ::after is placed in, so on hover the overlay shrank to
+     * the link's text, the pointer fell off it, the hover ended, the overlay grew back, and the
+     * pointer flickered between hand and arrow every frame (Rahman 2026-10-28).
+     */
 
     main article:hover .casa-media-overlay,
     main figure:hover .casa-media-overlay,
