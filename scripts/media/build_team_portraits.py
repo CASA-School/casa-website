@@ -38,9 +38,9 @@ QUALITY = 88
 PORTRAITS = {
     'tanja-langenickel': {'file': 'Tanja.JPG'},
     'natalia-sostres': {'file': 'Natalia.JPG'},
-    # IMG_0342 (Rahman, 2026-10-27): she stands right of centre; the 2:3 box centres her face, at 36% of
-    # its height, where the cards and the contact avatar's zoom expect it.
-    'meike-grosse-hundrup': {'file': 'IMG_0342.JPG', 'box': (1130, 946, 2800, 4200)},
+    # IMG_0342 (Rahman, 2026-10-27): she stands right of centre. A light 2:3 crop (90% of the frame) brings
+    # her face to 59% across and keeps it the size of the others' (a tighter 2800px box read zoomed in).
+    'meike-grosse-hundrup': {'file': 'IMG_0342.JPG', 'box': (400, 352, 3600, 5400)},
     'mareike-thomeczek': {'file': 'Mareike.JPG'},
     'ina-eismann': {'file': 'Ina.JPG'},
     'claudia-groene': {'file': 'Claudia G..JPG'},
