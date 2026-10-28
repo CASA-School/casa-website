@@ -1,11 +1,13 @@
 import { Compass, GraduationCap, HeartHandshake, LaptopMinimalCheck, MessageCircle, NotebookPen, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
 
 import { CasaImage } from '@/components/ui/casa-image';
+import { Icon3D } from '@/components/ui/icon-3d';
 import { IconBadge } from '@/components/ui/icon-badge';
 import { TextCta } from '@/components/ui/text-cta';
 import { levelKeyFromLabel, levelTokens } from '@/config/brand/tokens';
 import { LEVELS_PATH } from '@/config/content/cefr-levels';
 import type { SchoolFeature, SchoolFeatureIcon } from '@/config/content/school-features';
+import { schoolFeatureIcons3d } from '@/config/icons-3d';
 import { say } from '@/lib/cms/copy';
 import { cn } from '@/lib/utils';
 
@@ -197,7 +199,8 @@ export function CourseLevelGoals({
         meaning colour (config/content/school-features) and the feature in the display serif at
         20px, the size below which Playfair's hairlines break up. Four across from `lg` (three rows), two from `sm`; on a phone one
         column, the five as rows with the icon beside the feature, since the serif in half a phone's
-        width broke „Zusatzmaterial“ mid-word. Nothing moves on hover: the tiles are not links.
+        width broke „Zusatzmaterial“ mid-word. The tiles are not links, so they stay put on hover;
+        only their 3D icon (Rahman 2026-10-28, config/icons-3d) plays its motion.
       */}
       {features.length ? (
         <div className="mt-12">
@@ -234,9 +237,14 @@ export function CourseLevelGoals({
               return (
                 <li
                   key={feature.icon}
+                  data-icon-3d-host
                   className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-[var(--shadow-soft)] sm:min-h-[11rem] sm:flex-col sm:items-start sm:justify-between sm:gap-5 sm:p-5 lg:p-6"
                 >
-                  <IconBadge icon={FeatureIcon} meaning={feature.meaning ?? 'courses'} size="lg" />
+                  {schoolFeatureIcons3d[feature.icon] ? (
+                    <Icon3D icon={schoolFeatureIcons3d[feature.icon]} size="lg" />
+                  ) : (
+                    <IconBadge icon={FeatureIcon} meaning={feature.meaning ?? 'courses'} size="lg" />
+                  )}
                   <h4 className="text-xl font-semibold leading-snug text-[var(--casa-ink)] [font-family:var(--font-display),Georgia,serif]">
                     {feature.label}
                   </h4>

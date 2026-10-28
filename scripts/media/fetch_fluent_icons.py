@@ -41,6 +41,14 @@ ICONS = {
     'newspaper': 'Newspaper',
     'bar-chart': 'Bar chart',
     'globe-showing-europe-africa': 'Globe showing europe-africa',
+    'open-book': 'Open book',
+    'hot-beverage': 'Hot beverage',
+    'desktop-computer': 'Desktop computer',
+    'light-bulb': 'Light bulb',
+    'globe-with-meridians': 'Globe with meridians',
+    'laptop': 'Laptop',
+    'compass': 'Compass',
+    'luggage': 'Luggage',
 }
 
 

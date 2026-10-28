@@ -2301,8 +2301,9 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 
 /*
  * 3D icons (components/ui/icon-3d.tsx, Rahman 2026-10-28, after Airbnb's). At rest a soft
- * shadow under the object; when the link or button it sits in is hovered or focused it lifts
- * with a little overshoot and the picture plays its motion once.
+ * shadow under the object; when the link, button or card it sits in (`data-icon-3d-host`) is
+ * hovered or focused it lifts with a little overshoot and the picture plays its motion once. A
+ * choice card (a label with a radio) keeps its icon lifted while it is the one chosen.
  */
 [data-icon-3d] {
   filter: drop-shadow(0 3px 4px rgb(16 24 40 / 0.14));
@@ -2315,24 +2316,29 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
   transform-origin: 50% 85%;
 }
 
-:is(a, button):is(:hover, :focus-visible) > [data-icon-3d] {
+:is(a, button, [data-icon-3d-host]):is(:hover, :focus-visible, :has(:focus-visible)) [data-icon-3d],
+[data-icon-3d-host]:has(input:checked) [data-icon-3d] {
   transform: translateY(-2px) scale(1.12);
   filter: drop-shadow(0 8px 8px rgb(16 24 40 / 0.2));
 }
 
-:is(a, button):is(:hover, :focus-visible) > [data-icon-3d='hop'] > img {
+:is(a, button, [data-icon-3d-host]):is(:hover, :focus-visible, :has(:focus-visible)) [data-icon-3d='hop'] > img,
+[data-icon-3d-host]:has(input:checked) [data-icon-3d='hop'] > img {
   animation: casa-icon-hop 650ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
 }
 
-:is(a, button):is(:hover, :focus-visible) > [data-icon-3d='wobble'] > img {
+:is(a, button, [data-icon-3d-host]):is(:hover, :focus-visible, :has(:focus-visible)) [data-icon-3d='wobble'] > img,
+[data-icon-3d-host]:has(input:checked) [data-icon-3d='wobble'] > img {
   animation: casa-icon-wobble 700ms ease-in-out both;
 }
 
-:is(a, button):is(:hover, :focus-visible) > [data-icon-3d='float'] > img {
+:is(a, button, [data-icon-3d-host]):is(:hover, :focus-visible, :has(:focus-visible)) [data-icon-3d='float'] > img,
+[data-icon-3d-host]:has(input:checked) [data-icon-3d='float'] > img {
   animation: casa-icon-float 900ms ease-in-out both;
 }
 
-:is(a, button):is(:hover, :focus-visible) > [data-icon-3d='sway'] > img {
+:is(a, button, [data-icon-3d-host]):is(:hover, :focus-visible, :has(:focus-visible)) [data-icon-3d='sway'] > img,
+[data-icon-3d-host]:has(input:checked) [data-icon-3d='sway'] > img {
   animation: casa-icon-sway 900ms ease-in-out both;
 }
 

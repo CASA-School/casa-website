@@ -34,3 +34,36 @@ export const menuIcons3d: Record<string, Icon3D> = {
   '/courses/levels': { slug: 'bar-chart', motion: 'hop' },
   '/resources/study-in-germany': { slug: 'globe-showing-europe-africa', motion: 'sway' },
 };
+
+/*
+ * The card sets that show 3D icons too (Rahman 2026-10-28): the choices and the features that
+ * say what CASA is. Forms, search, buttons and the workspace keep their line icons.
+ */
+
+/** „Unsere Merkmale": the five tiles without a photograph (config/content/school-features). */
+export const schoolFeatureIcons3d: Record<string, Icon3D> = {
+  materials: { slug: 'open-book', motion: 'hop' },
+  cafeteria: { slug: 'hot-beverage', motion: 'float' },
+  digital: { slug: 'desktop-computer', motion: 'hop' },
+  advice: { slug: 'light-bulb', motion: 'wobble' },
+  'language-cafe': { slug: 'globe-with-meridians', motion: 'sway' },
+};
+
+/** „Wo startest du?" on the homepage (components/sections/persona-pathways). */
+export const personaIcons3d: Record<string, Icon3D> = {
+  'new-learners': { slug: 'compass', motion: 'wobble' },
+  'working-professionals': { slug: 'briefcase', motion: 'hop' },
+  'exam-candidates': { slug: 'pencil', motion: 'wobble' },
+  'housing-onboarding': { slug: 'luggage', motion: 'hop' },
+};
+
+/** The contact form's topics (components/forms/contact-inquiry-form). */
+export const contactTopicIcons3d: Record<string, Icon3D> = {
+  'website-feedback': { slug: 'laptop', motion: 'hop' },
+  'course-advice': { slug: 'books', motion: 'hop' },
+  'exam-registration': { slug: 'pencil', motion: 'wobble' },
+  'accommodation-support': { slug: 'house-with-garden', motion: 'hop' },
+  'group-booking': { slug: 'busts-in-silhouette', motion: 'hop' },
+  'company-courses': { slug: 'office-building', motion: 'hop' },
+  other: { slug: 'speech-balloon', motion: 'float' },
+};

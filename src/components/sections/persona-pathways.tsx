@@ -6,7 +6,9 @@ import { iconMap, type IconKey } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 import type { ContentLocale } from '@/lib/content/types';
 import { pickTree, say } from '@/lib/cms/copy';
+import { Icon3D } from '@/components/ui/icon-3d';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { personaIcons3d } from '@/config/icons-3d';
 
 type PersonaKey =
   | 'new-learners'
@@ -162,6 +164,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
                 meaning.hover
               )}
               data-casa-persona={pathway.key}
+              data-icon-3d-host
             >
               <span
                 className={cn('casa-card-edge', meaning.bar)}
@@ -169,7 +172,11 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
               />
 
               <div>
-                <IconBadge icon={Icon} meaning={personaMeaning[pathway.key]} size="lg" />
+                {personaIcons3d[pathway.key] ? (
+                  <Icon3D icon={personaIcons3d[pathway.key]} size="lg" />
+                ) : (
+                  <IconBadge icon={Icon} meaning={personaMeaning[pathway.key]} size="lg" />
+                )}
                 <h3 className="mt-7 text-2xl font-bold leading-tight text-[var(--casa-ink)]">
                   {pathway.title}
                 </h3>
