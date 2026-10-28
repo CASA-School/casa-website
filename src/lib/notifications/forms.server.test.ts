@@ -61,6 +61,11 @@ describe('public form notifications', () => {
       expect(formDeliveryConfig(kind)).toEqual({ test: true, recipient: TEST_FORM_RECIPIENT });
     }
   });
+  it('sends a placement appointment to the placement mailbox (online@) when live', () => {
+    vi.stubEnv('FORM_DELIVERY_MODE', 'live');
+    vi.stubEnv('FORM_RECIPIENT_PLACEMENT', 'online@example.com');
+    expect(formDeliveryConfig('placement-appointment')).toEqual({ test: false, recipient: 'online@example.com' });
+  });
   it('sends an interest-list entry to the contact mailbox when live', () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'live');
     vi.stubEnv('FORM_RECIPIENT_CONTACT', 'info@example.com');
@@ -162,6 +167,16 @@ describe('public form notifications', () => {
     expect(appointment.message.subject).toBe('[TEST] Terminanfrage: Ina Gast – Donnerstag, 8. Oktober 2026, 10:30 Uhr');
     expect(appointment.message.body.content).toContain('10:30 Uhr (Bremer Zeit)');
     expect(appointment.message.body.content).toContain('30 Minuten');
+  });
+  it('writes a placement appointment as booked, with its place and the phone number', async () => {
+    const booked = await sentMessage('placement-appointment', {
+      firstName: 'Lea', lastName: 'Gast', email: 'lea@example.com', phone: '+49 421 123',
+      localDate: '2026-10-28', localTime: '10:00', durationMinutes: 30, locale: 'de', held: true, seat: 2,
+    }, { stored: true });
+    expect(booked.message.subject).toBe('[TEST] Einstufungstermin: Lea Gast – Mittwoch, 28. Oktober 2026, 10:00 Uhr');
+    expect(booked.message.body.content).toContain('Platz 2 von 2');
+    expect(booked.message.body.content).toContain('+49 421 123');
+    expect(booked.message.body.content).toContain('/day');
   });
   it('sets no Reply-To when the submission carries no usable address', async () => {
     expect((await sentMessage('placement', { token: 'tok-1', band: 'B1' })).message.replyTo).toBeUndefined();
@@ -282,6 +297,17 @@ describe('confirmation to the sender', () => {
   };
 
   beforeEach(() => resetConfirmationLimits());
+
+  it('confirms a placement appointment as booked, with the school address; unheld only as a request', async () => {
+    const slot = { locale: 'de', firstName: 'Lea', email: 'lea@example.com', localDate: '2026-10-28', localTime: '10:00', durationMinutes: 30, message: 'PRIVATE-NOTE' };
+    const booked = (await confirmation('placement-appointment', { ...slot, held: true })).message;
+    expect(booked.subject).toBe('[TEST] Dein Einstufungstermin bei CASA: Mi., 28. Okt., 10:00 Uhr');
+    expect(booked.body.content).toContain('Am Dobben 14–16');
+    expect(booked.body.content).not.toContain('PRIVATE-NOTE');
+    const unheld = (await confirmation('placement-appointment', { ...slot, held: false })).message;
+    expect(unheld.body.content).toContain('bestätigen dir den Termin per E-Mail');
+    expect(unheld.body.content).not.toContain('Termin steht');
+  });
 
   it('goes to the test inbox in test mode and names the address it would have reached', async () => {
     const { result, message } = await confirmation('course', course);

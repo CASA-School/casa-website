@@ -19,7 +19,7 @@ has an honest policy rather than an outdated one, not because a lawyer has signe
 1 Definitions · 2 Controller (as in the imprint) · 3 Hosting · 4 Abuse protection ·
 5 Cookies · 6 Fonts and external content · 7 Social, map and placement-test links (Klett) ·
 8 Contact and group enquiries · 9 Internal handling · 10 Course registration ·
-11 Accommodation · 12 Allergies · 13 Exams · 14 Job applications · 15 Group appointments ·
+11 Accommodation · 12 Allergies · 13 Exams · 14 Job applications · 15 Group consultations and placement appointments ·
 16 Email notifications · 17 Assistant and search · 18 Recipients · 19 Storage periods ·
 20 Rights · 21 Complaint · 22 Legal basis · 23 Legitimate interests · 24 Legal requirements ·
 25 Automated decisions (none).
@@ -36,7 +36,8 @@ the same in both languages.
 - Mailboxes: contact and group enquiries → `info@`; course, exam and accommodation
   registrations → `online@` (learners email their Klett result there themselves); appointment requests → the responsible
   contact person's mailbox (group consultations: Ina Eismann), who confirms by email;
-  job-application alerts → `info@`, naming only the position (no reference since 2026-10-26).
+  job-application alerts → `info@`, naming only the position (no reference since 2026-10-26);
+  placement appointments (in person, 2026-10-28) → `online@`, booked at once (§15).
 - Job applications themselves: management only, in the workspace's Applications module.
 - Host families get name, age, gender, nationality, German level, dates of stay, and
   allergies only with the separate consent. No smoking in any CASA accommodation, so the

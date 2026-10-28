@@ -19,6 +19,16 @@
    "/news"
   ]
  },
+ "t.09-30-17-00.1sez1oz": {
+  "de": "09:30–17:00 Uhr",
+  "en": "09:30–17:00",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.1-4-wochen.fo9lh3": {
   "de": "1–4 Wochen",
   "en": "1–4 weeks",
@@ -196,6 +206,16 @@
    "/news"
   ]
  },
+ "t.30-minuten-dienstag-donnerstag.p5z8n6": {
+  "de": "30 Minuten · Dienstag–Donnerstag · in der Schule",
+  "en": "30 minutes · Tuesday–Thursday · at the school",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.30-minuten-montag-donnerstag.ipfd9a": {
   "de": "30 Minuten · Montag–Donnerstag",
   "en": "30 minutes · Monday–Thursday",
@@ -217,6 +237,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.30-minuten.zhf5bd": {
+  "de": "30 Minuten",
+  "en": "30 minutes",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.4-wochen-teilniveau.1fs53xg": {
@@ -715,6 +745,7 @@
   "de": "Alle Zeiten gelten für Bremen.",
   "en": "All times are local to Bremen.",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -902,6 +933,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.an-diesem-tag-ist.s4xjkm": {
+  "de": "An diesem Tag ist leider kein Platz mehr frei. Bitte wähle einen anderen Tag.",
+  "en": "No places left on this day. Please choose another day.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.an-welchen-tagen-kannst.sazjmx": {
@@ -3052,6 +3093,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.buch-dir-einen-einstufungstermin.sn9g0k": {
+  "de": "Buch dir einen Einstufungstermin",
+  "en": "Book your placement appointment",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.buchhaltung-und-ansprechpartneri.12203xb": {
   "de": "Buchhaltung und Ansprechpartnerin für Gruppenangebote",
   "en": "Accounts, and the contact for group course quotes",
@@ -4184,6 +4235,7 @@
   "de": "Datenschutzerklärung gelesen",
   "en": "privacy policy",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
@@ -4346,6 +4398,26 @@
    "/resources/why-germany"
   ]
  },
+ "t.dein-termin-ist-gebucht.ffugzd": {
+  "de": "Dein Termin ist gebucht",
+  "en": "Your appointment is booked",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
+ "t.dein-termin-konnte-nicht.16rkns8": {
+  "de": "Dein Termin konnte nicht gebucht werden. Bitte versuch es erneut.",
+  "en": "Your appointment could not be booked. Please try again.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.dein-zimmer-fuer-die.7b0xpi": {
   "de": "Dein Zimmer für die ersten vier Wochen.",
   "en": "Your room for the first four weeks.",
@@ -4407,6 +4479,16 @@
    "/team"
   ]
  },
+ "t.deine-anfrage-ist-angekommen.77f8lv": {
+  "de": "Deine Anfrage ist angekommen",
+  "en": "Your request has reached us",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.deine-anfrage-konnte-nicht.1f3xsov": {
   "de": "Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.",
   "en": "Your request could not be sent. Please try again.",
@@ -4438,6 +4520,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.deine-angaben.3a3l7u": {
+  "de": "Deine Angaben",
+  "en": "Your details",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.deine-entscheidung.1cvqf9d": {
@@ -4809,6 +4901,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.der-letzte-platz-zu.g1kc61": {
+  "de": "Der letzte Platz zu dieser Zeit wurde gerade gebucht. Bitte wähle eine andere Zeit.",
+  "en": "Someone has just booked the last place at this time. Please choose another time.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.der-link-ist-vielleicht.vhlvsp": {
   "de": "Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.",
   "en": "The link may be out of date, or there may be a typo in the address. You can carry on from here.",
@@ -5103,6 +5205,7 @@
   "de": "Di",
   "en": "Tu",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -5710,6 +5813,16 @@
    "/team"
   ]
  },
+ "t.die-terminauswahl-ist-gerade.izn8n7": {
+  "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
+  "en": "Appointments are temporarily unavailable. Please send us a message and we’ll arrange a time with you.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.die-termine-werden-bald.1timr7s": {
   "de": "Die Termine werden bald kommen.",
   "en": "We’ll announce the dates soon.",
@@ -5760,6 +5873,16 @@
   ],
   "pages": [
    "/accommodation/become-host"
+  ]
+ },
+ "t.dienstag-bis-donnerstag.12yq7iy": {
+  "de": "Dienstag bis Donnerstag",
+  "en": "Tuesday to Thursday",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.dienstag.i58tqk": {
@@ -5925,6 +6048,7 @@
   "de": "Do",
   "en": "Th",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -6072,6 +6196,16 @@
   ],
   "pages": [
    "/accommodation/become-host"
+  ]
+ },
+ "t.du-bekommst-eine-bestaetigung.brzpaq": {
+  "de": "Du bekommst eine Bestätigung per E-Mail.",
+  "en": "You’ll receive a confirmation by email.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.du-bekommst-eine-rueckmeldung.1fier0s": {
@@ -7852,6 +7986,16 @@
    "/team"
   ]
  },
+ "t.einstufung-vor-ort-casa.1spzu4f": {
+  "de": "Einstufung vor Ort · CASA Bremen",
+  "en": "Placement in person · CASA Bremen",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.einstufung.1w67cw7": {
   "de": "Einstufung",
   "en": "Placement",
@@ -8312,6 +8456,7 @@
   "de": "Fertig",
   "en": "Done",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
@@ -8628,16 +8773,6 @@
    "/",
    "/courses",
    "/courses/[slug]"
-  ]
- },
- "t.freitag-08-30-13.4w49f0": {
-  "de": "Freitag 08:30–13:00 Uhr",
-  "en": "Friday 08:30–13:00",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.freitag.wrwfeb": {
@@ -10480,6 +10615,7 @@
   "de": "Ich habe die",
   "en": "I have read the",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
@@ -11527,9 +11663,9 @@
    "/resources/why-germany"
   ]
  },
- "t.ja-wenn-du-in.17zrl0l": {
-  "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Einen Termin brauchst du nicht. Komm einfach während der Bürozeiten vorbei und bring mindestens eine Stunde Zeit mit. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
-  "en": "Yes. If you live in or near Bremen, we warmly invite you to come to the school for a personal assessment and advice. The assessment is free of obligation, and it is a good chance to get to know the school and ask any other questions. You don’t need an appointment. Just come by during office hours and allow at least an hour. For the intensive courses, we assess your level here at the school in any case. We may then adjust your course level, whatever certificates you already have.",
+ "t.ja-wenn-du-in.1k22y8r": {
+  "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Buch dir dafür auf der Seite zum Einstufungstest einen Termin: Dienstag bis Donnerstag zwischen 09:30 und 17:00 Uhr, für 30 Minuten. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
+  "en": "Yes. If you live in or near Bremen, we warmly invite you to come to the school for a personal assessment and advice. The assessment is free of obligation, and it is a good chance to get to know the school and ask any other questions. Book an appointment on the placement test page: Tuesday to Thursday between 09:30 and 17:00, for 30 minutes. For the intensive courses, we assess your level here at the school in any case. We may then adjust your course level, whatever certificates you already have.",
   "files": [
    "src/config/content/faq.ts"
   ],
@@ -14024,6 +14160,7 @@
   "de": "Mi",
   "en": "We",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -14293,6 +14430,16 @@
   ],
   "pages": []
  },
+ "t.mit-termin.wga3pd": {
+  "de": "Mit Termin",
+  "en": "By appointment",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
   "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
   "en": "With {course.intensive-german.lessons} lessons a week, you can reach the next level in 8 weeks.",
@@ -14477,6 +14624,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.moechtest-du-uns-noch.aszb91": {
+  "de": "Möchtest du uns noch etwas sagen? (optional)",
+  "en": "Anything we should know? (optional)",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.monate.133ypc1": {
   "de": "Monate",
   "en": "months",
@@ -14495,16 +14652,6 @@
   ],
   "pages": [
    "/contact"
-  ]
- },
- "t.montag-bis-donnerstag-08.1uc3i9j": {
-  "de": "Montag bis Donnerstag 08:30–19:00 Uhr",
-  "en": "Monday to Thursday 08:30–19:00",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.montag-donnerstag.fn1y93": {
@@ -14739,6 +14886,7 @@
   "de": "Nachname",
   "en": "Last name",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/forms/career-application-form.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
@@ -14759,6 +14907,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.nachricht-senden.11idvdd": {
+  "de": "Nachricht senden",
+  "en": "Send a message",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.nachricht-senden.27sosi": {
@@ -14839,6 +14997,7 @@
   "de": "Nächster Monat",
   "en": "Next month",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -15159,6 +15318,16 @@
    "/courses/levels"
   ]
  },
+ "t.noch-1-platz.16m1l4v": {
+  "de": "noch 1 Platz",
+  "en": "1 place left",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
   "de": "Noch gar keine Deutschkenntnisse?",
   "en": "No German at all yet?",
@@ -15373,16 +15542,6 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
-  ]
- },
- "t.ohne-termin.1ldcpiq": {
-  "de": "Ohne Termin",
-  "en": "No appointment needed",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
@@ -15797,16 +15956,6 @@
    "/placement-test",
    "/search",
    "/team"
-  ]
- },
- "t.plane-mindestens-eine-stunde.veokh6": {
-  "de": "Plane mindestens eine Stunde ein.",
-  "en": "Allow at least an hour.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.plane-neben-dem-studium.28gq4m": {
@@ -16841,6 +16990,7 @@
   "de": "Schließen",
   "en": "Close",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/courses/special-course-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx",
@@ -17587,6 +17737,7 @@
   "de": "So",
   "en": "Su",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -18567,6 +18718,7 @@
   "de": "Tag auswählen",
   "en": "Choose a day",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -18884,6 +19036,7 @@
   "de": "Termin ändern",
   "en": "Change appointment",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -18926,6 +19079,16 @@
    "/team"
   ]
  },
+ "t.termin-buchen.123tnps": {
+  "de": "Termin buchen",
+  "en": "Book appointment",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.termin-buchen.1b0n2cu": {
   "de": "Termin buchen",
   "en": "Book a call",
@@ -18953,6 +19116,7 @@
   "de": "Termin buchen",
   "en": "Book an appointment",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/sections/decision-rail.tsx"
   ],
   "pages": [
@@ -19053,6 +19217,7 @@
   "de": "Termine werden geladen …",
   "en": "Loading appointments…",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -19369,6 +19534,7 @@
   "de": "Uhrzeit auswählen",
   "en": "Choose a time",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -20567,6 +20733,26 @@
    "/courses/[slug]"
   ]
  },
+ "t.vielen-dank-wir-freuen.17nt60i": {
+  "de": "Vielen Dank. Wir freuen uns auf dich in der Schule, Am Dobben 14–16 in Bremen.",
+  "en": "Thank you. We look forward to seeing you at the school, Am Dobben 14–16 in Bremen.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
+ "t.vielen-dank-wir-pruefen.2305wc": {
+  "de": "Vielen Dank. Wir prüfen deine Wunschzeit und bestätigen dir den Termin per E-Mail.",
+  "en": "Thank you. We’ll check your chosen time and confirm the appointment by email.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.vielleicht-moechtest-du-studiere.1s2wljj": {
   "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
   "en": "Perhaps you want to study, get on in your career, improve your German or make a new home. What you want is a good starting point for exploring the options.",
@@ -21050,6 +21236,7 @@
   "de": "Vorheriger Monat",
   "en": "Previous month",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
   "pages": [
@@ -21106,6 +21293,7 @@
   "en": "First name",
   "files": [
    "src/app/(site)/[locale]/contact/page.tsx",
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/forms/career-application-form.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
@@ -21167,6 +21355,16 @@
   ],
   "pages": [
    "/exams"
+  ]
+ },
+ "t.waehl-eine-zeit-und.15pdujg": {
+  "de": "Wähl eine Zeit und komm zu uns in die Schule. Gemeinsam finden wir dein Niveau und den Kurs, der zu dir passt.",
+  "en": "Choose a time and come to the school. Together we’ll find your level and the course that suits you.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.waehle-abend-berufs-oder.10p6uqo": {
@@ -21283,6 +21481,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.waehle-einen-tag-um.zoj1mg": {
+  "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
+  "en": "Select a day to see the free times.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.waehle-oben-ein-thema.6m5f1p": {
@@ -21849,6 +22057,7 @@
   "de": "Weiter",
   "en": "Continue",
   "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx"
   ],
@@ -23087,6 +23296,16 @@
   "pages": [
    "/exams",
    "/exams/[code]"
+  ]
+ },
+ "t.wird-gebucht.1usfzd": {
+  "de": "Wird gebucht …",
+  "en": "Booking…",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.wird-gesendet.1v6ti23": {

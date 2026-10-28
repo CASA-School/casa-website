@@ -131,6 +131,10 @@
     "de": "02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt",
     "text": "02.10.–04.10. · Día de la Unidad Alemana en el centro de la ciudad"
   },
+  "t.09-30-17-00.1sez1oz": {
+    "de": "09:30–17:00 Uhr",
+    "text": "09:30–17:00 h"
+  },
   "t.1-4-wochen.fo9lh3": {
     "de": "1–4 Wochen",
     "text": "1–4 semanas"
@@ -203,9 +207,17 @@
     "de": "30.10. · telc C1-HS-Prüfung bei CASA",
     "text": "30.10. · Examen telc C1 Hochschule en CASA"
   },
+  "t.30-minuten-dienstag-donnerstag.p5z8n6": {
+    "de": "30 Minuten · Dienstag–Donnerstag · in der Schule",
+    "text": "30 minutos · de martes a jueves · en la escuela"
+  },
   "t.30-minuten-montag-donnerstag.ipfd9a": {
     "de": "30 Minuten · Montag–Donnerstag",
     "text": "30 minutos · De lunes a jueves"
+  },
+  "t.30-minuten.zhf5bd": {
+    "de": "30 Minuten",
+    "text": "30 minutos"
   },
   "t.4-wochen-teilniveau.1fs53xg": {
     "de": "4 Wochen (Teilniveau)",
@@ -462,6 +474,10 @@
   "t.an-diesem-tag-ist.rw9abe": {
     "de": "An diesem Tag ist leider kein Termin mehr frei. Bitte wähle einen anderen Tag.",
     "text": "Lo sentimos, ese día ya no quedan horas libres. Elige otro día, por favor."
+  },
+  "t.an-diesem-tag-ist.s4xjkm": {
+    "de": "An diesem Tag ist leider kein Platz mehr frei. Bitte wähle einen anderen Tag.",
+    "text": "Lo sentimos, ya no quedan plazas libres para este día. Por favor, elige otro día."
   },
   "t.an-welchen-tagen-kannst.sazjmx": {
     "de": "An welchen Tagen kannst du?",
@@ -1231,6 +1247,10 @@
     "de": "Bring deinen Pass, die Wohnungsgeberbestätigung und das ausgefüllte Formular mit.",
     "text": "Lleva tu pasaporte, la confirmación del arrendador (Wohnungsgeberbestätigung) y el formulario completado."
   },
+  "t.buch-dir-einen-einstufungstermin.sn9g0k": {
+    "de": "Buch dir einen Einstufungstermin",
+    "text": "Reserva tu cita para la prueba de nivel"
+  },
   "t.buchhaltung-und-ansprechpartneri.12203xb": {
     "de": "Buchhaltung und Ansprechpartnerin für Gruppenangebote",
     "text": "Contabilidad y persona de contacto para las ofertas de grupo"
@@ -1647,6 +1667,14 @@
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Tu nivel de idioma determina a qué programas de estudio puedes acceder y cuántas cosas del día a día puedes resolver sin ayuda."
   },
+  "t.dein-termin-ist-gebucht.ffugzd": {
+    "de": "Dein Termin ist gebucht",
+    "text": "Tu cita está reservada"
+  },
+  "t.dein-termin-konnte-nicht.16rkns8": {
+    "de": "Dein Termin konnte nicht gebucht werden. Bitte versuch es erneut.",
+    "text": "No se pudo reservar tu cita. Por favor, inténtalo de nuevo."
+  },
   "t.dein-zimmer-fuer-die.7b0xpi": {
     "de": "Dein Zimmer für die ersten vier Wochen.",
     "text": "Tu habitación para las primeras cuatro semanas."
@@ -1667,6 +1695,10 @@
     "de": "Deine Anfrage ist angekommen",
     "text": "Hemos recibido tu solicitud"
   },
+  "t.deine-anfrage-ist-angekommen.77f8lv": {
+    "de": "Deine Anfrage ist angekommen",
+    "text": "Hemos recibido tu solicitud"
+  },
   "t.deine-anfrage-konnte-nicht.1f3xsov": {
     "de": "Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.",
     "text": "No se pudo enviar tu solicitud. Inténtalo de nuevo, por favor."
@@ -1674,6 +1706,10 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "No se pudieron enviar tus datos. Inténtalo de nuevo, por favor."
+  },
+  "t.deine-angaben.3a3l7u": {
+    "de": "Deine Angaben",
+    "text": "Tus datos"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -1814,6 +1850,10 @@
   "t.der-kurs-richtet-sich.368fyh": {
     "de": "Der Kurs richtet sich an Ärztinnen und Ärzte vor und nach der Fachsprachprüfung Medizin und an medizinische Fachkräfte. Er orientiert sich an den Niveaustufen B2 und C1 des Gemeinsamen Europäischen Referenzrahmens.",
     "text": "El curso está dirigido a médicas y médicos, antes o después de la Fachsprachprüfung Medizin (el examen de idioma especializado para medicina), y a profesionales de la salud. Se orienta a los niveles B2 y C1 del Marco Común Europeo de Referencia."
+  },
+  "t.der-letzte-platz-zu.g1kc61": {
+    "de": "Der letzte Platz zu dieser Zeit wurde gerade gebucht. Bitte wähle eine andere Zeit.",
+    "text": "Acaban de reservar la última plaza para esta hora. Por favor, elige otra hora."
   },
   "t.der-link-ist-vielleicht.vhlvsp": {
     "de": "Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.",
@@ -2111,6 +2151,10 @@
     "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
     "text": "La selección de citas no está disponible en este momento. Escríbenos y con gusto acordamos una cita contigo."
   },
+  "t.die-terminauswahl-ist-gerade.izn8n7": {
+    "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
+    "text": "La selección de citas no está disponible en este momento. Escríbenos y con gusto acordamos una cita contigo."
+  },
   "t.die-termine-werden-bald.1timr7s": {
     "de": "Die Termine werden bald kommen.",
     "text": "Las fechas se publicarán pronto."
@@ -2130,6 +2174,10 @@
   "t.die-zusammenarbeit.s61ors": {
     "de": "Die Zusammenarbeit",
     "text": "La colaboración"
+  },
+  "t.dienstag-bis-donnerstag.12yq7iy": {
+    "de": "Dienstag bis Donnerstag",
+    "text": "De martes a jueves"
   },
   "t.dienstag.i58tqk": {
     "de": "Dienstag",
@@ -2222,6 +2270,10 @@
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
     "text": "Recibes todos los detalles antes de dar tu confirmación definitiva."
+  },
+  "t.du-bekommst-eine-bestaetigung.brzpaq": {
+    "de": "Du bekommst eine Bestätigung per E-Mail.",
+    "text": "Recibirás una confirmación por correo electrónico."
   },
   "t.du-bekommst-eine-rueckmeldung.1fier0s": {
     "de": "Du bekommst eine Rückmeldung",
@@ -2755,6 +2807,10 @@
     "de": "Einstufung starten",
     "text": "Empieza la prueba de nivel"
   },
+  "t.einstufung-vor-ort-casa.1spzu4f": {
+    "de": "Einstufung vor Ort · CASA Bremen",
+    "text": "Prueba de nivel en persona · CASA Bremen"
+  },
   "t.einstufung.1w67cw7": {
     "de": "Einstufung",
     "text": "Prueba de nivel"
@@ -3026,10 +3082,6 @@
   "t.freies-sprechen-zu-themen.16k669e": {
     "de": "Freies Sprechen zu Themen, die die Gruppe selbst mitbringt",
     "text": "Conversación libre sobre temas que propone el propio grupo"
-  },
-  "t.freitag-08-30-13.4w49f0": {
-    "de": "Freitag 08:30–13:00 Uhr",
-    "text": "Viernes 08:30–13:00 h"
   },
   "t.freitag-08-30-13.pbiota": {
     "de": "Freitag: 08:30–13:00 Uhr",
@@ -4083,9 +4135,9 @@
     "de": "Ja, und sie wird noch besser, je mehr Deutsch du sprichst. Sinnvoll ist es, schon vor der Ankunft mit dem Lernen anzufangen.",
     "text": "Sí, y será todavía mejor cuanto más alemán hables. Conviene empezar a aprender ya antes de llegar."
   },
-  "t.ja-wenn-du-in.17zrl0l": {
-    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Einen Termin brauchst du nicht. Komm einfach während der Bürozeiten vorbei und bring mindestens eine Stunde Zeit mit. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
-    "text": "Sí. Si vives en Bremen o alrededores, te invitamos con mucho gusto a la escuela para hacer la prueba de nivel en persona y recibir asesoramiento. La prueba de nivel es sin compromiso y, de paso, puedes conocer la escuela y hacer otras preguntas. No necesitas cita. Simplemente pasa durante el horario de oficina y reserva al menos una hora. En los cursos intensivos, de todos modos hacemos la prueba de nivel aquí. Nos reservamos el derecho de ajustar el nivel del curso, independientemente de los certificados que tengas."
+  "t.ja-wenn-du-in.1k22y8r": {
+    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Buch dir dafür auf der Seite zum Einstufungstest einen Termin: Dienstag bis Donnerstag zwischen 09:30 und 17:00 Uhr, für 30 Minuten. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
+    "text": "Sí. Si vives en Bremen o alrededores, te invitamos con mucho gusto a la escuela para hacer la prueba de nivel en persona y recibir asesoramiento. La prueba de nivel es sin compromiso y, de paso, puedes conocer la escuela y hacer otras preguntas. Para ello, reserva en la página de la prueba de nivel una cita de 30 minutos, de martes a jueves entre las 09:30 y las 17:00. En los cursos intensivos, de todos modos hacemos la prueba de nivel aquí en la escuela. Al hacerlo, nos reservamos el derecho de ajustar el nivel del curso, independientemente de los certificados que ya tengas."
   },
   "t.ja-zwei-bei-deiner.gx6d2r": {
     "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von {course.enrolment-fee}. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
@@ -5043,6 +5095,10 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "Con telc Deutsch C1 Hochschule demuestras que tu alemán es suficiente para estudiar en la universidad. Muchas universidades de habla alemana exigen este certificado para la admisión."
   },
+  "t.mit-termin.wga3pd": {
+    "de": "Mit Termin",
+    "text": "Con cita previa"
+  },
   "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
     "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
     "text": "Con {course.intensive-german.lessons} clases a la semana, puedes alcanzar el siguiente nivel en 8 semanas."
@@ -5115,6 +5171,10 @@
     "de": "Möchtest du uns noch etwas sagen? (optional)",
     "text": "¿Quieres contarnos algo más? (opcional)"
   },
+  "t.moechtest-du-uns-noch.aszb91": {
+    "de": "Möchtest du uns noch etwas sagen? (optional)",
+    "text": "¿Quieres contarnos algo más? (opcional)"
+  },
   "t.moeglichkeiten.68vill": {
     "de": "Möglichkeiten",
     "text": "Oportunidades"
@@ -5126,10 +5186,6 @@
   "t.monatsticket.qqe8sm": {
     "de": "Monatsticket",
     "text": "Abono mensual"
-  },
-  "t.montag-bis-donnerstag-08.1uc3i9j": {
-    "de": "Montag bis Donnerstag 08:30–19:00 Uhr",
-    "text": "De lunes a jueves, 08:30–19:00 h"
   },
   "t.montag-donnerstag-08-30.1p1q5a4": {
     "de": "Montag–Donnerstag: 08:30–19:00 Uhr",
@@ -5222,6 +5278,10 @@
   "t.nachname.10v4ea2": {
     "de": "Nachname",
     "text": "Apellidos"
+  },
+  "t.nachricht-senden.11idvdd": {
+    "de": "Nachricht senden",
+    "text": "Enviar mensaje"
   },
   "t.nachricht-senden.27sosi": {
     "de": "Nachricht senden",
@@ -5375,6 +5435,10 @@
     "de": "Niveaustufen",
     "text": "Niveles"
   },
+  "t.noch-1-platz.16m1l4v": {
+    "de": "noch 1 Platz",
+    "text": "queda 1 plaza"
+  },
   "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
     "de": "Noch gar keine Deutschkenntnisse?",
     "text": "¿Todavía no sabes nada de alemán?"
@@ -5454,10 +5518,6 @@
   "t.ohne-krankenversicherung-kannst-.1x43fp0": {
     "de": "Ohne Krankenversicherung kannst du dich nicht einschreiben und bekommst keinen Aufenthaltstitel.",
     "text": "Sin seguro médico no puedes matricularte ni obtener un permiso de residencia."
-  },
-  "t.ohne-termin.1ldcpiq": {
-    "de": "Ohne Termin",
-    "text": "Sin cita previa"
   },
   "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
     "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
@@ -5610,10 +5670,6 @@
   "t.plane-kursstart-unterkunft-und.1phog46": {
     "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
     "text": "Planifica el inicio del curso, el alojamiento y los primeros pasos concretos con nuestro apoyo."
-  },
-  "t.plane-mindestens-eine-stunde.veokh6": {
-    "de": "Plane mindestens eine Stunde ein.",
-    "text": "Calcula al menos una hora."
   },
   "t.plane-neben-dem-studium.28gq4m": {
     "de": "Plane neben dem Studium auch deine Ankunft. Unterkunft, Versicherung und erste Anschaffungen können in dieselben Wochen fallen.",
@@ -6699,6 +6755,10 @@
     "de": "Termin anfragen",
     "text": "Solicitar cita"
   },
+  "t.termin-buchen.123tnps": {
+    "de": "Termin buchen",
+    "text": "Reserva una cita"
+  },
   "t.termin-buchen.1b0n2cu": {
     "de": "Termin buchen",
     "text": "Reserva una cita"
@@ -7295,6 +7355,14 @@
     "de": "Vielen Dank. Sobald genug Interessierte zusammen sind, legen wir die Termine fest und melden uns per E-Mail oder Telefon bei dir.",
     "text": "Muchas gracias. En cuanto haya suficientes personas interesadas, fijaremos las fechas y nos pondremos en contacto contigo por correo electrónico o por teléfono."
   },
+  "t.vielen-dank-wir-freuen.17nt60i": {
+    "de": "Vielen Dank. Wir freuen uns auf dich in der Schule, Am Dobben 14–16 in Bremen.",
+    "text": "Muchas gracias. Te esperamos en la escuela, en Am Dobben 14–16, Bremen."
+  },
+  "t.vielen-dank-wir-pruefen.2305wc": {
+    "de": "Vielen Dank. Wir prüfen deine Wunschzeit und bestätigen dir den Termin per E-Mail.",
+    "text": "Muchas gracias. Revisaremos el horario que prefieres y te confirmaremos la cita por correo electrónico."
+  },
   "t.vielleicht-moechtest-du-studiere.1s2wljj": {
     "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
     "text": "Quizá quieras estudiar, avanzar en tu carrera profesional, mejorar tu alemán o establecerte en un nuevo lugar. Tus deseos son un buen punto de partida para explorar las opciones."
@@ -7499,6 +7567,10 @@
     "de": "Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.",
     "text": "Elige un examen para saber más sobre los requisitos, el desarrollo y la inscripción."
   },
+  "t.waehl-eine-zeit-und.15pdujg": {
+    "de": "Wähl eine Zeit und komm zu uns in die Schule. Gemeinsam finden wir dein Niveau und den Kurs, der zu dir passt.",
+    "text": "Elige una hora y ven a vernos a la escuela. Juntos encontraremos tu nivel y el curso adecuado para ti."
+  },
   "t.waehle-abend-berufs-oder.10p6uqo": {
     "de": "Wähle Abend-, Berufs- oder Firmenformate, die zu deiner Woche passen.",
     "text": "Elige formatos vespertinos, profesionales o para empresas que se adapten a tu semana."
@@ -7532,6 +7604,10 @@
     "text": "Elige un curso que se adapte a tus conocimientos previos, tus planes y tu día a día. Te asesoramos con gusto."
   },
   "t.waehle-einen-tag-um.z0gkpb": {
+    "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
+    "text": "Elige un día para ver las horas disponibles."
+  },
+  "t.waehle-einen-tag-um.zoj1mg": {
     "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
     "text": "Elige un día para ver las horas disponibles."
   },
@@ -8210,6 +8286,10 @@
   "t.wird-bestaetigt.e97sw3": {
     "de": "Wird bestätigt",
     "text": "Por confirmar"
+  },
+  "t.wird-gebucht.1usfzd": {
+    "de": "Wird gebucht …",
+    "text": "Reservando…"
   },
   "t.wird-gesendet.1v6ti23": {
     "de": "Wird gesendet...",

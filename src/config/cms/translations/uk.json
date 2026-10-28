@@ -131,6 +131,10 @@
     "de": "02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt",
     "text": "02.10.–04.10. · День єдності Німеччини в центрі міста"
   },
+  "t.09-30-17-00.1sez1oz": {
+    "de": "09:30–17:00 Uhr",
+    "text": "09:30–17:00"
+  },
   "t.1-4-wochen.fo9lh3": {
     "de": "1–4 Wochen",
     "text": "1–4 тижні"
@@ -203,9 +207,17 @@
     "de": "30.10. · telc C1-HS-Prüfung bei CASA",
     "text": "30.10. · Іспит telc C1 Hochschule у CASA"
   },
+  "t.30-minuten-dienstag-donnerstag.p5z8n6": {
+    "de": "30 Minuten · Dienstag–Donnerstag · in der Schule",
+    "text": "30 хвилин · вівторок–четвер · у школі"
+  },
   "t.30-minuten-montag-donnerstag.ipfd9a": {
     "de": "30 Minuten · Montag–Donnerstag",
     "text": "30 хвилин · понеділок–четвер"
+  },
+  "t.30-minuten.zhf5bd": {
+    "de": "30 Minuten",
+    "text": "30 хвилин"
   },
   "t.4-wochen-teilniveau.1fs53xg": {
     "de": "4 Wochen (Teilniveau)",
@@ -462,6 +474,10 @@
   "t.an-diesem-tag-ist.rw9abe": {
     "de": "An diesem Tag ist leider kein Termin mehr frei. Bitte wähle einen anderen Tag.",
     "text": "На жаль, на цей день уже немає вільного часу. Будь ласка, оберіть інший день."
+  },
+  "t.an-diesem-tag-ist.s4xjkm": {
+    "de": "An diesem Tag ist leider kein Platz mehr frei. Bitte wähle einen anderen Tag.",
+    "text": "На жаль, на цей день вільних місць уже немає. Будь ласка, виберіть інший день."
   },
   "t.an-welchen-tagen-kannst.sazjmx": {
     "de": "An welchen Tagen kannst du?",
@@ -1231,6 +1247,10 @@
     "de": "Bring deinen Pass, die Wohnungsgeberbestätigung und das ausgefüllte Formular mit.",
     "text": "Візьміть із собою паспорт, підтвердження від орендодавця (Wohnungsgeberbestätigung) і заповнений бланк."
   },
+  "t.buch-dir-einen-einstufungstermin.sn9g0k": {
+    "de": "Buch dir einen Einstufungstermin",
+    "text": "Запишіться на визначення рівня"
+  },
   "t.buchhaltung-und-ansprechpartneri.12203xb": {
     "de": "Buchhaltung und Ansprechpartnerin für Gruppenangebote",
     "text": "Бухгалтерія та контактна особа щодо пропозицій для груп"
@@ -1647,6 +1667,14 @@
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "Від вашого рівня мови залежить, які освітні програми вам доступні і скільки справ у повсякденні ви зможете вирішувати без сторонньої допомоги."
   },
+  "t.dein-termin-ist-gebucht.ffugzd": {
+    "de": "Dein Termin ist gebucht",
+    "text": "Вас записано"
+  },
+  "t.dein-termin-konnte-nicht.16rkns8": {
+    "de": "Dein Termin konnte nicht gebucht werden. Bitte versuch es erneut.",
+    "text": "Не вдалося вас записати. Будь ласка, спробуйте ще раз."
+  },
   "t.dein-zimmer-fuer-die.7b0xpi": {
     "de": "Dein Zimmer für die ersten vier Wochen.",
     "text": "Ваша кімната на перші чотири тижні."
@@ -1667,6 +1695,10 @@
     "de": "Deine Anfrage ist angekommen",
     "text": "Ваш запит отримано"
   },
+  "t.deine-anfrage-ist-angekommen.77f8lv": {
+    "de": "Deine Anfrage ist angekommen",
+    "text": "Ваш запит отримано"
+  },
   "t.deine-anfrage-konnte-nicht.1f3xsov": {
     "de": "Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Не вдалося надіслати ваш запит. Будь ласка, спробуйте ще раз."
@@ -1674,6 +1706,10 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Не вдалося надіслати ваші дані. Будь ласка, спробуйте ще раз."
+  },
+  "t.deine-angaben.3a3l7u": {
+    "de": "Deine Angaben",
+    "text": "Ваші дані"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -1814,6 +1850,10 @@
   "t.der-kurs-richtet-sich.368fyh": {
     "de": "Der Kurs richtet sich an Ärztinnen und Ärzte vor und nach der Fachsprachprüfung Medizin und an medizinische Fachkräfte. Er orientiert sich an den Niveaustufen B2 und C1 des Gemeinsamen Europäischen Referenzrahmens.",
     "text": "Курс розрахований на лікарів до та після складання Fachsprachprüfung Medizin (іспит із фахової мови), а також на медичних фахівців. Він орієнтований на рівні B2 і C1 Загальноєвропейських Рекомендацій з мовної освіти."
+  },
+  "t.der-letzte-platz-zu.g1kc61": {
+    "de": "Der letzte Platz zu dieser Zeit wurde gerade gebucht. Bitte wähle eine andere Zeit.",
+    "text": "Останнє місце на цей час щойно зайняли. Будь ласка, виберіть інший час."
   },
   "t.der-link-ist-vielleicht.vhlvsp": {
     "de": "Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.",
@@ -2111,6 +2151,10 @@
     "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
     "text": "Вибір часу зараз недоступний. Напишіть нам, і ми охоче домовимося з вами про зустріч."
   },
+  "t.die-terminauswahl-ist-gerade.izn8n7": {
+    "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
+    "text": "Вибір часу зараз недоступний. Напишіть нам, і ми охоче домовимося з вами про зустріч."
+  },
   "t.die-termine-werden-bald.1timr7s": {
     "de": "Die Termine werden bald kommen.",
     "text": "Дати незабаром з’являться."
@@ -2130,6 +2174,10 @@
   "t.die-zusammenarbeit.s61ors": {
     "de": "Die Zusammenarbeit",
     "text": "Співпраця"
+  },
+  "t.dienstag-bis-donnerstag.12yq7iy": {
+    "de": "Dienstag bis Donnerstag",
+    "text": "З вівторка до четверга"
   },
   "t.dienstag.i58tqk": {
     "de": "Dienstag",
@@ -2222,6 +2270,10 @@
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
     "text": "Ви отримаєте всі подробиці, перш ніж остаточно погодитеся."
+  },
+  "t.du-bekommst-eine-bestaetigung.brzpaq": {
+    "de": "Du bekommst eine Bestätigung per E-Mail.",
+    "text": "Ви отримаєте підтвердження електронною поштою."
   },
   "t.du-bekommst-eine-rueckmeldung.1fier0s": {
     "de": "Du bekommst eine Rückmeldung",
@@ -2755,6 +2807,10 @@
     "de": "Einstufung starten",
     "text": "Почати визначення рівня"
   },
+  "t.einstufung-vor-ort-casa.1spzu4f": {
+    "de": "Einstufung vor Ort · CASA Bremen",
+    "text": "Очне визначення рівня · CASA Bremen"
+  },
   "t.einstufung.1w67cw7": {
     "de": "Einstufung",
     "text": "Визначення рівня"
@@ -3026,10 +3082,6 @@
   "t.freies-sprechen-zu-themen.16k669e": {
     "de": "Freies Sprechen zu Themen, die die Gruppe selbst mitbringt",
     "text": "Вільне мовлення на теми, які пропонує сама група"
-  },
-  "t.freitag-08-30-13.4w49f0": {
-    "de": "Freitag 08:30–13:00 Uhr",
-    "text": "П’ятниця 08:30–13:00"
   },
   "t.freitag-08-30-13.pbiota": {
     "de": "Freitag: 08:30–13:00 Uhr",
@@ -4083,9 +4135,9 @@
     "de": "Ja, und sie wird noch besser, je mehr Deutsch du sprichst. Sinnvoll ist es, schon vor der Ankunft mit dem Lernen anzufangen.",
     "text": "Так, і цей вибір стає ще кращим, що більше ви говорите німецькою. Варто почати вчити мову ще до приїзду."
   },
-  "t.ja-wenn-du-in.17zrl0l": {
-    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Einen Termin brauchst du nicht. Komm einfach während der Bürozeiten vorbei und bring mindestens eine Stunde Zeit mit. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
-    "text": "Так. Якщо ви живете в Бремені чи околицях, щиро запрошуємо вас до школи на особисте визначення рівня та консультацію. Визначення рівня ні до чого не зобов’язує, а заразом ви зможете познайомитися зі школою й поставити інші запитання. Попередній запис не потрібен. Просто приходьте в години роботи офісу й заплануйте щонайменше годину. На інтенсивних курсах ми в будь-якому разі визначаємо рівень на місці. Водночас ми залишаємо за собою право скоригувати рівень курсу незалежно від раніше отриманих сертифікатів."
+  "t.ja-wenn-du-in.1k22y8r": {
+    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Buch dir dafür auf der Seite zum Einstufungstest einen Termin: Dienstag bis Donnerstag zwischen 09:30 und 17:00 Uhr, für 30 Minuten. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
+    "text": "Так. Якщо ви живете в Бремені чи околицях, щиро запрошуємо вас до школи на особисте визначення рівня та консультацію. Визначення рівня ні до чого не зобов’язує, а заразом ви зможете познайомитися зі школою й поставити інші запитання. Для цього запишіться на зустріч тривалістю 30 хвилин на сторінці тесту на визначення рівня: з вівторка до четверга, між 09:30 і 17:00. На інтенсивних курсах ми в будь-якому разі визначаємо рівень на місці. Водночас ми залишаємо за собою право скоригувати рівень курсу незалежно від раніше отриманих сертифікатів."
   },
   "t.ja-zwei-bei-deiner.gx6d2r": {
     "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von {course.enrolment-fee}. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
@@ -5043,6 +5095,10 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "З telc Deutsch C1 Hochschule ви підтверджуєте, що вашої німецької достатньо для навчання в університеті. Багато німецькомовних вишів вимагають цей сертифікат для вступу."
   },
+  "t.mit-termin.wga3pd": {
+    "de": "Mit Termin",
+    "text": "За записом"
+  },
   "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
     "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
     "text": "Займаючись {course.intensive-german.lessons} академічних годин на тиждень, ви можете за 8 тижнів досягти наступного рівня."
@@ -5115,6 +5171,10 @@
     "de": "Möchtest du uns noch etwas sagen? (optional)",
     "text": "Хочете ще щось нам сказати? (необов’язково)"
   },
+  "t.moechtest-du-uns-noch.aszb91": {
+    "de": "Möchtest du uns noch etwas sagen? (optional)",
+    "text": "Хочете ще щось нам сказати? (необов’язково)"
+  },
   "t.moeglichkeiten.68vill": {
     "de": "Möglichkeiten",
     "text": "Можливості"
@@ -5126,10 +5186,6 @@
   "t.monatsticket.qqe8sm": {
     "de": "Monatsticket",
     "text": "Місячний проїзний"
-  },
-  "t.montag-bis-donnerstag-08.1uc3i9j": {
-    "de": "Montag bis Donnerstag 08:30–19:00 Uhr",
-    "text": "З понеділка до четверга, 08:30–19:00"
   },
   "t.montag-donnerstag-08-30.1p1q5a4": {
     "de": "Montag–Donnerstag: 08:30–19:00 Uhr",
@@ -5222,6 +5278,10 @@
   "t.nachname.10v4ea2": {
     "de": "Nachname",
     "text": "Прізвище"
+  },
+  "t.nachricht-senden.11idvdd": {
+    "de": "Nachricht senden",
+    "text": "Надіслати повідомлення"
   },
   "t.nachricht-senden.27sosi": {
     "de": "Nachricht senden",
@@ -5375,6 +5435,10 @@
     "de": "Niveaustufen",
     "text": "Рівні"
   },
+  "t.noch-1-platz.16m1l4v": {
+    "de": "noch 1 Platz",
+    "text": "залишилося 1 місце"
+  },
   "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
     "de": "Noch gar keine Deutschkenntnisse?",
     "text": "Зовсім не знаєте німецької?"
@@ -5454,10 +5518,6 @@
   "t.ohne-krankenversicherung-kannst-.1x43fp0": {
     "de": "Ohne Krankenversicherung kannst du dich nicht einschreiben und bekommst keinen Aufenthaltstitel.",
     "text": "Без медичного страхування ви не зможете зарахуватися до вишу й не отримаєте дозволу на проживання."
-  },
-  "t.ohne-termin.1ldcpiq": {
-    "de": "Ohne Termin",
-    "text": "Без попереднього запису"
   },
   "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
     "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
@@ -5610,10 +5670,6 @@
   "t.plane-kursstart-unterkunft-und.1phog46": {
     "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
     "text": "Сплануйте початок курсу, проживання й перші конкретні кроки з нашою підтримкою."
-  },
-  "t.plane-mindestens-eine-stunde.veokh6": {
-    "de": "Plane mindestens eine Stunde ein.",
-    "text": "Виділіть на це щонайменше годину."
   },
   "t.plane-neben-dem-studium.28gq4m": {
     "de": "Plane neben dem Studium auch deine Ankunft. Unterkunft, Versicherung und erste Anschaffungen können in dieselben Wochen fallen.",
@@ -6699,6 +6755,10 @@
     "de": "Termin anfragen",
     "text": "Надіслати запит на зустріч"
   },
+  "t.termin-buchen.123tnps": {
+    "de": "Termin buchen",
+    "text": "Записатися на зустріч"
+  },
   "t.termin-buchen.1b0n2cu": {
     "de": "Termin buchen",
     "text": "Записатися на зустріч"
@@ -7295,6 +7355,14 @@
     "de": "Vielen Dank. Sobald genug Interessierte zusammen sind, legen wir die Termine fest und melden uns per E-Mail oder Telefon bei dir.",
     "text": "Дякуємо. Щойно збереться достатньо охочих, ми визначимо дати й зв’яжемося з вами електронною поштою або телефоном."
   },
+  "t.vielen-dank-wir-freuen.17nt60i": {
+    "de": "Vielen Dank. Wir freuen uns auf dich in der Schule, Am Dobben 14–16 in Bremen.",
+    "text": "Дякуємо. Чекаємо на вас у школі: Am Dobben 14–16, Бремен."
+  },
+  "t.vielen-dank-wir-pruefen.2305wc": {
+    "de": "Vielen Dank. Wir prüfen deine Wunschzeit und bestätigen dir den Termin per E-Mail.",
+    "text": "Дякуємо. Ми перевіримо бажаний час і підтвердимо запис електронною поштою."
+  },
   "t.vielleicht-moechtest-du-studiere.1s2wljj": {
     "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
     "text": "Можливо, ви хочете навчатися у виші, розвиватися професійно, покращити свою німецьку або знайти нове місце для життя. Ваші бажання — гарна відправна точка, щоб дослідити можливості."
@@ -7499,6 +7567,10 @@
     "de": "Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.",
     "text": "Виберіть іспит, щоб дізнатися більше про вимоги, перебіг і реєстрацію."
   },
+  "t.waehl-eine-zeit-und.15pdujg": {
+    "de": "Wähl eine Zeit und komm zu uns in die Schule. Gemeinsam finden wir dein Niveau und den Kurs, der zu dir passt.",
+    "text": "Виберіть час і приходьте до нас у школу. Разом ми визначимо ваш рівень і підберемо курс, який вам підходить."
+  },
   "t.waehle-abend-berufs-oder.10p6uqo": {
     "de": "Wähle Abend-, Berufs- oder Firmenformate, die zu deiner Woche passen.",
     "text": "Виберіть вечірній, професійний або корпоративний формат, що вписується у ваш тиждень."
@@ -7532,6 +7604,10 @@
     "text": "Виберіть курс, який відповідає вашим знанням, планам і повсякденному життю. Ми охоче вас проконсультуємо."
   },
   "t.waehle-einen-tag-um.z0gkpb": {
+    "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
+    "text": "Виберіть день, щоб побачити вільний час."
+  },
+  "t.waehle-einen-tag-um.zoj1mg": {
     "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
     "text": "Виберіть день, щоб побачити вільний час."
   },
@@ -8210,6 +8286,10 @@
   "t.wird-bestaetigt.e97sw3": {
     "de": "Wird bestätigt",
     "text": "Буде підтверджено"
+  },
+  "t.wird-gebucht.1usfzd": {
+    "de": "Wird gebucht …",
+    "text": "Записуємо…"
   },
   "t.wird-gesendet.1v6ti23": {
     "de": "Wird gesendet...",

@@ -96,11 +96,25 @@ applications now send the person a branded confirmation in the form's language
 | Course registration (incl. accommodation) | `COURSE` | `online@casa-bremen.de` |
 | Exam registration | `EXAM` | `online@casa-bremen.de` |
 | Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |
+| Placement appointment (in person) | `PLACEMENT` | `online@casa-bremen.de` (2026-10-28) |
 | Appointment request | `APPOINTMENT` | the contact person who holds the consultations — for group consultations, **Ina Eismann's mailbox** (address still to come). She confirms each appointment herself by email |
 | Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position only; the application itself is read in the workspace by management |
 
 `bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here
 is a change there (`docs/PRIVACY_POLICY.md`).
+
+## Placement appointments — 2026-10-28
+
+The placement test in person runs by appointment (Rahman): Tuesday to Thursday, twelve times from
+09:30 to 17:00, half an hour, two learners each (`src/lib/appointments/placement-schedule.ts`). The
+popup on the placement page (`PlacementAppointmentDialog`, sharing the calendar `SlotPicker` with Ina's
+dialog) books the place at once through `/api/placement-appointments` (table `placement_appointments`,
+0098): a per-time advisory lock counts the places, a third booking from the website gets 409. The
+learner's receipt (`placement-appointment` in `confirmation-copy.ts`) says the appointment stands and
+where; the staff alert goes to `FORM_RECIPIENT_PLACEMENT` (online@) and names the place (1 or 2 of 2).
+The team sees the appointments in the Tagesplan („Termine") and writes in the ones made by phone.
+Without a database the times are all offered, the request goes by mail alone, `held: false`, and the
+„unheld" receipt promises a confirmation instead.
 
 ## Without a database — 2026-10-09
 

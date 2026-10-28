@@ -1438,6 +1438,16 @@ day as one moves between them.
   Erledigt — not „erledigt" typed into a field, and done keeps who and when. Done tasks fold away
   under „Erledigt"; tasks written here and left open on the fourteen days before are carried onto
   today in their own fold (SchoolMan's never are). Changed and deleted in a dialog.
+- **Termine** (2026-10-28, migration 0098). The placement test in person runs by appointment:
+  Tuesday to Thursday, twelve half-hour times from 09:30 to 17:00, two learners each, booked by the
+  learner in the placement page's popup (docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md §Placement
+  appointments). A pill „Termine" beside the day's views, on all three pages, with the day's count,
+  opens `appointments-panel.tsx`: the plan's day first, then the days of the next two weeks that have
+  bookings, „x von 24 Plätzen", each row the time, the name, phone and email, a menu for where it
+  stands — Gebucht, Erschienen, Nicht gekommen, Abgesagt (which gives the place back) — and „Ändern".
+  „Termin eintragen" in the foot writes in an appointment made by phone or at the desk; the team may
+  book any day and a third person, the website never does. `day` at `edit` writes, `full` deletes.
+  No mail goes from here: a confirmation to someone booked by phone is written on the mail screen.
 - **Kurse** (`/admin/day/courses`). SchoolMan's RoomPlan and TeacherPlan as a table: a band for each
   part of the day in its colour (morning teal, afternoon blue, evening violet — amber is kept for
   cover, red for a missing teacher), then a row per class — time, course and SchoolMan number, room
