@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Building2, ChartNoAxesColumn, Check, Mail } from 'lucide-react';
 
+import { PlacementAppointmentDialog } from '@/components/appointments/placement-appointment-dialog';
 import { HeroSurface } from '@/components/heroes/shared';
 import { KlettLevelTests } from '@/components/sections';
 import { Container } from '@/components/ui/container';
@@ -23,6 +24,11 @@ import { pickTree, say } from '@/lib/cms/copy';
  * mean, which the levels page now tells in full (the level overview that used
  * to close this page went there).
  *
+ * IN PERSON BY APPOINTMENT (2026-10-28). Coming in without an appointment made the in-person
+ * placement hard to plan, so it now runs by appointment: Tuesday to Thursday, two learners per
+ * half hour, booked in the popup (`PlacementAppointmentDialog`, /api/placement-appointments) and
+ * shown to the team in the Tagesplan.
+ *
  * WHY KLETT (2026-10-01). From 2026-08-23 this page led into CASA's own
  * adaptive test. That test is not finished, so CASA went back to the Klett
  * tests the old casa-bremen.de offered, while the own test stays in development
@@ -39,8 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === 'de' ? 'Deutsch-Einstufungstest' : 'German placement test',
     description:
       locale === 'de'
-        ? 'Finde dein Deutschniveau mit den kostenlosen Online-Einstufungstests von A1 bis C1, oder komm ohne Termin zur persönlichen Einstufung zu CASA in Bremen.'
-        : 'Find your German level with the free online placement tests from A1 to C1, or come to CASA in Bremen for a placement test in person, no appointment needed.',
+        ? 'Finde dein Deutschniveau mit den kostenlosen Online-Einstufungstests von A1 bis C1, oder buch dir einen Termin zur persönlichen Einstufung bei CASA in Bremen.'
+        : 'Find your German level with the free online placement tests from A1 to C1, or book an appointment for a placement test in person at CASA in Bremen.',
     path: '/placement-test',
     keywords: ['German placement test Bremen', 'Einstufungstest Deutsch', 'Einstufungstest Bremen', 'CASA Bremen'],
   });
@@ -75,8 +81,8 @@ export default async function PlacementTestPage() {
           inPersonBody:
             'Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in die Schule ein. Die Einstufung ist unverbindlich, und du lernst dabei die Schule kennen und kannst deine Fragen stellen.',
           inPersonFacts: [
-            { label: 'Ohne Termin', lines: ['Montag bis Donnerstag 08:30–19:00 Uhr', 'Freitag 08:30–13:00 Uhr'] },
-            { label: 'Dauer', lines: ['Plane mindestens eine Stunde ein.'] },
+            { label: 'Mit Termin', lines: ['Dienstag bis Donnerstag', '09:30–17:00 Uhr'] },
+            { label: 'Dauer', lines: ['30 Minuten'] },
           ],
           inPersonCta: 'Kontakt und Adresse',
           prepTitle: 'Was du vorbereiten kannst',
@@ -103,8 +109,8 @@ export default async function PlacementTestPage() {
           inPersonBody:
             'If you live in or near Bremen, you’re very welcome to come to the school for a placement test and advice in person. The placement test doesn’t commit you to anything, and it’s a chance to get to know the school and ask your questions.',
           inPersonFacts: [
-            { label: 'No appointment needed', lines: ['Monday to Thursday 08:30–19:00', 'Friday 08:30–13:00'] },
-            { label: 'Time', lines: ['Allow at least an hour.'] },
+            { label: 'By appointment', lines: ['Tuesday to Thursday', '09:30–17:00'] },
+            { label: 'Time', lines: ['30 minutes'] },
           ],
           inPersonCta: 'Contact and address',
           prepTitle: 'What to prepare',
@@ -189,7 +195,8 @@ export default async function PlacementTestPage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-auto pt-6">
+              <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
+                <PlacementAppointmentDialog locale={locale} />
                 <TextCta href="/contact?topic=placement-in-person">{copy.inPersonCta}</TextCta>
               </div>
             </article>

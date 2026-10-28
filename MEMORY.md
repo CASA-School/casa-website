@@ -2829,3 +2829,22 @@ and then „map everything properly so every data is transferred properly to our
   layout tools in scripts/filemaker/layouts/. **Open**: Rahman's decisions (MIGRATION.md §3), the service onto
   the office server (CT 103).
 
+## 54. The placement test in person, by appointment (2026-10-28)
+
+Rahman, from a handwritten list: the in-person placement has been disorganised — people came in and
+asked — so it runs by appointment now: Tuesday to Thursday, 09:30, 10:00, 11:00, 11:30, 12:00, 13:30,
+14:00, 15:00, 15:30, 16:00, 16:30, 17:00 (no 10:30, 12:30, 13:00, 14:30), half an hour, two learners at a
+time. A popup on the placement page books the place at once (no confirming by hand), like Ina's group
+consultations; the learner gets a confirmation, online@ an alert, and the team sees the day in the
+Tagesplan behind a „Termine" button, where they also write in appointments made by phone or at the desk.
+
+- Migration 0098 `placement_appointments`; the times in `src/lib/appointments/placement-schedule.ts`
+  (same-day bookings close two hours ahead); `/api/placement-appointments` books under a per-time lock,
+  never a third person from the website (the team may).
+- Mail kind `placement-appointment` → `FORM_RECIPIENT_PLACEMENT` (online@); without a database the request
+  goes by mail alone and nothing calls it booked (the „unheld" receipt).
+- The calendar of both popups is one component now (`src/components/appointments/slot-picker.tsx`).
+- „Ohne Termin, plane eine Stunde ein" is gone from the placement page, the FAQ and CLARA's text; privacy
+  §15 names the new form. The six languages were re-run.
+- **Next** (Rahman): the Klett test → e-mail → registration chain is the bad part; the level test and the
+  registration should connect in the new system.

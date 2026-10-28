@@ -25,6 +25,10 @@
  * An appointment request sent without a database (`held: false` in the
  * payload) takes the "unheld" variant: nothing holds the time then, so it never
  * says the time is reserved or will be released.
+ *
+ * A placement appointment (2026-10-28) is booked at once: the learner's place is
+ * theirs, so its receipt says the appointment stands; without a database it
+ * takes the "unheld" variant and promises a confirmation instead.
  */
 export const CONFIRMATION_COPY = {
   "kinds": [
@@ -594,6 +598,156 @@ export const CONFIRMATION_COPY = {
         ],
         "closing": "We’re glad you’d like to join our team."
       }
+    },
+    {
+      "kind": "placement-appointment",
+      "variant": "",
+      "de": {
+        "subject": "Dein Einstufungstermin bei CASA: {dayShort}, {time} Uhr",
+        "preheader": "Dein Platz ist gebucht. Wir freuen uns auf dich in der Schule.",
+        "heading": "Dein Einstufungstermin steht",
+        "intro": "danke für deine Buchung. Bei deinem Termin finden wir gemeinsam heraus, welcher Kurs zu dir passt, und du lernst die Schule kennen.",
+        "summaryTitle": "Dein Termin",
+        "summaryRows": [
+          {
+            "label": "Datum",
+            "value": "{day}"
+          },
+          {
+            "label": "Uhrzeit",
+            "value": "{time} Uhr"
+          },
+          {
+            "label": "Dauer",
+            "value": "{duration} Minuten"
+          },
+          {
+            "label": "Ort",
+            "value": "CASA, Am Dobben 14–16, 28203 Bremen"
+          }
+        ],
+        "nextStepsTitle": "Gut zu wissen",
+        "nextSteps": [
+          {
+            "text": "Komm bitte ein paar Minuten früher und melde dich am Empfang."
+          },
+          {
+            "text": "Du kannst doch nicht kommen? Antworte einfach auf diese E-Mail. Dann geben wir deinen Platz frei oder finden eine andere Zeit."
+          }
+        ],
+        "closing": "Wir freuen uns auf dich."
+      },
+      "en": {
+        "subject": "Your placement appointment at CASA: {dayShort}, {time}",
+        "preheader": "Your place is booked. We look forward to seeing you at the school.",
+        "heading": "Your placement appointment is booked",
+        "intro": "Thank you for booking. At your appointment we’ll find out together which course suits you, and you’ll get to know the school.",
+        "summaryTitle": "Your appointment",
+        "summaryRows": [
+          {
+            "label": "Date",
+            "value": "{day}"
+          },
+          {
+            "label": "Time",
+            "value": "{time}"
+          },
+          {
+            "label": "Duration",
+            "value": "{duration} minutes"
+          },
+          {
+            "label": "Where",
+            "value": "CASA, Am Dobben 14–16, 28203 Bremen"
+          }
+        ],
+        "nextStepsTitle": "Good to know",
+        "nextSteps": [
+          {
+            "text": "Please arrive a few minutes early and let us know at reception."
+          },
+          {
+            "text": "Can’t come after all? Simply reply to this email. We’ll release your place or find another time."
+          }
+        ],
+        "closing": "We look forward to seeing you."
+      },
+      "replyNote": false
+    },
+    {
+      "kind": "placement-appointment",
+      "variant": "unheld",
+      "de": {
+        "subject": "Deine Anfrage für einen Einstufungstermin: {dayShort}, {time} Uhr",
+        "preheader": "Wir prüfen deine Wunschzeit und bestätigen dir den Termin per E-Mail.",
+        "heading": "Deine Terminanfrage ist angekommen",
+        "intro": "danke für deine Anfrage. Bei deinem Termin finden wir gemeinsam heraus, welcher Kurs zu dir passt, und du lernst die Schule kennen.",
+        "summaryTitle": "Deine Wunschzeit",
+        "summaryRows": [
+          {
+            "label": "Datum",
+            "value": "{day}"
+          },
+          {
+            "label": "Uhrzeit",
+            "value": "{time} Uhr"
+          },
+          {
+            "label": "Dauer",
+            "value": "{duration} Minuten"
+          },
+          {
+            "label": "Ort",
+            "value": "CASA, Am Dobben 14–16, 28203 Bremen"
+          }
+        ],
+        "nextStepsTitle": "So geht es weiter",
+        "nextSteps": [
+          {
+            "text": "Wir prüfen, ob zu dieser Zeit noch ein Platz frei ist, und bestätigen dir den Termin per E-Mail."
+          },
+          {
+            "text": "Passt die Zeit doch nicht? Antworte einfach auf diese E-Mail."
+          }
+        ],
+        "closing": "Wir freuen uns auf dich."
+      },
+      "en": {
+        "subject": "Your placement appointment request: {dayShort}, {time}",
+        "preheader": "We’ll check your chosen time and confirm the appointment by email.",
+        "heading": "Your appointment request has reached us",
+        "intro": "Thank you for your request. At your appointment we’ll find out together which course suits you, and you’ll get to know the school.",
+        "summaryTitle": "Your chosen time",
+        "summaryRows": [
+          {
+            "label": "Date",
+            "value": "{day}"
+          },
+          {
+            "label": "Time",
+            "value": "{time}"
+          },
+          {
+            "label": "Duration",
+            "value": "{duration} minutes"
+          },
+          {
+            "label": "Where",
+            "value": "CASA, Am Dobben 14–16, 28203 Bremen"
+          }
+        ],
+        "nextStepsTitle": "What happens next",
+        "nextSteps": [
+          {
+            "text": "We’ll check that a place is still free at this time and confirm the appointment by email."
+          },
+          {
+            "text": "If the time doesn’t suit you after all, simply reply to this email."
+          }
+        ],
+        "closing": "We look forward to seeing you."
+      },
+      "replyNote": false
     }
   ],
   "shared": {

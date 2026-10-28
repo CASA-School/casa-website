@@ -243,7 +243,8 @@ export function Select({
       name: ariaLabel ?? labelOf(select),
     };
     setShown((was) => (was.value === next.value && was.label === next.label && was.placeholder === next.placeholder && was.name === next.name ? was : next));
-    if (select.checkValidity()) setInvalid(false);
+    // `validity.valid`, not checkValidity(): that fires `invalid`, and an empty required field turned red on its second render.
+    if (select.validity.valid) setInvalid(false);
   }, [ariaLabel]);
   useLayoutEffect(read);
   useEffect(() => {

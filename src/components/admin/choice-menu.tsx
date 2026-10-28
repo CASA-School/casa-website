@@ -68,7 +68,8 @@ export function ChoiceMenu({
       <DropdownMenuTrigger aria-label={label} disabled={pending} className={cn(triggerClassName, pending && 'opacity-60')}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} sideOffset={8} className={cn(menuPanel, 'max-h-[min(60vh,420px)]')}>
+      {/* Above a side panel or dialog (z-[1000]) when the menu sits in one, as MenuSelect's does. */}
+      <DropdownMenuContent align={align} sideOffset={8} className={cn(menuPanel, 'z-[1100] max-h-[min(60vh,420px)]')}>
         <DropdownMenuLabel className="px-2.5 pt-1.5 pb-1 text-[0.72rem] font-bold text-[var(--casa-muted)]">{label}</DropdownMenuLabel>
         <DropdownMenuSeparator className="mx-1 my-1 bg-ws-line-soft" />
         {choices.map((choice) => (

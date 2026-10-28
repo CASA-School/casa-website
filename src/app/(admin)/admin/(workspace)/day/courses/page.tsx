@@ -1,3 +1,4 @@
+import { AppointmentsPanel } from '../appointments-panel';
 import { DayHeader, pickDay, weekOf } from '../day-header';
 import { CoursesTable } from './courses-table';
 import { dayLessons, lessonChoices, openTasksByDay } from '@/lib/admin/day-plan';
@@ -27,7 +28,8 @@ export default async function DayCoursesPage({ searchParams }: { searchParams: P
   const back = day === today ? '/admin/day/courses' : `/admin/day/courses?date=${day}`;
   return (
     <>
-      <DayHeader view="courses" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={tests} t={t} lang={lang} />
+      <DayHeader view="courses" day={day} today={today} openByDay={openByDay} lessons={lessons.length} flats={canAccess(user, 'accommodation')} tests={tests}
+        appointments={<AppointmentsPanel day={day} today={today} view="courses" />} t={t} lang={lang} />
       <CoursesTable day={day} lessons={lessons} editing={choices ? { choices, canTeacher, canRoom, back } : undefined}
         opens={{ staff: canAccess(user, 'staff'), rooms: canAccess(user, 'rooms'), catalogue: canAccess(user, 'catalogue') }}
       />

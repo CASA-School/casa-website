@@ -131,6 +131,10 @@
     "de": "02.10.–04.10. · Tag der Deutschen Einheit in der Innenstadt",
     "text": "02.10.–04.10. · День германского единства в центре города"
   },
+  "t.09-30-17-00.1sez1oz": {
+    "de": "09:30–17:00 Uhr",
+    "text": "09:30–17:00"
+  },
   "t.1-4-wochen.fo9lh3": {
     "de": "1–4 Wochen",
     "text": "1–4 недели"
@@ -203,9 +207,17 @@
     "de": "30.10. · telc C1-HS-Prüfung bei CASA",
     "text": "30.10. · Экзамен telc C1 Hochschule в CASA"
   },
+  "t.30-minuten-dienstag-donnerstag.p5z8n6": {
+    "de": "30 Minuten · Dienstag–Donnerstag · in der Schule",
+    "text": "30 минут · вторник–четверг · в школе"
+  },
   "t.30-minuten-montag-donnerstag.ipfd9a": {
     "de": "30 Minuten · Montag–Donnerstag",
     "text": "30 минут · понедельник–четверг"
+  },
+  "t.30-minuten.zhf5bd": {
+    "de": "30 Minuten",
+    "text": "30 минут"
   },
   "t.4-wochen-teilniveau.1fs53xg": {
     "de": "4 Wochen (Teilniveau)",
@@ -462,6 +474,10 @@
   "t.an-diesem-tag-ist.rw9abe": {
     "de": "An diesem Tag ist leider kein Termin mehr frei. Bitte wähle einen anderen Tag.",
     "text": "К сожалению, на этот день свободного времени больше нет. Пожалуйста, выберите другой день."
+  },
+  "t.an-diesem-tag-ist.s4xjkm": {
+    "de": "An diesem Tag ist leider kein Platz mehr frei. Bitte wähle einen anderen Tag.",
+    "text": "К сожалению, на этот день свободных мест больше нет. Пожалуйста, выберите другой день."
   },
   "t.an-welchen-tagen-kannst.sazjmx": {
     "de": "An welchen Tagen kannst du?",
@@ -1231,6 +1247,10 @@
     "de": "Bring deinen Pass, die Wohnungsgeberbestätigung und das ausgefüllte Formular mit.",
     "text": "Возьмите с собой паспорт, подтверждение от арендодателя (Wohnungsgeberbestätigung) и заполненный бланк."
   },
+  "t.buch-dir-einen-einstufungstermin.sn9g0k": {
+    "de": "Buch dir einen Einstufungstermin",
+    "text": "Запишитесь на определение уровня"
+  },
   "t.buchhaltung-und-ansprechpartneri.12203xb": {
     "de": "Buchhaltung und Ansprechpartnerin für Gruppenangebote",
     "text": "Бухгалтерия и контактное лицо по групповым предложениям"
@@ -1647,6 +1667,14 @@
     "de": "Dein Sprachniveau entscheidet, welche Studiengänge dir offenstehen und wie viel du im Alltag ohne Hilfe erledigen kannst.",
     "text": "От вашего уровня языка зависит, какие программы обучения вам доступны и как много повседневных дел вы сможете решать без посторонней помощи."
   },
+  "t.dein-termin-ist-gebucht.ffugzd": {
+    "de": "Dein Termin ist gebucht",
+    "text": "Вы записаны"
+  },
+  "t.dein-termin-konnte-nicht.16rkns8": {
+    "de": "Dein Termin konnte nicht gebucht werden. Bitte versuch es erneut.",
+    "text": "Не удалось вас записать. Пожалуйста, попробуйте еще раз."
+  },
   "t.dein-zimmer-fuer-die.7b0xpi": {
     "de": "Dein Zimmer für die ersten vier Wochen.",
     "text": "Ваша комната на первые четыре недели."
@@ -1667,6 +1695,10 @@
     "de": "Deine Anfrage ist angekommen",
     "text": "Ваш запрос получен"
   },
+  "t.deine-anfrage-ist-angekommen.77f8lv": {
+    "de": "Deine Anfrage ist angekommen",
+    "text": "Ваш запрос получен"
+  },
   "t.deine-anfrage-konnte-nicht.1f3xsov": {
     "de": "Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Не удалось отправить ваш запрос. Пожалуйста, попробуйте еще раз."
@@ -1674,6 +1706,10 @@
   "t.deine-angaben-konnten-nicht.194ujeg": {
     "de": "Deine Angaben konnten nicht gesendet werden. Bitte versuch es erneut.",
     "text": "Не удалось отправить ваши данные. Пожалуйста, попробуйте еще раз."
+  },
+  "t.deine-angaben.3a3l7u": {
+    "de": "Deine Angaben",
+    "text": "Ваши данные"
   },
   "t.deine-entscheidung.1cvqf9d": {
     "de": "Deine Entscheidung",
@@ -1814,6 +1850,10 @@
   "t.der-kurs-richtet-sich.368fyh": {
     "de": "Der Kurs richtet sich an Ärztinnen und Ärzte vor und nach der Fachsprachprüfung Medizin und an medizinische Fachkräfte. Er orientiert sich an den Niveaustufen B2 und C1 des Gemeinsamen Europäischen Referenzrahmens.",
     "text": "Курс предназначен для врачей, которым предстоит сдать Fachsprachprüfung Medizin (экзамен по профессиональному языку) или которые уже сдали его, а также для медицинских специалистов. Он ориентирован на уровни B2 и C1 Общеевропейской шкалы языковых компетенций."
+  },
+  "t.der-letzte-platz-zu.g1kc61": {
+    "de": "Der letzte Platz zu dieser Zeit wurde gerade gebucht. Bitte wähle eine andere Zeit.",
+    "text": "Последнее место на это время только что заняли. Пожалуйста, выберите другое время."
   },
   "t.der-link-ist-vielleicht.vhlvsp": {
     "de": "Der Link ist vielleicht veraltet, oder in der Adresse steckt ein Tippfehler. Von hier aus kommst du direkt weiter.",
@@ -2111,6 +2151,10 @@
     "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
     "text": "Выбор времени сейчас недоступен. Напишите нам, и мы с радостью договоримся с вами о встрече."
   },
+  "t.die-terminauswahl-ist-gerade.izn8n7": {
+    "de": "Die Terminauswahl ist gerade nicht verfügbar. Schreib uns, dann vereinbaren wir gern einen Termin mit dir.",
+    "text": "Выбор времени сейчас недоступен. Напишите нам, и мы с радостью договоримся с вами о встрече."
+  },
   "t.die-termine-werden-bald.1timr7s": {
     "de": "Die Termine werden bald kommen.",
     "text": "Даты скоро появятся."
@@ -2130,6 +2174,10 @@
   "t.die-zusammenarbeit.s61ors": {
     "de": "Die Zusammenarbeit",
     "text": "Сотрудничество"
+  },
+  "t.dienstag-bis-donnerstag.12yq7iy": {
+    "de": "Dienstag bis Donnerstag",
+    "text": "Со вторника по четверг"
   },
   "t.dienstag.i58tqk": {
     "de": "Dienstag",
@@ -2222,6 +2270,10 @@
   "t.du-bekommst-alle-einzelheiten.on1csu": {
     "de": "Du bekommst alle Einzelheiten, bevor du endgültig zusagst.",
     "text": "Вы получаете все подробности до того, как дадите окончательное согласие."
+  },
+  "t.du-bekommst-eine-bestaetigung.brzpaq": {
+    "de": "Du bekommst eine Bestätigung per E-Mail.",
+    "text": "Вы получите подтверждение по электронной почте."
   },
   "t.du-bekommst-eine-rueckmeldung.1fier0s": {
     "de": "Du bekommst eine Rückmeldung",
@@ -2755,6 +2807,10 @@
     "de": "Einstufung starten",
     "text": "Начать определение уровня"
   },
+  "t.einstufung-vor-ort-casa.1spzu4f": {
+    "de": "Einstufung vor Ort · CASA Bremen",
+    "text": "Очное определение уровня · CASA Bremen"
+  },
   "t.einstufung.1w67cw7": {
     "de": "Einstufung",
     "text": "Определение уровня"
@@ -3026,10 +3082,6 @@
   "t.freies-sprechen-zu-themen.16k669e": {
     "de": "Freies Sprechen zu Themen, die die Gruppe selbst mitbringt",
     "text": "Свободная беседа на темы, которые предлагает сама группа"
-  },
-  "t.freitag-08-30-13.4w49f0": {
-    "de": "Freitag 08:30–13:00 Uhr",
-    "text": "Пятница, 08:30–13:00"
   },
   "t.freitag-08-30-13.pbiota": {
     "de": "Freitag: 08:30–13:00 Uhr",
@@ -4083,9 +4135,9 @@
     "de": "Ja, und sie wird noch besser, je mehr Deutsch du sprichst. Sinnvoll ist es, schon vor der Ankunft mit dem Lernen anzufangen.",
     "text": "Да, и этот выбор тем удачнее, чем больше вы говорите по-немецки. Имеет смысл начать учить язык еще до приезда."
   },
-  "t.ja-wenn-du-in.17zrl0l": {
-    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Einen Termin brauchst du nicht. Komm einfach während der Bürozeiten vorbei und bring mindestens eine Stunde Zeit mit. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
-    "text": "Да. Если вы живете в Бремене или окрестностях, мы будем рады видеть вас в школе на личном определении уровня и консультации. Определение уровня ни к чему не обязывает, и заодно вы сможете познакомиться со школой и задать другие вопросы. Записываться заранее не нужно. Просто приходите в часы работы офиса и запланируйте на это не меньше часа. На интенсивных курсах мы в любом случае определяем уровень на месте. При этом мы оставляем за собой право скорректировать уровень курса независимо от ранее полученных сертификатов."
+  "t.ja-wenn-du-in.1k22y8r": {
+    "de": "Ja. Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in der Schule ein. Die Einstufung ist unverbindlich, und du kannst dabei gleich die Schule kennenlernen und weitere Fragen stellen. Buch dir dafür auf der Seite zum Einstufungstest einen Termin: Dienstag bis Donnerstag zwischen 09:30 und 17:00 Uhr, für 30 Minuten. Bei den Intensivkursen führen wir die Einstufung ohnehin vor Ort durch. Dabei behalten wir uns vor, das Kursniveau anzupassen, unabhängig von zuvor erworbenen Zertifikaten.",
+    "text": "Да. Если вы живете в Бремене или окрестностях, мы будем рады видеть вас в школе на личном определении уровня и консультации. Определение уровня ни к чему не обязывает, и заодно вы сможете познакомиться со школой и задать другие вопросы. Для этого запишитесь на встречу продолжительностью 30 минут на странице теста на определение уровня: со вторника по четверг, с 09:30 до 17:00. На интенсивных курсах мы в любом случае определяем уровень на месте. При этом мы оставляем за собой право скорректировать уровень курса независимо от ранее полученных сертификатов."
   },
   "t.ja-zwei-bei-deiner.gx6d2r": {
     "de": "Ja, zwei. Bei deiner ersten Anmeldung an unserer Schule berechnen wir eine einmalige Einschreibegebühr von {course.enrolment-fee}. Dazu kommt das Lehrwerk, das je nach Niveaustufe 23,99 € bis 26,99 € kostet. Bei der Bildungszeit brauchst du zwei Bücher, die zusammen 46 € bis 54 € kosten. An Wochenenden und an gesetzlichen Feiertagen im Land Bremen findet kein Unterricht statt. Feiertage werden nicht erstattet.",
@@ -5043,6 +5095,10 @@
     "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
     "text": "Экзамен telc Deutsch C1 Hochschule подтверждает, что вашего немецкого достаточно для учебы в вузе. Многие немецкоязычные вузы требуют этот сертификат при поступлении."
   },
+  "t.mit-termin.wga3pd": {
+    "de": "Mit Termin",
+    "text": "По записи"
+  },
   "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
     "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
     "text": "Занимаясь {course.intensive-german.lessons} академических часов в неделю, вы можете за 8 недель достичь следующего уровня."
@@ -5115,6 +5171,10 @@
     "de": "Möchtest du uns noch etwas sagen? (optional)",
     "text": "Хотите что-то добавить? (необязательно)"
   },
+  "t.moechtest-du-uns-noch.aszb91": {
+    "de": "Möchtest du uns noch etwas sagen? (optional)",
+    "text": "Хотите что-то добавить? (необязательно)"
+  },
   "t.moeglichkeiten.68vill": {
     "de": "Möglichkeiten",
     "text": "Возможности"
@@ -5126,10 +5186,6 @@
   "t.monatsticket.qqe8sm": {
     "de": "Monatsticket",
     "text": "Месячный проездной"
-  },
-  "t.montag-bis-donnerstag-08.1uc3i9j": {
-    "de": "Montag bis Donnerstag 08:30–19:00 Uhr",
-    "text": "С понедельника по четверг, 08:30–19:00"
   },
   "t.montag-donnerstag-08-30.1p1q5a4": {
     "de": "Montag–Donnerstag: 08:30–19:00 Uhr",
@@ -5222,6 +5278,10 @@
   "t.nachname.10v4ea2": {
     "de": "Nachname",
     "text": "Фамилия"
+  },
+  "t.nachricht-senden.11idvdd": {
+    "de": "Nachricht senden",
+    "text": "Отправить сообщение"
   },
   "t.nachricht-senden.27sosi": {
     "de": "Nachricht senden",
@@ -5375,6 +5435,10 @@
     "de": "Niveaustufen",
     "text": "Уровни"
   },
+  "t.noch-1-platz.16m1l4v": {
+    "de": "noch 1 Platz",
+    "text": "осталось 1 место"
+  },
   "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
     "de": "Noch gar keine Deutschkenntnisse?",
     "text": "Совсем не знаете немецкого?"
@@ -5454,10 +5518,6 @@
   "t.ohne-krankenversicherung-kannst-.1x43fp0": {
     "de": "Ohne Krankenversicherung kannst du dich nicht einschreiben und bekommst keinen Aufenthaltstitel.",
     "text": "Без медицинской страховки вас не зачислят в вуз и вы не получите вид на жительство."
-  },
-  "t.ohne-termin.1ldcpiq": {
-    "de": "Ohne Termin",
-    "text": "Без записи"
   },
   "t.ohne-vorkenntnisse-der-deutschen.5enf3o": {
     "de": "Ohne Vorkenntnisse der deutschen Sprache startest du mit A1.1, immer zum Kursbeginn.",
@@ -5610,10 +5670,6 @@
   "t.plane-kursstart-unterkunft-und.1phog46": {
     "de": "Plane Kursstart, Unterkunft und die ersten konkreten Schritte mit unserer Unterstützung.",
     "text": "Спланируйте начало курса, проживание и первые конкретные шаги при нашей поддержке."
-  },
-  "t.plane-mindestens-eine-stunde.veokh6": {
-    "de": "Plane mindestens eine Stunde ein.",
-    "text": "Выделите на это не меньше часа."
   },
   "t.plane-neben-dem-studium.28gq4m": {
     "de": "Plane neben dem Studium auch deine Ankunft. Unterkunft, Versicherung und erste Anschaffungen können in dieselben Wochen fallen.",
@@ -6699,6 +6755,10 @@
     "de": "Termin anfragen",
     "text": "Запросить встречу"
   },
+  "t.termin-buchen.123tnps": {
+    "de": "Termin buchen",
+    "text": "Назначить встречу"
+  },
   "t.termin-buchen.1b0n2cu": {
     "de": "Termin buchen",
     "text": "Назначить встречу"
@@ -7295,6 +7355,14 @@
     "de": "Vielen Dank. Sobald genug Interessierte zusammen sind, legen wir die Termine fest und melden uns per E-Mail oder Telefon bei dir.",
     "text": "Большое спасибо. Как только наберется достаточно желающих, мы назначим даты и свяжемся с вами по электронной почте или по телефону."
   },
+  "t.vielen-dank-wir-freuen.17nt60i": {
+    "de": "Vielen Dank. Wir freuen uns auf dich in der Schule, Am Dobben 14–16 in Bremen.",
+    "text": "Большое спасибо. Ждем вас в школе: Am Dobben 14–16, Бремен."
+  },
+  "t.vielen-dank-wir-pruefen.2305wc": {
+    "de": "Vielen Dank. Wir prüfen deine Wunschzeit und bestätigen dir den Termin per E-Mail.",
+    "text": "Большое спасибо. Мы проверим выбранное вами время и подтвердим запись по электронной почте."
+  },
   "t.vielleicht-moechtest-du-studiere.1s2wljj": {
     "de": "Vielleicht möchtest du studieren, beruflich weiterkommen, dein Deutsch verbessern oder einen neuen Lebensmittelpunkt finden. Deine Wünsche sind ein guter Ausgangspunkt, um die Möglichkeiten zu erkunden.",
     "text": "Возможно, вы хотите учиться в вузе, продвинуться в профессии, улучшить свой немецкий или обрести новый дом. Ваши желания — хорошая отправная точка, чтобы изучить возможности."
@@ -7499,6 +7567,10 @@
     "de": "Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.",
     "text": "Выберите экзамен, чтобы узнать больше о требованиях, порядке проведения и записи."
   },
+  "t.waehl-eine-zeit-und.15pdujg": {
+    "de": "Wähl eine Zeit und komm zu uns in die Schule. Gemeinsam finden wir dein Niveau und den Kurs, der zu dir passt.",
+    "text": "Выберите время и приходите к нам в школу. Вместе мы определим ваш уровень и подберем подходящий вам курс."
+  },
   "t.waehle-abend-berufs-oder.10p6uqo": {
     "de": "Wähle Abend-, Berufs- oder Firmenformate, die zu deiner Woche passen.",
     "text": "Выбирайте вечерние, профессиональные или корпоративные форматы, которые вписываются в вашу неделю."
@@ -7532,6 +7604,10 @@
     "text": "Выберите курс, который подходит вашим знаниям, планам и повседневной жизни. Мы охотно вас проконсультируем."
   },
   "t.waehle-einen-tag-um.z0gkpb": {
+    "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
+    "text": "Выберите день, чтобы увидеть свободное время."
+  },
+  "t.waehle-einen-tag-um.zoj1mg": {
     "de": "Wähle einen Tag, um die freien Uhrzeiten zu sehen.",
     "text": "Выберите день, чтобы увидеть свободное время."
   },
@@ -8210,6 +8286,10 @@
   "t.wird-bestaetigt.e97sw3": {
     "de": "Wird bestätigt",
     "text": "Будет подтверждено"
+  },
+  "t.wird-gebucht.1usfzd": {
+    "de": "Wird gebucht …",
+    "text": "Записываем…"
   },
   "t.wird-gesendet.1v6ti23": {
     "de": "Wird gesendet...",

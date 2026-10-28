@@ -25,7 +25,7 @@ import { CONFIRMATION_COPY } from './confirmation-copy';
  * every email is that. Table cells with `bgcolor`, so Outlook draws it too.
  */
 
-export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'placement' | 'appointment' | 'interest';
+export type FormKind = 'contact' | 'groups' | 'course' | 'exam' | 'careers' | 'placement' | 'appointment' | 'placement-appointment' | 'interest';
 type Locale = 'de' | 'en';
 type Payload = Record<string, unknown>;
 
@@ -54,7 +54,7 @@ const COPY = {
     replyHint: 'Oder antworte einfach auf diese E-Mail.',
     formLanguage: 'Sprache',
     stored: (inbox: string) => `Im Arbeitsbereich unter ${inbox} gespeichert.`,
-    inboxes: { enquiries: 'Anfragen', registrations: 'Anmeldungen', applications: 'Bewerbungen', placement: 'Einstufungstests' },
+    inboxes: { enquiries: 'Anfragen', registrations: 'Anmeldungen', applications: 'Bewerbungen', placement: 'Einstufungstests', day: 'Tagesplan' },
     notStored: 'Nicht im Arbeitsbereich gespeichert. Diese E-Mail ist der einzige Eintrag.',
     generated: (source: string) => `Automatisch erstellt ${source} auf casa-bremen.de.`,
     logoAlt: 'CASA Internationale Sprachschule',
@@ -151,6 +151,16 @@ const COPY = {
     appointmentNote: 'Diese Uhrzeit ist ab sofort für andere Anfragen reserviert.',
     appointmentNoteUnheld: 'Diese Uhrzeit ist nicht reserviert: Die Website speichert gerade keine Termine. Vor dem Bestätigen prüfen, ob sie noch frei ist.',
     appointment: 'Termin',
+    levelTestKind: 'Einstufungstermin',
+    levelTestTitle: 'Neuer Einstufungstermin',
+    levelTestSource: 'aus der Buchung eines Einstufungstermins',
+    levelTestLead: (name: string, day: string | null, time: string | null) =>
+      day && time ? `${name} kommt am ${day}, um ${time} Uhr zur persönlichen Einstufung.`
+      : `${name} möchte zur persönlichen Einstufung kommen.`,
+    levelTestNote: (seat: string | null) =>
+      `Der Termin ist gebucht und steht im Tagesplan${seat ? ` (Platz ${seat} von 2)` : ''}. Die Person hat eine Bestätigung bekommen.`,
+    levelTestNoteUnheld: 'Dieser Termin ist nicht gebucht: Die Website speichert gerade keine Termine. Prüfen, ob noch ein Platz frei ist, und den Termin per E-Mail bestätigen.',
+    levelTestReply: 'Dein Einstufungstermin bei CASA',
     date: 'Datum',
     time: 'Uhrzeit',
     timeValue: (t: string) => `${t} Uhr (Bremer Zeit)`,
@@ -236,7 +246,7 @@ const COPY = {
     replyHint: 'Or simply reply to this email.',
     formLanguage: 'Language',
     stored: (inbox: string) => `Stored in the workspace under ${inbox}.`,
-    inboxes: { enquiries: 'Enquiries', registrations: 'Registrations', applications: 'Applications', placement: 'Placement tests' },
+    inboxes: { enquiries: 'Enquiries', registrations: 'Registrations', applications: 'Applications', placement: 'Placement tests', day: 'Day plan' },
     notStored: 'Not stored in the staff workspace. This email is the only record.',
     generated: (source: string) => `Generated automatically ${source} on casa-bremen.de.`,
     logoAlt: 'CASA Internationale Sprachschule',
@@ -332,6 +342,16 @@ const COPY = {
     appointmentNote: 'This time is now reserved and no longer offered to others.',
     appointmentNoteUnheld: 'This time is not reserved: the website is not storing appointments at the moment. Check that it is still free before confirming.',
     appointment: 'Appointment',
+    levelTestKind: 'Placement appointment',
+    levelTestTitle: 'New placement appointment',
+    levelTestSource: 'from a placement appointment booking',
+    levelTestLead: (name: string, day: string | null, time: string | null) =>
+      day && time ? `${name} is coming for a placement test in person on ${day} at ${time}.`
+      : `${name} would like to come for a placement test in person.`,
+    levelTestNote: (seat: string | null) =>
+      `The appointment is booked and in the day plan${seat ? ` (place ${seat} of 2)` : ''}. The learner has received a confirmation.`,
+    levelTestNoteUnheld: 'This appointment is not booked: the website is not storing appointments at the moment. Check that a place is still free and confirm the appointment by email.',
+    levelTestReply: 'Your placement appointment at CASA',
     date: 'Date',
     time: 'Time',
     timeValue: (t: string) => `${t} (Bremen time)`,
@@ -691,6 +711,36 @@ function appointmentMail(p: Payload, locale: Locale, c: Copy): Mail {
   };
 }
 
+/** A placement test in person, booked on the placement page: the place is the learner's already. */
+function levelTestMail(p: Payload, locale: Locale, c: Copy): Mail {
+  const name = fullName(p) ?? c.name;
+  const day = formatDay(p.localDate, locale, true);
+  const time = text(p.localTime);
+  const minutes = p.durationMinutes ? String(p.durationMinutes) : '30';
+  const seat = typeof p.seat === 'number' ? String(p.seat) : null;
+  return {
+    subject: `${c.levelTestKind}: ${[fullName(p), [day, time ? c.subjectTime(time) : null].filter(Boolean).join(', ')].filter(Boolean).join(' – ')}`,
+    kindLabel: c.levelTestKind,
+    title: c.levelTestTitle,
+    lead: c.levelTestLead(name, day, time),
+    chips: [],
+    action: replyAction(p, c, c.levelTestReply),
+    note: p.held === false ? c.levelTestNoteUnheld : c.levelTestNote(seat),
+    sections: [
+      {
+        title: c.appointment,
+        rows: [
+          { label: c.date, value: day },
+          { label: c.time, value: time ? c.timeValue(time) : null },
+          { label: c.duration, value: c.minutes(minutes) },
+        ],
+      },
+      { title: c.contact, rows: [{ label: c.name, value: fullName(p) }, emailRow(p, c), { label: c.phone, value: text(p.phone) }] },
+      { title: null, rows: [{ label: c.message, value: text(p.message), block: true }] },
+    ],
+  };
+}
+
 function careersMail(p: Payload, c: Copy): Mail {
   const position = text(p.positionTitle);
   return {
@@ -814,6 +864,8 @@ function mailFor(kind: FormKind, p: Payload, locale: Locale): Mail {
       return examMail(p, locale, c);
     case 'appointment':
       return appointmentMail(p, locale, c);
+    case 'placement-appointment':
+      return levelTestMail(p, locale, c);
     case 'careers':
       return careersMail(p, c);
     case 'placement':
@@ -829,6 +881,7 @@ const SOURCES: Record<FormKind, (c: Copy, p: Payload) => string> = {
   course: (c) => c.courseSource,
   exam: (c) => c.examSource,
   appointment: (c) => c.appointmentSource,
+  'placement-appointment': (c) => c.levelTestSource,
   careers: (c) => c.careersSource,
   placement: (c) => c.placementSource,
   interest: (c) => c.interestSource,
@@ -954,6 +1007,7 @@ function renderShell(input: {
 const INBOX: Record<FormKind, keyof Copy['inboxes']> = {
   contact: 'enquiries', groups: 'enquiries', interest: 'enquiries', appointment: 'enquiries',
   course: 'registrations', exam: 'registrations', careers: 'applications', placement: 'placement',
+  'placement-appointment': 'day',
 };
 
 function workspaceLink(kind: FormKind, c: Copy) {
@@ -1078,6 +1132,7 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
   const size = typeof brief.groupSize === 'number' && Number.isInteger(brief.groupSize) ? String(brief.groupSize) : null;
   const stay = p.accommodationRequired === true ? (c.accommodationTypes[String(p.accommodationType)] ?? null) : null;
   const site = getSiteUrl();
+  const slotted = kind === 'appointment' || kind === 'placement-appointment';
   return {
     firstName: first,
     lastName: last,
@@ -1099,10 +1154,10 @@ function confirmationValues(kind: ConfirmationKind, p: Payload, locale: Locale):
     exam: kind === 'exam' ? text(p.examTypeLabel) : null,
     examDate: session.length === 2 ? rangeDash(session[0]) : null,
     examPart: kind === 'exam' ? (CONFIRMATION_EXAM_PARTS[locale][String(p.registrationType)] ?? null) : null,
-    day: kind === 'appointment' ? formatDay(p.localDate, locale, true) : null,
-    dayShort: kind === 'appointment' ? formatShortDay(p.localDate, locale) : null,
-    time: kind === 'appointment' ? text(p.localTime) : null,
-    duration: kind === 'appointment' && typeof p.durationMinutes === 'number' ? String(p.durationMinutes) : null,
+    day: slotted ? formatDay(p.localDate, locale, true) : null,
+    dayShort: slotted ? formatShortDay(p.localDate, locale) : null,
+    time: slotted ? text(p.localTime) : null,
+    duration: slotted && typeof p.durationMinutes === 'number' ? String(p.durationMinutes) : null,
     contactPerson: kind === 'appointment' ? APPOINTMENT_HOST : null,
     position: kind === 'careers' ? text(p.positionTitle) : null,
     groupSize: size,
@@ -1140,7 +1195,7 @@ function paragraph(value: string, style = '') {
 export function buildConfirmationMail(kind: ConfirmationKind, payload: Payload, options: ConfirmationOptions) {
   const locale: Locale = payload.locale === 'en' ? 'en' : 'de';
   const variant = kind === 'groups' && isCompanyTopic(text(payload.topicKey)) ? 'company'
-    : kind === 'appointment' && payload.held === false ? 'unheld'
+    : (kind === 'appointment' || kind === 'placement-appointment') && payload.held === false ? 'unheld'
     : '';
   const entry =
     CONFIRMATION_COPY.kinds.find((candidate) => candidate.kind === kind && candidate.variant === variant)

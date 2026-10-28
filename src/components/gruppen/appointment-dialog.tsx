@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ChevronLeft, ChevronRight, Clock, Check } from 'lucide-react';
+import { ArrowRight, Clock, Check } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
+import { SlotPicker } from '@/components/appointments/slot-picker';
 import type { ContentLocale } from '@/lib/content/types';
 import type { AppointmentDay } from '@/lib/appointments/schedule';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
@@ -74,7 +74,6 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
   const [days, setDays] = useState<AppointmentDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
-  const [month, setMonth] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [details, setDetails] = useState(false);
@@ -98,7 +97,6 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
         const body = await response.json();
         const available: AppointmentDay[] = body.data.days;
         setDays(available);
-        setMonth(available[0]?.date.slice(0, 7) ?? '');
         if (!available.length) setUnavailable(true);
       })
       .catch(() => { if (!controller.signal.aborted) setUnavailable(true); })
@@ -106,15 +104,9 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
     return () => controller.abort();
   }, []);
 
-  const months = [...new Set(days.map(day => day.date.slice(0, 7)))];
-  const monthIndex = months.indexOf(month);
-  const monthDate = new Date(`${month || '2000-01'}-01T12:00:00Z`);
-  const offset = (monthDate.getUTCDay() + 6) % 7;
-  const dayCount = new Date(Date.UTC(monthDate.getUTCFullYear(), monthDate.getUTCMonth() + 1, 0)).getUTCDate();
   const dateLabel = (value: string) => new Intl.DateTimeFormat(language, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${value}T12:00:00Z`));
-  const selectedDay = days.find(day => day.date === date);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,38 +155,8 @@ function AppointmentFlow({ locale, onDone }: { locale: ContentLocale; onDone: ()
       </div> : <>
         {error && <p role="alert" className="mb-5 text-sm text-[var(--casa-danger-text)]">{error}</p>}
         {!details ? <>
-          <div className="grid gap-7 sm:grid-cols-[1.25fr_1fr]">
-            <section aria-label={t.date}>
-              <div className="mb-4 flex items-center justify-between gap-2">
-                <Button aria-label={t.previousMonth} variant="ghost" size="icon-lg" disabled={monthIndex <= 0} onClick={() => setMonth(months[monthIndex - 1])}><ChevronLeft aria-hidden /></Button>
-                <h3 aria-live="polite" className="text-base font-semibold">{new Intl.DateTimeFormat(language, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(monthDate)}</h3>
-                <Button aria-label={t.nextMonth} variant="ghost" size="icon-lg" disabled={monthIndex >= months.length - 1} onClick={() => setMonth(months[monthIndex + 1])}><ChevronRight aria-hidden /></Button>
-              </div>
-              <div className="grid grid-cols-7 gap-y-1 text-center">
-                {t.weekdays.map((day, index) => <span key={index} className="pb-2 text-xs text-[var(--casa-muted)]" aria-hidden>{day}</span>)}
-                {Array.from({ length: offset }, (_, index) => <span key={`blank-${index}`} />)}
-                {Array.from({ length: dayCount }, (_, index) => {
-                  const value = `${month}-${String(index + 1).padStart(2, '0')}`;
-                  const enabled = days.some(day => day.date === value && day.times.length);
-                  return <button key={value} type="button" aria-label={dateLabel(value)} aria-pressed={value === date} disabled={!enabled}
-                    onClick={() => { setDate(value); setTime(''); setError(''); }}
-                    className={cn('min-h-11 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-[var(--casa-blue)] disabled:text-[var(--casa-muted)] disabled:opacity-40',
-                      value === date ? 'bg-[var(--casa-ink-deep)] text-white' : 'text-[var(--casa-ink)] enabled:hover:bg-[var(--casa-warm-soft)]')}>
-                    {index + 1}
-                  </button>;
-                })}
-              </div>
-            </section>
-            <section aria-label={t.time} className="border-t border-[var(--casa-sand)] pt-5 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-2">
-              <h3 className="text-base font-semibold">{t.time}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-[var(--casa-muted)]">{t.zone}</p>
-              {date && <p className="mt-4 text-sm font-medium">{dateLabel(date)}</p>}
-              <div aria-live="polite">
-                {!date ? <p className="mt-5 text-sm leading-relaxed text-[var(--casa-muted)]">{t.choose}</p> : !selectedDay?.times.length ? <p className="mt-5 text-sm text-[var(--casa-muted)]">{t.noTimes}</p> :
-                  <div className="mt-4 grid grid-cols-2 gap-2">{selectedDay.times.map(slot => <Button key={slot} variant={slot === time ? 'prism' : 'outline-prism'} size="lg" aria-pressed={slot === time} onClick={() => setTime(slot)}>{slot}</Button>)}</div>}
-              </div>
-            </section>
-          </div>
+          <SlotPicker days={days} date={date} time={time} language={language} labels={t}
+            onDate={(value) => { setDate(value); setTime(''); setError(''); }} onTime={setTime} />
           <div className="mt-7 flex justify-end border-t border-[var(--casa-sand)] pt-5"><Button variant="prism" size="lg" disabled={!time} onClick={() => setDetails(true)}>{t.next}<ArrowRight aria-hidden /></Button></div>
         </> : <form onSubmit={submit} className="space-y-5">
           <div className="rounded-lg bg-[var(--casa-surface-wash)] p-4">

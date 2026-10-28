@@ -14,6 +14,14 @@ import { requireModule } from '@/lib/admin/guard';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { pick } from '@/lib/admin/i18n';
 import { isAbsenceReason } from '@/lib/admin/kursplanung/types';
+import {
+  createPlacementAppointment,
+  deletePlacementAppointment,
+  isPlacementStatus,
+  setPlacementStatus,
+  updatePlacementAppointment,
+  type PlacementAppointmentInput,
+} from '@/lib/admin/placement-appointments';
 import { addAbsence } from '@/lib/admin/staff-members';
 import { isEntryTestId } from '@/lib/entry-test/tests';
 
@@ -318,4 +326,83 @@ export async function enterPaperAction(formData: FormData): Promise<void> {
   const result = await enterPaper({ sittingId, name, email: email || null, version, answers }, actor);
   if (!result.ok) fail(back(day), pick(lang, result.reason));
   revalidatePath('/admin/day');
+}
+
+// ------------------------------------------------------------ Einstufungstermine
+
+/**
+ * The „Termine" panel sits on all three views of the day, so its actions go back to the view and day
+ * it was opened from, and refresh the whole Tagesplan.
+ */
+const viewBack = (formData: FormData) => {
+  const value = String(formData.get('back') ?? '');
+  return /^\/admin\/day(\/courses|\/rooms)?(\?date=\d{4}-\d{2}-\d{2})?$/.test(value) ? value : back(dayOf(formData));
+};
+
+function doneAll(to: string): never {
+  revalidatePath('/admin/day', 'layout');
+  redirect(to);
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+async function placementInput(formData: FormData, from: string): Promise<PlacementAppointmentInput> {
+  const { t } = await getI18n();
+  const line = (name: string, max: number) => String(formData.get(name) ?? '').trim().replace(/\s+/g, ' ').slice(0, max) || null;
+  const date = dayOf(formData, 'date');
+  const time = timeOf(formData, 'time');
+  const firstName = line('firstName', 100);
+  const email = line('email', 254);
+  if (!date) fail(from, t('Bitte wähle einen Tag.', 'Choose a day.'));
+  if (!time) fail(from, t('Bitte wähle eine Uhrzeit.', 'Choose a time.'));
+  if (!firstName) fail(from, t('Bitte trag den Vornamen ein.', 'Enter the first name.'));
+  if (email && !EMAIL.test(email)) fail(from, t('Diese E-Mail-Adresse stimmt nicht.', 'This email address is not right.'));
+  return {
+    date,
+    time,
+    firstName,
+    lastName: line('lastName', 100),
+    email,
+    phone: line('phone', 40),
+    note: String(formData.get('note') ?? '').trim().slice(0, 1000) || null,
+  };
+}
+
+export async function createPlacementAppointmentAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const from = viewBack(formData);
+  const result = await createPlacementAppointment(await placementInput(formData, from), actor);
+  if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
+  doneAll(from);
+}
+
+export async function updatePlacementAppointmentAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const from = viewBack(formData);
+  const id = String(formData.get('appointmentId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid appointment');
+  const result = await updatePlacementAppointment(id, await placementInput(formData, from), actor);
+  if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
+  doneAll(from);
+}
+
+/** Chosen from the appointment's menu: posted without a redirect, the page revalidates where it stands. */
+export async function setPlacementStatusAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'edit');
+  const id = String(formData.get('appointmentId') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!UUID.test(id) || !isPlacementStatus(status)) throw new Error('Invalid status');
+  await setPlacementStatus(id, status, actor);
+  revalidatePath('/admin/day', 'layout');
+}
+
+export async function deletePlacementAppointmentAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('day', 'full');
+  const from = viewBack(formData);
+  if (formData.get('confirmed') !== '1') redirect(from);
+  const id = String(formData.get('appointmentId') ?? '');
+  if (!UUID.test(id)) throw new Error('Invalid appointment');
+  const result = await deletePlacementAppointment(id, actor);
+  if (!result.ok) fail(from, pick((await getI18n()).lang, result.reason));
+  doneAll(from);
 }
