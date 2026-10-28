@@ -9,12 +9,14 @@ import { Globe, Menu } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import { Button } from '@/components/ui/button';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { Icon3D } from '@/components/ui/icon-3d';
 import { Container } from '@/components/ui/container';
 import { HeaderSearchPopover } from '@/components/layout/header-search-popover';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { isNightHeroPage } from '@/components/sections/night-hero-routes';
 import { localizeNavText, navConfig, NavDropdown, NavItem } from '@/config/nav';
 import { iconMap } from '@/config/icon-map';
+import { menuIcons3d } from '@/config/icons-3d';
 import { cn } from '@/lib/utils';
 import { localizeHref } from '@/i18n/pathnames';
 import type { ContentLocale } from '@/lib/content/types';
@@ -32,6 +34,7 @@ const CLOSE_DELAY_MS = 110;
 const COURSES_PANEL_WIDTH_PX = 46 * 16;
 const DEFAULT_PANEL_WIDTH_PX = 34 * 16;
 const COMPACT_PANEL_WIDTH_PX = 28 * 16;
+const SCHOOL_PANEL_WIDTH_PX = 42 * 16;
 
 function navId(label: string) {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -167,7 +170,9 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
         ? COURSES_PANEL_WIDTH_PX
         : trigger === 'Resources'
           ? COMPACT_PANEL_WIDTH_PX
-          : DEFAULT_PANEL_WIDTH_PX;
+          : trigger === 'Our school'
+            ? SCHOOL_PANEL_WIDTH_PX
+            : DEFAULT_PANEL_WIDTH_PX;
     const panelWidth = Math.min(
       baseWidth,
       window.innerWidth - 32,
@@ -219,7 +224,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
     }
 
     const containerBounds = navContainerRef.current.getBoundingClientRect();
-    const panelBounds = panel.getBoundingClientRect();
+    // Measured from where the panel sits unshifted (its menu item's left edge), not from where
+    // the current shift put it: measuring the shifted panel and replacing the shift undid it.
+    const anchorLeft = panel.parentElement?.getBoundingClientRect().left ?? panel.getBoundingClientRect().left;
+    const panelBounds = { left: anchorLeft, right: anchorLeft + panel.offsetWidth };
 
     let shift = 0;
     if (panelBounds.left < containerBounds.left) {
@@ -535,8 +543,14 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                           ? 'visible opacity-100'
                           : 'pointer-events-none hidden opacity-0'
                       )}
+                      /*
+                       * The shift is `left`, not a translate: a translated panel still counts
+                       * where it was before the shift, and the 42rem „Unsere Schule" panel made
+                       * the page scroll sideways at 1280px.
+                       */
                       style={{
-                        transform: `translate3d(${panelShift}px, ${isOpen ? 0 : -4}px, 0)`,
+                        left: `${panelShift}px`,
+                        transform: `translate3d(0, ${isOpen ? 0 : -4}px, 0)`,
                       }}
                       onMouseEnter={() => openDropdown(dropdown.trigger)}
                       onMouseLeave={scheduleCloseDropdown}
@@ -559,6 +573,7 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                               <ul className="space-y-2">
                                 {section.items.map((subItem) => {
                                   const Icon = subItem.icon ? iconMap[subItem.icon] : null;
+                                  const icon3d = menuIcons3d[subItem.href];
                                   return (
                                     <li key={subItem.href}>
                                         <Link
@@ -572,8 +587,10 @@ export function Navbar({ contentLocale: initialContentLocale }: NavbarProps) {
                                           )}
                                           onClick={closeDropdown}
                                         >
-                                        {/* The phone menu's badge: the area's logo colour (2026-10-20, was a grey bordered square). */}
-                                        {Icon ? (
+                                        {/* A 3D icon that moves on hover (Rahman 2026-10-28, config/icons-3d.ts); else the area's logo-colour badge. */}
+                                        {icon3d ? (
+                                          <Icon3D icon={icon3d} />
+                                        ) : Icon ? (
                                           <IconBadge icon={Icon} meaning={dropdown.meaning ?? 'orientation'} />
                                         ) : (
                                           <span aria-hidden className="flex size-10 shrink-0 items-center justify-center">
