@@ -9,12 +9,15 @@ import { SIGNATURE_HEADER, verify } from '@/lib/schoolman/signature';
 export const dynamic = 'force-dynamic';
 
 const id = z.union([z.string().max(40), z.number().int()]).transform(String);
-const schema = z.object({
+const batch = z.object({
   table: z.string().refine((t) => SYNC_TABLES.has(t)),
   records: z.array(z.object({ recordId: id, modId: id, fieldData: z.record(z.string(), z.union([z.string(), z.number(), z.null()])) })).max(2000),
   // A complete read of the table: every record id SchoolMan has, sent once all its records are.
   complete: z.object({ recordIds: z.array(id).max(500_000) }).optional(),
 });
+// After every round of the service, once a minute: starts the bridge for changes held back.
+const tick = z.object({ tick: z.literal(true) });
+const schema = z.union([tick, batch]);
 
 /*
  * SchoolMan's records from the sync service on the office network (scripts/schoolman-sync, migration
@@ -35,15 +38,16 @@ export async function POST(request: Request) {
     return apiError('INVALID', 'Invalid request.', 400);
   }
   if (!parsed.success) return apiError('INVALID', 'Invalid request.', 400);
+  if ('tick' in parsed.data) return apiSuccess({ bridge: await requestBridgeRun(false) });
   const { table, records, complete } = parsed.data;
 
   const kept = await keepRecords(table, records);
   if (!complete) {
-    if (kept.changed) await requestBridgeRun();
+    if (kept.changed) await requestBridgeRun(true);
     return apiSuccess(kept);
   }
   const done = await completeTable(table, complete.recordIds);
   if ('refused' in done) return apiError('INCOMPLETE', `Fewer than half of the ${done.refused} records kept: nothing removed.`, 409);
-  if (kept.changed || done.removed) await requestBridgeRun();
+  if (kept.changed || done.removed) await requestBridgeRun(true);
   return apiSuccess({ ...kept, ...done });
 }

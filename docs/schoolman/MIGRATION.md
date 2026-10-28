@@ -42,13 +42,17 @@ bridge-mirror.mjs: the steps whose SchoolMan tables changed → mirror-export.mj
 - **Only what changed (2026-10-28, migration 0099; Rahman: the Azure costs had doubled).** Before, the job
   started every five minutes — four of five starts found nothing — and any change ran all 20 steps on all
   90 tables (3½ minutes at 1 vCPU / 2 GiB, every reader parsing the whole copy). Now:
-  - **Started on change.** After a batch that changed the copy, `/api/schoolman/sync` asks Azure to start the
-    job (`src/lib/schoolman/bridge-trigger.server.ts`), with the app's managed identity
+  - **Started on change, at most once in five minutes.** A batch that changed the copy marks it waiting
+    (`schoolman_bridge_state.pending_since`, 0100). The endpoint then asks Azure to start the job
+    (`src/lib/schoolman/bridge-trigger.server.ts`) when something waits, no run is going on
+    (`running_since`) and the last start (`requested_at`) was five minutes ago or more. The sync service
+    sends a signed tick (`{ "tick": true }`) after every round, once a minute, so changes held back by
+    those rules start the job as soon as they may. It asks with the app's managed identity
     (`id-casa-website-prod`), whose role „CASA bridge job starter" allows starting and reading that one job
-    and nothing else; the app knows the job by `SCHOOLMAN_BRIDGE_JOB` (its resource id). No start while a
-    run is going on (`schoolman_bridge_state.running_since`) or was asked for in the last three minutes.
-    The hourly schedule catches a start that failed. A start that fails clears the request, so the next
-    batch asks again.
+    and nothing else; the app knows the job by `SCHOOLMAN_BRIDGE_JOB` (its resource id). A start that
+    fails clears `requested_at`, so the next tick asks again; the hourly schedule catches anything else.
+    (0099 alone started on every change and had a run go round again while SchoolMan kept changing: on
+    27.–28.10. a busy morning became one run after another, each doing the learners again.)
   - **Only the steps that changed.** Each table of the copy has a `version` that rises with every batch that
     added, changed or removed a record (a counter, not a time: a batch committed late with an early time
     would look seen). Each step's reader notes the tables it reads (`FM_MIRROR_USED`, fm_read.py); after a
@@ -61,10 +65,9 @@ bridge-mirror.mjs: the steps whose SchoolMan tables changed → mirror-export.mj
   - **Every step once a night** (the first run between 02:00 and 06:00 Berlin after 20 hours, or after 30
     hours whatever the hour): what depends on today's date — who is in the learner sample, which sittings
     lie ahead — moves on then. `--always` forces it.
-  - **No change lost.** The run notes the sum of the versions before it reads; when it ends, it clears
-    `running_since` only if that sum is unchanged, in one statement, and otherwise goes round again (six
-    rounds at most). A batch that arrives meanwhile either sees the run going on (and the run goes round)
-    or sees it ended (and starts the job).
+  - **No change lost.** A run clears `pending_since` when it begins, before it reads the versions: a change
+    after that marks the copy waiting again and is the next run's. A run whose step failed marks it
+    waiting, so the next start (five minutes on) tries again.
 - Two runs never overlap (advisory lock); a run waits until
   every table has had one complete read (`schoolman_sync_tables.last_complete_at`), so a half-filled copy can
   never look like deletions. Runs are rows of `bridge_runs` with source `schoolman-copy`; the workspace's
