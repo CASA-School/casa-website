@@ -100,6 +100,7 @@ export const routes: readonly RouteDefinition[] = [
   { internal: '/resources/study-in-germany', de: '/ratgeber/studieren-in-deutschland' },
   { internal: '/resources/living-in-germany', de: '/ratgeber/leben-in-deutschland' },
   { internal: '/resources/why-germany', de: '/ratgeber/warum-deutschland' },
+  { internal: '/resources/language-tandem', de: '/ratgeber/sprachtandem' },
 ];
 
 /**

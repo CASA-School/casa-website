@@ -33,6 +33,7 @@ export const menuIcons3d: Record<string, Icon3D> = {
   '/news': { slug: 'newspaper', motion: 'wobble' },
   '/courses/levels': { slug: 'bar-chart', motion: 'hop' },
   '/resources/study-in-germany': { slug: 'globe-showing-europe-africa', motion: 'sway' },
+  '/resources/language-tandem': { slug: 'globe-with-meridians', motion: 'sway' },
 };
 
 /*
@@ -51,6 +52,12 @@ export const schoolFeatureIcons3d: Record<string, Icon3D> = {
 };
 
 /** „Wo startest du?" on the homepage (components/sections/persona-pathways). */
+/** The tandem page's two sides of a tandem (resources/language-tandem). */
+export const tandemIcons3d = {
+  learner: { slug: 'books', motion: 'hop' },
+  bremen: { slug: 'house-with-garden', motion: 'float' },
+} satisfies Record<string, Icon3D>;
+
 export const personaIcons3d: Record<string, Icon3D> = {
   'new-learners': { slug: 'compass', motion: 'wobble' },
   'working-professionals': { slug: 'briefcase', motion: 'hop' },

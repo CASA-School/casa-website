@@ -2860,6 +2860,12 @@ tile in the Tagesplan like the others, its panel „Alle | Meine" with whose eac
   alert mail; the receipt's replies go to i.eismann@. Termine rows: „Bestätigen", „Anfrage", „Ändern".
   Form mail went live the same day: registrations, exams and placement to online@, contact, groups and
   interest to info@, job-application alerts and applicants' replies to bewerbungen@ (which stays, after all).
+- 2026-10-29, Rahman: the language tandem „connects people from Bremen with our students" and gets its own page
+  under Ratgeber, `/ratgeber/sprachtandem` (`/resources/language-tandem`), as casa-bremen.de had one with a form.
+  The two sides of a tandem, four steps, the benefits, and the form as a popup (`TandemDialog`, anchor
+  `#tandem-anfrage`, `/api/tandem`): a contact enquiry „Sprachtandem" to info@ with the contact receipt. The old
+  form's gender, birth date and nationality are not asked (data minimisation). The Leitbild keeps „Lernen durch
+  Begegnung" and links to it; the old tandem URLs, the homepage card and the Ressourcen menu point to it; privacy §8.
 - **Next** (Rahman): the Klett test → e-mail → registration chain is the bad part; the level test and the
   registration should connect in the new system.
 

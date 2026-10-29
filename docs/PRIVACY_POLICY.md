@@ -46,7 +46,10 @@ the same in both languages.
   contact person's mailbox (group consultations: Ina Eismann), who confirms by email;
   job-application alerts → `bewerbungen@` (since 2026-10-29, Rahman; `info@` before), naming only the
   position (no reference since 2026-10-26), and applicants' replies to their receipt go there too;
-  placement appointments (in person, 2026-10-28) → `online@`, booked at once (§15).
+  placement appointments (in person, 2026-10-28) → `online@`, booked at once (§15);
+  tandem requests (the tandem page's form, 2026-10-29) → `info@` as contact enquiries (§8). §8 says CASA
+  does not pass contact details to the tandem partner and arranges the first meeting with both: ASSUMPTION
+  from the published tandem process, for CASA to confirm.
 - Job applications themselves: management only, in the workspace's Applications module.
 - Host families get name, age, gender, nationality, German level, dates of stay, and
   allergies only with the separate consent. No smoking in any CASA accommodation, so the

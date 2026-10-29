@@ -807,7 +807,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
   },
   about: {
     heroType: 'home-photo',
-    sections: ['figures', 'mission-story', 'quality-standards', 'partners', 'learning-through-connection', 'tandem', 'testimonial'],
+    sections: ['figures', 'mission-story', 'quality-standards', 'partners', 'learning-through-connection', 'testimonial'],
     ctas: [
       { label: { en: 'Get advice', de: 'Beratung anfragen' }, href: '/contact', kind: 'primary' },
       { label: { en: 'Find the right course', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
