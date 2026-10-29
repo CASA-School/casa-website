@@ -78,6 +78,27 @@ describe('public form notifications', () => {
     vi.stubEnv('FORM_RECIPIENT_CONTACT', 'info@example.com');
     expect(formDeliveryConfig('interest')).toEqual({ test: false, recipient: 'info@example.com' });
   });
+  it.each([
+    ['contact', 'CONTACT', 'info@example.com'],
+    ['interest', 'CONTACT', 'info@example.com'],
+    ['groups', 'GROUPS', 'info@example.com'],
+    ['course', 'COURSE', 'online@example.com'],
+    ['exam', 'EXAM', 'online@example.com'],
+    ['placement-appointment', 'PLACEMENT', 'online@example.com'],
+    ['careers', 'CAREERS', 'careers@example.com'],
+    ['appointment', 'APPOINTMENT', 'groups@example.com'],
+  ] as const)('sends live %s alerts from the receiving mailbox', async (kind, setting, mailbox) => {
+    vi.stubEnv('FORM_DELIVERY_MODE', 'live');
+    vi.stubEnv('FORM_MAIL_FROM', 'website@example.com');
+    vi.stubEnv(`FORM_RECIPIENT_${setting}`, mailbox);
+    vi.stubEnv('IDENTITY_ENDPOINT', 'http://identity.local/token');
+    vi.stubEnv('IDENTITY_HEADER', 'test-header');
+    const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'test-token' })))
+      .mockResolvedValueOnce(new Response(null, { status: 202 }));
+    vi.stubGlobal('fetch', fetch);
+    expect(await notifyForm(kind, { email: 'applicant@example.com' })).toEqual({ delivered: true, channel: 'email' });
+    expect(fetch.mock.calls[1][0]).toBe(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(mailbox)}/sendMail`);
+  });
   it('never falls back to an uncontrolled webhook while testing', async () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'test');
     vi.stubEnv('FORM_MAIL_FROM', '');
@@ -293,7 +314,7 @@ describe('confirmation to the sender', () => {
       .mockResolvedValueOnce(new Response(null, { status: 202 }));
     vi.stubGlobal('fetch', fetch);
     const result = await confirmToSender(kind, payload);
-    return { result, message: fetch.mock.calls[1] ? JSON.parse(fetch.mock.calls[1][1].body).message : null };
+    return { result, url: fetch.mock.calls[1]?.[0], message: fetch.mock.calls[1] ? JSON.parse(fetch.mock.calls[1][1].body).message : null };
   }
 
   const course = {
@@ -325,8 +346,9 @@ describe('confirmation to the sender', () => {
   });
 
   it('goes to the sender in live mode, with replies to the team mailbox for that form', async () => {
-    const { result, message } = await confirmation('course', course, 'live');
+    const { result, message, url } = await confirmation('course', course, 'live');
     expect(result).toEqual({ sent: true, reachedSender: true });
+    expect(url).toBe('https://graph.microsoft.com/v1.0/users/online%40example.com/sendMail');
     expect(message.toRecipients).toEqual([{ emailAddress: { address: 'maria@example.com' } }]);
     expect(message.replyTo).toEqual([{ emailAddress: { address: 'online@example.com', name: 'CASA Internationale Sprachschule' } }]);
     expect(message.subject.startsWith('[TEST]')).toBe(false);
@@ -389,7 +411,8 @@ describe('confirmation to the sender', () => {
     vi.stubEnv('FORM_RECIPIENT_CAREERS', 'info@example.com');
     expect((await confirmation('careers', application, 'live')).result.sent).toBe(false);
     vi.stubEnv('FORM_REPLY_TO_CAREERS', 'leitung@example.com');
-    const { message } = await confirmation('careers', application, 'live');
+    const { message, url } = await confirmation('careers', application, 'live');
+    expect(url).toBe('https://graph.microsoft.com/v1.0/users/leitung%40example.com/sendMail');
     expect(message.replyTo).toEqual([{ emailAddress: { address: 'leitung@example.com', name: 'CASA Internationale Sprachschule' } }]);
     expect(message.body.content).toContain('Lehrkraft DaF');
   });

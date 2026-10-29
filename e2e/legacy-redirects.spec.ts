@@ -31,7 +31,7 @@ test('an HTML-escaped news link is redirected like the plain one', async ({ requ
     maxRedirects: 0,
   });
   expect(response.status()).toBe(308);
-  expect(new URL(response.headers()['location'], 'http://localhost').pathname).toBe('/ueber-uns/casa-leitbild');
+  expect(new URL(response.headers()['location'], 'http://localhost').pathname).toBe('/ratgeber/sprachtandem');
 
   // Without the article parameter, /aktuelles is the news page itself.
   expect((await request.get('/aktuelles', { maxRedirects: 0 })).status()).toBe(200);

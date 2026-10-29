@@ -58,7 +58,10 @@ export async function notifyForm(
   const { test, recipient } = formDeliveryConfig(kind);
   if (!recipient) return { delivered: false, channel: 'unconfigured' };
   try {
-    const from = graphSender();
+    // Test mode keeps the restricted test sender. Live alerts originate from
+    // the team mailbox receiving them, so staff see the relevant identity.
+    const testSender = graphSender();
+    const from = testSender && (test ? testSender : recipient);
     if (from) {
       const mail = buildFormMail(kind, payload, { test, stored: options?.stored, testRecipient: TEST_FORM_RECIPIENT });
       await sendGraphMail(from, { to: recipient, subject: mail.subject, html: mail.html, replyTo: replyToFor(payload) });
@@ -168,8 +171,7 @@ function confirmationReplyMailbox(kind: ConfirmationKind, test: boolean, recipie
 /**
  * The receipt the person who sent a form gets, in the form's language.
  *
- * Replies go to the team mailbox that handles the form (`FORM_RECIPIENT_<KIND>`),
- * so the sender mailbox stays the single address Exchange lets the website use.
+ * Live receipts come from the mailbox that handles replies for the form.
  * In test mode it goes to the test inbox instead of the sender, and says so.
  * Never throws and never blocks the submission: `reachedSender` is true only
  * when Microsoft accepted a message addressed to the sender themselves.
@@ -179,13 +181,14 @@ export async function confirmToSender(
   payload: Record<string, unknown>,
 ): Promise<{ sent: boolean; reachedSender: boolean }> {
   const address = typeof payload.email === 'string' ? payload.email.trim() : '';
-  const from = graphSender();
-  if (!from || !z.email().safeParse(address).success) return { sent: false, reachedSender: false };
+  const testSender = graphSender();
+  if (!testSender || !z.email().safeParse(address).success) return { sent: false, reachedSender: false };
   const { test, recipient } = formDeliveryConfig(kind);
   const replyMailbox = confirmationReplyMailbox(kind, test, recipient);
   // Live, a form with no mailbox for replies has nobody to answer the person:
   // send nothing rather than a receipt whose replies land somewhere unplanned.
   if (!test && !replyMailbox) return { sent: false, reachedSender: false };
+  const from = test ? testSender : replyMailbox!;
   if (!test && !allowConfirmation(address)) return { sent: false, reachedSender: false };
   try {
     const mail = buildConfirmationMail(kind, payload, {
