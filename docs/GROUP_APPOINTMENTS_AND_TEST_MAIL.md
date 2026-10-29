@@ -254,6 +254,10 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
    `_PLACEMENT` = online@casa-bremen.de; `_CONTACT` and `_GROUPS` = info@casa-bremen.de;
    `_APPOINTMENT` unset (Ina's requests wait in her Termine, migration 0101). Later that day
    `_CAREERS` and `FORM_REPLY_TO_CAREERS` = bewerbungen@casa-bremen.de (info@ and unset before).
+   **Delivery verified 2026-10-29:** one live test per form (contact, groups, interest list, course,
+   exam, placement appointment, application), each stored and each mail — 7 alerts, 7 receipts —
+   „Delivered" in the Exchange admin center's message trace (sender admin@). The trace is the way to
+   check delivery without opening the team mailboxes.
 5. Finish the photo, operational-content and legal approval work. Review existing dependency alerts.
    Test the deployed website, back up TYPO3 and plan the casa-bremen.de domain cutover.
 
