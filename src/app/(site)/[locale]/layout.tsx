@@ -17,7 +17,7 @@ import type {Metadata} from 'next';
 import {NextIntlClientProvider} from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
+import { Montserrat, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { EditBridge } from '@/components/cms/edit-bridge';
 import { SiteCopyProvider } from '@/components/cms/site-copy-provider';
@@ -39,25 +39,18 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 /*
- * Display face for headings, matched to the caterlove-prep-system site
- * (~/Tasks/10-active/work/caterlove-prep-system/website), which pairs
- * Playfair Display for display type with a sans for body.
+ * Display face for headings: Montserrat (Rahman, 2026-10-29), in place of
+ * Playfair Display. A variable font, so every heading weight the site uses,
+ * semibold to black, comes from one file.
  *
- * HEADINGS ONLY. Body, UI and numerals stay on Plus Jakarta Sans, which matters
- * for two reasons beyond taste:
- *   - `--container-measure: 48ch` in globals.css is measured against Plus
- *     Jakarta Sans metrics (1ch = 0.732em) and governs body copy. Leaving body
- *     on PJS keeps that token honest.
- *   - Playfair has no tabular figures worth the name; the stat band and every
- *     `tabular-nums` price and date depend on PJS.
- *
- * Playfair is a high-contrast Didone: its hairlines thin out badly below ~20px,
- * so it is bound to h1/h2/h3 only and never to small text.
+ * HEADINGS ONLY. Body, UI and numerals stay on Plus Jakarta Sans:
+ * `--container-measure: 48ch` in globals.css is measured against its metrics
+ * (1ch = 0.732em) and governs body copy, and the stat band and every
+ * `tabular-nums` price and date depend on it.
  */
-const playfairDisplay = Playfair_Display({
+const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-display',
-  weight: ['500', '600', '700'],
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -123,7 +116,7 @@ export default async function RootLayout({
     <html lang={display ?? locale} dir={display ? cmsDirection(display) : directionFor(locale)}>
       <body
         suppressHydrationWarning
-        className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${playfairDisplay.variable} font-sans`}
+        className={`min-h-screen flex flex-col bg-background text-foreground antialiased ${plusJakartaSans.variable} ${montserrat.variable} font-sans`}
       >
         <OldBrowserNotice locale={locale} />
         <JsonLdScript id="site-schema" data={siteGraph(locale)} />

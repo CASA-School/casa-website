@@ -126,7 +126,7 @@
 }
 
 .captionTitle {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: clamp(1rem, 2.7cqw, 1.3rem);
   font-weight: 600;
   line-height: 1.15;
