@@ -250,6 +250,8 @@ export type CareerPositionViewItem = {
   applyUrl: string | null;
   applyEmail: string | null;
   isFeatured: boolean;
+  /** An Initiativbewerbung, not a vacancy: no posting date, no JobPosting for Google. */
+  isOpenApplication: boolean;
   closesAt: string | null;
   postedAt: string;
 };

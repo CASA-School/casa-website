@@ -57,6 +57,10 @@ export default async function CareersPage() {
           footerBody:
             'Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.',
           footerCta: 'Bewerbung senden',
+          openLabel: 'Initiativbewerbung',
+          openRequirements: 'Was du mitbringst',
+          openApply: 'Initiativ bewerben',
+          openCta: 'So bewirbst du dich',
         }, en: {
           eyebrow: 'Careers',
           title: 'Working at CASA in Bremen',
@@ -80,7 +84,14 @@ export default async function CareersPage() {
           footerBody:
             'We look forward to hearing from people who would like to help shape learning, diversity and teamwork.',
           footerCta: 'Send application',
+          openLabel: 'Speculative application',
+          openRequirements: 'What you bring',
+          openApply: 'Apply now',
+          openCta: 'How to apply',
         } });
+
+  // Only open applications listed: the hero's button says how to apply, not that there are vacancies.
+  const onlyOpen = positions.length > 0 && positions.every((position) => position.isOpenApplication);
 
   const breadcrumbs = [
     { label: say(locale, 'Start', 'Home'), href: '/' },
@@ -94,7 +105,7 @@ export default async function CareersPage() {
         title={copy.title}
         description={copy.description}
         breadcrumbs={breadcrumbs}
-        cta={{ label: copy.cta, href: '#open-roles', kind: 'primary' }}
+        cta={{ label: onlyOpen ? copy.openCta : copy.cta, href: '#open-roles', kind: 'primary' }}
         meta={['CASA Bremen', say(locale, 'Internationale Gemeinschaft', 'International community')]}
       />
 
@@ -128,9 +139,9 @@ export default async function CareersPage() {
                       <div className="flex items-center justify-between gap-3">
                         <p className="inline-flex items-center gap-2 rounded-full bg-[var(--casa-warm-soft)]/85 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-ink)]">
                           <Briefcase className="h-4 w-4 text-[var(--casa-accent-text)]" />
-                          {copy.openingLabel}
+                          {position.isOpenApplication ? copy.openLabel : copy.openingLabel}
                         </p>
-                        {position.isFeatured ? (
+                        {position.isFeatured && !position.isOpenApplication ? (
                           <span className="rounded-full bg-[var(--casa-blue)]/12 px-2.5 py-1 text-xs font-bold text-[var(--casa-accent-text)]">
                             {say(locale, 'Empfohlen', 'Featured')}
                           </span>
@@ -172,22 +183,24 @@ export default async function CareersPage() {
                         </div>
                       </dl>
 
-                      <div className="mt-4 space-y-1 text-sm text-[var(--casa-muted)]">
-                        <p>
-                          <span className="font-semibold text-[var(--casa-ink)]">{copy.posted}: </span>
-                          {formatDate(position.postedAt, locale)}
-                        </p>
-                        {position.closesAt ? (
+                      {position.isOpenApplication ? null : (
+                        <div className="mt-4 space-y-1 text-sm text-[var(--casa-muted)]">
                           <p>
-                            <span className="font-semibold text-[var(--casa-ink)]">{copy.deadline}: </span>
-                            {formatDate(position.closesAt, locale)}
+                            <span className="font-semibold text-[var(--casa-ink)]">{copy.posted}: </span>
+                            {formatDate(position.postedAt, locale)}
                           </p>
-                        ) : null}
-                      </div>
+                          {position.closesAt ? (
+                            <p>
+                              <span className="font-semibold text-[var(--casa-ink)]">{copy.deadline}: </span>
+                              {formatDate(position.closesAt, locale)}
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
 
                       {requirementLines.length > 0 ? (
                         <div className="mt-5 rounded-xl bg-[var(--casa-warm-panel)] p-4">
-                          <h3 className="text-base font-bold text-[var(--casa-ink)]">{copy.requirements}</h3>
+                          <h3 className="text-base font-bold text-[var(--casa-ink)]">{position.isOpenApplication ? copy.openRequirements : copy.requirements}</h3>
                           <ul className="mt-2 space-y-1.5">
                             {requirementLines.map((line) => (
                               <li key={line} className="flex gap-2 text-sm leading-relaxed text-[var(--casa-muted)]">
@@ -204,7 +217,7 @@ export default async function CareersPage() {
                           href={`/careers/${position.slug}`}
                           className="inline-flex items-center gap-1 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
                         >
-                          {copy.apply}
+                          {position.isOpenApplication ? copy.openApply : copy.apply}
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>

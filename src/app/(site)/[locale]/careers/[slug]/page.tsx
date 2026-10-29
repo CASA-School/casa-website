@@ -86,6 +86,9 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
   const requirements = toBullets(position.requirements);
   const responsibilities =
     paragraphs.length > 1 ? toBullets(paragraphs[1]) : [];
+  // The second paragraph IS the list above; it is not printed again as text.
+  const aboutParagraphs = responsibilities.length > 0 ? [paragraphs[0], ...paragraphs.slice(2)] : paragraphs;
+  const open = position.isOpenApplication;
 
   const fallbackResponsibilities =
     pickTree(locale, { de: [
@@ -117,6 +120,16 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             'Das CASA-Team liest deine Unterlagen.',
             'Im Vorstellungsgespräch lernen wir uns kennen und besprechen die nächsten Schritte.',
           ],
+          openLabel: 'Initiativbewerbung',
+          openApply: 'Initiativ bewerben',
+          openAbout: 'Worum es geht',
+          openResponsibilities: 'Was dich bei uns erwartet',
+          openRequirements: 'Was du mitbringst',
+          openProcessSteps: [
+            'Du schickst uns deinen Lebenslauf und schreibst uns, was du gern unterrichten möchtest und wann du Zeit hast.',
+            'Wir lesen deine Unterlagen und melden uns bei dir.',
+            'Passt es, lernen wir uns im Gespräch kennen und besprechen, ab wann und wie viel du bei uns unterrichten kannst.',
+          ],
         }, en: {
           back: 'Back to careers',
           applyNow: 'Apply now',
@@ -135,11 +148,26 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
             'The CASA team reads your application.',
             'At the interview, we get to know each other and talk about the next steps.',
           ],
+          openLabel: 'Speculative application',
+          openApply: 'Apply now',
+          openAbout: 'What this is about',
+          openResponsibilities: 'What to expect',
+          openRequirements: 'What you bring',
+          openProcessSteps: [
+            'You send us your CV and tell us what you would like to teach and when you are available.',
+            'We read your application and get back to you.',
+            'If it is a good fit, we get to know each other in an interview and talk about when and how much you could teach with us.',
+          ],
         } });
 
+  const labels = open
+    ? { applyNow: copy.openApply, about: copy.openAbout, responsibilities: copy.openResponsibilities, requirements: copy.openRequirements, processSteps: copy.openProcessSteps }
+    : { applyNow: copy.applyNow, about: copy.about, responsibilities: copy.responsibilities, requirements: copy.requirements, processSteps: copy.processSteps };
+
   // Google for Jobs reads the posting from this; the description is the page's own text.
+  // An open application is not a vacancy, and Google's job posting rules say so: no JobPosting for it.
   const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const jobSchema = jobPostingNode({
+  const jobSchema = open ? null : jobPostingNode({
     locale,
     path: `/careers/${position.slug}`,
     title: position.title,
@@ -154,7 +182,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
 
   return (
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]">
-      <JsonLdScript id="job-schema" data={jobSchema} />
+      {jobSchema ? <JsonLdScript id="job-schema" data={jobSchema} /> : null}
       {/* Banner / Hero Section */}
       {/*
         One accent, not two. This was a blue radial in the top-left AND a sun
@@ -190,7 +218,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
                   </span>
                 ) : null}
                 <span className="rounded-full bg-[var(--casa-blue)]/12 px-3 py-1 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                  {position.workMode}
+                  {open ? copy.openLabel : position.workMode}
                 </span>
               </div>
 
@@ -211,11 +239,15 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
                   <Clock className="h-4 w-4 text-[var(--casa-accent-text)] shrink-0" />
                   <span>{position.workMode}</span>
                 </span>
-                <span className="text-[var(--casa-sand)] hidden sm:inline">|</span>
-                <span>
-                  <span className="font-semibold text-[var(--casa-ink)]">{copy.posted}:</span> {formatDate(position.postedAt, locale)}
-                </span>
-                {position.closesAt ? (
+                {open ? null : (
+                  <>
+                    <span className="text-[var(--casa-sand)] hidden sm:inline">|</span>
+                    <span>
+                      <span className="font-semibold text-[var(--casa-ink)]">{copy.posted}:</span> {formatDate(position.postedAt, locale)}
+                    </span>
+                  </>
+                )}
+                {!open && position.closesAt ? (
                   <>
                     <span className="text-[var(--casa-sand)] hidden sm:inline">|</span>
                     <span>
@@ -232,7 +264,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
                 href="#apply-form"
                 className="inline-flex items-center justify-center gap-2 rounded-lg casa-button-prism bg-[var(--casa-ink-deep)] px-6 py-3 text-sm font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)] transition-colors shadow-[var(--shadow-soft)]"
               >
-                {copy.applyNow}
+                {labels.applyNow}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -246,11 +278,11 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)] xl:items-start">
             <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-white p-6 md:p-10 shadow-[var(--shadow-card)] space-y-8">
               <div>
-                <h2 className="text-3xl font-bold text-[var(--casa-ink)]">{copy.about}</h2>
+                <h2 className="text-3xl font-bold text-[var(--casa-ink)]">{labels.about}</h2>
                 <p className="mt-4 text-base leading-relaxed text-[var(--casa-muted)] font-medium">
                   {position.shortDescription}
                 </p>
-                {paragraphs.map((paragraph) => (
+                {aboutParagraphs.map((paragraph) => (
                   <p key={paragraph} className="mt-4 text-base leading-relaxed text-[var(--casa-muted)]">
                     {paragraph}
                   </p>
@@ -260,7 +292,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               <hr className="border-[color:var(--casa-sand)]" />
 
               <div>
-                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.responsibilities}</h3>
+                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{labels.responsibilities}</h3>
                 <ul className="mt-4 space-y-3.5">
                   {(responsibilities.length > 0 ? responsibilities : fallbackResponsibilities).map((item) => (
                     <li key={item} className="flex gap-3 text-base text-[var(--casa-muted)] leading-relaxed">
@@ -274,7 +306,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               <hr className="border-[color:var(--casa-sand)]" />
 
               <div>
-                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{copy.requirements}</h3>
+                <h3 className="text-2xl font-bold text-[var(--casa-ink)]">{labels.requirements}</h3>
                 <ul className="mt-4 space-y-3.5">
                   {(requirements.length > 0 ? requirements : fallbackResponsibilities).map((item) => (
                     <li key={item} className="flex gap-3 text-base text-[var(--casa-muted)] leading-relaxed">
@@ -290,7 +322,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
               <article className="rounded-3xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] p-6 shadow-[var(--shadow-card)]">
                 <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.processTitle}</p>
                 <ol className="mt-4 space-y-3">
-                  {copy.processSteps.map((step, index) => (
+                  {labels.processSteps.map((step, index) => (
                     <li key={step} className="flex items-start gap-3 text-sm text-[var(--casa-muted)] leading-relaxed font-medium">
                       <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--casa-ink-deep)] text-xs font-bold text-white">
                         {index + 1}

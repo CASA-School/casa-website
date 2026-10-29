@@ -1519,6 +1519,7 @@ type CareerPositionRow = {
   apply_email: string | null;
   is_published: boolean;
   is_featured: boolean;
+  open_application?: boolean | null;
   // `pg` returns timestamptz and date columns as a Date; the fixtures use strings.
   posted_at: string | Date | null;
   closes_at: string | Date | null;
@@ -1545,6 +1546,7 @@ function normalizeCareerRow(item: CareerPositionRow): CareerPositionViewItem {
     applyUrl: item.apply_url,
     applyEmail: item.apply_email,
     isFeatured: item.is_featured,
+    isOpenApplication: item.open_application === true,
     closesAt: toDateInputValue(item.closes_at) || null,
     postedAt: toTimestampString(item.posted_at || item.created_at || new Date()),
   };
@@ -1590,6 +1592,7 @@ export async function getCareerPositions(locale: ContentLocale): Promise<CareerP
             apply_email,
             is_published,
             is_featured,
+            open_application,
             posted_at,
             closes_at,
             created_at
@@ -1642,6 +1645,7 @@ export async function getCareerPositionBySlug(
               apply_email,
               is_published,
               is_featured,
+              open_application,
               posted_at,
               closes_at,
               created_at
