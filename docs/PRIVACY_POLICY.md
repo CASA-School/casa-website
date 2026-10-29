@@ -1,5 +1,13 @@
 # Privacy policy — the new website's own text
 
+> **29 October 2026:** Sections 3, 4 and 16–18 were shortened in both languages
+> to remove unnecessary infrastructure and abuse-protection details while retaining
+> processing purposes, legal bases, recipients and transfer information. The notes
+> below describe the earlier wording and its operational background; section
+> references should be checked against the current text. The revised policy remains
+> a draft for specialist review. Retention, deletion, the data protection officer,
+> Microsoft transfer safeguards and the final launch configuration still need review.
+
 `/privacy` (`/datenschutz`) no longer shows the old site's policy word for word. Since
 2026-09-30 it is CASA's own text, in German and English, written against what the code
 actually does. The general sections (introduction, §1 definitions, §20 rights, §24 legal
