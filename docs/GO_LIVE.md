@@ -1,5 +1,8 @@
 # Go-live: casa-bremen.de to the new site
 
+**Done on 2026-10-29.** Meike pressed the button at 16:27; casa-bremen.de answered from the new site at
+16:39 (revision `0000103`, main `a85d6a74`). The record is at the end of this file.
+
 The runbook for moving `casa-bremen.de` and `www.casa-bremen.de` from the old TYPO3 server to the
 Container App `ca-casa-website`. Written 2026-10-29 from a read-only check of DNS and Azure; re-check
 the values in „State" before you start, since a release or a DNS edit may have changed them.
@@ -82,9 +85,9 @@ Also before the day:
 2. Azure (Claude), once `dig casa-bremen.de` shows the new address:
    ```bash
    az containerapp hostname add -n ca-casa-website -g rg-casa-website-prod --hostname casa-bremen.de
-   az containerapp hostname bind -n ca-casa-website -g rg-casa-website-prod --hostname casa-bremen.de --environment cae-casa-prod --validation-method HTTP
+   az containerapp hostname bind -n ca-casa-website -g rg-casa-website-prod --hostname casa-bremen.de --environment /subscriptions/f8d745fc-c2dc-4ad9-a3a8-e9da556b69ab/resourceGroups/rg-casa-platform-prod/providers/Microsoft.App/managedEnvironments/cae-casa-prod --validation-method HTTP
    az containerapp hostname add -n ca-casa-website -g rg-casa-website-prod --hostname www.casa-bremen.de
-   az containerapp hostname bind -n ca-casa-website -g rg-casa-website-prod --hostname www.casa-bremen.de --environment cae-casa-prod --validation-method CNAME
+   az containerapp hostname bind -n ca-casa-website -g rg-casa-website-prod --hostname www.casa-bremen.de --environment /subscriptions/f8d745fc-c2dc-4ad9-a3a8-e9da556b69ab/resourceGroups/rg-casa-platform-prod/providers/Microsoft.App/managedEnvironments/cae-casa-prod --validation-method CNAME
    az containerapp update -n ca-casa-website -g rg-casa-website-prod --remove-env-vars CMS_PUBLIC_ORIGIN CMS_EDITOR_ORIGIN
    ```
    Until the managed certificate is issued (a few minutes), https on the apex shows a certificate
@@ -109,6 +112,22 @@ Also before the day:
 - The „neue Website" notice runs six to eight weeks, then `enabled: false` in `src/config/site-notice.ts`.
 - Branch protection on `main`, requiring the quality workflow (CLAUDE.md, open items).
 - Keep the old server and its backup until the new site has run a few weeks without a rollback.
+
+## Record of 2026-10-29
+
+- Step 1 by Codex in Plesk (smtp/imap/ftp → `mail.casa-bremen.de`, the SPF, `asuid` and `asuid.www`,
+  TTL 300), verified on `ns3.lands-concepts.com`; the old site's backup started from Plesk.
+- The switch: a button page (`output/golive/`, not in git) for Meike; her click wrote a signal file,
+  Codex applied the staged A and www records in Plesk 6 seconds later, and the button's program ran
+  the Azure commands. Two faults on the way, both in the program: `--environment` must be the
+  environment's **full resource id** (it lives in `rg-casa-platform-prod`, not in the app's group;
+  the name alone gives `ParentResourceNotFound`), and a new managed certificate stays „Pending" for
+  a few minutes, during which `hostname bind` answers `CertificateProvisioningError`: retry until it
+  binds. The apex certificate took about four minutes, www's about five.
+- Checked after: public DNS, a DigiCert/GeoTrust certificate for casa-bremen.de until 2027-04-29,
+  pages 200, `www` → 308 apex, http → 301 https, old tandem URLs → 308 to their pages, no `noindex`,
+  canonical casa-bremen.de, `/admin` 404 on the apex, admin.casa-bremen.de and `neu…/test` working,
+  MX and SPF unchanged.
 
 ## Rollback
 
