@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { NonprofitIncomeRing } from '@/components/sections/nonprofit-income-ring';
 import { NonprofitMission } from '@/components/sections/nonprofit-mission';
+import { NonprofitPrograms } from '@/components/sections/nonprofit-programs';
 import nightHero from '@/components/sections/night-hero.module.css';
 import { HeroLede, HeroSurface } from '@/components/heroes/shared';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -34,12 +35,12 @@ export async function generateMetadata(): Promise<Metadata> {
       ? {
           title: 'Gemeinnützigkeit & Mission',
           description:
-            'CASA ist eine gemeinnützige Sprachschule. Unsere Einnahmen aus Kursgebühren fließen zurück in Bildung, Integration, unsere Lehrkräfte und soziale Projekte.',
+            'CASA ist eine gemeinnützige Sprachschule in Bremen: Kursgebühren fließen in Bildung und Integration, in freie Kursplätze für Menschen in Not, Beratung und Begegnung.',
         }
       : {
           title: 'Non-profit status & mission',
           description:
-            'CASA is a non-profit language school. Our income from course fees goes back into education, integration, our teachers and social projects.',
+            'CASA is a non-profit language school in Bremen: course fees go into education and integration, free places for people in hardship, advice and meeting people.',
         }),
   });
 }
@@ -66,7 +67,7 @@ export default async function NonProfitStatusPage() {
           title: 'Was gemeinnützig bei uns heißt',
           description:
             'Als gemeinnützige Sprachschule setzen wir uns für Bildung, Verständigung und Teilhabe ein. Unsere Einnahmen fließen zurück in diese Arbeit.',
-          ctas: [{ label: 'Wirkung ansehen', href: '/about/nonprofit#integrationsprojekte', kind: 'primary' as const }],
+          ctas: [{ label: 'Wirkung ansehen', href: '/about/nonprofit#angebote', kind: 'primary' as const }],
         },
         ring: {
           nodes: ['Qualifizierte Lehrkräfte', 'Kleine Gruppen', 'Beratung & Lernräume', 'Soziale Projekte'] as const,
@@ -99,7 +100,7 @@ export default async function NonProfitStatusPage() {
           title: 'What being a non-profit means at CASA',
           description:
             'As a non-profit language school, we are committed to education, understanding and inclusion. Our income goes back into this work.',
-          ctas: [{ label: 'See the impact', href: '/about/nonprofit#integrationsprojekte', kind: 'primary' as const }],
+          ctas: [{ label: 'See the impact', href: '/about/nonprofit#angebote', kind: 'primary' as const }],
         },
         ring: {
           nodes: ['Qualified teachers', 'Small groups', 'Advice & places to learn', 'Social projects'] as const,
@@ -171,6 +172,8 @@ export default async function NonProfitStatusPage() {
           </aside>
         </Container>
       </section>
+
+      <NonprofitPrograms locale={locale} />
 
       <NonprofitMission locale={locale} />
 

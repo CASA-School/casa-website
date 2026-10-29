@@ -864,6 +864,16 @@
    "/about/nonprofit"
   ]
  },
+ "t.als-mitglied-von-tandem.a8dbdx": {
+  "de": "Als Mitglied von TANDEM International bringen wir Lernende und Menschen aus Bremen kostenlos ins Gespräch. So lernst du selbstständig weiter und lernst die Stadt kennen.",
+  "en": "As a member of TANDEM International we bring learners and people from Bremen together, free of charge. You keep learning on your own terms and get to know the city.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.altersgruppe.qqathq": {
   "de": "Altersgruppe",
   "en": "Age group",
@@ -2162,6 +2172,16 @@
    "/"
   ]
  },
+ "t.bei-casa-lernen-menschen.19vh54u": {
+  "de": "Bei CASA lernen Menschen aus über 150 Ländern zusammen, mit unterschiedlicher kultureller, religiöser und sozialer Herkunft. Wir fördern Verständigung, Respekt und Toleranz, nach unserem Leitbild „Miteinander reden – aufeinander zugehen\".",
+  "en": "At CASA, people from more than 150 countries and of different cultural, religious and social backgrounds learn together. We promote understanding, respect and tolerance, following our guiding principle: talk with each other, reach out to each other.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.bei-der-ankunft-und.1rjirl8": {
   "de": "Bei der Ankunft und bei der Abreise unterschreibst du das Formular gemeinsam mit deinem Gast.",
   "en": "You and your guest sign the form when they arrive and again when they leave.",
@@ -2476,6 +2496,16 @@
   "en": "Advice & places to learn",
   "files": [
    "src/app/(site)/[locale]/about/nonprofit/page.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
+ "t.beratung-ueber-den-unterricht.zy9gnx": {
+  "de": "Beratung über den Unterricht hinaus",
+  "en": "Advice beyond the classroom",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
   ],
   "pages": [
    "/about/nonprofit"
@@ -3128,6 +3158,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.bruecken-bauen-seit-1983.1r4oa5t": {
+  "de": "Brücken bauen, seit 1983",
+  "en": "Building bridges since 1983",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.buch-dir-einen-einstufungstermin.sn9g0k": {
@@ -4825,6 +4865,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.der-casa-foerderverein-e.1feeloi": {
+  "de": "Der CASA-Förderverein e.V.",
+  "en": "The CASA-Förderverein e.V.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.der-esel-steht-ganz.12ehyl9": {
   "de": "Der Esel steht ganz unten und trägt die anderen drei. Sei zielbewusst und unabhängig und stelle dir dein eigenes Programm zusammen.",
   "en": "The donkey stands at the very bottom and carries the other three. This is the package you put together yourself.",
@@ -4843,6 +4893,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.der-foerderverein-unterstuetzt-u.osht9": {
+  "de": "Der Förderverein unterstützt unsere gemeinnützige Arbeit bei Projekten wie den freien Kursplätzen und den geplanten Programmen. Wenn du ihn unterstützen möchtest, schreib uns.",
+  "en": "Our supporters’ association backs our non-profit work in projects such as the free course places and the programmes we are planning. If you would like to support it, get in touch.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.der-garantiefonds-hochschule-foe.5xjpd6": {
@@ -7118,6 +7178,16 @@
    "/team"
   ]
  },
+ "t.ein-fast-kostenfreier-vorbereitu.ewz6s3": {
+  "de": "Ein fast kostenfreier Vorbereitungskurs auf die telc-Prüfung Deutsch B1 für Menschen, die keine Förderung mehr bekommen können.",
+  "en": "A preparation course for the telc Deutsch B1 exam at almost no cost, for people who can no longer receive any funding.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.ein-ganzer-tag-in.1ex6fkb": {
   "de": "Ein ganzer Tag in Hamburg mit Speicherstadt, Hafen und Elbphilharmonie.",
   "en": "A whole day in Hamburg, with the Speicherstadt, the harbour and the Elbphilharmonie.",
@@ -7335,6 +7405,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.ein-ort-der-begegnung.laq8hm": {
+  "de": "Ein Ort der Begegnung",
+  "en": "A place to meet",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.ein-ort-zum-lernen.96gxty": {
   "de": "Ein Ort zum Lernen und Ankommen",
   "en": "A place to learn and settle in",
@@ -7354,6 +7434,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.ein-stipendienprogramm-fuer-lern.27w0wn": {
+  "de": "Ein Stipendienprogramm für Lernende, das gerade entsteht.",
+  "en": "A scholarship programme for learners, now being developed.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.ein-studierendenwohnheim-kann-ei.u69hgm": {
@@ -8936,6 +9026,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.freie-kursplaetze-fuer-menschen.5hxryb": {
+  "de": "Freie Kursplätze für Menschen in Not",
+  "en": "Free course places for people in hardship",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.freies-sprechen-zu-themen.16k669e": {
@@ -11403,6 +11503,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.in-einzelgespraechen-finden-wir.1p583cm": {
+  "de": "In Einzelgesprächen finden wir mit dir die passende Lernstrategie. Wir beraten dich auch zu Wohnungssuche, Beruf und Studium, und nach dem Kurs kannst du vor Prüfungen weiter bei uns lernen.",
+  "en": "In one-to-one talks we find the right learning strategy with you. We also advise you on finding a flat, on work and on studying, and after your course you can keep learning with us before exams.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.in-jedem-paket-sind.bajf26": {
   "de": "In jedem Paket sind Unterricht, Gastfamilie, alle Mahlzeiten, das Bremer Nahverkehrsticket, das Lehrmaterial und das Nachmittagsprogramm enthalten.",
   "en": "Every package includes the lessons, the host family, all meals, the Bremen public transport ticket, the course materials and the afternoon programme.",
@@ -12710,9 +12820,11 @@
   "de": "Kontakt aufnehmen",
   "en": "Get in touch",
   "files": [
-   "src/app/(site)/[locale]/faq/page.tsx"
+   "src/app/(site)/[locale]/faq/page.tsx",
+   "src/components/sections/nonprofit-programs.tsx"
   ],
   "pages": [
+   "/about/nonprofit",
    "/faq"
   ]
  },
@@ -14314,11 +14426,13 @@
   "en": "More about the language tandem",
   "files": [
    "src/app/(site)/[locale]/about/page.tsx",
-   "src/app/(site)/[locale]/page.tsx"
+   "src/app/(site)/[locale]/page.tsx",
+   "src/components/sections/nonprofit-programs.tsx"
   ],
   "pages": [
    "/",
-   "/about"
+   "/about",
+   "/about/nonprofit"
   ]
  },
  "t.mehr-zur-pruefung.185bh7": {
@@ -14403,6 +14517,16 @@
    "src/config/content/proof-metrics.ts"
   ],
   "pages": []
+ },
+ "t.menschen-in-besonders-schwierige.12j19n4": {
+  "de": "Menschen in besonders schwierigen Lebenslagen lernen bei uns immer wieder kostenlos Deutsch. So schließen wir eine Lücke und legen die Basis für ihren Weg in die Gesellschaft und in den Beruf.",
+  "en": "Time and again, people in particularly difficult circumstances learn German with us free of charge. This closes a gap and lays the foundation for their way into society and work.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
  },
  "t.menue-oeffnen.1p2sf4e": {
   "de": "Menü öffnen",
@@ -18410,6 +18534,16 @@
    "/resources/language-tandem"
   ]
  },
+ "t.sprachtandem-mit-menschen-aus.1cm3fes": {
+  "de": "Sprachtandem mit Menschen aus Bremen",
+  "en": "Language tandem with people from Bremen",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.sprachtandem.1rds4qb": {
   "de": "Sprachtandem",
   "en": "Language tandem",
@@ -20149,6 +20283,16 @@
   ],
   "pages": [
    "/exams/[code]"
+  ]
+ },
+ "t.unsere-cafeteria-ist-den.12ovarg": {
+  "de": "Unsere Cafeteria ist den ganzen Tag für alle Teilnehmenden offen: für Hausaufgaben, zum Üben vor Prüfungen oder zum Kennenlernen. Im Sprachcafé und beim CASA-Stammtisch sprichst du einfach Deutsch.",
+  "en": "Our cafeteria is open to all learners throughout the day: for homework, for practising before exams or for getting to know each other. At the language café and the CASA Stammtisch you simply speak German.",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.unsere-intensivkurse-finden-in.1myxstb": {
@@ -22324,6 +22468,16 @@
    "/about/nonprofit"
   ]
  },
+ "t.was-gemeinnuetzig-konkret-heisst.1hy68az": {
+  "de": "Was gemeinnützig konkret heißt",
+  "en": "What non-profit means in practice",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
+  ]
+ },
  "t.was-ihr-schon-selbst.1rx5bdl": {
   "de": "Was ihr schon selbst organisiert habt, kannst du hier abwählen.",
   "en": "Turn off anything you have already arranged yourselves.",
@@ -22500,6 +22654,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.was-wir-als-naechstes.1wkx1pz": {
+  "de": "Was wir als Nächstes planen",
+  "en": "What we are planning next",
+  "files": [
+   "src/components/sections/nonprofit-programs.tsx"
+  ],
+  "pages": [
+   "/about/nonprofit"
   ]
  },
  "t.was-wir-uns-von.1fg8s2c": {

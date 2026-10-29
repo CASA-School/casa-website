@@ -52,6 +52,15 @@ export const schoolFeatureIcons3d: Record<string, Icon3D> = {
 };
 
 /** „Wo startest du?" on the homepage (components/sections/persona-pathways). */
+/** The non-profit page's programmes and the Förderverein (components/sections/nonprofit-programs). */
+export const nonprofitIcons3d = {
+  freePlaces: { slug: 'handshake', motion: 'wobble' },
+  meeting: { slug: 'hot-beverage', motion: 'float' },
+  advice: { slug: 'light-bulb', motion: 'wobble' },
+  tandem: { slug: 'globe-with-meridians', motion: 'sway' },
+  foerderverein: { slug: 'seedling', motion: 'sway' },
+} satisfies Record<string, Icon3D>;
+
 /** The tandem page's two sides of a tandem (resources/language-tandem). */
 export const tandemIcons3d = {
   learner: { slug: 'books', motion: 'hop' },
