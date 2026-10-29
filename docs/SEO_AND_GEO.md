@@ -47,7 +47,23 @@ touched and the privacy policy (§5) says exactly this. What the server sees is 
 visit's first page, a page opened in a new tab, a reload. A click inside the site loads the next
 page through Next's router, whose headers Next strips before the proxy sees the request, so it
 cannot be told from a prefetch and is not counted. The screen therefore shows visits, their landing
-pages and sources (search engines and AI assistants named), not every page read.
+pages and sources (search engines and AI assistants named), not every page read. A visit counts
+only when the request carries what a browser sends when it opens a page (`Sec-Fetch-Dest: document`
+and `Accept-Language`): on the first evening, 235 „direct" visits that walked the sitemap were
+crawlers with a browser's name (PR #204; the table was cleared by 0107).
+
+Since 0108 each page load also keeps the browser's preferred language (the first tag of
+Accept-Language: which of the six prepared languages are worth routing) and, on a visit's first
+page, the campaign its link carried (utm_source · utm_campaign, or „Google Ads" for a gclid click,
+the Ad Grants clicks). The screen adds, from the workspace's own records, what came in through the
+website in the period (registrations, enquiries by form, appointments booked online, applications),
+the share of visits ending in one, and the age groups and nationalities of those who registered
+(counts from the registrations' parsed birth date and nationality code).
+
+Visitors' countries would need an IP-to-country database (DB-IP Lite or MaxMind GeoLite2) read on
+the server, the country kept and the address dropped; not built, as it needs a data file kept
+current and a line in the privacy policy. Age is not knowable from a visit at all; the registrants'
+ages are the honest measure.
 
 A script measuring every click and real readers' load times would read from the device and needs
 the consent question settled first (privacy owner). Until then:
