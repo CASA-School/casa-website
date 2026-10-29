@@ -784,27 +784,24 @@
  * --casa-container-max, never a class at a call site.
  */
 /*
- * Display type — Playfair Display, matched to the caterlove-prep-system site.
+ * Display type — Montserrat since 2026-10-29 (Rahman), Playfair Display before.
  *
  * Bound to the heading ELEMENTS rather than sprinkled as a `font-display` class,
  * so every existing h1/h2/h3 on every route picks it up without touching ~200
  * call sites, and so a new heading cannot forget it.
  *
- * h4 and below deliberately stay on Plus Jakarta Sans. Playfair is a
- * high-contrast Didone whose hairlines break up below roughly 20px, and h4 is
- * routinely set at 16-18px in cards. The line between display and text is a size
- * line, not a semantic one.
+ * h4 and below stay on Plus Jakarta Sans, as they did under Playfair: the line
+ * between display and text is a size line, not a semantic one.
  *
- * The tracking scale in @theme was measured against Plus Jakarta Sans. Playfair
- * has narrower sidebearings and needs less negative tracking at display sizes,
- * so headings get a small positive correction here to cancel most of it. If the
- * display face changes again, re-measure this value.
+ * Montserrat is a wide geometric face, so display sizes take a little negative
+ * tracking (Playfair needed +0.006em). If the display face changes again,
+ * re-measure this value.
  */
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
-  letter-spacing: 0.006em;
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.012em;
 }
 
 /*
