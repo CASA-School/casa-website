@@ -216,7 +216,7 @@ export const photoSlots: PhotoSlot[] = [
   { n: 52, src: '/media/casa/reel-partner-practice.webp', subject: 'Two learners doing a partner interview from a worksheet, talking and smiling. Collection frame 075, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 53, src: '/media/casa/reel-team-courtyard.webp', subject: 'The CASA team standing together in the leafy courtyard, most smiling at the camera. Collection frame 098, cropped 2:1 with light correction only, 2026-09-23.', ready: true },
   { n: 54, src: '/media/casa/hero-classroom-lesson.webp', subject: 'The slot 51 lesson as a 5:4 crop of the full frame (collection 093, 2110x1688), light correction only (scripts/media/build_reel.py), for the half-width homepage hero, 2026-10-01.', ready: true, position: 'lg:object-[40%_50%] xl:object-[50%_50%]' },
-  { n: 55, src: '/media/casa/about-team-courtyard.webp', subject: 'The slot 53 team photograph as the whole 3:2 frame (collection 098, 2560x1706), light correction only (scripts/media/build_reel.py), for the About hero, 2026-10-01.', ready: true },
+  { n: 55, src: '/media/casa/about-team-courtyard.webp', subject: 'The slot 53 team photograph as the whole 3:2 frame (collection 098, 2560x1706), light correction only (scripts/media/build_reel.py), the About hero from 2026-10-01 to 2026-10-29 (now 102); still the team page\'s photo.', ready: true },
   { n: 56, src: '/media/casa/home-class-welcome.webp', subject: 'The homepage\'s "Wir hören zu": the teacher with smiling learners at the course table. Collection frame 087, 3:2 crop, modern grade (scripts/media/build_reel.py), 2026-10-02.', ready: true },
   { n: 57, src: '/media/casa/casa-wg-room.webp', subject: 'A single room in a CASA shared flat: bed, armchair, desk, the navy wall. Collection file 008, 4:3 crop with light correction only (scripts/media/build_reel.py), for the homepage accommodation block, 2026-10-01. Not a host-family room.', ready: true, example: true },
   { n: 58, src: '/media/casa/course-intensive-hero.webp', subject: 'Intensivkurse course-page hero: frame 060 as a 2.4:1 band composed for the hero, modern grade, 2026-10-02.', ready: true },
@@ -277,6 +277,7 @@ export const photoSlots: PhotoSlot[] = [
   { n: 99, src: '/media/casa/level-b1plus.webp', subject: 'B1+: a runner crouched at the start line (old site, stock), warm grade.', ready: true },
   { n: 100, src: '/media/casa/level-b2.webp', subject: 'B2: runners crossing the finish line (old site, stock), warm grade.', ready: true },
   { n: 101, src: '/media/casa/level-c1.jpg', subject: 'C1: a runner taking the stairs by the sea (old site, stock), warm grade.', ready: true },
+  { n: 102, src: '/media/casa/casa-building-painting.webp', subject: 'The About page\'s hero (since 2026-10-29): a watercolour and ink painting of the CASA building on Am Dobben, signed „ISA". In the repository since its first commit as the header `school-building-illustration-header.jpg` (a0d95fda), removed with the old library on 2026-09-10; brought back at Rahman\'s request on 2026-10-29. A 3:2 crop to the building, sky and tree (signature kept), the header\'s white fade and a scan line cut away; no other change.', ready: true },
 ];
 
 const slotsBySrc = new Map(photoSlots.map((slot) => [slot.src, slot]));

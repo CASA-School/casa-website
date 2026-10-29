@@ -173,9 +173,10 @@ export default async function AboutPage() {
     <main className="bg-[var(--casa-canvas)] text-[var(--casa-ink)]" data-rhythm={rhythm.hero}>
       {/*
         THE SITE'S STANDARD HERO: one eyebrow, one headline, one sentence, one
-        button (`ctas.slice(0, 1)`). The photograph is the CASA team in the
-        courtyard (slot 55), shown at its own 3:2 because the group spans the
-        frame — see `photoLibrary.heroTeam` in public-page-config.ts.
+        button (`ctas.slice(0, 1)`). The picture is a watercolour of the house
+        on Am Dobben (slot 102, 2026-10-29), shown at its own 3:2 — see
+        `photoLibrary.buildingPainting` in public-page-config.ts. The team photo
+        it replaced is the team page's.
       */}
       <HeroAPhotoLed
         eyebrow={say(locale, 'Unsere Schule', 'Our school')}
