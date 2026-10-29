@@ -251,13 +251,13 @@ describe('course archetypes', () => {
 
   it('offers a call only where CASA has committed to one', () => {
     /*
-     * Two so far: group programmes and Firmenunterricht. Both are cases where
-     * the buyer is scoping a programme for other people rather than picking a
-     * level. Everyone else shows no button until CASA says otherwise, and this
-     * asserts the negative too — a call is a commitment on a real calendar, so
-     * switching one on should be a deliberate edit that trips this test.
+     * One so far: group programmes, where the buyer is scoping a programme for
+     * other people rather than picking a level. Everyone else shows no call until
+     * CASA says otherwise, and this asserts the negative too — a call is a
+     * commitment on a real calendar, so switching one on should be a deliberate
+     * edit that trips this test. Firmenunterricht asks for a quote instead.
      */
-    const offersACall = ['groups', 'company'];
+    const offersACall = ['groups'];
 
     for (const key of CASA_CONTACT_KEYS) {
       expect(
@@ -266,10 +266,11 @@ describe('course archetypes', () => {
       ).toBe(offersACall.includes(key));
     }
 
-    // Same colleague on both, and only one of her three formats offers it —
+    // Same colleague on both, and only one of her three formats asks for a quote —
     // which is why contacts are keyed by surface and not by person.
     expect(getCasaContact('company', 'en').name).toBe(getCasaContact('professional', 'en').name);
-    expect(getCasaContact('professional', 'en').booking).toBe(false);
+    expect(getCasaContact('company', 'en').quoteTopic).toBe('company-courses');
+    expect(getCasaContact('professional', 'en').quoteTopic).toBeUndefined();
   });
 
   it('spells the two names that are easy to get wrong', () => {
