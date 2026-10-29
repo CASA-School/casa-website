@@ -605,7 +605,8 @@ is still valid.
   One repository and one database stay; the running app splits into a public app with a
   least-privilege database role and no `/admin`, and a workspace app on admin.casa-bremen.de. Why,
   the shape and the steps: `docs/AZURE_DEPLOYMENT_PLAN.md` §Later. Not before go-live.
-- No canonical production deployment doc yet (domain, rollback owner). The custom domain
+- **Going live is `docs/GO_LIVE.md` (2026-10-29)**: the DNS and Azure steps, the two mail risks to fix
+  first (`smtp`/`imap`/`ftp` are CNAMEs of the apex; SPF's `+a`), the checks and the rollback. The custom domain
   for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
   and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82. The Container
   App needs **three** hostnames off the same revision: the apex `casa-bremen.de`, which is
