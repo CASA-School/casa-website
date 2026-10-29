@@ -53,3 +53,6 @@ scripts/placement/source-item-bank.md
 
 # Unapproved photo candidates awaiting a decision. Never part of the image.
 public/media/casa/editorial-2026
+
+# The image downloads its own country database (Dockerfile, stage geo)
+geo

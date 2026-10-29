@@ -82,6 +82,17 @@ export async function languages(days: StatRange, limit = 12) {
   return rows.map((row) => ({ language: row.language, visits: Number(row.visits) }));
 }
 
+/** Where visits come from: the country of the reader's IP address (DB-IP Lite), per visit. */
+export async function visitorCountries(days: StatRange, limit = 12) {
+  const rows = await query<{ country: string; visits: string }>(
+    `SELECT country, count(*) AS visits
+       FROM site_page_views WHERE entry AND country IS NOT NULL AND viewed_at >= ${SINCE}
+      GROUP BY country ORDER BY visits DESC, country LIMIT $2`,
+    [days, limit]
+  );
+  return rows.map((row) => ({ country: row.country.trim(), visits: Number(row.visits) }));
+}
+
 /** Visits that came through a tagged link: a Google Ads click, a newsletter, a partner's page. */
 export async function campaigns(days: StatRange, limit = 10) {
   const rows = await query<{ campaign: string; visits: string }>(

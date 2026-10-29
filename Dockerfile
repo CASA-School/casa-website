@@ -40,6 +40,14 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run build
 
 # --------------------------------------------------------------------- runtime
+# The visitor countries of the website statistics: DB-IP's free country database (CC BY 4.0),
+# fetched fresh on each build. A failed download leaves /geo empty and the site counts without
+# a country (scripts/geo/fetch-country-db.mjs, src/lib/site-views.ts).
+FROM node:22-bookworm-slim AS geo
+WORKDIR /geo
+COPY scripts/geo/fetch-country-db.mjs /tmp/fetch-country-db.mjs
+RUN node /tmp/fetch-country-db.mjs /geo || true
+
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 
@@ -72,6 +80,7 @@ RUN node /tmp/playwright-core/cli.js install --with-deps --only-shell chromium \
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
+COPY --from=geo --chown=nextjs:nodejs /geo ./geo
 # The whole of playwright-core: it loads parts of itself at run time, which file tracing can miss.
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/playwright-core ./node_modules/playwright-core
 

@@ -60,10 +60,13 @@ website in the period (registrations, enquiries by form, appointments booked onl
 the share of visits ending in one, and the age groups and nationalities of those who registered
 (counts from the registrations' parsed birth date and nationality code).
 
-Visitors' countries would need an IP-to-country database (DB-IP Lite or MaxMind GeoLite2) read on
-the server, the country kept and the address dropped; not built, as it needs a data file kept
-current and a line in the privacy policy. Age is not knowable from a visit at all; the registrants'
-ages are the honest measure.
+Since 0109 a visit's first page also keeps its country (Rahman's go, 2026-10-29): the IP address is
+looked up in DB-IP's free country database (IP to Country Lite, CC BY 4.0, credited on the screen)
+on the server and dropped; only the two letters are stored. The image downloads the current
+month's file on every build (Dockerfile stage `geo`, `scripts/geo/fetch-country-db.mjs`); a failed
+download leaves visits without a country and never fails a release. Locally,
+`npm run geo:fetch` puts it in `geo/` (gitignored). Age is not knowable from a
+visit at all; the registrants' ages are the honest measure.
 
 A script measuring every click and real readers' load times would read from the device and needs
 the consent question settled first (privacy owner). Until then:

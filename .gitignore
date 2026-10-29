@@ -57,3 +57,6 @@ next-env.d.ts
 
 # Python bytecode (scripts/filemaker reads SchoolMan through FileMaker Pro)
 __pycache__/
+
+# DB-IP Lite country database, downloaded by scripts/geo/fetch-country-db.mjs (the image fetches its own)
+/geo/

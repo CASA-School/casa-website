@@ -17,6 +17,7 @@ import {
   STAT_RANGES,
   topPages,
   viewsByDay,
+  visitorCountries,
   type AgeGroup,
   type LeadKind,
   type StatRange,
@@ -36,7 +37,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
   const { t, lang } = await getI18n();
   const range: StatRange = STAT_RANGES.find((days) => String(days) === requested) ?? 30;
 
-  const [totals, days, pages, origins, spoken, tagged, first, received, registered] = await Promise.all([
+  const [totals, days, pages, origins, spoken, tagged, first, received, registered, places] = await Promise.all([
     siteTotals(range),
     viewsByDay(range),
     topPages(range),
@@ -46,6 +47,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
     firstVisit(range),
     leads(range),
     registrants(range),
+    visitorCountries(range),
   ]);
   // The share of visits that ended in an enquiry or a registration counts only what came in since
   // the site began counting visits; before that there is nothing to divide by.
@@ -199,6 +201,34 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
           )}
         </Card>
 
+        <div className="grid gap-4">
+        <Card
+          title={t('Länder der Besucher', 'Visitors’ countries')}
+          icon={Icon.globe}
+          tint="sun"
+          bleed
+          footer={
+            <p className="text-xs text-[var(--casa-muted)]">
+              <a href="https://db-ip.com" target="_blank" rel="noreferrer" className="hover:underline">
+                {t('IP-Geolokalisierung von DB-IP', 'IP geolocation by DB-IP')}
+              </a>
+            </p>
+          }
+        >
+          {places.length === 0 ? (
+            <ListEmpty title={t('Noch keine Besuche', 'No visits yet')} />
+          ) : (
+            <Table head={[t('Land', 'Country'), { label: t('Besuche', 'Visits'), align: 'right' }]}>
+              {places.map((row) => (
+                <TableRow key={row.country}>
+                  <Cell>{countryName.of(row.country) ?? row.country}</Cell>
+                  <Cell align="right" className="tabular-nums">{number(row.visits)}</Cell>
+                </TableRow>
+              ))}
+            </Table>
+          )}
+        </Card>
+
         <Card title={t('Sprachen der Besucher', 'Visitors’ languages')} icon={Icon.book} tint="ink" bleed>
           {spoken.length === 0 ? (
             <ListEmpty title={t('Noch keine Besuche', 'No visits yet')} />
@@ -213,6 +243,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
             </Table>
           )}
         </Card>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
