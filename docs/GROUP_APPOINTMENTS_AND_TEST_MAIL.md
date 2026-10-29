@@ -97,7 +97,7 @@ applications now send the person a branded confirmation in the form's language
 | Exam registration | `EXAM` | `online@casa-bremen.de` |
 | Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |
 | Placement appointment (in person) | `PLACEMENT` | `online@casa-bremen.de` (2026-10-28) |
-| Appointment request | `APPOINTMENT` | the contact person who holds the consultations — for group consultations, **Ina Eismann's mailbox** (address still to come). She confirms each appointment herself by email |
+| Appointment request | `APPOINTMENT` | **No alert since 2026-10-29**: with the database a request is an appointment in Ina's „Meine Termine" (`requested`, migration 0101), which she confirms, moves or cancels there. Replies to the requester's receipt go to her published address (`i.eismann@`, `GROUP_CONTACT_EMAIL`), and so does the request itself when the site has no database. `FORM_RECIPIENT_APPOINTMENT` overrides that address if ever set |
 | Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position only; the application itself is read in the workspace by management |
 
 `bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here

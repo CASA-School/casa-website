@@ -24,23 +24,27 @@ export const KIND_CHIPS: Record<AppointmentKind, string> = {
   other: 'bg-[#edf0f5] text-[#2b3546]',
 };
 
-export const APPOINTMENT_STATUSES = ['booked', 'came', 'missed', 'cancelled'] as const;
+/** `requested`: a website request waiting for its colleague, Ina's group consultations (0101). */
+export const APPOINTMENT_STATUSES = ['requested', 'booked', 'came', 'missed', 'cancelled'] as const;
 export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[number];
 export const isAppointmentStatus = (value: string): value is AppointmentStatus => (APPOINTMENT_STATUSES as readonly string[]).includes(value);
 
 export const STATUS_LABELS: Record<AppointmentStatus, Bilingual> = {
+  requested: { de: 'Angefragt', en: 'Requested' },
   booked: { de: 'Gebucht', en: 'Booked' },
   came: { de: 'Erschienen', en: 'Came' },
   missed: { de: 'Nicht gekommen', en: 'Did not come' },
   cancelled: { de: 'Abgesagt', en: 'Cancelled' },
 };
 export const STATUS_DOTS: Record<AppointmentStatus, string> = {
+  requested: 'bg-[#e8710a]',
   booked: 'bg-[#2f6fdb]',
   came: 'bg-[#1f9d55]',
   missed: 'bg-[#d99a00]',
   cancelled: 'bg-[#98a2b3]',
 };
 export const STATUS_CHIPS: Record<AppointmentStatus, string> = {
+  requested: 'bg-[#fff0e6] text-[#9a3d00] ring-[#f6cfb2]',
   booked: 'bg-[#e8f0fd] text-[#1d4ea8] ring-[#c3d6f7]',
   came: 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]',
   missed: 'bg-[#fff2d6] text-[#6e4700] ring-[#f1d9a6]',

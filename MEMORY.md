@@ -2853,6 +2853,13 @@ tile in the Tagesplan like the others, its panel „Alle | Meine" with whose eac
 - The calendar of both popups is one component now (`src/components/appointments/slot-picker.tsx`).
 - „Ohne Termin, plane eine Stunde ein" is gone from the placement page, the FAQ and CLARA's text; privacy
   §15 names the new form. The six languages were re-run.
+- 2026-10-29, Rahman: Ina's appointment requests go to „the dashboard direct termine section, my termine so
+  she could confirm and cancel or delay". Migration 0101: a website group consultation is an appointment,
+  `requested` („Angefragt"), assigned to the account with her published address, linked to its enquiry; the
+  website's free times read `appointments`, and `group_appointments` is retired (copied, dropped later). No
+  alert mail; the receipt's replies go to i.eismann@. Termine rows: „Bestätigen", „Anfrage", „Ändern".
+  Form mail went live the same day: registrations, exams and placement to online@, contact, groups,
+  interest and job-application alerts to info@.
 - **Next** (Rahman): the Klett test → e-mail → registration chain is the bad part; the level test and the
   registration should connect in the new system.
 

@@ -162,6 +162,12 @@ const CONTACTS = {
 
 export type CasaContactKey = keyof typeof CONTACTS;
 
+/**
+ * Ina's published address. Her group consultations from the website are assigned to the workspace
+ * account with this address (Termine), and replies to their receipts reach her.
+ */
+export const GROUP_CONTACT_EMAIL = CONTACTS.groups.email;
+
 /** Every assignment, so a test can walk the list rather than restate it. */
 export const CASA_CONTACT_KEYS = Object.keys(CONTACTS) as CasaContactKey[];
 

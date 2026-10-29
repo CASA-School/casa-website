@@ -184,7 +184,7 @@ function AppointmentRow({
 }) {
   const cancelled = a.status === 'cancelled';
   const reach = [a.phone, a.email].filter(Boolean).join(' · ');
-  const request = Boolean(a.enquiryId);
+  const requested = a.status === 'requested';
   const owner = (
     <span className="inline-flex items-center gap-1.5">
       {a.assignee ? <Avatar name={a.assignee.name} staff size="sm" /> : <span aria-hidden="true" className="grid size-6 place-items-center rounded-full border border-dashed border-ws-line text-[var(--casa-text-subtle)] [&_svg]:size-3">{Icon.person}</span>}
@@ -207,7 +207,7 @@ function AppointmentRow({
         {reach ? <span className="block truncate text-[0.76rem] text-[var(--casa-muted)]">{reach}</span> : null}
         {a.note ? <span className="mt-0.5 line-clamp-2 block text-[0.76rem] whitespace-pre-line text-[var(--casa-muted)]">{a.note}</span> : null}
         <span className="mt-1.5 flex flex-wrap items-center gap-2">
-          {canEdit && !request ? (
+          {canEdit ? (
             <ChoiceMenu
               action={assignAppointmentAction}
               fields={{ appointmentId: a.id }}
@@ -228,45 +228,51 @@ function AppointmentRow({
               {pick(lang, ABSENCE_LABELS[a.assigneeAway])} · {t('Vertretung nötig', 'needs cover')}
             </span>
           ) : null}
+          {/* A website request: a confirmation in one click, and the organiser's details on its enquiry. */}
+          {canEdit && requested ? (
+            <form action={setAppointmentStatusAction}>
+              <input type="hidden" name="appointmentId" value={a.id} />
+              <input type="hidden" name="status" value="booked" />
+              <Button type="submit" variant="secondary" size="sm">{t('Bestätigen', 'Confirm')}</Button>
+            </form>
+          ) : null}
+          {a.enquiryId ? (
+            <Link
+              href={`/admin/enquiries/${a.enquiryId}`}
+              className="inline-flex h-7 items-center rounded-full bg-white px-2.5 text-[0.76rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] ring-1 ring-ws-line ring-inset hover:bg-ws-sunk"
+            >
+              {t('Anfrage', 'Enquiry')}
+            </Link>
+          ) : null}
         </span>
       </span>
       <span className="flex shrink-0 items-center gap-1">
-        {request ? (
-          <Link
-            href={`/admin/enquiries/${a.enquiryId}`}
-            className="inline-flex h-7 items-center rounded-full bg-white px-2.5 text-[0.76rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] ring-1 ring-ws-line ring-inset hover:bg-ws-sunk"
-          >
-            {t('Anfrage öffnen', 'Open enquiry')}
-          </Link>
+        {/* Moving a request is its „Ändern", so a request shows it without a hover. */}
+        {canEdit ? (
+          <span className={cn('transition-opacity focus-within:opacity-100', !requested && 'lg:opacity-0 lg:group-hover:opacity-100')}>
+            <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="ghost" size="sm" width="lg" icon={Icon.clock} tint="green" title={fullName(a)}>
+              <AppointmentForm appointment={a} day={a.date} back={back} colleagues={colleagues} me={me} canDelete={canDelete} />
+            </FormDialog>
+          </span>
+        ) : null}
+        {canEdit ? (
+          <ChoiceMenu
+            action={setAppointmentStatusAction}
+            fields={{ appointmentId: a.id }}
+            name="status"
+            label={t('Stand', 'Status')}
+            align="end"
+            triggerClassName="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
+            trigger={<StatusChip status={a.status} lang={lang} />}
+            choices={APPOINTMENT_STATUSES.map((s) => ({
+              value: s,
+              label: pick(lang, STATUS_LABELS[s]),
+              current: s === a.status,
+              icon: <span aria-hidden="true" className={cn('size-2.5 rounded-full', STATUS_DOTS[s])} />,
+            }))}
+          />
         ) : (
-          <>
-            {canEdit ? (
-              <span className="transition-opacity focus-within:opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
-                <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="ghost" size="sm" width="lg" icon={Icon.clock} tint="green" title={fullName(a)}>
-                  <AppointmentForm appointment={a} day={a.date} back={back} colleagues={colleagues} me={me} canDelete={canDelete} />
-                </FormDialog>
-              </span>
-            ) : null}
-            {canEdit ? (
-              <ChoiceMenu
-                action={setAppointmentStatusAction}
-                fields={{ appointmentId: a.id }}
-                name="status"
-                label={t('Stand', 'Status')}
-                align="end"
-                triggerClassName="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30"
-                trigger={<StatusChip status={a.status} lang={lang} />}
-                choices={APPOINTMENT_STATUSES.map((s) => ({
-                  value: s,
-                  label: pick(lang, STATUS_LABELS[s]),
-                  current: s === a.status,
-                  icon: <span aria-hidden="true" className={cn('size-2.5 rounded-full', STATUS_DOTS[s])} />,
-                }))}
-              />
-            ) : (
-              <StatusChip status={a.status} lang={lang} />
-            )}
-          </>
+          <StatusChip status={a.status} lang={lang} />
         )}
       </span>
     </li>

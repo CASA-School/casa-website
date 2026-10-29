@@ -2,6 +2,8 @@ import 'server-only';
 
 import { z } from 'zod';
 
+import { GROUP_CONTACT_EMAIL } from '@/config/content/contacts';
+
 import { buildConfirmationMail, buildFormMail, type FormKind } from './form-mail';
 import { graphSender, sendGraphMail } from './graph-mail.server';
 
@@ -14,7 +16,10 @@ export function formDeliveryConfig(kind: FormKind) {
   // An interest-list entry goes to the contact mailbox (info@), like any other enquiry; a
   // placement appointment to the placement mailbox (online@), with the placement results.
   const mailbox = kind === 'interest' ? 'CONTACT' : kind === 'placement-appointment' ? 'PLACEMENT' : kind.toUpperCase();
-  const recipient = test ? TEST_FORM_RECIPIENT : process.env[`FORM_RECIPIENT_${mailbox}`];
+  // Ina's group consultations wait in her Termine; her published address is where replies to
+  // their receipts go, and where a request goes by mail when the site has no database.
+  const live = process.env[`FORM_RECIPIENT_${mailbox}`] || (kind === 'appointment' ? GROUP_CONTACT_EMAIL : undefined);
+  const recipient = test ? TEST_FORM_RECIPIENT : live;
   return { test, recipient: z.email().safeParse(recipient).success ? recipient! : null };
 }
 

@@ -66,6 +66,13 @@ describe('public form notifications', () => {
     vi.stubEnv('FORM_RECIPIENT_PLACEMENT', 'online@example.com');
     expect(formDeliveryConfig('placement-appointment')).toEqual({ test: false, recipient: 'online@example.com' });
   });
+  it("answers Ina's group consultations from her published address when live, unless one is set", () => {
+    vi.stubEnv('FORM_DELIVERY_MODE', 'live');
+    vi.stubEnv('FORM_RECIPIENT_APPOINTMENT', '');
+    expect(formDeliveryConfig('appointment')).toEqual({ test: false, recipient: 'i.eismann@casa-bremen.de' });
+    vi.stubEnv('FORM_RECIPIENT_APPOINTMENT', 'groups@example.com');
+    expect(formDeliveryConfig('appointment')).toEqual({ test: false, recipient: 'groups@example.com' });
+  });
   it('sends an interest-list entry to the contact mailbox when live', () => {
     vi.stubEnv('FORM_DELIVERY_MODE', 'live');
     vi.stubEnv('FORM_RECIPIENT_CONTACT', 'info@example.com');
