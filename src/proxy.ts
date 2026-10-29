@@ -1,8 +1,9 @@
 import createIntlMiddleware from 'next-intl/middleware';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, type NextFetchEvent } from 'next/server';
 
 import { isNonLocalizedPath, toInternalPath, toPublicPath } from '@/i18n/pathnames';
 import { defaultLocale, locales } from '@/i18n/routing';
+import { pageView, recordPageView } from '@/lib/site-views';
 
 /**
  * Host routing for the staff workspace, then language routing for the site.
@@ -105,7 +106,7 @@ function allowWorkspaceOnPublicHost(): boolean {
   return process.env.NODE_ENV !== 'production';
 }
 
-export function proxy(request: NextRequest) {
+export function proxy(request: NextRequest, event?: NextFetchEvent) {
   const host = request.headers.get('host') ?? '';
   const { pathname, search } = request.nextUrl;
 
@@ -165,6 +166,9 @@ export function proxy(request: NextRequest) {
     url.pathname = canonical;
     return NextResponse.redirect(url, 308);
   }
+
+  // A reader's page view, counted after the response is on its way (src/lib/site-views.ts).
+  event?.waitUntil(recordPageView(pageView(request, resolved.locale)));
 
   if (resolved.locale === defaultLocale && resolved.internalPath !== pathname) {
     // A German public path. next-intl gets the internal path and does the

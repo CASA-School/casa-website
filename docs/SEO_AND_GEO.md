@@ -20,12 +20,14 @@ How the public site is made findable by search engines (SEO) and by AI answer en
 
 | Piece | Where | Notes |
 | --- | --- | --- |
-| Titles and descriptions | `createPublicMetadata` (`src/lib/seo.ts`), course and exam pages from `src/config/seo-pages.ts` | Titles named the way pages are searched ("Intensivkurs Deutsch in Bremen"), descriptions 70–160 characters, none duplicated |
+| Titles and descriptions | `createPublicMetadata` (`src/lib/seo.ts`), course and exam pages from `src/config/seo-pages.ts` | Titles named the way pages are searched ("Intensivkurs Deutsch in Bremen"), under about 60 characters with " \| CASA Bremen"; descriptions 110–160 characters, none duplicated, each saying what, for whom and where (2026-10-29: the homepage leads with „Sprachschule in Bremen", every course page has its own description with live lesson counts) |
+| Icons | `scripts/media/build_icons.py` → `src/app/favicon.ico`, `icon.png`, `apple-icon.png`, `public/icons/`, `src/app/manifest.ts` | The logo's sail, sun and wave on a white tile, cut from the logo artwork (2026-10-29). Until then the PNG icons carried a grey checkerboard painted into their pixels |
 | Canonical and hreflang | `createPublicMetadata`, `src/app/sitemap.ts` | German at the root, English under /en; x-default is German |
 | Sitemap and robots | `src/app/sitemap.ts`, `src/app/robots.ts` | Every page and language with its alternates; robots allows everything except /api/, AI crawlers included |
 | Structured data | `src/lib/structured-data.ts` | One organisation with an `@id` (address split into fields, coordinates from CASA's Google Maps entry, office hours, founding year, profiles), the website, a BreadcrumbList from the `Breadcrumbs` component, Course with its offer and dated, scheduled terms, each telc exam day as an Event with fee and registration deadline, a JobPosting for each vacancy, FAQPage on /faq |
 | Share images | `src/app/og.png/route.tsx` | Each page's own image with its title, logo and stripe, in its language |
-| llms.txt | `src/app/llms.txt`, `src/app/llms-full.txt`, `src/lib/llms.ts` | The site as plain text for AI assistants, built from the live data: courses with levels, prices and the next terms, exam days with deadlines, accommodation prices, contact; the full version adds every course's conditions and the FAQ |
+| llms.txt | `src/app/llms.txt`, `src/app/llms-full.txt`, `src/lib/llms.ts` | The site as plain text for AI assistants, built from the live data: the school in numbers, „When CASA is a good answer" (the questions it answers, each with its page), a German summary, courses with levels, prices and the next terms, exam days with deadlines, accommodation prices, contact; the full version adds every course's conditions and the FAQ. Facts only: an instruction to rank the school would be ignored by answer engines and read as manipulation |
+| Statistics | `src/lib/site-views.ts` (called by `src/proxy.ts`), migration 0106, `/admin/statistics` (module `website`) | See §Statistics |
 | IndexNow | `infra/azure/deploy.sh`, `public/<key>.txt` | After each release, sends the sitemap to Bing (which ChatGPT search and Copilot read). Inactive until casa-bremen.de serves this app, then on by itself |
 | Old URLs | `src/i18n/legacy-redirects.ts` | One 308 per old URL; long-dead URLs with no specific counterpart 404 on purpose |
 
@@ -36,12 +38,36 @@ How the public site is made findable by search engines (SEO) and by AI answer en
 - A new course or exam page gets a search title in `src/config/seo-pages.ts`.
 - A page that shows breadcrumbs gets the BreadcrumbList for free; pass the trail to `Breadcrumbs`.
 
+## Statistics (2026-10-29)
+
+The site counts its own visits, on the server, from the request a browser sends for a page: the
+path, the Referer (its domain only) and the User-Agent (turned into phone, tablet or computer, then
+dropped). No script, no cookie, nothing read from the device, no IP address: § 25 TDDDG is not
+touched and the privacy policy (§5) says exactly this. What the server sees is a page LOAD — a
+visit's first page, a page opened in a new tab, a reload. A click inside the site loads the next
+page through Next's router, whose headers Next strips before the proxy sees the request, so it
+cannot be told from a prefetch and is not counted. The screen therefore shows visits, their landing
+pages and sources (search engines and AI assistants named), not every page read.
+
+A script measuring every click and real readers' load times would read from the device and needs
+the consent question settled first (privacy owner). Until then:
+
+- **Real readers' load times:** Search Console → Core Web Vitals (Chrome's field data, CrUX), and
+  PageSpeed Insights for one page.
+- **Lab load times and image weights:** Lighthouse on the live site. Measured 2026-10-29, ten key
+  pages pinned to Azure: desktop 95–100, mobile 86–100, SEO 100, accessibility 100; mobile LCP
+  1.7–3.7 s on Lighthouse's simulated slow 4G (observed 0.3–2.6 s); photographs on phones 15–34 KB,
+  the Leitbild painting 82 KB; server render 0.15–1.0 s, the homepage slowest. The heroes' photo
+  had no `fetchpriority="high"`; it has since then.
+
 ## At go-live (with the domain)
 
 1. Point casa-bremen.de and www at the app (see `docs/AZURE_DEPLOYMENT_PLAN.md`). The
    `x-robots-tag: noindex` on every other host (`next.config.ts`) lifts by itself on the apex.
 2. **Google Search Console:** add the domain property (a DNS TXT record), submit
    `https://casa-bremen.de/sitemap.xml`, then watch Pages → Not found for old URLs we missed.
+   Done 2026-10-29 (domain property `sc-domain:casa-bremen.de`, owner r.shafiee@, TXT
+   `google-site-verification=…` in the Plesk zone; sitemap submitted the same evening).
 3. **Bing Webmaster Tools:** import the property from Search Console. IndexNow runs from the
    next release on.
 4. **Google Business Profile:** make sure the website field says `https://casa-bremen.de/` and

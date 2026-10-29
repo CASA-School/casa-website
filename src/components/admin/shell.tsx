@@ -246,6 +246,7 @@ export async function WorkspaceShell({
                 '/admin/applications',
                 '/admin/kursplanung',
                 '/admin/website',
+                '/admin/statistics',
                 '/admin/activity',
                 '/admin/team',
               ]}
@@ -273,7 +274,12 @@ export async function WorkspaceShell({
               ) : null}
               {/* What the public site says. Opens the editor full screen, outside the shell. */}
               {canAccess(user, 'website') ? (
-                <NavLink href="/admin/website" icon={Icon.website} title={t('Website', 'Website')}>
+                <NavLink
+                  href="/admin/website"
+                  icon={Icon.website}
+                  title={t('Website', 'Website')}
+                  items={[{ href: '/admin/statistics', label: t('Statistik', 'Statistics') }]}
+                >
                   Website
                 </NavLink>
               ) : null}

@@ -25,7 +25,7 @@ const tables: Record<TableName, MockRow[]> = {
   career_positions: [
     {
       id: '79b868c5-c66b-4288-9be6-000000000041',
-      slug: 'daf-teacher-bremen',
+      slug: 'daf-lehrkraft-bremen',
       locale: 'en',
       title: 'Speculative application: German teacher (DaF)',
       team: 'Academic team',

@@ -303,7 +303,8 @@ export function HeroBleedPhoto({
       )}
       style={{ aspectRatio: photo.aspectRatio }}
     >
-      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className={cn('object-cover', photo.objectPositionClassName)} style={photo.objectPosition ? { objectPosition: photo.objectPosition } : undefined} preload />
+      {/* The page's largest paint: fetched first, as MediaFrame does for a priority photo (Lighthouse, 2026-10-29). */}
+      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className={cn('object-cover', photo.objectPositionClassName)} style={photo.objectPosition ? { objectPosition: photo.objectPosition } : undefined} preload fetchPriority="high" loading="eager" />
     </div>
   );
 }

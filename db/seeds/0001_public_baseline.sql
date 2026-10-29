@@ -179,7 +179,7 @@ INSERT INTO career_positions (
 VALUES
   (
     '79b868c5-c66b-4288-9be6-000000000041',
-    'daf-teacher-bremen',
+    'daf-lehrkraft-bremen',
     'en',
     'Speculative application: German teacher (DaF)',
     'Academic team',

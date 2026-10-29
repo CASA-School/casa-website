@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Impressum' : 'Legal notice',
-    description: locale === 'de' ? 'Anbieterkennzeichnung und Kontaktdaten der CASA Internationale Sprachschule Bremen.' : 'Provider information and contact details for CASA Internationale Sprachschule Bremen.',
+    description: locale === 'de' ? 'Impressum der CASA – Internationale Sprachschule gGmbH, Am Dobben 14–16 in Bremen: Anbieterkennzeichnung und Kontaktdaten der gemeinnützigen Sprachschule.' : 'Legal notice of CASA – Internationale Sprachschule gGmbH, Am Dobben 14–16 in Bremen: provider information and contact details of the non-profit school.',
     path: '/imprint',
   });
 }

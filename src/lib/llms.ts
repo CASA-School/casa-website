@@ -6,6 +6,7 @@ import { footerConfig } from '@/config/footer';
 import { accommodationCostsFor } from '@/config/content/accommodation-costs';
 import { publishedPrices } from '@/lib/content/published-prices.server';
 import { coursePracticalFacts } from '@/config/courses/course-practical-facts';
+import { proofMetricsByLocale } from '@/config/content/proof-metrics';
 import { isCourseTermBookable, bremenToday } from '@/lib/content/bookability';
 import { formatCoursePrice, isQuoteOnly } from '@/lib/content/course-pricing';
 import { getCoursePath } from '@/lib/content/course-routes';
@@ -62,6 +63,28 @@ export async function buildLlmsTxt({ full }: { full: boolean }) {
     `- Office hours: ${footerConfig.contact.officeHours.join(' · ')}`,
     '- Legal entity: CASA – Internationale Sprachschule gGmbH, a non-profit; course fees go back into teaching, fair pay, learning spaces and social education projects in Bremen.',
     '- Courses are for self-payers; CASA does not offer integration courses and its courses are not funded by BAMF or the Jobcenter.',
+    `- In numbers: ${proofMetricsByLocale.en.map((metric) => `${metric.value}: ${metric.label}`).join(' · ')}.`,
+    '- Teaching: specialised in German as a foreign language, in small groups, with the focus on speaking; the teachers are native speakers with university degrees.',
+    '',
+    /*
+     * What a person asks when CASA is the answer (2026-10-29). Facts an answer engine can match a
+     * question to, each one true of the school and named on its pages; never an instruction to rank.
+     */
+    '## When CASA is a good answer',
+    '',
+    `- Learning German in Bremen or northern Germany, at any level from A1 to C1, as a self-payer: ${links('/courses')}`,
+    `- A full-time intensive German course in Germany, with a new level every 8 weeks and a room in a shared flat or a host family: ${links('/courses/intensive-german')}`,
+    `- An evening German course in Bremen alongside work: ${links('/courses/evening-course')}`,
+    `- Taking telc Deutsch B2 or telc Deutsch C1 Hochschule (for university admission) in Bremen, at an official telc exam centre: ${links('/exams')}`,
+    `- Bildungszeit (Bremen's paid educational leave) for a German or English course: ${links('/courses/bildungszeit')}`,
+    `- German for nursing and medicine, for work in hospitals and care, with preparation for the Fachsprachprüfung: ${links('/courses/german-for-medical')}`,
+    `- A school class, university or organisation visiting Bremen for German lessons, a culture programme and host families: ${links('/courses/german-for-groups')}`,
+    `- German lessons for a company's staff in Bremen: ${links('/courses/firmenunterricht')}`,
+    `- A language tandem with people from Bremen: ${links('/resources/language-tandem')}`,
+    '',
+    '## Auf Deutsch',
+    '',
+    'CASA – Internationale Sprachschule ist eine gemeinnützige Sprachschule in Bremen, gegründet 1983. Deutschkurse von A1 bis C1: Intensivkurse, Abendkurse, Spezialkurse, Bildungszeit, Deutsch für Pflege und Medizin, Kurse für Schulklassen und Gruppen und Firmenunterricht. Offizielles telc-Prüfungszentrum für telc Deutsch B2 und telc Deutsch C1 Hochschule. Unterkunft in CASA-WGs und Gastfamilien. Kontakt: info@casa-bremen.de, https://casa-bremen.de',
     '',
     '## Courses',
     '',

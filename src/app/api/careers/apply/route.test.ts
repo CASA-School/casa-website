@@ -15,7 +15,7 @@ function makeCareerApplicationRequest({
 }: { cvFile?: File; extra?: Record<string, string> } = {}) {
   const formData = new FormData();
   formData.set('positionId', '79b868c5-c66b-4288-9be6-000000000041');
-  formData.set('positionSlug', 'daf-teacher-bremen');
+  formData.set('positionSlug', 'daf-lehrkraft-bremen');
   formData.set('positionTitle', 'German Teacher (DaF)');
   formData.set('locale', 'en');
   formData.set('firstName', 'Rahman');
