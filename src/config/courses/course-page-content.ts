@@ -110,20 +110,12 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
 
     /* ------------------------------------------------------------------ */
     bildungszeit: {
-      audience: {
-        title: say(locale, 'Für alle, die im Land Bremen arbeiten', 'For everyone who works in the state of Bremen'),
-        bullets: [
-          say(locale, 'Nach dem Bremischen Bildungszeitgesetz hast du in zwei Jahren grundsätzlich Anspruch auf zehn Tage Bildungszeit.', 'Under the Bremisches Bildungszeitgesetz, you are generally entitled to ten days of Bildungszeit over two years.'),
-          // Clock hours, deliberately. This is the one CASA page that quotes them.
-          say(locale, 'Anerkannt wird ein Sprachkurs mit 30 bis 40 Stunden Unterricht pro Woche. Dafür besuchst du zwei Intensivkurse parallel, einen am Vormittag und einen am Nachmittag.', 'A language course is recognised if it has 30 to 40 hours of teaching a week. To reach that, you attend two intensive courses side by side, one in the morning and one in the afternoon.'),
-          say(locale, 'Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.', 'You can book from one to nine weeks and start on any Monday.'),
-          // level_min is B1 in the catalogue, and the live site says so plainly.
-          // Worth stating: it is the one format on the site that is not open at A1.
-          say(locale, 'Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.', 'Your German needs to be at B1 level or above.'),
-        ],
-      },
+      // No audience section (CASA's content review, 2026-10-29): each of its points, the ten days,
+      // the 30–40 hours with two intensive courses, the weekly start and B1, is in „Wichtige Punkte",
+      // and the weeks are in the next steps.
+      audience: false,
       nextSteps: {
-        description: say(locale, 'Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir planen den Kurs passend dazu.', 'You arrange your Bildungszeit with your employer, and we plan the course to fit.'),
+        description: say(locale, 'Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir beraten dich gern.', 'You arrange your Bildungszeit with your employer. We are happy to advise you.'),
         steps: [
           {
             step: '1',
@@ -165,8 +157,7 @@ function content(locale: ContentLocale): Record<string, LocalisedCourseContent> 
         title: say(locale, 'Kommunikation und Dokumentation im Klinikalltag', 'Communication and documentation in everyday hospital work'),
         bullets: [
           say(locale, 'Der Kurs orientiert sich an den Niveaustufen B2 und C1.', 'The course is geared to levels B2 and C1.'),
-          say(locale, 'Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.', 'The content follows the specialisms and current level of the group.'),
-          say(locale, 'Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.', 'You practise conversations, listening and the written documentation your work involves.'),
+          say(locale, 'Die Inhalte richten sich jeweils nach den Fachgebieten und dem Kenntnisstand der Gruppe.', 'The content follows the specialisms and current level of each group.'),
           say(locale, 'Der Kurs findet freitags von 13 bis 16:30 Uhr statt, an zehn Terminen mit je 4 UE.', 'The course runs on Fridays from 13:00 to 16:30, over ten sessions of 4 lessons.'),
         ],
       },

@@ -35,7 +35,7 @@ const copy = {
   },
   de: {
     trigger: 'Termin buchen', title: 'Gemeinsam deine Gruppenreise planen',
-    intro: 'Besprich mit Ina Eismann deine Ideen, offenen Fragen und Wünsche für deine Gruppe.',
+    intro: 'Besprich mit Ina Eismann deine Ideen, offene Fragen und Wünsche deiner Gruppe.',
     schedule: '30 Minuten · Montag–Donnerstag', zone: 'Alle Zeiten gelten für Bremen.',
     date: 'Tag auswählen', time: 'Uhrzeit auswählen', next: 'Weiter', back: 'Termin ändern',
     previousMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat', close: 'Schließen', loading: 'Termine werden geladen …',

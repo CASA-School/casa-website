@@ -15,7 +15,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'en',
       headline: 'telc Deutsch B2 for work, training and everyday life',
       summary:
-        'With telc Deutsch B2 you show what you can do in German. We explain how the exam works and help you prepare and register.',
+        'With telc Deutsch B2 you show what level your German has reached. We explain how the exam works and help you prepare and register.',
       outcomes: ['Better reading and listening comprehension', 'More confidence in writing', 'More fluent spoken communication'],
       prepHighlights: ['Strategies for each type of task', 'Practice with the exam time limits', 'Individual analysis of your mistakes'],
     },
@@ -24,7 +24,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'en',
       headline: 'telc Deutsch C1 Hochschule for university admission',
       summary:
-        'With telc Deutsch C1 Hochschule you show that your German is good enough for university. Many German-speaking universities require the certificate for admission.',
+        'With telc Deutsch C1 Hochschule you show that your German is good enough for university. Many German-speaking universities require the telc Deutsch C1 Hochschule certificate for admission to their degree courses.',
       // Who the exam is for, after the old casa-bremen.de page, as in German.
       intro:
         'telc Deutsch C1 Hochschule tests your German at a very advanced level, as you need it for university. The exam is for you if you want to prove your German because you plan to study at a German-speaking university, are already a student or work in an academic profession.',
@@ -38,7 +38,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'de',
       headline: 'telc Deutsch B2 für Arbeit, Ausbildung und Alltag',
       summary:
-        'Mit telc Deutsch B2 zeigst du, was du auf Deutsch kannst. Wir erklären dir, wie die Prüfung abläuft, und helfen dir bei der Vorbereitung und bei der Anmeldung.',
+        'Mit telc Deutsch B2 zeigst du, über welche Sprachkenntnisse du verfügst. Wir erklären dir, wie die Prüfung abläuft, und helfen dir bei der Vorbereitung und bei der Anmeldung.',
       outcomes: ['Stärkeres Lese- und Hörverstehen', 'Mehr Sicherheit im Schreiben', 'Flüssigere mündliche Kommunikation'],
       prepHighlights: ['Strategietraining nach Aufgabentyp', 'Üben mit den Zeitvorgaben der Prüfung', 'Individuelle Fehleranalyse'],
     },
@@ -47,7 +47,7 @@ export const examNarrativesByLocale: Record<ContentLocale, ExamNarrative[]> = {
       locale: 'de',
       headline: 'telc C1 Hochschule für die Zulassung an Hochschulen',
       summary:
-        'Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.',
+        'Mit telc Deutsch C1 Hochschule weist du nach, dass deine Deutschkenntnisse für ein Studium ausreichen. Viele deutschsprachige Hochschulen verlangen das Zertifikat telc Deutsch C1 Hochschule für die Zulassung zum Studium.',
       // Who the exam is for, after the old casa-bremen.de page (2026-10-07).
       intro:
         'telc Deutsch C1 Hochschule prüft Deutschkenntnisse für die Hochschule auf weit fortgeschrittenem Niveau. Die Prüfung ist für dich, wenn du an einer deutschsprachigen Hochschule studieren möchtest, schon studierst oder in einem akademischen Beruf arbeitest und deine Deutschkenntnisse nachweisen möchtest.',

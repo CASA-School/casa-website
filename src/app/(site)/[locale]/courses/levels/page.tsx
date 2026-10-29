@@ -113,8 +113,8 @@ export default async function LevelsPage() {
             <p className="mt-4 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">
               {say(
                 locale,
-                'Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.',
-                'We are happy to advise you. Our free online placement tests are a good place to start. If you don’t speak any German yet, you don’t need a test and simply start with A1.'
+                'Lass dich gern von uns beraten. Eine gute erste Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.',
+                'We are happy to advise you. Our free online placement tests are a good first step. If you don’t speak any German yet, you don’t need a test and simply start with A1.'
               )}
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">

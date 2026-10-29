@@ -30,7 +30,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'medical-german',
       locale: 'en',
       audience: 'For doctors and healthcare professionals preparing their German for work in Germany.',
-      promise: 'Train patient consultations, written documentation and professional exchange with your team, with clinical work and the Fachsprachprüfung in mind.',
+      promise: 'German for work in hospitals and care, with preparation for the medical language exam.',
       outcomes: [
         'Confident patient history-taking (Anamnese)',
         'Speaking appropriately to patients and colleagues, and writing professional documentation',
@@ -120,7 +120,7 @@ export const courseNarrativesByLocale: Record<ContentLocale, CourseNarrative[]> 
       slug: 'medical-german',
       locale: 'de',
       audience: 'Für Ärztinnen, Ärzte und medizinische Fachkräfte, die sich sprachlich auf die Arbeit in Deutschland vorbereiten.',
-      promise: 'Trainiere Patientengespräche, die schriftliche Dokumentation und den fachlichen Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.',
+      promise: 'Deutsch für den Klinik- und Pflegealltag, mit Vorbereitung auf die Fachsprachprüfung.',
       outcomes: [
         'Sichere Anamnesegespräche auf Deutsch',
         'Adressatengerechte mündliche Kommunikation und berufsspezifische schriftliche Dokumentation',

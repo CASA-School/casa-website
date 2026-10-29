@@ -16,12 +16,17 @@ import { fallbackCourseTypes } from '@/config/content/public-fixtures';
  * found that only the numbers changed.
  */
 describe('per-course page content', () => {
-  // The evening page has no audience section since CASA's content review (2026-10-20).
-  const registered = ['intensive-german', 'bildungszeit', 'medical-german', 'special-courses'];
+  // The evening page has no audience section since CASA's content review (2026-10-20), and
+  // Bildungszeit none since 2026-10-29: each of its points is in „Wichtige Punkte".
+  const registered = ['intensive-german', 'medical-german', 'special-courses'];
   const audience = (slug: string, locale: 'en' | 'de') => getCourseAudienceContent(slug, locale) || undefined;
 
   it('leaves the evening page without „Deutsch lernen neben dem Beruf"', () => {
     expect(getCourseAudienceContent('evening-german', 'de')).toBe(false);
+  });
+
+  it('leaves the Bildungszeit page without an audience section that repeats „Wichtige Punkte"', () => {
+    expect(getCourseAudienceContent('bildungszeit', 'de')).toBe(false);
   });
 
   it('gives every registered course its own audience heading', () => {

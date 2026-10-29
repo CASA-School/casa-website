@@ -2,6 +2,8 @@ import { Link } from '@/i18n/navigation';
 import { MediaFrame } from '@/components/ui/media-frame';
 
 import { Button } from '@/components/ui/button';
+import { Stars } from '@/components/sections/testimonial-grid';
+import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
 type HumanStoryBlockProps = {
@@ -20,6 +22,8 @@ type HumanStoryBlockProps = {
     href: string;
   };
   mediaSide?: 'left' | 'right';
+  /** A Google review's stars, shown over the quote as on the review cards. */
+  rating?: { stars: number; locale: ContentLocale };
   className?: string;
 };
 
@@ -33,6 +37,7 @@ export function HumanStoryBlock({
   supportingText,
   cta,
   mediaSide = 'left',
+  rating,
   className,
 }: HumanStoryBlockProps) {
   return (
@@ -68,6 +73,11 @@ export function HumanStoryBlock({
           <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">{eyebrow}</p>
           <span className="casa-tricolor-rule mt-2 block h-1 w-20 rounded-full" aria-hidden />
           <h2 className="mt-3 text-2xl font-bold text-[var(--casa-ink)] sm:text-3xl">{title}</h2>
+          {rating ? (
+            <div className="mt-5 -mb-1">
+              <Stars rating={rating.stars} locale={rating.locale} />
+            </div>
+          ) : null}
           <blockquote className="mt-4 text-lg font-medium leading-relaxed text-[var(--casa-ink)]">
             &quot;{quote}&quot;
           </blockquote>

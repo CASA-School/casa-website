@@ -13,7 +13,7 @@ export const placementNarrativesByLocale: Record<ContentLocale, PlacementNarrati
     ],
     prepChecklist: [
       'Bring your certificates with you, if you already have some.',
-      'Think briefly about what you’d like to achieve with your German.',
+      'Think briefly about what your goal is.',
       'Tell us roughly when you’d like to start the course.',
     ],
   },
@@ -29,7 +29,7 @@ export const placementNarrativesByLocale: Record<ContentLocale, PlacementNarrati
     ],
     prepChecklist: [
       'Bring deine Zertifikate mit, wenn du schon welche hast.',
-      'Überleg dir kurz, was du mit deinem Deutsch erreichen möchtest.',
+      'Überleg dir kurz, was dein Ziel ist.',
       'Sag uns, wann du ungefähr mit dem Kurs beginnen möchtest.',
     ],
   },
