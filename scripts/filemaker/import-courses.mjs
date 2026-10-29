@@ -8,8 +8,12 @@
  * level, so a second run adds nothing twice; what the workspace already has wins.
  *
  * - An intensive or an evening course lands on the start of that type with the same first day: the
- *   starts are the website's dates, read from SchoolMan already (seed 0006), and none is made here. A
- *   level SchoolMan has twice on one start is one course with two groups.
+ *   starts are the website's dates (seeds 0001, 0006). A level SchoolMan has twice on one start is one
+ *   course with two groups.
+ * - An intensive start ahead that SchoolMan has planned and the website has not goes on the website, a
+ *   morning one with its Bildungszeit start (2026-10-29, Rahman: „let the sync publish new starts"). A
+ *   start CASA cancelled here stays cancelled. The evening terms are the website's own, published before
+ *   SchoolMan has them, and none is made here.
  * - An exam preparation, a special module or a company's course is its own start, made here and not
  *   on the website (`on_website`), with its course: the title, the places, the price.
  * - An intensive course that has ended, of a start the website never had (before August 2026), gets that
@@ -22,6 +26,12 @@
 import { connect } from '../db/client.mjs';
 
 const SESSION = { 2: 'morning', 4: 'afternoon', 5: 'evening' };
+/** An intensive start's week as the website publishes it, and Bildungszeit's: both shifts, one span. */
+const SHIFT = {
+  morning: { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '09:00-12:30' },
+  afternoon: { days: ['Mon', 'Tue', 'Wed', 'Thu'], time: '13:00-17:30' },
+};
+const BILDUNGSZEIT = { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '09:00-17:30' };
 const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const PREPARATION = { CH: 'telc Deutsch C1 Hochschule', TD: 'TestDaF', B2: 'telc Deutsch B2' };
 
@@ -69,7 +79,7 @@ async function readStdin() {
 
 const courses = await readStdin();
 const client = await connect();
-const count = { read: courses.length, matched: 0, created: 0, groups: 0, starts: 0, pastStarts: 0, noStart: 0, noLevel: 0, otherType: 0, located: 0, notes: 0, notesGone: 0, titled: 0 };
+const count = { read: courses.length, matched: 0, created: 0, groups: 0, starts: 0, pastStarts: 0, publicStarts: 0, noStart: 0, noLevel: 0, otherType: 0, located: 0, notes: 0, notesGone: 0, titled: 0 };
 const today = new Date().toISOString().slice(0, 10);;
 
 try {
@@ -115,6 +125,26 @@ try {
           )
         ).rows[0];
         count.pastStarts++;
+      }
+      const shift = SHIFT[SESSION[c.daytime]];
+      if (!start && type.slug === 'intensive-german' && c.start > today && shift &&
+          !(await client.query(`SELECT 1 FROM course_instances WHERE course_type_id = $1 AND start_date = $2::date`, [type.id, c.start])).rowCount) {
+        start = (
+          await client.query(
+            `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, location, status)
+             VALUES ($1, $2::date, $3::date, 15, $4::jsonb, 'CASA Bremen - Am Dobben', 'scheduled') RETURNING id`,
+            [type.id, c.start, c.end, JSON.stringify(shift)]
+          )
+        ).rows[0];
+        if (shift === SHIFT.morning) {
+          await client.query(
+            `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, location, status)
+             SELECT t.id, $1::date, $2::date, 15, $3::jsonb, 'CASA Bremen - Am Dobben', 'scheduled' FROM course_types t
+              WHERE t.slug = 'bildungszeit' AND NOT EXISTS (SELECT 1 FROM course_instances i WHERE i.course_type_id = t.id AND i.start_date = $1::date)`,
+            [c.start, c.end, JSON.stringify(BILDUNGSZEIT)]
+          );
+        }
+        count.publicStarts++;
       }
       if (!start) {
         count.noStart++;
@@ -220,7 +250,7 @@ try {
 }
 
 console.log(
-  `${count.read} courses read: ${count.created} new, ${count.matched} already here · ${count.groups} with parallel groups · ${count.starts} own starts made · ${count.pastStarts} past intensive starts made · ` +
+  `${count.read} courses read: ${count.created} new, ${count.matched} already here · ${count.groups} with parallel groups · ${count.starts} own starts made · ${count.pastStarts} past intensive starts made · ${count.publicStarts} starts put on the website · ` +
     `skipped: ${count.noStart} without a start of ours, ${count.noLevel} without a level, ${count.otherType} of a type we do not have\n` +
     `${count.located} places set · ${count.notes} teacher's notes written, ${count.notesGone} removed · ${count.titled} titles from SchoolMan's older title`
 );

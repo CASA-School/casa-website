@@ -95,6 +95,9 @@ describe('course registration catalog (fallback mode)', () => {
       '2027-08-02',
       '2027-08-30',
       '2027-09-27',
+      '2027-10-25',
+      '2027-11-22',
+      '2028-01-03',
     ]);
     expect(options[0]).toMatchObject({ secondHalfOnly: true, secondHalfStart: '2026-09-28' });
     expect(options.slice(1).every((option) => !option.secondHalfOnly)).toBe(true);
@@ -194,6 +197,7 @@ describe('exam sittings (fallback mode)', () => {
       '2027-06-18T07:00:00.000Z',
       '2027-08-20T07:00:00.000Z',
       '2027-10-08T07:00:00.000Z',
+      '2027-11-12T08:00:00.000Z',
     ]);
     expect(catalog.optionsByExamTypeId[TELC_C1].map((option) => option.startsAt)).toEqual([
       '2026-10-30T07:30:00.000Z',
@@ -206,6 +210,8 @@ describe('exam sittings (fallback mode)', () => {
       '2027-07-02T06:30:00.000Z',
       '2027-09-03T06:30:00.000Z',
       '2027-10-01T06:30:00.000Z',
+      '2027-10-29T06:30:00.000Z',
+      '2027-11-26T07:30:00.000Z',
     ]);
     expect(catalog.optionsByExamTypeId[TELC_C1][0].deadlineStatus).toBe('closing-soon');
   });
