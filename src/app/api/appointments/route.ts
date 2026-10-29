@@ -82,18 +82,17 @@ export async function POST(request: Request) {
       source: 'group-appointment',
       organiserBrief: { appointmentStartsAt: startsAt.toISOString(), durationMinutes: 30 },
       userAgent: request.headers.get('user-agent'),
-    });
+    }, input.message || null);
     if (!reserved) return apiError('TAKEN', 'This appointment has just been requested. Please choose another time.', 409);
   } catch {
     console.error('[appointments] reservation failed', { requestId });
     return apiError('UNAVAILABLE', 'Your request could not be saved. Please try again.', 503);
   }
-  const [delivery, confirmation] = await Promise.all([
-    notifyForm('appointment', notification, null, { stored: true }),
-    confirmToSender('appointment', notification),
-  ]);
+  // No alert mail (Rahman, 2026-10-29): the request waits in Ina's „Meine Termine", where she
+  // confirms, moves or cancels it. The organiser still gets the receipt, replies going to Ina.
+  const confirmation = await confirmToSender('appointment', notification);
   return apiSuccess(
-    { requestId, status: 'requested', held: true, notified: delivery.delivered, confirmationSent: confirmation.reachedSender },
+    { requestId, status: 'requested', held: true, notified: false, confirmationSent: confirmation.reachedSender },
     201,
   );
 }

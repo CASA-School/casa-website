@@ -18,9 +18,8 @@ import type { AbsenceReason } from './kursplanung/types';
  * colleague — their „Meine Termine" — and everyone sees every appointment and whose it is, with a
  * mark when that colleague is away on the day, so somebody covers it.
  *
- * Ina's group consultations booked on the website stay requests on their enquiries
- * (group_appointments, 0015): they are listed beside the others, assigned to whoever owns the
- * enquiry, and changed on the enquiry, not here.
+ * Ina's group consultations requested on the website are appointments too (0101): `requested`
+ * until she confirms them, assigned to her, linked to the enquiry with the organiser's details.
  *
  * Every day is `YYYY-MM-DD` on Bremen's calendar; a time is Bremen's wall time, turned into an
  * instant by Postgres (`AT TIME ZONE`), so the change to and from summer time is its business.
@@ -47,7 +46,7 @@ export type Appointment = {
   assignee: { id: string; name: string } | null;
   /** The assignee's absence on the appointment's day, from the staff register. */
   assigneeAway: AbsenceReason | null;
-  /** A group consultation requested on the website: its enquiry, where it is changed. */
+  /** A group consultation requested on the website: the enquiry with the organiser's details. */
   enquiryId: string | null;
 };
 
@@ -100,15 +99,9 @@ export async function appointmentsFrom(from: string, days: number, assignedTo?: 
   const rows = await query<Row>(
     `WITH listed AS (
        SELECT a.id::text AS id, a.kind, a.starts_at, a.minutes, a.first_name, a.last_name, a.email, a.phone, a.note,
-              a.status, a.source, a.assigned_to, NULL::uuid AS enquiry_id
+              a.status, a.source, a.assigned_to, a.enquiry_id
          FROM appointments a
         WHERE (a.starts_at AT TIME ZONE $3)::date BETWEEN $1::date AND $1::date + $2::int
-       UNION ALL
-       SELECT 'request-' || e.id, 'group_consultation', g.starts_at, 30, e.first_name, e.last_name, e.email, NULL, NULL,
-              'booked', 'website', e.assigned_to, e.id
-         FROM group_appointments g JOIN enquiries e ON e.request_id = g.request_id
-        WHERE (g.starts_at AT TIME ZONE $3)::date BETWEEN $1::date AND $1::date + $2::int
-          AND e.status NOT IN ('declined', 'spam')
      )
      SELECT l.id, l.kind, to_char(l.starts_at AT TIME ZONE $3, 'YYYY-MM-DD') AS on_date, to_char(l.starts_at AT TIME ZONE $3, 'HH24:MI') AS at,
             l.minutes, l.first_name, l.last_name, l.email, l.phone, l.note, l.status, l.source,
@@ -161,6 +154,10 @@ export async function createAppointment(input: AppointmentInput, actor: StaffUse
   return { ok: true, id: row.id };
 }
 
+/** A website request moved or reopened onto a time another request already holds (0101's index). */
+const TIME_TAKEN = refuse('Zu dieser Zeit ist schon eine Gruppenberatung angefragt.', 'A group consultation is already requested at that time.');
+const isTimeTaken = (error: unknown) => (error as { code?: string })?.code === '23505';
+
 export async function updateAppointment(id: string, input: AppointmentInput, actor: StaffUser): Promise<Result> {
   const row = await queryFirst<{ id: string }>(
     `UPDATE appointments
@@ -168,18 +165,29 @@ export async function updateAppointment(id: string, input: AppointmentInput, act
             assigned_to = $10, updated_at = timezone('utc', now())
       WHERE id = $11 RETURNING id`,
     [input.date, input.time, input.kind, input.minutes, input.firstName, input.lastName, input.email, input.phone, input.note, input.assignedTo, id]
-  );
+  ).catch((error: unknown) => {
+    if (isTimeTaken(error)) return 'taken' as const;
+    throw error;
+  });
+  if (row === 'taken') return TIME_TAKEN;
   if (!row) return refuse('Diesen Termin gibt es nicht mehr.', 'This appointment no longer exists.');
   await logActivity({ actor, entity: 'appointment', entityId: id, action: 'appointment_updated', detail: { kind: input.kind, date: input.date, time: input.time } });
   return { ok: true };
 }
 
-/** Booked, came, did not come, cancelled: cancelling a placement test gives its place back to the website. */
+/**
+ * Requested, booked, came, did not come, cancelled. Confirming a request books it; cancelling a
+ * placement test or a group consultation gives its time back to the website.
+ */
 export async function setAppointmentStatus(id: string, status: AppointmentStatus, actor: StaffUser): Promise<Result> {
   const row = await queryFirst<{ id: string }>(
     `UPDATE appointments SET status = $2, updated_at = timezone('utc', now()) WHERE id = $1 RETURNING id`,
     [id, status]
-  );
+  ).catch((error: unknown) => {
+    if (isTimeTaken(error)) return 'taken' as const;
+    throw error;
+  });
+  if (row === 'taken') return TIME_TAKEN;
   if (!row) return refuse('Diesen Termin gibt es nicht mehr.', 'This appointment no longer exists.');
   await logActivity({ actor, entity: 'appointment', entityId: id, action: 'appointment_status', detail: { status } });
   return { ok: true };

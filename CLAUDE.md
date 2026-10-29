@@ -123,7 +123,8 @@ registration then answer **503** when nothing was stored and nothing delivered,
 and succeed with `stored: false` when the notification went out. Group appointments work the same
 way (2026-10-09): without a database the popup still offers Ina's schedule, the request goes out by
 mail alone with `held: false`, nothing holds the time and no copy calls it reserved, and the route
-answers 503 if the mail does not go out. The interest list (2026-10-09, a popup on German for
+answers 503 if the mail does not go out; with a database a request is an appointment in Ina's Termine
+(`requested`, 0101) and no alert mail goes out (2026-10-29). The interest list (2026-10-09, a popup on German for
 Medical, which has no set dates) behaves like the contact form: stored as an enquiry when there is
 a database, mailed to info@, 503 only when neither happened. Placement appointments (2026-10-28, the
 placement page's popup, docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md) are booked at once with a database;

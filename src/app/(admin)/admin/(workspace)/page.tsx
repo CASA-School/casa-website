@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
 import { canAccess, type WorkspaceModule } from '@/lib/admin/access';
-import { KIND_CHIPS, KIND_LABELS } from '@/lib/admin/appointment-labels';
+import { KIND_CHIPS, KIND_LABELS, STATUS_CHIPS, STATUS_LABELS } from '@/lib/admin/appointment-labels';
 import { appointmentsFrom, type Appointment } from '@/lib/admin/appointments';
 import { bridgeStatus, bridgeTime } from '@/lib/admin/bridge';
 import { berlinDay } from '@/lib/admin/days';
@@ -234,7 +234,7 @@ export default async function OverviewPage() {
     bridgeStatus(),
     getI18n(),
     // The colleague's own appointments of the coming week (0098), only for those who open the Tagesplan.
-    canAccess(user, 'day') ? appointmentsFrom(today, 6, user.id).then((list) => list.filter((a) => a.status === 'booked')) : Promise.resolve([]),
+    canAccess(user, 'day') ? appointmentsFrom(today, 6, user.id).then((list) => list.filter((a) => a.status === 'booked' || a.status === 'requested')) : Promise.resolve([]),
   ]);
 
   const now = new Date();
@@ -329,7 +329,12 @@ function MyAppointments({ appointments, today, t, lang }: { appointments: Appoin
                 <span className="text-[1.05rem] leading-tight font-extrabold text-[var(--casa-ink)] tabular-nums">{a.time}</span>
               </span>
               <span className="min-w-0 flex-1">
-                <span className={cn('inline-flex h-5 items-center rounded-md px-1.5 text-[0.68rem] font-bold', KIND_CHIPS[a.kind])}>{pick(lang, KIND_LABELS[a.kind])}</span>
+                <span className="flex flex-wrap items-center gap-1.5">
+                  <span className={cn('inline-flex h-5 items-center rounded-md px-1.5 text-[0.68rem] font-bold', KIND_CHIPS[a.kind])}>{pick(lang, KIND_LABELS[a.kind])}</span>
+                  {a.status === 'requested' ? (
+                    <span className={cn('inline-flex h-5 items-center rounded-md px-1.5 text-[0.68rem] font-bold ring-1 ring-inset', STATUS_CHIPS.requested)}>{pick(lang, STATUS_LABELS.requested)}</span>
+                  ) : null}
+                </span>
                 <span className="mt-1 block truncate text-[0.92rem] font-bold text-[var(--casa-ink)]">{[a.firstName, a.lastName].filter(Boolean).join(' ')}</span>
                 <span className="block truncate text-[0.78rem] text-[var(--casa-muted)]">{a.phone ?? a.email ?? t(`${a.minutes} Minuten`, `${a.minutes} minutes`)}</span>
               </span>

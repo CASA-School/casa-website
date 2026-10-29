@@ -59,7 +59,12 @@ describe('appointment requests', () => {
     expect(response.status).toBe(201);
     expect(mocks.reserve.mock.calls[0][0].toISOString()).toBe('2026-09-21T08:30:00.000Z');
     expect(await response.json()).toMatchObject({ data: { status: 'requested', held: true, notified: false }, error: null });
-    expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: true });
+  });
+  it('with a database puts the request in Termine: no alert mail, the receipt still goes out', async () => {
+    expect((await POST(request())).status).toBe(201);
+    expect(mocks.notify).not.toHaveBeenCalled();
+    expect(mocks.confirm).toHaveBeenCalledTimes(1);
+    expect(mocks.confirm.mock.calls[0][0]).toBe('appointment');
   });
   it('refuses a seventh request from one client in ten minutes, before reserving a slot', async () => {
     for (let i = 0; i < 6; i += 1) expect((await POST(request())).status).toBe(201);

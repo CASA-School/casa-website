@@ -1440,11 +1440,15 @@ day as one moves between them.
     assignee is away that day (staff register, `staff_members.staff_user_id`). The panel
     (`appointments-panel.tsx`): „Alle | Meine", the day („Einstufung: x von 24 Plätzen"), then the
     next two weeks; each row the time and length, the name with its kind, phone and email, whose it
-    is (a menu: a colleague or the team), the absence mark, where it stands (Gebucht, Erschienen,
-    Nicht gekommen, Abgesagt — which gives a placement place back) and „Ändern". „Termin eintragen":
-    kind, whose (yourself by default), day, time, length, with whom; contact and note open once a
-    name is in. Ina's group consultations booked on the website are listed too, assigned to whoever
-    owns their enquiry, and opened there. The start page shows the colleague's own appointments of
+    is (a menu: a colleague or the team), the absence mark, where it stands (Angefragt, Gebucht,
+    Erschienen, Nicht gekommen, Abgesagt — which gives a placement place or Ina's time back) and
+    „Ändern". „Termin eintragen": kind, whose (yourself by default), day, time, length, with whom;
+    contact and note open once a name is in. **Ina's group consultations requested on the website
+    are appointments too** (2026-10-29, migration 0101, Rahman: „my termine so she could confirm and
+    cancel or delay"): `requested` („Angefragt") and assigned to the account with her published
+    address (`GROUP_CONTACT_EMAIL`, src/config/content/contacts.ts), linked to the enquiry with the
+    organiser's details („Anfrage"). „Bestätigen" books it, „Ändern" moves it, „Abgesagt" frees the
+    time on the website; no alert mail goes to her any more. The start page shows the colleague's own appointments of
     the week as „Meine Termine" (`/admin/day?termine=mine`). `day` at `edit` writes, `full` deletes;
     no mail goes from here — a confirmation to someone booked by phone is written on the mail screen.
   - *Geburtstage* — colleagues' birthdays in the next two weeks, day and month only.

@@ -76,7 +76,8 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
 
 **For CASA**
 
-1. Ina's mailbox address, for `FORM_RECIPIENT_APPOINTMENT`.
+1. ~~Ina's mailbox address, for `FORM_RECIPIENT_APPOINTMENT`~~ **Settled 2026-10-29 (Rahman):** her group
+   consultations wait in her Termine in the workspace; no alert mail. §15 and §16 say so.
 2. Minors: may someone under 18 register for a course, exam or accommodation without a
    parent or guardian? The policy says nothing about it today.
 3. Job-application alert to `info@`: the site now sends only the position,
