@@ -250,6 +250,10 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
 4. Obtain permanent recipients and set every FORM_RECIPIENT_* variable listed in `.env.example`.
    Set FORM_DELIVERY_MODE=live only after owner approval and delivery tests. Verify any retained
    legacy webhook's recipient rules separately. Record the approved addresses and change date here.
+   **Live since 2026-10-29** (Rahman, revision 0000095): `FORM_RECIPIENT_COURSE`, `_EXAM` and
+   `_PLACEMENT` = online@casa-bremen.de; `_CONTACT`, `_GROUPS` and `_CAREERS` = info@casa-bremen.de;
+   `_APPOINTMENT` unset (Ina's requests wait in her Termine, migration 0101). `FORM_REPLY_TO_CAREERS`
+   is unset, so an applicant gets no receipt until management names a mailbox.
 5. Finish the photo, operational-content and legal approval work. Review existing dependency alerts.
    Test the deployed website, back up TYPO3 and plan the casa-bremen.de domain cutover.
 

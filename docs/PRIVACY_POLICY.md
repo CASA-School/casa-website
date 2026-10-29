@@ -66,9 +66,11 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
   Central (checked 2026-09-30, as `docs/AZURE_DEPLOYMENT_PLAN.md` says); the website and the logs
   stay there.
 - **Mail**: Graph mail from a CASA mailbox, `FORM_DELIVERY_MODE=live`, and every
-  `FORM_RECIPIENT_*` set to the routing in §16. **Not yet** (2026-10-26): the app runs in test mode,
-  every mail goes to `admin@`, and Exchange lets the site send from `admin@` only, so the scope
-  must be widened (or a sender mailbox chosen) before any `FORM_RECIPIENT_*` can work.
+  `FORM_RECIPIENT_*` set to the routing in §16. **True since 2026-10-29** (Rahman, revision 0000095):
+  `FORM_DELIVERY_MODE=live`; course, exam and placement to online@; contact, groups, the interest
+  list and job-application alerts to info@; Ina's group consultations wait in her Termine without an
+  alert. The sender stays `admin@`: the Exchange scope limits the mailbox the site sends from, not
+  whom it sends to.
 - **Staff host**: `admin.casa-bremen.de` live and `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset (§5).
   **True since 2026-10-11.**
 
