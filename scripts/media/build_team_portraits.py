@@ -2,8 +2,8 @@
 
 Each portrait is the colleague's own photograph — the file Rahman named after them, or the frame he
 chose (Meike: IMG_0342, 2026-10-27) — cropped where a recipe says so and resized, in the camera's own
-colour. No grade: two were tried on 2026-10-27, build_reel.py's warm editorial pass and then the same
-pass neutralised on each photo's whites, and Rahman kept the original colours („it is better").
+colour. No grade on the team-shoot portraits: two were tried on 2026-10-27 and Rahman kept the
+original colours („it is better"). Bettina's separately supplied photo also keeps its original colour.
 Nothing is retouched, moved or generated (CLAUDE.md hard rules 3 and 4).
 
 SHARPNESS. The first set (1000px, WebP quality 82) went through the image server, which re-encoded it
@@ -16,8 +16,8 @@ contact avatar still goes through the server, at quality 90 (person-monogram.tsx
     python3 scripts/media/build_team_portraits.py            # write public/media/casa/team/*.webp
     python3 scripts/media/build_team_portraits.py --sheet    # and a before/after sheet in output/
 
-The originals live outside the repository (~/Downloads/CASA Team Photos 2026), so this runs on the
-machine that holds them.
+The originals live outside the repository (~/Downloads/CASA Team Photos 2026 and Bettina's supplied
+~/Downloads/IMG_4996.jpg), so this runs on the machine that holds them.
 """
 import sys
 from pathlib import Path
@@ -36,6 +36,8 @@ QUALITY = 88
 
 # slug: the original, and a box (x, y, width, height in the upright original) where the frame needs one.
 PORTRAITS = {
+    # Rahman's replacement IMG_4996.jpg (2026-10-29), cropped and resized only.
+    'bettina-rick': {'source': Path.home() / 'Downloads/IMG_4996.jpg', 'box': (300, 1750, 3450, 3450)},
     'tanja-langenickel': {'file': 'Tanja.JPG'},
     'natalia-sostres': {'file': 'Natalia.JPG'},
     # IMG_0342 (Rahman, 2026-10-27): she stands right of centre. A light 2:3 crop (90% of the frame) brings
@@ -56,12 +58,13 @@ PORTRAITS = {
 
 
 def render(recipe: dict) -> np.ndarray:
-    rgb = load(SOURCE / recipe['file'])
+    source = recipe['source'] if 'source' in recipe else SOURCE / recipe['file']
+    rgb = load(source)
     h, w = rgb.shape[:2]
     if 'box' in recipe:
         x0, y0, bw, bh = recipe['box']
         if x0 < 0 or y0 < 0 or x0 + bw > w or y0 + bh > h:
-            raise SystemExit(f"{recipe['file']}: box {recipe['box']} does not fit {w}x{h}")
+            raise SystemExit(f"{source}: box {recipe['box']} does not fit {w}x{h}")
         rgb = rgb[y0:y0 + bh, x0:x0 + bw]
     size = (WIDTH, round(rgb.shape[0] * WIDTH / rgb.shape[1]))
     return cv2.resize(rgb, size, interpolation=cv2.INTER_AREA)
