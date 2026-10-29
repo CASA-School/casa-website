@@ -2162,16 +2162,6 @@
    "/contact"
   ]
  },
- "t.bei-casa-kannst-du.1d7cvga": {
-  "de": "Bei CASA kannst du nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.",
-  "en": "At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.",
-  "files": [
-   "src/app/(site)/[locale]/page.tsx"
-  ],
-  "pages": [
-   "/"
-  ]
- },
  "t.bei-casa-lernen-menschen.19vh54u": {
   "de": "Bei CASA lernen Menschen aus über 150 Ländern zusammen, mit unterschiedlicher kultureller, religiöser und sozialer Herkunft. Wir fördern Verständigung, Respekt und Toleranz, nach unserem Leitbild „Miteinander reden – aufeinander zugehen\".",
   "en": "At CASA, people from more than 150 countries and of different cultural, religious and social backgrounds learn together. We promote understanding, respect and tolerance, following our guiding principle: talk with each other, reach out to each other.",
@@ -2180,6 +2170,16 @@
   ],
   "pages": [
    "/about/nonprofit"
+  ]
+ },
+ "t.bei-casa-lernst-du.1p129z5": {
+  "de": "Bei CASA lernst du Deutsch und triffst Menschen aus aller Welt. Als gemeinnützige Sprachschule helfen wir dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.",
+  "en": "At CASA you learn German and meet people from all over the world. As a non-profit language school, we help you settle into Bremen, with personal support and a welcoming community.",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
   ]
  },
  "t.bei-der-ankunft-und.1rjirl8": {
@@ -5252,16 +5252,6 @@
    "src/config/content/heroes.ts"
   ],
   "pages": []
- },
- "t.deutsch-lernen-in-bremen.wgd8if": {
-  "de": "Deutsch lernen in Bremen · seit 1983",
-  "en": "German courses in Bremen · since 1983",
-  "files": [
-   "src/app/(site)/[locale]/page.tsx"
-  ],
-  "pages": [
-   "/"
-  ]
  },
  "t.deutsch-lernen-und-bremen.5q5wxi": {
   "de": "Deutsch lernen und Bremen gemeinsam erleben: Wir planen den Unterricht, das Kulturprogramm und die Unterkunft passend zu jeder Gruppe. Dieses Programm ist für Schulklassen, Hochschulen und Organisationen, die mit einer Gruppe nach Bremen kommen möchten.",
@@ -9734,6 +9724,24 @@
   ],
   "pages": [
    "/about/nonprofit"
+  ]
+ },
+ "t.gemeinnuetzige-sprachschule-in-b.dir2t3": {
+  "de": "Gemeinnützige Sprachschule in Bremen",
+  "en": "Non-profit language school in Bremen",
+  "files": [
+   "src/config/content/proof-metrics.ts"
+  ],
+  "pages": []
+ },
+ "t.gemeinnuetzige-sprachschule-in-b.k1h9mq": {
+  "de": "Gemeinnützige Sprachschule in Bremen · seit 1983",
+  "en": "Non-profit language school in Bremen · since 1983",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
   ]
  },
  "t.gemeinnuetzige-sprachschule.8osvkv": {
@@ -20143,14 +20151,6 @@
    "/courses/[slug]"
   ]
  },
- "t.unabhaengige-sprachschule-in-bre.1uend51": {
-  "de": "Unabhängige Sprachschule in Bremen",
-  "en": "Independent language school in Bremen",
-  "files": [
-   "src/config/content/proof-metrics.ts"
-  ],
-  "pages": []
- },
  "t.und.cbu5qy": {
   "de": " und ",
   "en": " and ",
@@ -20293,6 +20293,16 @@
   ],
   "pages": [
    "/about/nonprofit"
+  ]
+ },
+ "t.unsere-gemeinnuetzige-arbeit.1452jqw": {
+  "de": "Unsere gemeinnützige Arbeit",
+  "en": "Our non-profit work",
+  "files": [
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/"
   ]
  },
  "t.unsere-intensivkurse-finden-in.1myxstb": {

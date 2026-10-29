@@ -31,7 +31,19 @@ annual report; commercial activity limited, with how proceeds support the progra
 HTTPS, working links and buttons, fast and mobile-ready pages; no excessive third-party ads; any
 donation link going to a secure page dedicated to donations.
 
+**Decision (Rahman, 2026-10-29): reapply as CASA gGmbH from casa-bremen.de.** The earlier
+rejection was recorded as „too commercial", a website verdict, which Google gives after an
+organisation has been accepted into Google for Nonprofits; the old site was the problem. Before
+reapplying: deploy the changes below, add the tax number and Freistellungsbescheid to the
+non-profit page, and keep the homepage's first screen saying „gemeinnützig".
+
 ## Implemented In This Project
+
+- **2026-10-29, homepage first screen:** the eyebrow says „Gemeinnützige Sprachschule in Bremen ·
+  seit 1983" (was „Deutsch lernen in Bremen"), the lead „Als gemeinnützige Sprachschule …", a
+  second hero link „Unsere gemeinnützige Arbeit" beside „Kurs finden", and the proof band's
+  „Unabhängige Sprachschule" became „Gemeinnützige Sprachschule". The organisation's structured
+  data adds the `NGO` type to `EducationalOrganization` and `LocalBusiness`.
 
 - **2026-10-29, `/ueber-uns/gemeinnuetzigkeit` (`#angebote`):** what the non-profit work is,
   from the Förderverein's own description — free course places for people in hardship, the

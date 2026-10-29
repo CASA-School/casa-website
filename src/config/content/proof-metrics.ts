@@ -4,7 +4,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
   en: [
     {
       value: 'Since 1983',
-      label: 'Independent language school in Bremen',
+      label: 'Non-profit language school in Bremen',
       locale: 'en',
       sourceUrl: 'https://www.casa-bremen.de/unsere-sprachschule/',
       sourceType: 'website',
@@ -42,7 +42,7 @@ export const proofMetricsByLocale: Record<ContentLocale, ProofMetric[]> = {
   de: [
     {
       value: 'Seit 1983',
-      label: 'Unabhängige Sprachschule in Bremen',
+      label: 'Gemeinnützige Sprachschule in Bremen',
       locale: 'de',
       sourceUrl: 'https://www.casa-bremen.de/unsere-sprachschule/',
       sourceType: 'website',
