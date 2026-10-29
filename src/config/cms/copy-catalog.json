@@ -970,16 +970,6 @@
    "/courses/[slug]"
   ]
  },
- "t.anerkannt-wird-ein-sprachkurs.1eu32zg": {
-  "de": "Anerkannt wird ein Sprachkurs mit 30 bis 40 Stunden Unterricht pro Woche. Dafür besuchst du zwei Intensivkurse parallel, einen am Vormittag und einen am Nachmittag.",
-  "en": "A language course is recognised if it has 30 to 40 hours of teaching a week. To reach that, you attend two intensive courses side by side, one in the morning and one in the afternoon.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.anerkennung-wegen-foerderung-der.9g3xjf": {
   "de": "Anerkennung wegen Förderung der Volks- und Berufsbildung",
   "en": "Recognised for promoting adult education and vocational training",
@@ -1751,9 +1741,9 @@
    "*"
   ]
  },
- "t.auf-dieser-grundlage-stellen.txa2ah": {
-  "de": "Auf dieser Grundlage stellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter zusammen.",
-  "en": "On that basis we put together the training plan for your staff.",
+ "t.auf-dieser-grundlage-erstellen.19egouy": {
+  "de": "Auf dieser Grundlage erstellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter.",
+  "en": "On that basis we draw up the training plan for your staff.",
   "files": [
    "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
@@ -2482,6 +2472,16 @@
   ],
   "pages": []
  },
+ "t.beratung.ot01jp": {
+  "de": "Beratung",
+  "en": "Consultation",
+  "files": [
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.bereite-dich-gezielt-auf.1w6xkhe": {
   "de": "Bereite dich gezielt auf telc Deutsch B2 oder telc Deutsch C1 Hochschule vor.",
   "en": "Get ready for telc Deutsch B2 or telc Deutsch C1 Hochschule with focused practice.",
@@ -2613,8 +2613,8 @@
    "/accommodation/[type]"
   ]
  },
- "t.besprich-mit-ina-eismann.19gm8yd": {
-  "de": "Besprich mit Ina Eismann deine Ideen, offenen Fragen und Wünsche für deine Gruppe.",
+ "t.besprich-mit-ina-eismann.1ri2pdf": {
+  "de": "Besprich mit Ina Eismann deine Ideen, offene Fragen und Wünsche deiner Gruppe.",
   "en": "Choose a time to talk with Ina Eismann about your plans, your questions and what your group needs.",
   "files": [
    "src/components/gruppen/appointment-dialog.tsx"
@@ -3814,8 +3814,8 @@
    "/courses/[slug]"
   ]
  },
- "t.damit-ein-sprachkurs-als.42mzw1": {
-  "de": "Damit ein Sprachkurs als Bildungszeit anerkannt wird, braucht er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Dafür besuchst du gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.",
+ "t.damit-ein-sprachkurs-als.1x8zpaw": {
+  "de": "Damit ein Sprachkurs als Bildungszeit anerkannt wird, benötigt er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Du besuchst gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.",
   "en": "For a language course to count as Bildungszeit, it needs 30–40 hours of teaching a week. Our super-intensive courses meet this requirement. You attend two intensive courses at the same time, one in the morning and one in the afternoon.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
@@ -3835,9 +3835,9 @@
    "/accommodation"
   ]
  },
- "t.danach-erhaelt-die-firma.n0nhv3": {
-  "de": "Danach erhält die Firma unser Angebot. Beratung und Angebot sind stets unverbindlich.",
-  "en": "You then receive our quote. Neither the consultation nor the quote commits you to anything.",
+ "t.danach-erhaelt-die-firma.csgjll": {
+  "de": "Danach erhält die Firma unser Angebot. Beratung und Angebot sind kostenlos und unverbindlich.",
+  "en": "You then receive our quote. The consultation and the quote are free and without obligation.",
   "files": [
    "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
@@ -4673,9 +4673,9 @@
    "/resources/why-germany"
   ]
  },
- "t.den-preis-kalkulieren-wir.131dy5f": {
-  "de": "Den Preis kalkulieren wir für jede Firma einzeln. Die Studienberatung und das Angebot sind stets unverbindlich.",
-  "en": "We work out the price separately for each company. The consultation and the quote are always without obligation.",
+ "t.den-preis-kalkulieren-wir.1acxlsx": {
+  "de": "Den Preis kalkulieren wir für jede Firma einzeln. Die Beratung und das Angebot sind kostenlos und unverbindlich.",
+  "en": "We work out the price separately for each company. The consultation and the quote are free and without obligation.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -4750,8 +4750,8 @@
    "/courses/[slug]"
   ]
  },
- "t.der-esel-steht-ganz.1llilxs": {
-  "de": "Der Esel steht ganz unten und trägt die anderen drei. Sei stur und unabhängig und stelle dir dein eigenes Programm zusammen.",
+ "t.der-esel-steht-ganz.12ehyl9": {
+  "de": "Der Esel steht ganz unten und trägt die anderen drei. Sei zielbewusst und unabhängig und stelle dir dein eigenes Programm zusammen.",
   "en": "The donkey stands at the very bottom and carries the other three. This is the package you put together yourself.",
   "files": [
    "src/config/gruppen/packages.ts"
@@ -4801,9 +4801,9 @@
    "/courses/[slug]"
   ]
  },
- "t.der-hund-hat-dieselben.x0c9y6": {
-  "de": "Der Hund hat dieselben zwei Wochen wie die Katze und führt deine Gruppe auch hinaus in die Region, mit einem ganzen Tag in Hamburg, einer Hafenrundfahrt und dem Klimahaus in Bremerhaven. Er passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.",
-  "en": "The dog has the same two weeks as the cat and also takes your group out into the region, with a whole day in Hamburg, a boat tour of the harbour and the Klimahaus in Bremerhaven. It suits groups who have been on a language trip before and would like to see more of the region.",
+ "t.der-hund-beinhaltet-zwei.1j4qvbu": {
+  "de": "Der Hund beinhaltet zwei Wochen und führt deine Gruppe auch hinaus in die Region. Verbring einen Tag in Hamburg, mach eine Hafenrundfahrt und besuch das Klimahaus in Bremerhaven. Dieses Angebot passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.",
+  "en": "The dog covers two weeks and also takes your group out into the region. Spend a day in Hamburg, take a boat tour of the harbour and visit the Klimahaus in Bremerhaven. This package suits groups who have been on a language trip before and would like to see more of the region.",
   "files": [
    "src/config/gruppen/packages.ts"
   ],
@@ -4958,9 +4958,9 @@
    "/courses/[slug]"
   ]
  },
- "t.der-unterricht-umfasst-unterrich.1nvd406": {
-  "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
-  "en": "Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.",
+ "t.der-unterricht-umfasst-unterrich.12b5qkz": {
+  "de": "Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten und speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.",
+  "en": "Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves and put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -4979,9 +4979,9 @@
    "/exams/[code]"
   ]
  },
- "t.der-zeitraum-ist-flexibel.mqtxoe": {
-  "de": "Der Zeitraum ist flexibel, und du kannst immer montags einsteigen. Wir empfehlen dir, die Bildungszeit zu beginnen, wenn ein neuer Intensivkurs startet. So lernst du von Anfang an mit den anderen Teilnehmerinnen und Teilnehmern zusammen.",
-  "en": "The timing is flexible, and you can always start on a Monday. We recommend starting your Bildungszeit when a new intensive course begins. That way you learn alongside the other participants from the very first day.",
+ "t.der-zeitraum-ist-flexibel.si6rpv": {
+  "de": "Der Zeitraum ist flexibel, und du kannst wöchentlich einsteigen.",
+  "en": "The timing is flexible, and you can join in any week.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -5050,7 +5050,8 @@
   "de": "Deutsch für den Klinik- und Pflegealltag, mit Vorbereitung auf die Fachsprachprüfung.",
   "en": "German for work in hospitals and care, with preparation for the medical language exam.",
   "files": [
-   "src/app/(site)/[locale]/page.tsx"
+   "src/app/(site)/[locale]/page.tsx",
+   "src/config/content/course-narratives.ts"
   ],
   "pages": [
    "/"
@@ -5288,9 +5289,9 @@
    "*"
   ]
  },
- "t.die-bildungszeit-vereinbarst-du.zhehe6": {
-  "de": "Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir planen den Kurs passend dazu.",
-  "en": "You arrange your Bildungszeit with your employer, and we plan the course to fit.",
+ "t.die-bildungszeit-vereinbarst-du.1wzd9a5": {
+  "de": "Die Bildungszeit vereinbarst du mit deinem Arbeitgeber. Wir beraten dich gern.",
+  "en": "You arrange your Bildungszeit with your employer. We are happy to advise you.",
   "files": [
    "src/config/courses/course-page-content.ts"
   ],
@@ -5468,9 +5469,9 @@
    "/courses/[slug]"
   ]
  },
- "t.die-inhalte-richten-sich.sgtuqn": {
-  "de": "Die Inhalte richten sich nach den Fachgebieten und dem Kenntnisstand der Gruppe.",
-  "en": "The content follows the specialisms and current level of the group.",
+ "t.die-inhalte-richten-sich.d5q3kk": {
+  "de": "Die Inhalte richten sich jeweils nach den Fachgebieten und dem Kenntnisstand der Gruppe.",
+  "en": "The content follows the specialisms and current level of each group.",
   "files": [
    "src/config/courses/course-page-content.ts"
   ],
@@ -6243,9 +6244,9 @@
    "/resources/why-germany"
   ]
  },
- "t.du-brauchst-ein-deutschzertifika.1aund1k": {
-  "de": "Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten.",
-  "en": "Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses.",
+ "t.du-brauchst-ein-deutschzertifika.csgif3": {
+  "de": "Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten. Bald bieten wir auch telc Deutsch B1 an.",
+  "en": "Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses. Soon we will offer telc Deutsch B1 too.",
   "files": [
    "src/app/(site)/[locale]/exams/page.tsx"
   ],
@@ -6261,16 +6262,6 @@
   ],
   "pages": [
    "/"
-  ]
- },
- "t.du-brauchst-mindestens-sprachken.171a6aq": {
-  "de": "Du brauchst mindestens Sprachkenntnisse auf B1-Niveau.",
-  "en": "Your German needs to be at B1 level or above.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.du-entscheidest-was-dein.1ebwyj1": {
@@ -6356,24 +6347,14 @@
    "/"
   ]
  },
- "t.du-kannst-ein-modul.x5kfg5": {
-  "de": "Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
+ "t.du-kannst-ein-modul.1iibr56": {
+  "de": "Du kannst ein Modul einzeln belegen oder auch neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.",
   "en": "You can take a module on its own or alongside another course. The modules are a good choice if you want to revise, refresh or go deeper into particular topics.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
    "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.du-kannst-eine-bis.q0fkn8": {
-  "de": "Du kannst eine bis neun Wochen buchen und an jedem Montag einsteigen.",
-  "en": "You can book from one to nine weeks and start on any Monday.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
    "/courses/[slug]"
   ]
  },
@@ -6581,16 +6562,6 @@
   ],
   "pages": [
    "/careers/[slug]"
-  ]
- },
- "t.du-uebst-gespraeche-das.jk8fdc": {
-  "de": "Du übst Gespräche, das Hörverstehen und die schriftliche Dokumentation im Beruf.",
-  "en": "You practise conversations, listening and the written documentation your work involves.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.du-verstaendigst-dich-in.1gzvx9i": {
@@ -7552,6 +7523,16 @@
    "/team"
   ]
  },
+ "t.eine-gute-aussprache-laesst.15t35e9": {
+  "de": "Eine gute Aussprache lässt sich trainieren!",
+  "en": "Good pronunciation can be trained!",
+  "files": [
+   "src/config/courses/special-course-modules.ts"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.eine-haftpflichtversicherung-ist.16pgkce": {
   "de": "Eine Haftpflichtversicherung ist nicht vorgeschrieben, in Deutschland aber üblich, und viele Vermieterinnen und Vermieter fragen danach.",
   "en": "It is common in Germany to have personal liability insurance (Haftpflichtversicherung), although it is not compulsory, and many landlords ask about it.",
@@ -7936,6 +7917,18 @@
   ],
   "pages": [
    "/calculator"
+  ]
+ },
+ "t.einsteigen-kannst-du-ab.xxrzce": {
+  "de": "Einsteigen kannst du ab B1. Du lernst superintensiv und hast {course.bildungszeit.lessons} Unterrichtseinheiten pro Woche.",
+  "en": "You can join from B1. You learn super-intensively, with {course.bildungszeit.lessons} lessons a week.",
+  "files": [
+   "src/config/courses/course-profiles.ts"
+  ],
+  "pages": [
+   "/",
+   "/courses",
+   "/courses/[slug]"
   ]
  },
  "t.einstieg-in-den-laufenden.14qz0fk": {
@@ -8861,16 +8854,6 @@
   ],
   "pages": []
  },
- "t.fuer-alle-die-im.rmioqn": {
-  "de": "Für alle, die im Land Bremen arbeiten",
-  "en": "For everyone who works in the state of Bremen",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.fuer-alle-die-sich.1m34awk": {
   "de": "Für alle, die sich intensiv mit Deutsch beschäftigen möchten – für das Studium, den Beruf und den Alltag.",
   "en": "For anyone who wants to work intensively on their German, for their studies, their job and everyday life.",
@@ -9697,8 +9680,8 @@
    "/resources/why-germany"
   ]
  },
- "t.gerne-nehmen-wir-uns.q8skev": {
-  "de": "Gerne nehmen wir uns Zeit für eine gemeinsame Studienberatung, in der wir uns ein Bild von Lernbedürfnissen, Lernzielen und Sprachkenntnissen machen. Daraus entwickeln wir anschließend den Ausbildungsplan.",
+ "t.gerne-nehmen-wir-uns.xkxjfz": {
+  "de": "Gerne nehmen wir uns Zeit für eine gemeinsame Beratung, in der wir uns ein Bild von Lernbedürfnissen, Lernzielen und Sprachkenntnissen machen. Daraus entwickeln wir anschließend den Ausbildungsplan.",
   "en": "We are happy to take the time to sit down with you and get a picture of your team’s learning needs, goals and language skills. From that, we draw up the training plan.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
@@ -10744,9 +10727,9 @@
    "/resources/why-germany"
   ]
  },
- "t.im-ersten-gespraech-erfahren.momb1e": {
-  "de": "Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.",
-  "en": "In a first meeting we find out what your team needs to learn and how much German they already speak.",
+ "t.im-ersten-gespraech-erfahren.dblqyw": {
+  "de": "Im ersten Gespräch erfahren wir, welchen Bedarf es gibt und welche Sprachkenntnisse das jeweilige Team mitbringt.",
+  "en": "In a first meeting we find out what is needed and how much German the team already speaks.",
   "files": [
    "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
@@ -10797,9 +10780,9 @@
    "/team"
   ]
  },
- "t.im-klinikalltag-ist-es.taud3v": {
-  "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.",
-  "en": "In everyday hospital work it is very important to communicate accurately in professional terms and to take in every piece of information precisely. That is why you practise conversations with patients, relatives, doctors and nursing staff, as well as listening and the written documentation your job involves.",
+ "t.im-klinikalltag-ist-es.17vn7an": {
+  "de": "Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal sowie das Hörverstehen und die schriftliche Dokumentation.",
+  "en": "In everyday hospital work it is very important to communicate accurately in professional terms and to take in every piece of information precisely. That is why you practise conversations with patients, relatives, doctors and nursing staff, as well as listening comprehension and written documentation.",
   "files": [
    "src/config/courses/course-practical-facts.ts"
   ],
@@ -11073,9 +11056,9 @@
   ],
   "pages": []
  },
- "t.in-diesem-kurs-entwickelst.e7rlqm": {
-  "de": "In diesem Kurs entwickelst du gezielt dein Sprechen weiter. Gemeinsam üben wir Präsentationen, Diskussionen, Debatten und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und im Beruf freier und sicherer.",
-  "en": "In this course you develop your speaking skills. Together we practise presentations, discussions, debates and conversations for different occasions. Along the way you widen your vocabulary, improve how you express yourself and speak more freely and confidently, in everyday life and at work.",
+ "t.in-diesem-kurs-festigst.bds267": {
+  "de": "In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. So schaffen wir gemeinsam die Grundlage für einen sicheren und flüssigen Ausdruck.",
+  "en": "In this course you consolidate the most important grammar topics at levels B1 and B2, such as sentence structure, tenses, the subjunctive (Konjunktiv II), the passive, relative clauses and prepositions. Together we lay the foundations for confident, fluent expression.",
   "files": [
    "src/config/courses/special-course-modules.ts"
   ],
@@ -11083,9 +11066,9 @@
    "/courses/[slug]"
   ]
  },
- "t.in-diesem-kurs-festigst.h5mxy1": {
-  "de": "In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. Wir erklären sie verständlich und üben sie so, dass du sie gleich anwenden kannst. So schaffen wir gemeinsam die Grundlagen für sicheres und flüssiges Deutsch.",
-  "en": "In this course you consolidate the most important grammar topics at levels B1 and B2, such as sentence structure, tenses, the subjunctive (Konjunktiv II), the passive, relative clauses and prepositions. We explain them clearly and practise them so that you can use them straight away. Together we lay the foundations for confident, fluent German.",
+ "t.in-diesem-kurs-lernst.xo5kqh": {
+  "de": "In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel sowie Fehlervermeidung.",
+  "en": "In this course you learn the basics of writing step by step. We practise short emails, messages, descriptions and other everyday texts, and look at text structure, word choice, typical phrases and how to avoid mistakes.",
   "files": [
    "src/config/courses/special-course-modules.ts"
   ],
@@ -11093,9 +11076,9 @@
    "/courses/[slug]"
   ]
  },
- "t.in-diesem-kurs-lernst.1anyxae": {
-  "de": "In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel und häufige Fehler in Grammatik und Rechtschreibung.",
-  "en": "In this course you learn the basics of writing step by step. We practise short emails, messages, descriptions and other everyday texts, and look at text structure, word choice, typical phrases and common mistakes in grammar and spelling.",
+ "t.in-diesem-kurs-trainierst.1shcp6b": {
+  "de": "In diesem Kurs trainierst du gezielt den mündlichen Ausdruck. Gemeinsam üben wir Präsentationen, Diskussionen und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und Beruf freier und sicherer.",
+  "en": "In this course you work specifically on your spoken German. Together we practise presentations, discussions and conversations for different occasions. Along the way you widen your vocabulary, improve how you express yourself and speak more freely and confidently, in everyday life and at work.",
   "files": [
    "src/config/courses/special-course-modules.ts"
   ],
@@ -11123,8 +11106,8 @@
    "/courses/[slug]"
   ]
  },
- "t.in-diesem-kurs-verbesserst.1xxm3ap": {
-  "de": "In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du im Alltag, im Beruf und in Prüfungen flüssiger, verständlicher und mit mehr Selbstvertrauen.",
+ "t.in-diesem-kurs-verbesserst.18cutym": {
+  "de": "In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du in Alltag, Beruf und Prüfung flüssiger, verständlicher und mit mehr Selbstvertrauen.",
   "en": "In this course you work on your German pronunciation. You practise sounds, word stress, sentence melody and intonation through a variety of exercises, and you get personal feedback. That way you speak more fluently, more clearly and with more confidence, in everyday life, at work and in exams.",
   "files": [
    "src/config/courses/special-course-modules.ts"
@@ -11133,9 +11116,9 @@
    "/courses/[slug]"
   ]
  },
- "t.in-diesem-kurs-wiederholen.1iloqz9": {
-  "de": "In diesem Kurs wiederholen und festigen wir gemeinsam die wichtigsten Themen der Basisgrammatik. Er passt zu dir, wenn du auf A2-Niveau lernst, und auch dann, wenn du schon weiter bist und deine Grundlagen gezielt auffrischen möchtest.",
-  "en": "In this course we revise and consolidate the most important topics of basic grammar together. It suits you if you are learning at A2 level, and also if you are further on and want to brush up on the basics.",
+ "t.in-diesem-kurs-wiederholst.15kyg4r": {
+  "de": "In diesem Kurs wiederholst und festigst du die wichtigsten Themen der Basisgrammatik. Der Kurs passt zu dir, wenn du auf A2-Niveau lernst, aber auch dann, wenn du schon auf einem höheren Niveau bist und deine Grundlagen gezielt auffrischen möchtest.",
+  "en": "In this course you revise and consolidate the most important topics of basic grammar. It suits you if you are learning at A2 level, but also if you are already at a higher level and want to brush up on the basics.",
   "files": [
    "src/config/courses/special-course-modules.ts"
   ],
@@ -12386,16 +12369,6 @@
    "/about/nonprofit"
   ]
  },
- "t.kling-gut-aussprachetraining-deu.1gfao5x": {
-  "de": "Kling gut! Aussprachetraining Deutsch!",
-  "en": "Kling gut! German pronunciation training",
-  "files": [
-   "src/config/courses/special-course-modules.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.komm-rechtzeitig-und-bring.13c9yp8": {
   "de": "Komm rechtzeitig und bring deine Unterlagen mit.",
   "en": "Arrive in good time and bring your documents with you.",
@@ -13399,9 +13372,9 @@
   ],
   "pages": []
  },
- "t.lass-dich-gern-von.x9wxts": {
-  "de": "Lass dich gern von uns beraten. Eine gute Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
-  "en": "We are happy to advise you. Our free online placement tests are a good place to start. If you don’t speak any German yet, you don’t need a test and simply start with A1.",
+ "t.lass-dich-gern-von.10zr8q3": {
+  "de": "Lass dich gern von uns beraten. Eine gute erste Grundlage sind unsere kostenlosen Online-Einstufungstests. Wenn du noch gar kein Deutsch kannst, brauchst du keinen Test und beginnst einfach mit A1.",
+  "en": "We are happy to advise you. Our free online placement tests are a good first step. If you don’t speak any German yet, you don’t need a test and simply start with A1.",
   "files": [
    "src/app/(site)/[locale]/courses/levels/page.tsx"
   ],
@@ -14485,17 +14458,17 @@
    "/team"
   ]
  },
- "t.mit-telc-deutsch-b2.1satd7l": {
-  "de": "Mit telc Deutsch B2 zeigst du, was du auf Deutsch kannst. Wir erklären dir, wie die Prüfung abläuft, und helfen dir bei der Vorbereitung und bei der Anmeldung.",
-  "en": "With telc Deutsch B2 you show what you can do in German. We explain how the exam works and help you prepare and register.",
+ "t.mit-telc-deutsch-b2.668a4": {
+  "de": "Mit telc Deutsch B2 zeigst du, über welche Sprachkenntnisse du verfügst. Wir erklären dir, wie die Prüfung abläuft, und helfen dir bei der Vorbereitung und bei der Anmeldung.",
+  "en": "With telc Deutsch B2 you show what level your German has reached. We explain how the exam works and help you prepare and register.",
   "files": [
    "src/config/content/exam-narratives.ts"
   ],
   "pages": []
  },
- "t.mit-telc-deutsch-c1.sac4gt": {
-  "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass dein Deutsch für ein Studium reicht. Viele deutschsprachige Hochschulen verlangen das Zertifikat für die Zulassung.",
-  "en": "With telc Deutsch C1 Hochschule you show that your German is good enough for university. Many German-speaking universities require the certificate for admission.",
+ "t.mit-telc-deutsch-c1.kkk5q2": {
+  "de": "Mit telc Deutsch C1 Hochschule weist du nach, dass deine Deutschkenntnisse für ein Studium ausreichen. Viele deutschsprachige Hochschulen verlangen das Zertifikat telc Deutsch C1 Hochschule für die Zulassung zum Studium.",
+  "en": "With telc Deutsch C1 Hochschule you show that your German is good enough for university. Many German-speaking universities require the telc Deutsch C1 Hochschule certificate for admission to their degree courses.",
   "files": [
    "src/config/content/exam-narratives.ts"
   ],
@@ -14518,18 +14491,6 @@
    "src/config/courses/course-practical-facts.ts"
   ],
   "pages": [
-   "/courses",
-   "/courses/[slug]"
-  ]
- },
- "t.mit-zwei-intensivkursen-am.1igqgsj": {
-  "de": "Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.",
-  "en": "With two intensive courses a day, you have twice as many lessons as in a single intensive course. You can join from B1.",
-  "files": [
-   "src/config/courses/course-profiles.ts"
-  ],
-  "pages": [
-   "/",
    "/courses",
    "/courses/[slug]"
   ]
@@ -14868,16 +14829,6 @@
   ],
   "pages": [
    "/"
-  ]
- },
- "t.nach-dem-bremischen-bildungszeit.o9gk8d": {
-  "de": "Nach dem Bremischen Bildungszeitgesetz hast du in zwei Jahren grundsätzlich Anspruch auf zehn Tage Bildungszeit.",
-  "en": "Under the Bremisches Bildungszeitgesetz, you are generally entitled to ten days of Bildungszeit over two years.",
-  "files": [
-   "src/config/courses/course-page-content.ts"
-  ],
-  "pages": [
-   "/courses/[slug]"
   ]
  },
  "t.nach-dem-umzug-gehoert.m195s": {
@@ -16196,8 +16147,8 @@
   ],
   "pages": []
  },
- "t.preise-gelten-pro-person.ctsii": {
-  "de": "Preise gelten pro Person und sind freibleibend. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.",
+ "t.preise-gelten-pro-person.1nn5s4u": {
+  "de": "Preise gelten pro Person und sind unverbindlich. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.",
   "en": "Prices are per person and non-binding. We confirm the final quote in writing after we have your dates and group size.",
   "files": [
    "src/config/gruppen/packages.ts"
@@ -17066,16 +17017,6 @@
    "/courses/[slug]"
   ]
  },
- "t.schalte-ab-was-die.121vxot": {
-  "de": "Schalte ab, was die Gruppe bereits selbst organisiert hat.",
-  "en": "Switch off anything the group has already arranged.",
-  "files": [
-   "src/components/gruppen/esel-builder.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.schau-dir-das-gesamte.qtojvo": {
   "de": "Schau dir das gesamte Budget an, also Gebühren, Miete, Versicherung, Fahrtkosten und die Ausgaben für den Alltag.",
   "en": "Look at your whole budget, including fees, rent, insurance, travel and everyday spending.",
@@ -17241,9 +17182,9 @@
   ],
   "pages": []
  },
- "t.schreib-uns-wie-gross.1kl6qql": {
-  "de": "Schreib uns, wie groß deine Gruppe ist, wie alt die Teilnehmenden sind, wann ihr kommen möchtet und was dir wichtig ist.",
-  "en": "Tell us how big your group is, how old the participants are, when you would like to come and what matters to you.",
+ "t.schreib-uns-wie-gross.1vu91aq": {
+  "de": "Schreib uns, wie groß deine Gruppe ist, wie alt die Teilnehmenden sind, wann ihr kommen möchtet und was euch wichtig ist.",
+  "en": "Tell us how big your group is, how old the participants are, when you would like to come and what matters to your group.",
   "files": [
    "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
@@ -18579,16 +18520,6 @@
    "/team"
   ]
  },
- "t.studienberatung.1tmvi25": {
-  "de": "Studienberatung",
-  "en": "Consultation",
-  "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
-  ],
-  "pages": [
-   "/courses/[slug]"
-  ]
- },
  "t.studienleitung-abendkurse.4t82ny": {
   "de": "Studienleitung Abendkurse",
   "en": "Director of Studies, evening courses",
@@ -19483,14 +19414,6 @@
    "/placement-test"
   ]
  },
- "t.trainiere-patientengespraeche-di.2petua": {
-  "de": "Trainiere Patientengespräche, die schriftliche Dokumentation und den fachlichen Austausch im Team – mit Blick auf den Klinikalltag und die Fachsprachprüfung.",
-  "en": "Train patient consultations, written documentation and professional exchange with your team, with clinical work and the Fachsprachprüfung in mind.",
-  "files": [
-   "src/config/content/course-narratives.ts"
-  ],
-  "pages": []
- },
  "t.treffer-fuer-in.1b4yuwc": {
   "de": "{totalResults} Treffer für „{q}“ in „{scopeLabel}“",
   "en": "{totalResults} {value} for “{q}” in “{scopeLabel}”",
@@ -19623,9 +19546,9 @@
    "/resources/why-germany"
   ]
  },
- "t.ueberleg-dir-kurz-was.1q3qtl5": {
-  "de": "Überleg dir kurz, was du mit deinem Deutsch erreichen möchtest.",
-  "en": "Think briefly about what you’d like to achieve with your German.",
+ "t.ueberleg-dir-kurz-was.10hobz7": {
+  "de": "Überleg dir kurz, was dein Ziel ist.",
+  "en": "Think briefly about what your goal is.",
   "files": [
    "src/config/content/placement-narratives.ts"
   ],
@@ -21233,6 +21156,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.von.1q3mdea": {
+  "de": "von",
+  "en": "of",
+  "files": [
+   "src/components/gruppen/esel-builder.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
+  ]
+ },
  "t.vor-dem-abflug.rf46dr": {
   "de": "Vor dem Abflug",
   "en": "Before you fly",
@@ -22041,6 +21974,16 @@
   "pages": [
    "/about",
    "/about/nonprofit"
+  ]
+ },
+ "t.was-ihr-schon-selbst.1rx5bdl": {
+  "de": "Was ihr schon selbst organisiert habt, kannst du hier abwählen.",
+  "en": "Turn off anything you have already arranged yourselves.",
+  "files": [
+   "src/components/gruppen/esel-builder.tsx"
+  ],
+  "pages": [
+   "/courses/[slug]"
   ]
  },
  "t.was-in-deinem-haushalt.14onbwc": {
@@ -22995,9 +22938,9 @@
    "/accommodation/[type]"
   ]
  },
- "t.wiederkehrende-gruppen-aeltere-l.1fytnpx": {
-  "de": "Wiederkehrende Gruppen, ältere Lernende und Klassen, die Tagesausflüge über Bremen hinaus wollen.",
-  "en": "Returning groups, older students and classes who want day trips beyond Bremen.",
+ "t.wiederkehrenden-gruppen-selbstst.fvl67j": {
+  "de": "Wiederkehrenden Gruppen, selbstständig Lernenden und Klassen, die Tagesausflüge über Bremen hinaus machen möchten.",
+  "en": "Returning groups, independent learners and classes who would like day trips beyond Bremen.",
   "files": [
    "src/config/gruppen/packages.ts"
   ],
@@ -24612,9 +24555,9 @@
    "/team"
   ]
  },
- "t.zwei-wochen-in-bremen.t2itg8": {
-  "de": "Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
-  "en": "Two weeks in Bremen is a proper stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough for the German at the dinner table to come by itself. Like the cat, the group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.",
+ "t.zwei-wochen-in-bremen.1ve4x8s": {
+  "de": "Zwei Wochen in Bremen sind die beste Voraussetzung für einen gelungenen Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, um mit ihr auf Deutsch zu kommunizieren. Wie die Katze erkundet deine Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.",
+  "en": "Two weeks in Bremen is the best basis for a successful stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough to talk with them in German. Like the cat, your group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.",
   "files": [
    "src/config/gruppen/packages.ts"
   ],

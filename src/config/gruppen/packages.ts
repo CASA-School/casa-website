@@ -80,7 +80,7 @@ export const GRUPPEN_ACTIVITIES: GruppenActivity[] = [
   },
   {
     id: 'yoga',
-    name: 'Yoga at CASA',
+    name: 'Yoga bei CASA',
     price: 3,
     category: 'city',
     blurb: {
@@ -418,8 +418,8 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
       de: 'Die Katze steht an dritter Stelle. Schärfe deine Sinne, sei neugierig und lande auf allen vier Pfoten in unserer schönen Hansestadt.',
     },
     intro: {
-      en: 'Two weeks in Bremen is a proper stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough for the German at the dinner table to come by itself. Like the cat, the group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.',
-      de: 'Zwei Wochen in Bremen sind schon ein richtiger Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, dass das Deutsch am Abendbrottisch von selbst kommt. Wie die Katze erkundet die Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.',
+      en: 'Two weeks in Bremen is the best basis for a successful stay. Your group has forty lessons and eight afternoons of activities, and lives with its host families long enough to talk with them in German. Like the cat, your group explores the city with curiosity, from the Botanika greenhouses to the night watchman’s tour.',
+      de: 'Zwei Wochen in Bremen sind die beste Voraussetzung für einen gelungenen Aufenthalt. Deine Gruppe hat vierzig Unterrichtseinheiten und acht Nachmittage mit Programm und lebt lange genug in der Gastfamilie, um mit ihr auf Deutsch zu kommunizieren. Wie die Katze erkundet deine Gruppe die Stadt mit Neugier, von den Gewächshäusern der Botanika bis zum Rundgang mit dem Nachtwächter.',
     },
     bestFor: {
       en: 'Most school groups, who usually choose two weeks for a wide culture programme at a balanced pace.',
@@ -448,12 +448,12 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
       de: 'Der Hund steht auf dem Rücken des Esels. Geh mit ihm auf Wanderschaft in Bremen und darüber hinaus.',
     },
     intro: {
-      en: 'The dog has the same two weeks as the cat and also takes your group out into the region, with a whole day in Hamburg, a boat tour of the harbour and the Klimahaus in Bremerhaven. It suits groups who have been on a language trip before and would like to see more of the region.',
-      de: 'Der Hund hat dieselben zwei Wochen wie die Katze und führt deine Gruppe auch hinaus in die Region, mit einem ganzen Tag in Hamburg, einer Hafenrundfahrt und dem Klimahaus in Bremerhaven. Er passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.',
+      en: 'The dog covers two weeks and also takes your group out into the region. Spend a day in Hamburg, take a boat tour of the harbour and visit the Klimahaus in Bremerhaven. This package suits groups who have been on a language trip before and would like to see more of the region.',
+      de: 'Der Hund beinhaltet zwei Wochen und führt deine Gruppe auch hinaus in die Region. Verbring einen Tag in Hamburg, mach eine Hafenrundfahrt und besuch das Klimahaus in Bremerhaven. Dieses Angebot passt zu Gruppen, die schon eine Sprachreise gemacht haben und mehr von der Region sehen möchten.',
     },
     bestFor: {
-      en: 'Returning groups, older students and classes who want day trips beyond Bremen.',
-      de: 'Wiederkehrende Gruppen, ältere Lernende und Klassen, die Tagesausflüge über Bremen hinaus wollen.',
+      en: 'Returning groups, independent learners and classes who would like day trips beyond Bremen.',
+      de: 'Wiederkehrenden Gruppen, selbstständig Lernenden und Klassen, die Tagesausflüge über Bremen hinaus machen möchten.',
     },
     activities: [
       'nachtwaechter',
@@ -478,7 +478,7 @@ export const GRUPPEN_PACKAGES: GruppenPackage[] = [
     priceFrom: null,
     tagline: {
       en: 'The donkey stands at the very bottom and carries the other three. This is the package you put together yourself.',
-      de: 'Der Esel steht ganz unten und trägt die anderen drei. Sei stur und unabhängig und stelle dir dein eigenes Programm zusammen.',
+      de: 'Der Esel steht ganz unten und trägt die anderen drei. Sei zielbewusst und unabhängig und stelle dir dein eigenes Programm zusammen.',
     },
     intro: {
       en: 'The donkey stands at the very bottom and carries all the others. With this package you choose the length yourself, from one to four weeks. You leave out anything you have already organised, and you put the afternoons together from all sixteen activities. Three or four weeks are only possible with this package.',
@@ -579,7 +579,7 @@ export const GRUPPEN_INCLUDED_SUMMARY: LocalizedText = {
 
 export const PRICE_DISCLAIMER: LocalizedText = {
   en: 'Prices are per person and non-binding. We confirm the final quote in writing after we have your dates and group size.',
-  de: 'Preise gelten pro Person und sind freibleibend. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.',
+  de: 'Preise gelten pro Person und sind unverbindlich. Das verbindliche Angebot bestätigen wir schriftlich, sobald uns Termine und Gruppengröße vorliegen.',
 };
 
 export function localized(text: LocalizedText, locale: ContentLocale) {

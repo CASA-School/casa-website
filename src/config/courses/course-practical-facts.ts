@@ -178,7 +178,7 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       },
       {
         en: 'You can take a module on its own or alongside another course. The modules are a good choice if you want to revise, refresh or go deeper into particular topics.',
-        de: 'Du kannst ein Modul einzeln belegen oder neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.',
+        de: 'Du kannst ein Modul einzeln belegen oder auch neben einem anderen Kurs. Die Module eignen sich, wenn du gezielt bestimmte Lerninhalte wiederholen, auffrischen oder vertiefen möchtest.',
       },
       {
         en: 'Each module has its own entry level. Before you register, check which level your module requires.',
@@ -216,15 +216,15 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
       },
       {
         en: 'For a language course to count as Bildungszeit, it needs 30–40 hours of teaching a week. Our super-intensive courses meet this requirement. You attend two intensive courses at the same time, one in the morning and one in the afternoon.',
-        de: 'Damit ein Sprachkurs als Bildungszeit anerkannt wird, braucht er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Dafür besuchst du gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.',
+        de: 'Damit ein Sprachkurs als Bildungszeit anerkannt wird, benötigt er 30–40 Stunden Unterricht in der Woche. Unsere Superintensivkurse erfüllen diese Voraussetzung. Du besuchst gleichzeitig zwei Intensivkurse, einen am Vormittag und einen am Nachmittag.',
       },
       {
         en: 'You can join from level B1 upwards.',
         de: 'Ab einem Niveau von B1 kannst du teilnehmen.',
       },
       {
-        en: 'The timing is flexible, and you can always start on a Monday. We recommend starting your Bildungszeit when a new intensive course begins. That way you learn alongside the other participants from the very first day.',
-        de: 'Der Zeitraum ist flexibel, und du kannst immer montags einsteigen. Wir empfehlen dir, die Bildungszeit zu beginnen, wenn ein neuer Intensivkurs startet. So lernst du von Anfang an mit den anderen Teilnehmerinnen und Teilnehmern zusammen.',
+        en: 'The timing is flexible, and you can join in any week.',
+        de: 'Der Zeitraum ist flexibel, und du kannst wöchentlich einsteigen.',
       },
     ],
   },
@@ -288,8 +288,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
         de: 'Wir wählen die Themen der Fachsprachprüfung passend zu den Fachgebieten und zum Kenntnisstand der Gruppe aus, immer mit direktem Bezug zur Praxis. Dazu gehören das Anamnesegespräch, die körperliche Untersuchung, Diagnostik, Befund und Therapie, Gespräche mit Angehörigen, die Fallvorstellung, der interdisziplinäre Austausch und Arztbriefe.',
       },
       {
-        en: 'In everyday hospital work it is very important to communicate accurately in professional terms and to take in every piece of information precisely. That is why you practise conversations with patients, relatives, doctors and nursing staff, as well as listening and the written documentation your job involves.',
-        de: 'Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal, dazu das Hörverstehen und die schriftliche Dokumentation im Beruf.',
+        en: 'In everyday hospital work it is very important to communicate accurately in professional terms and to take in every piece of information precisely. That is why you practise conversations with patients, relatives, doctors and nursing staff, as well as listening comprehension and written documentation.',
+        de: 'Im Klinikalltag ist es sehr wichtig, sich fachlich richtig zu verständigen und alle Informationen genau aufzunehmen. Deshalb übst du Gespräche mit Patientinnen und Patienten, Angehörigen, Ärztinnen und Ärzten und dem Pflegepersonal sowie das Hörverstehen und die schriftliche Dokumentation.',
       },
       {
         en: 'The course also prepares you to carry on studying in more depth on your own.',
@@ -300,13 +300,13 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
 
   'in-company': {
     feeNote: {
-      en: 'We work out the price separately for each company. The consultation and the quote are always without obligation.',
-      de: 'Den Preis kalkulieren wir für jede Firma einzeln. Die Studienberatung und das Angebot sind stets unverbindlich.',
+      en: 'We work out the price separately for each company. The consultation and the quote are free and without obligation.',
+      de: 'Den Preis kalkulieren wir für jede Firma einzeln. Die Beratung und das Angebot sind kostenlos und unverbindlich.',
     },
     conditions: [
       {
         en: 'We are happy to take the time to sit down with you and get a picture of your team’s learning needs, goals and language skills. From that, we draw up the training plan.',
-        de: 'Gerne nehmen wir uns Zeit für eine gemeinsame Studienberatung, in der wir uns ein Bild von Lernbedürfnissen, Lernzielen und Sprachkenntnissen machen. Daraus entwickeln wir anschließend den Ausbildungsplan.',
+        de: 'Gerne nehmen wir uns Zeit für eine gemeinsame Beratung, in der wir uns ein Bild von Lernbedürfnissen, Lernzielen und Sprachkenntnissen machen. Daraus entwickeln wir anschließend den Ausbildungsplan.',
       },
       {
         en: 'For a company course to work well, it is important that the employees taking part are at roughly the same language level.',
@@ -327,8 +327,8 @@ export const coursePracticalFacts: Record<string, CoursePracticalFacts> = {
     conditions: [
       {
         // The focus on speaking is the old casa-bremen.de wording.
-        en: 'Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves or put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.',
-        de: 'Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten oder speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.',
+        en: 'Teaching is {course.german-for-groups.lessons} lessons a week, with materials we have written ourselves and put together specially. The focus is on spoken German and using it in conversation, and of course we practise grammar for that too. If you would like particular content or a different number of hours, we are happy to arrange it.',
+        de: 'Der Unterricht umfasst {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche mit eigens entwickelten und speziell zusammengestellten Materialien. Der Schwerpunkt liegt auf der gesprochenen Sprache und ihrer Anwendung im Gespräch, dafür üben wir natürlich auch Grammatik. Wenn du besondere Inhalte oder eine andere Stundenzahl wünschst, setzen wir deine Vorstellungen gern um.',
       },
       {
         en: 'Every participant receives a certificate of attendance at the end of the course.',

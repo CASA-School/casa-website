@@ -50,7 +50,8 @@ const DWELL_MS = 6500;
 const GLIDE_MS = 1100;
 const GAP_PX = 16;
 
-function Stars({ rating, locale }: { rating: number; locale: ContentLocale }) {
+/** The stars and „Google-Bewertung" over a review; HumanStoryBlock shows them too. */
+export function Stars({ rating, locale }: { rating: number; locale: ContentLocale }) {
   const { say } = useSiteCopy();
   const gradient = useId();
   return (

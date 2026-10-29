@@ -33,10 +33,11 @@ const copy = {
     participants: 'Participants',
     participantsHint: 'We price accompanying adults separately.',
     modules: 'What we take care of',
-    modulesHint: 'Switch off anything the group has already arranged.',
+    modulesHint: 'Turn off anything you have already arranged yourselves.',
     alwaysIncluded: 'Always included',
     afternoons: 'Afternoons',
-    afternoonsHint: (n: number) => `Up to ${n} for this stay, which is ${MAX_ACTIVITIES_PER_WEEK} a week.`,
+    afternoonsHint: (n: number) => `Choose up to ${n} activities, at most ${MAX_ACTIVITIES_PER_WEEK} a week.`,
+    of: 'of',
     chosen: 'chosen',
     over: 'more than usual. Send the request anyway and we will tell you what is possible.',
     perPerson: 'per person',
@@ -60,10 +61,11 @@ const copy = {
     participants: 'Teilnehmende',
     participantsHint: 'Begleitpersonen kalkulieren wir separat.',
     modules: 'Worum wir uns kümmern',
-    modulesHint: 'Schalte ab, was die Gruppe bereits selbst organisiert hat.',
+    modulesHint: 'Was ihr schon selbst organisiert habt, kannst du hier abwählen.',
     alwaysIncluded: 'Immer enthalten',
     afternoons: 'Nachmittage',
-    afternoonsHint: (n: number) => `Bis zu ${n} für diesen Aufenthalt, also ${MAX_ACTIVITIES_PER_WEEK} pro Woche.`,
+    afternoonsHint: (n: number) => `Wähle bis zu ${n} Aktivitäten, höchstens ${MAX_ACTIVITIES_PER_WEEK} pro Woche.`,
+    of: 'von',
     chosen: 'gewählt',
     over: 'mehr als üblich. Sende die Anfrage trotzdem, dann sagen wir dir, was möglich ist.',
     perPerson: 'pro Person',
@@ -280,7 +282,7 @@ export function EselBuilder({
                   : 'text-[var(--casa-ink)]'
               }`}
             >
-              {activities.length} / {quote.activityAllowance}
+              {activities.length} {t.of} {quote.activityAllowance}
             </span>{' '}
             <span className="text-[var(--casa-muted)]">{t.chosen}</span>
             {quote.overActivityAllowance ? (

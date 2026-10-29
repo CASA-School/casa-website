@@ -82,7 +82,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
   {
     id: 'aussprache-kling-gut',
     category: { en: 'Pronunciation', de: 'Aussprache' },
-    title: { en: 'Kling gut! German pronunciation training', de: 'Kling gut! Aussprachetraining Deutsch!' },
+    title: { en: 'Good pronunciation can be trained!', de: 'Eine gute Aussprache lässt sich trainieren!' },
     level: 'B1+',
     weekday: { en: 'Monday', de: 'Montag' },
     time: '18:30 - 20:00',
@@ -94,7 +94,7 @@ export const specialCourseModules: SpecialCourseModule[] = [
     detail: {
       intro: {
         en: 'In this course you work on your German pronunciation. You practise sounds, word stress, sentence melody and intonation through a variety of exercises, and you get personal feedback. That way you speak more fluently, more clearly and with more confidence, in everyday life, at work and in exams.',
-        de: 'In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du im Alltag, im Beruf und in Prüfungen flüssiger, verständlicher und mit mehr Selbstvertrauen.',
+        de: 'In diesem Kurs verbesserst du gezielt deine deutsche Aussprache. Du übst Laute, Wortakzent, Satzmelodie und Intonation mit abwechslungsreichen Übungen und bekommst persönliches Feedback. So sprichst du in Alltag, Beruf und Prüfung flüssiger, verständlicher und mit mehr Selbstvertrauen.',
       },
     },
   },
@@ -134,8 +134,8 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'grammar',
     detail: {
       intro: {
-        en: 'In this course we revise and consolidate the most important topics of basic grammar together. It suits you if you are learning at A2 level, and also if you are further on and want to brush up on the basics.',
-        de: 'In diesem Kurs wiederholen und festigen wir gemeinsam die wichtigsten Themen der Basisgrammatik. Er passt zu dir, wenn du auf A2-Niveau lernst, und auch dann, wenn du schon weiter bist und deine Grundlagen gezielt auffrischen möchtest.',
+        en: 'In this course you revise and consolidate the most important topics of basic grammar. It suits you if you are learning at A2 level, but also if you are already at a higher level and want to brush up on the basics.',
+        de: 'In diesem Kurs wiederholst und festigst du die wichtigsten Themen der Basisgrammatik. Der Kurs passt zu dir, wenn du auf A2-Niveau lernst, aber auch dann, wenn du schon auf einem höheren Niveau bist und deine Grundlagen gezielt auffrischen möchtest.',
       },
     },
   },
@@ -153,8 +153,8 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'grammar',
     detail: {
       intro: {
-        en: 'In this course you consolidate the most important grammar topics at levels B1 and B2, such as sentence structure, tenses, the subjunctive (Konjunktiv II), the passive, relative clauses and prepositions. We explain them clearly and practise them so that you can use them straight away. Together we lay the foundations for confident, fluent German.',
-        de: 'In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. Wir erklären sie verständlich und üben sie so, dass du sie gleich anwenden kannst. So schaffen wir gemeinsam die Grundlagen für sicheres und flüssiges Deutsch.',
+        en: 'In this course you consolidate the most important grammar topics at levels B1 and B2, such as sentence structure, tenses, the subjunctive (Konjunktiv II), the passive, relative clauses and prepositions. Together we lay the foundations for confident, fluent expression.',
+        de: 'In diesem Kurs festigst du die wichtigsten Grammatikthemen der Niveaustufen B1 und B2, zum Beispiel Satzbau, Zeiten, Konjunktiv II, Passiv, Relativsätze und Präpositionen. So schaffen wir gemeinsam die Grundlage für einen sicheren und flüssigen Ausdruck.',
       },
     },
   },
@@ -172,8 +172,8 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'writing',
     detail: {
       intro: {
-        en: 'In this course you learn the basics of writing step by step. We practise short emails, messages, descriptions and other everyday texts, and look at text structure, word choice, typical phrases and common mistakes in grammar and spelling.',
-        de: 'In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel und häufige Fehler in Grammatik und Rechtschreibung.',
+        en: 'In this course you learn the basics of writing step by step. We practise short emails, messages, descriptions and other everyday texts, and look at text structure, word choice, typical phrases and how to avoid mistakes.',
+        de: 'In diesem Kurs lernst du Schritt für Schritt die Grundlagen des Schreibens. Wir üben kurze E-Mails, Nachrichten, Beschreibungen und andere Alltagstexte. Dabei geht es um den Aufbau des Textes, die richtige Wortwahl, typische Redemittel sowie Fehlervermeidung.',
       },
     },
   },
@@ -213,8 +213,8 @@ export const specialCourseModules: SpecialCourseModule[] = [
     skill: 'speaking',
     detail: {
       intro: {
-        en: 'In this course you develop your speaking skills. Together we practise presentations, discussions, debates and conversations for different occasions. Along the way you widen your vocabulary, improve how you express yourself and speak more freely and confidently, in everyday life and at work.',
-        de: 'In diesem Kurs entwickelst du gezielt dein Sprechen weiter. Gemeinsam üben wir Präsentationen, Diskussionen, Debatten und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und im Beruf freier und sicherer.',
+        en: 'In this course you work specifically on your spoken German. Together we practise presentations, discussions and conversations for different occasions. Along the way you widen your vocabulary, improve how you express yourself and speak more freely and confidently, in everyday life and at work.',
+        de: 'In diesem Kurs trainierst du gezielt den mündlichen Ausdruck. Gemeinsam üben wir Präsentationen, Diskussionen und Gespräche zu unterschiedlichen Anlässen. Dabei erweiterst du deinen Wortschatz, verbesserst deine Ausdrucksweise und sprichst im Alltag und Beruf freier und sicherer.',
       },
     },
   },

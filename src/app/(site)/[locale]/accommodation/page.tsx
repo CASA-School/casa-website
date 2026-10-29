@@ -241,6 +241,7 @@ export default async function AccommodationPage() {
               quote={leadStory.quote}
               person={leadStory.personDisplay}
               context={leadStory.country}
+              rating={leadStory.rating ? { stars: leadStory.rating, locale } : undefined}
               photo={{
                 src: pageConfig.photos.story.src,
                 alt: pageConfig.photos.story.alt,

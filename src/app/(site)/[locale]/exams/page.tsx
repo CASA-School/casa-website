@@ -142,7 +142,7 @@ export default async function ExamsPage() {
             eyebrow={say(locale, 'Prüfungen', 'Exams')}
             title={say(locale, 'Deine telc-Prüfung bei CASA', 'Your telc exam at CASA')}
             description={
-              say(locale, 'Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten.', 'Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses.')
+              say(locale, 'Du brauchst ein Deutschzertifikat für deinen nächsten Schritt? Bei uns kannst du telc Deutsch B2 und telc Deutsch C1 Hochschule ablegen und dich in einem Kurs darauf vorbereiten. Bald bieten wir auch telc Deutsch B1 an.', 'Do you need a German certificate for your next step? You can take telc Deutsch B2 and telc Deutsch C1 Hochschule with us, and prepare for them in one of our courses. Soon we will offer telc Deutsch B1 too.')
             }
             ctas={pageConfig.ctas.slice(0, 1)}
             className="lg:py-6"
@@ -198,6 +198,7 @@ export default async function ExamsPage() {
               quote={leadStory.quote}
               person={leadStory.personDisplay}
               context={leadStory.country}
+              rating={leadStory.rating ? { stars: leadStory.rating, locale } : undefined}
               photo={{
                 src: pageConfig.photos.story.src,
                 alt: pageConfig.photos.story.alt,

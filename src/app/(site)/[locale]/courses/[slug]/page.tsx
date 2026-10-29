@@ -477,21 +477,21 @@ export default async function CourseDetailPage({
     ? [
         {
           step: '1',
-          title: say(locale, 'Studienberatung', 'Consultation'),
+          title: say(locale, 'Beratung', 'Consultation'),
           description:
-            say(locale, 'Im ersten Gespräch erfahren wir, was das Team lernen soll und welche Sprachkenntnisse es mitbringt.', 'In a first meeting we find out what your team needs to learn and how much German they already speak.'),
+            say(locale, 'Im ersten Gespräch erfahren wir, welchen Bedarf es gibt und welche Sprachkenntnisse das jeweilige Team mitbringt.', 'In a first meeting we find out what is needed and how much German the team already speaks.'),
         },
         {
           step: '2',
           title: say(locale, 'Ausbildungsplan', 'Training plan'),
           description:
-            say(locale, 'Auf dieser Grundlage stellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter zusammen.', 'On that basis we put together the training plan for your staff.'),
+            say(locale, 'Auf dieser Grundlage erstellen wir den Ausbildungsplan für die Mitarbeiterinnen und Mitarbeiter.', 'On that basis we draw up the training plan for your staff.'),
         },
         {
           step: '3',
           title: say(locale, 'Unverbindliches Angebot', 'No-obligation quote'),
           description:
-            say(locale, 'Danach erhält die Firma unser Angebot. Beratung und Angebot sind stets unverbindlich.', 'You then receive our quote. Neither the consultation nor the quote commits you to anything.'),
+            say(locale, 'Danach erhält die Firma unser Angebot. Beratung und Angebot sind kostenlos und unverbindlich.', 'You then receive our quote. The consultation and the quote are free and without obligation.'),
         },
       ]
     : isGroupQuote
@@ -500,7 +500,7 @@ export default async function CourseDetailPage({
             step: '1',
             title: say(locale, 'Anfrage senden', 'Send your enquiry'),
             description:
-              say(locale, 'Schreib uns, wie groß deine Gruppe ist, wie alt die Teilnehmenden sind, wann ihr kommen möchtet und was dir wichtig ist.', 'Tell us how big your group is, how old the participants are, when you would like to come and what matters to you.'),
+              say(locale, 'Schreib uns, wie groß deine Gruppe ist, wie alt die Teilnehmenden sind, wann ihr kommen möchtet und was euch wichtig ist.', 'Tell us how big your group is, how old the participants are, when you would like to come and what matters to your group.'),
           },
           {
             step: '2',

@@ -168,7 +168,7 @@ export function getCourseLevelGoals(slug: string, locale: ContentLocale) {
     bildungszeit: {
       title: say(locale, 'Lernziele nach Niveaustufen', 'Learning goals by level'),
       description:
-        say(locale, 'Mit zwei Intensivkursen am Tag hast du doppelt so viel Unterricht wie in einem einzelnen Intensivkurs. Einsteigen kannst du ab B1.', 'With two intensive courses a day, you have twice as many lessons as in a single intensive course. You can join from B1.'),
+        say(locale, 'Einsteigen kannst du ab B1. Du lernst superintensiv und hast {course.bildungszeit.lessons} Unterrichtseinheiten pro Woche.', 'You can join from B1. You learn super-intensively, with {course.bildungszeit.lessons} lessons a week.'),
       levels: levelRows(['B1', 'B1+', 'B2', 'C1']),
     },
     'in-company': {
