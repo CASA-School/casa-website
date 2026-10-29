@@ -4,7 +4,8 @@ import { isWorkspaceDatabaseConfigured, query } from '@/lib/admin/db';
 
 /**
  * The website's page views (2026-10-29, migration 0106), counted by src/proxy.ts from the
- * request a browser sends for a page: its path, the Referer and the User-Agent. Nothing runs
+ * request a browser sends for a page: its path, the Referer, the User-Agent, the preferred language
+ * (Accept-Language) and a campaign tag in the link (utm, gclid). Nothing runs
  * in the browser and nothing is read from the reader's device, so § 25 TDDDG is not touched
  * and the privacy policy's §5 stays true; nothing that identifies a reader is kept.
  *
@@ -19,7 +20,30 @@ const PUBLIC_HOST = /^casa-bremen\.de(:\d+)?$/i;
 const ROBOT = /bot|crawl|spider|slurp|lighthouse|headless|pagespeed|preview|monitor|inspectiontool|chatgpt-user|externalagent|yeti|curl|wget|python|axios|node-fetch|go-http|facebookexternalhit|embedly/i;
 const PATH = /^\/[A-Za-z0-9/_.%-]{0,199}$/;
 
-type View = { path: string; locale: string; device: 'mobile' | 'tablet' | 'desktop'; entry: boolean; referrer: string | null };
+type View = {
+  path: string;
+  locale: string;
+  device: 'mobile' | 'tablet' | 'desktop';
+  entry: boolean;
+  referrer: string | null;
+  language: string | null;
+  campaign: string | null;
+};
+
+/** The browser's preferred language, the first tag of Accept-Language without its region: „ar", „tr". */
+function preferredLanguage(header: string): string | null {
+  const first = header.split(',')[0]?.split(';')[0]?.trim().split('-')[0]?.toLowerCase() ?? '';
+  return /^[a-z]{2,3}$/.test(first) ? first : null;
+}
+
+/** The campaign a visit's link carried: a Google Ads click, or its utm_source and utm_campaign. */
+function campaignOf(params: URLSearchParams): string | null {
+  if (params.has('gclid') || params.has('gbraid') || params.has('wbraid')) return 'Google Ads';
+  const clean = (value: string | null) => (value ?? '').replace(/[^\p{L}\p{N} ._-]/gu, '').trim().slice(0, 60);
+  const source = clean(params.get('utm_source'));
+  const name = clean(params.get('utm_campaign'));
+  return source || name ? [source, name].filter(Boolean).join(' · ') : null;
+}
 
 /** What to count for this request, or null when it is not a reader's page view. */
 export function pageView(request: NextRequest, locale: string): View | null {
@@ -55,19 +79,24 @@ export function pageView(request: NextRequest, locale: string): View | null {
   const device = /iPad|Tablet|Android(?!.*Mobile)/i.test(agent) ? 'tablet' : /Mobi|iPhone|Android/i.test(agent) ? 'mobile' : 'desktop';
   // A page opened from one of the site's own pages continues a visit.
   const entry = !internal;
-  return { path, locale, device, entry, referrer: entry ? referrer : null };
+  return {
+    path,
+    locale,
+    device,
+    entry,
+    referrer: entry ? referrer : null,
+    language: preferredLanguage(headers.get('accept-language') ?? ''),
+    campaign: entry ? campaignOf(request.nextUrl.searchParams) : null,
+  };
 }
 
 export async function recordPageView(view: View | null): Promise<void> {
   if (!view || !isWorkspaceDatabaseConfigured()) return;
   try {
-    await query(`INSERT INTO site_page_views (path, locale, device, entry, referrer_host) VALUES ($1, $2, $3, $4, $5)`, [
-      view.path,
-      view.locale,
-      view.device,
-      view.entry,
-      view.referrer,
-    ]);
+    await query(
+      `INSERT INTO site_page_views (path, locale, device, entry, referrer_host, language, campaign) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [view.path, view.locale, view.device, view.entry, view.referrer, view.language, view.campaign]
+    );
     // Now and then the rows past thirteen months go, so a month can still be compared with the year before.
     if (Math.random() < 0.002) await query(`DELETE FROM site_page_views WHERE viewed_at < now() - interval '13 months'`);
   } catch (error) {

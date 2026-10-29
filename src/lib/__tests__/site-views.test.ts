@@ -23,7 +23,19 @@ describe('website page views (counted on the server)', () => {
       device: 'mobile',
       entry: true,
       referrer: 'google.de',
+      language: 'de',
+      campaign: null,
     });
+  });
+
+  it('keeps the browser language and the campaign a visit came from, never more', () => {
+    expect(view('/sprachkurse?utm_source=newsletter&utm_campaign=Herbst%202026', { 'accept-language': 'ar-EG,ar;q=0.9,en;q=0.8' })).toMatchObject({
+      path: '/sprachkurse',
+      language: 'ar',
+      campaign: 'newsletter · Herbst 2026',
+    });
+    expect(view('/?gclid=abc123', {})).toMatchObject({ campaign: 'Google Ads' });
+    expect(view('/kontakt?utm_source=x', { referer: 'https://casa-bremen.de/' })).toMatchObject({ entry: false, campaign: null });
   });
 
   it('counts a page opened from one of the site’s own pages as part of the visit', () => {

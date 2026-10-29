@@ -15,7 +15,9 @@
 > counting from request headers the browser sends anyway is not access to the terminal device under
 > § 25 TDDDG, so the no-banner statement stands. A browser script (every click, real readers' load
 > times) was built and withdrawn the same day, because reading screen size or timings from the device
-> would be such access; it needs the consent question answered first.
+> would be such access; it needs the consent question answered first. Since 0108 a page load also keeps the
+> browser's preferred language and, on a visit's first page, a campaign tag (utm, or „Google Ads" without the
+> click id); §5 says so.
 
 `/privacy` (`/datenschutz`) no longer shows the old site's policy word for word. Since
 2026-09-30 it is CASA's own text, in German and English, written against what the code
