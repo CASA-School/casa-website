@@ -361,6 +361,45 @@ for Google Ad Grants — so a cold start is paid for in bounced Ad Grants clicks
 seeing a slow first byte. Keeping one warm replica costs perhaps €5–15/month and protects the
 thing the site exists to do. Scale-to-zero is right for internal tools, not for the front door.
 
+## Later: the website and the workspace as two apps (direction, 2026-10-29)
+
+Rahman asked whether having the workspace and the public site in one project is a good idea.
+The answer: **one repository and one database, yes; one running app, not for long.** To be taken up
+**after the cutover to casa-bremen.de**, not before it, so go-live carries no extra change.
+
+**Keep together (it is what makes the two products work):** the site reads prices, dates and live
+values from the workspace's tables, forms land straight in the workspace queues, the website editor
+changes the real pages, and one set of migrations, tests and dependencies serves both.
+
+**Why the running app should split:**
+
+- **Blast radius.** Both products run in one process as one database user (`casa_web`), so a flaw in
+  the public site — a Next.js RCE like those fixed in October 2026 — reaches every learner,
+  applicant, CV and booking the workspace holds. The public site needs a small part of that.
+- **Releases.** Every copy change on the site restarts the workspace under colleagues' hands, and a
+  workspace migration can hold up a site release.
+- **Load.** Staff work (letter PDFs through headless Chromium, the SchoolMan bridge's reads) shares
+  one container with the front door.
+
+**Shape:** the same repository and image, deployed twice.
+
+| App | Hostnames | Database role | Serves |
+| --- | --- | --- | --- |
+| public site | apex, www, neu (the day-one test's QR posters) | a new least-privilege role: read published content and live values, insert submissions (enquiries, registrations, applications with CV files, appointments, placement), nothing else | `src/app/(site)`, `src/app/api`; no `/admin` at all |
+| workspace | admin.casa-bremen.de | today's full role | `/admin`, the SchoolMan sync endpoint, the CV download |
+
+**Steps when we circle back:**
+
+1. Inventory, from the code, every table the public site reads or writes (`src/app/(site)`,
+   `src/app/api`, `src/lib/content`, `src/lib/cms`, `src/lib/content/published-prices.ts`): table ×
+   read / insert / update.
+2. A migration that creates the public role with exactly those grants, and a test that holds it.
+3. A switch such as `CASA_SURFACE=public|workspace` in `src/proxy.ts`; unset, today's single app
+   behaves exactly as now. The four workspace checks (CLAUDE.md hard rule 7) all stay.
+4. `infra/azure/deploy.sh` releases either app or both; `db-job.sh` keeps migrating as the owner role.
+   The Entra callback is unchanged (it is on the admin host).
+5. A second small Container App (a few euros a month), then move `admin.casa-bremen.de` to it.
+
 ## Open questions
 
 - Budget ceiling for the website specifically. (Server topology is settled: its own Flexible

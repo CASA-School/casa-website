@@ -601,6 +601,10 @@ is still valid.
   in `docs/AZURE_DEPLOYMENT_PLAN.md` §1 is done — the careers CV upload is now an explicit
   `BEGIN`/`INSERT`/`INSERT`/`COMMIT` and still needs a real test against a managed server
   before cutover, not just a build. The Azure server exists since 2026-10-09 (see above).
+- **After the cutover: run the site and the workspace as two apps (decided direction, 2026-10-29).**
+  One repository and one database stay; the running app splits into a public app with a
+  least-privilege database role and no `/admin`, and a workspace app on admin.casa-bremen.de. Why,
+  the shape and the steps: `docs/AZURE_DEPLOYMENT_PLAN.md` §Later. Not before go-live.
 - No canonical production deployment doc yet (domain, rollback owner). The custom domain
   for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
   and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82. The Container
