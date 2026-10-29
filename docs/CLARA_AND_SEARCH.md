@@ -73,6 +73,25 @@ The search page shows it as "Direkt beantwortet" above the results; CLARA says i
 times for a "what time", dates for a "when". The widget sends the page it is open on, so "what
 does this cost?" on a course page means that course.
 
+## CLARA's panel (`src/components/assistant`, 2026-10-29)
+
+- **She opens on two short lines and four starting points** (course, exams, accommodation,
+  contact, with the site's 3D icons), not a paragraph about what she can do (Rahman: the
+  introduction was too long).
+- **Following a link closes her**, and so does going to another page or back: she was still open
+  on the homepage when a visitor came back to it. She closes by playing her way out, not at once:
+  taking the link out of the page in the same click made Next do a full reload.
+- **The conversation outlives the panel.** The launcher holds it, so a visitor who follows a link
+  and opens her again finds it there; „Neues Gespräch" starts over. Memory only, gone with the
+  tab: nothing is written to the browser (privacy policy §5).
+- **She speaks the page's language** until an answer comes back in another (the API reads the
+  question's language). The language menu, with three languages marked „Bald", was removed.
+- **While she looks, she says what she is doing** (reading the question, looking through the
+  pages, putting the answer together), beside three breathing dots.
+- **On a phone she is a sheet** the height of what is visible, so the keyboard never covers the
+  field; from `sm` a panel above her button. Motion: UI_SYSTEM.md §Motion; off under reduced
+  motion.
+
 ## The AI mode (switched off)
 
 `src/lib/assistant/ai.server.ts`. With it on, a language model writes CLARA's answer as

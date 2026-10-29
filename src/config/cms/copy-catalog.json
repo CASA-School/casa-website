@@ -1157,10 +1157,25 @@
   "de": "Angebot anfragen",
   "en": "Request a quote",
   "files": [
-   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx",
+   "src/components/sections/decision-rail.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/courses/levels",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/placement-test",
+   "/resources/language-tandem",
+   "/search",
+   "/team"
   ]
  },
  "t.angebot-erhalten.1doobbd": {
@@ -1191,16 +1206,6 @@
    "/exams/[code]",
    "/faq",
    "/team"
-  ]
- },
- "t.angezeigt.te6qvj": {
-  "de": "Angezeigt",
-  "en": "Showing",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
   ]
  },
  "t.ankommen-anmelden-einschreiben.1d4mkb": {
@@ -1689,16 +1694,6 @@
   ],
   "pages": []
  },
- "t.assistent-schliessen.b7ihp8": {
-  "de": "Assistent schließen",
-  "en": "Close assistant",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.auch-am-abend-lernst.rgoa4t": {
   "de": "Auch am Abend lernst du mit den Lehrwerken Netzwerk neu und Kontext, in jedem Trimester eine halbe Niveaustufe.",
   "en": "In the evenings, too, you learn with the Netzwerk neu and Kontext textbooks, completing half a level each trimester.",
@@ -2009,16 +2004,6 @@
   ],
   "pages": [
    "/accommodation/[type]"
-  ]
- },
- "t.bald.1myd6ys": {
-  "de": "Bald",
-  "en": "Soon",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
   ]
  },
  "t.bankgeschaefte-fuer-den-alltag.rxwkhp": {
@@ -3845,9 +3830,9 @@
    "*"
   ]
  },
- "t.clara-sucht-die-passende.iau8p0": {
-  "de": "CLARA sucht die passende Antwort …",
-  "en": "CLARA is looking for the right answer…",
+ "t.clara-schliessen.1rp0c04": {
+  "de": "CLARA schließen",
+  "en": "Close CLARA",
   "files": [
    "src/components/assistant/AssistantWidget.tsx"
   ],
@@ -4660,6 +4645,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.deine-fragen-zu-casa.917xic": {
+  "de": "Deine Fragen zu CASA",
+  "en": "Your questions about CASA",
+  "files": [
+   "src/components/assistant/AssistantWidget.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.deine-gaeste.1lo4g56": {
@@ -7032,16 +7027,6 @@
    "src/config/content/accommodation-narratives.ts"
   ],
   "pages": []
- },
- "t.du.1nb1j9k": {
-  "de": "Du",
-  "en": "You",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
  },
  "t.e-mail.1ilgnfl": {
   "de": "E-Mail",
@@ -10528,9 +10513,9 @@
    "/contact"
   ]
  },
- "t.hallo-ich-bin-clara.2d0h1p": {
-  "de": "Hallo, ich bin CLARA. Ich helfe dir bei Fragen zu Kursen, Prüfungen, Unterkunft und Anmeldung bei CASA. Schreib mir, was du vorhast, dann zeige ich dir den nächsten Schritt.",
-  "en": "Hello, I’m CLARA. I can help with questions about courses, exams, accommodation and registration at CASA. Tell me what you’re planning, and I’ll show you the next step.",
+ "t.hallo-ich-bin-clara.yoekh9": {
+  "de": "Hallo, ich bin CLARA.",
+  "en": "Hi, I’m CLARA.",
   "files": [
    "src/components/assistant/AssistantWidget.tsx"
   ],
@@ -10986,9 +10971,9 @@
    "/team"
   ]
  },
- "t.ich-lese-deine-frage.hjbg8m": {
+ "t.ich-lese-deine-frage.cr71hq": {
   "de": "Ich lese deine Frage …",
-  "en": "Reading your question…",
+  "en": "Reading your question …",
   "files": [
    "src/components/assistant/AssistantWidget.tsx"
   ],
@@ -11026,9 +11011,9 @@
    "/placement-test"
   ]
  },
- "t.ich-stelle-dir-den.7f8mlq": {
-  "de": "Ich stelle dir den nächsten Schritt zusammen …",
-  "en": "Putting together your next step…",
+ "t.ich-stelle-dir-die.x3c2oj": {
+  "de": "Ich stelle dir die Antwort zusammen …",
+  "en": "Putting your answer together …",
   "files": [
    "src/components/assistant/AssistantWidget.tsx"
   ],
@@ -11036,9 +11021,9 @@
    "*"
   ]
  },
- "t.ich-suche-die-passenden.ggaeq": {
-  "de": "Ich suche die passenden Seiten …",
-  "en": "Looking for the right pages…",
+ "t.ich-suche-auf-den.5648h6": {
+  "de": "Ich suche auf den Seiten …",
+  "en": "Looking through the pages …",
   "files": [
    "src/components/assistant/AssistantWidget.tsx"
   ],
@@ -15600,6 +15585,16 @@
    "/accommodation/[type]"
   ]
  },
+ "t.neues-gespraech.1rh1hvj": {
+  "de": "Neues Gespräch",
+  "en": "New conversation",
+  "files": [
+   "src/components/assistant/AssistantWidget.tsx"
+  ],
+  "pages": [
+   "*"
+  ]
+ },
  "t.neuigkeiten-und-geschichten-von.2ox7sa": {
   "de": "Neuigkeiten und Geschichten von CASA",
   "en": "News and stories from CASA",
@@ -16010,16 +16005,6 @@
    "/placement-test"
   ]
  },
- "t.option.8shdsq": {
-  "de": "Option",
-  "en": "option",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.optional-falls-bekannt.midmf1": {
   "de": "Optional, falls bekannt",
   "en": "Optional, if known",
@@ -16028,16 +16013,6 @@
   ],
   "pages": [
    "/contact"
-  ]
- },
- "t.optionen.15ory24": {
-  "de": "Optionen",
-  "en": "options",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
   ]
  },
  "t.organisation-oder-unternehmen.1iqlaiz": {
@@ -17508,16 +17483,6 @@
    "/calculator"
   ]
  },
- "t.schnellstart.n1qpzy": {
-  "de": "Schnellstart",
-  "en": "Quick start",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.schon-erste-deutschkenntnisse-ko.4t029s": {
   "de": "Schon erste Deutschkenntnisse können dir bei Gesprächen und Terminen helfen. Fang an, sobald es für dich möglich ist, und lern nach der Ankunft weiter.",
   "en": "Even a little German can help you with conversations and appointments. Start as soon as you can, and keep learning once you arrive.",
@@ -18449,7 +18414,6 @@
   "de": "Sprache",
   "en": "Language",
   "files": [
-   "src/components/assistant/AssistantWidget.tsx",
    "src/components/layout/mobile-nav.tsx"
   ],
   "pages": [
@@ -19181,16 +19145,6 @@
    "*"
   ]
  },
- "t.suche-und-naechste-schritte.nzrd1t": {
-  "de": "Suche und nächste Schritte",
-  "en": "Search and next steps",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.suche.1w6jbfg": {
   "de": "Suche",
   "en": "Search",
@@ -19673,26 +19627,13 @@
   "de": "Termin buchen",
   "en": "Book an appointment",
   "files": [
-   "src/components/appointments/placement-appointment-dialog.tsx",
-   "src/components/sections/decision-rail.tsx"
+   "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
    "/courses",
    "/courses/[slug]",
-   "/courses/levels",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
    "/placement-test",
-   "/registration/course",
-   "/resources/language-tandem",
-   "/search",
-   "/team"
+   "/registration/course"
   ]
  },
  "t.termin-folgt.b7w1fz": {
@@ -21990,16 +21931,6 @@
    "/accommodation/[type]"
   ]
  },
- "t.vorschlaege.6a51je": {
-  "de": "Vorschläge",
-  "en": "Suggestions",
-  "files": [
-   "src/components/assistant/AssistantWidget.tsx"
-  ],
-  "pages": [
-   "*"
-  ]
- },
  "t.waehl-eine-pruefung-aus.1cmc2k9": {
   "de": "Wähl eine Prüfung aus, dann erfährst du mehr über Voraussetzungen, Ablauf und Anmeldung.",
   "en": "Choose an exam to see the requirements, what to expect and how to register.",
@@ -22592,6 +22523,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.was-moechtest-du-ueber.p2q3e2": {
+  "de": "Was möchtest du über CASA wissen?",
+  "en": "What would you like to know about CASA?",
+  "files": [
+   "src/components/assistant/AssistantWidget.tsx"
+  ],
+  "pages": [
+   "*"
   ]
  },
  "t.was-moechtest-du-wissen.17z1c6e": {

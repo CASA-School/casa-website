@@ -67,6 +67,14 @@ export const tandemIcons3d = {
   bremen: { slug: 'house-with-garden', motion: 'float' },
 } satisfies Record<string, Icon3D>;
 
+/** CLARA's four starting points, in the order of her quick actions (components/assistant). */
+export const claraStartIcons3d: Icon3D[] = [
+  { slug: 'books', motion: 'hop' },
+  { slug: 'pencil', motion: 'wobble' },
+  { slug: 'house-with-garden', motion: 'hop' },
+  { slug: 'speech-balloon', motion: 'float' },
+];
+
 export const personaIcons3d: Record<string, Icon3D> = {
   'new-learners': { slug: 'compass', motion: 'wobble' },
   'working-professionals': { slug: 'briefcase', motion: 'hop' },

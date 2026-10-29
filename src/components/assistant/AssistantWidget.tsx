@@ -2,34 +2,27 @@
 
 import { Link, usePathname } from '@/i18n/navigation';
 import {
+  type Dispatch,
+  type SetStateAction,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
-import {
-  Activity,
-  ArrowRight,
-  Bot,
-  ChevronDown,
-  Compass,
-  Loader2,
-  SendHorizonal,
-  Sparkles,
-  User,
-  X,
-} from 'lucide-react';
+import { ArrowRight, ArrowUp, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Icon3D } from '@/components/ui/icon-3d';
+import { claraStartIcons3d } from '@/config/icons-3d';
+import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
-type UiLocale = 'auto' | 'en' | 'de' | 'es' | 'fr' | 'zh';
-
-type AssistantMessage = {
+export type AssistantMessage = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  /** The language CLARA answered in, so her labels follow the conversation rather than the page. */
+  locale?: ContentLocale;
   cta?: {
     label: string;
     href: string;
@@ -67,93 +60,71 @@ type AssistantApiResponse = {
 };
 
 type AssistantWidgetProps = {
-  onClose: () => void;
+  /** The page's language: CLARA greets in it until a question is asked in another. */
+  locale: ContentLocale;
+  /** Held by the launcher, so the conversation outlives the panel and the page (in memory only). */
+  messages: AssistantMessage[];
+  onMessages: Dispatch<SetStateAction<AssistantMessage[]>>;
+  /** True while the panel plays its way out. */
+  closing: boolean;
+  /** `false` when a link was followed: the focus goes with the visitor, not back to CLARA's button. */
+  onClose: (returnFocus?: boolean) => void;
 };
 
-type QuickAction = {
-  label: string;
-  prompt: string;
-};
-
-const localeOptions: Array<{ value: UiLocale; label: string; enabled: boolean }> = [
-  { value: 'auto', label: 'Auto', enabled: true },
-  { value: 'en', label: 'EN', enabled: true },
-  { value: 'de', label: 'DE', enabled: true },
-  { value: 'es', label: 'ES', enabled: false },
-  { value: 'fr', label: 'FR', enabled: false },
-  { value: 'zh', label: 'ZH', enabled: false },
-];
-
+/*
+ * The greeting is two short lines (Rahman, 2026-10-29: the introduction was too long). What CLARA
+ * can help with is shown by the four starting points under it, not listed in a sentence.
+ */
 const dictionary = {
   en: {
     title: 'CLARA',
-    subtitle: 'Search and next steps',
-    placeholder: 'Ask CLARA anything about CASA…',
+    subtitle: 'Your questions about CASA',
+    placeholder: 'Ask CLARA …',
     send: 'Send',
-    quickActionsTitle: 'Quick start',
     quickActions: [
       { label: 'The right course', prompt: 'Help me find a CASA course that suits my level and my weekly routine.' },
       { label: 'Exams', prompt: 'Which suits me better, telc B2 or C1 Hochschule?' },
       { label: 'Accommodation', prompt: 'Which suits me better, a shared flat or a host family?' },
       { label: 'Contact', prompt: 'I’d like to contact CASA. How can I reach you by phone or email?' },
     ],
-    greeting:
-      'Hello, I’m CLARA. I can help with questions about courses, exams, accommodation and registration at CASA. Tell me what you’re planning, and I’ll show you the next step.',
-    localeLabel: 'Language',
-    soon: 'Soon',
-    thinking: 'CLARA is looking for the right answer…',
-    liveSuggestionsTitle: 'Suggestions',
-    processingStages: [
-      'Reading your question…',
-      'Looking for the right pages…',
-      'Putting together your next step…',
-    ],
-    assistantLabel: 'CLARA',
-    userLabel: 'You',
-    closeLabel: 'Close assistant',
+    greetingTitle: 'Hi, I’m CLARA.',
+    greetingText: 'What would you like to know about CASA?',
+    processingStages: ['Reading your question …', 'Looking through the pages …', 'Putting your answer together …'],
+    closeLabel: 'Close CLARA',
+    restartLabel: 'New conversation',
     planLabel: 'Next steps',
     linksLabel: 'Useful links',
-    resultsLabel: 'Showing',
     detailsLabel: 'Details',
-    optionSingular: 'option',
-    optionPlural: 'options',
     courseTypeLabel: 'course',
   },
   de: {
     title: 'CLARA',
-    subtitle: 'Suche und nächste Schritte',
-    placeholder: 'Frag CLARA alles zu CASA …',
+    subtitle: 'Deine Fragen zu CASA',
+    placeholder: 'Frag CLARA …',
     send: 'Senden',
-    quickActionsTitle: 'Schnellstart',
     quickActions: [
       { label: 'Passender Kurs', prompt: 'Hilf mir, einen CASA-Kurs zu finden, der zu meinem Niveau und meinem Wochenrhythmus passt.' },
       { label: 'Prüfungen', prompt: 'Was passt besser zu mir, telc B2 oder C1 Hochschule?' },
       { label: 'Unterkunft', prompt: 'Was passt besser zu mir, eine WG oder eine Gastfamilie?' },
       { label: 'Kontakt', prompt: 'Ich möchte CASA kontaktieren. Wie erreiche ich euch per Telefon oder E-Mail?' },
     ],
-    greeting:
-      'Hallo, ich bin CLARA. Ich helfe dir bei Fragen zu Kursen, Prüfungen, Unterkunft und Anmeldung bei CASA. Schreib mir, was du vorhast, dann zeige ich dir den nächsten Schritt.',
-    localeLabel: 'Sprache',
-    soon: 'Bald',
-    thinking: 'CLARA sucht die passende Antwort …',
-    liveSuggestionsTitle: 'Vorschläge',
-    processingStages: [
-      'Ich lese deine Frage …',
-      'Ich suche die passenden Seiten …',
-      'Ich stelle dir den nächsten Schritt zusammen …',
-    ],
-    assistantLabel: 'CLARA',
-    userLabel: 'Du',
-    closeLabel: 'Assistent schließen',
+    greetingTitle: 'Hallo, ich bin CLARA.',
+    greetingText: 'Was möchtest du über CASA wissen?',
+    processingStages: ['Ich lese deine Frage …', 'Ich suche auf den Seiten …', 'Ich stelle dir die Antwort zusammen …'],
+    closeLabel: 'CLARA schließen',
+    restartLabel: 'Neues Gespräch',
     planLabel: 'Nächste Schritte',
     linksLabel: 'Nützliche Links',
-    resultsLabel: 'Angezeigt',
     detailsLabel: 'Details',
-    optionSingular: 'Option',
-    optionPlural: 'Optionen',
     courseTypeLabel: 'Kurs',
   },
 } as const;
+
+/** Phones get a sheet the height of what is visible, so the keyboard never covers the field. */
+const SHEET_QUERY = '(max-width: 639px)';
+const MAX_FIELD_HEIGHT = 128;
+/** How long each step of „what CLARA is doing" stays before the next. */
+const STAGE_MS = 1200;
 
 function makeMessage(role: 'user' | 'assistant', content: string): AssistantMessage {
   return {
@@ -163,109 +134,26 @@ function makeMessage(role: 'user' | 'assistant', content: string): AssistantMess
   };
 }
 
-function useDisplayLocale(selected: UiLocale, inferred: 'en' | 'de' | null) {
-  if (selected === 'en' || selected === 'de') {
-    return selected;
-  }
-
-  return inferred ?? 'de';
+/** Her face beside each of her messages: still, flat, no gradient (one per message). */
+function ClaraFace() {
+  return (
+    <svg viewBox="0 0 64 64" className="mt-1 h-7 w-7 shrink-0" fill="none" aria-hidden="true">
+      <circle cx="32" cy="32" r="26" fill="#e3f1fd" />
+      <circle cx="24" cy="28" r="4" fill="#0f172a" />
+      <circle cx="40" cy="28" r="4" fill="#0f172a" />
+      <path d="M22 41C24.8 44 28 45.4 32 45.4C36 45.4 39.2 44 42 41" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M17 18C21.2 12.5 26.1 9.6 32 9.6C37.9 9.6 42.8 12.5 47 18" stroke="#009fe3" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="50" cy="15" r="4.5" fill="var(--casa-sun)" />
+    </svg>
+  );
 }
 
-function normalizeInput(value: string) {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
-}
-
-function dedupeActions(actions: QuickAction[]) {
-  const map = new Map(actions.map((action) => [action.label, action]));
-  return Array.from(map.values());
-}
-
-function buildLiveSuggestions(locale: 'en' | 'de', input: string): QuickAction[] {
-  const normalized = normalizeInput(input);
-  if (!normalized) {
-    return dictionary[locale].quickActions.map((action) => ({ ...action }));
-  }
-
-  if (locale === 'de') {
-    const actions: QuickAction[] = [];
-    if (/(kurs|niveau|b1|b2|c1|a1|a2|abend|intensiv)/.test(normalized)) {
-      actions.push(
-        { label: 'Passender Kurs', prompt: 'Ich suche einen CASA-Kurs, der zu meinem Niveau und meinem Zeitplan passt.' },
-        { label: 'Einstufung', prompt: 'Hilf mir bei der Einstufung und zeig mir danach einen passenden Kurs.' }
-      );
-    }
-    if (/(prüfung|prufung|telc|zertifikat)/.test(normalized)) {
-      actions.push(
-        { label: 'Prüfungen', prompt: 'Welche Prüfung passt zu mir, und wann ist der nächste Termin?' },
-        { label: 'Prüfungsanmeldung', prompt: 'Ich möchte mich zu einer Prüfung anmelden. Wie geht das?' }
-      );
-    }
-    if (/(unterkunft|wg|gastfamilie|wohnen)/.test(normalized)) {
-      actions.push(
-        { label: 'Unterkunft vergleichen', prompt: 'Vergleiche WG und Gastfamilie für mich und gib eine klare Empfehlung.' },
-        { label: 'Unterkunftsanfrage', prompt: 'Wie frage ich eine Unterkunft an?' }
-      );
-    }
-    if (/(portal|dashboard|konto|login)/.test(normalized)) {
-      actions.push(
-        { label: 'Kontakt', prompt: 'Ich habe eine Frage zu einem Login oder Konto.' },
-        { label: 'Team kontaktieren', prompt: 'Ich möchte das CASA-Team kontaktieren. Wie erreiche ich euch per Telefon oder im Büro?' }
-      );
-    }
-    if (/(visum|visa|botschaft|aufenthalt)/.test(normalized)) {
-      actions.push({
-        label: 'Visum',
-        prompt: 'Was muss ich beim Sprachvisum beachten?',
-      });
-    }
-
-    return dedupeActions([...actions, ...dictionary.de.quickActions]).slice(0, 4);
-  }
-
-  const actions: QuickAction[] = [];
-  if (/(course|level|b1|b2|c1|a1|a2|evening|intensive)/.test(normalized)) {
-    actions.push(
-      { label: 'The right course', prompt: 'I’m looking for a CASA course that fits my level and my timetable.' },
-      { label: 'Placement', prompt: 'Help me find my level, then show me a course that suits me.' }
-    );
-  }
-  if (/(exam|telc|certificate)/.test(normalized)) {
-    actions.push(
-      { label: 'Exams', prompt: 'Which exam suits me, and when is the next date?' },
-      { label: 'Exam registration', prompt: 'I’d like to register for an exam. How does it work?' }
-    );
-  }
-  if (/(accommodation|housing|host family|shared|flat|room)/.test(normalized)) {
-    actions.push(
-      { label: 'Compare accommodation', prompt: 'Compare a shared flat and a host family for me and give me a clear recommendation.' },
-      { label: 'Accommodation request', prompt: 'How do I ask for accommodation?' }
-    );
-  }
-  if (/(portal|dashboard|account|login)/.test(normalized)) {
-    actions.push(
-      { label: 'Contact', prompt: 'I have a question about a login or an account.' },
-      { label: 'Contact the team', prompt: 'I’d like to contact the CASA team. How can I reach you by phone or at the office?' }
-    );
-  }
-  if (/(visa|embassy|residence)/.test(normalized)) {
-    actions.push({
-      label: 'Visa',
-      prompt: 'What do I need to know about a language visa?',
-    });
-  }
-
-  return dedupeActions([...actions, ...dictionary.en.quickActions]).slice(0, 4);
-}
-
-function ClaraAvatar({ active }: { active: boolean }) {
+function ClaraAvatar({ active, size = 'md' }: { active: boolean; size?: 'md' | 'lg' }) {
   return (
     <div
       className={cn(
-        'clara-avatar relative h-12 w-12 shrink-0 rounded-xl border border-white/45 bg-white/65 shadow-[var(--shadow-soft)] backdrop-blur-sm',
+        'clara-avatar relative shrink-0 rounded-xl border border-white/45 bg-white/65 shadow-[var(--shadow-soft)]',
+        size === 'lg' ? 'h-16 w-16 rounded-2xl' : 'h-10 w-10',
         active ? 'clara-avatar-thinking' : null
       )}
       aria-hidden="true"
@@ -293,81 +181,76 @@ function ClaraAvatar({ active }: { active: boolean }) {
   );
 }
 
-export function AssistantWidget({ onClose }: AssistantWidgetProps) {
+export function AssistantWidget({ locale, messages, onMessages, closing, onClose }: AssistantWidgetProps) {
   const { pickTree, say } = useSiteCopy();
   // The page the visitor asks from: "what does this cost?" on a course page means that course.
   const pagePath = usePathname();
-  const [selectedLocale, setSelectedLocale] = useState<UiLocale>('auto');
-  const [inferredLocale, setInferredLocale] = useState<'en' | 'de' | null>(null);
-  const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingStageIndex, setLoadingStageIndex] = useState(0);
-  const [mobilePanelHeight, setMobilePanelHeight] = useState<number | null>(null);
+  const [stage, setStage] = useState(0);
+  const [sheet, setSheet] = useState<{ top: number; height: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const fieldRef = useRef<HTMLTextAreaElement | null>(null);
+  const hasScrolled = useRef(false);
 
-  const displayLocale = useDisplayLocale(selectedLocale, inferredLocale);
+  // CLARA speaks the language of her last answer, and the page's until then.
+  const displayLocale = messages.findLast((message) => message.locale)?.locale ?? locale;
   const copy = pickTree(displayLocale, dictionary);
-  const liveSuggestions = useMemo(
-    () => buildLiveSuggestions(displayLocale, text),
-    [displayLocale, text]
-  );
-  const panelStyle = useMemo(
-    () => (mobilePanelHeight ? { height: `${mobilePanelHeight}px`, maxHeight: `${mobilePanelHeight}px` } : undefined),
-    [mobilePanelHeight]
-  );
 
-  const initialMessage = useMemo(
-    () => makeMessage('assistant', copy.greeting),
-    [copy.greeting]
-  );
-
-  const visibleMessages = messages.length > 0 ? messages : [initialMessage];
-
+  // To the newest message: at once when the panel opens on an earlier conversation, smoothly after.
   useEffect(() => {
     const container = scrollRef.current;
-    if (!container) {
+    // The welcome is read from its top; there is nothing newer to scroll to.
+    if (!container || (messages.length === 0 && !loading)) {
       return;
     }
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, [visibleMessages.length, loading]);
+    container.scrollTo({ top: container.scrollHeight, behavior: hasScrolled.current ? 'smooth' : 'auto' });
+    hasScrolled.current = true;
+  }, [messages.length, loading]);
 
+  // While she looks: what she is doing, a step at a time, staying on the last.
   useEffect(() => {
     if (!loading) {
-      setLoadingStageIndex(0);
       return;
     }
-
-    const interval = window.setInterval(() => {
-      setLoadingStageIndex((current) => (current + 1) % copy.processingStages.length);
-    }, 850);
-
-    return () => window.clearInterval(interval);
+    const timer = window.setInterval(() => {
+      setStage((current) => Math.min(current + 1, copy.processingStages.length - 1));
+    }, STAGE_MS);
+    return () => window.clearInterval(timer);
   }, [loading, copy.processingStages.length]);
 
   useEffect(() => {
-    const updatePanelHeight = () => {
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      const isMobile = window.matchMedia('(max-width: 639px)').matches;
-      if (!isMobile) {
-        setMobilePanelHeight(null);
+    const viewport = window.visualViewport;
+    const media = window.matchMedia(SHEET_QUERY);
+    const update = () => {
+      if (!media.matches) {
+        setSheet(null);
         return;
       }
-
-      setMobilePanelHeight(Math.max(420, Math.floor(viewportHeight - 12)));
+      // What is visible above the keyboard, less a strip of the page at the top.
+      const top = (viewport?.offsetTop ?? 0) + 8;
+      const height = Math.floor((viewport?.height ?? window.innerHeight) - 8);
+      setSheet({ top, height });
     };
 
-    updatePanelHeight();
-    window.addEventListener('resize', updatePanelHeight);
-    window.visualViewport?.addEventListener('resize', updatePanelHeight);
-
+    update();
+    media.addEventListener('change', update);
+    viewport?.addEventListener('resize', update);
+    viewport?.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener('resize', updatePanelHeight);
-      window.visualViewport?.removeEventListener('resize', updatePanelHeight);
+      media.removeEventListener('change', update);
+      viewport?.removeEventListener('resize', update);
+      viewport?.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
     };
+  }, []);
+
+  // With a mouse, straight into the field; on a phone the keyboard waits for a tap.
+  useEffect(() => {
+    if (window.matchMedia('(pointer: fine)').matches) {
+      fieldRef.current?.focus({ preventScroll: true });
+    }
   }, []);
 
   useEffect(() => {
@@ -381,6 +264,15 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
     return () => window.removeEventListener('keydown', onEscape);
   }, [onClose]);
 
+  function resizeField() {
+    const field = fieldRef.current;
+    if (!field) {
+      return;
+    }
+    field.style.height = 'auto';
+    field.style.height = `${Math.min(field.scrollHeight, MAX_FIELD_HEIGHT)}px`;
+  }
+
   async function sendMessage(content: string) {
     const trimmed = content.trim();
     if (!trimmed || loading) {
@@ -389,8 +281,10 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
     const userMessage = makeMessage('user', trimmed);
     const nextMessages = [...messages, userMessage];
-    setMessages(nextMessages);
+    onMessages(nextMessages);
     setText('');
+    requestAnimationFrame(resizeField);
+    setStage(0);
     setLoading(true);
 
     try {
@@ -404,7 +298,8 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
             role: message.role,
             content: message.content,
           })),
-          locale: selectedLocale === 'auto' ? null : selectedLocale,
+          // The language comes from the question itself (the API reads it), whatever the page's.
+          locale: null,
           pagePath,
         }),
       });
@@ -414,22 +309,21 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
         throw new Error(payload.message || 'Assistant request failed');
       }
 
-      setInferredLocale(payload.data.locale);
-
       const assistantMessage: AssistantMessage = {
         ...makeMessage('assistant', payload.data.message),
+        locale: payload.data.locale,
         cta: payload.data.cta,
         cards: payload.data.cards,
         quickLinks: payload.data.quickLinks,
         planSteps: payload.data.planSteps,
       };
 
-      setMessages((current) => [...current, assistantMessage]);
+      onMessages((current) => [...current, assistantMessage]);
     } catch {
       const fallbackText =
         say(displayLocale, 'Da bin ich mir gerade nicht sicher. Am besten wendest du dich direkt an unser Team.', 'I’m not sure about that right now. It’s best to contact our team directly.');
 
-      setMessages((current) => [
+      onMessages((current) => [
         ...current,
         {
           ...makeMessage('assistant', fallbackText),
@@ -446,275 +340,269 @@ export function AssistantWidget({ onClose }: AssistantWidgetProps) {
 
   return (
     <div className="fixed inset-0 z-[1000] pointer-events-none">
-      <div className="absolute inset-0 bg-[rgba(10,18,30,0.08)] backdrop-blur-[1px] sm:hidden" onClick={onClose} />
+      {/* Phones only: the page dims behind the sheet, and a tap on it closes CLARA. */}
+      <div
+        className="clara-backdrop pointer-events-auto absolute inset-0 bg-[rgba(10,18,30,0.28)] sm:hidden"
+        data-closing={closing || undefined}
+        onClick={() => onClose()}
+        aria-hidden="true"
+      />
       <div
         id="casa-assistant-panel"
-        style={panelStyle}
-        className="pointer-events-auto absolute inset-x-2 bottom-2 flex min-h-[min(520px,calc(100svh-0.75rem))] max-h-[calc(100svh-0.75rem)] h-[calc(100svh-0.75rem)] flex-col overflow-hidden rounded-3xl border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(86svh,680px)] sm:max-h-[86svh] sm:min-h-[min(560px,86svh)] sm:w-[min(96vw,460px)]"
+        role="dialog"
+        aria-labelledby="casa-assistant-title"
+        data-closing={closing || undefined}
+        style={sheet ? { top: `${sheet.top}px`, height: `${sheet.height}px` } : undefined}
+        /*
+          Any link inside: the visitor is going somewhere, and CLARA steps aside as the page
+          changes. Animated, not at once: taking the link out of the page in the same click
+          turned Next's navigation into a full reload, which lost the conversation.
+        */
+        onClickCapture={(event) => {
+          if ((event.target as HTMLElement).closest('a[href]')) {
+            onClose(false);
+          }
+        }}
+        className={cn(
+          'clara-panel pointer-events-auto absolute flex flex-col overflow-hidden border border-[color:var(--casa-sand)] bg-white shadow-[var(--shadow-modal)]',
+          // Phone: a sheet from the bottom edge. From `sm`: a panel above her button.
+          'inset-x-0 bottom-0 h-[calc(100dvh-0.5rem)] rounded-t-3xl',
+          'sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[min(640px,calc(100svh-7rem))] sm:w-[min(420px,calc(100vw-3rem))] sm:rounded-3xl'
+        )}
       >
-      {/*
-        THREE stacked layers became one, and it is the same one every other panel
-        on the site uses: a blue corner wash on white.
-
-        This was a blue radial at 0.15 top-left, a 17% sun radial top-right and a
-        white -> #f8fbff base fade — the brand triad plus a raw-hex ramp, in a
-        400px overlay that sits over every page. Clara keeps her identity in the
-        avatar gradient below, which is an icon and may hold the full palette for
-        the same reason the logo does.
-      */}
-      <header className="relative overflow-hidden border-b border-[color:var(--casa-sand)] bg-white bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_8%,transparent),transparent_55%)] px-4 pb-3 pt-3.5">
-        <div className="mb-2 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <ClaraAvatar active={loading} />
-            <div>
-              <p className="text-sm font-bold tracking-tight text-[var(--casa-ink)]">{copy.title}</p>
-              <p className="text-xs font-medium text-[var(--casa-muted)]">{copy.subtitle}</p>
-            </div>
+        <header className="flex items-center gap-3 border-b border-[color:var(--casa-sand)] bg-white bg-[radial-gradient(130%_120%_at_0%_0%,color-mix(in_srgb,var(--casa-blue)_7%,transparent),transparent_55%)] py-3 pl-4 pr-3">
+          <ClaraAvatar active={loading} />
+          <div className="min-w-0 flex-1">
+            <p id="casa-assistant-title" className="text-sm font-bold tracking-tight text-[var(--casa-ink)]">{copy.title}</p>
+            <p className="truncate text-xs text-[var(--casa-muted)]">{copy.subtitle}</p>
           </div>
+          {messages.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                onMessages([]);
+                setText('');
+                fieldRef.current?.focus({ preventScroll: true });
+              }}
+              disabled={loading}
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full px-3 text-xs font-semibold text-[var(--casa-muted)] transition-colors duration-200 hover:bg-[var(--casa-warm-soft)] hover:text-[var(--casa-ink)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/20 disabled:opacity-40"
+            >
+              {copy.restartLabel}
+            </button>
+          ) : null}
           <button
             type="button"
-            onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--casa-sand)] bg-white/80 text-[var(--casa-muted)] transition-colors hover:bg-[var(--casa-warm-soft)]"
+            onClick={() => onClose()}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--casa-muted)] transition-colors duration-200 hover:bg-[var(--casa-warm-soft)] hover:text-[var(--casa-ink)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/20"
             aria-label={copy.closeLabel}
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
-        </div>
+        </header>
 
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-            <Sparkles className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
-            {copy.localeLabel}
-          </span>
-          <div className="relative">
-            <select
-              value={selectedLocale}
-              onChange={(event) => setSelectedLocale(event.target.value as UiLocale)}
-              className="appearance-none rounded-full border border-[color:var(--casa-sand)] bg-white pl-3 pr-7 py-1 text-xs font-semibold text-[var(--casa-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
-            >
-              {localeOptions.map((option) => (
-                <option key={option.value} value={option.value} disabled={!option.enabled}>
-                  {option.enabled ? option.label : `${option.label} (${copy.soon})`}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--casa-muted)]" />
-          </div>
-        </div>
-      </header>
-
-      <div
-        ref={scrollRef}
-        className="clara-scroll flex-1 space-y-3 overflow-y-auto bg-[var(--casa-canvas)] px-4 py-3"
-      >
-        {visibleMessages.map((message) => (
-          <article
-            key={message.id}
-            className={cn(
-              'max-w-[95%] rounded-xl border px-3.5 py-2.5 text-sm leading-relaxed',
-              message.role === 'assistant'
-                ? 'mr-auto border-[color:var(--casa-sand)] bg-white text-[var(--casa-ink)]'
-                : 'ml-auto border-transparent bg-[var(--casa-ink-deep)] text-white'
-            )}
-          >
-            <div className="mb-1.5 flex items-center gap-1 text-xs font-semibold opacity-85">
-              {message.role === 'assistant' ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
-              <span>{message.role === 'assistant' ? copy.assistantLabel : copy.userLabel}</span>
-            </div>
-            <p className="whitespace-pre-line">{message.content}</p>
-
-            {message.planSteps && message.planSteps.length > 0 ? (
-              <div className="mt-3 rounded-xl border border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] px-3 py-2.5">
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                  {copy.planLabel}
-                </p>
-                <ol className="space-y-1.5">
-                  {message.planSteps.map((step, index) => (
-                    <li key={step.id} className="flex items-start gap-2 text-xs text-[var(--casa-ink)]">
-                      <span className="mt-[1px] inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
-                        {index + 1}
-                      </span>
-                      <span>{step.label}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ) : null}
-
-            {message.quickLinks && message.quickLinks.length > 0 ? (
-              <div className="mt-3">
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                  {copy.linksLabel}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {message.quickLinks.map((link) => (
-                    <Link
-                      key={`${message.id}-${link.href}`}
-                      href={link.href}
-                      className="inline-flex items-center gap-1 rounded-full border border-[color:var(--casa-sand)] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)]"
-                    >
-                      <Compass className="h-3 w-3 text-[var(--casa-accent-text)]" />
-                      {link.label}
-                    </Link>
-                  ))}
+        <div
+          ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          className="clara-scroll flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[var(--casa-canvas)] px-4 py-4"
+        >
+          {/*
+            Before the first question: her face, two short lines, and four starting points with the
+            site's 3D icons, which play their motion on hover as everywhere else.
+          */}
+          {messages.length === 0 ? (
+            // Centred by auto margins, not `justify-center`: on a short screen it scrolls from its top.
+            <div className="clara-message flex min-h-full flex-col">
+              <div className="my-auto py-2">
+              <div className="flex flex-col items-center text-center">
+                {/* Her big face only where there is height for it; the header already shows her. */}
+                <div className="mb-4 [@media(max-height:620px)]:hidden">
+                  <ClaraAvatar active={false} size="lg" />
                 </div>
+                <p className="text-lg font-bold tracking-tight text-[var(--casa-ink)]">{copy.greetingTitle}</p>
+                <p className="mt-1 text-sm text-[var(--casa-muted)]">{copy.greetingText}</p>
               </div>
-            ) : null}
-
-            {message.cards && message.cards.length > 0 ? (
-              <div className="mt-3 overflow-hidden rounded-xl border border-[color:var(--casa-sand)] bg-white">
-                <div className="flex items-center justify-between gap-2 border-b border-[color:var(--casa-sand)] bg-[var(--casa-warm-panel)] px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                    {copy.resultsLabel}
-                  </p>
-                  <p className="text-xs font-semibold text-[var(--casa-muted)]">
-                    {message.cards.length} {message.cards.length === 1 ? copy.optionSingular : copy.optionPlural}
-                  </p>
-                </div>
-                {message.cards.map((card) => (
-                  <Link
-                    key={card.id}
-                    href={card.href}
-                    className="group block border-b border-[color:var(--casa-sand)]/70 bg-white p-3 text-[var(--casa-ink)] transition-colors last:border-b-0 hover:bg-[var(--casa-warm-panel)]"
+              <div className="mt-6 grid grid-cols-2 gap-2.5">
+                {copy.quickActions.map((action, index) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    data-icon-3d-host
+                    onClick={() => sendMessage(action.prompt)}
+                    className="flex min-h-16 items-center gap-3 rounded-2xl border border-[color:var(--casa-sand)] bg-white px-3 py-3 text-left text-sm font-semibold leading-snug text-[var(--casa-ink)] shadow-[var(--shadow-soft)] transition duration-200 ease-casa hover:border-[color:var(--casa-blue)]/30 hover:shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/20 motion-safe:hover:-translate-y-0.5"
                   >
-                    <div className="flex items-start gap-2">
-                      <span className="mt-0.5 rounded-full bg-[var(--casa-blue)]/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-accent-text)]">
-                        {card.type === 'course' ? copy.courseTypeLabel : card.type}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold leading-snug">{card.title}</p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[var(--casa-muted)]">{card.description}</p>
-                      </div>
-                      <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--casa-accent-text)]" />
-                    </div>
-                    {card.badges.length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {card.badges.map((badge) => (
-                          <span
-                            key={`${card.id}-${badge}`}
-                            className="rounded-full border border-[color:var(--casa-sand)] bg-white px-2 py-0.5 text-xs font-semibold text-[var(--casa-muted)]"
-                          >
-                            {badge}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {card.meta.length > 0 ? (
-                      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
-                        {card.meta.slice(0, 4).map((item) => (
-                          <div key={`${card.id}-${item.label}`} className="min-w-0">
-                            <dt className="truncate text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-                              {item.label}
-                            </dt>
-                            <dd className="truncate text-xs font-semibold text-[var(--casa-ink)]">{item.value}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : null}
-                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[var(--casa-accent-text)]">
-                      {copy.detailsLabel}
-                      <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                    </span>
-                  </Link>
+                    {claraStartIcons3d[index] ? <Icon3D icon={claraStartIcons3d[index]} size="md" /> : null}
+                    <span className="min-w-0">{action.label}</span>
+                  </button>
                 ))}
               </div>
-            ) : null}
-
-            {message.role === 'assistant' && message.cta ? (
-              <div className="mt-3">
-                <Button
-                  asChild
-                  size="sm"
-                  className="h-8 rounded-full bg-[var(--casa-ink-deep)] px-3 text-xs font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]"
-                >
-                  <Link href={message.cta.href}>{message.cta.label}</Link>
-                </Button>
               </div>
-            ) : null}
-          </article>
-        ))}
-
-        {messages.length === 0 ? (
-          <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">{copy.quickActionsTitle}</p>
-            <div className="flex flex-wrap gap-2">
-              {copy.quickActions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={() => sendMessage(action.prompt)}
-                  className="rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)]"
-                >
-                  {action.label}
-                </button>
-              ))}
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {text.trim().length > 0 && !loading ? (
-          <div className="rounded-xl border border-[color:var(--casa-sand)] bg-white p-3">
-            <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-eyebrow text-[var(--casa-muted)]">
-              <Sparkles className="h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
-              {copy.liveSuggestionsTitle}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {liveSuggestions.map((suggestion) => (
-                <button
-                  key={suggestion.label}
-                  type="button"
-                  onClick={() => sendMessage(suggestion.prompt)}
-                  className="rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--casa-ink)] transition-colors hover:bg-[var(--casa-warm-soft)]"
-                >
-                  {suggestion.label}
-                </button>
-              ))}
+          {messages.map((message) =>
+            message.role === 'user' ? (
+              <p
+                key={message.id}
+                className="clara-message ml-auto w-fit max-w-[85%] whitespace-pre-line rounded-2xl rounded-tr-md bg-[var(--casa-ink-deep)] px-4 py-2.5 text-sm leading-relaxed text-white"
+              >
+                {message.content}
+              </p>
+            ) : (
+              <div key={message.id} className="clara-message flex items-start gap-2">
+              <ClaraFace />
+              <article className="min-w-0 max-w-[88%] rounded-2xl rounded-tl-md border border-[color:var(--casa-sand)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--casa-ink)] shadow-[var(--shadow-soft)]">
+                <p className="whitespace-pre-line">{message.content}</p>
+
+                {message.planSteps && message.planSteps.length > 0 ? (
+                  <div className="mt-3 rounded-xl bg-[var(--casa-warm-panel)] px-3 py-2.5">
+                    <p className="mb-1.5 text-xs font-semibold text-[var(--casa-muted)]">{copy.planLabel}</p>
+                    <ol className="space-y-1.5">
+                      {message.planSteps.map((step, index) => (
+                        <li key={step.id} className="flex items-start gap-2 text-sm text-[var(--casa-ink)]">
+                          <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
+                            {index + 1}
+                          </span>
+                          <span>{step.label}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+
+                {message.quickLinks && message.quickLinks.length > 0 ? (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-xs font-semibold text-[var(--casa-muted)]">{copy.linksLabel}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {message.quickLinks.map((link) => (
+                        <Link
+                          key={`${message.id}-${link.href}`}
+                          href={link.href}
+                          className="group inline-flex min-h-8 items-center gap-1 rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1 text-xs font-semibold text-[var(--casa-ink)] transition-colors duration-200 hover:border-[color:var(--casa-blue)]/40 hover:bg-[var(--casa-warm-soft)]"
+                        >
+                          {link.label}
+                          <ArrowRight className="h-3 w-3 text-[var(--casa-accent-text)] transition-transform duration-200 ease-casa group-hover:translate-x-0.5" aria-hidden="true" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {message.cards && message.cards.length > 0 ? (
+                  <div className="mt-3 divide-y divide-[color:var(--casa-sand)] overflow-hidden rounded-xl border border-[color:var(--casa-sand)]">
+                    {message.cards.map((card) => (
+                      <Link
+                        key={card.id}
+                        href={card.href}
+                        className="group block bg-white p-3 text-[var(--casa-ink)] transition-colors duration-200 hover:bg-[var(--casa-warm-panel)]"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-[var(--casa-accent-text)]">
+                              {card.type === 'course' ? copy.courseTypeLabel : card.type}
+                            </p>
+                            <p className="mt-0.5 text-sm font-bold leading-snug">{card.title}</p>
+                            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[var(--casa-muted)]">{card.description}</p>
+                          </div>
+                          <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--casa-muted)] transition-transform duration-200 ease-casa group-hover:translate-x-0.5 group-hover:text-[var(--casa-accent-text)]" aria-hidden="true" />
+                        </div>
+                        {card.badges.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {card.badges.map((badge) => (
+                              <span
+                                key={`${card.id}-${badge}`}
+                                className="rounded-full bg-[var(--casa-canvas)] px-2 py-0.5 text-xs font-semibold text-[var(--casa-muted)]"
+                              >
+                                {badge}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                        {card.meta.length > 0 ? (
+                          <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                            {card.meta.slice(0, 4).map((item) => (
+                              <div key={`${card.id}-${item.label}`} className="min-w-0">
+                                <dt className="truncate text-xs text-[var(--casa-muted)]">{item.label}</dt>
+                                <dd className="truncate text-xs font-semibold text-[var(--casa-ink)]">{item.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
+                        <span className="sr-only">{copy.detailsLabel}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+
+                {message.cta ? (
+                  <Button
+                    asChild
+                    size="sm"
+                    className="mt-3 h-9 rounded-full bg-[var(--casa-ink-deep)] px-4 text-xs font-semibold text-white hover:bg-[var(--casa-ink-deep-hover)]"
+                  >
+                    <Link href={message.cta.href}>{message.cta.label}</Link>
+                  </Button>
+                ) : null}
+              </article>
+              </div>
+            )
+          )}
+
+          {loading ? (
+            <div className="clara-message flex items-start gap-2">
+              <ClaraFace />
+              <div className="inline-flex min-w-0 items-center gap-2.5 rounded-2xl rounded-tl-md border border-[color:var(--casa-sand)] bg-white px-4 py-3 shadow-[var(--shadow-soft)]">
+                <span className="flex shrink-0 items-center gap-1" aria-hidden="true">
+                  <span className="clara-typing-dot" />
+                  <span className="clara-typing-dot" />
+                  <span className="clara-typing-dot" />
+                </span>
+                <span key={stage} className="clara-message text-xs text-[var(--casa-muted)]">
+                  {copy.processingStages[stage]}
+                </span>
+              </div>
             </div>
-          </div>
-        ) : null}
-
-        {loading ? (
-          <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--casa-sand)] bg-white px-3 py-1 text-xs text-[var(--casa-muted)]">
-            <Activity className="clara-status-pulse h-3.5 w-3.5 text-[var(--casa-accent-text)]" />
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            {copy.processingStages[loadingStageIndex]}
-          </div>
-        ) : null}
-      </div>
-
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void sendMessage(text);
-        }}
-        className="border-t border-[color:var(--casa-sand)] bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-      >
-        <div className="flex items-end gap-2">
-          <textarea
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                void sendMessage(text);
-              }
-            }}
-            rows={2}
-            maxLength={1000}
-            placeholder={copy.placeholder}
-            className="min-h-[44px] flex-1 resize-y rounded-xl border border-[color:var(--casa-sand)] bg-white px-3 py-2 text-sm text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]"
-          />
-          <Button
-            type="submit"
-            disabled={loading || text.trim().length === 0}
-            className="h-10 rounded-xl bg-[var(--casa-ink-deep)] px-3 text-white hover:bg-[var(--casa-ink-deep-hover)]"
-          >
-            <SendHorizonal className="h-4 w-4" />
-            <span className="sr-only">{copy.send}</span>
-          </Button>
+          ) : null}
         </div>
-      </form>
-    </div>
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void sendMessage(text);
+          }}
+          className="border-t border-[color:var(--casa-sand)] bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        >
+          <div className="flex items-end gap-2 rounded-2xl border border-[color:var(--casa-sand)] bg-white py-1.5 pl-3.5 pr-1.5 transition-shadow duration-200 focus-within:border-[color:var(--casa-blue)]/50 focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--casa-blue)_14%,transparent)]">
+            <textarea
+              ref={fieldRef}
+              value={text}
+              onChange={(event) => {
+                setText(event.target.value);
+                resizeField();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                  event.preventDefault();
+                  void sendMessage(text);
+                }
+              }}
+              rows={1}
+              maxLength={1000}
+              aria-label={copy.placeholder}
+              placeholder={copy.placeholder}
+              className="max-h-32 min-h-9 flex-1 resize-none bg-transparent py-2 text-base leading-snug text-[var(--casa-ink)] placeholder:text-[var(--casa-muted)] focus:outline-none sm:text-sm"
+            />
+            <button
+              type="submit"
+              disabled={loading || text.trim().length === 0}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--casa-ink-deep)] text-white transition-[background-color,opacity] duration-200 hover:bg-[var(--casa-ink-deep-hover)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/20 disabled:opacity-30"
+            >
+              <ArrowUp className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">{copy.send}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,26 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { usePathname } from '@/i18n/navigation';
 
-import { AssistantWidget } from '@/components/assistant/AssistantWidget';
+import { AssistantWidget, type AssistantMessage } from '@/components/assistant/AssistantWidget';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 import type { ContentLocale } from '@/lib/content/types';
 import { cn } from '@/lib/utils';
 
-const COMPACT_VIEWPORT_MEDIA_QUERY = '(max-width: 767px)';
+/** How long the panel takes to leave (globals.css, `clara-panel-out`). */
+const CLOSE_MS = 160;
 
 /** Standalone CLARA avatar — the full launcher icon. */
-function ClaraIcon({ size }: { size: 'sm' | 'md' }) {
-  const dim = size === 'md' ? 'h-14 w-14' : 'h-12 w-12';
-  const radius = size === 'md' ? 'rounded-xl' : 'rounded-xl';
+function ClaraIcon() {
   return (
     <span
-      className={cn(
-        'clara-avatar relative inline-flex shrink-0 border border-white/50 bg-white shadow-[var(--shadow-soft)]',
-        dim,
-        radius
-      )}
+      className="clara-avatar relative inline-flex h-12 w-12 shrink-0 rounded-xl border border-white/50 bg-white shadow-[var(--shadow-soft)] md:h-14 md:w-14"
       aria-hidden="true"
     >
       <svg viewBox="0 0 64 64" className="h-full w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,42 +38,78 @@ function ClaraIcon({ size }: { size: 'sm' | 'md' }) {
 
 export function AssistantLauncher({ contentLocale }: { contentLocale: ContentLocale }) {
   const { say } = useSiteCopy();
-  const pathname = usePathname();
-  const activePath = pathname ?? '/';
-  const [openPath, setOpenPath] = useState<string | null>(null);
-  const [isCompactViewport, setIsCompactViewport] = useState(false);
-  const isOpen = openPath === activePath;
+  const pathname = usePathname() ?? '/';
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const [closing, setClosing] = useState(false);
+  /*
+   * The conversation lives here, not in the panel: closed, or on another page, it is still there
+   * when CLARA is opened again. In memory only, gone with the tab (privacy policy §5 and §17).
+   */
+  const [messages, setMessages] = useState<AssistantMessage[]>([]);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const closeTimer = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mediaQuery = window.matchMedia(COMPACT_VIEWPORT_MEDIA_QUERY);
-    const handleChange = () => setIsCompactViewport(mediaQuery.matches);
-    handleChange();
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+  /*
+   * Open on one page only. Following a link, or going back, closes CLARA: she was left open on
+   * the homepage after a visitor picked an answer, and was still open when they came back
+   * (Rahman, 2026-10-29). It used to compare the page with the one she was opened on, which hid
+   * her elsewhere but brought her back on that page.
+   */
+  if (openOn !== null && openOn !== pathname) {
+    setOpenOn(null);
+    setClosing(false);
+  }
+
+  const isOpen = openOn === pathname;
+
+  const closeNow = useCallback(() => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+    setOpenOn(null);
+    setClosing(false);
   }, []);
+
+  const close = useCallback(
+    (returnFocus = true) => {
+      if (closeTimer.current) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        closeNow();
+      } else {
+        setClosing(true);
+        closeTimer.current = window.setTimeout(closeNow, CLOSE_MS);
+      }
+      if (returnFocus) buttonRef.current?.focus({ preventScroll: true });
+    },
+    [closeNow]
+  );
 
   return (
     <>
-      {isOpen ? <AssistantWidget onClose={() => setOpenPath(null)} /> : null}
+      {isOpen ? (
+        <AssistantWidget
+          locale={contentLocale}
+          messages={messages}
+          onMessages={setMessages}
+          closing={closing}
+          onClose={close}
+        />
+      ) : null}
 
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpenPath((current) => (current === activePath ? null : activePath))}
+        onClick={() => (isOpen && !closing ? close() : setOpenOn(pathname))}
         className={cn(
-          // Base: minimal floating icon — no background, no border, no text
-          'fixed right-3 z-40 p-0 opacity-100 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2 sm:right-6',
-          // Position: sit above safe area on mobile, a bit higher on desktop
-          isCompactViewport
-            ? 'bottom-[max(0.75rem,env(safe-area-inset-bottom))]'
-            : 'bottom-[max(1.25rem,env(safe-area-inset-bottom))] sm:bottom-6'
+          'fixed right-3 z-40 rounded-xl p-0 transition-transform duration-200 ease-casa hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2 sm:right-6',
+          // Above the safe area on phones, a little higher from `sm`.
+          'bottom-[max(0.75rem,env(safe-area-inset-bottom))] sm:bottom-6',
+          isOpen && !closing && 'ring-2 ring-[var(--casa-blue)]/30 ring-offset-2'
         )}
-        aria-expanded={isOpen}
+        aria-expanded={isOpen && !closing}
         aria-controls="casa-assistant-panel"
         aria-label={say(contentLocale, 'CLARA öffnen', 'Open CLARA assistant')}
       >
-        {/* Slightly larger on desktop, compact on mobile */}
-        <ClaraIcon size={isCompactViewport ? 'sm' : 'md'} />
+        <ClaraIcon />
         <span className="sr-only">CLARA</span>
       </button>
     </>
