@@ -128,6 +128,13 @@ Also before the day:
   pages 200, `www` → 308 apex, http → 301 https, old tandem URLs → 308 to their pages, no `noindex`,
   canonical casa-bremen.de, `/admin` 404 on the apex, admin.casa-bremen.de and `neu…/test` working,
   MX and SPF unchanged.
+- Propagation: Telekom's and the office's resolvers kept the old A record for up to a day (the old
+  TTL). Meanwhile the old server's `.htaccess` sent casa-bremen.de to `neu.casa-bremen.de` (302, by
+  Codex; the original file is `~/Downloads/htaccess`), and the website editor framed
+  `neu.casa-bremen.de` again (`CMS_PUBLIC_ORIGIN`, with `CMS_EDITOR_ORIGIN=https://admin.casa-bremen.de`),
+  because on a network still seeing the old server the framed page came from the wrong origin and the
+  editor waited for it forever. **Once both resolvers answer `20.79.72.159`:** remove the `.htaccess`
+  lines and both `CMS_*` variables (`az containerapp update … --remove-env-vars CMS_PUBLIC_ORIGIN CMS_EDITOR_ORIGIN`).
 
 ## Rollback
 
