@@ -17,7 +17,8 @@
 > times) was built and withdrawn the same day, because reading screen size or timings from the device
 > would be such access; it needs the consent question answered first. Since 0108 a page load also keeps the
 > browser's preferred language and, on a visit's first page, a campaign tag (utm, or „Google Ads" without the
-> click id); §5 says so.
+> click id); since 0109 the country of the IP address (DB-IP Lite on our own server, the address dropped);
+> §5 says so.
 
 `/privacy` (`/datenschutz`) no longer shows the old site's policy word for word. Since
 2026-09-30 it is CASA's own text, in German and English, written against what the code

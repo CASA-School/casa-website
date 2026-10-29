@@ -32,13 +32,15 @@
     "qa:shots": "node scripts/qa/responsive-shots.mjs",
     "admin:seed": "node scripts/admin/seed-staff.mjs",
     "admin:password": "node scripts/admin/seed-staff.mjs --reset",
-    "admin:check": "node --env-file-if-exists=.env.local scripts/admin/check-routes.mjs"
+    "admin:check": "node --env-file-if-exists=.env.local scripts/admin/check-routes.mjs",
+    "geo:fetch": "node scripts/geo/fetch-country-db.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "country-list": "^2.4.1",
+    "mmdb-lib": "^3.0.3",
     "next": "16.4.3",
     "next-intl": "^4.13.6",
     "pg": "^8.23.0",

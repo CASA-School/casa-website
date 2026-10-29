@@ -1,11 +1,17 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { Reader, type CountryResponse } from 'mmdb-lib';
 import type { NextRequest } from 'next/server';
 
 import { isWorkspaceDatabaseConfigured, query } from '@/lib/admin/db';
+import { clientAddress } from '@/lib/api/rate-limit';
 
 /**
  * The website's page views (2026-10-29, migration 0106), counted by src/proxy.ts from the
  * request a browser sends for a page: its path, the Referer, the User-Agent, the preferred language
- * (Accept-Language) and a campaign tag in the link (utm, gclid). Nothing runs
+ * (Accept-Language), a campaign tag in the link (utm, gclid) and the country of the IP address
+ * (DB-IP Lite, read in memory; the address itself is never stored). Nothing runs
  * in the browser and nothing is read from the reader's device, so § 25 TDDDG is not touched
  * and the privacy policy's §5 stays true; nothing that identifies a reader is kept.
  *
@@ -28,7 +34,40 @@ type View = {
   referrer: string | null;
   language: string | null;
   campaign: string | null;
+  country: string | null;
 };
+
+/*
+ * DB-IP's free country database (CC BY 4.0, https://db-ip.com), in `geo/` beside the app: the
+ * image fetches the current month's on each build (Dockerfile, stage geo), a developer with
+ * `npm run geo:fetch`. Read once; without it, visits have no country.
+ */
+let countries: Reader<CountryResponse> | null | undefined;
+
+function countryReader(): Reader<CountryResponse> | null {
+  if (countries !== undefined) return countries;
+  const file = join(process.cwd(), 'geo', 'dbip-country-lite.mmdb');
+  try {
+    countries = existsSync(file) ? new Reader<CountryResponse>(readFileSync(file)) : null;
+  } catch (error) {
+    console.error('[site views] country database unreadable', error);
+    countries = null;
+  }
+  return countries;
+}
+
+/** The country of the reader's IP address, as two letters; the address is used here and dropped. */
+function countryOf(request: NextRequest): string | null {
+  const reader = countryReader();
+  const address = clientAddress(request);
+  if (!reader || address === 'unknown') return null;
+  try {
+    const code = reader.get(address)?.country?.iso_code;
+    return code && /^[A-Z]{2}$/.test(code) ? code : null;
+  } catch {
+    return null;
+  }
+}
 
 /** The browser's preferred language, the first tag of Accept-Language without its region: „ar", „tr". */
 function preferredLanguage(header: string): string | null {
@@ -87,6 +126,7 @@ export function pageView(request: NextRequest, locale: string): View | null {
     referrer: entry ? referrer : null,
     language: preferredLanguage(headers.get('accept-language') ?? ''),
     campaign: entry ? campaignOf(request.nextUrl.searchParams) : null,
+    country: entry ? countryOf(request) : null,
   };
 }
 
@@ -94,8 +134,9 @@ export async function recordPageView(view: View | null): Promise<void> {
   if (!view || !isWorkspaceDatabaseConfigured()) return;
   try {
     await query(
-      `INSERT INTO site_page_views (path, locale, device, entry, referrer_host, language, campaign) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [view.path, view.locale, view.device, view.entry, view.referrer, view.language, view.campaign]
+      `INSERT INTO site_page_views (path, locale, device, entry, referrer_host, language, campaign, country)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [view.path, view.locale, view.device, view.entry, view.referrer, view.language, view.campaign, view.country]
     );
     // Now and then the rows past thirteen months go, so a month can still be compared with the year before.
     if (Math.random() < 0.002) await query(`DELETE FROM site_page_views WHERE viewed_at < now() - interval '13 months'`);

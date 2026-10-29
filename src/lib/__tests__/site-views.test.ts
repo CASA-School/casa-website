@@ -25,6 +25,7 @@ describe('website page views (counted on the server)', () => {
       referrer: 'google.de',
       language: 'de',
       campaign: null,
+      country: null,
     });
   });
 
