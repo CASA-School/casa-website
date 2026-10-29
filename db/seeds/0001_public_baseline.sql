@@ -173,24 +173,31 @@ INSERT INTO career_positions (
   requirements,
   apply_email,
   is_published,
-  is_featured
+  is_featured,
+  open_application
 )
 VALUES
   (
     '79b868c5-c66b-4288-9be6-000000000041',
     'daf-teacher-bremen',
     'en',
-    'German teacher (DaF)',
+    'Speculative application: German teacher (DaF)',
     'Academic team',
     'Bremen',
-    'Part-time / full-time',
+    'Part-time or full-time, by arrangement',
     'On-site',
-    'You teach international learners in small groups, using communicative methods.',
-    'You plan your lessons, follow your learners’ progress and work closely with the coordination and administration teams.',
+    'Even when no position is advertised, we are always glad to hear from teachers of German as a foreign language who would like to teach with us.',
+    'Every year, people from many countries learn German at CASA: in intensive courses, evening courses, exam preparation and visiting groups. Send us your application, even if no position is advertised at the moment. We read every application and get back to you.
+
+You teach international learners in small groups, from A1 to C1.
+You use communicative methods and plan your own lessons.
+You follow your learners’ progress.
+You work closely with the coordination and administration teams.',
     'DaF/DaZ qualification or equivalent
 Teaching experience
 Very good communication skills',
     'bewerbungen@casa-bremen.de',
+    true,
     true,
     true
   ),
@@ -210,23 +217,30 @@ Strong organisational communication
 German language school context preferred',
     'bewerbungen@casa-bremen.de',
     true,
+    false,
     false
   ),
   (
     '79b868c5-c66b-4288-9be6-000000000043',
     'daf-lehrkraft-bremen',
     'de',
-    'DaF-Lehrkraft',
+    'Initiativbewerbung als DaF-Lehrkraft',
     'Akademisches Team',
     'Bremen',
-    'Teilzeit / Vollzeit',
+    'Teilzeit oder Vollzeit, nach Absprache',
     'Präsenz',
-    'Du unterrichtest internationale Lernende in kleinen Gruppen und arbeitest mit kommunikativen Methoden.',
-    'Du planst deinen Unterricht, begleitest die Fortschritte deiner Lernenden und arbeitest eng mit der Koordination und der Verwaltung zusammen.',
+    'Auch wenn gerade keine Stelle ausgeschrieben ist: Wir freuen uns jederzeit über Bewerbungen von DaF-Lehrkräften, die bei uns unterrichten möchten.',
+    'Bei CASA lernen jedes Jahr Menschen aus vielen Ländern Deutsch, in Intensivkursen, Abendkursen, in der Prüfungsvorbereitung und in Gruppen, die uns besuchen. Schick uns deine Unterlagen, auch ohne ausgeschriebene Stelle. Wir lesen jede Bewerbung und melden uns bei dir.
+
+Du unterrichtest internationale Lernende in kleinen Gruppen, von A1 bis C1.
+Du arbeitest mit kommunikativen Methoden und planst deinen Unterricht selbst.
+Du begleitest die Fortschritte deiner Lernenden.
+Du arbeitest eng mit der Koordination und der Verwaltung zusammen.',
     'DaF/DaZ-Qualifikation oder vergleichbar
 Unterrichtserfahrung
 Sehr gute Kommunikationsfähigkeit',
     'bewerbungen@casa-bremen.de',
+    true,
     true,
     true
   )

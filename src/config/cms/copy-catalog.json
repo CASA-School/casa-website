@@ -6513,6 +6513,16 @@
    "/careers/[slug]"
   ]
  },
+ "t.du-schickst-uns-deinen.hksex5": {
+  "de": "Du schickst uns deinen Lebenslauf und schreibst uns, was du gern unterrichten möchtest und wann du Zeit hast.",
+  "en": "You send us your CV and tell us what you would like to teach and when you are available.",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/careers/[slug]"
+  ]
+ },
  "t.du-solltest-einen-c1.11ab2u8": {
   "de": "Du solltest einen C1-Kurs erfolgreich abgeschlossen haben, denn Wortschatz, Redemittel und Grammatik der C1 sind nicht Inhalt des Kurses. Alternativ kannst du bei uns vor Ort einen Einstufungstest machen.",
   "en": "You should have successfully completed a C1 course, because C1 vocabulary, phrases and grammar are not taught in this course. Alternatively, you can take a placement test with us at the school.",
@@ -11322,6 +11332,18 @@
    "/courses/[slug]"
   ]
  },
+ "t.initiativ-bewerben.1n9gyhb": {
+  "de": "Initiativ bewerben",
+  "en": "Apply now",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx",
+   "src/app/(site)/[locale]/careers/page.tsx"
+  ],
+  "pages": [
+   "/careers",
+   "/careers/[slug]"
+  ]
+ },
  "t.initiativbewerbung-senden.fpimjv": {
   "de": "Initiativbewerbung senden",
   "en": "Send a speculative application",
@@ -11330,6 +11352,18 @@
   ],
   "pages": [
    "/careers"
+  ]
+ },
+ "t.initiativbewerbung.sv2svr": {
+  "de": "Initiativbewerbung",
+  "en": "Speculative application",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx",
+   "src/app/(site)/[locale]/careers/page.tsx"
+  ],
+  "pages": [
+   "/careers",
+   "/careers/[slug]"
   ]
  },
  "t.inklusive-und-verbleibt-anschlie.108stg6": {
@@ -15790,6 +15824,16 @@
    "*"
   ]
  },
+ "t.passt-es-lernen-wir.1qyekz6": {
+  "de": "Passt es, lernen wir uns im Gespräch kennen und besprechen, ab wann und wie viel du bei uns unterrichten kannst.",
+  "en": "If it is a good fit, we get to know each other in an interview and talk about when and how much you could teach with us.",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/careers/[slug]"
+  ]
+ },
  "t.passt-zu-dir-wenn.13h9ee5": {
   "de": "Passt zu dir, wenn du deinen Alltag gern selbst gestaltest.",
   "en": "A good fit if you like to organise your daily life yourself.",
@@ -17671,6 +17715,16 @@
    "src/config/content/social-proof.ts"
   ],
   "pages": []
+ },
+ "t.so-bewirbst-du-dich.dbepr2": {
+  "de": "So bewirbst du dich",
+  "en": "How to apply",
+  "files": [
+   "src/app/(site)/[locale]/careers/page.tsx"
+  ],
+  "pages": [
+   "/careers"
+  ]
  },
  "t.so-entsteht-ein-firmenkurs.18nwhhl": {
   "de": "So entsteht ein Firmenkurs bei CASA.",
@@ -21849,6 +21903,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.was-dich-bei-uns.rctkst": {
+  "de": "Was dich bei uns erwartet",
+  "en": "What to expect",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/careers/[slug]"
+  ]
+ },
  "t.was-die-niveaustufen-bedeuten.1x3u02f": {
   "de": "Was die Niveaustufen bedeuten",
   "en": "What the levels mean",
@@ -21921,6 +21985,18 @@
   ],
   "pages": [
    "/about"
+  ]
+ },
+ "t.was-du-mitbringst.1shav3c": {
+  "de": "Was du mitbringst",
+  "en": "What you bring",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx",
+   "src/app/(site)/[locale]/careers/page.tsx"
+  ],
+  "pages": [
+   "/careers",
+   "/careers/[slug]"
   ]
  },
  "t.was-du-vorbereiten-kannst.w39n9m": {
@@ -23191,6 +23267,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.wir-lesen-deine-unterlagen.1jigpxt": {
+  "de": "Wir lesen deine Unterlagen und melden uns bei dir.",
+  "en": "We read your application and get back to you.",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/careers/[slug]"
+  ]
+ },
  "t.wir-melden-uns-per.vw8n0y": {
   "de": "Wir melden uns per E-Mail oder Telefon mit den Terminen. Dann meldest du dich verbindlich an.",
   "en": "We get in touch by email or phone with the dates. Then you register for your place.",
@@ -23813,6 +23899,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.worum-es-geht.8v83an": {
+  "de": "Worum es geht",
+  "en": "What this is about",
+  "files": [
+   "src/app/(site)/[locale]/careers/[slug]/page.tsx"
+  ],
+  "pages": [
+   "/careers/[slug]"
   ]
  },
  "t.worum-geht-es.1sqnc3s": {
