@@ -31,6 +31,8 @@
  * must not be used above text-2xl. See docs/PREMIUM_UI_REVIEW_2026-08-16.md §3.
  */
 @theme inline {
+  /* `ease-casa`, the motion curve as a utility (--casa-ease-out below). */
+  --ease-casa: cubic-bezier(0.2, 0.78, 0.2, 1);
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.45;
   --text-sm: 0.875rem;
@@ -210,6 +212,13 @@
 
 :root {
   --radius: 0.375rem;
+
+  /*
+   * Motion's one curve (UI_SYSTEM.md §Layout and Motion Conventions): everything
+   * that enters, draws or lifts eases out on it. Only the 3D icons keep their own
+   * overshoot, because they are objects that bounce and the rest is the page.
+   */
+  --casa-ease-out: cubic-bezier(0.2, 0.78, 0.2, 1);
 
   /*
    * Horizontal ceiling for the whole site.
@@ -1982,25 +1991,6 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .casa-reveal-init {
-    opacity: 0;
-    filter: blur(1.5px);
-    transform: translate3d(0, 12px, 0);
-    pointer-events: none;
-    transition-property: opacity, transform, filter;
-    transition-duration: 420ms;
-    transition-timing-function: cubic-bezier(0.2, 0.78, 0.2, 1);
-    transition-delay: var(--reveal-delay, 0ms);
-    will-change: opacity, transform;
-  }
-
-  .casa-reveal-init.is-visible {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0);
-    pointer-events: auto;
-  }
-
   /*
    * Baseline interaction transition.
    *
@@ -2034,12 +2024,6 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
      * pointer flickered between hand and arrow every frame (Rahman 2026-10-28).
      */
 
-    main article:hover .casa-media-overlay,
-    main figure:hover .casa-media-overlay,
-    main a:hover .casa-media-overlay {
-      transform: scale(1.014);
-    }
-
     main article:hover .casa-media-overlay::before,
     main figure:hover .casa-media-overlay::before,
     main a:hover .casa-media-overlay::before {
@@ -2053,6 +2037,10 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
      * and all three were animating decoration painted over a photograph.
      * The zoom below is the whole hover treatment now: the photo comes
      * forward, and nothing slides across it.
+     *
+     * 3%, and the photograph alone (2026-10-29, §Motion). It was 7% with a
+     * drift, a colour boost and the frame itself growing 1.4%, which read as
+     * the picture jumping at the pointer rather than the card answering it.
      */
     main article:hover .casa-media-overlay > img,
     main article:hover .casa-media-overlay > picture > img,
@@ -2066,8 +2054,7 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
     main a:hover .casa-media-overlay > picture > img,
     main a:hover .casa-media-overlay > span > img,
     main a:hover .casa-media-overlay img[data-nimg] {
-      transform: scale(1.07) translate3d(0.4%, -0.6%, 0);
-      filter: saturate(1.1) contrast(1.05) brightness(1.02);
+      transform: scale(1.03);
     }
 
     .casa-button-prism:hover,
@@ -2125,19 +2112,11 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
     }
   }
 
-  .casa-media-overlay {
-    transition: transform 380ms cubic-bezier(0.2, 0.78, 0.2, 1);
-    will-change: transform;
-  }
-
   .casa-media-overlay > img,
   .casa-media-overlay > picture > img,
   .casa-media-overlay > span > img,
   .casa-media-overlay img[data-nimg] {
-    transition:
-      transform 620ms cubic-bezier(0.2, 0.78, 0.2, 1),
-      filter 620ms cubic-bezier(0.2, 0.78, 0.2, 1);
-    will-change: transform, filter;
+    transition: transform 600ms var(--casa-ease-out);
   }
 
   .casa-media-overlay::before {
@@ -2300,6 +2279,160 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 
 .clara-status-pulse {
   animation: clara-status-pulse 1.2s ease-in-out infinite;
+}
+
+/*
+ * Motion (2026-10-29: Rahman found the sections static). One family with the 3D
+ * icons below: warm, calm, precise. Things enter by rising a little as they fade
+ * in, on one curve (--casa-ease-out), in 200-600ms; only opacity and transform
+ * move, so nothing shifts the layout; nothing loops. The rules are in UI_SYSTEM.md
+ * §Layout and Motion Conventions.
+ *
+ * scroll-effects.tsx adds the `-init` classes after hydration, and only to what is
+ * still below the first screen, so the server's HTML, a visitor without script and
+ * the first screen are never hidden. It takes them off once the motion has played,
+ * so no element keeps a layer or a transform. Screen only: a printed page shows
+ * everything. Reduced motion: nothing moves (the script adds nothing, and the
+ * depth below asks for no-preference too).
+ */
+@media screen and (prefers-reduced-motion: no-preference) {
+  /*
+   * A section, as a whole. No blur any more: a filter on a band thousands of
+   * pixels tall is repainted every frame on a phone, for a softness nobody saw.
+   */
+  .casa-reveal-init {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    pointer-events: none;
+    transition-property: opacity, transform;
+    transition-duration: 420ms;
+    transition-timing-function: var(--casa-ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .casa-reveal-init.is-visible {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /*
+   * A group (`data-stagger`): its children one after another, so a grid of cards
+   * is read in the order it is written. The script numbers them (--stagger-i, the
+   * sixth and later share the sixth's turn).
+   */
+  .casa-stagger-init > * {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    transition-property: opacity, transform;
+    transition-duration: 480ms;
+    transition-timing-function: var(--casa-ease-out);
+    transition-delay: calc(60ms + var(--stagger-i, 0) * var(--stagger-step, 70ms));
+  }
+
+  .casa-stagger-init.is-visible > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The steps' line is drawn from each number down as the step appears. */
+  .casa-stagger-init.casa-steps {
+    --stagger-step: 120ms;
+  }
+
+  .casa-stagger-init.casa-steps > li::before {
+    transform: scaleY(0);
+    transition: transform 600ms var(--casa-ease-out);
+    transition-delay: calc(60ms + var(--stagger-i, 0) * var(--stagger-step));
+  }
+
+  .casa-stagger-init.casa-steps.is-visible > li::before {
+    transform: none;
+  }
+}
+
+/*
+ * Process steps (process-steps.tsx): a line runs down from each step's number.
+ * Stacked, it carries on through the gap to the next number, so the steps read as
+ * one path; three abreast, each column has its own.
+ */
+.casa-steps > li {
+  position: relative;
+  padding-inline-start: 1rem;
+}
+
+.casa-steps > li::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 1px;
+  background: var(--casa-sand);
+  transform-origin: top;
+}
+
+/* While they are one column (process-steps.tsx: 44rem, four steps 36rem), over the `gap-7`. */
+@container (width < 44rem) {
+  .casa-steps:not(.casa-steps-four) > li:not(:last-child)::before {
+    inset-block-end: -1.75rem;
+  }
+}
+
+@container (width < 36rem) {
+  .casa-steps-four > li:not(:last-child)::before {
+    inset-block-end: -1.75rem;
+  }
+}
+
+/*
+ * A figure that counts up (`data-count-to`, the proof band). The server writes the
+ * real number, which is what a crawler, a screen reader and a visitor without
+ * script get; the script counts to it once, holding its width. Tabular figures, so
+ * the digits do not jostle while they change, and set to the end of the held width,
+ * so a shorter number grows from the „+" instead of leaving a gap before it.
+ */
+[data-count-to] {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/*
+ * Depth (`data-depth`, on the box that clips a photograph): the photograph moves a
+ * few percent slower than the page while the box passes through the screen. Tied
+ * to the scroll position itself, without script and off the main thread. A browser
+ * without scroll-driven animations (Safari before 26, for one) keeps it still,
+ * which is the whole fallback. Never on a hero: its photograph is the page's
+ * largest paint and must not wait for anything.
+ *
+ * The photograph is 6% larger than its box so a 2.5% travel either way never
+ * shows an edge. `scale` and `translate`, not `transform`, so the hover zoom
+ * (a transform) still works on top.
+ */
+@supports (animation-timeline: view()) {
+  @media screen and (prefers-reduced-motion: no-preference) {
+    [data-depth] {
+      view-timeline: --casa-depth block;
+    }
+
+    [data-depth] > img {
+      scale: 1.06;
+      animation-name: casa-depth;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --casa-depth;
+    }
+  }
+}
+
+@keyframes casa-depth {
+  from {
+    translate: 0 -2.5%;
+  }
+
+  to {
+    translate: 0 2.5%;
+  }
 }
 
 /*

@@ -18,6 +18,8 @@ type MediaFrameProps = {
    * beside the photograph rather than on it.
    */
   scrim?: boolean;
+  /** The photograph moves a little slower than the page (globals.css, `data-depth`). Never on a hero. */
+  depth?: boolean;
   children?: React.ReactNode;
 };
 
@@ -42,6 +44,7 @@ export function MediaFrame({
   className,
   frameClassName,
   scrim = false,
+  depth = false,
   children,
 }: MediaFrameProps) {
   return (
@@ -50,7 +53,10 @@ export function MediaFrame({
         <Image src={src} alt="" fill sizes="64px" quality={30} loading="lazy" />
       </div>
 
-      <div className={cn('casa-media__frame h-full w-full', scrim && 'casa-media-overlay', frameClassName)}>
+      <div
+        className={cn('casa-media__frame h-full w-full', scrim && 'casa-media-overlay', frameClassName)}
+        data-depth={depth && !priority ? '' : undefined}
+      >
         <Image
           src={src}
           alt={alt}

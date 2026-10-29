@@ -150,7 +150,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
         </div>
       )}
 
-      <div className={cn('grid gap-5', isRail ? 'sm:grid-cols-2' : 'md:grid-cols-2 xl:grid-cols-4')}>
+      <div data-stagger className={cn('grid gap-5', isRail ? 'sm:grid-cols-2' : 'md:grid-cols-2 xl:grid-cols-4')}>
         {pathways.map((pathway) => {
           const Icon = iconMap[pathway.icon];
           const primaryHref = withPersonaContext(pathway.primaryAction.href, pathway.key);
@@ -166,7 +166,7 @@ export function PersonaPathways({ locale, presentation = 'default', className }:
             <div key={pathway.title} className="group/lift flex" data-icon-3d-host>
             <article
               className={cn(
-                'group relative flex min-h-[18.5rem] w-full flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 group-hover/lift:shadow-[var(--shadow-card)] motion-safe:group-hover/lift:-translate-y-1 md:p-7',
+                'group relative flex min-h-[18.5rem] w-full flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--casa-sand)] transition duration-300 ease-casa group-hover/lift:shadow-[var(--shadow-card)] motion-safe:group-hover/lift:-translate-y-1 md:p-7',
                 meaning.hover
               )}
               data-casa-persona={pathway.key}

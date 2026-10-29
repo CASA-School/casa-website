@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 
+import { CountFigure } from '@/components/ui/count-figure';
 import { accreditationLogos } from '@/config/accreditations';
 import { getProofMetrics } from '@/lib/content/repository';
 import { toProofStripItems } from './proof-strip';
@@ -68,6 +69,7 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
         docs/PREMIUM_UI_REVIEW_2026-08-16.md §1.6.
       */}
       <ul
+        data-stagger
         className={cn(
           'mt-6 grid gap-5',
           stats.length >= 4 && 'sm:grid-cols-2 lg:grid-cols-4',
@@ -78,7 +80,9 @@ export function ProofBand({ locale, title, credibilityLine, className }: ProofBa
       >
         {stats.slice(0, 4).map((item) => (
           <li key={`${item.value}-${item.label}`} className="border-l border-white/25 pl-3">
-            <p className="text-2xl font-black tracking-tight text-white md:text-3xl">{item.value}</p>
+            <p className="text-2xl font-black tracking-tight text-white md:text-3xl">
+              <CountFigure value={item.value} />
+            </p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-eyebrow text-white/70">{item.label}</p>
           </li>
         ))}
@@ -105,7 +109,7 @@ export function AccreditationLogoList({ locale, className }: { locale: ContentLo
       tablets. Centred, the short last row reads as intended. All five in one
       row from `md` (a 768 tablet has room for them; 3 + 2 looked unfinished).
     */
-    <ul className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={say(locale, 'Qualität und Partnerschaften', 'Quality and partnerships')}>
+    <ul data-stagger className={cn('flex flex-wrap justify-center gap-3 lg:gap-4', className)} aria-label={say(locale, 'Qualität und Partnerschaften', 'Quality and partnerships')}>
       {accreditationLogos.slice(0, 5).map((logo) => (
         <li key={logo.id} className="basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] md:basis-[calc((100%-3rem)/5)] lg:basis-[calc((100%-4rem)/5)]">
           {/* A mark without a website is a plain tile, not a link to "#". */}

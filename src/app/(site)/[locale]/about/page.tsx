@@ -6,6 +6,7 @@ import { HeroAPhotoLed } from '@/components/heroes';
 import { AccreditationLogoList } from '@/components/sections';
 import { Stars } from '@/components/sections/testimonial-grid';
 import { CasaImage as Image } from '@/components/ui/casa-image';
+import { CountFigure } from '@/components/ui/count-figure';
 import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
@@ -159,11 +160,11 @@ export default async function AboutPage() {
       */}
       <section className="py-14 md:py-16" aria-label={say(locale, 'CASA in Zahlen', 'CASA in figures')}>
         <Container>
-          <dl className="mx-auto grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
+          <dl data-stagger className="mx-auto grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-[color:var(--casa-sand)]">
             {stats.map((stat) => (
               <div key={stat.value} className="flex flex-col-reverse justify-end lg:px-8 lg:first:pl-0 lg:last:pr-0">
                 <dt className="mt-2 max-w-[16rem] text-sm leading-snug text-[var(--casa-muted)] md:text-base">{stat.label}</dt>
-                <dd className="text-3xl font-black leading-none tracking-tight text-[var(--casa-ink)] min-[380px]:text-4xl md:text-5xl lg:text-4xl xl:text-5xl">{stat.value}</dd>
+                <dd className="text-3xl font-black leading-none tracking-tight text-[var(--casa-ink)] min-[380px]:text-4xl md:text-5xl lg:text-4xl xl:text-5xl"><CountFigure value={stat.value} /></dd>
               </div>
             ))}
           </dl>

@@ -87,7 +87,7 @@ export function NonprofitPrograms({ locale }: { locale: ContentLocale }) {
           </p>
         </div>
 
-        <ul className="mt-10 grid gap-5 md:grid-cols-2">
+        <ul data-stagger className="mt-10 grid gap-5 md:grid-cols-2">
           {programs.map((program) => (
             <li key={program.key} className="flex">
               <article data-icon-3d-host className="flex w-full flex-col rounded-2xl bg-white p-6 shadow-[var(--shadow-card)] md:p-8">
@@ -104,7 +104,7 @@ export function NonprofitPrograms({ locale }: { locale: ContentLocale }) {
           ))}
         </ul>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        <div data-stagger className="mt-10 grid gap-5 lg:grid-cols-2">
           <div className="rounded-2xl bg-[var(--casa-warm-soft)] p-6 ring-1 ring-[color:var(--casa-sand)] md:p-8">
             <h3 className="text-xl font-bold text-[var(--casa-ink)]">{say(locale, 'Was wir als Nächstes planen', 'What we are planning next')}</h3>
             <ul className="mt-4 grid gap-3">

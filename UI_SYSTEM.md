@@ -104,11 +104,45 @@ container).
 ## Layout and Motion Conventions
 - Shared container: `max-w-[1440px] px-6 lg:px-8`.
 - Public section rhythm commonly uses `py-14`, `py-16`, `py-20`.
-- Page section entrance animation: **`casa-reveal-init` + `is-visible`** (`420ms`, cubic-bezier
-  `(0.2, 0.78, 0.2, 1)`), applied by `src/components/ui/scroll-effects.tsx` via
-  `IntersectionObserver`. *(Corrected 2026-08-16: this doc previously named `casa-soft-rise` at
-  560ms. That class has no definition in `globals.css` and no consumers — it never shipped.)*
 - Reduced motion support remains global through `prefers-reduced-motion: reduce`.
+
+### Motion (2026-10-29)
+
+Rahman found the sections static after the launch. The motion is one family with the 3D icons:
+warm, calm, precise, never salesy. The CSS is the §Motion block in `src/app/globals.css`; the one
+script is `src/components/ui/scroll-effects.tsx`, a single `IntersectionObserver`.
+
+**Rules.**
+- **One curve:** `--casa-ease-out`, `cubic-bezier(0.2, 0.78, 0.2, 1)` (the utility `ease-casa`).
+  Only the 3D icons keep their overshoot: they are objects that bounce, the rest is the page.
+- **200–600ms.** Hover 200–300ms, an entrance 420–480ms, a drawn line or a photo zoom 600ms.
+- **Only `opacity` and `transform`** (or `translate`/`scale`), so nothing shifts the layout and the
+  browser can run it off the main thread. No filters, no blur, no animated shadows on large areas.
+- **Nothing loops**, except the 3D icons' existing one-shot hover motion and the news ticker.
+- **Content never depends on script.** The server's HTML is complete and visible; the script adds
+  the `-init` classes after hydration and only to what is still below the first screen, then takes
+  them off when the motion has played (no lasting `will-change` or transform). Screen only: a
+  printed page shows everything.
+- **Off under `prefers-reduced-motion: reduce`.** The script adds nothing and every rule sits in a
+  `no-preference` query.
+- **Never on the hero** or anything in the first screen: the hero photograph is the page's largest
+  paint (Lighthouse 100 desktop, 91–94 mobile at launch must hold).
+
+**The vocabulary.** Use these; do not add a second observer or a motion library.
+
+| What | How | Where |
+| --- | --- | --- |
+| A section enters | automatic for `main > section`, `main > article`, `[data-reveal="true"]`: rises 12px and fades in, 420ms | every page |
+| Its cards follow one another | `data-stagger` on the element whose **direct children** are the items: each rises 16px and fades in, 480ms, 60ms + 70ms apart, the 7th onwards with the 6th | proof band (figures and marks), „Wo startest du?", the course rows (copy, then photo), „Für Beruf und Weiterbildung" rail, the non-profit commitments and `#angebote`, the exam cards, the split's points, the course facts, the about page's figures |
+| A figure counts up | `<CountFigure value="30.000+" />` inside a `data-stagger` group: the number counts from 0 once in 600ms with tabular figures, its width held; a year („Seit 1983") or a single digit stays still | proof band, about page |
+| Steps are one path | `ProcessSteps` (`casa-steps`): the line from each number is drawn down as the step appears (120ms apart, 600ms); stacked, it runs on to the next number | every „Ablauf" |
+| A photograph has depth | `data-depth` on the box that clips it (or `MediaFrame depth`): the photo is 6% larger and travels 2.5% either way as the box crosses the screen, tied to scroll (`animation-timeline: view()` in `@supports`); browsers without it keep the photo still | editorial splits, story blocks, level rows, course rows, the homepage's accommodation photo |
+| A card answers the pointer | a still frame (`group/lift`) and the card inside lifts `-translate-y-1` (a card that is its own hover target: `-0.5`, or the pointer at its edge makes it flicker), shadow one step up, `duration-300 ease-casa`, `motion-safe:` | persona cards, rail cards, exam cards |
+| A photograph answers the pointer | `.casa-media-overlay` zooms to 1.03 in 600ms, nothing else (no drift, no colour change, the frame does not grow) | photo cards |
+
+To make a new grid enter in order, add `data-stagger` to it; if its items are not its direct
+children, put it on the element that holds them. Keep a group to what is read together: a whole
+page is not a group, and a row of rows (the course formats) is one group per row.
 
 ## Component Conventions
 - Primitives live in `src/components/ui`.
