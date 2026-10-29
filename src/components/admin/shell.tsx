@@ -274,13 +274,14 @@ export async function WorkspaceShell({
               ) : null}
               {/* What the public site says. Opens the editor full screen, outside the shell. */}
               {canAccess(user, 'website') ? (
-                <NavLink
-                  href="/admin/website"
-                  icon={Icon.website}
-                  title={t('Website', 'Website')}
-                  items={[{ href: '/admin/statistics', label: t('Statistik', 'Statistics') }]}
-                >
+                <NavLink href="/admin/website" icon={Icon.website} title={t('Website', 'Website')}>
                   Website
+                </NavLink>
+              ) : null}
+              {/* Its own item: Website opens the editor full screen, so a nested item was never seen. */}
+              {canAccess(user, 'website') ? (
+                <NavLink href="/admin/statistics" icon={Icon.chart} title={t('Statistik', 'Statistics')}>
+                  {t('Statistik', 'Statistics')}
                 </NavLink>
               ) : null}
               {canAccess(user, 'activity') ? (

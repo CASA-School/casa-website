@@ -194,6 +194,17 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
               : null,
         },
         {
+          title: t('Statistik', 'Statistics'),
+          href: '/admin/statistics',
+          module: 'website',
+          icon: Icon.chart,
+          tone: 'green',
+          figure: (f) => ({
+            value: n(f.websiteVisitsWeek),
+            label: f.websiteVisitsWeek === 1 ? t('Besuch in 7 Tagen', 'visit in 7 days') : t('Besuche in 7 Tagen', 'visits in 7 days'),
+          }),
+        },
+        {
           title: t('Preise', 'Prices'),
           href: '/admin/settings/prices',
           module: 'prices',

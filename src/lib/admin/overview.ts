@@ -229,6 +229,8 @@ export type OverviewFacts = {
   /** Website releases waiting for approval, and texts drafted but not released. */
   websitePending: number;
   websiteDrafts: number;
+  /** Visits to the public site in the last seven days (site_page_views, 0106). */
+  websiteVisitsWeek: number;
   /** The first day of the price list in force, and the last month the teaching plan covers. */
   pricesSince: Date | null;
   plannedTo: Date | null;
@@ -265,6 +267,7 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
        (SELECT count(*) FROM staff_activity WHERE created_at >= current_date) AS "changesToday",
        (SELECT count(*) FROM website_releases WHERE state = 'pending') AS "websitePending",
        (SELECT count(*) FROM website_drafts) AS "websiteDrafts",
+       (SELECT count(*) FROM site_page_views WHERE entry AND viewed_at >= now() - interval '7 days') AS "websiteVisitsWeek",
        (SELECT max(valid_from) FROM rates WHERE valid_from <= current_date) AS "pricesSince",
        (SELECT max(month) FROM course_groups) AS "plannedTo"`
   );
@@ -286,6 +289,7 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
     changesToday: n(row?.changesToday),
     websitePending: n(row?.websitePending),
     websiteDrafts: n(row?.websiteDrafts),
+    websiteVisitsWeek: n(row?.websiteVisitsWeek),
     pricesSince: row?.pricesSince ?? null,
     plannedTo: row?.plannedTo ?? null,
     waitlistWaiting: waitlist.waiting,

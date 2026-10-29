@@ -146,6 +146,12 @@ export const Icon = {
       <path d="M2 8h12M8 2a9.5 9.5 0 0 1 0 12M8 2a9.5 9.5 0 0 0 0 12" />
     </svg>
   ),
+  /** Three bars on a baseline — the website's statistics. */
+  chart: (
+    <svg {...box}>
+      <path d="M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5" />
+    </svg>
+  ),
   calendar: (
     <svg {...box}>
       <rect x="2" y="3.5" width="12" height="10" rx="1.3" />

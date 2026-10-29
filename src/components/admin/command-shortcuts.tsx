@@ -63,7 +63,7 @@ export function pageShortcuts(user: StaffUser, t: T): Shortcut[] {
     ...page('applications', '/admin/applications', 'Bewerbungen', 'Applications', Icon.applications, 'jobs karriere careers'),
     ...page('kursplanung', '/admin/kursplanung', 'Kursplanung', 'Course planning', Icon.kursplanung, 'planung planning besetzung staffing'),
     ...page('website', '/admin/website', 'Website', 'Website', Icon.website, 'webseite editor texte'),
-    ...page('website', '/admin/statistics', 'Statistik', 'Statistics', Icon.overview, 'aufrufe besucher ladezeit seo analytics'),
+    ...page('website', '/admin/statistics', 'Statistik', 'Statistics', Icon.chart, 'aufrufe besucher ladezeit seo analytics'),
     ...page('activity', '/admin/activity', 'Aktivität', 'Activity', Icon.note, 'verlauf history protokoll log'),
     ...page('team', '/admin/team', 'Zugänge', 'Accounts', Icon.lock, 'team rechte access konten'),
     ...page(null, '/admin/settings', 'Einstellungen', 'Settings', Icon.settings),
