@@ -22,7 +22,8 @@ import { pick, say } from '@/lib/cms/copy';
  *
  * - Photographs only of real colleagues who agreed. The portraits are CASA's
  *   own team shoot of 2026-09-10, chosen and named by Rahman (2026-10-27), cropped
- *   and resized for the web in the camera's own colours, no grade
+ *   and resized for the web in the camera's own colours, no grade. Bettina's
+ *   separately supplied portrait also keeps its original colour (2026-10-29)
  *   (scripts/media/build_team_portraits.py): public/media/casa/team/. The six synthetic images
  *   that once sat there are gone: a made-up face beside a real colleague's name
  *   is never acceptable. Without a portrait the card shows one of the Bremer
@@ -98,6 +99,7 @@ const TEAM: TeamMemberSource[] = [
   {
     id: 'bettina-rick',
     name: 'Bettina Rick',
+    photo: { file: 'bettina-rick.webp' },
     title: { en: 'Managing Director', de: 'Geschäftsführerin' },
     group: 'leadership',
   },
