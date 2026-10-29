@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { WaitlistForm } from '../../catalogue/waitlist-forms';
-import { bookRegistrationAction, editRegistrationAction, setLineDeclinedAction } from '../actions';
+import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction } from '../actions';
 import { courseNameResolver } from '../course-names';
 import { formatDay, formatRange, parseOptionLabel, type ParsedOption } from '../option-label';
 import { examLevel, levelWord, registrationChecks, registrationTitle, type RegistrationCheck } from '../summary';
@@ -23,7 +23,7 @@ import { levelFree, levelPlaces } from '@/lib/admin/booking-offer-types';
 import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
 import { BOOKING_STATUS_LABELS, PAYER_LABELS } from '@/lib/admin/bookings';
 import { isExamParts } from '@/lib/admin/exam-parts';
-import { listFlags } from '@/lib/admin/flags';
+import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
 import { requireModule } from '@/lib/admin/guard';
 import { pick, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -156,6 +156,7 @@ export default async function RegistrationPage({
     : [[], null];
 
   const { contact, stay } = registration;
+  const deliveryFlags = flags.filter((flag) => !flag.resolvedAt && (flag.code === 'registration_staff_notice_unconfirmed' || flag.code === 'registration_receipt_unconfirmed'));
   const fullName = `${contact.firstName} ${contact.lastName}`;
   const title = registrationTitle(lines.map((l) => ({ kind: l.kind, name: l.name, level: l.kind === 'course' ? l.detail : null }))) || t('Anmeldung', 'Registration');
   const reply = mailHref('registration', registration.id, { subject: inTheirLanguage(registration.locale, `Deine Anmeldung: ${title}`, `Your registration: ${title}`) });
@@ -487,6 +488,24 @@ export default async function RegistrationPage({
             ) : null}
           </SubmissionCard>
 
+          {deliveryFlags.length ? (
+            <Card title={t('E-Mail-Versand prüfen', 'Check email delivery')} icon={Icon.attention} tint="sun">
+              <p className="mb-3 text-sm">{t('Der Versand wurde nicht bestätigt. Prüfe die Anmeldung und kontaktiere die Person bei Bedarf. Markiere den Hinweis erst nach der Prüfung als erledigt.', 'Delivery was not confirmed. Review the registration and contact the applicant if needed. Mark each item done after checking it.')}</p>
+              <ul className="space-y-2">
+                {deliveryFlags.map((flag) => (
+                  <li key={flag.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span>{pick(lang, FLAG_LABELS[flag.code])}</span>
+                    {canEdit ? <form action={resolveRegistrationDeliveryAction}>
+                      <input type="hidden" name="id" value={registration.id} />
+                      <input type="hidden" name="flagId" value={flag.id} />
+                      <Button type="submit" variant="ghost" size="sm">{t('Geprüft', 'Checked')}</Button>
+                    </form> : null}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
           {checks.length ? (
             <Card title={t('Hinweise', 'Worth a look')} icon={Icon.attention} tint="sun">
               <ul className="space-y-2 text-[0.88rem] text-[var(--casa-ink)]">
@@ -620,7 +639,7 @@ export default async function RegistrationPage({
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags} returnTo={here} canList={canAccess(user, 'people', 'edit')} />
+          <PersonPanel person={person} candidates={candidates} flags={flags.filter((flag) => flag.code !== 'registration_staff_notice_unconfirmed' && flag.code !== 'registration_receipt_unconfirmed')} returnTo={here} canList={canAccess(user, 'people', 'edit')} />
           {/* Before there is a booking: the down payment or the placement test (docs/LETTERS.md); after it, one confirmation of every booking. */}
           <Card
             title={t('Briefe', 'Letters')}

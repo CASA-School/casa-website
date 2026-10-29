@@ -82,8 +82,8 @@ const FAQ: FaqSource[] = [
       de: 'Wie kann ich mich für einen Sprachkurs anmelden?',
     },
     answer: {
-      en: 'You can register either through our online form or in person at our office. Please take a placement test first and send us the result, so that we can put you in the right group.',
-      de: 'Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.',
+      en: 'You can register either through our online form or in person at our office. If you already know some German, please take a placement test first and send us the result, so that we can put you in the right group. If you are a complete beginner, you can register for A1 without a test.',
+      de: 'Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Wenn du schon etwas Deutsch kannst, mach bitte vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können. Wenn du noch gar kein Deutsch kannst, kannst du dich ohne Test für A1 anmelden.',
     },
     source: 'faq',
   },
@@ -108,8 +108,8 @@ const FAQ: FaqSource[] = [
       de: 'Warum muss ich einen Einstufungstest vor der Anmeldung machen?',
     },
     answer: {
-      en: 'It is very important to us that we find the right level for you and that you are happy with your course. If a course is too difficult for you, that is frustrating for you and for the others in the group. If it is too easy, you won’t be challenged enough. That is why we ask you to take a placement test before you register. Please always start with the A1 test and send your results to online@casa-bremen.de.',
-      de: 'Uns ist es sehr wichtig, dass wir das richtige Niveau für dich finden und du mit deinem Sprachkurs bei uns zufrieden bist. Wenn ein Kurs zu schwierig für dich ist, ist das für dich und für die anderen Teilnehmenden frustrierend. Ist der Kurs zu leicht, bist du unterfordert. Deshalb bitten wir dich, vorher einen Einstufungstest zu machen. Bitte starte immer mit dem A1-Test und schick deine Ergebnisse an online@casa-bremen.de.',
+      en: 'It is very important to us that we find the right level for you and that you are happy with your course. If a course is too difficult for you, that is frustrating for you and for the others in the group. If it is too easy, you won’t be challenged enough. If you already know some German, please take a placement test before you register. Start with the A1 test and send your results to online@casa-bremen.de. If you are a complete beginner, you can register for A1 without a test.',
+      de: 'Uns ist es sehr wichtig, dass wir das richtige Niveau für dich finden und du mit deinem Sprachkurs bei uns zufrieden bist. Wenn ein Kurs zu schwierig für dich ist, ist das für dich und für die anderen Teilnehmenden frustrierend. Ist der Kurs zu leicht, bist du unterfordert. Wenn du schon etwas Deutsch kannst, mach bitte vor der Anmeldung einen Einstufungstest. Starte mit dem A1-Test und schick deine Ergebnisse an online@casa-bremen.de. Wenn du noch gar kein Deutsch kannst, kannst du dich ohne Test für A1 anmelden.',
     },
     source: 'faq + /anmeldung/einstufungstest',
   },

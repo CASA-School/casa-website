@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
  */
 
 const calls: { sql: string; params: unknown[] }[] = [];
+const deliveryQuery = vi.hoisted(() => vi.fn(async () => []));
 const client = {
   query: vi.fn(async (sql: string, params: unknown[] = []) => {
     calls.push({ sql, params });
@@ -21,11 +22,12 @@ const client = {
 vi.mock('../db', () => ({
   isWorkspaceDatabaseConfigured: () => true,
   withTransaction: (work: (c: typeof client) => Promise<unknown>) => work(client),
+  query: deliveryQuery,
 }));
 const flags = vi.hoisted(() => ({ raiseFlag: vi.fn(async () => undefined) }));
 vi.mock('../flags', () => flags);
 
-import { storeCourseRegistration, storeExamRegistration, storeRegistration } from '../intake';
+import { settleRegistrationDelivery, storeCourseRegistration, storeExamRegistration, storeRegistration } from '../intake';
 
 const FIXTURE_TYPE_ID = '40000000-0000-4000-8000-000000010003';
 const FIXTURE_SESSION_ID = '20000000-0000-4000-8000-000000000001';
@@ -46,6 +48,7 @@ afterEach(() => {
   calls.length = 0;
   client.query.mockClear();
   flags.raiseFlag.mockClear();
+  deliveryQuery.mockClear();
 });
 
 describe('registration intake foreign keys', () => {
@@ -61,6 +64,8 @@ describe('registration intake foreign keys', () => {
     });
 
     expect(stored).toBe(true);
+    expect(flags.raiseFlag).toHaveBeenCalledWith(expect.objectContaining({ entity: 'exam_registration', code: 'registration_staff_notice_unconfirmed' }), expect.any(Function));
+    expect(flags.raiseFlag).toHaveBeenCalledWith(expect.objectContaining({ entity: 'exam_registration', code: 'registration_receipt_unconfirmed' }), expect.any(Function));
     const insert = calls.find((call) => /INSERT INTO exam_registrations/.test(call.sql))!;
     expect(insert.sql).toMatch(/\(SELECT id FROM exam_types WHERE id = \$2::uuid\)/);
     expect(insert.sql).toMatch(/\(SELECT id FROM exam_sessions WHERE id = \$3::uuid\)/);
@@ -131,6 +136,30 @@ describe('one Anmeldung, several lines (0097)', () => {
       .filter((flag) => flag.code === 'nationality_unmatched')
       .map((flag) => flag.entity);
     expect(nationality).toEqual(['course_registration']);
+    expect(flags.raiseFlag).toHaveBeenCalledWith(expect.objectContaining({ entity: 'course_registration', code: 'registration_staff_notice_unconfirmed' }), expect.any(Function));
+    expect(flags.raiseFlag).toHaveBeenCalledWith(expect.objectContaining({ entity: 'course_registration', code: 'registration_receipt_unconfirmed' }), expect.any(Function));
+  });
+});
+
+describe('registration delivery follow-up', () => {
+  it('leaves both checks open when neither notification was confirmed', async () => {
+    await settleRegistrationDelivery(person.requestId, 'course', false, false);
+    expect(deliveryQuery).not.toHaveBeenCalled();
+  });
+
+  it('settles only the accepted staff notification when the receipt failed', async () => {
+    await settleRegistrationDelivery(person.requestId, 'exam', true, false);
+    expect(deliveryQuery).toHaveBeenCalledWith(expect.stringContaining('FROM exam_registrations'), [
+      'exam_registration', person.requestId, ['registration_staff_notice_unconfirmed'],
+    ]);
+  });
+
+  it('settles both checks only after both notifications are accepted', async () => {
+    await settleRegistrationDelivery(person.requestId, 'course', true, true);
+    expect(deliveryQuery).toHaveBeenCalledWith(expect.stringContaining('FROM course_registrations'), [
+      'course_registration', person.requestId,
+      ['registration_staff_notice_unconfirmed', 'registration_receipt_unconfirmed'],
+    ]);
   });
 });
 

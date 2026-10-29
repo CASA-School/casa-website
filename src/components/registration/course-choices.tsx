@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import { PlacementAppointmentDialog } from '@/components/appointments/placement-appointment-dialog';
 import {
   ArrowRight,
   Briefcase,
@@ -451,7 +452,7 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
               id={`course-${index}-level`}
               aria-required
               aria-invalid={Boolean(errors?.level)}
-              aria-describedby={errors?.level ? `course-${index}-level-error` : undefined}
+              aria-describedby={`course-${index}-level-help${errors?.level ? ` course-${index}-level-error` : ''}`}
               className={formControlClassName}
             >
               <SelectValue placeholder={t('Choose a level…', 'Niveau auswählen…')} />
@@ -475,6 +476,16 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
               ))}
             </SelectContent>
           </Select>
+          <p id={`course-${index}-level-help`} className={formHintClassName}>
+            {t(
+              'New to German? Start with an A1 course; you don’t need a test. Otherwise, take the test and email your result to online@casa-bremen.de. Then return to this form; we’ll check your level.',
+              'Noch keine Deutschkenntnisse? Starte mit einem A1-Kurs; du brauchst keinen Test. Mach sonst den Test und schick dein Ergebnis an online@casa-bremen.de. Komm danach zu diesem Formular zurück; wir prüfen dein Niveau.'
+            )}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-2 text-sm text-[var(--casa-muted)]">
+            <span>{t('Prefer to visit CASA?', 'Lieber bei CASA vor Ort?')}</span>
+            <PlacementAppointmentDialog locale={locale} compact className="h-auto min-h-11 px-0 font-semibold text-[var(--casa-accent-text)] underline underline-offset-4" />
+          </div>
           {errors?.level ? <p id={`course-${index}-level-error`} className={formErrorClassName}>{errors.level.message}</p> : null}
         </div>
       ) : null}

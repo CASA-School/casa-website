@@ -145,7 +145,7 @@ test('the public placement page offers the Klett tests and never our own test', 
     await expect(link).toHaveAttribute('target', '_blank');
     await expect(link).toHaveAttribute('rel', /noreferrer/);
   }
-  await expect(page.getByText(/always start with the A1 test/i)).toBeVisible();
+  await expect(page.getByText(/start with the A1 test/i)).toBeVisible();
   await expect(page.locator('a[href="mailto:online@casa-bremen.de"]')).toBeVisible();
 
   await expect(page.locator('a[href*="/placement-test/test"]')).toHaveCount(0);
@@ -331,4 +331,42 @@ test('registration points to the placement page in a new tab, not to our own tes
   await expect(hint).toBeVisible();
   await expect(hint).toHaveAttribute('href', '/en/placement-test');
   await expect(hint).toHaveAttribute('target', '_blank');
+  const level = page.getByRole('combobox', { name: 'Level', exact: true });
+  await expect(level).toHaveAccessibleDescription(/start with an A1 course.*don’t need a test.*email your result.*return to this form/i);
+  await expect(level).toHaveAccessibleDescription(/we’ll check your level/i);
+});
+
+test('German registration explains the beginner exception and placement handoff', async ({ page }) => {
+  await page.goto('/anmeldung/anmeldeformular');
+
+  const level = page.getByRole('combobox', { name: 'Niveau', exact: true });
+  await expect(level).toHaveAccessibleDescription(/starte mit einem A1-Kurs.*brauchst keinen Test.*schick dein Ergebnis.*Formular zurück/i);
+  await expect(page.getByRole('link', { name: /kostenloser Einstufungstest/i })).toHaveAttribute('target', '_blank');
+});
+
+test('visitors can book from the level field and see a truthful acknowledgement fallback', async ({ page }) => {
+  let posted = false;
+  await page.route('**/api/placement-appointments', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ json: { data: { days: [{ date: '2026-11-03', times: ['09:30'], left: { '09:30': 2 } }], held: true } } });
+    } else {
+      posted = true;
+      await route.fulfill({ status: 201, json: { data: { status: 'booked', held: true, confirmationSent: false } } });
+    }
+  });
+  await page.goto('/anmeldung/anmeldeformular');
+  await page.getByRole('button', { name: 'Termin buchen' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Buch dir einen Einstufungstermin' })).toBeVisible();
+  await dialog.getByRole('button', { name: /Dienstag, 3\. November 2026/ }).click();
+  await dialog.getByRole('button', { name: '09:30' }).click();
+  await dialog.getByRole('button', { name: 'Weiter' }).click();
+  await dialog.getByLabel('Vorname').fill('Test');
+  await dialog.getByLabel('E-Mail-Adresse').fill('test@example.invalid');
+  await dialog.getByRole('checkbox').check();
+  await dialog.getByRole('button', { name: 'Termin buchen' }).click();
+  expect(posted).toBe(true);
+  await expect(dialog.getByRole('heading', { name: 'Dein Termin ist gebucht' })).toBeVisible();
+  await expect(dialog.getByText(/möglicherweise keine Eingangsbestätigung/)).toBeVisible();
+  await expect(dialog.getByText(/online@casa-bremen.de/)).toBeVisible();
 });

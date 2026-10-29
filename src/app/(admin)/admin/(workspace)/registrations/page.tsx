@@ -65,6 +65,7 @@ export default async function RegistrationsPage({ searchParams }: { searchParams
       preview: preview(item, lang),
       badges: (
         <>
+          {item.deliveryNeedsReview ? <Badge tone="neutral">{t('E-Mail-Versand prüfen', 'Check email delivery')}</Badge> : null}
           {item.accommodationRequired ? <Badge tone="neutral">{t('Unterkunft nötig', 'Room needed')}</Badge> : null}
           {onlyExam?.detail && onlyExam.detail !== 'full' ? <Badge tone="neutral">{registrationTypeLabel(onlyExam.detail, lang)}</Badge> : null}
           {item.lines.length > 1 && settled > 0 && settled < item.lines.length ? (

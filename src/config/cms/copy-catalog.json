@@ -19,16 +19,6 @@
    "/news"
   ]
  },
- "t.09-30-17-00.1sez1oz": {
-  "de": "09:30–17:00 Uhr",
-  "en": "09:30–17:00",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.1-4-wochen.fo9lh3": {
   "de": "1–4 Wochen",
   "en": "1–4 weeks",
@@ -213,7 +203,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.30-minuten-montag-donnerstag.ipfd9a": {
@@ -237,16 +230,6 @@
    "/placement-test",
    "/search",
    "/team"
-  ]
- },
- "t.30-minuten.zhf5bd": {
-  "de": "30 Minuten",
-  "en": "30 minutes",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.4-wochen-teilniveau.1fs53xg": {
@@ -761,6 +744,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -942,7 +926,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.an-welchen-tagen-kannst.sazjmx": {
@@ -2038,9 +2025,9 @@
    "/registration/exam"
   ]
  },
- "t.beginne-immer-mit-dem.pbpzom": {
-  "de": "Beginne immer mit dem A1-Test. Nimm dir Ruhe und Zeit, und mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
-  "en": "Always start with the A1 test. Find a quiet moment and take your time. Do the test on your own, without help such as a dictionary.",
+ "t.beginne-mit-a1-die.widssx": {
+  "de": "Beginne mit A1. Die Tests öffnen sich beim Klett Verlag in einem neuen Tab.",
+  "en": "Start with A1. The tests open on Klett’s website in a new tab.",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -2136,16 +2123,6 @@
   ],
   "pages": [
    "/"
-  ]
- },
- "t.bei-den-intensivkursen-stufen.1c1z54y": {
-  "de": "Bei den Intensivkursen stufen wir dich ohnehin vor Ort ein. Wir behalten uns dabei vor, dein Kursniveau anzupassen, auch wenn du schon ein Zertifikat hast.",
-  "en": "If you join an intensive course, we will place you here at the school anyway, and we may adjust your course level even if you already have a certificate.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.bei-der-ankunft-und.1rjirl8": {
@@ -3100,6 +3077,19 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
+  ]
+ },
+ "t.buch-einen-termin-zur.16h1jmf": {
+  "de": "Buch einen Termin zur persönlichen Einstufung und Beratung in Bremen.",
+  "en": "Book an appointment for a personal assessment and advice in Bremen.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
    "/placement-test"
   ]
  },
@@ -3855,16 +3845,6 @@
    "/registration/exam"
   ]
  },
- "t.dann-brauchst-du-keinen.1lhkfwj": {
-  "de": "Dann brauchst du keinen Einstufungstest und beginnst einfach mit einem Kurs auf dem Niveau A1.",
-  "en": "Then you don’t need a placement test. You simply start with a course at level A1.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.dann-erstatten-wir-dir.1ny31z7": {
   "de": "Dann erstatten wir dir die Kursgebühr abzüglich einer Bearbeitungsgebühr von 100 €. Das gilt, wenn wir die Information spätestens zwei Wochen vor Kursbeginn von dir erhalten und du uns ein offizielles Ablehnungsdokument vorlegst. Andernfalls berechnen wir Teile der Kursgebühr gemäß der Kündigungsfrist von vier Wochen.",
   "en": "In that case, we refund your course fee minus a €100 processing fee. This applies if you let us know at least two weeks before the course starts and show us an official refusal document. Otherwise, we charge part of the course fee in line with the four-week notice period.",
@@ -4252,6 +4232,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -4294,16 +4275,6 @@
   ],
   "pages": [
    "/calculator"
-  ]
- },
- "t.dauer.3fwujk": {
-  "de": "Dauer",
-  "en": "Time",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.dein-beruf-optional.zrhdqo": {
@@ -4405,7 +4376,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.dein-termin-konnte-nicht.16rkns8": {
@@ -4415,7 +4389,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.dein-zimmer-fuer-die.7b0xpi": {
@@ -4486,7 +4463,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.deine-anfrage-konnte-nicht.1f3xsov": {
@@ -4529,7 +4509,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.deine-entscheidung.1cvqf9d": {
@@ -4908,7 +4891,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.der-link-ist-vielleicht.vhlvsp": {
@@ -5221,6 +5207,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -5726,16 +5713,6 @@
    "/exams/[code]"
   ]
  },
- "t.die-richtige-einstufung-ist.19iulyv": {
-  "de": "Die richtige Einstufung ist die Grundlage für erfolgreiches Lernen. Mach einen kostenlosen Online-Test oder komm zur persönlichen Einstufung zu uns in die Schule.",
-  "en": "Learning well starts with a group at the right level. To find yours, take a free online test or come to the school for a placement test in person.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.die-rueckerstattbare-kaution-ist.1vnqahr": {
   "de": "Die rückerstattbare Kaution ist in der Summe nicht enthalten. Den endgültigen Betrag bestätigen wir dir, nachdem wir deine Anmeldung geprüft haben.",
   "en": "The refundable deposit is not included in the total. We’ll confirm the final amount once we have checked your registration.",
@@ -5820,7 +5797,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.die-termine-werden-bald.1timr7s": {
@@ -5875,9 +5855,9 @@
    "/accommodation/become-host"
   ]
  },
- "t.dienstag-bis-donnerstag.12yq7iy": {
-  "de": "Dienstag bis Donnerstag",
-  "en": "Tuesday to Thursday",
+ "t.dienstag-bis-donnerstag-30.wfat3t": {
+  "de": "Dienstag bis Donnerstag · 30 Minuten · Am Dobben 14–16, Bremen",
+  "en": "Tuesday to Thursday · 30 minutes · Am Dobben 14–16, Bremen",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -6064,6 +6044,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -6196,16 +6177,6 @@
   ],
   "pages": [
    "/accommodation/become-host"
-  ]
- },
- "t.du-bekommst-eine-bestaetigung.brzpaq": {
-  "de": "Du bekommst eine Bestätigung per E-Mail.",
-  "en": "You’ll receive a confirmation by email.",
-  "files": [
-   "src/components/appointments/placement-appointment-dialog.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.du-bekommst-eine-rueckmeldung.1fier0s": {
@@ -6355,9 +6326,9 @@
    "/contact"
   ]
  },
- "t.du-kannst-dich-entweder.i88v94": {
-  "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Bitte mach vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können.",
-  "en": "You can register either through our online form or in person at our office. Please take a placement test first and send us the result, so that we can put you in the right group.",
+ "t.du-kannst-dich-entweder.1u8cnox": {
+  "de": "Du kannst dich entweder über unser Online-Formular oder bei uns im Büro anmelden. Wenn du schon etwas Deutsch kannst, mach bitte vorher einen Einstufungstest und schick uns das Ergebnis, damit wir dich in die passende Lerngruppe einstufen können. Wenn du noch gar kein Deutsch kannst, kannst du dich ohne Test für A1 anmelden.",
+  "en": "You can register either through our online form or in person at our office. If you already know some German, please take a placement test first and send us the result, so that we can put you in the right group. If you are a complete beginner, you can register for A1 without a test.",
   "files": [
    "src/config/content/faq.ts"
   ],
@@ -7993,7 +7964,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.einstufung.1w67cw7": {
@@ -8159,6 +8133,16 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.ergebnis-schicken.1mfe9av": {
+  "de": "Ergebnis schicken",
+  "en": "Send your result",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.ergebnis-und-zertifikat-liegen.17507ad": {
@@ -8473,6 +8457,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -9117,6 +9102,16 @@
    "/exams/[code]",
    "/faq",
    "/team"
+  ]
+ },
+ "t.fuer-intensivkurse-pruefen-wir.pldbb3": {
+  "de": "Für Intensivkurse prüfen wir das Niveau auch vor Ort. Wenn du ganz neu anfängst und Fragen dazu hast, sprich uns gern an.",
+  "en": "For intensive courses, we also check your level in person. If you are a complete beginner and have questions, please ask us.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.fuer-schulklassen-und-gruppen.8u5pfs": {
@@ -10611,6 +10606,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.ich-fange-ganz-neu.1i68tv3": {
+  "de": "Ich fange ganz neu an",
+  "en": "I am a complete beginner",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.ich-habe-die.16rx36q": {
   "de": "Ich habe die",
   "en": "I have read the",
@@ -10632,6 +10637,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -10654,6 +10660,26 @@
   ],
   "pages": [
    "*"
+  ]
+ },
+ "t.ich-moechte-den-online.qiki3b": {
+  "de": "Ich möchte den Online-Test machen",
+  "en": "I want to take the online test",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
+ "t.ich-moechte-zu-casa.qhkto6": {
+  "de": "Ich möchte zu CASA kommen",
+  "en": "I want to visit CASA",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.ich-stelle-dir-den.7f8mlq": {
@@ -12597,16 +12623,6 @@
    "/courses/[slug]"
   ]
  },
- "t.kostenlos-von-a1-bis.45ucxk": {
-  "de": "Kostenlos, von A1 bis C1",
-  "en": "Free, from A1 to C1",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.kostenloser-einstufungstest.1snfv6v": {
   "de": "Kostenloser Einstufungstest",
   "en": "Free placement test",
@@ -13743,14 +13759,14 @@
    "/courses/[slug]"
   ]
  },
- "t.lieber-persoenlich-in-bremen.s46giw": {
-  "de": "Lieber persönlich in Bremen?",
-  "en": "Prefer to come in person?",
+ "t.lieber-persoenlich-einstufen-las.1j2cx0k": {
+  "de": "Lieber persönlich einstufen lassen?",
+  "en": "Prefer a placement assessment in person?",
   "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
+   "src/app/(site)/[locale]/courses/[slug]/page.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses/[slug]"
   ]
  },
  "t.lieber-persoenlich-sprechen.g9ti35": {
@@ -14176,6 +14192,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -14430,16 +14447,6 @@
   ],
   "pages": []
  },
- "t.mit-termin.wga3pd": {
-  "de": "Mit Termin",
-  "en": "By appointment",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.mit-unterrichtseinheiten-pro-woc.1si1d6h": {
   "de": "Mit {course.intensive-german.lessons} Unterrichtseinheiten pro Woche kannst du die nächste Niveaustufe in 8 Wochen erreichen.",
   "en": "With {course.intensive-german.lessons} lessons a week, you can reach the next level in 8 weeks.",
@@ -14631,7 +14638,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.monate.133ypc1": {
@@ -14905,6 +14915,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -14916,7 +14927,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.nachricht-senden.27sosi": {
@@ -15013,6 +15027,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -15308,6 +15323,16 @@
    "/calculator"
   ]
  },
+ "t.niveaustufen-ansehen.1qphayy": {
+  "de": "Niveaustufen ansehen",
+  "en": "Explore the levels",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.niveaustufen.8erybc": {
   "de": "Niveaustufen",
   "en": "Levels",
@@ -15325,12 +15350,15 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
- "t.noch-gar-keine-deutschkenntnisse.rb14yn": {
-  "de": "Noch gar keine Deutschkenntnisse?",
-  "en": "No German at all yet?",
+ "t.noch-keine-deutschkenntnisse-sta.pffv4t": {
+  "de": "Noch keine Deutschkenntnisse? Starte mit einem A1-Kurs. Einen Online-Test brauchst du nicht.",
+  "en": "New to German? Start with an A1 course. You do not need an online test.",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -15416,6 +15444,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.ob-du-ganz-neu.frxy8v": {
+  "de": "Ob du ganz neu anfängst, online testen oder persönlich zu uns kommen möchtest: Hier findest du deinen nächsten Schritt.",
+  "en": "Whether you are a complete beginner, want to take a test online or visit us in person, find your next step here.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.ob-du-kueche-bad.1j4ds90": {
@@ -15572,6 +15610,16 @@
    "src/config/content/placement-narratives.ts"
   ],
   "pages": []
+ },
+ "t.online-test-schritt-fuer.w2ztj4": {
+  "de": "Online-Test: Schritt für Schritt",
+  "en": "Online test: step by step",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
  },
  "t.option.8shdsq": {
   "de": "Option",
@@ -15801,6 +15849,16 @@
    "/exams/[code]",
    "/faq",
    "/team"
+  ]
+ },
+ "t.persoenlich-bei-casa-in.17vm4kz": {
+  "de": "Persönlich bei CASA in Bremen",
+  "en": "Visit CASA in Bremen",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.persoenliche-beratung-bezueglich.1iiopg3": {
@@ -16966,6 +17024,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.schick-dein-ergebnis-an.1xzsw4n": {
+  "de": "Schick dein Ergebnis an online@casa-bremen.de. Danach kannst du zur Kursanmeldung zurückkehren.",
+  "en": "Email your result to online@casa-bremen.de. Then you can return to course registration.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.schick-die-anmeldung-ab.p3lni2": {
   "de": "Schick die Anmeldung ab. Sobald wir deine Angaben und die Zahlung geprüft haben, bestätigen wir dir deinen Platz per E-Mail.",
   "en": "Send off your registration. As soon as we have checked your details and your payment, we will confirm your place by email.",
@@ -16974,16 +17042,6 @@
   ],
   "pages": [
    "/exams/[code]"
-  ]
- },
- "t.schick-uns-deine-ergebnisse.186z0s0": {
-  "de": "Schick uns deine Ergebnisse",
-  "en": "Send us your results",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.schliessen.6wi840": {
@@ -17010,6 +17068,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -17633,6 +17692,16 @@
    "/accommodation"
   ]
  },
+ "t.so-funktioniert-der-online.3eya5f": {
+  "de": "So funktioniert der Online-Test",
+  "en": "How the online test works",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.so-funktioniert-es.n50zkb": {
   "de": "So funktioniert es",
   "en": "How it works",
@@ -17641,16 +17710,6 @@
   ],
   "pages": [
    "/about"
-  ]
- },
- "t.so-gehst-du-vor.1w7gcaa": {
-  "de": "So gehst du vor",
-  "en": "How it works",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.so-geht-es-weiter.3v95kz": {
@@ -17753,6 +17812,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -18199,6 +18259,16 @@
    "/resources/why-germany",
    "/search",
    "/team"
+  ]
+ },
+ "t.starte-mit-dem-a1.2i8cge": {
+  "de": "Starte mit dem A1-Test. Mach den Test allein und ohne Hilfsmittel wie Wörterbücher.",
+  "en": "Start with the A1 test. Take it on your own, without help such as a dictionary.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.startpunkt-waehlen.1dnzq1g": {
@@ -18734,6 +18804,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -19052,6 +19123,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -19086,7 +19158,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.termin-buchen.1b0n2cu": {
@@ -19132,6 +19207,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -19233,6 +19309,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -19268,6 +19345,16 @@
    "/placement-test",
    "/search",
    "/team"
+  ]
+ },
+ "t.teste-dein-deutsch-kostenlos.179orgk": {
+  "de": "Teste dein Deutsch kostenlos von zu Hause und schick uns dein Ergebnis.",
+  "en": "Test your German for free from home and send us your result.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.thema-waehlen.ctxpo4": {
@@ -19312,9 +19399,9 @@
    "/resources/why-germany"
   ]
  },
- "t.trag-im-testformular-deinen.1g42v89": {
+ "t.trag-im-testformular-deinen.1cbtt89": {
   "de": "Trag im Testformular deinen Namen und deine E-Mail-Adresse ein, damit wir dein Ergebnis zuordnen können.",
-  "en": "Enter your name and email address in the test form so that we can match your result to you.",
+  "en": "Enter your name and email in the test form so that we can match your result to you.",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -19550,6 +19637,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -19647,9 +19735,9 @@
    "/resources/why-germany"
   ]
  },
- "t.uns-ist-es-sehr.wc9d2y": {
-  "de": "Uns ist es sehr wichtig, dass wir das richtige Niveau für dich finden und du mit deinem Sprachkurs bei uns zufrieden bist. Wenn ein Kurs zu schwierig für dich ist, ist das für dich und für die anderen Teilnehmenden frustrierend. Ist der Kurs zu leicht, bist du unterfordert. Deshalb bitten wir dich, vorher einen Einstufungstest zu machen. Bitte starte immer mit dem A1-Test und schick deine Ergebnisse an online@casa-bremen.de.",
-  "en": "It is very important to us that we find the right level for you and that you are happy with your course. If a course is too difficult for you, that is frustrating for you and for the others in the group. If it is too easy, you won’t be challenged enough. That is why we ask you to take a placement test before you register. Please always start with the A1 test and send your results to online@casa-bremen.de.",
+ "t.uns-ist-es-sehr.5bh62k": {
+  "de": "Uns ist es sehr wichtig, dass wir das richtige Niveau für dich finden und du mit deinem Sprachkurs bei uns zufrieden bist. Wenn ein Kurs zu schwierig für dich ist, ist das für dich und für die anderen Teilnehmenden frustrierend. Ist der Kurs zu leicht, bist du unterfordert. Wenn du schon etwas Deutsch kannst, mach bitte vor der Anmeldung einen Einstufungstest. Starte mit dem A1-Test und schick deine Ergebnisse an online@casa-bremen.de. Wenn du noch gar kein Deutsch kannst, kannst du dich ohne Test für A1 anmelden.",
+  "en": "It is very important to us that we find the right level for you and that you are happy with your course. If a course is too difficult for you, that is frustrating for you and for the others in the group. If it is too easy, you won’t be challenged enough. If you already know some German, please take a placement test before you register. Start with the A1 test and send your results to online@casa-bremen.de. If you are a complete beginner, you can register for A1 without a test.",
   "files": [
    "src/config/content/faq.ts"
   ],
@@ -20740,7 +20828,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.vielen-dank-wir-pruefen.2305wc": {
@@ -20750,7 +20841,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.vielleicht-moechtest-du-studiere.1s2wljj": {
@@ -20939,9 +21033,9 @@
    "/courses/levels"
   ]
  },
- "t.von-a1-bis-c1.1yk6pdi": {
-  "de": "Von A1 bis C1: Auf der Seite Niveaustufen siehst du, was du auf jeder Stufe verstehen und sagen kannst.",
-  "en": "From A1 to C1: the levels page shows what you can understand and say at each level.",
+ "t.von-a1-bis-c1.9d9uo": {
+  "de": "Von A1 bis C1: Entdecke, was du auf jeder Stufe verstehen und sagen kannst.",
+  "en": "From A1 to C1: discover what you can understand and say at each level.",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
   ],
@@ -21252,6 +21346,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -21313,6 +21408,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -21364,7 +21460,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.waehle-abend-berufs-oder.10p6uqo": {
@@ -21418,6 +21517,16 @@
   ],
   "pages": [
    "/exams/[code]"
+  ]
+ },
+ "t.waehle-deinen-test.19krlgb": {
+  "de": "Wähle deinen Test",
+  "en": "Choose your test",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.waehle-ein-format-und.wz02zz": {
@@ -21490,7 +21599,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.waehle-oben-ein-thema.6m5f1p": {
@@ -21697,8 +21809,8 @@
    "/resources/why-germany"
   ]
  },
- "t.was-die-stufen-bedeuten.1nlttzl": {
-  "de": "Was die Stufen bedeuten",
+ "t.was-die-niveaustufen-bedeuten.1x3u02f": {
+  "de": "Was die Niveaustufen bedeuten",
   "en": "What the levels mean",
   "files": [
    "src/app/(site)/[locale]/placement-test/page.tsx"
@@ -22074,6 +22186,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/registration/course",
    "/search",
    "/team"
   ]
@@ -22220,6 +22333,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.welcher-weg-passt-zu.soa2iz": {
+  "de": "Welcher Weg passt zu dir?",
+  "en": "Which route suits you?",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.welches-modul-passt-in.16ndh8f": {
   "de": "Welches Modul passt in deine Woche?",
   "en": "Which module fits your week?",
@@ -22327,16 +22450,6 @@
    "/accommodation/become-host"
   ]
  },
- "t.wenn-du-in-bremen.1e3sbx5": {
-  "de": "Wenn du in Bremen oder Umgebung lebst, laden wir dich herzlich zur persönlichen Einstufung und Beratung in die Schule ein. Die Einstufung ist unverbindlich, und du lernst dabei die Schule kennen und kannst deine Fragen stellen.",
-  "en": "If you live in or near Bremen, you’re very welcome to come to the school for a placement test and advice in person. The placement test doesn’t commit you to anything, and it’s a chance to get to know the school and ask your questions.",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.wenn-du-laenger-als.1owhsi2": {
   "de": "Wenn du länger als vier Wochen bleibst.",
   "en": "If you stay longer than four weeks.",
@@ -22387,16 +22500,6 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
-  ]
- },
- "t.wenn-ein-test-ausgewertet.sdqjrs": {
-  "de": "Wenn ein Test ausgewertet ist, schick das Ergebnis bitte an",
-  "en": "Once a test has been marked, please send the result to",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
   ]
  },
  "t.wenn-ihr-euch-weiter.198sg7a": {
@@ -22936,6 +23039,16 @@
    "/courses"
   ]
  },
+ "t.wir-finden-gemeinsam-dein.1lpvuw8": {
+  "de": "Wir finden gemeinsam dein Niveau und beantworten deine Fragen. Die Einstufung ist unverbindlich.",
+  "en": "We will find your level together and answer your questions. The assessment does not commit you to anything.",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
+  ]
+ },
  "t.wir-freuen-uns-ueber.1st9sm3": {
   "de": "Wir freuen uns über Bewerbungen von Menschen, die Lernen, Vielfalt und die Arbeit im Team mitgestalten möchten.",
   "en": "We look forward to hearing from people who would like to help shape learning, diversity and teamwork.",
@@ -23242,6 +23355,19 @@
    "/about"
   ]
  },
+ "t.wir-versuchen-dir-eine.1q7hu5g": {
+  "de": "Wir versuchen, dir eine Bestätigung per E-Mail zu schicken.",
+  "en": "We’ll try to send you an email confirmation.",
+  "files": [
+   "src/components/appointments/placement-appointment-dialog.tsx"
+  ],
+  "pages": [
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
+  ]
+ },
  "t.wir-waehlen-deine-gaeste.dltfpo": {
   "de": "Wir wählen deine Gäste passend zu Kurs, Aufenthaltsdauer und Profil aus und informieren dich vorab über alles Wichtige.",
   "en": "We choose your guests to suit their course, length of stay and profile, and tell you everything important in advance.",
@@ -23305,7 +23431,10 @@
    "src/components/appointments/placement-appointment-dialog.tsx"
   ],
   "pages": [
-   "/placement-test"
+   "/courses",
+   "/courses/[slug]",
+   "/placement-test",
+   "/registration/course"
   ]
  },
  "t.wird-gesendet.1v6ti23": {
@@ -23807,16 +23936,6 @@
   ],
   "pages": []
  },
- "t.zu-den-niveaustufen.jtztoo": {
-  "de": "Zu den Niveaustufen",
-  "en": "Go to the levels",
-  "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx"
-  ],
-  "pages": [
-   "/placement-test"
-  ]
- },
  "t.zu-diesem-modul-beraten.1us72m2": {
   "de": "Zu diesem Modul beraten lassen",
   "en": "Ask about this module",
@@ -23859,6 +23978,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.zum-a1-kurs-anmelden.tbthke": {
+  "de": "Zum A1-Kurs anmelden",
+  "en": "Register for an A1 course",
+  "files": [
+   "src/app/(site)/[locale]/placement-test/page.tsx"
+  ],
+  "pages": [
+   "/placement-test"
   ]
  },
  "t.zum-abschluss-des-kurses.rva2e4": {
@@ -24006,7 +24135,6 @@
   "de": "Zur Kursanmeldung",
   "en": "Register for a course",
   "files": [
-   "src/app/(site)/[locale]/placement-test/page.tsx",
    "src/components/layout/mobile-nav.tsx",
    "src/components/layout/navbar.tsx",
    "src/config/content/heroes.ts",

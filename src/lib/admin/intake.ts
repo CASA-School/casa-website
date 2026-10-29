@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 
 import { isOrganiserTopic, isCompanyTopic } from '@/lib/validation/contact';
-import { isWorkspaceDatabaseConfigured, withTransaction } from './db';
+import { isWorkspaceDatabaseConfigured, query, withTransaction } from './db';
 import { raiseFlag, type FlagEntity } from './flags';
 import {
   countryCodeFromName,
@@ -526,6 +526,7 @@ export async function storeRegistration(input: {
           if (index === 0) throw new Duplicate();
           continue;
         }
+        if (index === 0) await raiseDeliveryFlags(exec, 'course_registration', id);
         await raiseIntakeFlags(exec, 'course_registration', id, {
           ...(index === 0 ? personFacts(person, input.registrant) : { candidates: [] }),
           levelRaw: course.levelRaw,
@@ -555,12 +556,39 @@ export async function storeExamRegistration(input: RegistrantInput & ExamRowInpu
       if (!registrationId) throw new Duplicate();
       const id = await insertExamRow(client, registrationId, person, input, input, input.locale, now);
       if (!id) throw new Duplicate();
+      await raiseDeliveryFlags(execOn(client), 'exam_registration', id);
       await raiseIntakeFlags(execOn(client), 'exam_registration', id, personFacts(person, input));
     });
     return true;
   } catch (error) {
     if (error instanceof Duplicate) return true;
     return report('exam registration', error);
+  }
+}
+
+/** Fail safe: flags are committed with the registration before any mail attempt. */
+async function raiseDeliveryFlags(exec: Exec, entity: 'course_registration' | 'exam_registration', entityId: string) {
+  await raiseFlag({ entity, entityId, code: 'registration_staff_notice_unconfirmed' }, exec);
+  await raiseFlag({ entity, entityId, code: 'registration_receipt_unconfirmed' }, exec);
+}
+
+/** Clear only the checks the provider accepted; an interrupted or failed update leaves a review flag. */
+export async function settleRegistrationDelivery(requestId: string, kind: 'course' | 'exam', staffAccepted: boolean, receiptReached: boolean): Promise<void> {
+  const codes = [
+    ...(staffAccepted ? ['registration_staff_notice_unconfirmed'] : []),
+    ...(receiptReached ? ['registration_receipt_unconfirmed'] : []),
+  ];
+  if (!codes.length) return;
+  try {
+    const table = kind === 'course' ? 'course_registrations' : 'exam_registrations';
+    await query(
+      `UPDATE record_flags SET resolved_at = now()
+        WHERE entity = $1 AND entity_id = (SELECT id FROM ${table} WHERE request_id = $2::uuid)
+          AND code = ANY($3::text[]) AND resolved_at IS NULL`,
+      [`${kind}_registration`, requestId, codes]
+    );
+  } catch {
+    console.error('[registration-delivery] could not settle review flags', { requestId, kind });
   }
 }
 

@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
 
-const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })), catalog: vi.fn() }));
-vi.mock('@/lib/admin/intake', () => ({ storeExamRegistration: mocks.store }));
+const mocks = vi.hoisted(() => ({ store: vi.fn(), settle: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })), catalog: vi.fn() }));
+vi.mock('@/lib/admin/intake', () => ({ storeExamRegistration: mocks.store, settleRegistrationDelivery: mocks.settle }));
 vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify, confirmToSender: mocks.confirm }));
 vi.mock('@/lib/content/repository', () => ({ getExamRegistrationCatalog: mocks.catalog }));
 import { POST } from './route';
@@ -68,6 +68,18 @@ describe('exam registration route', () => {
       examSessionLabel: '21 Nov 2026 | CASA Bremen',
     });
     expect(mocks.notify.mock.calls[0][3]).toEqual({ stored: true });
+    expect(mocks.settle).toHaveBeenCalledWith(expect.any(String), 'exam', false, true);
+  });
+
+  it('reports an acknowledgement failure separately from the staff alert', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    mocks.store.mockResolvedValue(true);
+    mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+    mocks.confirm.mockResolvedValueOnce({ sent: false, reachedSender: false });
+    const response = await POST(request(valid));
+    const result = await response.json();
+    expect(result).toMatchObject({ status: 'accepted', notified: true, confirmationSent: false });
+    expect(mocks.settle).toHaveBeenCalledWith(result.requestId, 'exam', true, false);
   });
 
   it('does not claim receipt when both storage and delivery are unavailable', async () => {

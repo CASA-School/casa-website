@@ -433,6 +433,7 @@ export type RegistrationListItem = {
   submittedAt: Date;
   personId: string | null;
   openFlags: number;
+  deliveryNeedsReview: boolean;
   accommodationRequired: boolean;
   /** Courses first, by start, then the exam. */
   lines: RegistrationLineSummary[];
@@ -480,6 +481,7 @@ export async function listRegistrations({
     person_id: string | null;
     submitted_at: Date;
     open_flags: string;
+    delivery_needs_review: boolean;
     accommodation_required: boolean;
     lines: RegistrationLineSummary[] | null;
   }>(
@@ -489,6 +491,10 @@ export async function listRegistrations({
               WHERE f.resolved_at IS NULL
                 AND ((f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE registration_id = g.id))
                   OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE registration_id = g.id)))) AS open_flags,
+            EXISTS (SELECT 1 FROM record_flags f WHERE f.resolved_at IS NULL
+              AND f.code IN ('registration_staff_notice_unconfirmed', 'registration_receipt_unconfirmed')
+              AND ((f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE registration_id = g.id))
+                OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE registration_id = g.id)))) AS delivery_needs_review,
             EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id AND c.accommodation_required) AS accommodation_required,
             (SELECT json_agg(json_build_object('kind', l.kind, 'label', l.label, 'typeId', l.type_id, 'detail', l.detail, 'option', l.option, 'settled', l.settled)
                              ORDER BY l.rank, l.starts NULLS LAST, l.created_at)
@@ -524,6 +530,7 @@ export async function listRegistrations({
       submittedAt: row.submitted_at,
       personId: row.person_id,
       openFlags: Number(row.open_flags ?? 0),
+      deliveryNeedsReview: row.delivery_needs_review,
       accommodationRequired: row.accommodation_required,
       lines: row.lines ?? [],
     })),
