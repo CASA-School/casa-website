@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
+import { confirmationFollowUp, confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import { Link } from '@/i18n/navigation';
 import type { ContentLocale } from '@/lib/content/types';
 import type { PlacementDay } from '@/lib/appointments/placement-schedule';
@@ -26,7 +26,7 @@ const copy = {
     choose: 'Select a day to see the free times.', oneLeft: '1 place left',
     details: 'Your details', first: 'First name', last: 'Last name', email: 'Email address', phone: 'Phone (optional)',
     message: 'Anything we should know? (optional)', privacy: 'I have read the', privacyLink: 'privacy policy',
-    note: 'You’ll receive a confirmation by email.',
+    note: 'We’ll try to send you an email confirmation.',
     submit: 'Book appointment', sending: 'Booking…', error: 'Your appointment could not be booked. Please try again.',
     taken: 'Someone has just booked the last place at this time. Please choose another time.',
     success: 'Your appointment is booked', thanks: 'Thank you. We look forward to seeing you at the school, Am Dobben 14–16 in Bremen.',
@@ -44,7 +44,7 @@ const copy = {
     choose: 'Wähle einen Tag, um die freien Uhrzeiten zu sehen.', oneLeft: 'noch 1 Platz',
     details: 'Deine Angaben', first: 'Vorname', last: 'Nachname', email: 'E-Mail-Adresse', phone: 'Telefon (optional)',
     message: 'Möchtest du uns noch etwas sagen? (optional)', privacy: 'Ich habe die', privacyLink: 'Datenschutzerklärung gelesen',
-    note: 'Du bekommst eine Bestätigung per E-Mail.',
+    note: 'Wir versuchen, dir eine Bestätigung per E-Mail zu schicken.',
     submit: 'Termin buchen', sending: 'Wird gebucht …', error: 'Dein Termin konnte nicht gebucht werden. Bitte versuch es erneut.',
     taken: 'Der letzte Platz zu dieser Zeit wurde gerade gebucht. Bitte wähle eine andere Zeit.',
     success: 'Dein Termin ist gebucht', thanks: 'Vielen Dank. Wir freuen uns auf dich in der Schule, Am Dobben 14–16 in Bremen.',
@@ -54,13 +54,13 @@ const copy = {
 } as const;
 
 /** The placement test in person, by appointment (2026-10-28): pick a time, leave a name, come over. */
-export function PlacementAppointmentDialog({ locale, className }: { locale: ContentLocale; className?: string }) {
+export function PlacementAppointmentDialog({ locale, className, compact = false }: { locale: ContentLocale; className?: string; compact?: boolean }) {
   const { pickTree } = useSiteCopy();
   const [open, setOpen] = useState(false);
   const t = pickTree(locale, copy);
   return <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild>
-      <Button variant="prism" size="lg" className={className}>{t.trigger}</Button>
+      <Button type="button" variant={compact ? 'link' : 'prism'} size={compact ? 'default' : 'lg'} className={className}>{t.trigger}</Button>
     </DialogTrigger>
     <DialogContent closeLabel={t.close} brandStripe className="max-w-3xl">
       {open && <BookingFlow locale={locale} onDone={() => setOpen(false)} />}
@@ -143,7 +143,7 @@ function BookingFlow({ locale, onDone }: { locale: ContentLocale; onDone: () => 
         {booked ? (held ? t.success : t.successUnheld) : t.title}
       </DialogTitle>
       <DialogDescription className="mt-3 max-w-xl text-sm">{booked ? (held ? t.thanks : t.thanksUnheld) : t.intro}</DialogDescription>
-      {booked && confirmationSent ? <p className="mt-2 max-w-xl text-sm font-medium text-[var(--casa-ink)]">{confirmationNotice(locale)}</p> : null}
+      {booked ? <p className="mt-2 max-w-xl text-sm font-medium text-[var(--casa-ink)]">{confirmationSent ? confirmationNotice(locale) : confirmationFollowUp(locale)}</p> : null}
       <p className="mt-4 flex items-center gap-2 text-sm text-[var(--casa-ink)]"><Clock aria-hidden className="size-4" />{t.schedule}</p>
     </header>
     <div className="p-5 sm:p-8">

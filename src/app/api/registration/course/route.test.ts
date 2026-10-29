@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server';
 
 import { resetRateLimits } from '@/lib/api/rate-limit';
 
-const mocks = vi.hoisted(() => ({ store: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })), catalog: vi.fn(), examCatalog: vi.fn() }));
-vi.mock('@/lib/admin/intake', () => ({ storeRegistration: mocks.store }));
+const mocks = vi.hoisted(() => ({ store: vi.fn(), settle: vi.fn(), notify: vi.fn(), confirm: vi.fn<(...args: unknown[]) => Promise<{ sent: boolean; reachedSender: boolean }>>(async () => ({ sent: true, reachedSender: true })), catalog: vi.fn(), examCatalog: vi.fn() }));
+vi.mock('@/lib/admin/intake', () => ({ storeRegistration: mocks.store, settleRegistrationDelivery: mocks.settle }));
 vi.mock('@/lib/notifications/forms.server', () => ({ notifyForm: mocks.notify, confirmToSender: mocks.confirm }));
 vi.mock('@/lib/content/repository', () => ({ getCourseRegistrationCatalog: mocks.catalog, getExamRegistrationCatalog: mocks.examCatalog }));
 import { POST } from './route';
@@ -98,6 +98,17 @@ describe('course registration route', () => {
     const [kind, payload] = mocks.confirm.mock.calls[0];
     expect(kind).toBe('course');
     expect(payload).toMatchObject({ courseTypeLabel: 'Intensiv Deutsch', email: 'ada@example.com' });
+  });
+
+  it('keeps a stored registration accepted while both delivery checks need follow-up', async () => {
+    mocks.catalog.mockResolvedValue(catalog);
+    mocks.store.mockResolvedValue(true);
+    mocks.notify.mockResolvedValue({ delivered: false, channel: 'failed' });
+    mocks.confirm.mockResolvedValueOnce({ sent: false, reachedSender: false });
+    const response = await POST(request(valid));
+    const result = await response.json();
+    expect(result).toMatchObject({ status: 'accepted', stored: true, notified: false, confirmationSent: false });
+    expect(mocks.settle).toHaveBeenCalledWith(result.requestId, 'course', false, false);
   });
 
   it('sends no confirmation when nothing was stored and nothing delivered', async () => {

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { confirmToSender, notifyForm } from '@/lib/notifications/forms.server';
 
-import { storeRegistration } from '@/lib/admin/intake';
+import { settleRegistrationDelivery, storeRegistration } from '@/lib/admin/intake';
 import { levelCodeFrom } from '@/lib/admin/normalize';
 import { rateLimit } from '@/lib/api/rate-limit';
 import { getCourseRegistrationCatalog, getExamRegistrationCatalog } from '@/lib/content/repository';
@@ -272,6 +272,7 @@ export async function POST(request: NextRequest) {
   }
 
   const confirmation = early ?? await confirmToSender('course', notification);
+  if (stored) await settleRegistrationDelivery(requestId, 'course', delivery.delivered, confirmation.reachedSender);
 
   return NextResponse.json({
     status: 'accepted',

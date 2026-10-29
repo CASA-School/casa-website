@@ -36,7 +36,7 @@ import { RegistrationStepper, RegistrationTabs } from '@/components/registration
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
-import { confirmationNotice } from '@/lib/notifications/confirmation-notice';
+import { confirmationFollowUp, confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
 import { clockRange, formatDay } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
@@ -894,7 +894,9 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
             <p className="max-w-md text-sm text-[var(--casa-muted)] mt-2">
               {say(catalog.locale, 'Wir sehen uns deine Anmeldung jetzt an und melden uns so bald wie möglich per E-Mail bei dir.', 'We’ll look at your registration now and get back to you by email as soon as we can.')}
             </p>
-            {confirmationSent ? <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">{confirmationNotice(catalog.locale)}</p> : null}
+            <p className="max-w-md text-sm font-medium text-[var(--casa-ink)] mt-2">
+              {confirmationSent ? confirmationNotice(catalog.locale) : confirmationFollowUp(catalog.locale)}
+            </p>
 
             <div className="w-full max-w-lg text-left mt-6">
               <NextStepsTimeline

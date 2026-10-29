@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import type { BookingStatus, Payer } from '@/lib/admin/bookings';
 import { requireModule } from '@/lib/admin/guard';
+import { query } from '@/lib/admin/db';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { isUuid } from '@/lib/admin/ids';
@@ -21,6 +22,22 @@ function registrationId(formData: FormData): string {
   const id = String(formData.get('id') ?? '');
   if (!isUuid(id)) throw new Error('Invalid id');
   return id;
+}
+
+/** A colleague records a manual follow-up, without sending or retrying mail. */
+export async function resolveRegistrationDeliveryAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const flagId = String(formData.get('flagId') ?? '');
+  if (!isUuid(flagId)) throw new Error('Invalid flag id');
+  await query(`UPDATE record_flags f SET resolved_at = now(), resolved_by = $3
+    WHERE f.id = $1 AND f.resolved_at IS NULL
+      AND f.code IN ('registration_staff_notice_unconfirmed', 'registration_receipt_unconfirmed')
+      AND ((f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE registration_id = $2))
+        OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE registration_id = $2)))`,
+    [flagId, id, actor.id]);
+  revalidatePath('/admin/registrations', 'layout');
+  redirect(`/admin/registrations/${id}`);
 }
 
 /**

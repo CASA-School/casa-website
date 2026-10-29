@@ -2883,3 +2883,7 @@ copy (3½ minutes at 1 vCPU / 2 GiB, the learners' reader at 1.2 GB).
 - **One file per field**: a reader loads only the columns it reads (learners 1.2 → 0.87 GB). Locally a run
   with nothing to do takes 0.2 s, a Person change 13 s (5 steps), every step 22 s. Job at 0.75 vCPU / 1.5 GiB.
 - docs/schoolman/MIGRATION.md §1 has the rules.
+
+## Registration delivery follow-up (local, 2026-10-29)
+
+Placement guidance and registration delivery follow-up were prepared in the `website` worktree. Course and exam registrations now create review flags with the saved record; provider-accepted sends settle each flag (acceptance is not proof of inbox delivery), and the registration inbox/detail offer manual follow-up. The public success screen gives a contact path when the acknowledgement is unconfirmed. Apply migration 0102 before deploying the corresponding application code; it has not been applied to CASA's database. No automated retry or response-time promise. Mail-review exports remain ignored under CASA/output/mail-review.

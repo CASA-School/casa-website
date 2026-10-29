@@ -11,3 +11,10 @@ export function confirmationNotice(locale: 'de' | 'en') {
     ? 'Eine Eingangsbestätigung ist per E-Mail unterwegs.'
     : 'An acknowledgement is on its way to your inbox.';
 }
+
+/** Used when the server cannot confirm an acknowledgement reached the applicant. */
+export function confirmationFollowUp(locale: 'de' | 'en') {
+  return locale === 'de'
+    ? 'Du erhältst möglicherweise keine Eingangsbestätigung. Falls du keine Rückmeldung von uns bekommst, melde dich bitte bei online@casa-bremen.de.'
+    : 'You may not receive an acknowledgement email. If you do not hear from us, please contact online@casa-bremen.de.';
+}

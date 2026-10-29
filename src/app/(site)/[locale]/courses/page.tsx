@@ -23,6 +23,7 @@ import { CEFR_LADDER, filterCourses } from '@/lib/content/course-finder';
 import { getCourseFinderData, getPageHero } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import { BandHeading } from '@/components/sections/band-heading';
+import { PlacementAppointmentDialog } from '@/components/appointments/placement-appointment-dialog';
 import { intl, pick, pickTree, say } from '@/lib/cms/copy';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -595,7 +596,7 @@ export default async function CoursesPage({
                 linkHref: '/faq',
                 linkLabel: say(locale, 'Fragen zum Visum', 'Questions about visas'),
               },
-            ].map((fact) => (
+            ].map((fact, index) => (
               <li key={fact.title} className="border-t border-[color:var(--casa-sand)] pt-6">
                 <h3 className="text-lg font-bold leading-snug text-[var(--casa-ink)]">{fact.title}</h3>
                 <p className="mt-3 max-w-measure text-base leading-relaxed text-[var(--casa-muted)]">{fact.body}</p>
@@ -611,6 +612,7 @@ export default async function CoursesPage({
                     />
                   </Link>
                 ) : null}
+                {index === 0 ? <div className="mt-2"><PlacementAppointmentDialog locale={locale} compact className="h-auto min-h-11 px-0 font-bold text-[var(--casa-accent-text)] underline underline-offset-4" /></div> : null}
               </li>
             ))}
           </ul>

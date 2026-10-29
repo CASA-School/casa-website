@@ -28,6 +28,7 @@ import { courseNode } from '@/lib/structured-data';
 import { COURSE_SEO } from '@/config/seo-pages';
 import { GruppenPackages } from '@/components/gruppen/gruppen-packages';
 import { InterestDialog } from '@/components/courses/interest-dialog';
+import { PlacementAppointmentDialog } from '@/components/appointments/placement-appointment-dialog';
 import { hasInterestList, INTEREST_ANCHOR } from '@/config/courses/interest-list';
 import { GRUPPEN_PACKAGES_BY_STACK } from '@/config/gruppen/packages';
 import { getCourseArchetype, archetypeAllowsFact, nextStepsHeading } from '@/config/courses/archetypes';
@@ -650,8 +651,8 @@ export default async function CourseDetailPage({
 
                 case 'next-steps':
                   return (
+                  <div key={sectionKey}>
                   <ProcessSteps
-                    key={sectionKey}
                     title={archetype.cta === 'request-quote' ? processHeading.title : t('coursePage.steps.title')}
                     description={processDescription}
                     steps={processStepItems}
@@ -664,6 +665,15 @@ export default async function CourseDetailPage({
                      * for the click.
                      */
                   />
+                  {requiresLevelField(courseSlug) ? (
+                    <Container className="pb-10">
+                      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--casa-muted)]">
+                        <span>{say(locale, 'Lieber persönlich einstufen lassen?', 'Prefer a placement assessment in person?')}</span>
+                        <PlacementAppointmentDialog locale={locale} compact className="h-auto min-h-11 px-0 font-semibold text-[var(--casa-accent-text)] underline underline-offset-4" />
+                      </div>
+                    </Container>
+                  ) : null}
+                  </div>
                   );
 
                 case 'testimonials': {

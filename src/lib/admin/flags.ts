@@ -27,7 +27,9 @@ export type FlagCode =
   | 'birth_date_unparsed'
   | 'person_unlinked'
   | 'cohort_withdrawn'
-  | 'period_without_cohort';
+  | 'period_without_cohort'
+  | 'registration_staff_notice_unconfirmed'
+  | 'registration_receipt_unconfirmed';
 
 /** Read with `pick(lang, FLAG_LABELS[code])` (docs/ADMIN_I18N.md). */
 export const FLAG_LABELS: Record<FlagCode, Bilingual> = {
@@ -38,6 +40,8 @@ export const FLAG_LABELS: Record<FlagCode, Bilingual> = {
   person_unlinked: { de: 'Mit keiner Person verknüpft', en: 'Not linked to a person' },
   cohort_withdrawn: { de: 'Gewählter Termin findet nicht mehr statt', en: 'Chosen cohort no longer runs' },
   period_without_cohort: { de: 'Gebuchter Zeitraum noch ohne Termin', en: 'Booked dates have no cohort yet' },
+  registration_staff_notice_unconfirmed: { de: 'Team-Benachrichtigung prüfen und Anmeldung bearbeiten', en: 'Check staff notification and follow up on registration' },
+  registration_receipt_unconfirmed: { de: 'Eingangsbestätigung prüfen und bei Bedarf Kontakt aufnehmen', en: 'Check acknowledgement and contact applicant if needed' },
 };
 
 export type RecordFlag = {
