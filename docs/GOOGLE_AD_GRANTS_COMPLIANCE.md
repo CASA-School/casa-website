@@ -18,12 +18,12 @@ Reference points to keep in view:
 
 Google for Nonprofits excludes „a school, academic institution, or university (philanthropic arms
 of educational organizations are eligible)" (support.google.com/nonprofits/answer/3215869). CASA
-gGmbH is a language school, so its own application may fail on eligibility whatever the website
-says. The **CASA-Förderverein e.V.** is the school's philanthropic arm and the applicant Google's
-rule allows. Ad Grants then requires that „your nonprofit must own the domain(s) your ads point
-to" (answer/1657899): the Förderverein's ads point to the Förderverein's own website (planned by
-Rahman), not to casa-bremen.de. This site's non-profit page still matters, as the school the
-Förderverein supports and as what a reviewer will open.
+gGmbH was nevertheless **approved** in Google for Nonprofits in June 2026 (request through
+Goodstack with the Freistellungsbescheid, recorded in
+`~/Tasks/10-active/work/casa-website-project/notes/progress-log.md`); only the Ad Grants
+activation was refused, for the website. The CASA-Förderverein e.V. remains a second route if
+eligibility is ever questioned; Ad Grants requires that „your nonprofit must own the domain(s)
+your ads point to" (answer/1657899).
 
 The website policy (answer/1657899) asks for: a mission stated prominently; the programmes,
 services and impact described; physical address and a registration number or tax ID and/or an
@@ -35,7 +35,7 @@ donation link going to a secure page dedicated to donations.
 rejection was recorded as „too commercial", a website verdict, which Google gives after an
 organisation has been accepted into Google for Nonprofits; the old site was the problem. Before
 reapplying: deploy the changes below, add the tax number and Freistellungsbescheid to the
-non-profit page, and keep the homepage's first screen saying „gemeinnützig".
+non-profit page (done), and keep the homepage's first screen saying „gemeinnützig".
 
 ## Implemented In This Project
 
@@ -52,8 +52,10 @@ non-profit page, and keep the homepage's first screen saying „gemeinnützig".
   planned (an almost free telc B1 preparation course for people without funding, a scholarship
   programme); and the Förderverein itself, with a contact link (no donation link until there is
   a dedicated donation page). The Förderverein text's „bis zu 80 Nationen" is not used; the page
-  keeps the approved „über 150 Länder". **Open for CASA:** the tax number and the date of the
-  latest Freistellungsbescheid, so the legal block can show them.
+  keeps the approved „über 150 Länder". The legal block shows the Freistellungsbescheid word for
+  word (Finanzamt Bremen, 16.10.2025, for 2021–2023, Steuernummer 60/147/04599, the three
+  purposes of § 52 AO, entitled to issue Zuwendungsbestätigungen); the structured data carries the
+  tax number as `taxID`.
 
 - Added public mission route: `/ueber-uns/gemeinnuetzigkeit`
 - Folded integration-project proof points into the mission route under `#integrationsprojekte`.
