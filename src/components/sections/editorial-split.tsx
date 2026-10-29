@@ -132,6 +132,7 @@ export function EditorialSplit({
             alt={photo.alt}
             sizes="(min-width: 1280px) 42vw, (min-width: 1024px) 45vw, 95vw"
             className="h-full w-full"
+            depth
           />
         </figure>
       </div>
@@ -145,7 +146,7 @@ export function EditorialSplit({
         width, because it sits both full-width and in the detail pages' column.
       */}
       {bullets.length > 0 ? (
-        <ul className={cn('mt-8 grid gap-x-8 gap-y-4 border-t border-[color:var(--casa-sand)] pt-6', pointColumns(bullets.length))}>
+        <ul data-stagger className={cn('mt-8 grid gap-x-8 gap-y-4 border-t border-[color:var(--casa-sand)] pt-6', pointColumns(bullets.length))}>
           {bullets.map((bullet) => (
             <li key={bullet} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--casa-ink)] md:text-base">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--casa-accent-text)] md:mt-1" aria-hidden />

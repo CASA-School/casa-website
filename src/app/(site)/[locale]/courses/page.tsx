@@ -568,7 +568,7 @@ export default async function CoursesPage({
             }
           />
 
-          <ul className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
+          <ul data-stagger className="mx-auto grid max-w-[76rem] gap-x-10 gap-y-10 md:grid-cols-2 md:gap-y-12">
             {[
               {
                 title: say(locale, 'Wir finden dein passendes Kursniveau', 'We find the right level for you'),

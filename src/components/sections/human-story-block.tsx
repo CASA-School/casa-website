@@ -66,6 +66,7 @@ export function HumanStoryBlock({
             alt={photo.alt}
             sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 45vw, 95vw"
             className="h-full w-full"
+            depth
           />
         </figure>
 

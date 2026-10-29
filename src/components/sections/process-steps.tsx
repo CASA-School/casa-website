@@ -50,16 +50,21 @@ export function ProcessSteps({
       half-empty row. At full width each step gets ~390px at 1280 rather than the
       ~215px the removed `rail` layout left it, which is the difference between
       one line per step title and two.
+
+      `casa-steps` draws the line down from each number (globals.css, §Motion): stacked, it runs
+      on to the next number, and on the way in it is drawn as each step appears.
     */
     <ol
+      data-stagger
       className={cn(
-        'mt-8 grid gap-7',
+        'casa-steps mt-8 grid gap-7',
+        steps.length === 4 && 'casa-steps-four',
         // Four steps go two by two, then four across, rather than three and an orphan.
         steps.length === 4 ? '@[36rem]:grid-cols-2 @[64rem]:grid-cols-4' : '@[44rem]:grid-cols-3'
       )}
     >
       {steps.map((item) => (
-        <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
+        <li key={item.step}>
           <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">
             {item.step}
           </span>

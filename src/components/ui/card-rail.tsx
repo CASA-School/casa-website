@@ -138,6 +138,7 @@ export function CardRail({
           edge with nothing left to reveal is just a gap.
         */
         data-scrollable={scrollable ? 'true' : 'false'}
+        data-stagger
         className={cn(
           // `group/rail` so an item can react to data-scrollable — the cards on
           // the homepage band stretch to fill the row when nothing scrolls.

@@ -81,6 +81,8 @@ export function CourseFormatRows({
         <div
           key={row.id}
           id={row.id}
+          // Each row is its own group: the copy comes in, then its photograph.
+          data-stagger
           className="grid scroll-mt-28 gap-8 md:scroll-mt-32 lg:grid-cols-2 lg:items-center lg:gap-14"
         >
           {/*
@@ -173,6 +175,7 @@ export function CourseFormatRows({
           </div>
 
           <div
+            data-depth
             className={cn(
               // Wider when it runs the full width of a tablet, so it does not fill the screen.
               'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl md:aspect-[16/9] lg:aspect-[4/3]',

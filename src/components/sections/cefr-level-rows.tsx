@@ -72,6 +72,7 @@ export function CefrLevelRows({ locale }: { locale: ContentLocale }) {
                 alt={pick(locale, level.photo.alt)}
                 sizes="(min-width: 1440px) 640px, (min-width: 1024px) 46vw, calc(100vw - 40px)"
                 className="h-full w-full"
+                depth
               />
             </figure>
           </article>
