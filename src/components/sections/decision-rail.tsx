@@ -138,27 +138,17 @@ export function DecisionRail({
                 <p className="mt-0.5 break-words text-xs leading-snug text-[var(--casa-muted)]">{contact.role}</p>
               </div>
             </div>
-            {/* Ina's group appointments are active. Other contacts await their own schedule. */}
-            {contact.appointment === 'groups' ? <AppointmentDialog locale={locale} /> : contact.booking ? (
-              <button
-                type="button"
-                /*
-                  `aria-disabled`, not `disabled`. Full visual weight, because
-                  this is the control CASA will approve on sight and a greyed-out
-                  primary in a finished card reads as breakage — but a screen
-                  reader is told it is unavailable rather than promised an action
-                  that has no destination yet.
-
-                  IT DOES NOTHING WHEN CLICKED, and that is the open item: give
-                  this an `href` (a scheduling URL, or /contact?topic=group-booking
-                  as an interim) and it becomes a real control with no other
-                  change here.
-                */
-                aria-disabled="true"
+            {/*
+              Ina's group appointments are booked here. Meike's Firmenunterricht asks for a quote
+              (the contact form on its topic) until she takes bookings too (Rahman, 2026-10-29).
+            */}
+            {contact.appointment === 'groups' ? <AppointmentDialog locale={locale} /> : contact.quoteTopic ? (
+              <Link
+                href={`/contact?topic=${contact.quoteTopic}`}
                 className="casa-button-prism mt-4 inline-flex w-full items-center justify-center rounded-lg bg-[var(--casa-ink-deep)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--casa-ink-deep-hover)]"
               >
-                {say(locale, 'Termin buchen', 'Book an appointment')}
-              </button>
+                {say(locale, 'Angebot anfragen', 'Request a quote')}
+              </Link>
             ) : null}
           </div>
         ) : null}

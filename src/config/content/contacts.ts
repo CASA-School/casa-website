@@ -55,13 +55,18 @@ export type CasaContact = {
   /**
    * Whether this person offers a scheduled call.
    *
-   * Not everyone will: it is a real commitment on a real calendar. The two so
-   * far are Ina Eismann for group programmes and Meike Große Hundrup for
-   * Firmenunterricht — both cases where the buyer is scoping a programme for
+   * Not everyone will: it is a real commitment on a real calendar. So far only
+   * Ina Eismann for group programmes, where the buyer is scoping a programme for
    * other people rather than picking a level, which is where a call beats a
-   * form. Omit the field and the card shows no button.
+   * form (Meike Große Hundrup's Firmenunterricht asks for a quote instead, see
+   * `quoteTopic`). Omit both fields and the card shows no button.
    */
   booking?: true;
+  /**
+   * The contact form's topic their card's button opens, „Angebot anfragen": for
+   * a colleague whose buyers ask for a quote before anything is booked.
+   */
+  quoteTopic?: 'company-courses';
   /** Kept so the next person can re-check rather than re-guess. */
   source: string;
 };
@@ -141,13 +146,17 @@ const CONTACTS = {
      instead of a condition inside a component. Bildungszeit and the medical
      course keep `professional` and show no button.
      
-     casa-bremen.de's team page lists Firmenunterricht among her areas too. */
+     casa-bremen.de's team page lists Firmenunterricht among her areas too.
+
+     Her button asks for a quote, not a call (Rahman, 2026-10-29: „Angebot
+     anfragen" for now, „Termin buchen" perhaps later, once she has a schedule
+     the way Ina has). Until then it was a „Termin buchen" that did nothing. */
   company: {
     teamId: 'meike-grosse-hundrup',
     role: { en: 'In-company teaching', de: 'Firmenunterricht' },
     email: 'info@casa-bremen.de',
-    booking: true,
-    source: 'assigned by CASA 2026-09-08; call offered from 2026-09-08',
+    quoteTopic: 'company-courses',
+    source: 'assigned by CASA 2026-09-08; quote button from 2026-10-29',
   },
 
   /* CASA's instruction, 2026-09-08; casa-bremen.de's team page lists telc
@@ -184,6 +193,7 @@ export type ResolvedContact = {
   role: string;
   booking: boolean;
   appointment?: 'groups';
+  quoteTopic?: 'company-courses';
   photo?: { src: string; position?: string };
 };
 
@@ -198,5 +208,6 @@ export function getCasaContact(key: CasaContactKey, locale: ContentLocale): Reso
     role: pick(locale, entry.role),
     booking: (entry as CasaContact).booking === true,
     ...(key === 'groups' ? { appointment: 'groups' as const } : {}),
+    ...((entry as CasaContact).quoteTopic ? { quoteTopic: (entry as CasaContact).quoteTopic } : {}),
   };
 }
