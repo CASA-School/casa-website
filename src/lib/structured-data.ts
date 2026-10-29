@@ -44,7 +44,8 @@ const organizationRef = () => ({ '@id': organizationId() });
 
 export function organizationNode(locale: ContentLocale) {
   return {
-    '@type': ['EducationalOrganization', 'LocalBusiness'],
+    // NGO: a gemeinnützige GmbH; LocalBusiness keeps the address, hours and map for local search.
+    '@type': ['EducationalOrganization', 'NGO', 'LocalBusiness'],
     '@id': organizationId(),
     name: 'CASA – Internationale Sprachschule',
     alternateName: ['CASA Bremen', 'CASA Internationale Sprachschule Bremen'],

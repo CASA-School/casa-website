@@ -359,22 +359,31 @@ export default async function HomePage() {
     >
       {/* The organisation and the website come from the layout (lib/structured-data). */}
 
-      {/* Keep CASA's German Leitbild; English expresses the same welcome in its own voice. */}
+      {/*
+        Keep CASA's German Leitbild; English expresses the same welcome in its own voice.
+        The non-profit is named above the fold (2026-10-29, for the Google Ad Grants review):
+        in the eyebrow, in the lead, and as the second way out of the hero.
+      */}
       <HeroAPhotoLed
         eyebrow={
-          say(locale, 'Deutsch lernen in Bremen · seit 1983', 'German courses in Bremen · since 1983')
+          say(locale, 'Gemeinnützige Sprachschule in Bremen · seit 1983', 'Non-profit language school in Bremen · since 1983')
         }
         title={
           say(locale, 'Miteinander reden – aufeinander zugehen', 'Learn German. Feel at home.')
         }
         description={
-          say(locale, 'Bei CASA kannst du nicht nur Deutsch lernen, sondern auch Menschen aus aller Welt treffen. Wir helfen dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.', 'At CASA you don’t just learn German, you meet people from all over the world. We help you settle into Bremen, with personal support and a welcoming community.')
+          say(locale, 'Bei CASA lernst du Deutsch und triffst Menschen aus aller Welt. Als gemeinnützige Sprachschule helfen wir dir, gut in Bremen anzukommen – mit individueller Begleitung und einem offenen Miteinander.', 'At CASA you learn German and meet people from all over the world. As a non-profit language school, we help you settle into Bremen, with personal support and a welcoming community.')
         }
         ctas={[
           {
             label: say(locale, 'Kurs finden', 'Find my course'),
             href: '#course-recommendation',
             kind: 'primary',
+          },
+          {
+            label: say(locale, 'Unsere gemeinnützige Arbeit', 'Our non-profit work'),
+            href: '/about/nonprofit',
+            kind: 'secondary',
           },
         ]}
         photo={pageConfig.photos.hero}
