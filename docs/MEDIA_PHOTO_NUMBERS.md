@@ -28,8 +28,10 @@ staff members after the code had removed them.
   Still awaited: **37** (a clinical setting). **81** is now the reference-based
   guest-bedroom example, shown on both host-family pages. The host-family slots
   (27, 72–77, 81) are labelled AI illustrations: `docs/HOST_FAMILY_IMAGES.md`.
-- The About hero is **55** (since 2026-10-01): the CASA team in the courtyard, the
-  whole 3:2 frame of 098 with light correction only.
+- The About hero is **102** (since 2026-10-29, Rahman): a watercolour of the house on Am
+  Dobben, signed „ISA", from the repository's first commit, cropped 3:2 to the building.
+  It replaced **55** (the CASA team in the courtyard, the whole 3:2 frame of 098), which
+  is also the team page's photo, so the two pages opened on the same picture.
 - The homepage hero is **54** (since 2026-10-01): the lesson, a 5:4 crop with light
   correction only, built by `scripts/media/build_reel.py`. **51, 53, 52, 50** were the
   full-width reel, retired the same day; they remain real, available crops. Slots **46–49** are retired (the AI-edited

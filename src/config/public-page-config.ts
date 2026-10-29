@@ -498,6 +498,20 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     objectPosition: '50% 27%',
   },
   /*
+   * THE ABOUT HERO (slot 102, since 2026-10-29): a watercolour of the building on
+   * Am Dobben, for a page whose first line is „CASA heißt auf Deutsch ‚Haus'".
+   * A painting, so the hero shows it at its own 3:2.
+   */
+  buildingPainting: {
+    src: '/media/casa/casa-building-painting.webp',
+    alt: {
+      de: 'Aquarell des CASA-Hauses Am Dobben in Bremen: gelbe Klinkerfassade, CASA-Schriftzüge in den Fenstern, ein Herbstbaum und Fahrräder vor dem Eingang',
+      en: 'Watercolour of the CASA building on Am Dobben in Bremen: yellow brick front, CASA lettering in the windows, an autumn tree and bicycles by the door',
+    },
+    caption: { de: 'Unser Haus Am Dobben, gemalt von ISA', en: 'Our house on Am Dobben, painted by ISA' },
+    aspectRatio: '3 / 2',
+  },
+  /*
    * THE HOMEPAGE HERO. A real photograph: a 5:4 crop of camera original 093
    * with global light and colour correction only, built and checked by
    * scripts/media/build_reel.py (slot 54). It replaced the full-width reel on
@@ -799,8 +813,9 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Find the right course', de: 'Passenden Kurs finden' }, href: '/courses', kind: 'secondary' },
     ],
     photos: {
-      // The people who run the school, not the building: slot 55.
-      hero: photoLibrary.heroTeam,
+      // The house itself, painted (slot 102, Rahman 2026-10-29): the team photo it replaced
+      // (slot 55) is also the team page's, so the two pages no longer open on the same picture.
+      hero: photoLibrary.buildingPainting,
       mission: photoLibrary.groupCourseBremenMusicians,
       /* The community-story block's photo, which used to borrow `hero`. */
       story: photoLibrary.groupClassroomTeacherActivity,

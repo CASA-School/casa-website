@@ -1570,6 +1570,26 @@
    "/calculator"
   ]
  },
+ "t.aquarell-des-casa-hauses.sv5pav": {
+  "de": "Aquarell des CASA-Hauses Am Dobben in Bremen: gelbe Klinkerfassade, CASA-Schriftzüge in den Fenstern, ein Herbstbaum und Fahrräder vor dem Eingang",
+  "en": "Watercolour of the CASA building on Am Dobben in Bremen: yellow brick front, CASA lettering in the windows, an autumn tree and bicycles by the door",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.arbeiten-bei-casa-in.yd1gvi": {
   "de": "Arbeiten bei CASA in Bremen",
   "en": "Working at CASA in Bremen",
@@ -19753,6 +19773,26 @@
   ],
   "pages": [
    "/about/nonprofit"
+  ]
+ },
+ "t.unser-haus-am-dobben.153cjua": {
+  "de": "Unser Haus Am Dobben, gemalt von ISA",
+  "en": "Our house on Am Dobben, painted by ISA",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.unser-kursangebot-ist-verlaessli.1lrt8ip": {
