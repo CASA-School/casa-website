@@ -290,9 +290,14 @@ export function Footer({ contentLocale: locale, closingCta = true }: FooterProps
         reference's does instead of stopping at the gutters. The social icons
         move up into the columns on mobile, so this row carries only the two
         things that belong in a colophon: the legal entity and the legal links.
+
+        Its bottom padding clears CLARA's button, which floats over the page's
+        bottom-right corner (48px, 12px up on phones; 56px, 24px up from `sm`):
+        scrolled to the end, it sat on the social icons and on „AGB"
+        (Rahman, 2026-10-29).
       */}
       <div className="border-t border-white/10">
-        <Container className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+        <Container className="flex flex-col gap-4 pb-[4.5rem] pt-6 sm:flex-row sm:items-center sm:justify-between sm:pb-24">
           <p className="text-xs text-[var(--casa-text-subtle)]">
             &copy; {new Date().getFullYear()} CASA – Internationale Sprachschule gGmbH.{' '}
             {footerText('All rights reserved.', locale, say)}
