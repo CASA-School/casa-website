@@ -63,7 +63,7 @@ const tables: Record<TableName, MockRow[]> = {
         'Experience in educational coordination\nStrong organisational communication\nGerman language school context preferred',
       apply_url: null,
       apply_email: APPLY_EMAIL,
-      is_published: true,
+      is_published: false,
       is_featured: false,
       open_application: false,
       posted_at: FIXTURE_DATE,

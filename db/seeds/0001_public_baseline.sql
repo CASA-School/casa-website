@@ -216,7 +216,7 @@ Very good communication skills',
 Strong organisational communication
 German language school context preferred',
     'bewerbungen@casa-bremen.de',
-    true,
+    false,
     false,
     false
   ),
