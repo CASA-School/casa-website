@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from '@/i18n/navigation';
 
 import { AssistantWidget, type AssistantMessage } from '@/components/assistant/AssistantWidget';
@@ -48,6 +48,21 @@ export function AssistantLauncher({ contentLocale }: { contentLocale: ContentLoc
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const closeTimer = useRef<number | null>(null);
+  const [atPageEnd, setAtPageEnd] = useState(false);
+
+  /*
+   * Her button steps aside while the footer's last row is on screen: scrolled to the end, it sat
+   * on the social icons and on „AGB" (Rahman, 2026-10-29: hide CLARA there, leave the footer).
+   */
+  useEffect(() => {
+    const lastRow = document.querySelector('[data-site-footer]')?.lastElementChild;
+    if (!lastRow) {
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => setAtPageEnd(entry.isIntersecting));
+    observer.observe(lastRow);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   /*
    * Open on one page only. Following a link, or going back, closes CLARA: she was left open on
@@ -61,6 +76,8 @@ export function AssistantLauncher({ contentLocale }: { contentLocale: ContentLoc
   }
 
   const isOpen = openOn === pathname;
+  // Not while she is open: her button is also the way to close her.
+  const hidden = atPageEnd && !isOpen;
 
   const closeNow = useCallback(() => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -99,11 +116,14 @@ export function AssistantLauncher({ contentLocale }: { contentLocale: ContentLoc
         ref={buttonRef}
         type="button"
         onClick={() => (isOpen && !closing ? close() : setOpenOn(pathname))}
+        tabIndex={hidden ? -1 : undefined}
+        aria-hidden={hidden || undefined}
         className={cn(
-          'fixed right-3 z-40 rounded-xl p-0 transition-transform duration-200 ease-casa hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2 sm:right-6',
+          'fixed right-3 z-40 rounded-xl p-0 transition-[translate,opacity] duration-200 ease-casa hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)] focus-visible:ring-offset-2 sm:right-6',
           // Above the safe area on phones, a little higher from `sm`.
           'bottom-[max(0.75rem,env(safe-area-inset-bottom))] sm:bottom-6',
-          isOpen && !closing && 'ring-2 ring-[var(--casa-blue)]/30 ring-offset-2'
+          isOpen && !closing && 'ring-2 ring-[var(--casa-blue)]/30 ring-offset-2',
+          hidden && 'pointer-events-none opacity-0 motion-safe:translate-y-3'
         )}
         aria-expanded={isOpen && !closing}
         aria-controls="casa-assistant-panel"

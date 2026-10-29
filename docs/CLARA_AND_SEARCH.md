@@ -91,6 +91,8 @@ does this cost?" on a course page means that course.
 - **On a phone she is a sheet** the height of what is visible, so the keyboard never covers the
   field; from `sm` a panel above her button. Motion: UI_SYSTEM.md §Motion; off under reduced
   motion.
+- **Her button steps aside at the end of the page**, while the footer's last row is on screen:
+  it sat on the social icons and on „AGB". The footer is left as it is (Rahman, 2026-10-29).
 
 ## The AI mode (switched off)
 
