@@ -93,6 +93,7 @@ applications now send the person a branded confirmation in the form's language
 | --- | --- | --- |
 | Contact | `CONTACT` | `info@casa-bremen.de` |
 | Group and company enquiries | `GROUPS` | `info@casa-bremen.de` |
+| Tandem request (`/api/tandem`, the tandem page's popup, 2026-10-29) | `CONTACT` | `info@casa-bremen.de`, as a contact enquiry „Sprachtandem" with the contact receipt |
 | Course registration (incl. accommodation) | `COURSE` | `online@casa-bremen.de` |
 | Exam registration | `EXAM` | `online@casa-bremen.de` |
 | Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |

@@ -51,7 +51,13 @@ export function ProcessSteps({
       ~215px the removed `rail` layout left it, which is the difference between
       one line per step title and two.
     */
-    <ol className="mt-8 grid gap-7 @[44rem]:grid-cols-3">
+    <ol
+      className={cn(
+        'mt-8 grid gap-7',
+        // Four steps go two by two, then four across, rather than three and an orphan.
+        steps.length === 4 ? '@[36rem]:grid-cols-2 @[64rem]:grid-cols-4' : '@[44rem]:grid-cols-3'
+      )}
+    >
       {steps.map((item) => (
         <li key={item.step} className="relative border-l border-[color:var(--casa-sand)] pl-4">
           <span className="absolute -left-2 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--casa-accent-surface)] text-xs font-bold text-white">

@@ -37,6 +37,7 @@ const STATIC_ROUTES: Array<{ path: string; priority: number; lastModified?: Date
   { path: '/resources/study-in-germany', priority: 0.5 },
   { path: '/resources/living-in-germany', priority: 0.4 },
   { path: '/resources/why-germany', priority: 0.4 },
+  { path: '/resources/language-tandem', priority: 0.5 },
   { path: '/imprint', priority: 0.2 },
   { path: '/privacy', priority: 0.2 },
   { path: '/terms', priority: 0.2 },

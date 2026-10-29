@@ -874,8 +874,8 @@ export default async function HomePage() {
                   <h3 className="mt-5 text-xl font-bold text-[var(--casa-ink)]">{tandemProgram.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--casa-muted)]">{tandemProgram.summary}</p>
                 </div>
-                <TextCta href="/contact" className="mt-6 self-start">
-                  {say(locale, 'Tandem anfragen', 'Ask about a tandem')}
+                <TextCta href="/resources/language-tandem" className="mt-6 self-start">
+                  {say(locale, 'Mehr zum Sprachtandem', 'More about the language tandem')}
                 </TextCta>
               </article>
             ) : null}

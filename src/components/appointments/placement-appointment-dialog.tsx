@@ -163,12 +163,12 @@ function BookingFlow({ locale, onDone }: { locale: ContentLocale; onDone: () => 
             note={(day, slot) => days.find((item) => item.date === day)?.left[slot] === 1 ? t.oneLeft : null} />
           <div className="mt-7 flex justify-end border-t border-[var(--casa-sand)] pt-5"><Button variant="prism" size="lg" disabled={!time} onClick={() => setDetails(true)}>{t.next}<ArrowRight aria-hidden /></Button></div>
         </> : <form onSubmit={submit} className="space-y-5">
-          <div className="rounded-lg bg-[var(--casa-surface-wash)] p-4">
+          <div className="rounded-lg bg-[var(--casa-warm-soft)] p-4 ring-1 ring-[color:var(--casa-sand)]">
             <p className="text-sm font-semibold">{dateLabel(date)} · {time} · 30 min</p>
             <p className="mt-1 text-xs text-[var(--casa-muted)]">{t.zone}</p>
-            <Button type="button" variant="link" className="mt-1 px-0" disabled={sending} onClick={() => setDetails(false)}>{t.back}</Button>
+            <Button type="button" variant="link" className="mt-1 h-auto px-0 font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 hover:text-[var(--casa-accent-text-hover)]" disabled={sending} onClick={() => setDetails(false)}>{t.back}</Button>
           </div>
-          <h3 ref={stepHeading} tabIndex={-1} className="text-lg font-semibold">{t.details}</h3>
+          <h3 ref={stepHeading} tabIndex={-1} className="text-lg font-semibold outline-none">{t.details}</h3>
           <fieldset disabled={sending} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2 text-sm font-medium">{t.first}<Input name="firstName" autoComplete="given-name" required maxLength={100} className="h-11" /></label>

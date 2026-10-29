@@ -228,6 +228,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -457,6 +458,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -479,12 +481,14 @@
   "files": [
    "src/app/(site)/[locale]/accommodation/page.tsx",
    "src/app/(site)/[locale]/exams/page.tsx",
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx",
    "src/config/courses/archetypes.ts"
   ],
   "pages": [
    "/accommodation",
    "/courses/[slug]",
-   "/exams"
+   "/exams",
+   "/resources/language-tandem"
   ]
  },
  "t.absenden.5y32ji": {
@@ -745,6 +749,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -794,6 +799,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -915,6 +921,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1059,6 +1066,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1087,10 +1095,12 @@
   "de": "Angaben ändern",
   "en": "Change your answers",
   "files": [
-   "src/components/courses/interest-dialog.tsx"
+   "src/components/courses/interest-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/resources/language-tandem"
   ]
  },
  "t.angaben-zum-firmenunterricht-wur.1aesfn1": {
@@ -1274,6 +1284,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1327,6 +1338,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1350,6 +1362,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1373,6 +1386,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1396,6 +1410,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1423,6 +1438,16 @@
    "/exams",
    "/exams/[code]",
    "/faq"
+  ]
+ },
+ "t.anmerkungen-oder-wuensche-option.1mjx0gi": {
+  "de": "Anmerkungen oder Wünsche (optional)",
+  "en": "Anything else you would like us to know? (optional)",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.anrede-auswaehlen.2f4aqi": {
@@ -1508,6 +1533,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -1770,6 +1796,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -2274,6 +2301,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -2482,6 +2510,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.bereit-fuer-dein-tandem.ysz7wg": {
+  "de": "Bereit für dein Tandem?",
+  "en": "Ready for your tandem?",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.bereite-dich-gezielt-auf.1w6xkhe": {
   "de": "Bereite dich gezielt auf telc Deutsch B2 oder telc Deutsch C1 Hochschule vor.",
   "en": "Get ready for telc Deutsch B2 or telc Deutsch C1 Hochschule with focused practice.",
@@ -2501,6 +2539,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -2632,6 +2671,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -4070,6 +4110,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.das-hilft-uns-eine.f6mtgn": {
+  "de": "Das hilft uns, eine Person zu finden, die zu dir passt.",
+  "en": "This helps us find someone who suits you.",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.das-international-office-deiner.158fabh": {
   "de": "Das International Office deiner Hochschule hilft dir bei der Orientierung. Die Ausländerbehörde kann dir die Bedingungen deines Aufenthaltstitels bestätigen.",
   "en": "Your university’s International Office can help you find your way. The immigration office (Ausländerbehörde) can confirm the conditions of your residence permit.",
@@ -4237,7 +4287,8 @@
   "files": [
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -4253,6 +4304,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -4472,6 +4524,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -4489,11 +4542,22 @@
    "/registration/course"
   ]
  },
+ "t.deine-anfrage-ist-angekommen.kge6qe": {
+  "de": "Deine Anfrage ist angekommen",
+  "en": "Your request has arrived",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.deine-anfrage-konnte-nicht.1f3xsov": {
   "de": "Deine Anfrage konnte nicht gesendet werden. Bitte versuch es erneut.",
   "en": "Your request could not be sent. Please try again.",
   "files": [
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -4508,6 +4572,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -4628,6 +4693,16 @@
   ],
   "pages": [
    "/calculator"
+  ]
+ },
+ "t.deine-sprachen.zhrz49": {
+  "de": "Deine Sprachen",
+  "en": "Your languages",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.deine-telc-pruefung-bei.12u6nqp": {
@@ -5165,6 +5240,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5229,6 +5305,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5366,6 +5443,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5401,6 +5479,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5700,6 +5779,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5807,6 +5887,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5917,6 +5998,26 @@
    "*"
   ]
  },
+ "t.diese-sprache-moechtest-du.tivlbo": {
+  "de": "Diese Sprache möchtest du üben",
+  "en": "The language you would like to practise",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
+ "t.diese-sprache-n-sprichst.1u9bqym": {
+  "de": "Diese Sprache(n) sprichst du gut",
+  "en": "The language(s) you speak well",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.diesen-weg-waehlen.jq4f4l": {
   "de": "Diesen Weg wählen",
   "en": "Choose this path",
@@ -5936,6 +6037,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -5969,6 +6071,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6066,6 +6169,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6186,6 +6290,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6303,6 +6408,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6311,10 +6417,10 @@
   "de": "Du frischst deine Sprachkenntnisse auf und verbesserst sie.",
   "en": "You refresh and improve your language skills.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.du-hast-ein-moebliertes.199xm6o": {
@@ -6409,14 +6515,24 @@
    "/courses/[slug]"
   ]
  },
+ "t.du-lernst-deutsch-bei.re74jd": {
+  "de": "Du lernst Deutsch bei CASA",
+  "en": "You are learning German at CASA",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.du-lernst-neue-menschen.zt2ead": {
   "de": "Du lernst neue Menschen und ihre Kultur kennen.",
   "en": "You get to know new people and their culture.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.du-lernst-vormittags-oder.1xlolv5": {
@@ -6480,6 +6596,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6514,14 +6631,24 @@
    "/exams/[code]"
   ]
  },
+ "t.du-sprichst-deutsch-und.1522o8q": {
+  "de": "Du sprichst Deutsch und lebst in Bremen",
+  "en": "You speak German and live in Bremen",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.du-sprichst-mehr-und.ack6nb": {
   "de": "Du sprichst mehr und wirst im Alltag sicherer.",
   "en": "You speak more and feel more confident in everyday life.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.du-stehst-auf-der.141t38r": {
@@ -6583,6 +6710,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6606,6 +6734,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6629,6 +6758,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6652,6 +6782,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6675,6 +6806,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6698,6 +6830,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6721,6 +6854,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6744,6 +6878,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6767,6 +6902,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6790,6 +6926,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6813,6 +6950,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -6925,6 +7063,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -7050,6 +7189,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -7073,6 +7213,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -7634,6 +7775,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -7657,6 +7799,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -8099,6 +8242,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -8132,6 +8276,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -8218,6 +8363,16 @@
   ],
   "pages": [
    "404"
+  ]
+ },
+ "t.erstes-treffen-bei-casa.10o5atw": {
+  "de": "Erstes Treffen bei CASA",
+  "en": "First meeting at CASA",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.erwachsene-lernende-in-einer.1e026fx": {
@@ -8465,7 +8620,8 @@
   "files": [
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -8481,6 +8637,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -8636,6 +8793,16 @@
    "src/config/content/exam-narratives.ts"
   ],
   "pages": []
+ },
+ "t.formular-ausfuellen.1wz7ved": {
+  "de": "Formular ausfüllen",
+  "en": "Fill in the form",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
  },
  "t.fortschritte-auf-deinem-sprachni.8km5eu": {
   "de": "Fortschritte auf deinem Sprachniveau",
@@ -8901,6 +9068,16 @@
    "/courses"
   ]
  },
+ "t.fuer-casa-lernende.1lu0whr": {
+  "de": "Für CASA-Lernende",
+  "en": "For CASA learners",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.fuer-das-studienvisum-brauchst.e11yp9": {
   "de": "Für das Studienvisum brauchst du meist schon vor der Einreise einen Finanzierungsnachweis und eine Krankenversicherung.",
   "en": "For a student visa, you usually need proof of funds and health insurance before you even travel.",
@@ -8979,6 +9156,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -9125,6 +9303,16 @@
   ],
   "pages": [
    "/placement-test"
+  ]
+ },
+ "t.fuer-menschen-aus-bremen.wx1m1l": {
+  "de": "Für Menschen aus Bremen",
+  "en": "For people in Bremen",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.fuer-schulklassen-und-gruppen.8u5pfs": {
@@ -9527,6 +9715,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -9884,6 +10073,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -10492,6 +10682,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -10568,6 +10759,16 @@
    "*"
   ]
  },
+ "t.hobbys-und-interessen-optional.aquklo": {
+  "de": "Hobbys und Interessen (optional)",
+  "en": "Hobbies and interests (optional)",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.hochqualifizierte-lehrkraefte.cg5vip": {
   "de": "Hochqualifizierte Lehrkräfte",
   "en": "Highly qualified teachers",
@@ -10635,7 +10836,8 @@
   "files": [
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -10651,6 +10853,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -10776,6 +10979,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -10843,14 +11047,24 @@
    "/news"
   ]
  },
- "t.im-sprachtandem-lernen-zwei.tamljv": {
-  "de": "Im Sprachtandem lernen zwei Menschen voneinander. Du übst Deutsch und hilfst deinem Gegenüber beim Lernen deiner Sprache, und dabei lernt ihr euch kennen.",
-  "en": "In a language tandem, two people learn from each other. You practise your German and help your partner learn your language, and you get to know each other along the way.",
+ "t.im-sprachtandem-bei-casa.1oj1f17": {
+  "de": "Im Sprachtandem bei CASA lernen Deutschlernende und Menschen aus Bremen voneinander. Schreib uns, welche Sprachen du sprichst, und wir finden eine passende Person für dich.",
+  "en": "In a CASA language tandem, learners of German and people in Bremen learn from each other. Tell us which languages you speak and we will find someone who suits you.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
+  ]
+ },
+ "t.im-sprachtandem-lernen-zwei.15qa2aj": {
+  "de": "Im Sprachtandem lernen zwei Menschen voneinander: Lernende von CASA und Menschen aus Bremen, die Deutsch sprechen. Du übst eine Sprache im echten Gespräch und gibst deine eigene weiter.",
+  "en": "In a language tandem, two people learn from each other: CASA learners and people in Bremen who speak German. You practise a language in real conversation and share your own in return.",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.im-sprachtandem-lernen.15pqoov": {
@@ -10948,6 +11162,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -11265,6 +11480,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -11416,6 +11632,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -12053,6 +12270,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -12465,6 +12683,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -13110,6 +13329,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -13340,6 +13560,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -13411,6 +13632,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -13622,6 +13844,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -13997,6 +14220,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -14093,6 +14317,18 @@
   ],
   "pages": [
    "/exams"
+  ]
+ },
+ "t.mehr-zum-sprachtandem.1vk1isq": {
+  "de": "Mehr zum Sprachtandem",
+  "en": "More about the language tandem",
+  "files": [
+   "src/app/(site)/[locale]/about/page.tsx",
+   "src/app/(site)/[locale]/page.tsx"
+  ],
+  "pages": [
+   "/",
+   "/about"
   ]
  },
  "t.mehr-zur-pruefung.185bh7": {
@@ -14220,6 +14456,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -14904,7 +15141,8 @@
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/forms/career-application-form.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -14921,6 +15159,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -15008,6 +15247,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -15033,6 +15273,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -15274,6 +15515,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -16027,6 +16269,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -16647,6 +16890,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -16829,9 +17073,11 @@
   "de": "Ressourcen",
   "en": "Resources",
   "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx",
    "src/components/resources/ResourceGuidePage.tsx"
   ],
   "pages": [
+   "/resources/language-tandem",
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
@@ -16997,6 +17243,26 @@
    "/accommodation/[type]"
   ]
  },
+ "t.sag-uns-welche-sprachen.1jlp1gr": {
+  "de": "Sag uns, welche Sprachen du sprichst und welche du üben möchtest. Den Rest übernehmen wir.",
+  "en": "Tell us which languages you speak and which one you would like to practise. We will take care of the rest.",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
+ "t.sag-uns-welche-sprachen.1myw5sn": {
+  "de": "Sag uns, welche Sprachen du sprichst und welche du üben möchtest. Wir suchen eine passende Person für dich und melden uns, sobald wir jemanden gefunden haben.",
+  "en": "Tell us which languages you speak and which one you would like to practise. We look for someone who suits you and get in touch as soon as we have found them.",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.sag-uns-wie-du.jgpqsy": {
   "de": "Sag uns, wie du wohnen möchtest und für welchen Zeitraum.",
   "en": "Let us know how you would like to live and for which dates.",
@@ -17058,6 +17324,7 @@
    "src/components/courses/special-course-dialog.tsx",
    "src/components/gruppen/appointment-dialog.tsx",
    "src/components/gruppen/gruppen-package-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx",
    "src/components/signatures/team-directory.tsx"
   ],
   "pages": [
@@ -17074,6 +17341,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -17168,10 +17436,10 @@
   "de": "Schreib uns, welche Sprache du sprichst und welche du lernen oder verbessern möchtest.",
   "en": "Write to us and tell us which language you speak and which one you would like to learn or improve.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.schreib-uns-welchen-kurs.mwfijw": {
@@ -17466,6 +17734,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -17557,6 +17826,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -17721,10 +17991,10 @@
   "de": "So funktioniert es",
   "en": "How it works",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.so-geht-es-weiter.3v95kz": {
@@ -17828,6 +18098,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -17866,10 +18137,10 @@
   "de": "Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule.",
   "en": "As soon as we have found someone, we get in touch and arrange a first meeting with you both here at the school.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.sonstige-fragen.q7ty7o": {
@@ -18129,14 +18400,25 @@
    "/team"
   ]
  },
+ "t.sprachtandem-in-bremen.17rrnfn": {
+  "de": "Sprachtandem in Bremen",
+  "en": "Language tandem in Bremen",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.sprachtandem.1rds4qb": {
   "de": "Sprachtandem",
   "en": "Language tandem",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.sprechen-ueben.21b2xq": {
@@ -18245,6 +18527,7 @@
    "src/app/(site)/[locale]/faq/page.tsx",
    "src/app/(site)/[locale]/partners/page.tsx",
    "src/app/(site)/[locale]/placement-test/page.tsx",
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx",
    "src/app/(site)/[locale]/search/page.tsx",
    "src/app/(site)/[locale]/team/page.tsx",
    "src/components/registration/registration-page-shell.tsx",
@@ -18269,6 +18552,7 @@
    "/placement-test",
    "/registration/course",
    "/registration/exam",
+   "/resources/language-tandem",
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany",
@@ -18306,6 +18590,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18349,6 +18634,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18372,6 +18658,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18395,6 +18682,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18418,6 +18706,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18671,6 +18960,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18694,6 +18984,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18757,6 +19048,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18789,6 +19081,16 @@
   ],
   "pages": []
  },
+ "t.taetigkeit-oder-beruf-optional.1gojxqw": {
+  "de": "Tätigkeit oder Beruf (optional)",
+  "en": "Job or occupation (optional)",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.tag-auswaehlen.9xicuj": {
   "de": "Tag auswählen",
   "en": "Choose a day",
@@ -18810,6 +19112,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -18834,16 +19137,15 @@
    "/courses/[slug]"
   ]
  },
- "t.tandem-anfragen.oejcnv": {
+ "t.tandem-anfragen.izjm6p": {
   "de": "Tandem anfragen",
-  "en": "Ask about a tandem",
+  "en": "Ask for a tandem",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx",
-   "src/app/(site)/[locale]/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
-   "/",
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.tandem-international-e-v.1c44i56": {
@@ -19129,6 +19431,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19152,6 +19455,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19188,6 +19492,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19213,6 +19518,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19315,6 +19621,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19348,6 +19655,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -19474,6 +19782,16 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.uebe-dein-deutsch-im.12n18": {
+  "de": "Übe dein Deutsch im Gespräch mit jemandem aus Bremen und lerne die Stadt von einer neuen Seite kennen. Dafür hilfst du deinem Gegenüber beim Lernen deiner Sprache.",
+  "en": "Practise your German in conversation with someone from Bremen and see the city from a new angle. In return, you help your partner learn your language.",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.uebe-mit-den-typischen.owd5p6": {
@@ -19635,6 +19953,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -20791,6 +21110,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -20824,6 +21144,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -20862,6 +21183,16 @@
    "/courses/[slug]",
    "/placement-test",
    "/registration/course"
+  ]
+ },
+ "t.vielen-dank-wir-suchen.1dvif0j": {
+  "de": "Vielen Dank. Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner für dich und melden uns, sobald wir jemanden gefunden haben.",
+  "en": "Thank you. We will look for a tandem partner who suits you and get in touch as soon as we have found someone.",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.vielleicht-moechtest-du-studiere.1s2wljj": {
@@ -21017,6 +21348,16 @@
    "/courses/[slug]"
   ]
  },
+ "t.vom-formular-bis-zum.1a51b3d": {
+  "de": "Vom Formular bis zum ersten Treffen begleiten wir dich.",
+  "en": "From the form to your first meeting, we are with you.",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.von-5-sternen.1hmfo2i": {
   "de": "{n} von 5 Sternen",
   "en": "{n} out of 5 stars",
@@ -21036,6 +21377,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21349,6 +21691,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21374,6 +21717,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21418,7 +21762,8 @@
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
    "src/components/forms/career-application-form.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -21436,6 +21781,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21512,6 +21858,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21615,6 +21962,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -21882,10 +22230,10 @@
   "de": "Was dir ein Tandem bringt",
   "en": "What a tandem gives you",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.was-du-erreichen-kannst.og5hiu": {
@@ -21914,10 +22262,10 @@
   "de": "Was du im Unterricht lernst, wendest du im echten Gespräch an.",
   "en": "You use what you learn in class in real conversations.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.was-du-mitbringst.1shav3c": {
@@ -22224,13 +22572,24 @@
    "/courses/[slug]"
   ]
  },
+ "t.weiter-im-tandem.1d8r39j": {
+  "de": "Weiter im Tandem",
+  "en": "Carry on as a tandem",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.weiter.1tg7ggn": {
   "de": "Weiter",
   "en": "Continue",
   "files": [
    "src/components/appointments/placement-appointment-dialog.tsx",
    "src/components/courses/interest-dialog.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -22246,6 +22605,7 @@
    "/faq",
    "/placement-test",
    "/registration/course",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -22431,6 +22791,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -22565,10 +22926,10 @@
   "de": "Wenn ihr euch weiter treffen möchtet, tauscht ihr eure Kontaktdaten aus. Gern könnt ihr euch auch weiterhin bei uns treffen.",
   "en": "If you would like to keep meeting, you swap contact details. You are also welcome to carry on meeting at the school.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.wenn-noch-etwas-offen.5mfvn0": {
@@ -22783,10 +23144,12 @@
   "de": "Wie erreichen wir dich?",
   "en": "How can we reach you?",
   "files": [
-   "src/components/courses/interest-dialog.tsx"
+   "src/components/courses/interest-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/resources/language-tandem"
   ]
  },
  "t.wie-frueh-sollte-ich.yzxvtg": {
@@ -22868,6 +23231,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23364,24 +23728,34 @@
    "/accommodation/become-host"
   ]
  },
- "t.wir-suchen-auch-deutschsprachige.s4nr1w": {
-  "de": "Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Wenn du Deutsch sprichst und eine andere Sprache üben möchtest, melde dich gern.",
-  "en": "We are also looking for German-speaking tandem partners. If you speak German and would like to practise another language, please get in touch.",
+ "t.wir-suchen-auch-deutschsprachige.zzq9f6": {
+  "de": "Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Übe eine andere Sprache und lerne Menschen aus vielen Ländern kennen, die bei CASA Deutsch lernen.",
+  "en": "We are also looking for German-speaking tandem partners. Practise another language and meet people from many countries who are learning German at CASA.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.wir-suchen-eine-passende.1plvut0": {
   "de": "Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner für dich.",
   "en": "We look for a suitable tandem partner for you.",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
+  ]
+ },
+ "t.wir-suchen-fuer-dich.19hqu9r": {
+  "de": "Wir suchen für dich",
+  "en": "We look for you",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.wir-verbessern-sie-gerade.hk37n1": {
@@ -23521,7 +23895,8 @@
   "en": "Sending…",
   "files": [
    "src/components/courses/interest-dialog.tsx",
-   "src/components/gruppen/appointment-dialog.tsx"
+   "src/components/gruppen/appointment-dialog.tsx",
+   "src/components/resources/tandem-dialog.tsx"
   ],
   "pages": [
    "/",
@@ -23536,6 +23911,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23569,6 +23945,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23632,6 +24009,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23679,6 +24057,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23840,6 +24219,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -23894,6 +24274,26 @@
   ],
   "pages": [
    "/contact"
+  ]
+ },
+ "t.z-b-deutsch.drksa": {
+  "de": "z. B. Deutsch",
+  "en": "e.g. German",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
+ "t.z-b-spanisch-englisch.1ay0gpi": {
+  "de": "z. B. Spanisch, Englisch",
+  "en": "e.g. Spanish, English",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
   ]
  },
  "t.zeit-zum-deutschlernen-einplanen.mb415h": {
@@ -24090,6 +24490,16 @@
    "/"
   ]
  },
+ "t.zum-beispiel-deine-muttersprache.kqzmj1": {
+  "de": "Zum Beispiel deine Muttersprache.",
+  "en": "Your first language, for example.",
+  "files": [
+   "src/components/resources/tandem-dialog.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.zum-einstufungstest.14p85nq": {
   "de": "Zum Einstufungstest",
   "en": "Take the placement test",
@@ -24130,6 +24540,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]
@@ -24465,14 +24876,24 @@
    "/accommodation"
   ]
  },
+ "t.zwei-seiten-ein-tandem.1r2b1yp": {
+  "de": "Zwei Seiten, ein Tandem",
+  "en": "Two sides, one tandem",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.zwei-sprachen-ein-gemeinsames.qezul7": {
   "de": "Zwei Sprachen, ein gemeinsames Gespräch",
   "en": "Two languages, one conversation",
   "files": [
-   "src/app/(site)/[locale]/about/page.tsx"
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
   ],
   "pages": [
-   "/about"
+   "/resources/language-tandem"
   ]
  },
  "t.zwei-teilnehmer-besprechen-einen.1jxp55r": {
@@ -24594,6 +25015,7 @@
    "/exams/[code]",
    "/faq",
    "/placement-test",
+   "/resources/language-tandem",
    "/search",
    "/team"
   ]

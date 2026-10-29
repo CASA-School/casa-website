@@ -255,7 +255,7 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
         ) : (
           <form onSubmit={submit} className="space-y-5">
             {error && <p role="alert" className="text-sm text-[var(--casa-danger-text)]">{error}</p>}
-            <div className="rounded-lg bg-[var(--casa-surface-wash)] p-4 text-sm">
+            <div className="rounded-lg bg-[var(--casa-warm-soft)] p-4 ring-1 ring-[color:var(--casa-sand)] text-sm">
               <p className="font-semibold">
                 {[
                   (INTEREST_LEVELS.find((option) => option.value === level)?.label ? pick(locale, INTEREST_LEVELS.find((option) => option.value === level)?.label) : undefined),
@@ -265,9 +265,9 @@ function InterestFlow({ course, locale, onDone }: { course: InterestCourseSlug; 
               <p className="mt-1 text-xs text-[var(--casa-muted)]">
                 {times.map((time) => (INTEREST_TIMES.find((option) => option.value === time)?.label ? pick(locale, INTEREST_TIMES.find((option) => option.value === time)?.label) : undefined)).join(', ')}
               </p>
-              <Button type="button" variant="link" className="mt-1 px-0" disabled={sending} onClick={() => setDetails(false)}>{t.back}</Button>
+              <Button type="button" variant="link" className="mt-1 h-auto px-0 font-semibold text-[var(--casa-accent-text)] underline underline-offset-4 hover:text-[var(--casa-accent-text-hover)]" disabled={sending} onClick={() => setDetails(false)}>{t.back}</Button>
             </div>
-            <h3 ref={stepHeading} tabIndex={-1} className="text-lg font-semibold">{t.details}</h3>
+            <h3 ref={stepHeading} tabIndex={-1} className="text-lg font-semibold outline-none">{t.details}</h3>
             <fieldset disabled={sending} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block space-y-2 text-sm font-medium">{t.first}<Input name="firstName" autoComplete="given-name" required maxLength={100} className="h-11" /></label>

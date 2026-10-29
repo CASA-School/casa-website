@@ -4,7 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 
 import { HeroAPhotoLed } from '@/components/heroes';
 import { AccreditationLogoList } from '@/components/sections';
-import { BandHeading } from '@/components/sections/band-heading';
+import { Stars } from '@/components/sections/testimonial-grid';
 import { CasaImage as Image } from '@/components/ui/casa-image';
 import { TextCta } from '@/components/ui/text-cta';
 import { Container } from '@/components/ui/container';
@@ -121,52 +121,6 @@ export default async function AboutPage() {
           'A culture programme in Bremen and trips around the region',
           'Pair work and exchange in class',
         ],
-      } });
-
-  const tandemGuide = pickTree(locale, { de: {
-        eyebrow: 'Sprachtandem',
-        title: 'Zwei Sprachen, ein gemeinsames Gespräch',
-        intro:
-          'Im Sprachtandem lernen zwei Menschen voneinander. Du übst Deutsch und hilfst deinem Gegenüber beim Lernen deiner Sprache, und dabei lernt ihr euch kennen.',
-        germanSpeakers:
-          'Wir suchen auch deutschsprachige Tandempartnerinnen und -partner. Wenn du Deutsch sprichst und eine andere Sprache üben möchtest, melde dich gern.',
-        stepsTitle: 'So funktioniert es',
-        steps: [
-          'Schreib uns, welche Sprache du sprichst und welche du lernen oder verbessern möchtest.',
-          'Wir suchen eine passende Tandempartnerin oder einen passenden Tandempartner für dich.',
-          'Sobald wir jemanden gefunden haben, melden wir uns bei dir und verabreden gemeinsam mit euch ein erstes Treffen bei uns in der Schule.',
-          'Wenn ihr euch weiter treffen möchtet, tauscht ihr eure Kontaktdaten aus. Gern könnt ihr euch auch weiterhin bei uns treffen.',
-        ],
-        benefitsTitle: 'Was dir ein Tandem bringt',
-        benefits: [
-          'Du frischst deine Sprachkenntnisse auf und verbesserst sie.',
-          'Du sprichst mehr und wirst im Alltag sicherer.',
-          'Du lernst neue Menschen und ihre Kultur kennen.',
-          'Was du im Unterricht lernst, wendest du im echten Gespräch an.',
-        ],
-        primaryCta: 'Tandem anfragen',
-      }, en: {
-        eyebrow: 'Language tandem',
-        title: 'Two languages, one conversation',
-        intro:
-          'In a language tandem, two people learn from each other. You practise your German and help your partner learn your language, and you get to know each other along the way.',
-        germanSpeakers:
-          'We are also looking for German-speaking tandem partners. If you speak German and would like to practise another language, please get in touch.',
-        stepsTitle: 'How it works',
-        steps: [
-          'Write to us and tell us which language you speak and which one you would like to learn or improve.',
-          'We look for a suitable tandem partner for you.',
-          'As soon as we have found someone, we get in touch and arrange a first meeting with you both here at the school.',
-          'If you would like to keep meeting, you swap contact details. You are also welcome to carry on meeting at the school.',
-        ],
-        benefitsTitle: 'What a tandem gives you',
-        benefits: [
-          'You refresh and improve your language skills.',
-          'You speak more and feel more confident in everyday life.',
-          'You get to know new people and their culture.',
-          'You use what you learn in class in real conversations.',
-        ],
-        primaryCta: 'Ask about a tandem',
       } });
 
   return (
@@ -300,56 +254,22 @@ export default async function AboutPage() {
                   learning group is in „Unsere Ziele" above. */}
               <p className="mt-5 max-w-measure text-base leading-relaxed text-[var(--casa-muted)] md:text-lg">{leitbild.approachText}</p>
               <p className="mt-6 text-sm font-semibold text-[var(--casa-ink)]">{leitbild.encounterIntro}</p>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+              {/* A divided list, not four small cards (2026-10-29): read in passing, so on the page itself. */}
+              <ul className="mt-3 grid border-t border-[color:var(--casa-sand)] sm:grid-cols-2 sm:gap-x-8">
                 {leitbild.encounterBullets.map((item) => (
                   <li
                     key={item}
-                    className="flex items-center gap-3 rounded-lg bg-white px-4 py-3 text-sm font-bold text-[var(--casa-ink)] ring-1 ring-[color:var(--casa-sand)]"
+                    className="flex items-center gap-3 border-b border-[color:var(--casa-sand)] py-3.5 text-base text-[var(--casa-ink)]"
                   >
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
                     {item}
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* `#tandem` is where the old site's tandem URLs redirect (src/i18n/legacy-redirects.ts). */}
-      <section id="tandem" className="scroll-mt-28 py-16 md:py-24">
-        <Container>
-          <BandHeading tone="light" eyebrow={tandemGuide.eyebrow} title={tandemGuide.title} description={tandemGuide.intro} />
-
-          <div className="mx-auto mt-10 max-w-[64rem] md:mt-12">
-            <h3 className="sr-only">{tandemGuide.stepsTitle}</h3>
-            {/* Two by two, with hairlines from the gap: the four steps are two lines each. */}
-            <ol className="grid gap-px overflow-hidden rounded-xl bg-[var(--casa-sand)] shadow-[var(--shadow-card)] sm:grid-cols-2">
-              {tandemGuide.steps.map((step, index) => (
-                <li key={step} className="bg-white p-6 md:p-7">
-                  <span className="text-xs font-semibold tracking-eyebrow text-[var(--casa-accent-text)]" aria-hidden>
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <p className="mt-4 text-base leading-relaxed text-[var(--casa-ink)]">{step}</p>
-                </li>
-              ))}
-            </ol>
-
-            <h3 className="sr-only">{tandemGuide.benefitsTitle}</h3>
-            <ul className="mx-auto mt-8 grid max-w-[46rem] gap-x-10 gap-y-3 sm:grid-cols-2">
-              {tandemGuide.benefits.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-[var(--casa-muted)]">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--casa-accent-text)]" aria-hidden />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mx-auto mt-10 max-w-[40rem] text-center">
-            <p className="text-sm leading-relaxed text-[var(--casa-muted)]">{tandemGuide.germanSpeakers}</p>
-            <div className="mt-4">
-              <TextCta href="/contact?topic=tandem">{tandemGuide.primaryCta}</TextCta>
+              {/* The tandem has its own page since 2026-10-29 (Ratgeber → Sprachtandem). */}
+              <TextCta href="/resources/language-tandem" className="mt-6">
+                {say(locale, 'Mehr zum Sprachtandem', 'More about the language tandem')}
+              </TextCta>
             </div>
           </div>
         </Container>
@@ -363,7 +283,14 @@ export default async function AboutPage() {
         <section className="py-16 md:py-24">
           <Container>
             <figure className="mx-auto max-w-[50rem] text-center">
-              <span aria-hidden className="block font-display text-6xl leading-none text-[var(--casa-accent-text)]">“</span>
+              {/* A Google review: its stars, as on every review card (2026-10-29). */}
+              {communityStory.rating ? (
+                <div className="mx-auto max-w-[17rem]">
+                  <Stars rating={communityStory.rating} locale={locale} />
+                </div>
+              ) : (
+                <span aria-hidden className="block font-display text-6xl leading-none text-[var(--casa-accent-text)]">“</span>
+              )}
               <blockquote className="mt-2 text-balance text-xl font-medium leading-relaxed text-[var(--casa-ink)] md:text-2xl">
                 {communityStory.quote}
               </blockquote>
