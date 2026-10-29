@@ -11047,16 +11047,6 @@
    "/news"
   ]
  },
- "t.im-sprachtandem-bei-casa.1oj1f17": {
-  "de": "Im Sprachtandem bei CASA lernen Deutschlernende und Menschen aus Bremen voneinander. Schreib uns, welche Sprachen du sprichst, und wir finden eine passende Person für dich.",
-  "en": "In a CASA language tandem, learners of German and people in Bremen learn from each other. Tell us which languages you speak and we will find someone who suits you.",
-  "files": [
-   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
-  ],
-  "pages": [
-   "/resources/language-tandem"
-  ]
- },
  "t.im-sprachtandem-lernen-zwei.15qa2aj": {
   "de": "Im Sprachtandem lernen zwei Menschen voneinander: Lernende von CASA und Menschen aus Bremen, die Deutsch sprechen. Du übst eine Sprache im echten Gespräch und gibst deine eigene weiter.",
   "en": "In a language tandem, two people learn from each other: CASA learners and people in Bremen who speak German. You practise a language in real conversation and share your own in return.",
@@ -18400,6 +18390,16 @@
    "/team"
   ]
  },
+ "t.sprachtandem-in-bremen-casa.1bzpkmh": {
+  "de": "Sprachtandem in Bremen: CASA bringt Deutschlernende und Menschen aus Bremen zusammen. Sag uns, welche Sprachen du sprichst, und wir finden dein Tandem.",
+  "en": "Language tandem in Bremen: CASA brings learners of German together with people from Bremen. Tell us your languages and we will find your tandem partner.",
+  "files": [
+   "src/app/(site)/[locale]/resources/language-tandem/page.tsx"
+  ],
+  "pages": [
+   "/resources/language-tandem"
+  ]
+ },
  "t.sprachtandem-in-bremen.17rrnfn": {
   "de": "Sprachtandem in Bremen",
   "en": "Language tandem in Bremen",
@@ -18843,6 +18843,18 @@
    "/contact"
   ]
  },
+ "t.studieren-in-deutschland-die.sag49x": {
+  "de": "Studieren in Deutschland: die nächsten Schritte",
+  "en": "Study and life in Germany: your next steps",
+  "files": [
+   "src/content/resource-guides/de.ts"
+  ],
+  "pages": [
+   "/resources/living-in-germany",
+   "/resources/study-in-germany",
+   "/resources/why-germany"
+  ]
+ },
  "t.studium-leben-in-deutschland.1m3h4be": {
   "de": "Studium & Leben in Deutschland",
   "en": "Study & life in Germany",
@@ -18858,18 +18870,6 @@
  "t.studium-und-arbeit-lassen.11s4s2": {
   "de": "Studium und Arbeit lassen sich verbinden, solange du dich an die Auflagen in deinem Aufenthaltstitel hältst.",
   "en": "You can combine study and work, as long as you keep to the conditions in your residence permit.",
-  "files": [
-   "src/content/resource-guides/de.ts"
-  ],
-  "pages": [
-   "/resources/living-in-germany",
-   "/resources/study-in-germany",
-   "/resources/why-germany"
-  ]
- },
- "t.studium-und-leben-in.a44ejw": {
-  "de": "Studium und Leben in Deutschland: nächste Schritte",
-  "en": "Study and life in Germany: your next steps",
   "files": [
    "src/content/resource-guides/de.ts"
   ],
@@ -22092,8 +22092,8 @@
    "/resources/why-germany"
   ]
  },
- "t.warum-in-deutschland-studieren.1akkvw": {
-  "de": "Warum in Deutschland studieren und Deutsch lernen?",
+ "t.warum-in-deutschland-studieren.newlm3": {
+  "de": "Warum in Deutschland studieren?",
   "en": "Why study and learn German in Germany?",
   "files": [
    "src/content/resource-guides/de.ts"
@@ -22246,9 +22246,9 @@
    "/courses"
   ]
  },
- "t.was-du-fuer-ein.41epv8": {
+ "t.was-du-fuer-ein.f2w20p": {
   "de": "Was du für ein Studium in Deutschland brauchst, vom Studiengang bis zum ersten Monat vor Ort: Zulassung, Sprachniveau, Bewerbung, Finanzierung und Wohnen.",
-  "en": "What you need to study in Germany, from choosing a degree programme to your first month here. It covers admission, language level, applications, funding and housing.",
+  "en": "What you need to study in Germany, from choosing a degree to your first month here: admission, language level, applications, funding and housing.",
   "files": [
    "src/content/resource-guides/de.ts"
   ],
@@ -23118,8 +23118,8 @@
    "/resources/why-germany"
   ]
  },
- "t.wie-du-deinen-wohnsitz.1hu4r3a": {
-  "de": "Wie du deinen Wohnsitz anmeldest, ein Konto eröffnest, dich krankenversicherst und ein Zimmer findest, und was dir den ersten Monat in Deutschland leichter macht.",
+ "t.wie-du-deinen-wohnsitz.7cdrmn": {
+  "de": "Wie du deinen Wohnsitz anmeldest, ein Konto eröffnest, dich krankenversicherst und ein Zimmer findest: so wird dein erster Monat in Deutschland leichter.",
   "en": "How to register your address, open a bank account, get health insurance and find a room, and what makes your first month in Germany easier.",
   "files": [
    "src/content/resource-guides/de.ts"

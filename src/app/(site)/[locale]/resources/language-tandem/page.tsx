@@ -27,8 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: say(locale, 'Sprachtandem in Bremen', 'Language tandem in Bremen'),
     description: say(
       locale,
-      'Im Sprachtandem bei CASA lernen Deutschlernende und Menschen aus Bremen voneinander. Schreib uns, welche Sprachen du sprichst, und wir finden eine passende Person für dich.',
-      'In a CASA language tandem, learners of German and people in Bremen learn from each other. Tell us which languages you speak and we will find someone who suits you.'
+      'Sprachtandem in Bremen: CASA bringt Deutschlernende und Menschen aus Bremen zusammen. Sag uns, welche Sprachen du sprichst, und wir finden dein Tandem.',
+      'Language tandem in Bremen: CASA brings learners of German together with people from Bremen. Tell us your languages and we will find your tandem partner.'
     ),
     path: PATH,
     keywords: ['Sprachtandem Bremen', 'Tandempartner Bremen', 'Language tandem Bremen'],

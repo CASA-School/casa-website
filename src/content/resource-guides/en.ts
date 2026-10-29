@@ -31,7 +31,7 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
   path: '/resources/study-in-germany',
   metaTitle: 'Study and life in Germany: your next steps',
   metaDescription:
-    'What you need to study in Germany, from choosing a degree programme to your first month here. It covers admission, language level, applications, funding and housing.',
+    'What you need to study in Germany, from choosing a degree to your first month here: admission, language level, applications, funding and housing.',
   hero: {
     title: 'Study & life in Germany',
     summary: 'Help with choosing what to study, applying and your first steps in Germany.',

@@ -480,7 +480,9 @@ nothing replaced them. Ignore those specific names.
 `src/proxy.ts` DOES exist again as of 2026-09-08, but it is not what section 3
 means by "route protection": it does host routing for the staff workspace
 (`admin.casa-bremen.de` → `/admin`, and `/admin` 404s on the public host in
-production) and has no database connection, so it cannot authenticate anything.
+production) and knows no session, so it cannot authenticate anything. Since
+2026-10-29 it also counts the public site's page loads after the response has
+gone (`src/lib/site-views.ts`, `/admin/statistics`; docs/SEO_AND_GEO.md §Statistics).
 The workspace's auth gate is its layouts plus `requireModule()` in every server
 action — see `docs/ADMIN_WORKSPACE.md`. Do not add a role check to `proxy.ts`.
 

@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Jobs bei CASA, der Sprachschule in Bremen' : 'Jobs at CASA, the language school in Bremen',
-    description: locale === 'de' ? 'Werde Teil unseres internationalen Teams in Bremen. Hier findest du die offenen Stellen bei CASA.' : 'Join our international team in Bremen. Here you’ll find the current vacancies at CASA.',
+    description: locale === 'de' ? 'Arbeiten bei CASA in Bremen: offene Stellen und Initiativbewerbungen für DaF-Lehrkräfte und das Team einer gemeinnützigen Sprachschule seit 1983.' : 'Working at CASA in Bremen: vacancies and open applications for German teachers (DaF) and staff at a non-profit language school since 1983.',
     path: '/careers',
     keywords: ['CASA careers', 'Language school jobs Bremen', 'DaF teacher jobs'],
   });

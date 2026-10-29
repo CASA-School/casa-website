@@ -8,6 +8,15 @@
 > a draft for specialist review. Retention, deletion, the data protection officer,
 > Microsoft transfer safeguards and the final launch configuration still need review.
 
+> **29 October 2026, later:** §5 says how the site counts its own visits (docs/SEO_AND_GEO.md
+> §Statistics): on the server, from the path, the referring domain and the device type derived
+> from the User-Agent, with no script, cookie, IP address or identifier stored, 13 months, Art. 6(1)(f).
+> „No analytics services" became „no third-party analytics services". ASSUMPTION for the reviewer:
+> counting from request headers the browser sends anyway is not access to the terminal device under
+> § 25 TDDDG, so the no-banner statement stands. A browser script (every click, real readers' load
+> times) was built and withdrawn the same day, because reading screen size or timings from the device
+> would be such access; it needs the consent question answered first.
+
 `/privacy` (`/datenschutz`) no longer shows the old site's policy word for word. Since
 2026-09-30 it is CASA's own text, in German and English, written against what the code
 actually does. The general sections (introduction, §1 definitions, §20 rights, §24 legal

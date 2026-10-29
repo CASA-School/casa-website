@@ -10,7 +10,7 @@ import type { ResourceGuideData, ResourceGuideSlug } from './types';
 export const studyInGermanyGuideDe: ResourceGuideData = {
   slug: 'study-in-germany',
   path: '/resources/study-in-germany',
-  metaTitle: 'Studium und Leben in Deutschland: nächste Schritte',
+  metaTitle: 'Studieren in Deutschland: die nächsten Schritte',
   metaDescription:
     'Was du für ein Studium in Deutschland brauchst, vom Studiengang bis zum ersten Monat vor Ort: Zulassung, Sprachniveau, Bewerbung, Finanzierung und Wohnen.',
   hero: {
@@ -171,7 +171,7 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
   path: '/resources/living-in-germany',
   metaTitle: 'Leben in Deutschland: ankommen und sich einleben',
   metaDescription:
-    'Wie du deinen Wohnsitz anmeldest, ein Konto eröffnest, dich krankenversicherst und ein Zimmer findest, und was dir den ersten Monat in Deutschland leichter macht.',
+    'Wie du deinen Wohnsitz anmeldest, ein Konto eröffnest, dich krankenversicherst und ein Zimmer findest: so wird dein erster Monat in Deutschland leichter.',
   hero: {
     title: 'Leben in Deutschland',
     summary: 'Hier findest du praktische Tipps zu Unterkunft, Terminen und deinem neuen Alltag.',
@@ -318,7 +318,7 @@ export const livingInGermanyGuideDe: ResourceGuideData = {
 export const whyGermanyGuideDe: ResourceGuideData = {
   slug: 'why-germany',
   path: '/resources/why-germany',
-  metaTitle: 'Warum in Deutschland studieren und Deutsch lernen?',
+  metaTitle: 'Warum in Deutschland studieren?',
   metaDescription:
     'Was dir ein Studium in Deutschland bietet, was es kostet, welche Abschlüsse anerkannt sind, wie Studium und Arbeit zusammenpassen und wobei dir Deutsch hilft.',
   hero: {

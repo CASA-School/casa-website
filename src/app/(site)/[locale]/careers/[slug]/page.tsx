@@ -61,13 +61,10 @@ export async function generateMetadata({ params }: CareerDetailPageProps): Promi
 
   return createPublicMetadata({
     locale,
-    // createPublicMetadata already appends "| CASA Bremen"
-    title: `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Working at CASA'}`,
-    // The posting is written in German; the English page gets an English summary.
-    description:
-      locale === 'de'
-        ? position.shortDescription
-        : `${position.title} at CASA: teach international learners in small groups at a non-profit language school in Bremen since 1983.`,
+    // createPublicMetadata already appends "| CASA Bremen". An open application's title already says what it is.
+    title: position.isOpenApplication ? position.title : `${position.title} — ${locale === 'de' ? 'Arbeiten bei CASA' : 'Working at CASA'}`,
+    // Each language has its own row since 2026-10-29 (0105), so its own summary.
+    description: position.shortDescription,
     path: `/careers/${slug}`,
     keywords: ['CASA careers', position.title, 'Language school jobs Bremen'],
   });

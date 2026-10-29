@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return createPublicMetadata({
     locale,
-    title: locale === 'de' ? 'Prüfungsanmeldung' : 'Exam registration',
-    description: locale === 'de' ? 'Melde dich bei CASA in Bremen zu deiner telc-Prüfung an. Wähle Prüfung und Termin und trag deine Daten ein.' : 'Register for your telc exam at CASA in Bremen. Choose your exam and date, then enter your details.',
+    title: locale === 'de' ? 'Anmeldung zur telc-Prüfung in Bremen' : 'Register for a telc exam in Bremen',
+    description: locale === 'de' ? 'Melde dich online zu telc Deutsch B2 oder telc Deutsch C1 Hochschule bei CASA in Bremen an: Prüfung und Termin wählen, Daten eintragen, fertig.' : 'Register online for telc Deutsch B2 or telc Deutsch C1 Hochschule at CASA in Bremen: choose your exam and date, enter your details and you are done.',
     path: '/registration/exam',
   });
 }

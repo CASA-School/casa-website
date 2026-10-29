@@ -46,6 +46,8 @@ import { getAvailableLevels, getCourseDetail, getCourses, getSocialProofForCours
 import { getPageContent } from '@/lib/cms/content.server';
 import { createPublicMetadata } from '@/lib/seo';
 import { intl, pick, say } from '@/lib/cms/copy';
+import { fillFacts } from '@/lib/cms/facts';
+import { loadFacts } from '@/lib/cms/facts.server';
 
 /* What each of the Bremen Town Musicians says in the group page's hero. */
 const MUSICIAN_VOICES = {
@@ -79,7 +81,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     locale,
     // createPublicMetadata already appends "| CASA Bremen"; config/seo-pages.ts has why.
     title: COURSE_SEO[detail.course.slug]?.title[locale] ?? detail.course.name,
-    description: COURSE_SEO[detail.course.slug]?.description?.[locale] ?? (detail.course.narrative?.promise || 'Course detail'),
+    // A lesson count in a description is a live value, as in the page's copy.
+    description: fillFacts(
+      COURSE_SEO[detail.course.slug]?.description?.[locale] ?? (detail.course.narrative?.promise || 'Course detail'),
+      (await loadFacts(locale)).values
+    ),
     path: `/courses/${getCanonicalCourseRouteSlug(slug)}`,
     keywords: [detail.course.name, 'CASA course detail', 'German learning outcomes'],
   });

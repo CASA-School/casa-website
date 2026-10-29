@@ -47,14 +47,14 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: ['CASA Bremen', 'Learn German', 'Deutsch lernen Bremen', 'Language school Bremen', 'telc Deutsch B2', 'telc C1 Hochschule'],
     ...(locale === 'de'
       ? {
-          title: 'Deutsch lernen in Bremen',
+          title: 'Sprachschule in Bremen: Deutsch lernen',
           description:
-            'Deutsch lernen und in Bremen ankommen: CASA bietet Kurse, telc-Prüfungen, persönliche Beratung und Unterkunft in einer internationalen Gemeinschaft.',
+            'Deutsch lernen in Bremen bei CASA, der gemeinnützigen Sprachschule seit 1983: Intensiv- und Abendkurse von A1 bis C1, telc-Prüfungen und Unterkunft.',
         }
       : {
-          title: 'Learn German in Bremen',
+          title: 'German language school in Bremen',
           description:
-            'Learn German and feel at home in Bremen. Discover CASA courses, telc exams, accommodation and personal advice in an international community.',
+            'Learn German in Bremen at CASA, a non-profit language school since 1983: intensive and evening courses from A1 to C1, telc exams and accommodation.',
         }),
   });
 }

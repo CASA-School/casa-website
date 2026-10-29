@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicMetadata({
     locale,
     title: locale === 'de' ? 'Allgemeine Geschäftsbedingungen' : 'Terms and conditions',
-    description: locale === 'de' ? 'Die Allgemeinen Geschäftsbedingungen von CASA in Bremen für Sprachkurse, Prüfungen, Unterkunft und weitere Angebote.' : 'The terms and conditions of CASA in Bremen for language courses, exams, accommodation and our other services.',
+    description: locale === 'de' ? 'Die Allgemeinen Geschäftsbedingungen von CASA in Bremen für Sprachkurse, Prüfungen, Unterkunft und weitere Angebote.' : 'The terms and conditions of CASA – Internationale Sprachschule gGmbH in Bremen for language courses, exams, accommodation and our other services.',
     path: '/terms',
   });
 }
