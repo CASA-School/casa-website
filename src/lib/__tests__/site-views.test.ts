@@ -7,7 +7,13 @@ const PHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKi
 const DESKTOP = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36';
 
 const view = (path: string, headers: Record<string, string>, method = 'GET') =>
-  pageView(new NextRequest(`https://casa-bremen.de${path}`, { method, headers: { host: 'casa-bremen.de', 'user-agent': DESKTOP, ...headers } }), 'de');
+  pageView(
+    new NextRequest(`https://casa-bremen.de${path}`, {
+      method,
+      headers: { host: 'casa-bremen.de', 'user-agent': DESKTOP, 'sec-fetch-dest': 'document', 'accept-language': 'de-DE,de;q=0.9', ...headers },
+    }),
+    'de'
+  );
 
 describe('website page views (counted on the server)', () => {
   it('counts the first page of a visit with the site it came from, and nothing that identifies the reader', () => {
@@ -27,6 +33,10 @@ describe('website page views (counted on the server)', () => {
   it('does not count the router fetching a page, prefetches, robots, form posts or other hosts', () => {
     expect(view('/kontakt', { 'sec-fetch-dest': 'empty', referer: 'https://casa-bremen.de/sprachkurse' })).toBeNull();
     expect(view('/kontakt', { 'sec-purpose': 'prefetch' })).toBeNull();
+    // A script or crawler with a browser's name: no fetch metadata, no languages.
+    expect(view('/kontakt', { 'sec-fetch-dest': '', 'accept-language': '' })).toBeNull();
+    expect(view('/kontakt', { 'accept-language': '' })).toBeNull();
+    expect(view('/kontakt', { 'user-agent': `${PHONE} (compatible; Google-InspectionTool/1.0;)` })).toBeNull();
     expect(view('/kontakt', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' })).toBeNull();
     expect(view('/kontakt', { 'user-agent': 'Mozilla/5.0 Chrome-Lighthouse' })).toBeNull();
     expect(view('/kontakt', { 'sec-fetch-dest': 'image' })).toBeNull();

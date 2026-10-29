@@ -16,7 +16,7 @@ import { isWorkspaceDatabaseConfigured, query } from '@/lib/admin/db';
  */
 
 const PUBLIC_HOST = /^casa-bremen\.de(:\d+)?$/i;
-const ROBOT = /bot|crawl|spider|slurp|lighthouse|headless|pagespeed|preview|monitor|curl|wget|python|axios|node-fetch|go-http|facebookexternalhit|embedly/i;
+const ROBOT = /bot|crawl|spider|slurp|lighthouse|headless|pagespeed|preview|monitor|inspectiontool|chatgpt-user|externalagent|yeti|curl|wget|python|axios|node-fetch|go-http|facebookexternalhit|embedly/i;
 const PATH = /^\/[A-Za-z0-9/_.%-]{0,199}$/;
 
 type View = { path: string; locale: string; device: 'mobile' | 'tablet' | 'desktop'; entry: boolean; referrer: string | null };
@@ -27,9 +27,11 @@ export function pageView(request: NextRequest, locale: string): View | null {
   const host = headers.get('host') ?? '';
   const local = process.env.NODE_ENV !== 'production' && /^localhost(:\d+)?$/.test(host);
   if (request.method !== 'GET' || !(PUBLIC_HOST.test(host) || local)) return null;
-  // A page load, not the router fetching a page or a prefetch (both `sec-fetch-dest: empty`).
-  const destination = headers.get('sec-fetch-dest');
-  if ((destination && destination !== 'document') || headers.get('sec-purpose')?.includes('prefetch')) return null;
+  // A browser opening a page: every browser the site supports sends `sec-fetch-dest: document`
+  // and its languages on a page load; the router's fetches and prefetches say `empty`, and scripts
+  // and most crawlers send neither, whatever their user agent claims (on the first evening, 235
+  // „direct" visits walked the sitemap page by page before this rule).
+  if (headers.get('sec-fetch-dest') !== 'document' || !headers.get('accept-language') || headers.get('sec-purpose')?.includes('prefetch')) return null;
   const agent = headers.get('user-agent') ?? '';
   if (!agent || ROBOT.test(agent)) return null;
 
