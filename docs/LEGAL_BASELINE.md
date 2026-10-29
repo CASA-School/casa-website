@@ -19,6 +19,15 @@ Only the source `main` element is imported, excluding navigation and shared foot
 
 This replaces the abbreviated English-only privacy draft and the independently adapted terms/imprint. The local added dispute-resolution clause is removed because it is absent from the published imprint. Existing dated wording (including the 2022 copyright and 2023 terms date) is intentionally retained; the retrieval date is not represented as a legal revision date.
 
+## Presentation (2026-10-29)
+
+The pages render the snapshot through `prepareLegalDocument` (`src/lib/content/legal-document.ts`): numbered
+sections get an id and a set-off number and feed the contents list beside the text (folded above it on a phone),
+an unnumbered heading inside a section becomes its sub-heading, the AGB's clause numbers hang in the margin, and
+the imprint's lines show in their three groups. The head shows the date the document gives itself („Stand").
+Only markup and empty paragraphs change: `legal-document.test.ts` asserts that the text of all six documents is
+unchanged.
+
 ## Later legal-team discussion
 
 This is a faithful baseline, not legal approval of the new website. Before launch, ask the legal team to compare the published wording with the actual registration, contact, application/upload, placement-test and appointment flows, and the planned Azure/Microsoft processing. Check the original language differences and old registration links against the final launch routes. Any revised wording should be a separate reviewed change, not mixed into this import.
