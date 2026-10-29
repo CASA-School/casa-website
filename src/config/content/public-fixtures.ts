@@ -283,6 +283,10 @@ function buildCourseInstances(): CourseInstanceRow[] {
     courseInstance('000000010013', 'intensive-german', '2027-05-31', '2027-07-29', intensiveAfternoon, 15, at, intensiveLevels),
     courseInstance('000000010014', 'intensive-german', '2027-08-02', '2027-09-23', intensiveAfternoon, 15, at, intensiveLevels),
     courseInstance('000000010015', 'intensive-german', '2027-09-27', '2027-11-18', intensiveAfternoon, 15, at, intensiveLevels),
+    // Planned in SchoolMan since; the bridge puts such starts on the website by itself (2026-10-29).
+    courseInstance('000000010016', 'intensive-german', '2027-10-25', '2027-12-17', intensiveMorning, 15, at, intensiveLevels),
+    courseInstance('000000010017', 'intensive-german', '2027-11-22', '2028-01-27', intensiveAfternoon, 15, at, intensiveLevels),
+    courseInstance('000000010018', 'intensive-german', '2028-01-03', '2028-02-25', intensiveMorning, 15, at, intensiveLevels),
     courseInstance('000000020001', 'evening-german', '2026-08-24', '2026-12-16', eveningMondayWednesday, 12, at, ['A2.1', 'A2.2', 'B1.2', 'B2.1', 'B2.2', 'C1.1']),
     courseInstance('000000020002', 'evening-german', '2026-08-25', '2026-12-17', eveningTuesdayThursday, 12, at, ['A1.1', 'A1.2', 'B1.1', 'C1.2']),
     courseInstance('000000020003', 'evening-german', '2027-01-04', '2027-04-14', eveningMondayWednesday, 12, at, ['A2.2', 'B1.1', 'B2.1', 'B2.2', 'C1.1']),
@@ -294,6 +298,8 @@ function buildCourseInstances(): CourseInstanceRow[] {
     courseInstance('000000050005', 'bildungszeit', '2027-05-03', '2027-06-25', bildungszeitFullDay, 15),
     courseInstance('000000050006', 'bildungszeit', '2027-06-28', '2027-08-27', bildungszeitFullDay, 15),
     courseInstance('000000050007', 'bildungszeit', '2027-08-30', '2027-10-22', bildungszeitFullDay, 15),
+    courseInstance('000000050008', 'bildungszeit', '2027-10-25', '2027-12-17', bildungszeitFullDay, 15),
+    courseInstance('000000050009', 'bildungszeit', '2028-01-03', '2028-02-25', bildungszeitFullDay, 15),
   ];
 }
 
@@ -316,6 +322,7 @@ function buildExamSessions(): ExamSessionRow[] {
     examSession('000000010007', 'telc_b2', '2027-06-18T07:00:00.000Z', '2027-06-18T15:00:00.000Z', '2027-05-17'),
     examSession('000000010008', 'telc_b2', '2027-08-20T07:00:00.000Z', '2027-08-20T15:00:00.000Z', '2027-07-19'),
     examSession('000000010009', 'telc_b2', '2027-10-08T07:00:00.000Z', '2027-10-08T15:00:00.000Z', '2027-09-07'),
+    examSession('000000010010', 'telc_b2', '2027-11-12T08:00:00.000Z', '2027-11-12T16:00:00.000Z', '2027-10-11'),
     examSession('000000020001', 'telc_c1_hochschule', '2026-09-04T06:30:00.000Z', '2026-09-04T15:00:00.000Z', '2026-08-03'),
     examSession('000000020002', 'telc_c1_hochschule', '2026-10-02T06:30:00.000Z', '2026-10-02T15:00:00.000Z', '2026-09-01'),
     examSession('000000020003', 'telc_c1_hochschule', '2026-10-30T07:30:00.000Z', '2026-10-30T16:00:00.000Z', '2026-09-29'),
@@ -328,6 +335,9 @@ function buildExamSessions(): ExamSessionRow[] {
     examSession('000000020010', 'telc_c1_hochschule', '2027-07-02T06:30:00.000Z', '2027-07-02T15:00:00.000Z', '2027-06-01'),
     examSession('000000020011', 'telc_c1_hochschule', '2027-09-03T06:30:00.000Z', '2027-09-03T15:00:00.000Z', '2027-08-02'),
     examSession('000000020012', 'telc_c1_hochschule', '2027-10-01T06:30:00.000Z', '2027-10-01T15:00:00.000Z', '2027-08-31'),
+    // From SchoolMan since; the bridge publishes such days by itself (2026-10-29).
+    examSession('000000020013', 'telc_c1_hochschule', '2027-10-29T06:30:00.000Z', '2027-10-29T15:00:00.000Z', '2027-09-28'),
+    examSession('000000020014', 'telc_c1_hochschule', '2027-11-26T07:30:00.000Z', '2027-11-26T16:00:00.000Z', '2027-10-25'),
   ];
 }
 

@@ -2890,6 +2890,24 @@ copy (3½ minutes at 1 vCPU / 2 GiB, the learners' reader at 1.2 GB).
   with nothing to do takes 0.2 s, a Person change 13 s (5 steps), every step 22 s. Job at 0.75 vCPU / 1.5 GiB.
 - docs/schoolman/MIGRATION.md §1 has the rules.
 
+## 56. New starts and exam days go on the website by themselves (2026-10-29)
+
+Rahman asked whether the latest dates from FileMaker were on the website. Everything up to September 2027
+was, but the three intensive starts SchoolMan had planned since the 9 October read (25.10.2027, 22.11.2027,
+3.1.2028) were not: the website's starts were seeded once (0001, 0006), and the bridge only added levels to
+starts it found — 40 SchoolMan courses skipped on every run. A new telc day came across as a draft.
+Rahman: „let the sync publish new starts automatically", but „evening is true on the site even if it is
+still not on FileMaker".
+
+- `import-courses.mjs`: an intensive start ahead that the website lacks is made on it (the seeds' shape: 15
+  places, the shift's week and hours), a morning one with its Bildungszeit start; a cancelled start is never
+  remade; evening starts are never made.
+- `exam-sittings.mjs`: a sitting ahead is made published with the deadline rule (one month and a day
+  before); the bridge's earlier drafts ahead are published unless `staff_activity` shows a colleague touched
+  them.
+- The fallback fixtures carry the same new dates. The summer 9-week terms (31.05.–29.07. afternoon,
+  28.06.–27.08. morning) were already on the site; it shows starts only, so „9 Wochen" appears nowhere.
+
 ## Registration delivery follow-up (local, 2026-10-29)
 
 Placement guidance and registration delivery follow-up were prepared in the `website` worktree. Course and exam registrations now create review flags with the saved record; provider-accepted sends settle each flag (acceptance is not proof of inbox delivery), and the registration inbox/detail offer manual follow-up. The public success screen gives a contact path when the acknowledgement is unconfirmed. Deployment must apply migration 0102 before the corresponding application code. No automated retry or response-time promise. Mail-review exports remain ignored under CASA/output/mail-review.

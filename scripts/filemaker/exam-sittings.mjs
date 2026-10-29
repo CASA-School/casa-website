@@ -4,8 +4,10 @@
  * and a wait for an exam (import-intake).
  *
  * A sitting is found by SchoolMan's exam (`filemaker_exam_id`, 0056), else by its exam and day here (one
- * a colleague or the seeds made, which then takes SchoolMan's number), else made — as a draft, so a date
- * only SchoolMan knows never appears on the website until someone publishes it. An exam the catalogue does
+ * a colleague or the seeds made, which then takes SchoolMan's number), else made. A sitting ahead is made
+ * published, with the deadline the website states (one month and a day before), since SchoolMan is where
+ * CASA plans its exam days (2026-10-29, Rahman); one already past is made a draft. A sitting the bridge made
+ * as a draft before that and nobody here has touched is published the same way. An exam the catalogue does
  * not offer (TestDaF, TestAS) has none.
  */
 
@@ -26,6 +28,12 @@ export async function examSittings(client) {
     ).rows.map((r) => [r.code, r])
   );
   const count = { linked: 0, made: 0 };
+  const DEADLINE = `((starts_at AT TIME ZONE 'Europe/Berlin')::date - interval '1 month' - interval '1 day')::date`;
+  await client.query(
+    `UPDATE exam_sessions s SET status = 'scheduled', registration_deadline = coalesce(registration_deadline, ${DEADLINE})
+      WHERE status = 'draft' AND created_by IS NULL AND filemaker_exam_id IS NOT NULL AND starts_at > now()
+        AND NOT EXISTS (SELECT 1 FROM staff_activity a WHERE a.entity = 'exam_session' AND a.entity_id = s.id)`
+  );
 
   /**
    * The sitting of SchoolMan's exam `{ id, ref, day, places, from?, to? }`, or null for an exam we do not
@@ -52,8 +60,10 @@ export async function examSittings(client) {
     const timed = exam.from && exam.to && exam.to > exam.from;
     const made = (
       await client.query(
-        `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, capacity, status, filemaker_exam_id)
-         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5, 'draft', $6)
+        `INSERT INTO exam_sessions (exam_type_id, starts_at, ends_at, capacity, status, filemaker_exam_id, registration_deadline)
+         VALUES ($1, ($2::date + $3::time) AT TIME ZONE 'Europe/Berlin', ($2::date + $4::time) AT TIME ZONE 'Europe/Berlin', $5,
+                 CASE WHEN $2::date > (now() AT TIME ZONE 'Europe/Berlin')::date THEN 'scheduled' ELSE 'draft' END, $6,
+                 CASE WHEN $2::date > (now() AT TIME ZONE 'Europe/Berlin')::date THEN ($2::date - interval '1 month' - interval '1 day')::date END)
          RETURNING id`,
         [type.id, exam.day, timed ? exam.from : type.starts, timed ? exam.to : type.ends, Number(exam.places) > 0 ? Number(exam.places) : 20, exam.id]
       )

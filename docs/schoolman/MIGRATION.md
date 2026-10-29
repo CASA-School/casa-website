@@ -109,6 +109,19 @@ waiting-list place from the last twelve months — 552 more learners, so an exam
 (telc B2 13.11.: 21, not 7). Learners outside the selection stay in SchoolMan (decided per area in
 bridge-gaps.md).
 
+**Dates on the website** (2026-10-29, Rahman: „let the sync publish new starts automatically").
+SchoolMan is where CASA plans its dates, so the bridge puts what it plans on the website by itself:
+- an **intensive start** ahead that the website does not have yet, with its levels from SchoolMan, and for a
+  morning start the **Bildungszeit** start of the same weeks (`import-courses.mjs`). A start CASA cancelled
+  in the workspace is not made again;
+- a **telc exam day** ahead (B2, C1 Hochschule) is made published, with the deadline the site states, one
+  month and a day before (`exam-sittings.mjs`). A day the bridge made as a draft earlier is published unless
+  a colleague has changed it in the workspace;
+- the **evening terms are the website's own**: they are published before SchoolMan has them, and the bridge
+  never makes one;
+- nothing is taken off the website when SchoolMan drops a date: a start or sitting is cancelled in the
+  workspace.
+
 **What the workspace gained on 2026-10-27** (the four mapping PRs, migrations 0092–0095, plus 0096 for the
 exams screens; counts from the local test runs):
 
