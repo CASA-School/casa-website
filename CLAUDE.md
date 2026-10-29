@@ -492,10 +492,9 @@ is still valid.
 - **`admin.casa-bremen.de` is live (2026-10-11).** CNAME and `asuid.admin` TXT in
   the Lands Concepts Plesk zone, bound to `ca-casa-website` with a managed
   certificate; `src/proxy.ts` serves the workspace there, and `/admin` stays 404 on
-  the public host (`CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset). Until the site moves to
-  casa-bremen.de, the app carries `CMS_PUBLIC_ORIGIN=https://neu.casa-bremen.de` and
-  `CMS_EDITOR_ORIGIN=https://admin.casa-bremen.de`, so the website editor frames the
-  new site and not the old one; **remove both at cutover**, but **keep `neu.casa-bremen.de` bound to the
+  the public host (`CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset). `CMS_PUBLIC_ORIGIN` and
+  `CMS_EDITOR_ORIGIN` were removed at the cutover (2026-10-29), so the website editor frames
+  casa-bremen.de; **keep `neu.casa-bremen.de` bound to the
   app**: the day-one test's printed QR posters open `neu.casa-bremen.de/test` (docs/ENTRY_TEST.md). Rahman's owner account
   exists on the Azure database (`db-job.sh owner`); everyone else is added from the
   Team screen.
@@ -605,13 +604,12 @@ is still valid.
   One repository and one database stay; the running app splits into a public app with a
   least-privilege database role and no `/admin`, and a workspace app on admin.casa-bremen.de. Why,
   the shape and the steps: `docs/AZURE_DEPLOYMENT_PLAN.md` §Later. Not before go-live.
-- **Going live is `docs/GO_LIVE.md` (2026-10-29)**: the DNS and Azure steps, the two mail risks to fix
-  first (`smtp`/`imap`/`ftp` are CNAMEs of the apex; SPF's `+a`), the checks and the rollback. The custom domain
-  for the website is still unassigned: `lernen.casa-bremen.de` points at the *student app*,
-  and `www.casa-bremen.de` still resolves to the old site at 195.34.167.82. The Container
-  App needs **three** hostnames off the same revision: the apex `casa-bremen.de`, which is
-  the canonical host (`src/lib/seo.ts`, as on the old site); `www.casa-bremen.de`, which
-  `src/proxy.ts` 308s to the apex; and `admin.casa-bremen.de` for the staff workspace.
+- **casa-bremen.de is live on the new site (2026-10-29, 16:39).** Meike pressed the button;
+  the apex (A `20.79.72.159`) and `www` (CNAME the app) point at `ca-casa-website`, all four hostnames
+  (apex, www, admin, neu) are bound with managed certificates, and the old TYPO3 server
+  (195.34.167.82) keeps only mail (`mail`, `smtp`, `imap`, `ftp`, SPF `a:mail.casa-bremen.de`).
+  `docs/GO_LIVE.md` has the steps, the record, the rollback and what follows (Search Console,
+  `relaunch.casa-bremen.de`, the notice, branch protection).
 
 ## Artifacts
 
