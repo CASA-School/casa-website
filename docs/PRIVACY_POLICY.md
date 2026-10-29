@@ -36,7 +36,8 @@ the same in both languages.
 - Mailboxes: contact and group enquiries → `info@`; course, exam and accommodation
   registrations → `online@` (learners email their Klett result there themselves); appointment requests → the responsible
   contact person's mailbox (group consultations: Ina Eismann), who confirms by email;
-  job-application alerts → `info@`, naming only the position (no reference since 2026-10-26);
+  job-application alerts → `bewerbungen@` (since 2026-10-29, Rahman; `info@` before), naming only the
+  position (no reference since 2026-10-26), and applicants' replies to their receipt go there too;
   placement appointments (in person, 2026-10-28) → `online@`, booked at once (§15).
 - Job applications themselves: management only, in the workspace's Applications module.
 - Host families get name, age, gender, nationality, German level, dates of stay, and
@@ -67,9 +68,10 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
   stay there.
 - **Mail**: Graph mail from a CASA mailbox, `FORM_DELIVERY_MODE=live`, and every
   `FORM_RECIPIENT_*` set to the routing in §16. **True since 2026-10-29** (Rahman, revision 0000095):
-  `FORM_DELIVERY_MODE=live`; course, exam and placement to online@; contact, groups, the interest
-  list and job-application alerts to info@; Ina's group consultations wait in her Termine without an
-  alert. The sender stays `admin@`: the Exchange scope limits the mailbox the site sends from, not
+  `FORM_DELIVERY_MODE=live`; course, exam and placement to online@; contact, groups and the interest
+  list to info@; job-application alerts, and applicants' replies to their receipt, to bewerbungen@
+  (`FORM_RECIPIENT_CAREERS`, `FORM_REPLY_TO_CAREERS`, the same day); Ina's group consultations wait
+  in her Termine without an alert. The sender stays `admin@`: the Exchange scope limits the mailbox the site sends from, not
   whom it sends to.
 - **Staff host**: `admin.casa-bremen.de` live and `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset (§5).
   **True since 2026-10-11.**
@@ -82,10 +84,10 @@ The text describes the site as it will run on `casa-bremen.de`, not the current 
    consultations wait in her Termine in the workspace; no alert mail. §15 and §16 say so.
 2. Minors: may someone under 18 register for a course, exam or accommodation without a
    parent or guardian? The policy says nothing about it today.
-3. Job-application alert to `info@`: the site now sends only the position,
-   so nobody outside management sees applicant data. Confirm that is what you want.
-4. Where the careers page's email fallback should point once `bewerbungen@` is retired
-   (`src/lib/mock/store.ts`, and `apply_email` per position in the database).
+3. ~~Job-application alert to `info@`~~ **Settled 2026-10-29 (Rahman):** alerts go to `bewerbungen@`,
+   which management reads; they still name only the position. §14 and §16 say so.
+4. ~~Where the careers page's email fallback should point once `bewerbungen@` is retired~~ **Settled
+   2026-10-29:** `bewerbungen@` stays CASA's applications mailbox, so the fallback is right as it is.
 5. Deletion: nothing is deleted on a schedule, in the code or in the mailboxes. §19 promises
    periods. Needs scheduled deletion in the workspace and Microsoft 365 retention rules on
    `info@`, `online@`, the contact person's mailbox and the sender's Sent Items.
