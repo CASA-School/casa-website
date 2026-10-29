@@ -2858,8 +2858,8 @@ tile in the Tagesplan like the others, its panel „Alle | Meine" with whose eac
   `requested` („Angefragt"), assigned to the account with her published address, linked to its enquiry; the
   website's free times read `appointments`, and `group_appointments` is retired (copied, dropped later). No
   alert mail; the receipt's replies go to i.eismann@. Termine rows: „Bestätigen", „Anfrage", „Ändern".
-  Form mail went live the same day: registrations, exams and placement to online@, contact, groups,
-  interest and job-application alerts to info@.
+  Form mail went live the same day: registrations, exams and placement to online@, contact, groups and
+  interest to info@, job-application alerts and applicants' replies to bewerbungen@ (which stays, after all).
 - **Next** (Rahman): the Klett test → e-mail → registration chain is the bad part; the level test and the
   registration should connect in the new system.
 

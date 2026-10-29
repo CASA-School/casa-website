@@ -98,10 +98,10 @@ applications now send the person a branded confirmation in the form's language
 | Placement test result | `PLACEMENT` | `online@casa-bremen.de`, once CASA's own test opens; until then learners email their Klett result there themselves |
 | Placement appointment (in person) | `PLACEMENT` | `online@casa-bremen.de` (2026-10-28) |
 | Appointment request | `APPOINTMENT` | **No alert since 2026-10-29**: with the database a request is an appointment in Ina's „Meine Termine" (`requested`, migration 0101), which she confirms, moves or cancels there. Replies to the requester's receipt go to her published address (`i.eismann@`, `GROUP_CONTACT_EMAIL`), and so does the request itself when the site has no database. `FORM_RECIPIENT_APPOINTMENT` overrides that address if ever set |
-| Job application alert | `CAREERS` | `info@casa-bremen.de` in the first phase. The alert names the position only; the application itself is read in the workspace by management |
+| Job application alert | `CAREERS` | `bewerbungen@casa-bremen.de` since 2026-10-29 (Rahman; info@ before). The alert names the position only; the application itself is read in the workspace by management. `FORM_REPLY_TO_CAREERS` is bewerbungen@ too, so applicants get a receipt whose replies reach it |
 
-`bewerbungen@` is being retired. The privacy policy (§16) states this routing, so a change here
-is a change there (`docs/PRIVACY_POLICY.md`).
+`bewerbungen@` stays CASA's applications mailbox (2026-10-29; it was to be retired). The privacy
+policy (§14, §16) states this routing, so a change here is a change there (`docs/PRIVACY_POLICY.md`).
 
 ## Placement appointments — 2026-10-28
 
@@ -251,9 +251,9 @@ Sources: [Microsoft Graph sendMail](https://learn.microsoft.com/en-us/graph/api/
    Set FORM_DELIVERY_MODE=live only after owner approval and delivery tests. Verify any retained
    legacy webhook's recipient rules separately. Record the approved addresses and change date here.
    **Live since 2026-10-29** (Rahman, revision 0000095): `FORM_RECIPIENT_COURSE`, `_EXAM` and
-   `_PLACEMENT` = online@casa-bremen.de; `_CONTACT`, `_GROUPS` and `_CAREERS` = info@casa-bremen.de;
-   `_APPOINTMENT` unset (Ina's requests wait in her Termine, migration 0101). `FORM_REPLY_TO_CAREERS`
-   is unset, so an applicant gets no receipt until management names a mailbox.
+   `_PLACEMENT` = online@casa-bremen.de; `_CONTACT` and `_GROUPS` = info@casa-bremen.de;
+   `_APPOINTMENT` unset (Ina's requests wait in her Termine, migration 0101). Later that day
+   `_CAREERS` and `FORM_REPLY_TO_CAREERS` = bewerbungen@casa-bremen.de (info@ and unset before).
 5. Finish the photo, operational-content and legal approval work. Review existing dependency alerts.
    Test the deployed website, back up TYPO3 and plan the casa-bremen.de domain cutover.
 
