@@ -83,11 +83,17 @@ export default async function NonProfitStatusPage() {
           'Soziale Bildungsprojekte, Sprachtandems und, wo es möglich ist, ermäßigte Gebühren',
         ],
         legalTitle: 'Rechtsform und Nachweise',
+        // From the Freistellungsbescheid of the Finanzamt Bremen, 16.10.2025 (2021–2023), word for word.
         legalRows: [
           ['Rechtsform', 'CASA – Internationale Sprachschule gGmbH'],
           ['Register', 'Amtsgericht Bremen HRB 32761 HB'],
+          ['Gemeinnützigkeit', 'Freistellungsbescheid des Finanzamts Bremen vom 16. Oktober 2025 für 2021 bis 2023, Steuernummer 60/147/04599'],
+          [
+            'Steuerbegünstigte Zwecke',
+            'Förderung der Erziehung; Förderung der Volks- und Berufsbildung einschließlich der Studentenhilfe; Förderung internationaler Gesinnung, der Toleranz auf allen Gebieten der Kultur und des Völkerverständigungsgedankens (§ 52 AO)',
+          ],
+          ['Spenden', 'CASA ist berechtigt, Zuwendungsbestätigungen auszustellen.'],
           ['Anerkennung', 'Staatlich anerkannter Träger der freien Jugendhilfe'],
-          ['Steuerliche Einordnung', 'Anerkennung wegen Förderung der Volks- und Berufsbildung'],
         ],
       }, en: {
         breadcrumbs: [
@@ -118,8 +124,13 @@ export default async function NonProfitStatusPage() {
         legalRows: [
           ['Legal form', 'CASA – Internationale Sprachschule gGmbH'],
           ['Commercial register', 'Amtsgericht Bremen HRB 32761 HB'],
+          ['Non-profit status', 'Exemption notice (Freistellungsbescheid) from the Bremen tax office dated 16 October 2025, for 2021 to 2023; tax number 60/147/04599'],
+          [
+            'Charitable purposes',
+            'Promoting education; promoting adult and vocational education, including support for students; promoting international understanding, tolerance in all areas of culture and understanding between peoples (section 52 of the German Fiscal Code)',
+          ],
+          ['Donations', 'CASA may issue official donation receipts (Zuwendungsbestätigungen).'],
           ['Recognition', 'A state-recognised independent youth welfare provider'],
-          ['Tax status', 'Recognised for promoting adult education and vocational training'],
         ],
       } });
 
