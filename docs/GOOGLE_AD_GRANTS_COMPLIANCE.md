@@ -14,7 +14,34 @@ Reference points to keep in view:
 - Commercial activity must not be the website's primary purpose.
 - Forms, links, mobile layout, and HTTPS handling should be checked before resubmission.
 
+## Who can apply (checked 2026-10-29)
+
+Google for Nonprofits excludes „a school, academic institution, or university (philanthropic arms
+of educational organizations are eligible)" (support.google.com/nonprofits/answer/3215869). CASA
+gGmbH is a language school, so its own application may fail on eligibility whatever the website
+says. The **CASA-Förderverein e.V.** is the school's philanthropic arm and the applicant Google's
+rule allows. Ad Grants then requires that „your nonprofit must own the domain(s) your ads point
+to" (answer/1657899): the Förderverein's ads point to the Förderverein's own website (planned by
+Rahman), not to casa-bremen.de. This site's non-profit page still matters, as the school the
+Förderverein supports and as what a reviewer will open.
+
+The website policy (answer/1657899) asks for: a mission stated prominently; the programmes,
+services and impact described; physical address and a registration number or tax ID and/or an
+annual report; commercial activity limited, with how proceeds support the programmes disclosed;
+HTTPS, working links and buttons, fast and mobile-ready pages; no excessive third-party ads; any
+donation link going to a secure page dedicated to donations.
+
 ## Implemented In This Project
+
+- **2026-10-29, `/ueber-uns/gemeinnuetzigkeit` (`#angebote`):** what the non-profit work is,
+  from the Förderverein's own description — free course places for people in hardship, the
+  cafeteria and Sprachcafé/Stammtisch as a place to meet, advice beyond the lesson (learning
+  coaching, housing, work and study), the free tandem as a TANDEM International member; what is
+  planned (an almost free telc B1 preparation course for people without funding, a scholarship
+  programme); and the Förderverein itself, with a contact link (no donation link until there is
+  a dedicated donation page). The Förderverein text's „bis zu 80 Nationen" is not used; the page
+  keeps the approved „über 150 Länder". **Open for CASA:** the tax number and the date of the
+  latest Freistellungsbescheid, so the legal block can show them.
 
 - Added public mission route: `/ueber-uns/gemeinnuetzigkeit`
 - Folded integration-project proof points into the mission route under `#integrationsprojekte`.
