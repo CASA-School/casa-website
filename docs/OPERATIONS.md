@@ -23,9 +23,9 @@ releases it. Read this before touching anything outside the repository. Checked 
 | Image cache | Azure Files `stcasawebsitef8d745/next-image-cache` at `/app/.next/cache/images` | Survives releases |
 | Logs | Log Analytics workspace `cd81b967-7d74-49b0-8748-85cb79210580` | Tables `ContainerAppConsoleLogs_CL`, `ContainerAppSystemLogs_CL` |
 | SchoolMan bridge | Job `caj-casa-website-schoolman` | Runs when the copy changed, hourly as a fallback; docs/schoolman/MIGRATION.md |
-| DNS | Lands Concepts Plesk zone (Codex does Plesk work, with Rahman's go) | Apex A `20.79.72.159`, `www` CNAME the app, `admin` and `neu` bound too |
+| DNS | Lands Concepts Plesk zone (`ns3`/`ns4.lands-concepts.com`), changed only with Rahman's go; Plesk applies an edit only after „Update" | Apex A `20.79.72.159`, `www` CNAME the app, `admin` and `neu` bound too |
 | Mail | Old server `195.34.167.82` (`mail.casa-bremen.de`), MX through SpamExperts; Microsoft 365 for the mailboxes | Form mail goes out through Microsoft Graph as admin@; docs/GROUP_APPOINTMENTS_AND_TEST_MAIL.md |
-| Old website | TYPO3 on `195.34.167.82` | Serves only mail now; its `.htaccess` still redirects casa-bremen.de to neu.casa-bremen.de for resolvers with the old record. Removal is a board item |
+| Old website | TYPO3 on `195.34.167.82`, Plesk `https://f120.lands-concepts.com:8443` (subscription `casa-bremen.de`, document root `t3-web/htdocs`) | Serves only mail now. The temporary redirect to neu was removed on 2026-10-30, and so was the `relaunch` DNS record. The Plesk sites `relaunch` and `berlin` and the old TYPO3 files remain. Chrome „Browser 1" has a Plesk session; the Plesk account and the zone's SOA contact are still in the name of a colleague who has left |
 
 Hostnames: `casa-bremen.de` (the site), `www` (308 to the apex), `admin.casa-bremen.de` (the
 workspace; `/admin` is 404 on the public host), `neu.casa-bremen.de` (kept: the day-one test's

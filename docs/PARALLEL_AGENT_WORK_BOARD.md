@@ -53,8 +53,8 @@ Paste this to a new agent, with the unit's id:
 | A5 | Open Turkish and Spanish on the site | code + review | later (month 3) |
 | G1 | Placement appointment deep link + second booking link | code + Business Profile | ready |
 | G2 | Business Profile: monthly post, reviews, attributes | Business Profile | recurring |
-| H1 | Remove the old server's redirect to neu | Plesk (Codex) | from Mon 2 Nov 2026, with Rahman's go |
-| H2 | Remove `relaunch.casa-bremen.de` | Plesk (Codex) | with Rahman's go |
+| H1 | Remove the old server's redirect to neu | Plesk | ✅ done 2026-10-30 |
+| H2 | Remove `relaunch.casa-bremen.de` | Plesk | ✅ done 2026-10-30 (DNS record; the Plesk site stays) |
 | H3 | Branch protection on `main` | GitHub | with Rahman's go |
 | H4 | Switch off the „new website" notice | code | between 10 and 24 Dec 2026 |
 | H5 | Search Console and Bing after the switch | Google/Bing | ready (check first) |
@@ -122,13 +122,10 @@ Paste this to a new agent, with the unit's id:
 ## After go-live: housekeeping
 
 ### H1 · Remove the old server's redirect to neu
-**Status:** from Monday 2 November 2026, with Rahman's go. Plesk work is Codex's.
-**Read first:** `docs/GO_LIVE.md` §Record of 2026-10-29; `docs/OPERATIONS.md`.
-**Goal:** run `./scripts/ops/health.sh` and confirm every resolver (including Telekom's and the office's `10.0.60.1`) answers `20.79.72.159`; then the redirect lines in the old server's `.htaccess` come out (original file: `~/Downloads/htaccess`).
-**Done when:** the old server no longer redirects; `docs/GO_LIVE.md` records it.
+**Status:** ✅ done 2026-10-30 at Rahman's request, once every resolver (Google, Cloudflare, Telekom, Quad9, the office's `10.0.60.1`) answered `20.79.72.159`. The redirect block came out of `t3-web/htdocs/.htaccess`; the file is again identical to the original (`~/Downloads/htaccess`, SHA-256 checked). Recorded in `docs/GO_LIVE.md`.
 
 ### H2 · Remove `relaunch.casa-bremen.de`
-**Status:** with Rahman's go (it still points at the old server; nobody should need it).
+**Status:** ✅ done 2026-10-30 at Rahman's request: its A record (`195.34.167.82`) is out of the zone; both name servers answer NXDOMAIN (caches may hold the old record for up to a day, its TTL). The Plesk site `relaunch.casa-bremen.de` (16.6 MB of files, a TYPO3 that answered „Page Not Found") still exists; deleting it erases its files and is Rahman's call.
 
 ### H3 · Branch protection on `main`
 **Status:** with Rahman's go. Deferred until go-live on purpose; due now.
