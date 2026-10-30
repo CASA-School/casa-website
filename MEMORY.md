@@ -1,6 +1,6 @@
 # CASA Project Memory
 
-Current handoff: `docs/RELEASE_CLEANUP_COPY.md` (2026-09-16).
+Current handoff: `docs/PARALLEL_AGENT_WORK_BOARD.md` (the open units after go-live, 2026-10-30) and `docs/OPERATIONS.md` (how the live site runs). casa-bremen.de has run on the new site since 2026-10-29.
 
 The entries below are historical work notes, not a current launch checklist. Prefer README, the current handoff and runtime code when an older entry conflicts.
 
@@ -2911,3 +2911,32 @@ still not on FileMaker".
 ## Registration delivery follow-up (local, 2026-10-29)
 
 Placement guidance and registration delivery follow-up were prepared in the `website` worktree. Course and exam registrations now create review flags with the saved record; provider-accepted sends settle each flag (acceptance is not proof of inbox delivery), and the registration inbox/detail offer manual follow-up. The public success screen gives a contact path when the acknowledgement is unconfirmed. Deployment must apply migration 0102 before the corresponding application code. No automated retry or response-time promise. Mail-review exports remain ignored under CASA/output/mail-review.
+
+## 57. After go-live: housekeeping, Google, and a board for parallel agents (2026-10-29 to 10-30)
+
+- **The switch held.** Health checked the morning after (all resolvers, certificates, responses; one
+  two-minute database restart at 23:07 from Azure's maintenance, the site served its fallback). Once
+  the office's DNS had the new address, `CMS_PUBLIC_ORIGIN`/`CMS_EDITOR_ORIGIN` were removed (revision
+  0000112); Codex then released PR #214 as revision 0000113. The old server's `.htaccess` redirect to neu
+  stays until after the weekend.
+- **GitHub:** 16 merged branches deleted, auto-delete of merged branches switched on, the four
+  Dependabot PRs merged (not released yet).
+- **Google Business Profile:** tagged website link, the registration form as booking link, six
+  products without prices, photos, a first post, a review poster with QR code
+  (docs/GOOGLE_BUSINESS_PROFILE.md).
+- **Social posts** for the new site, DE and EN, in `output/social-launch/` (not in git).
+- **Google Ad Grants approved (2026-10-30).** Account 343-341-7137; invitation, payments profile and
+  terms accepted at Rahman's request. Research for the plan (docs/GOOGLE_ADS.md, PDF in
+  `output/ad-grants/`):
+  - The German authorities read an ad's `gclid` in the URL as device access under § 25 TDDDG, so
+    measurement becomes an unticked consent box plus a daily list for Google's Data Manager.
+  - Ads API uploads have been blocked since 2026-06-15.
+  - The 5 % click-rate rule applies from the account's 90th day.
+  - Search no longer has a language setting (2026-09).
+  - Visa ads are restricted (policy of 2026-10-05).
+  - Only 25 first language-course permits were issued in Bremen in 2025.
+  - Bremen searches are few; the larger audience is abroad.
+- **Documentation for parallel agents:** the August work board archived; a new board of units
+  (Ads, Business Profile, housekeeping, privacy, platform) with a paste-in brief; `docs/OPERATIONS.md`
+  with the ops scripts now in `scripts/ops/` (health, Azure health, logs, read-only queries inside the
+  app); `AGENTS.md` cleared of the portal-era helpers.

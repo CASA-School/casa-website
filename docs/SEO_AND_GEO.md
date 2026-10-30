@@ -91,7 +91,8 @@ the consent question settled first (privacy owner). Until then:
 3. **Bing Webmaster Tools:** import the property from Search Console. IndexNow runs from the
    next release on.
 4. **Google Business Profile:** make sure the website field says `https://casa-bremen.de/` and
-   that name, address and phone match the site exactly.
+   that name, address and phone match the site exactly. Done 2026-10-29/30 with a tagged link,
+   products and a booking link: `docs/GOOGLE_BUSINESS_PROFILE.md`.
 5. Check one course, one exam and the job page in Google's Rich Results Test.
 
 ### Registration measurement (prepared, disabled by default)

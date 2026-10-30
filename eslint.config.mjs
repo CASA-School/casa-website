@@ -13,7 +13,7 @@ import nextTs from 'eslint-config-next/typescript';
  * `--casa-muted` was darkened to #5b697e specifically to clear AA on warm
  * surfaces; slate-500 is #64748b, the exact value that was rejected.
  *
- * The mapping to use is in docs/PARALLEL_AGENT_WORK_BOARD.md → "Tier 2 · T2-C".
+ * The mapping to use is in docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md → "Tier 2 · T2-C".
  */
 const TAILWIND_PALETTES = [
   'slate',
@@ -64,7 +64,7 @@ const COLOR_UTILITIES = [
 const DEFAULT_PALETTE_CLASS = String.raw`(?:^|[\s"'\`])(?:[a-z-]+:)*(?:${COLOR_UTILITIES})-(?:${TAILWIND_PALETTES})-(?:50|9[05]0|[1-8]00)(?:\/\d{1,3})?(?=[\s"'\`]|$)`;
 
 const NO_DEFAULT_PALETTE_MESSAGE =
-  'Use a CASA token, not a stock Tailwind colour. Map it via docs/PARALLEL_AGENT_WORK_BOARD.md ' +
+  'Use a CASA token, not a stock Tailwind colour. Map it via docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md ' +
   "-> 'Tier 2 · T2-C' (e.g. text-slate-600 -> text-[var(--casa-muted)], border-slate-200 -> " +
   'border-[color:var(--casa-sand)]). On a DARK surface use text-[var(--casa-text-subtle)], which ' +
   'globals.css flips to #cbd5e1 automatically. CASA brand colours fail AA as text - point text at ' +

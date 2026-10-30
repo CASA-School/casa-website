@@ -1,6 +1,8 @@
 # Google Ad Grants Website Compliance
 
-Last updated: 2026-06-29
+Last updated: 2026-06-29. **Status 2026-10-30: approved.** The Ads account, the program's rules,
+measurement and the campaigns are in `docs/GOOGLE_ADS.md`; this file stays the record of
+eligibility and of what the website must show to keep the grant.
 
 ## Purpose
 

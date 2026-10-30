@@ -12,17 +12,18 @@ Project-specific operating rules for coding agents in this repository.
 ## 2) Pattern Adherence
 - Follow existing App Router structure and domain grouping (`src/app`, `src/components/<domain>`, `src/lib/<domain>`).
 - Reuse guard and API helpers instead of custom access patterns:
-  - `requirePageRoles`
-  - `requireApiRoles` / `requirePortalApiContext`
-  - `apiSuccess` / `apiError`
-- Preserve mock-mode parity when changing auth/data flows.
+  - `requireModule(module, level)` in every workspace module layout and at the top of every
+    server action (`src/lib/admin/access.ts`, docs/ADMIN_WORKSPACE.md §Security model)
+  - `apiSuccess` / `apiError` for every route handler (`src/lib/api/response.ts`)
+- Preserve fallback-mode parity (no `DATABASE_URL`) on the public site when changing data flows.
+  The workspace has one mode and refuses to run without a database.
 
 ## 3) Next.js SSR/Client Rules
 - Default to Server Components.
 - Add `'use client'` only when hooks, browser APIs, or client interactivity are required.
 - Never call server-only helpers (`cookies`, server clients, redirects) inside client components.
 - Guard browser-only APIs (`window`, `document`, `localStorage`) with client-safe checks.
-- Keep middleware/proxy assumptions aligned with `src/proxy.ts` route protection.
+- `src/proxy.ts` does host routing (admin.casa-bremen.de → `/admin`, `/admin` 404 on the public host) and counts page loads; it knows no session. Never add auth or a role check to it.
 
 ## 4) UI Consistency Rules
 - Use existing tokens/variables from `src/app/globals.css` and `src/config/brand/tokens.ts`.
@@ -36,7 +37,8 @@ Project-specific operating rules for coding agents in this repository.
 - Keep API response envelope shape: `{ data, error }`.
 - Validate request payloads with `zod` in route handlers.
 - Preserve audit logging for critical write operations.
-- Respect RLS-oriented assumptions and role scopes when adding queries/mutations.
+- Respect module and level access (`none`/`view`/`edit`/`full`) when adding workspace queries or mutations.
+- After writing or editing raw SQL, run `npm run admin:check`; nothing else checks column names.
 
 ## 6) Verification Gates (Required)
 Run after non-trivial changes:
@@ -55,6 +57,14 @@ When delivering work, report in this order:
 3. `fix` (what changed)
 4. `files` (exact paths)
 5. `verification` (commands run and outcomes)
+
+## 8) Working Beside Other Agents
+- Several agents work on this repository at once. Take one unit from `docs/PARALLEL_AGENT_WORK_BOARD.md`,
+  work in your own worktree and branch from `casa/main`, and follow the board's rules (ports,
+  claiming, shipping).
+- Merging to `main` does not deploy; a release is Rahman's call (`docs/OPERATIONS.md`).
+- Production and outside accounts (Azure, Google, Microsoft, DNS) are read-only unless the unit
+  says otherwise and Rahman has said yes.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
