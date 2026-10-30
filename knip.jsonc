@@ -191,6 +191,12 @@
     "scripts/filemaker/import-history.mjs",
     "scripts/filemaker/history-line.mjs",
 
+    // Read-only queries run inside the live app by scripts/ops/run-in-app.sh (docs/OPERATIONS.md
+    // §Reading the database), never imported.
+    //
+    // Removal condition: delete when the database can be read without going through the app.
+    "scripts/ops/queries/*.js",
+
     // Crawls the running site for every photo box; the input of
     // scripts/media/fit_positions.py (docs/MEDIA_LIBRARY.md, crop pass). Run by
     // hand against a dev server, never imported.

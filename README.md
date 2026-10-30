@@ -14,6 +14,13 @@ receives lands in a queue with a status and an owner, instead of leaving as a
 webhook POST nobody could query. Routes under `src/app/(admin)`. See
 [docs/ADMIN_WORKSPACE.md](docs/ADMIN_WORKSPACE.md).
 
+Both run on Azure Container Apps and have been live on casa-bremen.de since 2026-10-29.
+
+**Working on it:** the rules for agents are in [CLAUDE.md](CLAUDE.md) and
+[AGENTS.md](AGENTS.md); the open work, cut into units, is on
+[docs/PARALLEL_AGENT_WORK_BOARD.md](docs/PARALLEL_AGENT_WORK_BOARD.md); how the live site
+runs and is checked is in [docs/OPERATIONS.md](docs/OPERATIONS.md).
+
 The workspace is not the old portal. The previous role-based student/teacher
 portal was removed and is not coming back; the workspace has three staff roles,
 no learner-facing surface, and no relation to that code.
@@ -84,7 +91,7 @@ English under `/en`; the list uses the internal English paths. See `docs/I18N_RO
 
 ## Integrations
 - Postgres via `pg` — a local container (`npm run db:up`) in development, Azure
-  Flexible Server or Neon in deployment. Public content reads, the workspace
+  Database for PostgreSQL Flexible Server in production. Public content reads, the workspace
   queues, and career application persistence.
 - Webhook submission fan-out. Each fires **alongside** storing the record in the
   workspace, never instead of it:
@@ -139,4 +146,4 @@ Current homepage metrics use rounded aggregate values from the 2026-06-17 dashbo
   - `npm run test`
   - `npm run test:e2e`
 
-See [docs/DEV_SETUP.md](/Users/rahmanshafiee/Downloads/CASA/docs/DEV_SETUP.md) for environment and Neon setup notes.
+See [docs/DEV_SETUP.md](docs/DEV_SETUP.md) for environment setup notes.

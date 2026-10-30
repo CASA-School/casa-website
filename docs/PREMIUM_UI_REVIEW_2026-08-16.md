@@ -196,8 +196,8 @@ content-policy decision, not a UI one, so nothing was changed.
 
 > **✅ Complete 2026-08-16.** Default-palette drift is at **0** (was 515) and **a lint rule now
 > holds it there**. Full record, the token mapping and the traps are in
-> `docs/PARALLEL_AGENT_WORK_BOARD.md` → "Tier 2"; this section is the reasoning behind it. **Live status, per-file counts and the
-> established mapping live in `docs/PARALLEL_AGENT_WORK_BOARD.md` → "Tier 2"** — that is the
+> `docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md` → "Tier 2"; this section is the reasoning behind it. **Live status, per-file counts and the
+> established mapping live in `docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md` → "Tier 2"** — that is the
 > handover surface; this section is the reasoning behind it.
 
 ### 2.1 515 stock-Tailwind palette utilities, concentrated where people convert
@@ -346,7 +346,7 @@ returns nothing.
 
 > **✅ Complete 2026-08-16**, except the optional typeface change (T3-G), which is a user
 > decision. Full record and the measurement traps are in
-> `docs/PARALLEL_AGENT_WORK_BOARD.md` → "Tier 3".
+> `docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md` → "Tier 3".
 
 `@theme inline` (globals.css:7-48) hands tokens to colour and radius and **nothing to type**. In
 1,459 lines of `globals.css` there is one typographic rule (`text-wrap: balance`, :484). Type is
@@ -564,7 +564,7 @@ it wants its own visual check — and it is the natural first consumer of `--sha
 
 The canvas tint (`--casa-canvas: #f6fafb`) was introduced so white cards could separate by
 contrast instead of needing a border. The follow-up border-removal pass never happened
-(`docs/PARALLEL_AGENT_WORK_BOARD.md` U1b records this as still open). Border + shadow on the same
+(`docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md` U1b records this as still open). Border + shadow on the same
 white card is a classic non-premium tell.
 
 **Deliberately not done, with measurements to make the next attempt cheap.** A naive sweep is

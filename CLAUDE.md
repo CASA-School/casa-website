@@ -2,6 +2,11 @@
 
 Guidance for Claude Code when working in this repository.
 
+**Picking up work?** Start with `docs/PARALLEL_AGENT_WORK_BOARD.md`: the open units, each with
+what to read, what it owns and where it needs Rahman, and the rules for working beside other
+agents (one worktree per unit, ports, claiming, shipping). **Touching the live site or an outside
+account** (Azure, Google, DNS)? Read `docs/OPERATIONS.md` first.
+
 ## Project
 
 This repository holds **two products**, one Next build, one container.
@@ -39,7 +44,7 @@ name is still `casa-portal`; that is historical, not current scope.
 
 ## Stack
 
-- Next.js `16.3.8` (App Router) · React `19.2.4` · TypeScript
+- Next.js `16.4.3` (App Router) · React `19.2.4` · TypeScript
 - Tailwind CSS v4 + shadcn patterns + Radix (`radix-ui`), `tw-animate-css`
 - Postgres via `pg` — a local container in development (`docker-compose.yml`),
   Azure Flexible Server or Neon in deployment. One shared pool
@@ -80,6 +85,10 @@ npm run placement:port  # re-ports the placement item bank from its source markd
 npm run qa:responsive -- chromium|webkit|firefox  # every page at 24 sizes against `next start -p 3018` (docs/RESPONSIVE_AND_BROWSERS.md)
 npm run qa:shots -- chromium  # full-page screenshots of 15 key pages for a visual review
 npm run qa:clara     # the 124 golden questions against a running server: search and CLARA scores (docs/CLARA_AND_SEARCH.md)
+./scripts/ops/health.sh        # the live site from outside: DNS, responses, certificates, mail records
+./scripts/ops/health-azure.sh  # the live app from inside: revision, settings, errors, SchoolMan job (az login)
+./scripts/ops/logs.sh 24       # errors and form deliveries of the last 24 hours, grouped (az login)
+./scripts/ops/run-in-app.sh scripts/ops/queries/site-activity.js '2026-10-29 16:39'  # read-only counts from the private database
 ```
 
 `E2E_PORT=3017 npm run test:e2e` runs Playwright on its own port. Use it:
@@ -427,7 +436,7 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `README.md` | Scope, route list, integrations |
 | `ARCHITECTURE.md` | Stack, runtime modes, folder responsibilities, env vars |
 | `UI_SYSTEM.md` | Brand tokens, typography, radius, layout/motion conventions |
-| `AGENTS.md` | Agent operating rules — see caveat below |
+| `AGENTS.md` | Agent operating rules, the reporting format, working beside other agents |
 | `docs/DEV_SETUP.md` | Environment and Neon setup |
 | `docs/ERD.md` | Mermaid data model |
 | `docs/PUBLIC_UI_AUDIT.md` | Route inventory + responsive findings (375/768/1280) |
@@ -436,8 +445,12 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/SEO_AND_GEO.md` | **Read before touching metadata, structured data, the sitemap or llms.txt.** What the site does for search and AI answer engines, the 2026-10-10 audit, and the go-live steps (Search Console, Bing, Business Profile) |
 | `docs/LEGACY_REDIRECTS.md` | The old casa-bremen.de URLs and where each one redirects (`src/i18n/legacy-redirects.ts`): inventory, rules, judgement calls for CASA |
 | `docs/PRIVACY_POLICY.md` | **Read before changing a form, a recipient or a retention period.** The website's own privacy text, the facts it states, what must exist at launch for it to be true, and the open questions |
-| `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Nonprofit visibility work + production checklist |
-| `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** Independent units with file ownership, verification commands, and blockers |
+| `docs/GOOGLE_AD_GRANTS_COMPLIANCE.md` | Ad Grants eligibility and what the website must show (nonprofit visibility) |
+| `docs/GOOGLE_ADS.md` | **Read before touching the Ads account or ad tracking.** The Ad Grants account (approved 2026-10-30): the grant, its rules, measuring sign-ups with consent, search volumes, the campaigns and drafts, learners abroad, pending decisions |
+| `docs/GOOGLE_BUSINESS_PROFILE.md` | The Google Business Profile: what is on it, content rules, how an agent edits it, what is open |
+| `docs/PARALLEL_AGENT_WORK_BOARD.md` | **Start here when picking up work.** The open units after go-live, each with what to read, what it owns, when it is done and where it needs Rahman; the rules for parallel agents; who else is working on what |
+| `docs/OPERATIONS.md` | **Read before touching the live site or an outside account.** What runs where, which release is live, releasing, health checks and logs, read-only database queries, statistics tags, the accounts, git and PRs, the generated files outside git |
+| `docs/GO_LIVE.md` | The switch of casa-bremen.de on 2026-10-29: steps, record, rollback |
 | `docs/WEBSITE_EDITOR.md` | **Read before touching the website editor or making a page editable.** Content source maps, the catalog, drafts/releases/approval/scheduling, presence, languages, writing help |
 | `docs/OFFERS.md` | **Read before touching `/admin/offers`.** FileMaker's offers measured (396 offers, the bugs), the model, group offers on the four packages with extras and the own offer, the new-offer wizard, the engine, the design direction |
 | `docs/LETTERS.md` | **Read before adding a kind of letter.** The `letters` table (every letter as sent), the shared shape, the sheet, printing, standard texts, how to add a kind |
@@ -467,27 +480,11 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
 | `docs/WEBAPP_REVIEW.md` | Historical Feb 2026 audit, largely superseded |
 | `docs/RELEASE_CLEANUP_COPY.md` | September cleanup, copy decisions and launch handoff |
 
-### AGENTS.md caveat
+### AGENTS.md
 
-`AGENTS.md` sections 1, 4, 5, 6, and 7 are current and should be followed —
-especially the required reporting format (evidence → root cause → fix → files →
-verification).
-
-Sections 2 and 3 are **partly stale**. `requirePageRoles`, `requireApiRoles` and
-`requirePortalApiContext` do not exist — they were removed with the portal, and
-nothing replaced them. Ignore those specific names.
-
-`src/proxy.ts` DOES exist again as of 2026-09-08, but it is not what section 3
-means by "route protection": it does host routing for the staff workspace
-(`admin.casa-bremen.de` → `/admin`, and `/admin` 404s on the public host in
-production) and knows no session, so it cannot authenticate anything. Since
-2026-10-29 it also counts the public site's page loads after the response has
-gone (`src/lib/site-views.ts`, `/admin/statistics`; docs/SEO_AND_GEO.md §Statistics).
-The workspace's auth gate is its layouts plus `requireModule()` in every server
-action — see `docs/ADMIN_WORKSPACE.md`. Do not add a role check to `proxy.ts`.
-
-The `apiSuccess` / `apiError` and mock-mode-parity guidance in the same sections
-is still valid.
+`AGENTS.md` is current (its stale portal helpers were replaced on 2026-10-30). Follow it,
+especially the reporting format in §7 (evidence → root cause → fix → files → verification) and
+§8 on working beside other agents.
 
 ## Known open items
 
@@ -495,7 +492,8 @@ is still valid.
   the Lands Concepts Plesk zone, bound to `ca-casa-website` with a managed
   certificate; `src/proxy.ts` serves the workspace there, and `/admin` stays 404 on
   the public host (`CASA_ALLOW_ADMIN_ON_PUBLIC_HOST` unset). `CMS_PUBLIC_ORIGIN` and
-  `CMS_EDITOR_ORIGIN` were removed at the cutover (2026-10-29), so the website editor frames
+  `CMS_EDITOR_ORIGIN` were removed on 2026-10-30 once the office's DNS had the new address
+  (revision 0000112), so the website editor frames
   casa-bremen.de; **keep `neu.casa-bremen.de` bound to the
   app**: the day-one test's printed QR posters open `neu.casa-bremen.de/test` (docs/ENTRY_TEST.md). Rahman's owner account
   exists on the Azure database (`db-job.sh owner`); everyone else is added from the
@@ -560,7 +558,7 @@ is still valid.
   development has run on Node 22. Treat the doc's version floor as unverified.
 - ~~Course detail pages assume one universal template~~ **Resolved 2026-08-12.** The archetype
   registry is `src/config/courses/archetypes.ts` + `course-profiles.ts`. Add a course by adding
-  a profile entry, never by branching inside `src/app/courses/[slug]/page.tsx` — that file no
+  a profile entry, never by branching inside `src/app/(site)/[locale]/courses/[slug]/page.tsx` — that file no
   longer knows any course slug. A page's facts rail and section order come from its archetype;
   `scheduled-cohort` is the default, so an unregistered course keeps legacy behaviour.
   `professional-track` and `module-catalogue` exist but still need content (work board U5, U6).
@@ -594,10 +592,10 @@ is still valid.
   `.github/workflows/` — `quality.yml` is the only one, and it never deploys. A release is
   a deliberate manual run of `./infra/azure/deploy.sh`, which builds in ACR and pins the
   revision to the image digest. Merging is therefore safe; shipping is a separate act.
-- `main` is unprotected. That is a **deliberate choice while the site is still being
-  built** — branch protection would add review friction during active iteration, and the
-  site is not final and not yet live. **Enable branch protection before go-live**, at
-  minimum requiring the `quality` workflow to pass. Decision recorded 2026-08-16.
+- `main` is unprotected. That was a **deliberate choice while the site was being built**
+  (decision 2026-08-16). The site is live now, so protection requiring the `quality`
+  workflow is due, with Rahman's go (board unit H3). GitHub deletes merged branches by
+  itself since 2026-10-30.
 - `@neondatabase/serverless` is gone; both products run on one `pg` pool. The Azure work
   in `docs/AZURE_DEPLOYMENT_PLAN.md` §1 is done — the careers CV upload is now an explicit
   `BEGIN`/`INSERT`/`INSERT`/`COMMIT` and still needs a real test against a managed server
@@ -611,7 +609,14 @@ is still valid.
   (apex, www, admin, neu) are bound with managed certificates, and the old TYPO3 server
   (195.34.167.82) keeps only mail (`mail`, `smtp`, `imap`, `ftp`, SPF `a:mail.casa-bremen.de`).
   `docs/GO_LIVE.md` has the steps, the record, the rollback and what follows (Search Console,
-  `relaunch.casa-bremen.de`, the notice, branch protection).
+  `relaunch.casa-bremen.de`, the notice, branch protection); those follow-ups are board units
+  H1–H7. How the live site runs and is checked: `docs/OPERATIONS.md`.
+- **Google Ad Grants is approved (2026-10-30).** Google Ads account 343-341-7137, up to
+  10,000 USD a month of Search ads; the invitation, payments profile and terms are accepted.
+  Nothing runs yet. Google requires conversion tracking, and German guidance makes the ad's
+  click id a consent matter, so the plan is an unticked consent box in the forms plus a daily
+  list for Google's Data Manager (no cookie, no banner). Plan, rules, campaigns and the decisions
+  waiting for Rahman: `docs/GOOGLE_ADS.md`; work: board units A1–A5.
 
 ## Artifacts
 
