@@ -108,7 +108,8 @@ Also before the day:
 - Google Search Console (the domain is verified by TXT): submit `https://casa-bremen.de/sitemap.xml`,
   check coverage over the following days. Bing Webmaster Tools: import from Search Console.
   `docs/SEO_AND_GEO.md` has the rest (IndexNow, the Business Profile's website link).
-- `relaunch.casa-bremen.de` still points at the old server: remove it once nobody needs it.
+- ~~`relaunch.casa-bremen.de` still points at the old server: remove it once nobody needs it.~~
+  Done 2026-10-30: the DNS record is gone; the Plesk site itself stays until Rahman decides.
 - The „neue Website" notice runs six to eight weeks, then `enabled: false` in `src/config/site-notice.ts`.
 - Branch protection on `main`, requiring the quality workflow (CLAUDE.md, open items).
 - Keep the old server and its backup until the new site has run a few weeks without a rollback.
@@ -135,9 +136,17 @@ Also before the day:
   because on a network still seeing the old server the framed page came from the wrong origin and the
   editor waited for it forever. **Once both resolvers answer `20.79.72.159`:** remove the `.htaccess`
   lines and both `CMS_*` variables (`az containerapp update … --remove-env-vars CMS_PUBLIC_ORIGIN CMS_EDITOR_ORIGIN`).
+- **2026-10-30, both done.** The office resolver answered `20.79.72.159` at 08:08, and the `CMS_*`
+  variables were removed at 08:13 (revision 0000112). In the afternoon, with every resolver (Google, Cloudflare,
+  Telekom, Quad9, the office's) on the new address, the redirect block came out of
+  `t3-web/htdocs/.htaccess` in Plesk. The file is again byte for byte the original (SHA-256 checked
+  against `~/Downloads/htaccess`). The old server now answers casa-bremen.de with its own TYPO3 site,
+  which only a stale cache would still reach. The same afternoon the `relaunch` A record left the zone
+  (board unit H2).
 
 ## Rollback
 
 Plesk: apex A back to `195.34.167.82`, `www` back to CNAME `casa-bremen.de`. With TTL 300 the old site
-is back within minutes. The Azure bindings can stay; the step-1 changes (smtp/imap/ftp, SPF) are
+is back within minutes. (Since 2026-10-30 the old server no longer redirects to neu, so a rollback
+shows the old TYPO3 site directly, as it did before the switch.) The Azure bindings can stay; the step-1 changes (smtp/imap/ftp, SPF) are
 correct either way and stay too.
