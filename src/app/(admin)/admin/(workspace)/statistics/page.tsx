@@ -8,7 +8,9 @@ import { wsLocale, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import {
   campaigns,
-  firstVisit,
+  displayedLanguages,
+  registrationMetrics,
+  registrationDeliveryReview,
   languages,
   leads,
   registrants,
@@ -37,26 +39,23 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
   const { t, lang } = await getI18n();
   const range: StatRange = STAT_RANGES.find((days) => String(days) === requested) ?? 30;
 
-  const [totals, days, pages, origins, spoken, tagged, first, received, registered, places] = await Promise.all([
+  const [totals, days, pages, origins, spoken, tagged, received, registered, places, displayed, metrics, delivery] = await Promise.all([
     siteTotals(range),
     viewsByDay(range),
     topPages(range),
     sources(range),
     languages(range),
     campaigns(range),
-    firstVisit(range),
     leads(range),
     registrants(range),
     visitorCountries(range),
+    displayedLanguages(range),
+    registrationMetrics(range),
+    registrationDeliveryReview(),
   ]);
-  // The share of visits that ended in an enquiry or a registration counts only what came in since
-  // the site began counting visits; before that there is nothing to divide by.
-  const receivedSinceCounting = first ? await leads(range, first) : [];
   const number = (value: number) => new Intl.NumberFormat(wsLocale(lang)).format(value);
-  const sum = (list: readonly { count: number }[]) => list.reduce((total, item) => total + item.count, 0);
   const fromSearch = origins.filter((o) => o.kind === 'search').reduce((total, o) => total + o.visits, 0);
   const fromAi = origins.filter((o) => o.kind === 'ai').reduce((total, o) => total + o.visits, 0);
-  const rate = totals.visits >= 20 ? sum(receivedSinceCounting) / totals.visits : null;
   const languageName = new Intl.DisplayNames([wsLocale(lang)], { type: 'language' });
   const countryName = new Intl.DisplayNames([wsLocale(lang)], { type: 'region' });
   const peakAge = Math.max(1, ...registered.ages.map((age) => age.count));
@@ -94,14 +93,68 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
       </nav>
 
       <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Figure label={t('Besuche', 'Visits')} value={number(totals.visits)} />
-        <Figure label={t('Anfragen & Anmeldungen', 'Enquiries & registrations')} value={number(sum(received))} />
-        <Figure
-          label={t('Besuche mit Anfrage', 'Visits ending in an enquiry')}
-          value={rate === null ? '–' : `${new Intl.NumberFormat(wsLocale(lang), { maximumFractionDigits: 1 }).format(rate * 100)} %`}
-        />
+        <Figure label={t('Geschätzte Besuche', 'Estimated visits')} value={number(totals.visits)} />
+        <Figure label={t('Kursanmeldungen', 'Course registrations')} value={number(received.find((r) => r.kind === 'course')?.count ?? 0)} />
+        <Figure label={t('Prüfungsanmeldungen', 'Exam registrations')} value={number(received.find((r) => r.kind === 'exam')?.count ?? 0)} />
         <Figure label={t('Vom Handy', 'On a phone')} value={`${Math.round(totals.mobileShare * 100)} %`} />
       </div>
+      <p className="mb-4 text-sm text-[var(--casa-text-subtle)]">{t('Besuche sind geschätzte Seitenaufrufe beim Einstieg, keine einzelnen Personen. Interne Navigation wird nicht vollständig erfasst.', 'Visits are estimated landing-page loads, not individual people. Navigation within the site is not fully counted.')}</p>
+
+      <div className="mb-4 grid gap-4 lg:grid-cols-2">
+        {(['course', 'exam'] as const).map((form) => {
+          const count = (event: string, step?: string) => metrics.filter((m) => m.form === form && m.event === event && (!step || m.step === step)).reduce((n, m) => n + m.count, 0);
+          const submitted = received.find((r) => r.kind === form)?.count ?? 0;
+          return <Card key={form} title={form === 'course' ? t('Kursanmeldung: Schritte', 'Course registration: steps') : t('Prüfungsanmeldung: Schritte', 'Exam registration: steps')} icon={Icon.overview} tint="blue">
+            <p className="mb-3 text-sm text-[var(--casa-text-subtle)]">{t('Anonyme Ereignisse, keine verknüpften Personen: wiederholte Besuche und fehlende Ereignisse sind möglich. Keine Conversion-Rate.', 'Anonymous event counts, not linked people: repeat visits and missed events are possible. These are not conversion rates.')}</p>
+            <dl className="grid gap-2 text-sm">
+              {[
+                [t('Formular angezeigt', 'Form shown'), count('shown')],
+                [t('Formular begonnen', 'Form started'), count('started')],
+                [t('Auswahl abgeschlossen', 'Choice completed'), count('choice_completed')],
+                [t('Details abgeschlossen', 'Details completed'), count('details_completed')],
+                [t('Anmeldungen gespeichert', 'Registrations saved'), submitted],
+                [t('Prüffehler: Auswahl', 'Validation errors: choice'), count('validation_error', 'choice')],
+                [t('Prüffehler: Details', 'Validation errors: details'), count('validation_error', 'details')],
+                [t('Fehler beim Senden', 'Submission errors'), count('submit_error')],
+              ].map(([label, value]) => <div key={String(label)} className="flex justify-between gap-4"><dt>{label}</dt><dd className="font-semibold tabular-nums">{Number(value) === 0 && process.env.REGISTRATION_METRICS !== 'enabled' && label !== t('Anmeldungen gespeichert', 'Registrations saved') ? '–' : number(Number(value))}</dd></div>)}
+            </dl>
+            {count('validation_error') >= 10 && <div className="mt-4 border-t border-ws-line pt-3 text-sm">
+              <p className="mb-2 font-semibold">{t('Häufige Fehlerkategorien', 'Common error categories')}</p>
+              {([
+                ['level', t('Niveau', 'Level')], ['date', t('Termin', 'Date')], ['choice', t('Auswahl', 'Choice')],
+                ['contact', t('Kontaktangaben', 'Contact details')], ['personal', t('Persönliche Angaben', 'Personal details')],
+                ['terms', t('Bedingungen', 'Terms')], ['other', t('Andere Angaben', 'Other details')],
+              ] as const).map(([category, label]) => {
+                const value = metrics.filter((m) => m.form === form && m.event === 'validation_error' && m.category === category).reduce((n, m) => n + m.count, 0);
+                return value >= 10 ? <p key={category}>{label}: <strong>{number(value)}</strong></p> : null;
+              })}
+              <p className="mt-1 text-[var(--casa-text-subtle)]">{t('Nur Kategorien mit mindestens 10 Fehlern; jeder Versuch kann mehrfach zählen.', 'Only categories with at least 10 errors; repeated attempts can be counted.')}</p>
+            </div>}
+            {count('submit_error') >= 10 && <div className="mt-3 text-sm">{(['network', 'server'] as const).map((category) => {
+              const value = metrics.filter((m) => m.form === form && m.event === 'submit_error' && m.category === category).reduce((n, m) => n + m.count, 0);
+              return value >= 10 ? <p key={category}>{category === 'network' ? t('Netzwerkfehler', 'Network errors') : t('Server- oder sonstige Fehler', 'Server or other errors')}: <strong>{number(value)}</strong></p> : null;
+            })}</div>}
+            {count('shown') >= 10 && <div className="mt-4 border-t border-ws-line pt-3 text-sm">
+              <p className="mb-2 font-semibold">{t('Begonnene Formulare nach Sprache und Gerät', 'Forms started by language and device')}</p>
+              <p className="mb-2 text-[var(--casa-text-subtle)]">{t('Kleine Gruppen unter 10 Ereignissen werden nicht angezeigt.', 'Small groups with fewer than 10 events are hidden.')}</p>
+              {(['de', 'en'] as const).flatMap((locale) => (['mobile', 'tablet', 'desktop'] as const).map((device) => {
+                const started = metrics.filter((m) => m.form === form && m.locale === locale && m.device === device && m.event === 'started').reduce((n, m) => n + m.count, 0);
+                if (started < 10) return null;
+                const deviceLabel = device === 'mobile' ? t('Handy', 'Phone') : device === 'tablet' ? 'Tablet' : t('Computer', 'Computer');
+                const completed = metrics.filter((m) => m.form === form && m.locale === locale && m.device === device && m.event === 'details_completed').reduce((n, m) => n + m.count, 0);
+                const errors = metrics.filter((m) => m.form === form && m.locale === locale && m.device === device && m.event === 'validation_error').reduce((n, m) => n + m.count, 0);
+                const safeCount = (n: number) => n < 10 ? '<10' : number(n);
+                return <p key={`${locale}-${device}`}>{locale === 'de' ? t('Deutsch', 'German') : t('Englisch', 'English')} · {deviceLabel}: <strong>{number(started)}</strong> {t('begonnen', 'started')} · {safeCount(completed)} {t('Details abgeschlossen', 'details completed')} · {safeCount(errors)} {t('Prüffehler', 'validation errors')}</p>;
+              }))}
+            </div>}
+            {process.env.REGISTRATION_METRICS !== 'enabled' && <p className="mt-3 text-sm text-[var(--casa-text-subtle)]">{t('Schrittmessung ist nicht aktiviert; gespeicherte Anmeldungen werden trotzdem angezeigt.', 'Step measurement is not enabled; saved registrations are still shown.')}</p>}
+          </Card>;
+        })}
+      </div>
+      <Card title={t('E-Mail-Zustellung prüfen', 'Email delivery needs review')} icon={Icon.enquiries} tint="blue" className="mb-4">
+        <p className="text-sm">{t('Offene Prüfhinweise insgesamt (unabhängig vom Zeitraum):', 'Open review flags in total (not limited to the selected period):')} {t('Bestätigung an Anmeldende', 'Applicant acknowledgement')}: <strong>{number(delivery.registration_receipt_unconfirmed ?? 0)}</strong> · {t('Benachrichtigung an CASA', 'CASA notification')}: <strong>{number(delivery.registration_staff_notice_unconfirmed ?? 0)}</strong></p>
+        <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">{t('Ein Hinweis bedeutet unbestätigt, nicht zwingend fehlgeschlagen. Annahme durch den Anbieter bestätigt nicht den Posteingang.', 'A flag means unconfirmed, not necessarily failed. Provider acceptance does not guarantee inbox delivery.')}</p>
+      </Card>
 
       <Card title={t('Besuche pro Tag', 'Visits per day')} icon={Icon.overview} tint="blue" className="mb-4">
         <DayBars days={days} lang={lang} />
@@ -245,6 +298,11 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         </Card>
         </div>
       </div>
+
+      <Card title={t('Angezeigte Website-Sprache', 'Displayed website language')} icon={Icon.book} tint="ink" className="mt-4">
+        <p className="mb-2 text-sm text-[var(--casa-text-subtle)]">{t('Sprache der geschätzten Einstiegsaufrufe; unterscheidet sich von der Browsersprache und erfasst nicht jede interne Navigation.', 'Language of estimated landing-page loads; distinct from browser language and does not include every in-site navigation.')}</p>
+        {displayed.length ? <ul className="space-y-1 text-sm">{displayed.map((row) => <li key={row.locale}>{languageName.of(row.locale) ?? row.locale}: <strong>{number(row.count)}</strong></li>)}</ul> : <p className="text-sm">{t('Noch keine Aufrufe', 'No page loads yet')}</p>}
+      </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
         <Card title={t('Alter bei der Anmeldung', 'Age when registering')} icon={Icon.person} tint="green">

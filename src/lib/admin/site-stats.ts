@@ -202,3 +202,29 @@ export async function registrants(days: StatRange) {
     nationalities: nationalities.map((row) => ({ code: row.code?.trim() ?? null, raw: row.raw, count: Number(row.n) })),
   };
 }
+
+/** Displayed language of document loads, not a count of every client-side page view. */
+export async function displayedLanguages(days: StatRange) {
+  const rows = await query<{ locale: string; n: string }>(
+    `SELECT locale, count(*) AS n FROM site_page_views WHERE entry AND viewed_at >= ${SINCE}
+      GROUP BY locale ORDER BY n DESC`, [days]);
+  return rows.map((row) => ({ locale: row.locale, count: Number(row.n) }));
+}
+
+/** Aggregate browser events, never a session funnel: repeat visits and missed events are possible. */
+export async function registrationMetrics(days: StatRange) {
+  const rows = await query<{ form: 'course' | 'exam'; locale: 'de' | 'en'; device: string; event: string; step: string; category: string; n: string }>(
+    `SELECT form, locale, device, event, step, category, sum(count) AS n FROM registration_metric_counts
+      WHERE day >= (now() AT TIME ZONE 'Europe/Berlin')::date - ($1::int - 1)
+      GROUP BY form, locale, device, event, step, category`, [days]);
+  return rows.map((row) => ({ ...row, count: Number(row.n) }));
+}
+
+/** Current unresolved flags: provider acceptance is not proof of inbox delivery. */
+export async function registrationDeliveryReview() {
+  const rows = await query<{ code: string; n: string }>(
+    `SELECT code, count(*) AS n FROM record_flags
+      WHERE resolved_at IS NULL AND code IN ('registration_receipt_unconfirmed', 'registration_staff_notice_unconfirmed')
+      GROUP BY code`);
+  return Object.fromEntries(rows.map((row) => [row.code, Number(row.n)]));
+}

@@ -36,6 +36,7 @@ import { RegistrationStepper, RegistrationTabs } from '@/components/registration
 import { NextStepsTimeline } from '@/components/sections/next-steps-timeline';
 import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
+import { metricFieldCategory, recordRegistrationMetric } from '@/lib/analytics/registration-metrics';
 import { confirmationFollowUp, confirmationNotice } from '@/lib/notifications/confirmation-notice';
 import type { RegistrationCourseCatalog, RegistrationExamCatalog } from '@/lib/content/types';
 import { clockRange, formatDay } from '@/lib/registration/term-format';
@@ -110,6 +111,18 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
   const { pickTree, say } = useSiteCopy();
   const isDe = catalog.locale === 'de';
   const t = (en: string, de: string) => (isDe ? de : en);
+  const metricSeen = useRef(new Set<string>());
+  const metric = (event: 'shown' | 'started' | 'choice_completed' | 'details_completed' | 'validation_error' | 'submit_error', metricStep: 'choice' | 'details' | 'review', once = false, category: 'none' | 'level' | 'date' | 'choice' | 'contact' | 'personal' | 'terms' | 'other' | 'network' | 'server' = 'none') => {
+    const key = `${event}:${metricStep}`;
+    if (once && metricSeen.current.has(key)) return;
+    if (once) metricSeen.current.add(key);
+    recordRegistrationMetric({ form: 'course', locale: catalog.locale, event, step: metricStep, category });
+  };
+  useEffect(() => {
+    if (metricSeen.current.has('shown:choice')) return;
+    metricSeen.current.add('shown:choice');
+    recordRegistrationMetric({ form: 'course', locale: catalog.locale, event: 'shown', step: 'choice', category: 'none' });
+  }, [catalog.locale]);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -261,6 +274,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
         locale: catalog.locale,
       });
     } catch (error: unknown) {
+      metric('submit_error', 'review', false, error instanceof TypeError ? 'network' : 'server');
       // A network failure's own message ("Failed to fetch") is the browser's, not ours.
       const message =
         error instanceof Error && !(error instanceof TypeError)
@@ -314,6 +328,8 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
     if (valid && issues.length === 0) {
       stepChanged.current = true;
       setStepFailures(0);
+      if (step === 1) metric('choice_completed', 'choice', true);
+      if (step === 2) metric('details_completed', 'details', true);
       setStep((current) => Math.min(current + 1, stepItems.length));
       return;
     }
@@ -334,6 +350,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
       invalidFieldId.current = firstInvalid ? (FIELD_ELEMENT_IDS[firstInvalid] ?? firstInvalid) : null;
     }
     setStepFailures((count) => count + 1);
+    metric('validation_error', step === 1 ? 'choice' : step === 2 ? 'details' : 'review', false, metricFieldCategory(invalidFieldId.current));
 
     trackCasaEvent('form_error', {
       form: 'course_registration',
@@ -361,7 +378,9 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
       </div>
 
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onFocusCapture={() => metric('started', 'choice', true)}
+        onClickCapture={() => metric('started', 'choice', true)}
+        onSubmit={form.handleSubmit(onSubmit, () => metric('validation_error', 'review'))}
         className="mt-7"
         noValidate
         data-casa-track-form="course_registration"
