@@ -10,6 +10,8 @@ vi.mock('@/i18n/navigation', () => ({
   ),
 }));
 vi.mock('@/lib/analytics/client', () => ({ trackCasaEvent: vi.fn() }));
+vi.mock('@/lib/analytics/registration-metrics', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/analytics/registration-metrics')>()), recordRegistrationMetric: vi.fn() }));
+import { recordRegistrationMetric } from '@/lib/analytics/registration-metrics';
 
 import { CourseWizard } from '../course-wizard';
 import { ExamWizard } from '../exam-wizard';
@@ -71,6 +73,7 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
+  vi.mocked(recordRegistrationMetric).mockClear();
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -109,7 +112,15 @@ describe.each([
     () => <ExamWizard catalog={examCatalogWithoutDates} />,
     '#exam-session',
   ],
-])('%s registration wizard', (_, render, stepTwoHeading, renderWithoutDates, dateSelect) => {
+])('%s registration wizard', (formKind, render, stepTwoHeading, renderWithoutDates, dateSelect) => {
+  it('records progress and safe validation categories without form values', async () => {
+    await act(async () => root.render(render()));
+    expect(recordRegistrationMetric).toHaveBeenCalledWith(expect.objectContaining({ form: formKind, event: 'shown' }));
+    await click(button('Weiter'));
+    expect(recordRegistrationMetric).toHaveBeenCalledWith(expect.objectContaining({ form: formKind, event: 'choice_completed' }));
+    await click(button('Weiter'));
+    expect(recordRegistrationMetric).toHaveBeenCalledWith(expect.objectContaining({ form: formKind, event: 'validation_error', step: 'details', category: 'personal' }));
+  });
   it('shows no invented availability tag for the selected option', async () => {
     await act(async () => root.render(render()));
     expect(container.textContent).not.toMatch(/Plätze frei|Nur wenige Plätze|Warteliste/);

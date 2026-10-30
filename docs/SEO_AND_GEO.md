@@ -57,8 +57,9 @@ Accept-Language: which of the six prepared languages are worth routing) and, on 
 page, the campaign its link carried (utm_source · utm_campaign, or „Google Ads" for a gclid click,
 the Ad Grants clicks). The screen adds, from the workspace's own records, what came in through the
 website in the period (registrations, enquiries by form, appointments booked online, applications),
-the share of visits ending in one, and the age groups and nationalities of those who registered
-(counts from the registrations' parsed birth date and nationality code).
+separate registration counts, and the age groups and nationalities of those who registered
+(counts from the registrations' parsed birth date and nationality code). It does not infer a
+conversion rate from unrelated visit and submission totals.
 
 Since 0109 a visit's first page also keeps its country (Rahman's go, 2026-10-29): the IP address is
 looked up in DB-IP's free country database (IP to Country Lite, CC BY 4.0, credited on the screen)
@@ -92,3 +93,22 @@ the consent question settled first (privacy owner). Until then:
 4. **Google Business Profile:** make sure the website field says `https://casa-bremen.de/` and
    that name, address and phone match the site exactly.
 5. Check one course, one exam and the job page in Google's Rich Results Test.
+
+### Registration measurement (prepared, disabled by default)
+
+The registration dashboard shows accepted records and unresolved mail review flags from the
+workspace. Optional browser events are **not linked** to one another or to records, and are not
+conversion rates. They use a closed vocabulary and are aggregated by Bremen day, form, displayed
+language and broad device type; no form values, URLs or visitor IDs are retained. Validation
+counts describe attempts, so one person can generate more than one error. Records use the selected
+rolling period while browser aggregates use calendar days; they are not a cohort.
+
+Before activation, the privacy owner must review the exact processing, legal basis, retention,
+consent requirements and privacy notice. Collection is off by default. After review, both the
+build-time `NEXT_PUBLIC_REGISTRATION_METRICS=enabled` and server runtime
+`REGISTRATION_METRICS=enabled` are required. The migration creates only an empty table. A daily
+aggregate older than 13 months is removed opportunistically during collection; implement a
+scheduled retention job if a firm deletion deadline is required. The endpoint uses the existing
+in-memory request limiter, which temporarily holds the client address. Browser events are best
+effort, can be blocked, and cannot reconstruct a journey. Small displayed language/device groups
+under ten starts are suppressed. No retroactive event history exists.
