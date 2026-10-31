@@ -4,7 +4,15 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { WaitlistForm } from '../../catalogue/waitlist-forms';
-import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction } from '../actions';
+import {
+  bookRegistrationAction,
+  dismissSchoolmanBookingAction,
+  editRegistrationAction,
+  linkSchoolmanBookingAction,
+  resolveRegistrationDeliveryAction,
+  setLineDeclinedAction,
+  unlinkSchoolmanBookingAction,
+} from '../actions';
 import { courseNameResolver } from '../course-names';
 import { formatDay, formatRange, parseOptionLabel, type ParsedOption } from '../option-label';
 import { examLevel, levelWord, registrationChecks, registrationTitle, type RegistrationCheck } from '../summary';
@@ -18,6 +26,7 @@ import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Badge, BirthDate, Button, ButtonLink, Card, DetailList, Field, Input, RecordHeader, Select, Textarea } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
+import { shortDay } from '@/lib/admin/days';
 import { bookingOffer, stayVocabulary } from '@/lib/admin/booking-offer';
 import { levelFree, levelPlaces } from '@/lib/admin/booking-offer-types';
 import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
@@ -34,6 +43,7 @@ import { listNotes } from '@/lib/admin/notes';
 import { learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
 import { getRegistration, registrationTypeLabel, type LineOutcome, type RegistrationCourseLine, type RegistrationExamLine } from '@/lib/admin/registrations';
+import { schoolmanCandidates, type SchoolmanCandidate } from '@/lib/admin/registration-schoolman';
 import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { startLevelPlaces } from '@/lib/admin/waitlist';
@@ -78,7 +88,7 @@ export default async function RegistrationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string }>;
+  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string; unlink?: string }>;
 }) {
   const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('registrations')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
@@ -132,7 +142,7 @@ export default async function RegistrationPage({
   );
 
   const lineIds = [...registration.courses.map((c) => ['course_registration', c.id] as const), ...registration.exams.map((e) => ['exam_registration', e.id] as const)];
-  const [notes, activity, staff, flags, person, letters, offer, vocabulary, history] = await Promise.all([
+  const [notes, activity, staff, flags, person, letters, offer, vocabulary, history, inSchoolman] = await Promise.all([
     Promise.all([listNotes('registration', registration.id), ...lineIds.map(([entity, lineId]) => listNotes(entity, lineId))]).then((all) => all.flat()),
     Promise.all([activityFor('registration', registration.id), ...lineIds.map(([entity, lineId]) => activityFor(entity, lineId))]).then((all) => all.flat()),
     listAssignableStaff(),
@@ -142,6 +152,8 @@ export default async function RegistrationPage({
     canBook && (query.book || query.queue) ? bookingOffer() : null,
     canBook && registration.stay?.accommodationRequired && bookable.length ? stayVocabulary() : null,
     canBook && personId && bookable.length ? learnerHistory(personId).catch(() => null) : null,
+    // „In SchoolMan gebucht?" (0113): the SchoolMan bookings that may have been made from an open line.
+    open.length ? schoolmanCandidates(registration.id) : [],
   ]);
   const [candidates, confirmed] = person
     ? await Promise.all([
@@ -424,6 +436,25 @@ export default async function RegistrationPage({
                       </FormDialog>
                     </div>
                   ) : null}
+                  {canEdit && query.unlink === line.id && line.outcome.kind === 'booked' && line.outcome.schoolman ? (
+                    <form action={unlinkSchoolmanBookingAction} className="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-[#fdecec]/60 px-3.5 py-2.5 ring-1 ring-[#f5cfcd] ring-inset">
+                      <input type="hidden" name="id" value={registration.id} />
+                      <input type="hidden" name="lineId" value={line.id} />
+                      <input type="hidden" name="kind" value={line.kind} />
+                      <input type="hidden" name="confirmed" value="1" />
+                      <span className="text-[0.84rem] font-semibold text-[var(--casa-ink)]">
+                        {t(`${lineName(line)} von ${line.outcome.number} lösen?`, `Unlink ${lineName(line)} from ${line.outcome.number}?`)}
+                      </span>
+                      <span className="ml-auto flex gap-2">
+                        <ButtonLink href={`${here}#line-${line.id}`} variant="ghost" size="sm">
+                          {t('Abbrechen', 'Cancel')}
+                        </ButtonLink>
+                        <Button type="submit" variant="danger" size="sm">
+                          {t('Lösen', 'Unlink')}
+                        </Button>
+                      </span>
+                    </form>
+                  ) : null}
                   {canEdit && query.decline === line.id && isOpen(line.outcome) ? (
                     <form action={setLineDeclinedAction} className="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-[#fdecec]/60 px-3.5 py-2.5 ring-1 ring-[#f5cfcd] ring-inset">
                       <input type="hidden" name="id" value={registration.id} />
@@ -487,6 +518,8 @@ export default async function RegistrationPage({
               </figure>
             ) : null}
           </SubmissionCard>
+
+          {inSchoolman.length ? <InSchoolman candidates={inSchoolman} lines={lines} registrationId={registration.id} canEdit={canEdit} t={t} lang={lang} /> : null}
 
           {deliveryFlags.length ? (
             <Card title={t('E-Mail-Versand prüfen', 'Check email delivery')} icon={Icon.attention} tint="sun">
@@ -726,7 +759,7 @@ function Outcome({ outcome, t }: { outcome: LineOutcome; t: T }) {
       return (
         <Link href={`/admin/bookings/${outcome.bookingId}`} className="hover:opacity-80">
           <Badge tone={outcome.cancelled ? 'quiet' : 'positive'}>
-            {outcome.cancelled ? t('Storniert', 'Cancelled') : t('Gebucht', 'Booked')} · {outcome.number}
+            {outcome.cancelled ? t('Storniert', 'Cancelled') : outcome.schoolman ? t('In SchoolMan gebucht', 'Booked in SchoolMan') : t('Gebucht', 'Booked')} · {outcome.number}
           </Badge>
         </Link>
       );
@@ -743,6 +776,10 @@ function Outcome({ outcome, t }: { outcome: LineOutcome; t: T }) {
 
 /** Behind „…" on a line: its queue, a later start by letter, declining it. */
 function lineActions(line: Line, { here, canBook, canEdit, t }: { here: string; canBook: boolean; canEdit: boolean; t: T }): RowAction[] {
+  // A line linked to a booking made in SchoolMan (0113) can be unlinked, should the link be wrong.
+  if (canEdit && line.outcome.kind === 'booked' && line.outcome.schoolman) {
+    return [{ label: t('Verknüpfung lösen', 'Unlink'), href: `${here}?unlink=${line.id}#line-${line.id}` }];
+  }
   if (!isOpen(line.outcome)) return [];
   const actions: RowAction[] = [];
   if (line.kind === 'course' && line.courseInstanceId && canBook && line.outcome.kind !== 'waiting') {
@@ -802,3 +839,96 @@ function OriginalValues({ original, current, lang }: { original: Record<string, 
     </Card>
   );
 }
+
+/** Why a SchoolMan booking is offered as the line's: what agrees, and what does not. */
+function candidateReasons(c: SchoolmanCandidate, t: T): { text: string; tone: 'positive' | 'warning' | 'neutral' }[] {
+  return [
+    ...(c.samePerson ? [{ text: t('dieselbe Person', 'the same person'), tone: 'positive' as const }] : []),
+    ...(c.byEmail ? [{ text: t('gleiche E-Mail', 'same email'), tone: 'positive' as const }] : []),
+    ...(c.byName ? [{ text: t('gleicher Name', 'same name'), tone: 'positive' as const }] : []),
+    ...(c.byBirth ? [{ text: t('gleiches Geburtsdatum', 'same date of birth'), tone: 'positive' as const }] : []),
+    c.exact
+      ? { text: c.lineKind === 'exam' ? t('gleicher Prüfungstermin', 'same sitting') : t('gleicher Termin', 'same start'), tone: 'positive' as const }
+      : { text: c.lineKind === 'exam' ? t('anderer Prüfungstermin', 'another sitting') : t('anderer Termin', 'another start'), tone: 'warning' as const },
+    ...(c.bookedAfter ? [] : [{ text: t('vor der Anmeldung gebucht', 'booked before the registration'), tone: 'warning' as const }]),
+  ];
+}
+
+/**
+ * „In SchoolMan gebucht?" (0113): the bookings a colleague made in SchoolMan that may be an open line's.
+ * What the bridge was sure of is linked already; these it leaves to a colleague: „Verknüpfen" settles the
+ * line and makes the two people one, „Nicht dieselbe" stops asking.
+ */
+function InSchoolman({
+  candidates,
+  lines,
+  registrationId,
+  canEdit,
+  t,
+  lang,
+}: {
+  candidates: readonly SchoolmanCandidate[];
+  lines: readonly Line[];
+  registrationId: string;
+  canEdit: boolean;
+  t: T;
+  lang: WsLang;
+}) {
+  const day = (value: string | null) => (value ? new Date(`${value}T00:00:00Z`) : null);
+  return (
+    <Card title={t('In SchoolMan gebucht?', 'Booked in SchoolMan?')} icon={Icon.bookings} tint="blue">
+      <ul className="divide-y divide-ws-line-soft">
+        {candidates.map((c) => {
+          const line = lines.find((l) => l.id === c.lineId);
+          const from = day(c.from);
+          return (
+            <li key={`${c.lineId}-${c.bookingId}`} className="flex flex-wrap items-start gap-x-4 gap-y-3 py-3.5 first:pt-0 last:pb-0">
+              <div className="min-w-0 flex-1">
+                <p className="text-[0.92rem] font-semibold text-[var(--casa-ink)]">
+                  <Link href={`/admin/bookings/${c.bookingId}`} className="hover:underline">
+                    {c.bookingNumber}
+                  </Link>
+                  {c.what ? <span className="font-normal text-[#2b3546]"> · {c.what}</span> : null}
+                  {from ? <span className="font-normal text-[#2b3546]"> · {c.lineKind === 'exam' ? formatDay(from, lang, true) : formatRange(from, day(c.to), lang)}</span> : null}
+                </p>
+                <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
+                  {c.learnerName} · {t('in SchoolMan angelegt am', 'made in SchoolMan on')} {shortDay(c.bookedAt, lang)}
+                  {line ? ` · ${t('für', 'for')} ${lineName(line)}` : ''}
+                </p>
+                <p className="mt-2 flex flex-wrap gap-1.5">
+                  {candidateReasons(c, t).map((reason) => (
+                    <Badge key={reason.text} tone={reason.tone}>
+                      {reason.text}
+                    </Badge>
+                  ))}
+                </p>
+              </div>
+              {canEdit ? (
+                <div className="flex shrink-0 items-center gap-2">
+                  <form action={dismissSchoolmanBookingAction}>
+                    <input type="hidden" name="id" value={registrationId} />
+                    <input type="hidden" name="lineId" value={c.lineId} />
+                    <input type="hidden" name="bookingId" value={c.bookingId} />
+                    <Button type="submit" variant="ghost" size="sm">
+                      {t('Nicht dieselbe', 'Not the same')}
+                    </Button>
+                  </form>
+                  <form action={linkSchoolmanBookingAction}>
+                    <input type="hidden" name="id" value={registrationId} />
+                    <input type="hidden" name="lineId" value={c.lineId} />
+                    <input type="hidden" name="bookingId" value={c.bookingId} />
+                    <input type="hidden" name="kind" value={c.lineKind} />
+                    <Button type="submit" variant="secondary" size="sm">
+                      {t('Verknüpfen', 'Link')}
+                    </Button>
+                  </form>
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+}
+

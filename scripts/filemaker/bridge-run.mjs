@@ -48,6 +48,21 @@ export function importStep(importer, input) {
   });
 }
 
+/**
+ * The website registrations SchoolMan has now booked (0113): every sure match linked to its booking, the
+ * rest left for a colleague on the Anmeldung. At the end of every run, whichever steps ran — the learner
+ * may have registered online after the booking came across. Never fails a run: the link waits for the next.
+ */
+export async function linkRegistrations(client) {
+  try {
+    if (!(await client.query(`SELECT to_regproc('link_registrations_to_schoolman') AS f`)).rows[0].f) return;
+    const [{ n }] = (await client.query(`SELECT link_registrations_to_schoolman() AS n`)).rows;
+    if (n) console.log(`${n} website registration line${n === 1 ? '' : 's'} linked to the SchoolMan booking made from ${n === 1 ? 'it' : 'them'}`);
+  } catch (error) {
+    console.error(`linking website registrations failed: ${error.message}`);
+  }
+}
+
 export function printCounts(before, after) {
   console.log('\nrows        before → after');
   for (const table of Object.keys(after)) console.log(`  ${table.padEnd(16)} ${String(before[table] ?? '').padStart(7)} → ${after[table]}`);

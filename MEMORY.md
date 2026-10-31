@@ -2958,3 +2958,21 @@ departed colleague's account, and CT 103 already had Docker, a link to FileMaker
 - The Klassenbuch monitor watches it through `/etc/klassenbuch-monitor.json` (no change to its code): stopped,
   restarted, or a line saying „failed" — so `sync.mjs` now writes „<table> failed: …" and „tick failed: …".
 - docs/schoolman/MIGRATION.md §1 and §5 have the runbook.
+
+## 60. A website registration finds the SchoolMan booking made from it (2026-10-31)
+
+Rahman, for the parallel phase: the team books website registrations in SchoolMan, the sync brings each in
+as a second person, and the Anmeldung stays open though it is booked. Migration 0113:
+
+- `registration_schoolman_candidates()` (one rule, SQL): open lines of the last half year × SchoolMan bookings of
+  a person with the same address / surname + birthday / full name, fitting the start or sitting; *sure* = exact
+  fit, booked after the registration, same person (address + birthday or full name), unique both ways.
+- `link_registration_line()` links one (booking → line, line settled, website person merged into SchoolMan's,
+  flags answered, history); `link_registrations_to_schoolman()` links every sure one at the end of every bridge
+  run (`linkRegistrations` in bridge-run.mjs, both runners).
+- The Anmeldung asks the rest („In SchoolMan gebucht?": Verknüpfen / Nicht dieselbe); the list marks them; a
+  linked line can be unlinked (and is then not linked back). Tested on the local copy in rolled-back
+  transactions: exact course and exam matches link, a sibling from the same address and a booking made
+  before the registration are only asked.
+- docs/ADMIN_WORKSPACE.md §Website registrations and SchoolMan bookings.
+
