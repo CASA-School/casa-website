@@ -169,7 +169,7 @@ describe('course registration catalog (fallback mode)', () => {
 
   it('gives an exam page its own preparation terms, the ones the form offers', async () => {
     setClock('2026-10-31T10:00:00+01:00');
-    const [c1, b2] = await Promise.all([getPreparationTerms('telc_c1_hochschule', 'de'), getPreparationTerms('telc_b2', 'de')]);
+    const [c1, b2] = await Promise.all([getPreparationTerms('de', 'telc_c1_hochschule'), getPreparationTerms('de', 'telc_b2')]);
 
     expect(c1.slice(0, 3).map((term) => term.startDate)).toEqual(['2027-01-04', '2027-02-01', '2027-03-01']);
     expect(b2).toEqual([]);

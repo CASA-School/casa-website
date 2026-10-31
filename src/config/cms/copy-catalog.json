@@ -893,6 +893,16 @@
   ],
   "pages": []
  },
+ "t.am-nach-deinem-vorbereitungskurs.1yhneqg": {
+  "de": "{exam} am {date}, nach deinem Vorbereitungskurs",
+  "en": "{exam} on {date}, after your preparation course",
+  "files": [
+   "src/components/registration/course-choices.tsx"
+  ],
+  "pages": [
+   "/registration/course"
+  ]
+ },
  "t.am-tisch-der-gastfamilie.1yrvhly": {
   "de": "Am Tisch der Gastfamilie",
   "en": "At the host family's table",
@@ -15261,6 +15271,16 @@
    "/careers"
   ]
  },
+ "t.moechtest-du-dich-vorbereiten.14fugfq": {
+  "de": "Möchtest du dich vorbereiten? Unser Vorbereitungskurs vom {dates} führt zu diesem Termin, und die Prüfung meldest du dort gleich mit an.",
+  "en": "Would you like to prepare? Our preparation course from {dates} leads up to this date, and you can register for the exam there too.",
+  "files": [
+   "src/components/registration/exam-wizard.tsx"
+  ],
+  "pages": [
+   "/registration/exam"
+  ]
+ },
  "t.moechtest-du-uns-noch.1wluyfl": {
   "de": "Möchtest du uns noch etwas sagen? (optional)",
   "en": "Anything else you’d like to tell us? (optional)",
@@ -24974,6 +24994,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.zum-vorbereitungskurs.13jogqu": {
+  "de": "Zum Vorbereitungskurs",
+  "en": "To the preparation course",
+  "files": [
+   "src/components/registration/exam-wizard.tsx"
+  ],
+  "pages": [
+   "/registration/exam"
   ]
  },
  "t.zur-casa-startseite.ldc95j": {

@@ -35,8 +35,9 @@ import { footerConfig } from '@/config/footer';
 import { trackCasaEvent } from '@/lib/analytics/client';
 import { metricFieldCategory, recordRegistrationMetric } from '@/lib/analytics/registration-metrics';
 import { confirmationFollowUp, confirmationNotice } from '@/lib/notifications/confirmation-notice';
-import type { RegistrationExamCatalog } from '@/lib/content/types';
-import { formatDay } from '@/lib/registration/term-format';
+import type { CourseRegistrationOption, RegistrationExamCatalog } from '@/lib/content/types';
+import { examAfterPreparation } from '@/lib/registration/preparation';
+import { formatDay, termRange } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { examTypeIcons3d, formStepIcons3d } from '@/config/icons-3d';
 import { createExamRegistrationFormSchema } from '@/lib/validation/registration-submissions';
@@ -48,6 +49,8 @@ type FormSubmissionData = z.output<RegistrationSchema>;
 
 type ExamWizardProps = {
   catalog: RegistrationExamCatalog;
+  /** The preparation courses the course form offers: one that leads to the chosen sitting is pointed out. */
+  preparations?: Array<Pick<CourseRegistrationOption, 'id' | 'exam' | 'startDate' | 'endDate'>>;
 };
 
 type ExamRegistrationApiResult = {
@@ -69,7 +72,7 @@ const FIELD_ELEMENT_IDS: Partial<Record<keyof FormData, string>> = {
   registrationType: 'registration-type',
 };
 
-export function ExamWizard({ catalog }: ExamWizardProps) {
+export function ExamWizard({ catalog, preparations = [] }: ExamWizardProps) {
   const { pickTree, say } = useSiteCopy();
   const isDe = catalog.locale === 'de';
   const t = (en: string, de: string) => (isDe ? de : en);
@@ -174,6 +177,10 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
     () => selectedOptions.find((option) => option.id === selectedExamSessionId) || null,
     [selectedOptions, selectedExamSessionId]
   );
+  // The preparation course that leads to this sitting, the nearest before it (lib/registration/preparation).
+  const preparation = selectedOption
+    ? preparations.filter((course) => course.exam === selectedExamType?.code && examAfterPreparation([selectedOption], course.endDate, (option) => option.startsAt)).at(-1)
+    : undefined;
   const stepItems = [{ title: t('Exam', 'Prüfung') }, { title: t('Details', 'Daten') }, { title: t('Review', 'Prüfen') }];
   const stepFields = FIELDS_BY_STEP[step - 1] ?? [];
   const showStepAlert = stepFailures > 0 && stepFields.some((name) => errors[name]);
@@ -362,6 +369,23 @@ export function ExamWizard({ catalog }: ExamWizardProps) {
                 emptyText={t('There are no dates for this exam yet.', 'Für diese Prüfung gibt es noch keine Termine.')}
               />
               {selectedOption ? <p className={formHintClassName}>{sittingFacts(selectedOption, catalog.locale)}</p> : null}
+              {/* Pointed out, not offered here: the course form books the course and this exam together (2026-10-31). */}
+              {preparation ? (
+                <p className={formHintClassName}>
+                  {say(
+                    catalog.locale,
+                    'Möchtest du dich vorbereiten? Unser Vorbereitungskurs vom {dates} führt zu diesem Termin, und die Prüfung meldest du dort gleich mit an.',
+                    'Would you like to prepare? Our preparation course from {dates} leads up to this date, and you can register for the exam there too.',
+                    { dates: termRange(preparation.startDate, preparation.endDate, catalog.locale) }
+                  )}{' '}
+                  <Link
+                    href={`/registration/course?courseId=${encodeURIComponent(preparation.id)}`}
+                    className="font-semibold text-[var(--casa-accent-text)] underline decoration-[color:var(--casa-sand)] underline-offset-4 hover:decoration-current"
+                  >
+                    {say(catalog.locale, 'Zum Vorbereitungskurs', 'To the preparation course')}
+                  </Link>
+                </p>
+              ) : null}
             </div>
 
             <PillChoices

@@ -18,7 +18,7 @@ import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { publishedPrices } from '@/lib/content/published-prices.server';
 import { CourseTermTable, type CourseTermDate } from '@/components/courses/course-term-table';
-import { bremenDate } from '@/lib/appointments/schedule';
+import { examAfterPreparation } from '@/lib/registration/preparation';
 import { scheduleLine } from '@/lib/registration/term-format';
 import { intl, pickTree, say } from '@/lib/cms/copy';
 
@@ -170,10 +170,9 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
    * course pages' date card (2026-10-31): a sentence of three date ranges in a bullet was hard to
    * read. Each course is said with the exam day it leads to, the first sitting after it ends.
    */
-  const preparationTerms = isB2 || isC1 ? await getPreparationTerms(isC1 ? 'telc_c1_hochschule' : 'telc_b2', locale) : [];
-  const examAfter = (end: string) => detail.sessions.find((sitting) => bremenDate(new Date(sitting.starts_at)) > end);
+  const preparationTerms = isB2 || isC1 ? await getPreparationTerms(locale, isC1 ? 'telc_c1_hochschule' : 'telc_b2') : [];
   const preparationDates: CourseTermDate[] = preparationTerms.map((term) => {
-    const exam = examAfter(term.endDate);
+    const exam = examAfterPreparation(detail.sessions, term.endDate, (sitting) => sitting.starts_at);
     return {
       id: term.id,
       start: term.startDate,
