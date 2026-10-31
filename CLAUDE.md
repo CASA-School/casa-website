@@ -276,8 +276,9 @@ Today (the day board, the FileMaker-style control room) and the rota were remove
 request; `day_tasks` stays in the database. `docs/ADMIN_WORKSPACE.md` §Overview.
 
 **Workspace design standards.** A section is one white block and the canvas
-between sections separates them — a card header is white with a rule, never a
-grey band the same value as the page. A field title is a label (12px sentence
+between sections separates them — a section's head is a navy band with white
+type (`.ws-head-band`, 2026-10-31), never a pale band near the page's own grey; the
+hues mean something (sessions, course/stay/programme, a visa) and stay off heads. A field title is a label (12px sentence
 case), not an uppercase eyebrow — in `DetailList` and table column
 heads. One primary button per screen. Never show a raw uuid as a field, and
 never give plumbing a badge in the rail.
