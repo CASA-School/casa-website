@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 /**
  * A room and a visa, each its own section in its own colour (2026-10-31, Rahman: „unterkunft should have an
  * identifying color and even on its own section and visum as well so it is more prominent"): the stay's
- * blue and the visa's violet, the same in the head of the Anmeldung and on the list. Each says what was
+ * blue and the visa's orange (that of „Unter Beobachtung"), the same in the head of the Anmeldung and on the list. Each says what was
  * asked, and how far it has come — booked, placed; the letter for the embassy sent.
  */
 
@@ -24,7 +24,7 @@ const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.
  */
 const EDGE = {
   stay: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]',
-  visa: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#8a5cd6]',
+  visa: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#d99a00]',
 } as const;
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
@@ -136,13 +136,13 @@ export function VisaCard({
     <Card
       title={t('Visumshilfe', 'Visa support')}
       icon={Icon.globe}
-      tint="violet"
+      tint="orange"
       className={EDGE.visa}
       actions={
         done === steps.length ? (
           <Badge tone="positive">{t('Brief für die Botschaft verschickt', 'Embassy letter sent')}</Badge>
         ) : (
-          <Badge tone="neutral" className="bg-[#f1ebfd] text-[#5b2ea6] ring-[#ddd0f6]">
+          <Badge tone="visa">
             {t(`${done} von ${steps.length} erledigt`, `${done} of ${steps.length} done`)}
           </Badge>
         )
@@ -158,7 +158,7 @@ export function VisaCard({
               aria-hidden="true"
               className={cn(
                 'mt-px grid size-5 shrink-0 place-items-center rounded-full text-[0.66rem] font-extrabold [&_svg]:size-3',
-                step.done ? 'bg-[#7a3fc8] text-white' : 'bg-white text-[#7a3fc8] ring-[1.5px] ring-[#c4a9ef] ring-inset'
+                step.done ? 'bg-[#d99a00] text-white' : 'bg-white text-[#8a5a00] ring-[1.5px] ring-[#ebd298] ring-inset'
               )}
             >
               {step.done ? Icon.check : i + 1}
@@ -174,7 +174,7 @@ export function VisaCard({
         <div className="mt-1 flex justify-end border-t border-ws-line pt-3">
           <Link
             href={action.href}
-            className="inline-flex h-9 items-center rounded-lg border border-[#c4a9ef] bg-white px-4 text-sm font-semibold text-[#7a3fc8] transition-colors hover:border-[#7a3fc8] hover:bg-[#f6f1fe]"
+            className="inline-flex h-9 items-center rounded-lg border border-[#ebd298] bg-white px-4 text-sm font-semibold text-[#6e4700] transition-colors hover:border-[#d99a00] hover:bg-[#fff8e8]"
           >
             {action.label}
           </Link>
