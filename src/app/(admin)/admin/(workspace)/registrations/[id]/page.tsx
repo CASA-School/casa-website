@@ -4,15 +4,16 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { WaitlistForm } from '../../catalogue/waitlist-forms';
-import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction } from '../actions';
+import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction, unlinkSchoolmanBookingAction } from '../actions';
 import { courseNameResolver } from '../course-names';
 import { formatDay, formatRange, parseOptionLabel, type ParsedOption } from '../option-label';
+import { StayCard, VisaCard } from './needs';
+import { RegistrationPersonCard } from './person-card';
 import { examLevel, levelWord, registrationChecks, registrationTitle, type RegistrationCheck } from '../summary';
 import { DateFormField } from '@/components/admin/date-picker';
 import { DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { LetterList } from '@/components/admin/letters/letter-list';
-import { PersonPanel } from '@/components/admin/person-panel';
 import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
 import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Badge, BirthDate, Button, ButtonLink, Card, DetailList, Field, Input, RecordHeader, Select, Textarea } from '@/components/admin/ui';
@@ -20,7 +21,7 @@ import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer, stayVocabulary } from '@/lib/admin/booking-offer';
 import { levelFree, levelPlaces } from '@/lib/admin/booking-offer-types';
-import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
+import { REGISTRATION_ACCOMMODATION, stayFor, wishesWholeLevel } from '@/lib/admin/booking-levels';
 import { BOOKING_STATUS_LABELS, PAYER_LABELS } from '@/lib/admin/bookings';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
@@ -32,8 +33,12 @@ import { lettersForRegistration } from '@/lib/admin/letters/repo';
 import { mailHref } from '@/lib/admin/mail/href';
 import { listNotes } from '@/lib/admin/notes';
 import { learnerHistory } from '@/lib/admin/offers/course-catalogue';
-import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
+import { getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
+import { describePeople, personCandidates } from '@/lib/admin/person-match';
 import { getRegistration, registrationTypeLabel, type LineOutcome, type RegistrationCourseLine, type RegistrationExamLine } from '@/lib/admin/registrations';
+import { bookedStays, visaProgress } from '@/lib/admin/registration-needs';
+import { registrationFacts } from '@/lib/admin/registration-person';
+import { schoolmanCandidates } from '@/lib/admin/registration-schoolman';
 import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { startLevelPlaces } from '@/lib/admin/waitlist';
@@ -60,6 +65,8 @@ type Line = (RegistrationCourseLine | RegistrationExamLine) & {
   option: ParsedOption | null;
   /** A course's free places at its level in its start; null where there is no start or no level. */
   free: number | null;
+  /** That course's places, booked and waiting, for the meter. */
+  group: { places: number; booked: number; waiting: number; closed: boolean } | null;
 };
 
 const isOpen = (outcome: LineOutcome) => outcome.kind !== 'booked' && outcome.kind !== 'declined';
@@ -78,7 +85,7 @@ export default async function RegistrationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string }>;
+  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string; unlink?: string; person?: string }>;
 }) {
   const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('registrations')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
@@ -99,12 +106,14 @@ export default async function RegistrationPage({
   const lines: Line[] = [
     ...registration.courses.map((c) => {
       const places = c.courseInstanceId ? placesByStart.get(c.courseInstanceId) : undefined;
+      const level = places && c.declaredLevelCode ? levelPlaces({ levels: places }, c.declaredLevelCode) : null;
       return {
         ...c,
         name: courseName(c.courseTypeLabel, c.courseTypeId) ?? t('Kurs', 'Course'),
         detail: c.declaredLevelRaw?.trim() || c.declaredLevelCode,
         option: parseOptionLabel(c.courseInstanceLabel),
-        free: places && c.declaredLevelCode ? levelFree(levelPlaces({ levels: places }, c.declaredLevelCode), personId ?? undefined) : null,
+        free: level ? levelFree(level, personId ?? undefined) : null,
+        group: level ? { places: level.places, booked: level.booked + level.offered, waiting: level.queue.length, closed: Boolean(level.closed) } : null,
       };
     }),
     ...registration.exams.map((e) => ({
@@ -113,6 +122,7 @@ export default async function RegistrationPage({
       detail: registrationTypeLabel(e.registrationType, lang),
       option: parseOptionLabel(e.examSessionLabel),
       free: null,
+      group: null,
     })),
   ].sort((a, b) => (a.option?.start?.getTime() ?? Infinity) - (b.option?.start?.getTime() ?? Infinity));
 
@@ -132,7 +142,7 @@ export default async function RegistrationPage({
   );
 
   const lineIds = [...registration.courses.map((c) => ['course_registration', c.id] as const), ...registration.exams.map((e) => ['exam_registration', e.id] as const)];
-  const [notes, activity, staff, flags, person, letters, offer, vocabulary, history] = await Promise.all([
+  const [notes, activity, staff, flags, person, letters, offer, vocabulary, history, inSchoolman] = await Promise.all([
     Promise.all([listNotes('registration', registration.id), ...lineIds.map(([entity, lineId]) => listNotes(entity, lineId))]).then((all) => all.flat()),
     Promise.all([activityFor('registration', registration.id), ...lineIds.map(([entity, lineId]) => activityFor(entity, lineId))]).then((all) => all.flat()),
     listAssignableStaff(),
@@ -142,18 +152,19 @@ export default async function RegistrationPage({
     canBook && (query.book || query.queue) ? bookingOffer() : null,
     canBook && registration.stay?.accommodationRequired && bookable.length ? stayVocabulary() : null,
     canBook && personId && bookable.length ? learnerHistory(personId).catch(() => null) : null,
+    // The SchoolMan bookings that may have been made from an open line (0113), while SchoolMan still books.
+    open.length ? schoolmanCandidates(registration.id) : [],
   ]);
-  const [candidates, confirmed] = person
-    ? await Promise.all([
-        findDuplicateCandidates({
-          email: registration.contact.email,
-          lastName: registration.contact.lastName,
-          birthDate: toDateInputValue(registration.contact.birthDate) || null,
-          excludePersonId: person.id,
-        }),
-        latestConfirmedLevel(person.canonicalId),
-      ])
-    : [[], null];
+  // Who sent it (2026-10-31): the people at CASA it may be, found in the background, and the one it is once decided.
+  const facts = registrationFacts(registration.contact);
+  const [suggestions, linked, confirmed, stays, visa] = await Promise.all([
+    personId ? personCandidates(facts, { excludeId: personId, include: inSchoolman.map((c) => c.personId) }) : [],
+    person && person.canonicalId !== person.id ? describePeople([person.canonicalId], facts).then((found) => found[0] ?? null) : null,
+    person ? latestConfirmedLevel(person.canonicalId) : null,
+    // A room and a visa, each how far it has come: booked and placed; the letter for the embassy sent.
+    registration.stay?.accommodationRequired ? bookedStays(booked) : [],
+    registration.stay?.visaRequired ? visaProgress(booked) : null,
+  ]);
 
   const { contact, stay } = registration;
   const deliveryFlags = flags.filter((flag) => !flag.resolvedAt && (flag.code === 'registration_staff_notice_unconfirmed' || flag.code === 'registration_receipt_unconfirmed'));
@@ -164,6 +175,8 @@ export default async function RegistrationPage({
   const dated = lines.filter((l) => l.kind === 'course' && l.option?.start);
   const stayFrom = dated[0]?.option?.start ?? null;
   const stayTo = dated.reduce<Date | null>((end, l) => (l.option?.end && (!end || l.option.end > end) ? l.option.end : end), null);
+  // The stay around the courses asked for: the day before the first, the Saturday after the last.
+  const stayDates = stayFor(toDateInputValue(stayFrom) || null, toDateInputValue(stayTo) || null);
 
   // The line whose wizard, queue or confirmation the address asks for.
   const bookingLine = canBook && offer ? lines.find((l) => l.id === query.book && isOpen(l.outcome)) : undefined;
@@ -209,6 +222,27 @@ export default async function RegistrationPage({
               </MetaItem>
               <MetaItem icon={Icon.globe}>{registration.locale === 'de' ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
             </MetaLine>
+            {stay?.accommodationRequired || stay?.visaRequired ? (
+              // What the stay asks besides the course, in its own colour, where the eye starts.
+              <span className="mt-2 flex flex-wrap gap-1.5">
+                {stay.accommodationRequired ? (
+                  <a href="#unterkunft" className="hover:opacity-80">
+                    <Badge tone="stay">
+                      <span aria-hidden="true" className="[&_svg]:size-3.5">{Icon.home}</span>
+                      {stay.accommodationType && ACCOMMODATION[stay.accommodationType] ? t(`Unterkunft · ${ACCOMMODATION[stay.accommodationType].de}`, `Accommodation · ${ACCOMMODATION[stay.accommodationType].en}`) : t('Unterkunft', 'Accommodation')}
+                    </Badge>
+                  </a>
+                ) : null}
+                {stay.visaRequired ? (
+                  <a href="#visum" className="hover:opacity-80">
+                    <Badge tone="visa">
+                      <span aria-hidden="true" className="[&_svg]:size-3.5">{Icon.globe}</span>
+                      {t('Visumshilfe', 'Visa support')}
+                    </Badge>
+                  </a>
+                ) : null}
+              </span>
+            ) : null}
           </>
         }
         actions={
@@ -352,6 +386,12 @@ export default async function RegistrationPage({
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[0.76rem] text-[var(--casa-muted)]">
                         {lineFacts(line, t)}
+                        {isOpen(line.outcome) && inSchoolman.some((c) => c.lineId === line.id) ? (
+                          // A booking in SchoolMan that may be this line's: compared in the person panel.
+                          <Link href={`${here}?person=1`} className="hover:opacity-80">
+                            <Badge tone="accent">{t('In SchoolMan gebucht?', 'Booked in SchoolMan?')}</Badge>
+                          </Link>
+                        ) : null}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
@@ -424,6 +464,25 @@ export default async function RegistrationPage({
                       </FormDialog>
                     </div>
                   ) : null}
+                  {canEdit && query.unlink === line.id && line.outcome.kind === 'booked' && line.outcome.schoolman ? (
+                    <form action={unlinkSchoolmanBookingAction} className="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-[#fdecec]/60 px-3.5 py-2.5 ring-1 ring-[#f5cfcd] ring-inset">
+                      <input type="hidden" name="id" value={registration.id} />
+                      <input type="hidden" name="lineId" value={line.id} />
+                      <input type="hidden" name="kind" value={line.kind} />
+                      <input type="hidden" name="confirmed" value="1" />
+                      <span className="text-[0.84rem] font-semibold text-[var(--casa-ink)]">
+                        {t(`${lineName(line)} von ${line.outcome.number} lösen?`, `Unlink ${lineName(line)} from ${line.outcome.number}?`)}
+                      </span>
+                      <span className="ml-auto flex gap-2">
+                        <ButtonLink href={`${here}#line-${line.id}`} variant="ghost" size="sm">
+                          {t('Abbrechen', 'Cancel')}
+                        </ButtonLink>
+                        <Button type="submit" variant="danger" size="sm">
+                          {t('Lösen', 'Unlink')}
+                        </Button>
+                      </span>
+                    </form>
+                  ) : null}
                   {canEdit && query.decline === line.id && isOpen(line.outcome) ? (
                     <form action={setLineDeclinedAction} className="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-[#fdecec]/60 px-3.5 py-2.5 ring-1 ring-[#f5cfcd] ring-inset">
                       <input type="hidden" name="id" value={registration.id} />
@@ -446,25 +505,13 @@ export default async function RegistrationPage({
               ))}
             </ol>
 
-            {stay ? (
+            {stay && (!stay.accommodationRequired || !stay.visaRequired || confirmed || stay.allergies) ? (
               <div className="mt-4">
+                {/* What is needed has its own section below; here what is not, and the placement. */}
                 <FactGrid
                   facts={[
-                    {
-                      label: t('Unterkunft', 'Accommodation'),
-                      value: stay.accommodationRequired
-                        ? stay.accommodationType && ACCOMMODATION[stay.accommodationType]
-                          ? pick(lang, ACCOMMODATION[stay.accommodationType])
-                          : t('Nötig', 'Needed')
-                        : t('Nicht nötig', 'Not needed'),
-                      sub: stay.accommodationRequired && stayFrom ? formatRange(stayFrom, stayTo, lang) : undefined,
-                      tone: stay.accommodationRequired ? 'attention' : 'plain',
-                    },
-                    {
-                      label: t('Visumshilfe', 'Visa support'),
-                      value: stay.visaRequired ? t('Nötig', 'Needed') : t('Nicht nötig', 'Not needed'),
-                      tone: stay.visaRequired ? 'attention' : 'plain',
-                    },
+                    ...(stay.accommodationRequired ? [] : [{ label: t('Unterkunft', 'Accommodation'), value: t('Nicht nötig', 'Not needed'), tone: 'plain' as const }]),
+                    ...(stay.visaRequired ? [] : [{ label: t('Visumshilfe', 'Visa support'), value: t('Nicht nötig', 'Not needed'), tone: 'plain' as const }]),
                     ...(confirmed
                       ? [
                           {
@@ -475,7 +522,7 @@ export default async function RegistrationPage({
                           },
                         ]
                       : []),
-                    ...(stay.allergies ? [{ label: t('Allergien', 'Allergies'), value: stay.allergies, tone: 'attention' as const }] : []),
+                    ...(stay.allergies && !stay.accommodationRequired ? [{ label: t('Allergien', 'Allergies'), value: stay.allergies, tone: 'attention' as const }] : []),
                   ]}
                 />
               </div>
@@ -487,6 +534,41 @@ export default async function RegistrationPage({
               </figure>
             ) : null}
           </SubmissionCard>
+
+          {stay?.accommodationRequired || stay?.visaRequired ? (
+            <div className={cn('grid gap-4', stay.accommodationRequired && stay.visaRequired && 'xl:grid-cols-2')}>
+              {stay.accommodationRequired ? (
+                <div id="unterkunft" className="scroll-mt-24">
+                  <StayCard
+                    wish={stay.accommodationType && ACCOMMODATION[stay.accommodationType] ? ACCOMMODATION[stay.accommodationType] : null}
+                    from={stayDates?.from ?? null}
+                    to={stayDates?.to ?? null}
+                    allergies={stay.allergies}
+                    stays={stays}
+                    canPlace={canAccess(user, 'accommodation', 'edit')}
+                    t={t}
+                    lang={lang}
+                  />
+                </div>
+              ) : null}
+              {stay.visaRequired ? (
+                <div id="visum" className="scroll-mt-24">
+                  <VisaCard
+                    nationality={contact.nationalityName ?? (contact.nationalityRaw || null)}
+                    steps={visaSteps({ letters, booked: lines.filter((l) => l.outcome.kind === 'booked' && !l.outcome.cancelled), embassyLetterAt: visa?.embassyLetterAt ?? null, t, lang })}
+                    action={
+                      booked.length && visa?.bookingId && !visa.embassyLetterAt && canAccess(user, 'bookings', 'edit')
+                        ? { href: `/admin/bookings/${visa.bookingId}/letter?kind=visa`, label: t('Brief für die Botschaft schreiben', 'Write the embassy letter') }
+                        : !booked.length && canEdit && firstCourse && !letters.some((l) => l.kind === 'registration_deposit_request')
+                          ? { href: `/admin/registrations/course/${firstCourse.id}/letter`, label: t(`${LETTER_KIND_LABELS.registration_deposit_request.de} schreiben`, `Write the ${LETTER_KIND_LABELS.registration_deposit_request.en.toLowerCase()}`) }
+                          : null
+                    }
+                    t={t}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           {deliveryFlags.length ? (
             <Card title={t('E-Mail-Versand prüfen', 'Check email delivery')} icon={Icon.attention} tint="sun">
@@ -639,7 +721,33 @@ export default async function RegistrationPage({
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags.filter((flag) => flag.code !== 'registration_staff_notice_unconfirmed' && flag.code !== 'registration_receipt_unconfirmed')} returnTo={here} canList={canAccess(user, 'people', 'edit')} />
+          <RegistrationPersonCard
+            registrationId={registration.id}
+            firstName={contact.firstName}
+            sent={{ name: fullName, birthDate: toDateInputValue(contact.birthDate) || null, email: contact.email, phone: contact.phone, nationality: contact.nationalityName ?? (contact.nationalityRaw || null) }}
+            person={person}
+            suggestions={suggestions}
+            linked={linked}
+            schoolman={inSchoolman.map((c) => {
+              const line = lines.find((l) => l.id === c.lineId);
+              const from = c.from ? new Date(`${c.from}T00:00:00Z`) : null;
+              return {
+                personId: c.personId,
+                bookingId: c.bookingId,
+                number: c.bookingNumber,
+                what: c.what,
+                when: from ? (c.lineKind === 'exam' ? formatDay(from, lang, true) : formatRange(from, c.to ? new Date(`${c.to}T00:00:00Z`) : null, lang)) : null,
+                line: line ? lineName(line) : t('eine Position', 'a line'),
+                lineId: c.lineId,
+                lineKind: c.lineKind,
+                exact: c.exact,
+                bookedAfter: c.bookedAfter,
+              };
+            })}
+            flags={flags.filter((flag) => flag.code !== 'registration_staff_notice_unconfirmed' && flag.code !== 'registration_receipt_unconfirmed')}
+            canEdit={canEdit}
+            openPanel={query.person === '1'}
+          />
           {/* Before there is a booking: the down payment or the placement test (docs/LETTERS.md); after it, one confirmation of every booking. */}
           <Card
             title={t('Briefe', 'Letters')}
@@ -712,11 +820,26 @@ function lineFacts(line: Line, t: T) {
       </>
     );
   }
-  if (line.free === null || !isOpen(line.outcome)) return line.option?.location ?? null;
-  return line.free === 0 ? (
-    <Badge tone="warning">{t('Niveau voll', 'Level full')}</Badge>
-  ) : (
-    <span>{line.free === 1 ? t('1 Platz frei', '1 place free') : t(`${line.free} Plätze frei`, `${line.free} places free`)}</span>
+  if (line.free === null || !line.group || !isOpen(line.outcome)) return line.option?.location ?? null;
+  const { places, booked, waiting, closed } = line.group;
+  // The level's course in that start, as the team checks it before booking: how full, and who waits.
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span aria-hidden="true" className="relative h-1.5 w-14 overflow-hidden rounded-full bg-[#e6ebf2]">
+        <span
+          className={cn('absolute inset-y-0 left-0 rounded-full', line.free === 0 ? 'bg-[#d99a00]' : line.free <= 2 ? 'bg-[#e0b24a]' : 'bg-[#2f9e5b]')}
+          style={{ width: `${Math.min(100, Math.round((booked / Math.max(places, 1)) * 100))}%` }}
+        />
+      </span>
+      {closed ? (
+        <Badge tone="warning">{t('Niveau geschlossen', 'Level closed')}</Badge>
+      ) : line.free === 0 ? (
+        <Badge tone="warning">{t('Niveau voll', 'Level full')}</Badge>
+      ) : (
+        <span className="tabular-nums">{t(`${line.free} von ${places} Plätzen frei`, `${line.free} of ${places} places free`)}</span>
+      )}
+      {waiting ? <span>{t(`· ${waiting} auf der Warteliste`, `· ${waiting} waiting`)}</span> : null}
+    </span>
   );
 }
 
@@ -726,7 +849,7 @@ function Outcome({ outcome, t }: { outcome: LineOutcome; t: T }) {
       return (
         <Link href={`/admin/bookings/${outcome.bookingId}`} className="hover:opacity-80">
           <Badge tone={outcome.cancelled ? 'quiet' : 'positive'}>
-            {outcome.cancelled ? t('Storniert', 'Cancelled') : t('Gebucht', 'Booked')} · {outcome.number}
+            {outcome.cancelled ? t('Storniert', 'Cancelled') : outcome.schoolman ? t('In SchoolMan gebucht', 'Booked in SchoolMan') : t('Gebucht', 'Booked')} · {outcome.number}
           </Badge>
         </Link>
       );
@@ -743,6 +866,10 @@ function Outcome({ outcome, t }: { outcome: LineOutcome; t: T }) {
 
 /** Behind „…" on a line: its queue, a later start by letter, declining it. */
 function lineActions(line: Line, { here, canBook, canEdit, t }: { here: string; canBook: boolean; canEdit: boolean; t: T }): RowAction[] {
+  // A line linked to a booking made in SchoolMan (0113) can be unlinked, should the link be wrong.
+  if (canEdit && line.outcome.kind === 'booked' && line.outcome.schoolman) {
+    return [{ label: t('Verknüpfung lösen', 'Unlink'), href: `${here}?unlink=${line.id}#line-${line.id}` }];
+  }
   if (!isOpen(line.outcome)) return [];
   const actions: RowAction[] = [];
   if (line.kind === 'course' && line.courseInstanceId && canBook && line.outcome.kind !== 'waiting') {
@@ -802,3 +929,43 @@ function OriginalValues({ original, current, lang }: { original: Record<string, 
     </Card>
   );
 }
+
+/**
+ * A visa case's way to the embassy (2026-10-31): the down payment asked for (a learner abroad pays the whole
+ * first course, docs/LETTERS.md), the booking, the letter for the embassy.
+ */
+function visaSteps({
+  letters,
+  booked,
+  embassyLetterAt,
+  t,
+  lang,
+}: {
+  letters: readonly { kind: string; sentAt: Date }[];
+  booked: readonly Line[];
+  embassyLetterAt: Date | null;
+  t: T;
+  lang: WsLang;
+}) {
+  const asked = letters.find((l) => l.kind === 'registration_deposit_request');
+  const sentOn = (at: Date) => t(`verschickt am ${shortDate(at, lang)}`, `sent on ${shortDate(at, lang)}`);
+  return [
+    {
+      label: pick(lang, LETTER_KIND_LABELS.registration_deposit_request),
+      done: Boolean(asked),
+      detail: asked ? sentOn(asked.sentAt) : t('noch nicht verschickt', 'not sent yet'),
+    },
+    {
+      label: t('Gebucht', 'Booked'),
+      done: booked.length > 0,
+      detail: booked.length ? booked.map((l) => (l.outcome.kind === 'booked' ? l.outcome.number : '')).join(', ') : t('noch nicht gebucht', 'not booked yet'),
+    },
+    {
+      label: pick(lang, LETTER_KIND_LABELS.visa_letter),
+      done: Boolean(embassyLetterAt),
+      detail: embassyLetterAt ? sentOn(embassyLetterAt) : t('noch nicht verschickt', 'not sent yet'),
+    },
+  ];
+}
+
+const shortDate = (at: Date, lang: WsLang) => new Date(at).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });

@@ -2632,6 +2632,106 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
 
 ---
 
+## Website registrations and SchoolMan bookings (2026-10-31, migration 0113)
+
+The parallel phase: a learner registers on the website, a colleague books them in SchoolMan as before, and
+the sync brings the booking in — under a second person (the bridge matches people only by their SchoolMan
+number; FILEMAKER_LESSONS: never by an address alone) and with the Anmeldung still open, though it is
+booked. Rahman, 2026-10-31: link them, so the inbox says what is really still open.
+
+**One rule, in the database.** `registration_schoolman_candidates(registration)` lists, for every open line
+of an Anmeldung of the last half year, the SchoolMan bookings (`filemaker_booking_id`, not cancelled, not
+linked to a line, made at most 45 days before the registration came in) of a person who has the line's
+e-mail address, its surname and date of birth, or its first name and surname (folded, `ws_fold`), and which
+fit: a course booking with a period in the start asked for, or the same type beginning within three days
+(*exact*), or the same type / within a week (*near*); an exam booking at the sitting asked for (*exact*) or at
+another sitting of that exam (*near*). A match is **sure** when it is exact, the booking was made after the
+registration came in (a day's grace), the person is the same — already linked, or the same address with the
+same birthday or full name — and it is the only sure booking for the line and the only sure line for the
+booking. A family writing from one address is never sure: siblings share the surname and the address, not
+the first name or the birthday.
+
+**The bridge links what is sure** at the end of every run, whichever steps ran
+(`link_registrations_to_schoolman()`, called by `linkRegistrations` in `scripts/filemaker/bridge-run.mjs`).
+`link_registration_line()` makes one link, for the bridge and for a colleague alike: the booking points at
+the line (`source_registration_id` / `source_exam_registration_id`, as a booking made in the workspace does),
+the line is settled (0097's trigger then settles the Anmeldung: „Erledigt" once every line is), the website's
+person is linked into SchoolMan's (`merged_into`, as „Verknüpfen" on a person; SchoolMan's keeps its number,
+bookings and name), its duplicate flags are answered, and the history says it („Workspace hat Intensivkurs B1
+mit der SchoolMan-Buchung B-2026-0582 verknüpft"). The bridge never writes these two booking columns, so a
+link survives every later run.
+
+**What is not sure is asked** — in the person panel (below): under the person a booking belongs to, each
+booking with its number, course and dates, the line it may be, and why (gleicher / anderer Termin, vor der
+Anmeldung gebucht). „Mit der Position verknüpfen" makes the link (`registrations` at `edit`; the server asks
+the rule again); „Nicht diese Buchung" stops asking (`registration_link_dismissals`). The line itself and the
+list of Anmeldungen mark it „In SchoolMan gebucht?" (the line's badge opens the panel, `?person=1`). A linked
+line reads „In SchoolMan gebucht · B-…"; its „…" offers „Verknüpfung lösen", which opens the line again and
+records the booking as not the line's, so the next run does not link it back. The two people stay one;
+„Trennen" parts them.
+
+## Who sent a registration: the person check (2026-10-31)
+
+Rahman, 2026-10-31: the team's first step with a registration — online or at the desk — is to search the
+first and last name in the database: someone already a learner keeps their record, someone new gets one. Then
+they check the places, then they book. The SchoolMan comparison above is temporary; this one stays.
+
+**In the background.** `personCandidates()` (`src/lib/admin/person-match.ts`) finds the people at CASA —
+the register, SchoolMan's learners with it, and earlier website contacts — by the address (and the same
+address before the @ at another provider), the phone number (its last nine digits, with or without the
+country code), and the name: the surname with the start of the first name, the first name with the start of
+the surname, either start with the birthday (`search_name`, folded like `ws_fold`). Each is then judged field
+by field by `judgeMatch()` (`person-match-rules.ts`, pure, unit-tested): name, birthday, address, phone,
+nationality, each *gleich*, *ähnlich* or *anders*. Forgiving where people differ from their own records —
+accents and ä/ae, one typo in a short name and two in a long one, first and last name swapped, a double
+surname given in part, a nickname's start (Alex — Alexander), day and month of the birthday exchanged, a
+typo in the address's domain. Strict where families differ: another birthday on both sides is another person,
+whatever else agrees, so a sibling writing from the family's address is only ever *möglich*. Strength:
+*sehr wahrscheinlich* (the name fits, and the address, phone or birthday too, nothing against it),
+*wahrscheinlich*, *möglich*; someone who shares only a birthday is no candidate. No database extension is
+needed (no `pg_trgm`): the SQL narrows, TypeScript judges.
+
+**On the Anmeldung.** „Person" heads the rail: *Schon bei CASA?* with the surest candidate (their customer
+number, since when, their course now, next or last, and what agrees), „Vergleichen" and „Neue Person"; or
+*Neu bei CASA?* when nobody fits, with „Selbst suchen" and „Als neue Person anlegen". Decided, it shows the
+person: *Schon bei CASA* with „Ändern", or *Neu bei CASA* with „Doch schon bei CASA?".
+
+**The panel** (`person-compare.tsx`, the workspace's `SidePanel`): a search on top (name, address, phone or
+customer number, as FileMaker was searched; what was typed alone finds, the registration only judges); the
+candidates, the surest first, each opening to the registration and the record side by side with a mark per
+field (✓ gleich, ≈ ähnlich, ≠ anders, – fehlt), the reasons as chips, their course and a link to the profile,
+and any SchoolMan booking of theirs that may be a line's. Its foot: „Das ist …" (`confirmRegistrationPerson`:
+the website's person is linked into theirs, `linkPerson`; one linked to someone else before is moved) or
+„Neue Person anlegen" (`newRegistrationPerson`: on the register, the duplicate question answered), and for the
+person it is linked to, „Trennen". Each is written to the Anmeldung's history. `registrations` at `edit`
+decides; the search is a read (`searchRegistrationPeopleAction`, `registrations` at `view`).
+
+**Places, before booking.** Each open course line shows its level's course in the start asked for: a meter,
+„3 von 14 Plätzen frei" or „Niveau voll", and how many wait. The week-by-week view stays on the course's own
+page (Kurse).
+
+**A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant — the stay
+blue (badge tone `stay`, solid), the visa the soft orange of „Unter Beobachtung" (badge tone `visa`, Rahman:
+„more like orange … if it is required and if it is not, just nothing"): pills in the Anmeldung's head that jump to their
+sections and a tag on the list. Each is a section of its own (`needs.tsx`): the workspace's card with a
+tinted icon and its colour as a fine line along the top, rows ruled in `--ws-line`. Solid coloured heads were
+tried and turned back („like an elegant top border"), as were navy heads for every section. *Unterkunft*: what was asked for, the stay's dates (the day before the first
+course to the Saturday after the last, `stayFor`), allergies, and per booking made from it what was booked
+and where it was placed (`bookedStays`), or „Unterkunft zuteilen". *Visumshilfe*: the nationality and three
+steps — „Bitte um Anzahlung" sent, booked, „Bestätigung für die Botschaft" sent (`visaProgress`) — with the
+next letter one click away. What is not needed stays a quiet fact in the submission.
+
+„Alle buchen" stays visible during the parallel phase (Rahman, 2026-10-31): he watches for double bookings
+himself, and the team needs it open to test and to write the manuals.
+
+**The wizard asks only what fits the course** (`booking-wizard-client.tsx`, `levelsOf`). From a registration
+the kind of course is known: its starts alone, and of a kind with several courses the one asked for (telc C1
+Hochschule, not B2), with „Andere Kursart" and „Alle Termine dieser Kursart" one click away. The level step
+offers the levels the chosen start teaches — its own courses and, for an intensive start, the second halves
+of the start running on its first day — each with its free places, the one asked for marked; a start with no
+course set up yet offers what its kind teaches (the evening course no B1+). A start of named courses (a
+preparation course, a module) teaches no level: the step is skipped (Was → Auswahl → Unterkunft → Prüfen).
+
 ## Data flow from the public site
 
 `src/lib/admin/intake.ts` is the write path. Three rules:

@@ -686,13 +686,14 @@ export async function linkPerson({
 
     // The flags that asked the question are answered by this action.
     await client.query(
-      `UPDATE record_flags f SET resolved_at = now(), resolved_by = $3
+      `UPDATE record_flags f SET resolved_at = now(), resolved_by = $2
         WHERE f.code = 'duplicate_candidate' AND f.resolved_at IS NULL
           AND ((f.entity = 'person' AND f.entity_id = $1)
             OR (f.entity = 'enquiry' AND f.entity_id IN (SELECT id FROM enquiries WHERE person_id = $1))
             OR (f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE person_id = $1))
             OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE person_id = $1)))`,
-      [duplicateId, canonical, actor.id]
+      // Only what the statement reads: an unused parameter is one Postgres cannot type, and refuses.
+      [duplicateId, actor.id]
     );
     await client.query(
       `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)

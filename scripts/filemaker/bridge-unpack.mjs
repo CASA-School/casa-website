@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs';
 
 import { connect, requireConnectionString } from '../db/client.mjs';
 import { open } from './bridge-bundle.mjs';
-import { counts, importStep, printCounts } from './bridge-run.mjs';
+import { counts, importStep, linkRegistrations, printCounts } from './bridge-run.mjs';
 import { BRIDGE_STEPS } from './bridge-steps.mjs';
 
 const at = process.argv.indexOf('--file');
@@ -81,6 +81,7 @@ const after = await counts();
 const client = await connect();
 try {
   await client.query(`INSERT INTO bridge_runs (read_at, ok, steps) VALUES ($1, $2, $3::jsonb)`, [bundle.readAt, ok, JSON.stringify(done)]);
+  if (ok) await linkRegistrations(client);
 } finally {
   await client.end();
 }

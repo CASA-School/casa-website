@@ -435,6 +435,7 @@ export type RegistrationListItem = {
   openFlags: number;
   deliveryNeedsReview: boolean;
   accommodationRequired: boolean;
+  visaRequired: boolean;
   /** Courses first, by start, then the exam. */
   lines: RegistrationLineSummary[];
 };
@@ -483,6 +484,7 @@ export async function listRegistrations({
     open_flags: string;
     delivery_needs_review: boolean;
     accommodation_required: boolean;
+    visa_required: boolean;
     lines: RegistrationLineSummary[] | null;
   }>(
     `SELECT g.id, who.first_name, who.last_name, who.email, g.locale, g.status::text AS status,
@@ -496,6 +498,7 @@ export async function listRegistrations({
               AND ((f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE registration_id = g.id))
                 OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE registration_id = g.id)))) AS delivery_needs_review,
             EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id AND c.accommodation_required) AS accommodation_required,
+            EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id AND c.visa_required) AS visa_required,
             (SELECT json_agg(json_build_object('kind', l.kind, 'label', l.label, 'typeId', l.type_id, 'detail', l.detail, 'option', l.option, 'settled', l.settled)
                              ORDER BY l.rank, l.starts NULLS LAST, l.created_at)
                FROM (SELECT 'course' AS kind, 0 AS rank, c.course_type_label AS label, c.course_type_id AS type_id,
@@ -532,6 +535,7 @@ export async function listRegistrations({
       openFlags: Number(row.open_flags ?? 0),
       deliveryNeedsReview: row.delivery_needs_review,
       accommodationRequired: row.accommodation_required,
+      visaRequired: row.visa_required,
       lines: row.lines ?? [],
     })),
   };
@@ -540,7 +544,8 @@ export async function listRegistrations({
 /** What became of a line: booked (its booking), on a waiting list, a later course offered, declined, or still open. */
 export type LineOutcome =
   | { kind: 'open' }
-  | { kind: 'booked'; bookingId: string; number: string; cancelled: boolean }
+  /** `schoolman`: a booking made in SchoolMan and linked to the line (0113), not booked from it here. */
+  | { kind: 'booked'; bookingId: string; number: string; cancelled: boolean; schoolman: boolean }
   | { kind: 'waiting'; entryId: string; offered: boolean }
   | { kind: 'later' }
   | { kind: 'declined' };
@@ -611,13 +616,16 @@ type OutcomeColumns = {
   booking_id: string | null;
   booking_number: string | null;
   booking_status: string | null;
+  booking_schoolman?: boolean | null;
   waitlist_id: string | null;
   waitlist_status: string | null;
   later_offered?: boolean;
 };
 
 function outcomeOf(row: OutcomeColumns): LineOutcome {
-  if (row.booking_id) return { kind: 'booked', bookingId: row.booking_id, number: row.booking_number ?? '', cancelled: row.booking_status === 'cancelled' };
+  if (row.booking_id) {
+    return { kind: 'booked', bookingId: row.booking_id, number: row.booking_number ?? '', cancelled: row.booking_status === 'cancelled', schoolman: row.booking_schoolman === true };
+  }
   if (row.status === 'declined') return { kind: 'declined' };
   if (row.waitlist_id && (row.waitlist_status === 'waiting' || row.waitlist_status === 'offered')) {
     return { kind: 'waiting', entryId: row.waitlist_id, offered: row.waitlist_status === 'offered' };
@@ -688,14 +696,14 @@ export async function getRegistration(id: string): Promise<RegistrationDetail | 
               c.visa_required, c.accommodation_required, c.accommodation_type::text AS accommodation_type, c.allergies, c.notes,
               c.original, c.edited_at, (SELECT name FROM staff_users eu WHERE eu.id = c.edited_by) AS edited_by_name,
               c.status::text AS status,
-              b.id AS booking_id, b.number AS booking_number, b.status::text AS booking_status,
+              b.id AS booking_id, b.number AS booking_number, b.status::text AS booking_status, b.schoolman AS booking_schoolman,
               w.id AS waitlist_id, w.status AS waitlist_status,
               EXISTS (SELECT 1 FROM letters l WHERE l.registration_id = c.id AND l.kind = 'registration_later_course') AS later_offered,
               ${FLAGS('course_registration', 'c')}
          FROM course_registrations c
          LEFT JOIN countries n ON n.code = c.nationality_code
          LEFT JOIN course_instances ci ON ci.id = c.course_instance_id
-         LEFT JOIN LATERAL (SELECT id, number, status FROM bookings WHERE source_registration_id = c.id AND deleted_at IS NULL LIMIT 1) b ON true
+         LEFT JOIN LATERAL (SELECT id, number, status, filemaker_booking_id IS NOT NULL AS schoolman FROM bookings WHERE source_registration_id = c.id AND deleted_at IS NULL LIMIT 1) b ON true
          LEFT JOIN LATERAL (SELECT id, status FROM waitlist_entries WHERE registration_id = c.id ORDER BY created_at DESC LIMIT 1) w ON true
         WHERE c.registration_id = $1
         ORDER BY ci.start_date NULLS LAST, c.created_at, c.id`,
@@ -718,13 +726,13 @@ export async function getRegistration(id: string): Promise<RegistrationDetail | 
               coalesce(n.name_de, n.name_en) AS nationality_name, e.birth_date_raw, e.birth_date,
               e.exam_type_id, e.exam_type_label, e.exam_session_id, e.exam_session_label, e.registration_type, e.official_name_confirmed,
               e.status::text AS status,
-              b.id AS booking_id, b.number AS booking_number, b.status::text AS booking_status,
+              b.id AS booking_id, b.number AS booking_number, b.status::text AS booking_status, b.schoolman AS booking_schoolman,
               w.id AS waitlist_id, w.status AS waitlist_status,
               ${FLAGS('exam_registration', 'e')}
          FROM exam_registrations e
          LEFT JOIN countries n ON n.code = e.nationality_code
          LEFT JOIN exam_sessions es ON es.id = e.exam_session_id
-         LEFT JOIN LATERAL (SELECT id, number, status FROM bookings WHERE source_exam_registration_id = e.id AND deleted_at IS NULL LIMIT 1) b ON true
+         LEFT JOIN LATERAL (SELECT id, number, status, filemaker_booking_id IS NOT NULL AS schoolman FROM bookings WHERE source_exam_registration_id = e.id AND deleted_at IS NULL LIMIT 1) b ON true
          LEFT JOIN LATERAL (SELECT id, status FROM waitlist_entries WHERE exam_registration_id = e.id ORDER BY created_at DESC LIMIT 1) w ON true
         WHERE e.registration_id = $1
         ORDER BY es.starts_at NULLS LAST, e.created_at, e.id`,

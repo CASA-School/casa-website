@@ -6,6 +6,7 @@ import { translator, type WsLang } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { inboxCounts } from '@/lib/admin/inbox';
 import { listRegistrations, registrationTypeLabel, type RegistrationListItem } from '@/lib/admin/registrations';
+import { registrationsWithSchoolmanCandidates } from '@/lib/admin/registration-schoolman';
 import { courseNameResolver } from './course-names';
 import { formatDay, formatRange, parseOptionLabel } from './option-label';
 import { levelWord, registrationTitle } from './summary';
@@ -42,12 +43,14 @@ function preview(item: RegistrationListItem, lang: WsLang): string | null {
 export default async function RegistrationsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const view = inboxParams(params);
-  const [user, { items, total }, counts, courseName, { t, lang }] = await Promise.all([
+  const [user, { items, total }, counts, courseName, { t, lang }, inSchoolman] = await Promise.all([
     requireModule('registrations'),
     listRegistrations({ period: view.period, state: view.state, search: view.search, limit: view.limit, offset: view.offset }),
     inboxCounts('registration'),
     courseNameResolver(),
     getI18n(),
+    // An open Anmeldung a colleague has probably booked in SchoolMan already (0113): the page asks which booking.
+    registrationsWithSchoolmanCandidates(),
   ]);
 
   const rows: InboxItem[] = items.map((item) => {
@@ -65,8 +68,10 @@ export default async function RegistrationsPage({ searchParams }: { searchParams
       preview: preview(item, lang),
       badges: (
         <>
+          {inSchoolman.has(item.id) ? <Badge tone="positive">{t('In SchoolMan gebucht?', 'Booked in SchoolMan?')}</Badge> : null}
           {item.deliveryNeedsReview ? <Badge tone="neutral">{t('E-Mail-Versand prüfen', 'Check email delivery')}</Badge> : null}
-          {item.accommodationRequired ? <Badge tone="neutral">{t('Unterkunft nötig', 'Room needed')}</Badge> : null}
+          {item.accommodationRequired ? <Badge tone="stay">{t('Unterkunft', 'Accommodation')}</Badge> : null}
+          {item.visaRequired ? <Badge tone="visa">{t('Visum', 'Visa')}</Badge> : null}
           {onlyExam?.detail && onlyExam.detail !== 'full' ? <Badge tone="neutral">{registrationTypeLabel(onlyExam.detail, lang)}</Badge> : null}
           {item.lines.length > 1 && settled > 0 && settled < item.lines.length ? (
             <Badge tone="neutral">{t(`${settled} von ${item.lines.length} erledigt`, `${settled} of ${item.lines.length} done`)}</Badge>

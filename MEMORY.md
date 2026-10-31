@@ -2958,3 +2958,42 @@ departed colleague's account, and CT 103 already had Docker, a link to FileMaker
 - The Klassenbuch monitor watches it through `/etc/klassenbuch-monitor.json` (no change to its code): stopped,
   restarted, or a line saying „failed" — so `sync.mjs` now writes „<table> failed: …" and „tick failed: …".
 - docs/schoolman/MIGRATION.md §1 and §5 have the runbook.
+
+## 60. A website registration finds the SchoolMan booking made from it (2026-10-31)
+
+Rahman, for the parallel phase: the team books website registrations in SchoolMan, the sync brings each in
+as a second person, and the Anmeldung stays open though it is booked. Migration 0113:
+
+- `registration_schoolman_candidates()` (one rule, SQL): open lines of the last half year × SchoolMan bookings of
+  a person with the same address / surname + birthday / full name, fitting the start or sitting; *sure* = exact
+  fit, booked after the registration, same person (address + birthday or full name), unique both ways.
+- `link_registration_line()` links one (booking → line, line settled, website person merged into SchoolMan's,
+  flags answered, history); `link_registrations_to_schoolman()` links every sure one at the end of every bridge
+  run (`linkRegistrations` in bridge-run.mjs, both runners).
+- The Anmeldung asks the rest („In SchoolMan gebucht?": Verknüpfen / Nicht dieselbe); the list marks them; a
+  linked line can be unlinked (and is then not linked back). Tested on the local copy in rolled-back
+  transactions: exact course and exam matches link, a sibling from the same address and a booking made
+  before the registration are only asked.
+- docs/ADMIN_WORKSPACE.md §Website registrations and SchoolMan bookings.
+
+
+## 61. Who sent a registration, its places, and a wizard that asks only what fits (2026-10-31)
+
+Rahman, after seeing pass 60 and the wizard on a preparation course offering every level: the team's journey
+is find the person (by first and last name, in FileMaker), check the places, book; the SchoolMan comparison is
+temporary and belongs inside the person check; the wizard must offer only what fits the course.
+
+- **Person check** on every Anmeldung: `personCandidates()` (SQL narrows: address, phone, name parts, birthday)
+  + `judgeMatch()` (pure rule, `person-match-rules.ts`: typos, swapped names, double surnames, nicknames, day and
+  month exchanged, phone with or without country code; another birthday = another person, so siblings stay
+  *möglich*). The rail's „Person" card says *Schon bei CASA?* / *Neu bei CASA?*; „Vergleichen" opens a side panel
+  with a search and the fields side by side; „Das ist …" links the website's person into theirs, „Neue Person
+  anlegen" lists them; „Trennen" undoes. The SchoolMan card is gone: its bookings show under their person in the
+  panel, and the line says „In SchoolMan gebucht?".
+- **Places** on each open course line: a meter, „3 von 14 Plätzen frei", the waiting count.
+- **Wizard**: from a registration only its kind of course and, of a kind with several, the course asked for;
+  levels are the start's own (`levelsOf`), each with its free places, the asked one marked; a start of named
+  courses (preparation course, module) skips the level step.
+- Bug found on the way: `linkPerson` passed a parameter its flags query never read, so Postgres refused every
+  „Dieselbe Person" since 0007. Fixed.
+- docs/ADMIN_WORKSPACE.md §Who sent a registration.
