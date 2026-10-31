@@ -145,6 +145,8 @@ export const TINTS = {
   sun: 'bg-[#fff7cc] text-[#6b5600]',
   ink: 'bg-[#edf0f5] text-[#2b3546]',
   green: 'bg-[#e5f5eb] text-[#137a3c]',
+  /** A visa (2026-10-31): its own colour, beside the course's red and the stay's blue. */
+  violet: 'bg-[#f1ebfd] text-[#5b2ea6]',
 } as const;
 
 export type Tint = keyof typeof TINTS;
