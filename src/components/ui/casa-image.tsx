@@ -83,7 +83,11 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
           width={width}
           height={height}
           className={positioned || !slot?.position ? className : `${className ?? ''} ${slot.position}`.trim()}
-          style={slot?.fit && alt !== '' ? { ...style, objectFit: slot.fit } : style}
+          style={alt !== '' && (slot?.fit || slot?.motion) ? {
+            ...style,
+            ...(slot.fit ? { objectFit: slot.fit } : {}),
+            ...(slot.motion === 'none' ? { scale: 'none', translate: 'none', animation: 'none' } : {}),
+          } : style}
           {...rest}
           data-casa-illustration={slot?.illustration && alt !== '' ? '' : undefined}
           data-casa-example-image={(slot?.example || slot?.illustration) && alt !== '' ? '' : undefined}

@@ -10059,6 +10059,26 @@
    "/team"
   ]
  },
+ "t.gemeinsam-deutsch-lernen-im.a8k5in": {
+  "de": "Gemeinsam Deutsch lernen im Intensivkurs.",
+  "en": "Learning German together in an intensive course.",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.gemeinsam-entwickeln-wir-strateg.cysbx9": {
   "de": "Gemeinsam entwickeln wir Strategien für die Aufgaben. Wir üben Hören, Lesen, Schreiben und Sprechen, vor allem aber Schreiben und Sprechen.",
   "en": "Together we work out strategies for the tasks. We practise listening, reading, writing and speaking, but above all writing and speaking.",
@@ -13754,26 +13774,6 @@
   ],
   "pages": [
    "/courses"
-  ]
- },
- "t.kursformate-werden-greifbarer-we.jei1bk": {
-  "de": "Kursformate werden greifbarer, wenn der Lernraum sichtbar bleibt.",
-  "en": "Course formats stay easier to understand when the learning room is visible.",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
   ]
  },
  "t.kursformate.o4o5ui": {
@@ -17949,6 +17949,26 @@
    "/exams"
   ]
  },
+ "t.schriftliche-vorbereitung.8jq0ei": {
+  "de": "Schriftliche Vorbereitung",
+  "en": "Written preparation",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.schritt-fuer-schritt-sicherer.yzv4f6": {
   "de": "Schritt für Schritt sicherer auf Deutsch – mit regelmäßigen Übungen in einer angenehmen Gruppenatmosphäre.",
   "en": "Build your German step by step, with regular practice in a friendly group atmosphere.",
@@ -19655,46 +19675,6 @@
  "t.teilnehmergeschichten-sollen-dur.11g9z8e": {
   "de": "Teilnehmergeschichten sollen durch echte CASA Lernmomente getragen werden.",
   "en": "Learner stories should be supported by real CASA learning scenes.",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
- "t.teilnehmerinnen-am-langen-tisch.dp1dig": {
-  "de": "Teilnehmerinnen am langen Tisch am Fenster im Deutschunterricht",
-  "en": "Learners at the long table by the window in a German lesson",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
- "t.teilnehmerinnen-an-einem-langen.u1zjvw": {
-  "de": "Teilnehmerinnen an einem langen Tisch am Fenster folgen dem Deutschunterricht",
-  "en": "Learners at a long table by the window, following a German lesson",
   "files": [
    "src/config/public-page-config.ts"
   ],

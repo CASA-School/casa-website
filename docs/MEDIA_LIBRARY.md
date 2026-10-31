@@ -41,6 +41,18 @@ older issues is built.
 
 ## What is in this folder (since 2026-09-10)
 
+Photo selection approved for release, 2026-10-31: the supplied three-student lead belongs to
+Intensive (`selected-learning-trio-card.webp` for cards/phones and
+`selected-learning-trio.webp` for the wide hero). Intensive keeps its
+`selected-pair-study.webp` supporting photo. C1 Hochschule uses the edited
+`learning-writing-detail.webp` close-up, with a lower focal point to retain the
+pen tip in wide frames; its `learning-focused-pair.webp` supporting photo stays.
+The trio card crop stays stationary during scroll: its tight original headroom
+cannot accommodate the usual 6% depth zoom without trimming the first learner.
+This is study imagery, not a claim that a particular C1 exam is pictured. No
+pixels or filters changed. Reviewed locally across phone, tablet and desktop;
+the historical inventory below describes earlier deliveries.
+
 | File | Status |
 | --- | --- |
 | `group-course-bremen-musicians.jpg` | Slot 20, live. Editorial grade (the pool's W008). |
