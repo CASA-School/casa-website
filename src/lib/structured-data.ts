@@ -49,7 +49,15 @@ export function organizationNode(locale: ContentLocale) {
     taxID: '60/147/04599',
     '@id': organizationId(),
     name: 'CASA – Internationale Sprachschule',
-    alternateName: ['CASA Bremen', 'CASA Internationale Sprachschule Bremen'],
+    // Every name the school is listed under (Google Maps, the University of Bremen's list), so
+    // search and answer engines join them into one school.
+    alternateName: [
+      'CASA Bremen',
+      'CASA Internationale Sprachschule Bremen',
+      'CASA - Internationale Sprachschule gemeinnützige GmbH',
+      'CASA gGmbH',
+      'CASA International Language School',
+    ],
     legalName: 'CASA – Internationale Sprachschule gGmbH',
     description:
       locale === 'de'
