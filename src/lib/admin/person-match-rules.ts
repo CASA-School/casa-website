@@ -74,12 +74,31 @@ export function distance(a: string, b: string, max = 2): number {
   return rows[a.length][b.length];
 }
 
-/** Two name words that are one: the same, a typo (one edit in a short name, two in a long one), or one the start of the other (Alex — Alexander). */
+/** A name as it sounds: Sophia — Sofia, Mayer — Meier, Carl — Karl, Schmitt — Schmidt, Anna — Ana. */
+export function soundOf(word: string): string {
+  return word
+    .replace(/ph/g, 'f')
+    .replace(/th/g, 't')
+    .replace(/ck/g, 'k')
+    .replace(/c(?=[aou])/g, 'k')
+    .replace(/dt\b/g, 't')
+    .replace(/(?<=[a-z])d\b/g, 't')
+    .replace(/[ae][iy]/g, 'ai')
+    .replace(/y/g, 'i')
+    .replace(/(.)\1+/g, '$1');
+}
+
+/**
+ * Two name words that are one: the same; or close — the same sound, a typo (one edit in a short name, two
+ * from six letters on), or one the start of the other (Alex — Alexander).
+ */
 function nearWord(a: string, b: string): 'same' | 'close' | null {
   if (a === b) return 'same';
   const shorter = Math.min(a.length, b.length);
   if (shorter >= 3 && (a.startsWith(b) || b.startsWith(a))) return 'close';
-  if (shorter >= 4 && distance(a, b, shorter >= 8 ? 2 : 1) <= (shorter >= 8 ? 2 : 1)) return 'close';
+  if (shorter >= 3 && soundOf(a) === soundOf(b)) return 'close';
+  const edits = shorter >= 6 ? 2 : 1;
+  if (shorter >= 4 && distance(soundOf(a), soundOf(b), edits) <= edits) return 'close';
   return null;
 }
 
@@ -124,11 +143,13 @@ function compareSets(sent: readonly string[], record: readonly string[], near: (
   return sent.some((a) => record.some((b) => near(a, b))) ? 'close' : 'different';
 }
 
-/** One address nearly the other: the same before the @ at another provider, or one typo in all of it (gmial.com). */
+/** One address nearly the other: the same before the @ at another provider, the same name spelt otherwise, or one typo in all of it (gmial.com). */
 const nearEmail = (a: string, b: string) => {
   const [localA, domainA] = a.split('@');
   const [localB, domainB] = b.split('@');
   if (localA.length >= 5 && localA === localB && domainA !== domainB) return true;
+  // sofia.rossi@ — sophia.rossi@: the same name spelt another way, at the same provider.
+  if (domainA === domainB && localA.length >= 5 && soundOf(localA) === soundOf(localB)) return true;
   return distance(a, b, 1) <= 1;
 };
 
