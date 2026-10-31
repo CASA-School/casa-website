@@ -159,14 +159,14 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   courseClassroomWide: {
-    src: '/media/casa/course-intensive-class.webp',
+    src: '/media/casa/selected-learning-trio-card.webp',
     alt: {
-      en: 'Learners at a long table by the window, following a German lesson',
-      de: 'Teilnehmerinnen an einem langen Tisch am Fenster folgen dem Deutschunterricht',
+      en: 'Three learners working together with course books and notes',
+      de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen',
     },
     caption: {
-      en: 'Course formats stay easier to understand when the learning room is visible.',
-      de: 'Kursformate werden greifbarer, wenn der Lernraum sichtbar bleibt.',
+      en: 'Learning German together in an intensive course.',
+      de: 'Gemeinsam Deutsch lernen im Intensivkurs.',
     },
   },
   courseDiscussion: {
@@ -562,8 +562,8 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
    * is a different picture, so no course page shows the same photo twice.
    */
   intensiveHero: {
-    src: '/media/casa/course-intensive-hero.webp',
-    alt: { de: 'Teilnehmerinnen am langen Tisch am Fenster im Deutschunterricht', en: 'Learners at the long table by the window in a German lesson' },
+    src: '/media/casa/selected-learning-trio.webp',
+    alt: { de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen', en: 'Three learners working together with course books and notes' },
     caption: { de: 'Intensivkurse', en: 'Intensive courses' },
   },
   intensiveStory: {
@@ -659,9 +659,9 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
   },
   /*
    * EXAM PAGES (2026-10-02). The index leads with learners writing (slot 11),
-   * the B2 card is the telc answer sheet (18), the C1 card two learners over
-   * their texts (68). Each exam page has a 2.4:1 hero crop for lg up and a
-   * different second photo, as the course pages do.
+   * the B2 lead is the telc answer sheet (18). C1 uses a writing detail
+   * (107), with learners studying in its supporting photo. The three-student
+   * lead moved to Intensive on 2026-10-31; its supporting pair stays there.
    */
   examB2Hero: {
     src: '/media/casa/exam-b2-hero.webp',
@@ -673,16 +673,15 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Zwei Teilnehmer gehen gemeinsam ihre Blätter durch', en: 'Two learners going through their papers together' },
     caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
   },
-  // User-selected finished photograph; separate phone and wide crops (2026-10-30).
   examC1: {
-    src: '/media/casa/selected-learning-trio-card.webp',
-    alt: { de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen', en: 'Three learners working together with course books and notes' },
-    caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
+    src: '/media/casa/learning-writing-detail.webp',
+    alt: { de: 'Eine Hand mit einem Stift über Deutsch-Lernmaterialien', en: 'A hand holding a pen over German learning materials' },
+    caption: { de: 'Schriftliche Vorbereitung', en: 'Written preparation' },
   },
   examC1Hero: {
-    src: '/media/casa/selected-learning-trio.webp',
-    alt: { de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen', en: 'Three learners working together with course books and notes' },
-    caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
+    src: '/media/casa/learning-writing-detail.webp',
+    alt: { de: 'Eine Hand mit einem Stift über Deutsch-Lernmaterialien', en: 'A hand holding a pen over German learning materials' },
+    caption: { de: 'Schriftliche Vorbereitung', en: 'Written preparation' },
   },
   examC1Class: {
     src: '/media/casa/learning-dictionary-detail.webp',
