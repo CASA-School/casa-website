@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import type { Meaning } from '@/config/brand/meaning';
 import { photoMeaningFor, photoSlotFor } from '@/config/content/photo-numbers';
+import reviewedMedia from '@/config/content/reviewed-media-2026-10-31.json';
 import { iconMap } from '@/config/icon-map';
 import { cn } from '@/lib/utils';
 
@@ -43,6 +44,12 @@ import { cn } from '@/lib/utils';
  */
 const PLACEHOLDERS_ENABLED = true;
 
+// The production optimizer cache survives releases. Changed photos need a new
+// URL so both that cache and visitors' browser caches fetch the reviewed bytes.
+const reviewedVersions = new Map(reviewedMedia.deliveries.map(({file, sha256}) => [
+  `/media/casa/${file}`, sha256.slice(0, 12),
+]));
+
 /*
  * THE STAND-IN, SINCE 2026-10-01. Until then a missing photograph showed as a
  * colour gradient with its number on it, which made the gaps visible while the
@@ -61,6 +68,7 @@ const STAND_IN: Record<Meaning, { tint: string; icon: string; Icon: LucideIcon }
 
 export function CasaImage({ src, alt, fill, width, height, className, style, ...rest }: ImageProps) {
   const slot = typeof src === 'string' ? photoSlotFor(src) : undefined;
+  const version = typeof src === 'string' ? reviewedVersions.get(src) : undefined;
 
   if (!PLACEHOLDERS_ENABLED || slot?.ready) {
     // The registry's focus position (heads kept in frame), unless the call site
@@ -69,13 +77,13 @@ export function CasaImage({ src, alt, fill, width, height, className, style, ...
     return (
       <>
         <NextImage
-          src={src}
+          src={version ? `${src}?v=${version}` : src}
           alt={alt}
           fill={fill}
           width={width}
           height={height}
           className={positioned || !slot?.position ? className : `${className ?? ''} ${slot.position}`.trim()}
-          style={style}
+          style={slot?.fit && alt !== '' ? { ...style, objectFit: slot.fit } : style}
           {...rest}
           data-casa-illustration={slot?.illustration && alt !== '' ? '' : undefined}
           data-casa-example-image={(slot?.example || slot?.illustration) && alt !== '' ? '' : undefined}

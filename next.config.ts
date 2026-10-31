@@ -96,6 +96,11 @@ const nextConfig: NextConfig = {
   // code, and without them the page never starts. No effect on a build.
   allowedDevOrigins: ['127.0.0.1', ...lanAddresses()],
   images: {
+    // CasaImage versions reviewed photos; other local assets keep bare paths.
+    localPatterns: [
+      { pathname: '/**', search: '' },
+      { pathname: '/media/casa/**' },
+    ],
     /*
      * WebP only (2026-10-09). AVIF came first in this list, so every browser got
      * AVIF, and AVIF is slow to encode: on the container's 0.5 vCPU the first

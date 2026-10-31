@@ -2,6 +2,8 @@
 
 Current handoff: `docs/PARALLEL_AGENT_WORK_BOARD.md` (the open units after go-live, 2026-10-30) and `docs/OPERATIONS.md` (how the live site runs). casa-bremen.de has run on the new site since 2026-10-29.
 
+Photography review, 2026-10-31: Rahman accepted 16 replacement placements and retained the edited classroom personal story, edited breakfast tile and courtyard lunch story. Three alternative-use photos remain unassigned. The homepage walking row uses 16:10 framing; C1 has separate phone/card and wide crops. The 53 approved deliveries and 19 decisions are pinned in `src/config/content/reviewed-media-2026-10-31.json`; the legacy media builder preserves them and CasaImage versions their URLs to refresh the persistent image cache. See `docs/MEDIA_LIBRARY.md`. Source layers and the comparison board remain local under ignored `output/`. Rahman requested push, merge and deployment after the review.
+
 The entries below are historical work notes, not a current launch checklist. Prefer README, the current handoff and runtime code when an older entry conflicts.
 
 Historical summary last updated: 2026-06-29

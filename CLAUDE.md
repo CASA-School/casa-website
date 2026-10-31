@@ -401,6 +401,11 @@ pattern already covers the case. If a fact is not verifiable in the repo, mark i
    (`scripts/media/retouch.py`, fixed regions, classical image processing, no image
    model). The learners are unchanged: no person-coloured pixel moves, checked when
    it was made. Any further retouch needs Rahman's explicit approval, like this one.
+   **Approved refresh (Rahman, 2026-10-31):** source-preserving light/colour
+   corrections and explicitly masked background cleanup, with original people
+   and teaching content protected. The reviewed exports supersede the older
+   warm recipes; `docs/MEDIA_LIBRARY.md` and the delivery-hash manifest are
+   authoritative. The five supplied finished selections receive no added grade.
 5. **Accommodation photos are contextual, not availability claims.**
 6. **Placement test content and results.** All 163 placement items are
    `PILOT_UNREVIEWED` and need two qualified DaF reviewers before live use. Never

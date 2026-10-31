@@ -1,5 +1,37 @@
 # CASA Media Library
 
+## Approved photography refresh — 31 October 2026
+
+Rahman approved this refresh and requested its release on 31 October 2026. His numbered review accepts 16 replacements and keeps the existing photos at items 1, 2 and 6: homepage personal story (edited classroom photo), Life at CASA (edited breakfast photo), and group-course supporting story (courtyard lunch). The accepted walking photo is wired to the actual homepage group-course row, which previously ignored the home-specific configuration. All 53 edited/selected delivery files remain available; 14 new responsive outputs from 11 supplied source photos have current placements. IMG_0113, IMG_9233 and the outdoor phone-task photo remain available with alternative placements unassigned.
+
+The portable [delivery manifest](../src/config/content/reviewed-media-2026-10-31.json) records all 53 approved hashes, dimensions, supplied-source hashes, the 19 placement decisions and the two permanently removed files. `python3 scripts/media/build_reel.py --verify-reviewed` checks every delivery and rejects reintroduced retired files. The historical builder preserves reviewed exports instead of overwriting them with the older warm grade. CasaImage adds each reviewed hash to its URL so the persistent production optimizer cache and browser caches fetch the updated photograph immediately. Source frames, lossless masters, masks, prompts and local review evidence remain in the ignored `output/photo-modernisation-2026-10-30/` archive; they are not deployed.
+
+- **Scene 066 is rejected.** `learners-writing-class.jpg` and `course-medical-writing.webp` are deleted from public media and their builder recipes removed. Numbers 11 and 90 remain permanently retired; never reintroduce the scene. Original review snapshots remain outside public media.
+- **Limit repeated pairs.** Sources 074/076/079 (the same two men) now have a single page context: the B2 supporting photograph, slot67. Sources 077/078 (the same two women) remain only in the medical course page’s supporting photograph, slot88. Its lead and overview card now use IMG_0235; slot89 is retired. Slots70/71/84/85/86/92/93 are retired from active placements; their old exports are historical library files.
+- **Protect people and text.** Nine built-in edit guides inform smooth photographic light/white-balance corrections. Generated people and text are never served. Background pixels are composited only for the partial wall poster in IMG_0113 and the window cord in IMG_0235, with original people protected. A coat-removal draft for IMG_0473 was rejected after edge review; that photograph keeps its real background and receives light correction only. The saved lossless masters retain the protected faces and all pixels outside background edit masks relative to their photographic lighting masters. Delivery encoding is lossy.
+- **Keep source framing.** The group-table and close-up ball scene use contain where a lateral crop would cut a person. New phone/wide exports of the three-learner selection are separately composed. Some newly supplied originals already touch/crop hair at the source edge; no expansion or invented hair is used.
+- The five finished selections receive no additional colour filter or generative edit. Existing individual portraits, especially Bettina, remain unchanged.
+- **Wide selections need card-specific framing (Rahman, 2026-10-31).** Do not inherit a panoramic source ratio into a shallow card. The group walk now uses16:10 with a67% horizontal focus on the homepage and Why Germany guide; the C1 selection retains its separate4:3 phone/card export and wide hero export. The intensive supporting image and attentive-learners guide retain comfortable-height frames. No stretching or new filters. All current uses were checked at320,390,768,1024,1440,1920px:168 sharp photo boxes on7 routes, zero additional head cuts. The phone-task selection remains pending a different placement and must be checked in its chosen layout before use.
+
+| Supplied photograph | Approved placement | Delivered file |
+| --- | --- | --- |
+| `IMG_0071.JPG` | `/ueber-uns/casa-leitbild` | `learning-ball-exercise.webp` |
+| `IMG_0103.JPG` | `/sprachkurse/firmenunterricht` | `learning-group-discussion.webp` |
+| `IMG_0113.JPG` | Available; new placement pending (not Life at CASA) | `learning-learner-smile.webp` |
+| `IMG_0156.JPG` | `/sprachkurse/firmenunterricht` | `learning-writing-detail.webp` |
+| `IMG_0235.JPG` | `/sprachkurse/deutsch-fuer-mediziner` | `learning-speaking-prompt.webp` |
+| `IMG_0473.JPG` | `/pruefungszentrum/telc-deutsch-c1-hochschule` | `learning-focused-pair.webp` |
+| `IMG_0506.JPG` | `/sprachkurse/firmenunterricht` | `learning-collaborative-writing.webp` |
+| `IMG_0524.JPG` | `/pruefungszentrum` | `learning-dictionary-detail.webp` |
+| `IMG_9233.JPG` | Library; homepage personal story keeps edited original | `learning-friends-heart.webp` |
+| `casa-student.png` | `/pruefungszentrum/telc-deutsch-c1-hochschule` | `selected-learning-trio.webp` |
+| `casa-student-2.png` | `/sprachkurse/deutsch-intensiv` | `selected-pair-study.webp` |
+| `casa-student-3-groups.png` | `/ratgeber/warum-deutschland` | `selected-bremen-walk.webp` |
+| `casa-group-image.png` | Available; new placement pending (group course keeps courtyard lunch) | `selected-city-phone-task.webp` |
+| `casa-student-image.png` | `/ratgeber/studieren-in-deutschland` | `selected-attentive-learners.webp` |
+
+New permanent numbers103–119 identify these exports. The earlier dated inventory and grading notes below describe historical selections; this section supersedes them for the rejected scene, pair limits and new placements.
+
 Approved photographs and labelled host-room illustrations live in `public/media/casa/` and are served from `/media/casa/…`.
 
 The two August 2026 NewsFlash photographs (`newsflash-editor-lisa-dao.jpg`,

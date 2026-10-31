@@ -2095,6 +2095,26 @@
    "/accommodation/become-host"
   ]
  },
+ "t.bei-casa-ankommen.4byji1": {
+  "de": "Bei CASA ankommen",
+  "en": "Feeling at home at CASA",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.bei-casa-arbeitest-du.18146lz": {
   "de": "Bei CASA arbeitest du mit Menschen, denen guter Unterricht, persönliche Begegnung und eine offene Gemeinschaft am Herzen liegen.",
   "en": "At CASA, you work with people who care about good teaching, personal contact and an open community.",
@@ -3085,6 +3105,26 @@
    "/"
   ]
  },
+ "t.bremen-gemeinsam-erleben.9mrzyx": {
+  "de": "Bremen gemeinsam erleben",
+  "en": "Exploring Bremen together",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.bremen-und-die-region.gsw9ik": {
   "de": "Bremen und die Region entdecken",
   "en": "Bremen and beyond",
@@ -3482,26 +3522,6 @@
  "t.casa-lernende-hoeren-zu.1ihi6s6": {
   "de": "CASA Lernende hören zu und sprechen in einer Kursdiskussion",
   "en": "CASA learners listening and speaking during a classroom discussion",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
- "t.casa-lernende-konzentrieren-sich.13tbj9p": {
-  "de": "CASA Lernende konzentrieren sich auf schriftliche Deutschübungen",
-  "en": "CASA learners concentrating on written German practice",
   "files": [
    "src/config/public-page-config.ts"
   ],
@@ -6248,6 +6268,26 @@
   ],
   "pages": []
  },
+ "t.drei-lernende-arbeiten-gemeinsam.1d6uyso": {
+  "de": "Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen",
+  "en": "Three learners working together with course books and notes",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.drei-teilnehmende-lachen-bei.1sc2yj3": {
   "de": "Drei Teilnehmende lachen bei einer gemeinsamen Übung am Kurstisch",
   "en": "Three learners laughing over a shared exercise at the course table",
@@ -7079,6 +7119,46 @@
    "/courses/[slug]"
   ]
  },
+ "t.ein-aufgeschlagenes-deutsch-ukra.1djzyi": {
+  "de": "Ein aufgeschlagenes deutsch-ukrainisches Wörterbuch bei der Wortschatzarbeit",
+  "en": "An open German–Ukrainian dictionary during vocabulary practice",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.ein-aufgeschlagenes-woerterbuch-.10cfadd": {
+  "de": "Ein aufgeschlagenes Wörterbuch bei der Wortschatzarbeit",
+  "en": "An open dictionary during vocabulary practice",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.ein-baby-krabbelt-und.acgqmh": {
   "de": "Ein Baby krabbelt und schaut neugierig nach oben",
   "en": "A baby crawling and looking up with curiosity",
@@ -7236,6 +7316,66 @@
    "/placement-test",
    "/resources/language-tandem",
    "/search",
+   "/team"
+  ]
+ },
+ "t.ein-lernender-bei-einer.z3vh8e": {
+  "de": "Ein Lernender bei einer gemeinsamen Sprechübung im Unterricht",
+  "en": "A learner during a paired speaking exercise in class",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.ein-lernender-haelt-einen.1m8vc10": {
+  "de": "Ein Lernender hält einen handgeschriebenen Impuls für eine Sprechübung hoch",
+  "en": "A learner holding up a handwritten prompt for a speaking exercise",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.ein-lernender-laechelt-beim.ucwml1": {
+  "de": "Ein Lernender lächelt beim gemeinsamen Arbeiten mit Kursbuch und Stift",
+  "en": "A learner smiling while working together with a course book and pencil",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
    "/team"
   ]
  },
@@ -7729,6 +7869,26 @@
    "/team"
   ]
  },
+ "t.eine-gruppe-lernender-geht.rzf8yw": {
+  "de": "Eine Gruppe Lernender geht bei Sonnenschein gemeinsam durch Bremen",
+  "en": "A group of learners walking together through Bremen in the sunshine",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.eine-gute-aussprache-laesst.15t35e9": {
   "de": "Eine gute Aussprache lässt sich trainieren!",
   "en": "Good pronunciation can be trained!",
@@ -7759,6 +7919,26 @@
   ],
   "pages": [
    "/courses/[slug]"
+  ]
+ },
+ "t.eine-hand-mit-einem.1bs1kgz": {
+  "de": "Eine Hand mit einem Stift über Deutsch-Lernmaterialien",
+  "en": "A hand holding a pen over German learning materials",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.eine-hand-schreibt-die.1k3k77w": {
@@ -7912,6 +8092,46 @@
  "t.eine-lehrerin-und-laechelnde.1g7wds5": {
   "de": "Eine Lehrerin und lächelnde Teilnehmende im Unterricht",
   "en": "A teacher with smiling learners in class",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.eine-lernende-laechelt-bei.f81fb6": {
+  "de": "Eine Lernende lächelt bei einer Übung mit einem kleinen Ball, neben ihr schreibt eine Teilnehmerin",
+  "en": "A learner smiling during an exercise with a small ball while another participant writes beside her",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.eine-lerngruppe-bespricht-gemein.basuam": {
+  "de": "Eine Lerngruppe bespricht gemeinsam eine Übung am Kurstisch",
+  "en": "A learning group discussing an exercise around the course table",
   "files": [
    "src/config/public-page-config.ts"
   ],
@@ -9890,6 +10110,46 @@
   "pages": [
    "/about/nonprofit",
    "/partners"
+  ]
+ },
+ "t.gemeinsam-ueben.om28ih": {
+  "de": "Gemeinsam üben",
+  "en": "Practising together",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
+ "t.gemeinsam-weiterkommen.buauyp": {
+  "de": "Gemeinsam weiterkommen",
+  "en": "Making progress together",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.gemeinsame-kueche.141toyp": {
@@ -14048,6 +14308,26 @@
    "/calculator"
   ]
  },
+ "t.lernende-arbeiten-gemeinsam-an.g8af0r": {
+  "de": "Lernende arbeiten gemeinsam an einer schriftlichen Deutschübung",
+  "en": "Learners working together on a written German exercise",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.lernende-berichten-ueber-fortsch.1w1iyq5": {
   "de": "Lernende berichten über Fortschritt, Vertrauen und Alltag in Bremen.",
   "en": "Learners share stories about progress, confidence and life in Bremen.",
@@ -14738,6 +15018,26 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.mit-freude-lernen.1yhi4rm": {
+  "de": "Mit Freude lernen",
+  "en": "Enjoying learning",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
   ]
  },
  "t.mit-ihrer-unterschrift-bestaetig.dxmewm": {
@@ -17595,26 +17895,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.schreiben-ueben.e5pw1d": {
-  "de": "Schreiben üben",
-  "en": "Writing practice",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
   ]
  },
  "t.schreiben.v2bmw1": {
@@ -21332,46 +21612,6 @@
    "/resources/why-germany"
   ]
  },
- "t.vier-lernende-ueben-das.bb4dtf": {
-  "de": "Vier Lernende üben das Schreiben im Kurs",
-  "en": "Four learners practising writing in class",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
- "t.vier-teilnehmende-schreiben-am.5qc4zl": {
-  "de": "Vier Teilnehmende schreiben am langen Kurstisch",
-  "en": "Four learners writing along the course table",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
  "t.visa-orientiert.1pn4lzs": {
   "de": "Visa-orientiert",
   "en": "For visa applicants",
@@ -24345,6 +24585,26 @@
    "/news"
   ]
  },
+ "t.wortschatz-vertiefen.bsnelx": {
+  "de": "Wortschatz vertiefen",
+  "en": "Building vocabulary",
+  "files": [
+   "src/config/public-page-config.ts"
+  ],
+  "pages": [
+   "/",
+   "/about",
+   "/accommodation",
+   "/accommodation/[type]",
+   "/accommodation/become-host",
+   "/courses",
+   "/courses/[slug]",
+   "/exams",
+   "/exams/[code]",
+   "/faq",
+   "/team"
+  ]
+ },
  "t.worueber-moechtest-du-sprechen.1uprdwu": {
   "de": "Worüber möchtest du sprechen? (optional)",
   "en": "What would you like to discuss? (optional)",
@@ -24951,9 +25211,9 @@
    "/accommodation/[type]"
   ]
  },
- "t.zwei-lernende-besprechen-gemeins.jdbxdr": {
-  "de": "Zwei Lernende besprechen gemeinsam ein Dokument",
-  "en": "Two learners going through a document together",
+ "t.zwei-laechelnde-lernende-formen.xqum9e": {
+  "de": "Zwei lächelnde Lernende formen mit den Fingern gemeinsam ein Herz",
+  "en": "Two smiling learners making a heart together with their fingers",
   "files": [
    "src/config/public-page-config.ts"
   ],
@@ -24971,9 +25231,9 @@
    "/team"
   ]
  },
- "t.zwei-lernende-lesen-gemeinsam.14lekl3": {
-  "de": "Zwei Lernende lesen gemeinsam ihre Unterlagen",
-  "en": "Two learners reading their papers together",
+ "t.zwei-lernende-bearbeiten-gemeins.x6mnrb": {
+  "de": "Zwei Lernende bearbeiten gemeinsam Aufgaben in ihren Kursbüchern",
+  "en": "Two learners working together on exercises in their course books",
   "files": [
    "src/config/public-page-config.ts"
   ],
@@ -24991,9 +25251,9 @@
    "/team"
   ]
  },
- "t.zwei-lernende-lesen-gemeinsam.dh0cbv": {
-  "de": "Zwei Lernende lesen gemeinsam Prüfungstexte",
-  "en": "Two learners reading exam texts together",
+ "t.zwei-lernende-konzentrieren-sich.122hkq6": {
+  "de": "Zwei Lernende konzentrieren sich auf Kursbücher und schriftliche Übungen",
+  "en": "Two learners concentrating on course books and written exercises",
   "files": [
    "src/config/public-page-config.ts"
   ],
@@ -25041,26 +25301,6 @@
    "/resources/language-tandem"
   ]
  },
- "t.zwei-teilnehmer-besprechen-einen.1jxp55r": {
-  "de": "Zwei Teilnehmer besprechen einen Text",
-  "en": "Two learners discussing a text",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
  "t.zwei-teilnehmer-gehen-gemeinsam.1l6l3pk": {
   "de": "Zwei Teilnehmer gehen gemeinsam ihre Blätter durch",
   "en": "Two learners going through their papers together",
@@ -25084,26 +25324,6 @@
  "t.zwei-teilnehmerinnen-gehen-gemei.1n3k4yk": {
   "de": "Zwei Teilnehmerinnen gehen gemeinsam einen Text durch",
   "en": "Two learners going through a text together",
-  "files": [
-   "src/config/public-page-config.ts"
-  ],
-  "pages": [
-   "/",
-   "/about",
-   "/accommodation",
-   "/accommodation/[type]",
-   "/accommodation/become-host",
-   "/courses",
-   "/courses/[slug]",
-   "/exams",
-   "/exams/[code]",
-   "/faq",
-   "/team"
-  ]
- },
- "t.zwei-teilnehmerinnen-lesen-ihre.1e43med": {
-  "de": "Zwei Teilnehmerinnen lesen ihre Prüfungstexte",
-  "en": "Two learners reading their exam texts",
   "files": [
    "src/config/public-page-config.ts"
   ],
