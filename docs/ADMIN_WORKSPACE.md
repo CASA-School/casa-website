@@ -2710,6 +2710,18 @@ decides; the search is a read (`searchRegistrationPeopleAction`, `registrations`
 „3 von 14 Plätzen frei" or „Niveau voll", and how many wait. The week-by-week view stays on the course's own
 page (Kurse).
 
+**A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant — the stay
+the workspace's blue (`TINTS.blue`, badge `stay`), the visa violet (`TINTS.violet`, badge `visa`): pills in
+the Anmeldung's head that jump to their sections, a tag on the list, and a section of its own with its colour
+along the top (`needs.tsx`). *Unterkunft*: what was asked for, the stay's dates (the day before the first
+course to the Saturday after the last, `stayFor`), allergies, and per booking made from it what was booked
+and where it was placed (`bookedStays`), or „Unterkunft zuteilen". *Visumshilfe*: the nationality and three
+steps — „Bitte um Anzahlung" sent, booked, „Bestätigung für die Botschaft" sent (`visaProgress`) — with the
+next letter one click away. What is not needed stays a quiet fact in the submission.
+
+„Alle buchen" stays visible during the parallel phase (Rahman, 2026-10-31): he watches for double bookings
+himself, and the team needs it open to test and to write the manuals.
+
 **The wizard asks only what fits the course** (`booking-wizard-client.tsx`, `levelsOf`). From a registration
 the kind of course is known: its starts alone, and of a kind with several courses the one asked for (telc C1
 Hochschule, not B2), with „Andere Kursart" and „Alle Termine dieser Kursart" one click away. The level step
