@@ -646,12 +646,12 @@ export async function SubmissionCard({
   const german = reply.locale === 'de';
   return (
     <article className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
-      <header className="ws-head-band flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-card-line bg-ws-card-head px-6 py-4">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={name || email} />
           <div className="min-w-0 text-[0.84rem]">
             <p className="truncate">
-              <span className="font-semibold text-white">{name}</span> <span className="text-[var(--casa-muted)]">&lt;{email}&gt;</span>
+              <span className="font-semibold text-[var(--casa-ink)]">{name}</span> <span className="text-[var(--casa-muted)]">&lt;{email}&gt;</span>
             </p>
             <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
               {t('an CASA Bremen', 'to CASA Bremen')}
@@ -660,7 +660,7 @@ export async function SubmissionCard({
           </div>
         </div>
         <time dateTime={at.toISOString()} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-[var(--casa-ink)]">
             {shortDay(at, lang)}, {berlinTime(at, lang)}
           </span>{' '}
           · {relativeDays(at, lang)}
