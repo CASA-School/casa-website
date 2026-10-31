@@ -40,6 +40,7 @@ const QUEUE_ENTITIES = new Set<string>([
   'course_registration',
   'exam_registration',
   'career_application',
+  'feedback',
 ]);
 
 const NOTE_ENTITIES = new Set<string>([...QUEUE_ENTITIES, 'placement_attempt', 'booking', 'person', 'offer', 'group_visit', 'accommodation', 'organisation', 'course', 'exam_session']);
@@ -51,6 +52,7 @@ const MODULE_FOR: Record<string, WorkspaceModule> = {
   course_registration: 'registrations',
   exam_registration: 'registrations',
   career_application: 'applications',
+  feedback: 'feedback',
   placement_attempt: 'placement',
   booking: 'bookings',
   person: 'people',

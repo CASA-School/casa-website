@@ -42,6 +42,7 @@ export const MODULES = [
   'staff_private',
   'website',
   'activity',
+  'feedback',
   'team',
   'settings',
 ] as const;
@@ -84,6 +85,7 @@ export const MODULE_LABELS: Record<WorkspaceModule, Bilingual> = {
   staff_private: { de: 'Personaldaten', en: 'Staff records' },
   website: { de: 'Website', en: 'Website' },
   activity: { de: 'Aktivität', en: 'Activity' },
+  feedback: { de: 'Feedback', en: 'Feedback' },
   team: { de: 'Zugänge', en: 'Accounts' },
   settings: { de: 'Einstellungen', en: 'Settings' },
 };
@@ -139,6 +141,9 @@ export type Access = Record<WorkspaceModule, AccessLevel>;
  * `accommodation` — host families, CASA's flats, their rooms and the stays at them — is the team's
  * (2026-10-18; the placement is Natalia's daily work, and every colleague answers where a learner lives):
  * `edit` adds and changes a place, its family and rooms, and places a stay; `full` also deletes.
+ * `feedback` — what the team sends with „Feedback" from any screen (0112, 2026-10-31) — is read and worked
+ * by management: every colleague SENDS feedback and reads their own under „Mein Feedback" whatever this
+ * module says; holding it opens everyone's (`edit` answers and sets the state, `full` also deletes).
  */
 const STAFF_MODULES: readonly WorkspaceModule[] = [
   'day',

@@ -399,7 +399,7 @@ password — or uses **Sign in with Microsoft**.
 The workspace is a set of **modules**, registered once in
 `src/lib/admin/access.ts`: overview, enquiries, registrations, placement,
 applications, people, private_data, bookings, offers, organisations, groups, accommodation, rooms, prices, catalogue,
-kursplanung, website, staff, staff_private, activity, team, settings. For each
+kursplanung, website, staff, staff_private, activity, feedback, team, settings. For each
 module a person holds a **level** — `none`, `view`, `edit` or `full`. `view`
 opens the screens, `edit` creates and changes, `full` also deletes and does
 the irreversible things. A role sets the default level per module; a
@@ -412,7 +412,7 @@ link is not access control.
 
 | Role | Default |
 | --- | --- |
-| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Groups, Accommodation, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records and Team |
+| `staff` | `view` on Overview and Settings; `edit` on Enquiries, Registrations, Placement, Students, Bookings, Organisations, Groups, Accommodation, Courses & exams, Activity; `none` on Applications, Rooms, Prices, Kursplanung, Website, Offers, Staff, Staff records, Feedback and Team |
 | `admin` | `full` everywhere, and sets other people's levels on the Team screen |
 | `owner` | The above, plus granting the owner role |
 
@@ -574,7 +574,7 @@ retention period (Open items).
 | --- | --- |
 | **Inbox** | Enquiries, Registrations — what the public site sent, waiting to be worked |
 | **School** | Students (→ Placement tests), Bookings, Offers, Courses, Exams — the records the school keeps. Offers sit in the frame like the rest since 2026-10-17 (docs/OFFERS.md) |
-| **Management** | Applications, Activity, Team, Settings (→ Prices, Lists, Rooms) |
+| **Management** | Applications, Activity, Feedback, Team, Settings (→ Prices, Lists, Rooms) |
 
 Nine top-level items, and the placements are the argument:
 
@@ -2553,6 +2553,55 @@ first aid, IT, examiner training …) are a tab „Schulungen" with `staff`, sho
 teacher teaches (`StaffMember._ID_Level`) are added to Kursplanung's while nobody set the rules by hand.
 Not brought: the month's „comment", which is SchoolMan's own stamp („… aktualisiert – <account>"), and a
 day's `Adjustment`, which the office's adoption copies into `AdminWork`.
+
+## Feedback (2026-10-31, migration 0112)
+
+Rahman, for the parallel phase (the team works in FileMaker and starts using the workspace beside it): „let's
+build the feedback button first … make it very advanced and dynamic and best user experience and what if they
+want to share a screenshot … an email notification would be appreciated. email to admin@".
+
+**Sending, from any screen, by every colleague.** „Feedback" sits in the top bar between „Neu" and the
+language (on a phone, the speech bubble in the navy band). It opens a panel from the right
+(`src/components/admin/feedback/feedback-button.tsx`):
+
+- **What it is about:** Funktioniert nicht · Fehlt hier (FileMaker has it) · Idee · Frage. The text box's
+  placeholder follows the choice („Was fehlt dir hier, und wo findest du es in FileMaker?").
+- **Screenshots, up to five:** „Bildschirm aufnehmen" takes one picture of this tab through the browser's own
+  screen sharing (Chrome and Edge offer this tab first; the panel steps out of the picture without closing, so
+  nothing typed is lost, and the sharing ends after one frame); ⌘V / Strg+V pastes a picture copied anywhere;
+  a picture can be dropped on the panel or chosen. Each is shrunk to 2,200 px on its long side (PNG, or JPEG
+  when PNG would be heavy). A click on one opens the drawing tool (`screenshot-editor.tsx`): Markieren (a red
+  frame), Pfeil, Stift, Schwärzen (a black block over what nobody else should read, a learner's address or
+  account), Rückgängig (⌘Z); „Übernehmen" burns the marks into the picture and the original is not kept.
+- **What travels with it, without being typed** (`capture.ts`): the page's address and name (the name its head
+  gave the way back), the pages before it in the visit, the window, the screen, the browser, the workspace's
+  language, and the last errors the page met in the browser (messages only, never a stack).
+- „Senden" or ⌘↵, with the upload's progress; then „Danke, …! Feedback #12 ist angekommen."
+- **„Mein Feedback"** lists what the colleague sent, its state and the answer. A blue dot on the button says
+  an answer has come; it goes once the list has been on screen a moment. A real source, so a notification is
+  allowed (§The sidebar is the frame).
+
+**Where it goes.** `staff_feedback` (one row, a number `#12` for talking about it) and `staff_feedback_files`
+(the pictures in the database, as the CVs are). The upload is a route handler, `/admin/feedback/send`, not a
+server action: an action takes 1 MB and the panel shows progress. It checks the session itself, accepts a post
+only from this host (`sameOrigin`), and a picture only when its first bytes say PNG, JPEG or WebP. After the
+answer (`after()`), a mail goes to **admin@casa-bremen.de** (`feedback-mail.ts`): from `FORM_MAIL_FROM`
+through Microsoft Graph, in both delivery modes, replies to the colleague, the text, the screenshots inline
+while the mail stays under Graph's 4 MB (the rest named), „Im Workspace öffnen" on the admin host, and the
+browser and errors under it. Without Graph mail (a laptop) nothing is sent and the record says „nicht gesendet".
+
+**Working it: the module `feedback`** (owners and administrators; given to a colleague on the Team screen).
+Verwaltung → Feedback is the inboxes' one screen (`InboxScreen`, entity `feedback`): the week by day, the
+history, a search by text, name, page or `#12`. A record has the head and bar of every inbox record (state,
+owner), the message with the screenshots (a click opens them large, ← →), „Antwort an …" — what the sender
+reads under „Mein Feedback", with whether they have read it — what travelled with it, the notes and the
+history, and Delete (`full`, confirmed). The overview shows a Feedback card with the open count.
+
+**Access, checked in four places.** Sending and „Mein Feedback" are every colleague's (the check is the
+Overview, which no account drops below `view`); `mine` returns only the caller's own rows, by the session's
+person and never an id from the request. A screenshot (`/admin/feedback/<id>/files/<file>`) is served to the
+module's holders and to its sender, inline as its proven type with `nosniff`; anyone else gets a 404.
+`host-routing.test.ts` asserts the three route handlers' checks.
 
 ## Mail from the workspace (2026-10-23)
 

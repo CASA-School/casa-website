@@ -363,6 +363,28 @@ describe('workspace auth gate', () => {
     expect(route).toContain('attachment;');
   });
 
+  it('checks the session in the feedback routes, and serves a screenshot only to the module or its sender', () => {
+    // „Feedback" (0112) is three route handlers: outside every layout, each checks for itself.
+    const send = readFileSync(path.join(ADMIN_APP, '(workspace)/feedback/send/route.ts'), 'utf8');
+    expect(send).toMatch(/if \(!user\) \{\s*return apiError\('signed_out', 'Signed out', 401\);/);
+    expect(send).toContain('sameOrigin(request)');
+    expect(send.indexOf('getStaffUser')).toBeLessThan(send.indexOf('createFeedback('));
+    // A picture is what its first bytes say, or nothing.
+    expect(send.indexOf('feedbackImageType(bytes)')).toBeLessThan(send.indexOf('createFeedback('));
+
+    const mine = readFileSync(path.join(ADMIN_APP, '(workspace)/feedback/mine/route.ts'), 'utf8');
+    expect(mine).toContain('getStaffUser');
+    expect(mine).toContain('myFeedback(user.id)');
+    expect(mine).toContain('markMyFeedbackSeen(user.id)');
+
+    const file = readFileSync(path.join(ADMIN_APP, '(workspace)/feedback/[id]/files/[file]/route.ts'), 'utf8');
+    expect(file).toContain('getStaffUser');
+    expect(file).toContain("redirect('/admin/sign-in')");
+    expect(file).toMatch(/canAccess\(user, 'feedback', 'view'\) \|\| picture\.senderId === user\.id/);
+    expect(file).toContain('nosniff');
+    expect(file).not.toContain('image/svg');
+  });
+
   it('checks the session in the search route, and searches only the modules the colleague holds', () => {
     // The palette's search (2026-10-27) is a route handler, so cancellable: outside every layout, it
     // checks the session itself, and hands every reader the colleague's own access.

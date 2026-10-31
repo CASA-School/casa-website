@@ -8,6 +8,7 @@ import { LangSwitch } from './lang-switch';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
+import { FeedbackButton } from './feedback/feedback-button';
 import { TopBar } from './top-bar';
 import { AccountMenu } from './top-bar-menus';
 import { canAccess } from '@/lib/admin/access';
@@ -93,6 +94,7 @@ export async function WorkspaceShell({
             <span className="flex items-center gap-1 lg:hidden">
               <LangSwitch />
               <CommandSearch variant="rail-icon" pages={pages} creates={createItems(user, t)} />
+              <FeedbackButton tone="rail" firstName={user.name.trim().split(/\s+/)[0] ?? user.name} canReview={canAccess(user, 'feedback')} />
               <AccountMenu
                 tone="rail"
                 name={user.name}
@@ -248,6 +250,7 @@ export async function WorkspaceShell({
                 '/admin/website',
                 '/admin/statistics',
                 '/admin/activity',
+                '/admin/feedback',
                 '/admin/team',
               ]}
             >
@@ -287,6 +290,12 @@ export async function WorkspaceShell({
               {canAccess(user, 'activity') ? (
                 <NavLink href="/admin/activity" icon={Icon.note} title={t('Aktivität', 'Activity')}>
                   {t('Aktivität', 'Activity')}
+                </NavLink>
+              ) : null}
+              {/* What the team sends with „Feedback" (0112). */}
+              {canAccess(user, 'feedback') ? (
+                <NavLink href="/admin/feedback" icon={Icon.feedback} title={t('Feedback', 'Feedback')}>
+                  {t('Feedback', 'Feedback')}
                 </NavLink>
               ) : null}
               {canAccess(user, 'team') ? (
