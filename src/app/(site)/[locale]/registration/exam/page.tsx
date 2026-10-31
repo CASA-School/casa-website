@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { ExamWizard } from '@/components/registration/exam-wizard';
 import { RegistrationPageShell } from '@/components/registration/registration-page-shell';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamRegistrationCatalog } from '@/lib/content/repository';
+import { getExamRegistrationCatalog, getPreparationTerms } from '@/lib/content/repository';
 import { createPublicMetadata } from '@/lib/seo';
 import { say } from '@/lib/cms/copy';
 
@@ -26,7 +26,12 @@ export default async function ExamRegistrationPage({
   const locale = await getContentLocale();
   const { sessionId } = await searchParams;
   const requestedSessionId = typeof sessionId === 'string' ? sessionId : undefined;
-  const examCatalog = await getExamRegistrationCatalog(locale, requestedSessionId);
+  const [examCatalog, preparationTerms] = await Promise.all([
+    getExamRegistrationCatalog(locale, requestedSessionId),
+    getPreparationTerms(locale),
+  ]);
+  // What the form needs to point to a sitting's preparation course, and nothing else.
+  const preparations = preparationTerms.map(({ id, exam, startDate, endDate }) => ({ id, exam, startDate, endDate }));
 
   return (
     <RegistrationPageShell
@@ -37,7 +42,7 @@ export default async function ExamRegistrationPage({
       helpTitle={say(locale, 'Fragen zur Prüfung?', 'Questions about the exam?')}
       helpBody={say(locale, 'Wir helfen dir gern bei der Wahl von Prüfung und Termin.', 'We’re happy to help you choose an exam and a date.')}
     >
-      <ExamWizard catalog={examCatalog} />
+      <ExamWizard catalog={examCatalog} preparations={preparations} />
     </RegistrationPageShell>
   );
 }

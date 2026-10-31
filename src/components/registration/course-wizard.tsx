@@ -430,7 +430,7 @@ export function CourseWizard({ catalog, examCatalog }: CourseWizardProps) {
               </button>
             ) : null}
 
-            {examCatalog ? <ExamAddOn form={form} examCatalog={examCatalog} /> : null}
+            {examCatalog ? <ExamAddOn form={form} examCatalog={examCatalog} catalog={catalog} /> : null}
           </div>
         )}
 

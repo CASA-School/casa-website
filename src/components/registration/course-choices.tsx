@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { PlacementAppointmentDialog } from '@/components/appointments/placement-appointment-dialog';
 import {
   ArrowRight,
@@ -52,12 +52,13 @@ import type {
 import { isSecondHalf } from '@/lib/registration/halves';
 import { buildLevelPath, continuationLevels, pathWeeks } from '@/lib/registration/level-path';
 import { levelChoiceGroups, soldByLevel } from '@/lib/registration/levels';
+import { examAfterPreparation } from '@/lib/registration/preparation';
 import { daytimeLabel, formatDay, scheduleLine, termRange, weeksLabel } from '@/lib/registration/term-format';
 import { cn } from '@/lib/utils';
 import { courseTypeIcons3d, examTypeIcons3d } from '@/config/icons-3d';
 import { requiresLevelField } from '@/lib/validation/registration-submissions';
 
-import type { CourseForm } from './course-form-types';
+import type { CourseForm, CourseFormData } from './course-form-types';
 import { useSiteCopy } from '@/components/cms/site-copy-provider';
 
 /*
@@ -529,13 +530,31 @@ export function CourseItemFields({ form, catalog, index }: CourseItemFieldsProps
 type ExamAddOnProps = {
   form: CourseForm;
   examCatalog: RegistrationExamCatalog;
+  /** The courses' catalogue: a preparation course chosen in it suggests its exam day. */
+  catalog: RegistrationCourseCatalog;
 };
 
-/** An exam booked with the courses (2026-10-05): off until the learner asks for it. */
-export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
+/** The exam day a preparation course of the registration leads to (lib/registration/preparation), if any. */
+function suggestedSitting(courses: CourseFormData['courses'] | undefined, catalog: RegistrationCourseCatalog, examCatalog: RegistrationExamCatalog) {
+  for (const course of courses ?? []) {
+    const option = catalog.optionsByCourseTypeId[course.courseTypeId]?.find((candidate) => candidate.id === course.courseInstanceId);
+    const type = option?.exam ? examCatalog.examTypes.find((candidate) => candidate.code === option.exam) : undefined;
+    const sitting = option && type ? examAfterPreparation(examCatalog.optionsByExamTypeId[type.id] ?? [], option.endDate, (candidate) => candidate.startsAt) : null;
+    if (type && sitting) return { type, sitting };
+  }
+  return null;
+}
+
+/**
+ * An exam booked with the courses (2026-10-05): off until the learner asks for it. With a preparation
+ * course chosen (2026-10-31) it names the exam day the course leads to and, ticked, books that one:
+ * the exam's registration closes about when the course begins, so the two are best booked together.
+ */
+export function ExamAddOn({ form, examCatalog, catalog }: ExamAddOnProps) {
   const locale = examCatalog.locale;
   const de = locale === 'de';
   const t = (en: string, deText: string) => (de ? deText : en);
+  const { say } = useSiteCopy();
   const { watch, setValue, clearErrors, formState } = form;
 
   const examTypes = examCatalog.examTypes.filter((type) => (examCatalog.optionsByExamTypeId[type.id] ?? []).length > 0);
@@ -544,6 +563,19 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
   const sessionId = watch('exam.examSessionId') ?? '';
   const registrationType = watch('exam.registrationType');
   const errors = formState.errors.exam;
+  const suggestion = suggestedSitting(watch('courses'), catalog, examCatalog);
+  const suggestedTypeId = suggestion?.type.id ?? '';
+  const suggestedId = suggestion?.sitting.id ?? '';
+
+  // Another preparation date moves the exam with it, unless the learner chose another sitting.
+  const followed = useRef(suggestedId);
+  useEffect(() => {
+    const previous = followed.current;
+    followed.current = suggestedId;
+    if (!enabled || !suggestedId || previous === suggestedId || (sessionId && sessionId !== previous)) return;
+    setValue('exam.examTypeId', suggestedTypeId, { shouldDirty: true });
+    setValue('exam.examSessionId', suggestedId, { shouldDirty: true });
+  }, [enabled, sessionId, setValue, suggestedId, suggestedTypeId]);
 
   if (examTypes.length === 0) {
     return null;
@@ -561,7 +593,11 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
 
   const toggle = (checked: boolean) => {
     setValue('examEnabled', checked, { shouldDirty: true });
-    if (checked && !examTypeId) {
+    if (checked && suggestion) {
+      setValue('exam.examTypeId', suggestion.type.id, { shouldDirty: true });
+      setValue('exam.examSessionId', suggestion.sitting.id, { shouldDirty: true });
+      clearErrors('exam');
+    } else if (checked && !examTypeId) {
       chooseExam(examTypes[0].id);
     }
     // The full exam, as the exam form starts: a part on its own is the exception.
@@ -579,7 +615,14 @@ export function ExamAddOn({ form, examCatalog }: ExamAddOnProps) {
         <Checkbox id="exam-enabled" checked={enabled} onCheckedChange={(checked) => toggle(Boolean(checked))} className="mt-0.5" />
         <Label htmlFor="exam-enabled" className="block cursor-pointer leading-relaxed">
           <span className="block text-sm font-semibold text-[var(--casa-ink)]">{t('Add an exam', 'Prüfung dazubuchen')}</span>
-          <span className="mt-0.5 block text-sm font-normal text-[var(--casa-muted)]">{examTypes.map((type) => type.name).join(' · ')}</span>
+          <span className="mt-0.5 block text-sm font-normal text-[var(--casa-muted)]">
+            {suggestion
+              ? say(locale, '{exam} am {date}, nach deinem Vorbereitungskurs', '{exam} on {date}, after your preparation course', {
+                  exam: suggestion.type.name,
+                  date: formatDay(suggestion.sitting.startsAt, locale),
+                })
+              : examTypes.map((type) => type.name).join(' · ')}
+          </span>
         </Label>
       </div>
 

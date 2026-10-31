@@ -1106,12 +1106,12 @@ export async function getCourseRegistrationCatalog(
   };
 }
 
-/** An exam's preparation terms the form offers, soonest first: what its page lists and links to. */
-export async function getPreparationTerms(exam: PreparationExam, locale: ContentLocale): Promise<CourseRegistrationOption[]> {
+/** The preparation terms the form offers, an exam's or all, soonest first: what the exam pages and form point to. */
+export async function getPreparationTerms(locale: ContentLocale, exam?: PreparationExam): Promise<CourseRegistrationOption[]> {
   const catalog = await getCourseRegistrationCatalog(locale);
   return Object.values(catalog.optionsByCourseTypeId)
     .flat()
-    .filter((option) => option.exam === exam);
+    .filter((option) => (exam ? option.exam === exam : Boolean(option.exam)));
 }
 
 export async function getExamRegistrationCatalog(
