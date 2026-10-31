@@ -365,7 +365,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.ab.zuehjf": {
@@ -1516,7 +1517,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.ansprechperson.150y9f2": {
@@ -2064,7 +2066,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.begleitende-lehrerin-schuelergru.1gou3we": {
@@ -4471,7 +4474,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.dein-sprachniveau-entscheidet-we.1uvgqyc": {
@@ -5803,17 +5807,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.die-naechsten-vorbereitungskurse.1wi3xs3": {
-  "de": "Die nächsten Vorbereitungskurse",
-  "en": "The next preparation courses",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/",
-   "/exams/[code]"
   ]
  },
  "t.die-niveaustufen-bei-casa.pe11im": {
@@ -8367,7 +8360,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.einstufung-anfragen.1gepwut": {
@@ -9157,7 +9151,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.fragen-wir-helfen-dir.iowcbx": {
@@ -12510,17 +12505,7 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
-  ]
- },
- "t.jeweils.1y2sb58": {
-  "de": "jeweils",
-  "en": "each",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/",
+   "/courses/[slug]",
    "/exams/[code]"
   ]
  },
@@ -13253,7 +13238,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.kostenrechner.ikj22o": {
@@ -13882,7 +13868,8 @@
   ],
   "pages": [
    "/courses",
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.kurstermine.aztmhh": {
@@ -13892,7 +13879,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.kursverwaltung.1jwq52p": {
@@ -13949,7 +13937,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.lampe.hiavx3": {
@@ -17001,6 +16990,16 @@
    "/resources/why-germany"
   ]
  },
+ "t.pruefung-am.1r34s7k": {
+  "de": "Prüfung am {date}",
+  "en": "Exam on {date}",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.pruefung-ansehen.w6k6mo": {
   "de": "Prüfung ansehen",
   "en": "View exam",
@@ -19001,7 +19000,8 @@
    "src/components/courses/course-term-table.tsx"
   ],
   "pages": [
-   "/courses/[slug]"
+   "/courses/[slug]",
+   "/exams/[code]"
   ]
  },
  "t.steuerbeguenstigte-zwecke.1pt6gyh": {
@@ -19927,6 +19927,16 @@
   ],
   "pages": []
  },
+ "t.termine-des-vorbereitungskurses.71m9c9": {
+  "de": "Termine des Vorbereitungskurses",
+  "en": "Preparation course dates",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
+  ]
+ },
  "t.termine-dieser-ausgabe.hp96s5": {
   "de": "Termine dieser Ausgabe",
   "en": "Dates in this issue",
@@ -20383,17 +20393,6 @@
   "pages": [
    "/courses",
    "/courses/[slug]"
-  ]
- },
- "t.und.cbu5qy": {
-  "de": " und ",
-  "en": " and ",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/",
-   "/exams/[code]"
   ]
  },
  "t.universitaeten-legen-meist-einen.1k4rm0h": {
@@ -24975,16 +24974,6 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
-  ]
- },
- "t.zum-vorbereitungskurs-anmelden.18n9gg7": {
-  "de": "Zum Vorbereitungskurs anmelden",
-  "en": "Register for the preparation course",
-  "files": [
-   "src/app/(site)/[locale]/exams/[code]/page.tsx"
-  ],
-  "pages": [
-   "/exams/[code]"
   ]
  },
  "t.zur-casa-startseite.ldc95j": {

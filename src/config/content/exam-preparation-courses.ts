@@ -2,8 +2,8 @@
  * The telc preparation courses.
  *
  * Booked online since 2026-10-31 (Rahman: „build it"): the registration form offers
- * „Prüfungsvorbereitung" with its terms grouped by exam, and each exam page lists the
- * next ones with a button into the form. The terms are SchoolMan's (`Course`, type
+ * „Prüfungsvorbereitung" with its terms grouped by exam, and each exam page shows them
+ * in the course pages' date card, each with its exam day. The terms are SchoolMan's (`Course`, type
  * Prüfungsvorbereitung), which the bridge brings across and puts on the website
  * (scripts/filemaker/import-courses.mjs); nothing tells a term's exam but its title,
  * so `preparationExamOf` reads it there, as `is_c1h_course` does in the database (0079).
@@ -13,9 +13,7 @@
  * telc Deutsch C1 Hochschule exam day, and the B2 preparation runs on two evenings
  * a week.
  */
-import type { ContentLocale, PreparationExam, TermSchedule } from '@/lib/content/types';
-import { say } from '@/lib/cms/copy';
-import { scheduleLine } from '@/lib/registration/term-format';
+import type { PreparationExam } from '@/lib/content/types';
 
 type Schedule = 'mornings' | 'afternoons' | 'evenings';
 type PreparationCourse = { exam: PreparationExam; from: string; to: string; schedule: Schedule };
@@ -63,35 +61,4 @@ export function preparationExamOf(title: string | null | undefined): Preparation
   if (/C1\s*(Hochschule|H\b)/i.test(title)) return 'telc_c1_hochschule';
   if (/\bB2\b/.test(title)) return 'telc_b2';
   return null;
-}
-
-type PreparationTerm = { startDate: string; endDate: string; schedule?: TermSchedule | null };
-
-function range(term: PreparationTerm, locale: ContentLocale) {
-  const [fy, fm, fd] = term.startDate.split('-');
-  const [ty, tm, td] = term.endDate.split('-');
-  if (locale === 'de') return `${fd}.${fm}.${fy === ty ? '' : fy}–${td}.${tm}.${ty}`;
-  const day = (date: string, withYear: boolean) =>
-    new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' })
-      .format(new Date(`${date}T12:00:00Z`));
-  return `${day(term.startDate, fy !== ty)} – ${day(term.endDate, true)}`;
-}
-
-/** „Mo–Fr, 09:00–12:30 Uhr": the form's schedule line, as a sentence says it. */
-const when = (term: PreparationTerm, locale: ContentLocale) => scheduleLine(term.schedule, locale).replace(' · ', ', ');
-
-/**
- * „Die nächsten Vorbereitungskurse, jeweils Mo–Fr, 09:00–12:30 Uhr: 04.01.–29.01.2027,
- * 01.02.–26.02.2027 und 01.03.–02.04.2027." The schedule is said once when the
- * terms share it, after each date when they do not. Null when none is planned.
- */
-export function preparationCoursesSentence(terms: PreparationTerm[], locale: ContentLocale) {
-  if (!terms.length) return null;
-  const shared = terms.every((term) => when(term, locale) === when(terms[0], locale));
-  const items = terms.map((term) => (shared ? range(term, locale) : `${range(term, locale)} (${when(term, locale)})`));
-  const and = say(locale, ' und ', ' and ');
-  const list = items.length > 1 ? `${items.slice(0, -1).join(', ')}${and}${items[items.length - 1]}` : items[0];
-  const lead = say(locale, 'Die nächsten Vorbereitungskurse', 'The next preparation courses');
-  const each = say(locale, 'jeweils', 'each');
-  return shared ? `${lead}, ${each} ${when(terms[0], locale)}: ${list}.` : `${lead}: ${list}.`;
 }
