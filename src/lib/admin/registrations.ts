@@ -435,6 +435,7 @@ export type RegistrationListItem = {
   openFlags: number;
   deliveryNeedsReview: boolean;
   accommodationRequired: boolean;
+  visaRequired: boolean;
   /** Courses first, by start, then the exam. */
   lines: RegistrationLineSummary[];
 };
@@ -483,6 +484,7 @@ export async function listRegistrations({
     open_flags: string;
     delivery_needs_review: boolean;
     accommodation_required: boolean;
+    visa_required: boolean;
     lines: RegistrationLineSummary[] | null;
   }>(
     `SELECT g.id, who.first_name, who.last_name, who.email, g.locale, g.status::text AS status,
@@ -496,6 +498,7 @@ export async function listRegistrations({
               AND ((f.entity = 'course_registration' AND f.entity_id IN (SELECT id FROM course_registrations WHERE registration_id = g.id))
                 OR (f.entity = 'exam_registration' AND f.entity_id IN (SELECT id FROM exam_registrations WHERE registration_id = g.id)))) AS delivery_needs_review,
             EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id AND c.accommodation_required) AS accommodation_required,
+            EXISTS (SELECT 1 FROM course_registrations c WHERE c.registration_id = g.id AND c.visa_required) AS visa_required,
             (SELECT json_agg(json_build_object('kind', l.kind, 'label', l.label, 'typeId', l.type_id, 'detail', l.detail, 'option', l.option, 'settled', l.settled)
                              ORDER BY l.rank, l.starts NULLS LAST, l.created_at)
                FROM (SELECT 'course' AS kind, 0 AS rank, c.course_type_label AS label, c.course_type_id AS type_id,
@@ -532,6 +535,7 @@ export async function listRegistrations({
       openFlags: Number(row.open_flags ?? 0),
       deliveryNeedsReview: row.delivery_needs_review,
       accommodationRequired: row.accommodation_required,
+      visaRequired: row.visa_required,
       lines: row.lines ?? [],
     })),
   };
