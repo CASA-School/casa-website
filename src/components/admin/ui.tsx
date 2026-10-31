@@ -145,8 +145,8 @@ export const TINTS = {
   sun: 'bg-[#fff7cc] text-[#6b5600]',
   ink: 'bg-[#edf0f5] text-[#2b3546]',
   green: 'bg-[#e5f5eb] text-[#137a3c]',
-  /** A visa (2026-10-31): its own colour, beside the course's red and the stay's blue. */
-  violet: 'bg-[#f1ebfd] text-[#5b2ea6]',
+  /** A visa (2026-10-31): the orange of „Unter Beobachtung". */
+  orange: 'bg-[#fff2d6] text-[#8a5a00]',
 } as const;
 
 export type Tint = keyof typeof TINTS;
@@ -461,8 +461,8 @@ const badgeTones = {
   quiet: 'bg-transparent text-[var(--casa-text-subtle)] ring-ws-line',
   /** A room, solid in the stay's blue: unmistakable on a white card and on the canvas (2026-10-31). */
   stay: 'bg-[#0b78b4] text-white ring-[#0b78b4]',
-  /** A visa, solid in its violet. */
-  visa: 'bg-[#7a3fc8] text-white ring-[#7a3fc8]',
+  /** A visa needed: the orange of „Unter Beobachtung" (booking-light.tsx), Rahman 2026-10-31. */
+  visa: 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]',
 } as const;
 
 export type BadgeTone = keyof typeof badgeTones;
