@@ -10,15 +10,14 @@ import { Container } from '@/components/ui/container';
 import { getLayoutRhythm } from '@/config/layout-rhythm';
 import { getPublicPageConfig } from '@/config/public-page-config';
 import { getContentLocale } from '@/lib/content/locale.server';
-import { getExamDetail } from '@/lib/content/repository';
+import { getExamDetail, getPreparationTerms } from '@/lib/content/repository';
 import { examGraph } from '@/lib/structured-data';
 import { EXAM_SEO } from '@/config/seo-pages';
 import { createPublicMetadata } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { publishedPrices } from '@/lib/content/published-prices.server';
-import { nextPreparationCourses, preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
-import { bremenDate } from '@/lib/appointments/schedule';
+import { preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
 import { intl, pickTree, say } from '@/lib/cms/copy';
 
 type ExamDetailPageProps = {
@@ -164,10 +163,16 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     : isC1
       ? say(locale, 'Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.', 'The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.')
       : say(locale, 'Komm rechtzeitig und bring deine Unterlagen mit.', 'Arrive in good time and bring your documents with you.');
-  // The next preparation courses from FileMaker, as casa-bremen.de listed them on its C1 page.
-  // Built from the dates, so it is shown first and never offered for editing.
-  const nextPreparation = nextPreparationCourses(isC1 ? 'telc_c1_hochschule' : 'telc_b2', bremenDate());
-  const nextPreparationLine = isB2 || isC1 ? [preparationCoursesSentence(nextPreparation, locale)].filter((line): line is string => Boolean(line)) : [];
+  // The next preparation courses the registration form offers (SchoolMan's, through the bridge), as
+  // casa-bremen.de listed them on its C1 page. Built from the dates, so it is shown first and never
+  // offered for editing; the button opens the form on the first of them.
+  const preparationTerms = isB2 || isC1 ? await getPreparationTerms(isC1 ? 'telc_c1_hochschule' : 'telc_b2', locale) : [];
+  const nextPreparationLine = [preparationCoursesSentence(preparationTerms.slice(0, 3), locale)].filter((line): line is string => Boolean(line));
+  const preparationCtas: Array<{ label: string; href: string; kind: 'primary' | 'secondary' }> = !(isB2 || isC1)
+    ? []
+    : preparationTerms.length > 0
+      ? [{ label: say(locale, 'Zum Vorbereitungskurs anmelden', 'Register for the preparation course'), href: `/registration/course?courseId=${encodeURIComponent(preparationTerms[0].id)}`, kind: 'primary' }]
+      : [{ label: say(locale, 'Nach dem nächsten Kurs fragen', 'Ask about the next course'), href: '/contact?topic=course-advice', kind: 'secondary' }];
   const preparationCopy = isC1
     ? pickTree(locale, {
         de: {
@@ -333,6 +338,7 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                 description={preparation.description}
                 bullets={preparation.bullets}
                 photo={examStoryPhoto}
+                ctas={preparationCtas}
               />
 
               <ProcessSteps

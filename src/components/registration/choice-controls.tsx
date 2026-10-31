@@ -52,7 +52,8 @@ export function ChoiceChip({ name, value, checked, icon: Icon, icon3d, meaning, 
     >
       <input type="radio" name={name} value={value} checked={checked} onChange={onSelect} className="sr-only" />
       {icon3d ? <Icon3D icon={icon3d} /> : <IconBadge icon={Icon} meaning={meaning} />}
-      <span className="min-w-0 leading-snug">
+      {/* Hyphenated: in a narrow chip „Prüfungsvorbereitung" broke as „Prüfungs / vorbereit / ung", „Unterrichtseinheiten" as „Unterrichtseinhe / iten". */}
+      <span className="min-w-0 leading-snug hyphens-auto">
         <span className="block text-sm font-semibold text-[var(--casa-ink)]">{title}</span>
         {meta ? <span className="block text-xs text-[var(--casa-muted)]">{meta}</span> : null}
       </span>

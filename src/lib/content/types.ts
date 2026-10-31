@@ -299,7 +299,12 @@ export type CourseInstanceRow = {
    * „B1+.1"), as a list and nothing more (lib/content/term-levels). Missing where none is planned yet.
    */
   levels?: string[];
+  /** A course of its own's name, as SchoolMan gives it: „telc Deutsch C1 Hochschule – Prüfungsvorbereitung". */
+  title?: string | null;
 };
+
+/** The exams CASA runs a preparation course for (config/content/exam-preparation-courses). */
+export type PreparationExam = 'telc_b2' | 'telc_c1_hochschule';
 
 export type ExamTypeRow = {
   id: string;
@@ -364,6 +369,10 @@ export type CourseRegistrationOption = {
   levelMax: string | null;
   /** Ordered list of CASA sub-levels the learner can select (derived from levelMin..levelMax). */
   availableLevels: string[];
+  /** An exam preparation's exam: the term is for it, and its level is the exam's. */
+  exam?: PreparationExam;
+  /** What the term is for where its format does not say: „telc Deutsch C1 Hochschule". */
+  title?: string;
 };
 
 export type ExamRegistrationOption = {

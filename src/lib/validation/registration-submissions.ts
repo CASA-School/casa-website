@@ -21,7 +21,8 @@ export function submissionLocale(body: unknown): RegistrationLocale {
 /**
  * Course type slugs that require the learner to declare their current level.
  * All level-based courses are included; corporate / conversation courses are excluded
- * because they use needs-analysis intake instead of CEFR self-assessment.
+ * because they use needs-analysis intake instead of CEFR self-assessment. An exam
+ * preparation's level is its exam's, so the term says it.
  */
 const LEVEL_REQUIRED_SLUGS = new Set([
   'intensive-german',
@@ -29,7 +30,6 @@ const LEVEL_REQUIRED_SLUGS = new Set([
   'special-courses',
   'medical-german',
   'bildungszeit',
-  'exam-preparation',
 ]);
 
 /**

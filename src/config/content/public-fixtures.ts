@@ -1,4 +1,5 @@
 import { faqByLocale } from './faq';
+import { PREPARATION_COURSES, PREPARATION_SCHEDULES, preparationTitle } from './exam-preparation-courses';
 import type {
   ContentLocale,
   CourseInstanceRow,
@@ -122,7 +123,8 @@ const COURSE_TYPES: CourseTypeRow[] = [
     format: 'Exam Prep',
     level_min: 'B1',
     level_max: 'C1',
-    lessons_per_week: 10,
+    // As the workspace's type: its weeks differ by exam, so the form says none.
+    lessons_per_week: 0,
     default_price: 520,
     currency: 'EUR',
     is_active: true,
@@ -300,6 +302,11 @@ function buildCourseInstances(): CourseInstanceRow[] {
     courseInstance('000000050007', 'bildungszeit', '2027-08-30', '2027-10-22', bildungszeitFullDay, 15),
     courseInstance('000000050008', 'bildungszeit', '2027-10-25', '2027-12-17', bildungszeitFullDay, 15),
     courseInstance('000000050009', 'bildungszeit', '2028-01-03', '2028-02-25', bildungszeitFullDay, 15),
+    // The telc preparations, each named for its exam as SchoolMan names it (config/content/exam-preparation-courses).
+    ...PREPARATION_COURSES.map((course, index) => ({
+      ...courseInstance(`0000000700${String(index + 1).padStart(2, '0')}`, 'exam-preparation', course.from, course.to, PREPARATION_SCHEDULES[course.schedule], 14, at),
+      title: preparationTitle(course.exam),
+    })),
   ];
 }
 

@@ -157,7 +157,8 @@ export async function POST(request: NextRequest) {
     courses.push({
       typeId: courseType.id,
       instanceId: option.id,
-      typeLabel: courseType.name,
+      // An exam preparation by its exam, as SchoolMan names the course: „telc Deutsch B2 – Prüfungsvorbereitung".
+      typeLabel: option.title ? `${option.title} – ${courseType.name}` : courseType.name,
       instanceLabel: termLabel(option, courseType.slug, secondHalf, payload.locale),
       level,
     });

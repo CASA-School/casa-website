@@ -124,6 +124,9 @@ SchoolMan is where CASA plans its dates, so the bridge puts what it plans on the
 - a **telc exam day** ahead (B2, C1 Hochschule) is made published, with the deadline the site states, one
   month and a day before (`exam-sittings.mjs`). A day the bridge made as a draft earlier is published unless
   a colleague has changed it in the workspace;
+- a **telc preparation course** ahead (B2, C1 Hochschule; 2026-10-31) is made published, its own start under
+  the type „Prüfungsvorbereitung" (`import-courses.mjs`; 0111 published the ones made before). The site knows
+  its exam only by the start's title (`preparationExamOf`), so a title that names neither is not offered;
 - the **evening terms are the website's own**: they are published before SchoolMan has them, and the bridge
   never makes one;
 - nothing is taken off the website when SchoolMan drops a date: a start or sitting is cancelled in the

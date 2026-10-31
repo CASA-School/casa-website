@@ -15,7 +15,9 @@
  *   start CASA cancelled here stays cancelled. The evening terms are the website's own, published before
  *   SchoolMan has them, and none is made here.
  * - An exam preparation, a special module or a company's course is its own start, made here and not
- *   on the website (`on_website`), with its course: the title, the places, the price.
+ *   on the website (`on_website`), with its course: the title, the places, the price. A telc B2 or
+ *   C1 Hochschule preparation ahead goes on the website (2026-10-31): the exam pages and the
+ *   registration form offer it, by the exam its title names (config/content/exam-preparation-courses).
  * - An intensive course that has ended, of a start the website never had (before August 2026), gets that
  *   start here, off the website (2026-10-22): Kursplanung follows a class through its earlier levels.
  * - Its level by SchoolMan's numbers, not their text copies (2026-10-27, 0093): the band, and an evening
@@ -187,13 +189,15 @@ try {
     const session = SESSION[c.daytime] ?? null;
     const title = c.title ?? defaultTitle(c, type);
     const schedule = { days: days(type.slug, session, c.start), time: c.hours ? `${c.hours[0]}-${c.hours[1]}` : '' };
+    const published = type.slug === 'exam-preparation' && (c.band === 'B2' || c.band === 'CH') && c.start > today;
     const start = (
       await client.query(
         `INSERT INTO course_instances (course_type_id, start_date, end_date, capacity, schedule, status, session, title, on_website)
-         VALUES ($1, $2::date, $3::date, $4, $5::jsonb, 'scheduled', $6, $7, false) RETURNING id`,
-        [type.id, c.start, c.end, places(c.places), JSON.stringify(schedule), session, title]
+         VALUES ($1, $2::date, $3::date, $4, $5::jsonb, 'scheduled', $6, $7, $8) RETURNING id`,
+        [type.id, c.start, c.end, places(c.places), JSON.stringify(schedule), session, title, published]
       )
     ).rows[0];
+    if (published) count.publicStarts++;
     count.starts++;
     const level = levelOf(c, type.slug);
     await client.query(

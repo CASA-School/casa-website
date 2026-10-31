@@ -94,7 +94,7 @@ when CASA plans further ahead.
 | Bildungszeit | full day, morning + afternoon in parallel | follows the morning intensive terms; join any Monday |
 | telc Deutsch B2 | about 09:00–17:00 | 16.10.26 · 13.11.26 · 22.01.27 · 12.03.27 · 21.05.27 · 18.06.27 · 20.08.27 · 08.10.27 |
 | telc Deutsch C1 Hochschule | about 08:30–17:00 | 30.10.26 · 27.11.26 · 05.02.27 · 05.03.27 · 09.04.27 · 14.05.27 · 04.06.27 · 02.07.27 · 03.09.27 · 01.10.27 |
-| C1 preparation | Mon–Fri 09:00–12:30, four weeks | `src/config/content/exam-preparation-courses.ts`, ending before each C1 day |
+| C1 preparation | Mon–Fri 09:00–12:30, four weeks | SchoolMan's starts through the bridge (bookable in the course form since 2026-10-31), ending before each C1 day; `src/config/content/exam-preparation-courses.ts` without a database |
 
 Exam registration deadlines are not in FileMaker; they follow the rule the published dates
 already used, one month minus one day before the exam. FileMaker prices the evening Wintertrimester

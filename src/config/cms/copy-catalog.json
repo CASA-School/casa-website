@@ -5812,6 +5812,7 @@
    "src/config/content/exam-preparation-courses.ts"
   ],
   "pages": [
+   "/",
    "/exams/[code]"
   ]
  },
@@ -12519,6 +12520,7 @@
    "src/config/content/exam-preparation-courses.ts"
   ],
   "pages": [
+   "/",
    "/exams/[code]"
   ]
  },
@@ -15220,16 +15222,6 @@
    "/courses/[slug]"
   ]
  },
- "t.mo-do-13-17.17vbuq1": {
-  "de": "Mo–Do, 13–17:30 Uhr",
-  "en": "Mon–Thu, 13:00–17:30",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/exams/[code]"
-  ]
- },
  "t.mo-fr-09-00.1u1johs": {
   "de": "Mo–Fr, 09:00–12:30. {course.german-for-groups.lessons} Unterrichtseinheiten pro Woche in niveaugerechten Gruppen.",
   "en": "Mon–Fri, 09:00–12:30. {course.german-for-groups.lessons} lessons a week, taught in groups matched to level.",
@@ -15238,26 +15230,6 @@
   ],
   "pages": [
    "/courses/[slug]"
-  ]
- },
- "t.mo-fr-9-12.aiuruc": {
-  "de": "Mo–Fr, 9–12:30 Uhr",
-  "en": "Mon–Fri, 9:00–12:30",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/exams/[code]"
-  ]
- },
- "t.mo-und-mi-18.nxi02x": {
-  "de": "Mo und Mi, 18:30–20 Uhr",
-  "en": "Mon and Wed, 18:30–20:00",
-  "files": [
-   "src/config/content/exam-preparation-courses.ts"
-  ],
-  "pages": [
-   "/exams/[code]"
   ]
  },
  "t.modell.17dztdr": {
@@ -15493,6 +15465,16 @@
   ],
   "pages": [
    "/"
+  ]
+ },
+ "t.nach-dem-naechsten-kurs.lvkrws": {
+  "de": "Nach dem nächsten Kurs fragen",
+  "en": "Ask about the next course",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.nach-dem-umzug-gehoert.m195s": {
@@ -17241,7 +17223,8 @@
    "src/app/(site)/[locale]/courses/page.tsx",
    "src/components/calculator/casa-cost-pathway-calculator.tsx",
    "src/config/courses/special-course-modules.ts",
-   "src/config/forms/organiser-brief-copy.ts"
+   "src/config/forms/organiser-brief-copy.ts",
+   "src/lib/content/repository.ts"
   ],
   "pages": [
    "/calculator",
@@ -20409,6 +20392,7 @@
    "src/config/content/exam-preparation-courses.ts"
   ],
   "pages": [
+   "/",
    "/exams/[code]"
   ]
  },
@@ -24991,6 +24975,16 @@
    "/resources/living-in-germany",
    "/resources/study-in-germany",
    "/resources/why-germany"
+  ]
+ },
+ "t.zum-vorbereitungskurs-anmelden.18n9gg7": {
+  "de": "Zum Vorbereitungskurs anmelden",
+  "en": "Register for the preparation course",
+  "files": [
+   "src/app/(site)/[locale]/exams/[code]/page.tsx"
+  ],
+  "pages": [
+   "/exams/[code]"
   ]
  },
  "t.zur-casa-startseite.ldc95j": {
