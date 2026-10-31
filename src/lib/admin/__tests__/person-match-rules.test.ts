@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { distance, judgeMatch, type MatchFacts } from '../person-match-rules';
+import { distance, judgeMatch, soundOf, type MatchFacts } from '../person-match-rules';
 
 const sent: MatchFacts = {
   firstName: 'Lena',
@@ -62,6 +62,25 @@ describe('judgeMatch', () => {
 
   it('drops someone who only shares a birthday', () => {
     expect(judgeMatch(sent, record({ firstName: 'Omar', lastName: 'Haddad', emails: [], phones: [] })).strength).toBeNull();
+  });
+});
+
+describe('soundOf', () => {
+  it('hears the spellings of one name as one', () => {
+    expect(soundOf('sophia')).toBe(soundOf('sofia'));
+    expect(soundOf('mayer')).toBe(soundOf('meier'));
+    expect(soundOf('carl')).toBe(soundOf('karl'));
+    expect(soundOf('schmitt')).toBe(soundOf('schmidt'));
+    expect(soundOf('anna')).toBe(soundOf('ana'));
+  });
+
+  it('makes Sofia, phone and a birthday with day and month exchanged sure', () => {
+    const j = judgeMatch(
+      { firstName: 'Sofia', lastName: 'Rossi', birthDate: '1999-05-04', emails: ['sofia.rossi@example.org'], phones: ['0039 333 1234567'], nationalityCode: 'IT' },
+      { firstName: 'Sophia', lastName: 'Rossi', birthDate: '1999-04-05', emails: ['sophia.rossi@example.org'], phones: ['+39 333 1234567'], nationalityCode: 'IT' }
+    );
+    expect(j.fields).toMatchObject({ name: 'close', birthDate: 'close', phone: 'same', email: 'close' });
+    expect(j.strength).toBe('sure');
   });
 });
 
