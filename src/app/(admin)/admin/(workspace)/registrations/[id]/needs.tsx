@@ -19,39 +19,13 @@ const day = (iso: string, lang: WsLang) =>
 const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / (7 * 86_400_000)));
 
 /**
- * The two colours, solid (2026-10-31, Rahman: the pale bands were „too similar to each other with the
- * blueish background"): a head in its colour with white type cannot be taken for the page, for a row, or
- * for the other section. The same two colours mark the head of the Anmeldung and the list (badge tones
- * `stay`, `visa`).
+ * Each section is the workspace's own card with its colour as a fine line along the top (Rahman,
+ * 2026-10-31, after solid heads: „to the one before that like an elegant top border").
  */
-const COLOUR = { visa: '#7a3fc8' } as const;
-
-/**
- * The stay's section is the workspace's own card with its blue as a fine line along the top (Rahman,
- * 2026-10-31, after the solid head: „to the one before that like an elegant top border").
- */
-const STAY_EDGE = 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]';
-
-/** One section: a solid head in its colour, its title and where it stands; white rows under it. */
-function Section({ kind, icon, title, status, children }: { kind: keyof typeof COLOUR; icon: ReactNode; title: string; status: { text: string; state: 'open' | 'part' | 'done' }; children: ReactNode }) {
-  return (
-    <section className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
-      <header className="flex min-h-[52px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-white" style={{ backgroundColor: COLOUR[kind] }}>
-        <span className="flex min-w-0 items-center gap-2.5">
-          <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/20 [&_svg]:size-4">
-            {icon}
-          </span>
-          <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em]">{title}</h2>
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-0.5 text-[0.72rem] font-bold whitespace-nowrap" style={{ color: COLOUR[kind] }}>
-          <span aria-hidden="true" className={cn('size-1.5 rounded-full', status.state === 'done' ? 'bg-[#2f9e5b]' : status.state === 'part' ? 'bg-[#3a9fd0]' : 'bg-[#d99a00]')} />
-          {status.text}
-        </span>
-      </header>
-      <div className="px-4 py-2">{children}</div>
-    </section>
-  );
-}
+const EDGE = {
+  stay: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]',
+  visa: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#8a5cd6]',
+} as const;
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -91,7 +65,7 @@ export function StayCard({
       title={t('Unterkunft', 'Accommodation')}
       icon={Icon.home}
       tint="blue"
-      className={STAY_EDGE}
+      className={EDGE.stay}
       actions={
         placed ? (
           <Badge tone="positive">{t('Zugeteilt', 'Placed')}</Badge>
@@ -159,14 +133,19 @@ export function VisaCard({
 }) {
   const done = steps.filter((s) => s.done).length;
   return (
-    <Section
-      kind="visa"
-      icon={Icon.globe}
+    <Card
       title={t('Visumshilfe', 'Visa support')}
-      status={
-        done === steps.length
-          ? { text: t('Brief für die Botschaft verschickt', 'Embassy letter sent'), state: 'done' }
-          : { text: t(`${done} von ${steps.length} erledigt`, `${done} of ${steps.length} done`), state: done ? 'part' : 'open' }
+      icon={Icon.globe}
+      tint="violet"
+      className={EDGE.visa}
+      actions={
+        done === steps.length ? (
+          <Badge tone="positive">{t('Brief für die Botschaft verschickt', 'Embassy letter sent')}</Badge>
+        ) : (
+          <Badge tone="neutral" className="bg-[#f1ebfd] text-[#5b2ea6] ring-[#ddd0f6]">
+            {t(`${done} von ${steps.length} erledigt`, `${done} of ${steps.length} done`)}
+          </Badge>
+        )
       }
     >
       <dl className="divide-y divide-ws-line border-b border-ws-line">
@@ -192,7 +171,7 @@ export function VisaCard({
         ))}
       </ol>
       {action ? (
-        <div className="flex justify-end border-t border-ws-line pt-3 pb-2">
+        <div className="mt-1 flex justify-end border-t border-ws-line pt-3">
           <Link
             href={action.href}
             className="inline-flex h-9 items-center rounded-lg border border-[#c4a9ef] bg-white px-4 text-sm font-semibold text-[#7a3fc8] transition-colors hover:border-[#7a3fc8] hover:bg-[#f6f1fe]"
@@ -201,6 +180,6 @@ export function VisaCard({
           </Link>
         </div>
       ) : null}
-    </Section>
+    </Card>
   );
 }
