@@ -29,6 +29,7 @@ const GUARDED_PATHS = [
   '/admin/applications',
   '/admin/catalogue',
   '/admin/activity',
+  '/admin/feedback',
   '/admin/team',
   '/admin/settings',
   '/admin/settings/prices',
@@ -86,6 +87,20 @@ test.describe('workspace access', () => {
 
     // Whatever happens, it is not a file.
     expect(response.headers()['content-disposition']).toBeUndefined();
+  });
+
+  test('feedback takes nothing and shows nothing to an anonymous request', async ({ request }) => {
+    // Three route handlers (0112), outside the layout like the CV download: each checks for itself.
+    const sent = await request.post('/admin/feedback/send', { multipart: { kind: 'problem', message: 'anonym' }, maxRedirects: 0 });
+    expect([401, 404]).toContain(sent.status());
+
+    const mine = await request.get('/admin/feedback/mine', { maxRedirects: 0 });
+    expect([401, 404]).toContain(mine.status());
+    expect(await mine.text()).not.toContain('"items"');
+
+    const picture = await request.get('/admin/feedback/00000000-0000-0000-0000-000000000001/files/00000000-0000-0000-0000-000000000002', { maxRedirects: 0 });
+    expect([302, 303, 307, 404]).toContain(picture.status());
+    expect(picture.headers()['content-type'] ?? '').not.toMatch(/^image\//);
   });
 
   test('the sign-in page says one thing for every failure', async ({ page }) => {

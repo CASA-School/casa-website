@@ -4,6 +4,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { cn } from '@/lib/utils';
 
 import { CommandSearch } from './command-search';
+import { FeedbackButton } from './feedback/feedback-button';
 import { createItems, type Shortcut } from './command-shortcuts';
 import { Icon } from './icons';
 import { LangSwitch } from './lang-switch';
@@ -14,7 +15,7 @@ import { AccountMenu, BarLink, CreateMenu } from './top-bar-menus';
  * some of the functionalities"). Desktop only — on a phone the navy band is
  * already the top bar. What a colleague reaches for from any page: search on
  * the left, then the Tagesplan (FileMaker's calendar, the screen the team opens
- * first — 2026-10-19), "Neu", the language, and who is signed in. The navigation
+ * first — 2026-10-19), "Neu", „Feedback" (2026-10-31), the language, and who is signed in. The navigation
  * stays in the sidebar; there is no notification bell until something real
  * would ring it (CLAUDE.md, workspace design standards).
  *
@@ -49,6 +50,8 @@ export async function TopBar({
         <div className="ml-auto flex items-center gap-1.5">
           {canAccess(user, 'day') ? <BarLink href="/admin/day" label={t('Tagesplan', 'Day plan')} icon={Icon.calendar} /> : null}
           {creates.length ? <CreateMenu items={creates} /> : null}
+          {/* Feedback from any screen (0112): what does not work, what FileMaker has and this lacks. */}
+          <FeedbackButton firstName={user.name.trim().split(/\s+/)[0] ?? user.name} canReview={canAccess(user, 'feedback')} />
           <span className="mx-1.5">
             <LangSwitch tone="page" />
           </span>
