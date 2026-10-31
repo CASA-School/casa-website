@@ -668,7 +668,7 @@ export default async function BookingPage({
             {booking.status === 'reserved' || booking.status === 'completed' ? (
               <Badge tone={BOOKING_STATUS_TONES[booking.status]}>{pick(lang, BOOKING_STATUS_LABELS[booking.status])}</Badge>
             ) : null}
-            {booking.visaRequired ? <Badge tone="warning">{t('Visum nötig', 'Visa required')}</Badge> : null}
+            {booking.visaRequired ? <Badge tone="visa">{t('Visum nötig', 'Visa required')}</Badge> : null}
           </>
         }
         subtitle={

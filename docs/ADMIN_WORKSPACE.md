@@ -848,6 +848,25 @@ The rules, each of which came from a real defect on a real screen.
    `--ws-sunk` still appears only *inside* a card (toolbars, a total) where it
    reads as a sub-level; a section on the canvas is `Card`, or
    `border-ws-card-line shadow-ws-card` when a screen draws its own.
+   **Changed again 2026-10-31: a section's head is navy.** Rahman, after the
+   stay and visa sections got solid heads: „this is clean and clear
+   distinction, do this for other headings too … but carefully, we already have
+   some color coding". The pale band sat one breath from the blue-grey canvas
+   and from the white rows. Every section head — `Card`, `SidePanel`,
+   `SubmissionCard`, a course's level sections, the Einstufungstest panel — is
+   now `.ws-head-band` (`globals.css`): FileMaker's navy `#1f3e6c` with white
+   type (10.4:1). Navy because it is the workspace's neutral (the sidebar, the
+   primary button) and means nothing; every hue already means something — the
+   session colours (Vormittag green, Nachmittag blue, Abend violet), the offer's
+   red course / blue stay / yellow programme, a stay's blue and a visa's berry
+   band — and stays where it was: the tinted icon chip on a head still says what
+   the section is about. Inside the band the light-surface tokens flip to their
+   on-dark values (links, quiet buttons, muted lines read light; white controls
+   keep their ground), and a primary button in a head turns white with navy
+   type. A card's foot, a list's group headings, the facts bar and the
+   offers module's `.cardHead` keep the pale band. Checked by measuring every
+   text in every head on all 118 screens of `admin:check` (≥ 4.5:1, no control
+   the colour of the band).
 2. **A field title is a label, not an eyebrow.** `DetailList` and a
    `Table`'s column heads are 12px sentence case in `--casa-muted`. They were 10.4px bold
    uppercase with letter-spacing — decoration doing a functional job, slower
@@ -2711,7 +2730,7 @@ decides; the search is a read (`searchRegistrationPeopleAction`, `registrations`
 page (Kurse).
 
 **A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant, solid —
-the stay blue `#0b78b4`, the visa violet `#7a3fc8` (badge tones `stay`, `visa`): pills in the Anmeldung's head
+the stay blue `#0b78b4`, the visa berry `#9b2c6f` — not violet, which is Abend's (badge tones `stay`, `visa`): pills in the Anmeldung's head
 that jump to their sections, a tag on the list, and a section of its own whose head is a band of its colour
 with white type, over white rows ruled in `--ws-line` (`needs.tsx`). Pale tints were tried first and
 rejected: next to each other and to the blue-grey canvas they read as one colour, and the head as a row. *Unterkunft*: what was asked for, the stay's dates (the day before the first
