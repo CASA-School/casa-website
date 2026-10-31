@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
-import { Badge, Card, type BadgeTone } from '@/components/admin/ui';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import type { BookedStay } from '@/lib/admin/registration-needs';
 import { cn } from '@/lib/utils';
@@ -18,23 +17,42 @@ const day = (iso: string, lang: WsLang) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
 const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / (7 * 86_400_000)));
 
-/** The section's frame: its colour as a line along the top. */
-const EDGE = {
-  stay: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]',
-  visa: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#8a5cd6]',
-} as const;
+/**
+ * The two colours, solid (2026-10-31, Rahman: the pale bands were „too similar to each other with the
+ * blueish background"): a head in its colour with white type cannot be taken for the page, for a row, or
+ * for the other section. The same two colours mark the head of the Anmeldung and the list (badge tones
+ * `stay`, `visa`).
+ */
+const COLOUR = { stay: '#0b78b4', visa: '#7a3fc8' } as const;
+
+/** One section: a solid head in its colour, its title and where it stands; white rows under it. */
+function Section({ kind, icon, title, status, children }: { kind: keyof typeof COLOUR; icon: ReactNode; title: string; status: { text: string; state: 'open' | 'part' | 'done' }; children: ReactNode }) {
+  return (
+    <section className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+      <header className="flex min-h-[52px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-white" style={{ backgroundColor: COLOUR[kind] }}>
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/20 [&_svg]:size-4">
+            {icon}
+          </span>
+          <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em]">{title}</h2>
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-0.5 text-[0.72rem] font-bold whitespace-nowrap" style={{ color: COLOUR[kind] }}>
+          <span aria-hidden="true" className={cn('size-1.5 rounded-full', status.state === 'done' ? 'bg-[#2f9e5b]' : status.state === 'part' ? 'bg-[#3a9fd0]' : 'bg-[#d99a00]')} />
+          {status.text}
+        </span>
+      </header>
+      <div className="px-4 py-2">{children}</div>
+    </section>
+  );
+}
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-baseline gap-4 py-2">
+    <div className="flex items-baseline gap-4 py-2.5">
       <dt className="w-28 shrink-0 text-xs font-medium text-[var(--casa-muted)]">{label}</dt>
       <dd className="min-w-0 flex-1 text-[0.88rem] text-[var(--casa-ink)]">{children}</dd>
     </div>
   );
-}
-
-function Status({ tone, children }: { tone: BadgeTone; children: string }) {
-  return <Badge tone={tone}>{children}</Badge>;
 }
 
 export function StayCard({
@@ -62,22 +80,19 @@ export function StayCard({
   const placed = stays.find((s) => s.place);
   const booked = stays[0] ?? null;
   return (
-    <Card
-      title={t('Unterkunft', 'Accommodation')}
+    <Section
+      kind="stay"
       icon={Icon.home}
-      tint="blue"
-      className={EDGE.stay}
-      actions={
-        placed ? (
-          <Status tone="positive">{t('Zugeteilt', 'Placed')}</Status>
-        ) : booked ? (
-          <Status tone="stay">{t('Gebucht · noch nicht zugeteilt', 'Booked · not placed yet')}</Status>
-        ) : (
-          <Status tone="warning">{t('Noch nicht gebucht', 'Not booked yet')}</Status>
-        )
+      title={t('Unterkunft', 'Accommodation')}
+      status={
+        placed
+          ? { text: t('Zugeteilt', 'Placed'), state: 'done' }
+          : booked
+            ? { text: t('Gebucht · noch nicht zugeteilt', 'Booked · not placed yet'), state: 'part' }
+            : { text: t('Noch nicht gebucht', 'Not booked yet'), state: 'open' }
       }
     >
-      <dl className="divide-y divide-ws-line-soft">
+      <dl className="divide-y divide-ws-line">
         <Row label={t('Gewünscht', 'Asked for')}>{wish ? pick(lang, wish) : t('Ohne Angabe', 'Not given')}</Row>
         {from && to ? (
           <Row label={t('Zeitraum', 'Dates')}>
@@ -114,7 +129,7 @@ export function StayCard({
           </Row>
         ))}
       </dl>
-    </Card>
+    </Section>
   );
 }
 
@@ -134,30 +149,27 @@ export function VisaCard({
 }) {
   const done = steps.filter((s) => s.done).length;
   return (
-    <Card
-      title={t('Visumshilfe', 'Visa support')}
+    <Section
+      kind="visa"
       icon={Icon.globe}
-      tint="violet"
-      className={EDGE.visa}
-      actions={
-        done === steps.length ? (
-          <Status tone="positive">{t('Brief für die Botschaft verschickt', 'Embassy letter sent')}</Status>
-        ) : (
-          <Status tone="visa">{t(`${done} von ${steps.length}`, `${done} of ${steps.length}`)}</Status>
-        )
+      title={t('Visumshilfe', 'Visa support')}
+      status={
+        done === steps.length
+          ? { text: t('Brief für die Botschaft verschickt', 'Embassy letter sent'), state: 'done' }
+          : { text: t(`${done} von ${steps.length} erledigt`, `${done} of ${steps.length} done`), state: done ? 'part' : 'open' }
       }
     >
-      <dl className="divide-y divide-ws-line-soft">
+      <dl className="divide-y divide-ws-line border-b border-ws-line">
         <Row label={t('Nationalität', 'Nationality')}>{nationality ?? t('Ohne Angabe', 'Not given')}</Row>
       </dl>
-      <ol className="mt-3 space-y-2.5">
+      <ol className="divide-y divide-ws-line">
         {steps.map((step, i) => (
-          <li key={step.label} className="flex items-start gap-3">
+          <li key={step.label} className="flex items-start gap-3 py-2.5">
             <span
               aria-hidden="true"
               className={cn(
                 'mt-px grid size-5 shrink-0 place-items-center rounded-full text-[0.66rem] font-extrabold [&_svg]:size-3',
-                step.done ? 'bg-[#5b2ea6] text-white' : 'bg-white text-[#5b2ea6] ring-[1.5px] ring-[#cdb9f2] ring-inset'
+                step.done ? 'bg-[#7a3fc8] text-white' : 'bg-white text-[#7a3fc8] ring-[1.5px] ring-[#c4a9ef] ring-inset'
               )}
             >
               {step.done ? Icon.check : i + 1}
@@ -170,15 +182,15 @@ export function VisaCard({
         ))}
       </ol>
       {action ? (
-        <div className="mt-4 flex justify-end">
+        <div className="flex justify-end border-t border-ws-line pt-3 pb-2">
           <Link
             href={action.href}
-            className="inline-flex h-9 items-center rounded-lg border border-[#cdb9f2] bg-white px-4 text-sm font-semibold text-[#5b2ea6] transition-colors hover:border-[#8a5cd6] hover:bg-[#f7f3fe]"
+            className="inline-flex h-9 items-center rounded-lg border border-[#c4a9ef] bg-white px-4 text-sm font-semibold text-[#7a3fc8] transition-colors hover:border-[#7a3fc8] hover:bg-[#f6f1fe]"
           >
             {action.label}
           </Link>
         </div>
       ) : null}
-    </Card>
+    </Section>
   );
 }
