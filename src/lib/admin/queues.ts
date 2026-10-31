@@ -61,7 +61,9 @@ export type QueueEntity =
   | 'registration'
   | 'course_registration'
   | 'exam_registration'
-  | 'career_application';
+  | 'career_application'
+  /** The team's own feedback from the workspace (0112). */
+  | 'feedback';
 
 type EntitySpec = {
   table: string;
@@ -108,6 +110,12 @@ const ENTITIES: Record<QueueEntity, EntitySpec> = {
     path: '/admin/applications',
     singular: { de: 'Bewerbung', en: 'Application' },
     statusColumn: 'text',
+  },
+  feedback: {
+    table: 'staff_feedback',
+    path: '/admin/feedback',
+    singular: { de: 'Feedback', en: 'Feedback' },
+    statusColumn: 'enum',
   },
 };
 

@@ -250,6 +250,7 @@ const ENTITY_ICON: Record<string, ReactNode> = {
   course_registration: Icon.registrations,
   exam_registration: Icon.registrations,
   career_application: Icon.applications,
+  feedback: Icon.feedback,
   placement_attempt: Icon.placement,
   person: Icon.person,
   booking: Icon.bookings,

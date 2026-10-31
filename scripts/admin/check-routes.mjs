@@ -40,7 +40,7 @@ async function firstId(sql) {
   return rows[0]?.id ?? null;
 }
 
-const [enquiry, courseReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup, lessonDay] =
+const [enquiry, courseReg, person, booking, room, attempt, application, offer, start, letter, entry, sitting, examBooking, staffMember, course, numbered, organisation, group, place, ledger, publisher, flat, keyHolder, programmeGroup, lessonDay, feedback] =
   await Promise.all([
     firstId(`SELECT id FROM enquiries ORDER BY submitted_at DESC LIMIT 1`),
     firstId(`SELECT id FROM course_registrations ORDER BY submitted_at DESC LIMIT 1`),
@@ -85,6 +85,7 @@ const [enquiry, courseReg, person, booking, room, attempt, application, offer, s
     firstId(`SELECT d.id FROM course_days d WHERE NOT d.cancelled AND d.on_date >= current_date - 7
               AND EXISTS (SELECT 1 FROM booking_periods bp WHERE bp.course_id = d.course_id AND bp.start_date <= d.on_date AND bp.end_date >= d.on_date)
               ORDER BY d.on_date LIMIT 1`),
+    firstId(`SELECT id FROM staff_feedback ORDER BY submitted_at DESC LIMIT 1`),
   ]);
 const lessonDate = lessonDay ? (await client.query(`SELECT to_char(on_date, 'YYYY-MM-DD') AS d FROM course_days WHERE id = $1`, [lessonDay])).rows[0]?.d : null;
 // The next first day of an intensive A2, B1 or B1+ class: the Tagesplan's Einstufungstest card (0075).
@@ -218,6 +219,9 @@ const routes = [
   '/admin/applications',
   application && `/admin/applications/${application}`,
   '/admin/activity',
+  '/admin/feedback',
+  '/admin/feedback?view=history',
+  feedback && `/admin/feedback/${feedback}`,
   '/admin/statistics',
   '/admin/team',
   '/admin/settings',

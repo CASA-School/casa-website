@@ -49,6 +49,7 @@ const SPECS: Record<QueueEntity, Spec> = {
     status: (a) => `coalesce(${a}.status, 'new')`,
     values: { ...WORK, new: ['new', 'submitted'], inProgress: ['in_progress', 'interview'] },
   },
+  feedback: { table: 'staff_feedback', at: 'submitted_at', status: (a) => `${a}.status::text`, values: WORK },
 };
 
 const list = (values: readonly string[]) => `(${values.map((value) => `'${value}'`).join(', ')})`;

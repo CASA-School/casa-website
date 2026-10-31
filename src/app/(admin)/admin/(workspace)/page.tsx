@@ -171,6 +171,15 @@ function groups(t: T, lang: WsLang): { label: string; cards: Card[] }[] {
           figure: (f) => ({ value: n(f.applicationsOpen), label: open }),
         },
         {
+          title: t('Feedback', 'Feedback'),
+          href: '/admin/feedback',
+          module: 'feedback',
+          icon: Icon.feedback,
+          tone: 'blue',
+          figure: (f) => ({ value: n(f.feedbackOpen), label: open }),
+          pill: (f) => (f.feedbackNew ? fresh(f.feedbackNew) : null),
+        },
+        {
           title: 'Kursplanung',
           href: '/admin/kursplanung',
           module: 'kursplanung',

@@ -71,6 +71,11 @@ function previous(path: string): Entry | null {
   return before && before.path !== path ? before : null;
 }
 
+/** The pages of this visit with their names, oldest first, the open one last: where a feedback was sent from (0112). */
+export function trailSnapshot(limit = 8): { path: string; title: string }[] {
+  return trail.slice(-limit).map((e) => ({ path: `${e.path}${e.search}`, title: e.label ?? named.get(e.path) ?? '' }));
+}
+
 export type RecentRef = `${string}:${string}`;
 
 /** The records this colleague opened last in this browser, newest first: `person:<id>`. */

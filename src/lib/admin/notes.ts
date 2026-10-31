@@ -26,7 +26,9 @@ export type NoteEntity =
   /** A class (`courses`): SchoolMan's notes on a course (0094) and the team's own. */
   | 'course'
   /** An exam sitting (0096): the team's notes beside its history. */
-  | 'exam_session';
+  | 'exam_session'
+  /** The team's feedback (0112). */
+  | 'feedback';
 
 export type StaffNote = {
   id: string;

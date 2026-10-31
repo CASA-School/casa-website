@@ -151,6 +151,7 @@ const KNOWN_QUEUES = new Set<string>([
   'course_registration',
   'exam_registration',
   'career_application',
+  'feedback',
 ]);
 
 const asQueue = (entity: string) => (KNOWN_QUEUES.has(entity) ? (entity as QueueEntity) : null);
@@ -190,6 +191,7 @@ const NOUNS_DE: Record<string, { noun: string; gender: 'f' | 'm' | 'n' }> = {
   course_registration: { noun: 'Kursanmeldung', gender: 'f' },
   exam_registration: { noun: 'Prüfungsanmeldung', gender: 'f' },
   career_application: { noun: 'Bewerbung', gender: 'f' },
+  feedback: { noun: 'Feedback', gender: 'n' },
   placement_attempt: { noun: 'Einstufungstest', gender: 'm' },
   course_instance: { noun: 'Kurstermin', gender: 'm' },
   exam_session: { noun: 'Prüfungstermin', gender: 'm' },
@@ -260,6 +262,12 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t(`hat „Bücher ausgegeben" zurückgenommen: ${String(entry.detail?.description ?? '')}`, `took back „books handed out": ${String(entry.detail?.description ?? '')}`);
     case 'letter_mailed':
       return t('hat einen Brief per E-Mail gesendet', 'sent a letter by e-mail');
+    case 'feedback_answered':
+      return t('hat ein Feedback beantwortet', 'answered a feedback');
+    case 'feedback_answer_removed':
+      return t('hat die Antwort auf ein Feedback zurückgenommen', 'took back the answer to a feedback');
+    case 'feedback_deleted':
+      return t(`hat Feedback #${String(entry.detail?.number ?? '')} gelöscht`, `deleted feedback #${String(entry.detail?.number ?? '')}`);
     case 'cv_downloaded':
       return t(`hat den Lebenslauf zu ${dat} heruntergeladen`, `downloaded the CV on ${subject}`);
     case 'person_created':
