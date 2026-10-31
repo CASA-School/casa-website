@@ -80,6 +80,51 @@ the consent question settled first (privacy owner). Until then:
   the Leitbild painting 82 KB; server render 0.15–1.0 s, the homepage slowest. The heroes' photo
   had no `fetchpriority="high"`; it has since then.
 
+## AI answers: where CASA stands (2026-10-31)
+
+Rahman: asking Gemini for the best language school in Bremen, CASA came third or fourth. Asked on
+2026-10-31 from his account in Bremen:
+
+| Question | CASA |
+| --- | --- |
+| Gemini, German: „Was ist die beste Sprachschule in Bremen, um Deutsch zu lernen?" | First of six, with the right facts (non-profit, 1983, A1–C1, telc centre, accommodation) and one wrong one: „Unterstützung bei Visa-Angelegenheiten" |
+| Gemini, English: „best language school in bremen" | **Not named.** Goethe-Institut (4.8), inlingua (4.8), VHS, then speakeasy, Campus German, Berlitz |
+| Google, „beste Sprachschule Bremen" | Local pack: Sprachschule Aktiv 5.0 (463 reviews), **CASA 4.3 (211)**, Campus German 5.0 (45); CASA's site is in the web results |
+
+What the answers are built from, in the order it matters for a „best" question: the Google rating and
+the number of reviews (the Maps entry), lists on other sites (werkenntdenbesten.de, which averages
+reviews; kennstdueinen.de; languagecourse.net; the University of Bremen's list of schools for
+intensive German, which names CASA as „CASA gGmbH"), English-language mentions (for English
+questions; few for CASA: studydestiny.com, an old Turkish forum thread), and only then the school's
+own site. The site went live on casa-bremen.de on 2026-10-29, so the engines still mostly know the
+old site.
+
+**On the site (done 2026-10-31):** llms.txt states what CASA does for a visa (the letter, not the
+visa; the old answer said „help with visa matters") and the names CASA is listed under; the
+organisation's `alternateName` adds „CASA gGmbH", „CASA - Internationale Sprachschule gemeinnützige
+GmbH" and „CASA International Language School", so search and answer engines join the listings into
+one school. No ranking instruction, no review markup of our own (Google ignores self-serving
+ratings and an instruction would read as manipulation).
+
+**Off the site (the levers that move a „best" answer):**
+
+1. **Reviews.** Ask every learner, at the end of each level or trimester, with the profile's review
+   link (Business Profile → „Um Rezensionen bitten"), the QR poster in every classroom and the link
+   in the end-of-course mail. Everyone, not only the happy ones: Google forbids selecting or rewarding
+   reviewers. Answer every review, the critical ones first. Target: above 4.6 with more reviews than
+   the schools above CASA.
+2. **English mentions.** A correct, current entry on the English listings people and engines read
+   (languagecourse.net, studydestiny.com, expat and student guides for Bremen); ask the University of
+   Bremen to list CASA under its full name with the website.
+3. **Business Profile.** Add „Deutsch-Sprachschule" (German language school) as a second category,
+   the category the English answer's newer schools carry; a short English sentence in the
+   description; the monthly post (docs/GOOGLE_BUSINESS_PROFILE.md).
+4. **An English page „Learn German in Bremen"** (docs/GOOGLE_ADS.md §Learners abroad, decision 5):
+   the page an English question can be answered from.
+
+**Check it monthly:** the three questions above, plus the same in ChatGPT and Perplexity, from a
+Bremen location; note CASA's place and what the answer says about it.
+
 ## At go-live (with the domain)
 
 1. Point casa-bremen.de and www at the app (see `docs/AZURE_DEPLOYMENT_PLAN.md`). The
