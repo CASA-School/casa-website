@@ -72,6 +72,26 @@ describe('structured data', () => {
     const [credential, event] = graph['@graph'] as Record<string, unknown>[];
     expect(credential.url).toBe('https://casa-bremen.de/pruefungszentrum/telc-deutsch-b2');
     expect(event).toMatchObject({ '@type': 'Event', startDate: session.starts_at, offers: { price: 190, validThrough: '2026-10-12' } });
+    expect((event.offers as Record<string, unknown>).validFrom).toBeUndefined();
+  });
+
+  it('gives an exam day the performer and the sale start Google asks for', () => {
+    const session: ExamSessionRow = {
+      id: 's2',
+      exam_type_id: 'e',
+      starts_at: '2026-12-12T08:00:00.000Z',
+      ends_at: '2026-12-12T16:00:00.000Z',
+      registration_deadline: '2026-11-11',
+      capacity: 28,
+      fee_override: null,
+      status: 'scheduled',
+      created_at: '2026-09-01T10:00:00.000Z',
+      updated_at: '',
+    };
+    const graph = examGraph({ locale: 'en', path: '/exams/c1', name: 'telc Deutsch C1 Hochschule', description: '', level: 'C1', fee: 210, currency: 'EUR', sessions: [session] });
+    const event = graph['@graph'][1] as Record<string, unknown>;
+    expect(event.performer).toEqual({ '@id': organizationId() });
+    expect(event.offers).toMatchObject({ validFrom: '2026-09-01T10:00:00.000Z', validThrough: '2026-11-11' });
   });
 
   it('lists the breadcrumb trail with each page in its language', () => {
