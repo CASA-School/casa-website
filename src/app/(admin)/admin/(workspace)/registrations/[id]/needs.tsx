@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
+import { Badge, Card } from '@/components/admin/ui';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
 import type { BookedStay } from '@/lib/admin/registration-needs';
 import { cn } from '@/lib/utils';
@@ -23,7 +24,13 @@ const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.
  * for the other section. The same two colours mark the head of the Anmeldung and the list (badge tones
  * `stay`, `visa`).
  */
-const COLOUR = { stay: '#0b78b4', visa: '#7a3fc8' } as const;
+const COLOUR = { visa: '#7a3fc8' } as const;
+
+/**
+ * The stay's section is the workspace's own card with its blue as a fine line along the top (Rahman,
+ * 2026-10-31, after the solid head: „to the one before that like an elegant top border").
+ */
+const STAY_EDGE = 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]';
 
 /** One section: a solid head in its colour, its title and where it stands; white rows under it. */
 function Section({ kind, icon, title, status, children }: { kind: keyof typeof COLOUR; icon: ReactNode; title: string; status: { text: string; state: 'open' | 'part' | 'done' }; children: ReactNode }) {
@@ -80,16 +87,19 @@ export function StayCard({
   const placed = stays.find((s) => s.place);
   const booked = stays[0] ?? null;
   return (
-    <Section
-      kind="stay"
-      icon={Icon.home}
+    <Card
       title={t('Unterkunft', 'Accommodation')}
-      status={
-        placed
-          ? { text: t('Zugeteilt', 'Placed'), state: 'done' }
-          : booked
-            ? { text: t('Gebucht · noch nicht zugeteilt', 'Booked · not placed yet'), state: 'part' }
-            : { text: t('Noch nicht gebucht', 'Not booked yet'), state: 'open' }
+      icon={Icon.home}
+      tint="blue"
+      className={STAY_EDGE}
+      actions={
+        placed ? (
+          <Badge tone="positive">{t('Zugeteilt', 'Placed')}</Badge>
+        ) : booked ? (
+          <Badge tone="accent">{t('Gebucht · noch nicht zugeteilt', 'Booked · not placed yet')}</Badge>
+        ) : (
+          <Badge tone="warning">{t('Noch nicht gebucht', 'Not booked yet')}</Badge>
+        )
       }
     >
       <dl className="divide-y divide-ws-line">
@@ -129,7 +139,7 @@ export function StayCard({
           </Row>
         ))}
       </dl>
-    </Section>
+    </Card>
   );
 }
 
