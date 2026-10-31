@@ -2,18 +2,18 @@
 
 Every slide is a CROP of a real photograph plus global light and colour
 correction: white balance, a tone curve on lightness, and a chroma factor.
-Nothing is generated, retouched, moved or removed, which is CLAUDE.md hard
-rule 4. One declared exception (Rahman, 2026-10-09): slot 90's recipe carries a
-`retouch` step that cleans the classroom's walls, door and whiteboard behind
-the learners, on fixed regions, never the people (scripts/media/retouch.py). A slide that needs more width than its photograph has gets a different
-photograph, not invented surroundings.
+The historical recipes below use photographic crop/light/colour corrections.
+The user-approved refresh of 2026-10-31 supersedes 53 delivery files: their
+committed bytes are recorded in src/config/content/reviewed-media-2026-10-31.json and are
+verified and preserved, never regenerated with an older warm grade. The
+rejected slot 90 scene and its retouch recipe have been removed.
 
     python3 scripts/media/build_reel.py            # write public/media/casa/reel-*.webp
     python3 scripts/media/build_reel.py --verify   # re-render and compare with what is committed
+    python3 scripts/media/build_reel.py --verify-reviewed  # hash-check all 53 reviewed exports
 
-`--verify` is the check that a published reel image is still exactly this
-recipe applied to its original: an image edited by any other means, AI or by
-hand, fails it. The originals live outside the repository (the photo pool in
+`--verify` checks the approved hashes for reviewed exports and the original
+recipe for other images. The originals live outside the repository (the photo pool in
 ~/Archive/CASA, see docs/MEDIA_LIBRARY.md), so the check runs on the machine
 that holds them, not in CI.
 
@@ -37,6 +37,8 @@ Output never exceeds the source's own pixels: the crop is taken at full
 resolution and written at that size, so there is no upscaling.
 """
 import argparse
+import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -44,7 +46,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
-from retouch import MEDICAL_WRITING, clean_background
+from retouch import clean_background
 
 REPO = Path(__file__).resolve().parents[2]
 POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
@@ -52,6 +54,7 @@ POOL = Path.home() / 'Archive/CASA/website-cleanup-2026-09-16/editorial-2026'
 # saved at their largest size from the site on 2026-10-12 (SOURCES.txt has the URLs).
 LEVELS_POOL = Path.home() / 'Archive/CASA/old-site-niveaustufen-2026-10-12'
 OUT = REPO / 'public/media/casa'
+REVIEWED = REPO / 'src/config/content/reviewed-media-2026-10-31.json'
 
 # THE WARM EDITORIAL GRADE (2026-10-08). Rahman: the photos should have warm,
 # editorial light; the modern grade of 2026-10-02 left them bright and neutral,
@@ -287,15 +290,6 @@ SLIDES = [
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 0.99)),
     },
     {
-        # Slot 11, the exams hero (since the crop pass of 2026-10-02): four
-        # learners writing along the table, room above every head. 5:4. Replaced
-        # 012, whose original frame cuts one learner's crown.
-        'out': 'learners-writing-class.jpg',
-        'source': POOL / '066_IMG_0265.JPG',
-        'box': (0, 0, 2134, 1707),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.02, 1.0, 0.985)),
-    },
-    {
         # Slot 70, the telc C1 Hochschule page's second photo: two learners
         # discussing a text. Replaced 031 (hair touching the frame top).
         'out': 'exam-c1-speaking.webp',
@@ -439,17 +433,6 @@ SLIDES = [
         'source': POOL / '077_IMG_0284.JPG',
         'box': (0, 180, 2560, 1067),
         'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.01, 1.0, 1.0)),
-    },
-    {
-        # Slot 90: writing practice, replacing source-cut frame 012. Its stained
-        # walls, door and smeared whiteboard are cleaned (Rahman, 2026-10-09:
-        # "give it proper ai touch so it looks clean and elegant"); the
-        # learners are untouched. The one retouch in this file, see retouch.py.
-        'out': 'course-medical-writing.webp',
-        'source': POOL / '066_IMG_0265.JPG',
-        'box': (0, 200, 2250, 1500),
-        'tone': EDITORIAL_TONE, 'chroma': EDITORIAL_CHROMA, 'wb': warm((1.02, 1.0, 0.985)),
-        'retouch': MEDICAL_WRITING,
     },
     {
         # Slot 91, Bildungszeit's second photo (was the empty classroom): a
@@ -638,14 +621,35 @@ def worst_tile_psnr(a, b):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--verify', action='store_true')
+    parser.add_argument('--verify-reviewed', action='store_true', help='verify all approved delivery hashes without rebuilding photographs')
     parser.add_argument('--only', nargs='+', metavar='OUT', help='build or verify only these output files')
     args = parser.parse_args()
     failed = False
+    review = json.loads(REVIEWED.read_text())
+    approved = {item['file']: item['sha256'] for item in review['deliveries']}
+    if args.verify_reviewed:
+        for name, digest in approved.items():
+            target = OUT / name
+            ok = target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest() == digest
+            failed |= not ok
+            print(f"{'ok' if ok else 'FAIL'} reviewed {name}")
+        for name in review['removed_files']:
+            if (OUT / name).exists():
+                print(f'FAIL retired file reintroduced: {name}')
+                failed = True
+        sys.exit(1 if failed else 0)
     for slide in SLIDES:
         if args.only and slide['out'] not in args.only:
             continue
-        image = render(slide)
         target = OUT / slide['out']
+        # These reviewed exports supersede the old warm recipes. Never overwrite
+        # them with a historical grade; the manifest records the approved bytes.
+        if slide['out'] in approved:
+            ok = target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest() == approved[slide['out']]
+            failed |= not ok
+            print(f"{'kept' if ok else 'FAIL'} reviewed {slide['out']}")
+            continue
+        image = render(slide)
         if args.verify:
             if not target.exists():
                 print(f"MISSING  {slide['out']}")

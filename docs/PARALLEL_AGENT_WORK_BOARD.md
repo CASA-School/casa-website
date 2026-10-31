@@ -59,7 +59,7 @@ Paste this to a new agent, with the unit's id:
 | H4 | Switch off the „new website" notice | code | between 10 and 24 Dec 2026 |
 | H5 | Search Console and Bing after the switch | Google/Bing | ready (check first) |
 | H6 | Database maintenance window | Azure | offered, waiting for Rahman |
-| H7 | Next release | Azure | on Rahman's go |
+| H7 | Next release | Azure | photography release authorized by Rahman, 2026-10-31 |
 | P1 | Privacy: specialist review pack | docs | ready |
 | P2 | Scheduled deletion (retention) | code, both products | needs a privacy owner |
 | X1 | Site and workspace as two apps | Azure + code | later, Rahman will come back to it |
@@ -145,7 +145,7 @@ Paste this to a new agent, with the unit's id:
 **Goal:** move the Postgres server's custom maintenance window to Sunday 03:00 Europe/Berlin (`az postgres flexible-server update --maintenance-window "Sun:3:0"` on `psql-casa-website-f8d745`), so Azure's restarts happen at night.
 
 ### H7 · Next release
-**Status:** on Rahman's go. `main` carries dependency bumps since revision 0000113.
+**Status:** Rahman authorized the reviewed photography release on 2026-10-31. Its baseline is revision 0000114 (`35b926ed`); the approved selections, retained originals, delivery hashes and framing rules are in `docs/MEDIA_LIBRARY.md`. Merge after green CI, then deploy through the runbook. Later releases still require Rahman's go; ask Azure for the live revision rather than relying on this historical baseline.
 **Read first:** `docs/OPERATIONS.md` §Releasing.
 
 ---

@@ -26,7 +26,7 @@ export type CourseFormatRow = {
   ctaLabel?: string;
   /** Optional kicker, e.g. "Next start: 3 Mar 2026". */
   meta?: string;
-  media: { src: string; alt: string };
+  media: { src: string; alt: string; aspectRatio?: string };
 };
 
 /**
@@ -176,6 +176,7 @@ export function CourseFormatRows({
 
           <div
             data-depth
+            style={row.media.aspectRatio ? { aspectRatio: row.media.aspectRatio } : undefined}
             className={cn(
               // Wider when it runs the full width of a tablet, so it does not fill the screen.
               'casa-media-overlay relative aspect-[4/3] overflow-hidden rounded-xl md:aspect-[16/9] lg:aspect-[4/3]',

@@ -49,13 +49,13 @@ for (const width of widths) {
           let src = img.currentSrc || img.src;
           const match = src.match(/[?&]url=([^&]+)/);
           if (match) src = decodeURIComponent(match[1]);
-          src = src.replace(location.origin, '');
+          src = src.replace(location.origin, '').split('?')[0];
           return {
             src, y: box.top + scrollY, W: box.width, H: box.height, nw: img.naturalWidth, nh: img.naturalHeight,
-            fit: style.objectFit, pos: style.objectPosition, blur: style.filter.includes('blur'),
+            fit: style.objectFit, pos: style.objectPosition, blur: style.filter.includes('blur'), decorative: img.alt === '',
           };
         })
-        .filter((img) => img.src.startsWith('/media/casa/') && img.W > 2 && img.H > 2 && !img.blur)
+        .filter((img) => img.src.startsWith('/media/casa/') && img.W > 2 && img.H > 2 && !img.blur && !img.decorative)
     );
     const seen = new Set();
     for (const img of found) {

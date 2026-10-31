@@ -71,6 +71,29 @@ PHOTOS = {
     'team-lesson-wide.webp': {'core': (0.14, 0.10, 0.96, 0.80), 'heads': [(0.58, 0.65, 0.23, 0.36), (0.68, 0.81, 0.35, 0.58), (0.81, 0.93, 0.40, 0.60)]},
 }
 
+# User-supplied replacements, 2026-10-30. Bounds preserve the source framing;
+# source-edge close-ups are not expanded or reconstructed.
+PHOTOS.update({
+    'learning-ball-exercise.webp': {'core': (0.15, 0, 1, 0.75), 'heads': [(0.15, 0.64, 0, 0.72), (0.68, 1, 0, 0.4)]},
+    'learning-group-discussion.webp': {'core': (0, 0, 1, 0.65), 'heads': [(0, 0.19, 0, 0.36), (0.09, 0.32, 0.145, 0.53), (0.28, 0.4, 0.145, 0.39), (0.455, 0.55, 0.14, 0.39), (0.678, 0.84, 0.125, 0.45), (0.845, 0.99, 0.102, 0.42)]},
+    'learning-group-discussion-wide.webp': {'core': (0, 0, 1, 1), 'heads': [(0, 0.19, 0, 0.58), (0.09, 0.32, 0.23, 0.85), (0.28, 0.4, 0.23, 0.63), (0.455, 0.55, 0.22, 0.63), (0.678, 0.84, 0.2, 0.72), (0.845, 0.99, 0.16, 0.68)]},
+    'learning-learner-smile.webp': {'core': (0.3, 0, 0.6, 0.85), 'heads': [(0.33, 0.54, 0.015, 0.5)]},
+    'learning-writing-detail.webp': {'core': (0.02, 0.05, 0.98, 0.95), 'heads': []},
+    'learning-speaking-prompt.webp': {'core': (0.18, 0, 0.57, 0.85), 'heads': [(0.2, 0.47, 0, 0.48), (0, 0.13, 0.32, 0.54)]},
+    'learning-focused-pair.webp': {'core': (0.3, 0, 1, 0.85), 'heads': [(0.48, 1, 0, 0.55), (0.4, 0.62, 0.12, 0.55)]},
+    'learning-collaborative-writing.webp': {'core': (0.15, 0, 1, 0.85), 'heads': [(0, 0.17, 0, 0.25), (0.17, 0.52, 0, 0.43), (0.7, 0.99, 0, 0.43)]},
+    'learning-dictionary-detail.webp': {'core': (0.25, 0, 1, 1), 'heads': []},
+    'learning-friends-heart.webp': {'core': (0.05, 0, 0.9, 0.67), 'heads': [(0.07, 0.43, 0, 0.48), (0.53, 0.85, 0.02, 0.5)]},
+    'selected-learning-trio.webp': {'core': (0.25, 0, 0.77, 0.85), 'heads': [(0.255, 0.4, 0, 0.49), (0.42, 0.54, 0.14, 0.49), (0.62, 0.74, 0.16, 0.54)]},
+    'selected-learning-trio-card.webp': {'core': (0.1, 0, 0.99, 0.85), 'heads': [(0.121, 0.382, 0, 0.49), (0.418, 0.634, 0.14, 0.49), (0.777, 0.993, 0.16, 0.54)]},
+    'selected-pair-study.webp': {'core': (0.29, 0, 0.78, 0.85), 'heads': [(0.3, 0.46, 0, 0.54), (0.6, 0.77, 0.13, 0.57)]},
+    'selected-bremen-walk.webp': {'core': (0.29, 0.15, 0.88, 0.75), 'heads': [(0.29, 0.39, 0.2, 0.42), (0.45, 0.54, 0.18, 0.39), (0.62, 0.71, 0.15, 0.4), (0.74, 0.8, 0.24, 0.39), (0.82, 0.88, 0.27, 0.44)]},
+    'selected-city-phone-task.webp': {'core': (0.035, 0, 1, 0.9), 'heads': [(0.035, 0.18, 0.07, 0.33), (0.2, 0.43, 0.005, 0.41), (0.51, 0.69, 0.1, 0.48), (0.64, 1, 0.005, 0.48)]},
+    'selected-attentive-learners.webp': {'core': (0.13, 0, 1, 0.68), 'heads': [(0.13, 0.36, 0.15, 0.6), (0.395, 0.62, 0.02, 0.62), (0.53, 1, 0, 0.66)]},
+})
+
+PHOTOS["learning-speaking-prompt-wide.webp"] = {"core": [0.18, 0, 0.60, 1], "heads": [[0.20, 0.47, 0, 0.768], [0, 0.13, 0.512, 0.864]]}
+
 BANDS = [('', 0), ('sm', 640), ('md', 768), ('lg', 1024), ('xl', 1280), ('2xl', 1536)]
 
 
@@ -83,6 +106,9 @@ def band(width):
 
 
 def visible_fraction(row):
+    # Contained photos stay whole; background halo copies are excluded by the crawler.
+    if row.get('fit') in {'contain', 'scale-down', 'fill'}:
+        return 1.0, 1.0
     scale = max(row['W'] / row['nw'], row['H'] / row['nh'])
     return min(1.0, row['W'] / scale / row['nw']), min(1.0, row['H'] / scale / row['nh'])
 

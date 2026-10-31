@@ -137,7 +137,7 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   groupCoursePhoneTask: {
-    src: '/media/casa/group-course-phone-task.jpg',
+    src: '/media/casa/selected-city-phone-task.webp',
     alt: {
       en: 'CASA group-course students using phones during an outdoor Bremen task',
       de: 'CASA Teilnehmende eines Gruppenkurses nutzen Handys bei einer Aufgabe in Bremen',
@@ -368,10 +368,10 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   studentSuccess: {
-    src: '/media/casa/learners-writing-class.jpg',
+    src: '/media/casa/learning-focused-pair.webp',
     alt: {
-      en: 'Four learners writing along the course table',
-      de: 'Vier Teilnehmende schreiben am langen Kurstisch',
+      en: 'Two learners concentrating on course books and written exercises',
+      de: 'Zwei Lernende konzentrieren sich auf Kursbücher und schriftliche Übungen',
     },
     caption: {
       en: 'Consistent progress builds confidence for study and work.',
@@ -445,10 +445,10 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     },
   },
   studentTestimonialPortrait2: {
-    src: '/media/casa/learners-writing-class.jpg',
+    src: '/media/casa/learning-writing-detail.webp',
     alt: {
-      en: 'CASA learners concentrating on written German practice',
-      de: 'CASA Lernende konzentrieren sich auf schriftliche Deutschübungen',
+      en: 'A hand holding a pen over German learning materials',
+      de: 'Eine Hand mit einem Stift über Deutsch-Lernmaterialien',
     },
     caption: {
       en: 'Language confidence grows from small victories every week.',
@@ -598,23 +598,23 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
    * photograph at all. Slots 84-91.
    */
   companyColleagues: {
-    src: '/media/casa/course-company-colleagues.webp',
-    alt: { de: 'Zwei Lernende besprechen gemeinsam ein Dokument', en: 'Two learners going through a document together' },
+    src: '/media/casa/learning-group-discussion.webp',
+    alt: { de: 'Eine Lerngruppe bespricht gemeinsam eine Übung am Kurstisch', en: 'A learning group discussing an exercise around the course table' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
   companyColleaguesHero: {
-    src: '/media/casa/course-company-colleagues-hero.webp',
-    alt: { de: 'Zwei Lernende besprechen gemeinsam ein Dokument', en: 'Two learners going through a document together' },
+    src: '/media/casa/learning-group-discussion-wide.webp',
+    alt: { de: 'Eine Lerngruppe bespricht gemeinsam eine Übung am Kurstisch', en: 'A learning group discussing an exercise around the course table' },
     caption: { de: 'Firmenunterricht', en: 'In-company teaching' },
   },
   companyFocus: {
-    src: '/media/casa/course-company-focus.webp',
-    alt: { de: 'Zwei Lernende lesen gemeinsam ihre Unterlagen', en: 'Two learners reading their papers together' },
+    src: '/media/casa/learning-collaborative-writing.webp',
+    alt: { de: 'Lernende arbeiten gemeinsam an einer schriftlichen Deutschübung', en: 'Learners working together on a written German exercise' },
     caption: { de: 'Deutsch für den Arbeitsalltag', en: 'German for everyday work' },
   },
   // Beside a named participant's quote: a hand and a pen, no face (hard rule 2).
   companyQuote: {
-    src: '/media/casa/course-company-writing.webp',
+    src: '/media/casa/learning-writing-detail.webp',
     alt: { de: 'Eine Hand schreibt mit einem Stift auf Papier', en: 'A hand writing on paper with a pen' },
     caption: { de: 'Im Kurs', en: 'In class' },
   },
@@ -629,9 +629,14 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     caption: { de: 'Deutsch für Pflege und Medizin', en: 'German for nursing and medicine' },
   },
   medicalWriting: {
-    src: '/media/casa/course-medical-writing.webp',
-    alt: { de: 'Vier Lernende üben das Schreiben im Kurs', en: 'Four learners practising writing in class' },
-    caption: { de: 'Schreiben üben', en: 'Writing practice' },
+    src: '/media/casa/learning-speaking-prompt.webp',
+    alt: { de: 'Ein Lernender hält einen handgeschriebenen Impuls für eine Sprechübung hoch', en: 'A learner holding up a handwritten prompt for a speaking exercise' },
+    caption: { de: 'Sprechen üben', en: 'Speaking practice' },
+  },
+  medicalSpeakingHero: {
+    src: '/media/casa/learning-speaking-prompt-wide.webp',
+    alt: { de: 'Ein Lernender bei einer gemeinsamen Sprechübung im Unterricht', en: 'A learner during a paired speaking exercise in class' },
+    caption: { de: 'Sprechen üben', en: 'Speaking practice' },
   },
   bildungszeitLearner: {
     src: '/media/casa/course-bildungszeit-learner.webp',
@@ -668,26 +673,51 @@ const photoLibrary: Record<string, PhotoPlaceholderConfig> = {
     alt: { de: 'Zwei Teilnehmer gehen gemeinsam ihre Blätter durch', en: 'Two learners going through their papers together' },
     caption: { de: 'Vorbereitung im Kurs', en: 'Preparing in class' },
   },
-  // Slots 92-93: approved whole-head reading scene, replacing source-cut frame 023.
+  // User-selected finished photograph; separate phone and wide crops (2026-10-30).
   examC1: {
-    src: '/media/casa/exam-c1-study.webp',
-    alt: { de: 'Zwei Lernende lesen gemeinsam Prüfungstexte', en: 'Two learners reading exam texts together' },
+    src: '/media/casa/selected-learning-trio-card.webp',
+    alt: { de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen', en: 'Three learners working together with course books and notes' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Hero: {
-    src: '/media/casa/exam-c1-study-hero.webp',
-    alt: { de: 'Zwei Lernende lesen gemeinsam Prüfungstexte', en: 'Two learners reading exam texts together' },
+    src: '/media/casa/selected-learning-trio.webp',
+    alt: { de: 'Drei Lernende arbeiten gemeinsam mit Kursbüchern und Notizen', en: 'Three learners working together with course books and notes' },
     caption: { de: 'telc Deutsch C1 Hochschule', en: 'telc Deutsch C1 Hochschule' },
   },
   examC1Class: {
-    src: '/media/casa/exam-c1-speaking.webp',
-    alt: { de: 'Zwei Teilnehmer besprechen einen Text', en: 'Two learners discussing a text' },
-    caption: { de: 'Sprechen üben', en: 'Speaking practice' },
+    src: '/media/casa/learning-dictionary-detail.webp',
+    alt: { de: 'Ein aufgeschlagenes deutsch-ukrainisches Wörterbuch bei der Wortschatzarbeit', en: 'An open German–Ukrainian dictionary during vocabulary practice' },
+    caption: { de: 'Wortschatz vertiefen', en: 'Building vocabulary' },
   },
   examStory: {
-    src: '/media/casa/exam-story-writing.webp',
-    alt: { de: 'Zwei Teilnehmerinnen lesen ihre Prüfungstexte', en: 'Two learners reading their exam texts' },
+    src: '/media/casa/learning-dictionary-detail.webp',
+    alt: { de: 'Ein aufgeschlagenes Wörterbuch bei der Wortschatzarbeit', en: 'An open dictionary during vocabulary practice' },
     caption: { de: 'Mit Ruhe vorbereiten', en: 'Calm preparation' },
+  },
+  learningBall: {
+    src: '/media/casa/learning-ball-exercise.webp',
+    alt: { de: 'Eine Lernende lächelt bei einer Übung mit einem kleinen Ball, neben ihr schreibt eine Teilnehmerin', en: 'A learner smiling during an exercise with a small ball while another participant writes beside her' },
+    caption: { de: 'Mit Freude lernen', en: 'Enjoying learning' },
+  },
+  learningSmile: {
+    src: '/media/casa/learning-learner-smile.webp',
+    alt: { de: 'Ein Lernender lächelt beim gemeinsamen Arbeiten mit Kursbuch und Stift', en: 'A learner smiling while working together with a course book and pencil' },
+    caption: { de: 'Gemeinsam weiterkommen', en: 'Making progress together' },
+  },
+  learningFriends: {
+    src: '/media/casa/learning-friends-heart.webp',
+    alt: { de: 'Zwei lächelnde Lernende formen mit den Fingern gemeinsam ein Herz', en: 'Two smiling learners making a heart together with their fingers' },
+    caption: { de: 'Bei CASA ankommen', en: 'Feeling at home at CASA' },
+  },
+  selectedPairStudy: {
+    src: '/media/casa/selected-pair-study.webp',
+    alt: { de: 'Zwei Lernende bearbeiten gemeinsam Aufgaben in ihren Kursbüchern', en: 'Two learners working together on exercises in their course books' },
+    caption: { de: 'Gemeinsam üben', en: 'Practising together' },
+  },
+  selectedGroupWalk: {
+    src: '/media/casa/selected-bremen-walk.webp',
+    alt: { de: 'Eine Gruppe Lernender geht bei Sonnenschein gemeinsam durch Bremen', en: 'A group of learners walking together through Bremen in the sunshine' },
+    caption: { de: 'Bremen gemeinsam erleben', en: 'Exploring Bremen together' },
   },
   /*
    * ACCOMMODATION (2026-10-08). Host-family images are labelled AI examples
@@ -795,7 +825,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       courseA: photoLibrary.courseClassroomCircle,
       courseB: photoLibrary.whiteboardPractice,
       courseC: photoLibrary.consultationDesk,
-      courseD: photoLibrary.groupCourseWalking,
+      courseD: photoLibrary.selectedGroupWalk,
       courseE: photoLibrary.mentorSupport,
       courseF: photoLibrary.teamCollaboration,
       accommodation: photoLibrary.wgRoom,
@@ -816,7 +846,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // The house itself, painted (slot 102, Rahman 2026-10-29): the team photo it replaced
       // (slot 55) is also the team page's, so the two pages no longer open on the same picture.
       hero: photoLibrary.buildingPainting,
-      mission: photoLibrary.groupCourseBremenMusicians,
+      mission: photoLibrary.learningBall,
       /* The community-story block's photo, which used to borrow `hero`. */
       story: photoLibrary.groupClassroomTeacherActivity,
       team: photoLibrary.teamCollaboration,
@@ -851,20 +881,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       { label: { en: 'Check your German level', de: 'Einstufung starten' }, href: '/placement-test', kind: 'secondary' },
     ],
     photos: {
-      /*
-        The hero photograph, and it may not be any one format's face.
-
-        `courseClassroomWide` (thumbB) is Intensive German's identity
-        photograph, `teacherGuiding` (thumbC) is Special Courses', and
-        `groupClassroomTeacherActivity` — what this slot used to hold — is the
-        homepage's hero. An index of six formats led by one format's photograph
-        ranks them, which is the editorial choice the homepage makes and an
-        index should not.
-
-        `groupConversation` is a whole class with the teacher at the board and
-        belongs to no format in `course-detail.photos`.
-      */
-      // The hero (thumbA): the homepage's lesson (slot 54), no format's photograph.
+      // Reserved index photo; the current course chooser has no photo hero.
       thumbA: photoLibrary.heroLesson,
       thumbB: photoLibrary.courseClassroomWide,
       thumbC: photoLibrary.teacherGuiding,
@@ -894,7 +911,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       supportCard: photoLibrary.consultationDesk,
       intensive: photoLibrary.courseClassroomWide,
       intensiveHero: photoLibrary.intensiveHero,
-      intensiveStory: photoLibrary.intensiveStory,
+      intensiveStory: photoLibrary.selectedPairStudy,
       evening: photoLibrary.courseClassroomCircle,
       eveningHero: photoLibrary.eveningHero,
       eveningStory: photoLibrary.classWelcome,
@@ -903,12 +920,11 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       specialStory: photoLibrary.classroomMapVocabulary,
       // A group course at the Bremen Town Musicians (slot 20), a real photograph.
       groups: photoLibrary.groupCourseBremenMusicians,
-      // A group lunch in the courtyard (slot 21, pool W009).
       groupsStory: photoLibrary.groupCourseLunch,
       // Slot 37 (a clinical photograph) is still awaited; until then slots 88-90.
-      medical: photoLibrary.medicalDialogue,
-      medicalHero: photoLibrary.medicalDialogueHero,
-      medicalStory: photoLibrary.medicalWriting,
+      medical: photoLibrary.medicalWriting,
+      medicalHero: photoLibrary.medicalSpeakingHero,
+      medicalStory: photoLibrary.medicalDialogue,
       company: photoLibrary.companyColleagues,
       companyHero: photoLibrary.companyColleaguesHero,
       companyStory: photoLibrary.companyFocus,
@@ -937,7 +953,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       // The hero (slot 11). The exam cards have no photographs since 2026-10-08.
       thumbC: photoLibrary.studentSuccess,
       // The candidate story (slot 71).
-      story: photoLibrary.companyQuote,
+      story: photoLibrary.examC1Class,
     },
   },
   'exam-detail': {
@@ -956,7 +972,7 @@ export const publicPageConfigMap: Record<PublicRouteKey, PublicPageConfig> = {
       b2Story: photoLibrary.examB2Class,
       c1: photoLibrary.examC1,
       c1Hero: photoLibrary.examC1Hero,
-      c1Story: photoLibrary.examC1Class,
+      c1Story: photoLibrary.studentSuccess,
       testimonialA: photoLibrary.studentTestimonialPortrait1,
       testimonialB: photoLibrary.studentTestimonialPortrait2,
       testimonialC: photoLibrary.studentTestimonialPortrait3,

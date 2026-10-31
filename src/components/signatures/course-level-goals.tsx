@@ -217,16 +217,27 @@ export function CourseLevelGoals({
                       PHOTO_TILE[feature.icon] ?? 'h-48 sm:h-auto sm:min-h-[11rem]'
                     )}
                   >
+                    {/* These tiles change shape from a wide band to a tall cell.
+                        Keep the full group visible; the site's low-resolution halo
+                        treatment fills the remaining space behind it. */}
+                    <CasaImage
+                      src={feature.photo}
+                      alt=""
+                      fill
+                      sizes="64px"
+                      quality={30}
+                      className="-z-20 scale-110 object-cover opacity-40 blur-2xl"
+                    />
                     <CasaImage
                       src={feature.photo}
                       alt=""
                       fill
                       sizes="(min-width: 1024px) 600px, 100vw"
-                      className="-z-10 object-cover"
+                      className="-z-10 object-contain"
                     />
                     <span
                       aria-hidden
-                      className="absolute inset-0 -z-10 bg-gradient-to-t from-[rgba(15,23,42,0.82)] via-[rgba(15,23,42,0.28)] via-55% to-transparent"
+                      className="absolute inset-0 -z-10 bg-gradient-to-t from-[rgba(15,23,42,0.86)] via-[rgba(15,23,42,0.24)] via-30% to-transparent to-60%"
                     />
                     <h4 className="max-w-[18rem] text-xl font-semibold leading-snug text-white [font-family:var(--font-display),Georgia,serif] [text-shadow:0_1px_12px_rgba(15,23,42,0.35)] lg:text-2xl">
                       {feature.label}

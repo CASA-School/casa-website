@@ -18,8 +18,9 @@ export const studyInGermanyGuideDe: ResourceGuideData = {
     summary: 'Hier findest du Hilfe bei der Studienwahl, der Bewerbung und den ersten Schritten in Deutschland.',
     lead: 'Du möchtest in Deutschland studieren? Dieser Ratgeber hilft dir bei der Planung, von der Wahl des Studiums über den Sprachkurs bis zur Ankunft vor Ort.',
     photo: {
-      src: '/media/casa/study-learners-attentive.webp',
-      alt: 'Zwei Teilnehmerinnen hören aufmerksam zu',
+      src: '/media/casa/selected-attentive-learners.webp',
+      alt: 'Drei Lernende mit Brille hören im Unterricht aufmerksam zu',
+      aspectRatio: '3 / 2',
     },
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },
@@ -326,10 +327,10 @@ export const whyGermanyGuideDe: ResourceGuideData = {
     summary: 'Hier erfährst du, was Deutschland dir im Studium und im Alltag bietet und wobei dir Deutsch hilft.',
     lead: 'Was könnten ein Studium und ein Leben in Deutschland für dich bedeuten? Dieser Ratgeber hilft dir, es herauszufinden.',
     photo: {
-      src: '/media/casa/group-course-walking-bremen.jpg',
+      src: '/media/casa/selected-bremen-walk.webp',
       alt: 'CASA-Lernende gehen gemeinsam durch Bremen',
-      // The group spans the whole width: shown as its full 3:2 frame, no head cut.
-      aspectRatio: '3 / 2',
+      // A comfortable-height frame; the registry focus keeps the group together.
+      aspectRatio: '16 / 10',
     },
     ctas: [{ label: 'Kurse ansehen', href: '/courses' }],
   },

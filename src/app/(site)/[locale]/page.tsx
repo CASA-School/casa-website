@@ -222,11 +222,13 @@ export default async function HomePage() {
   const guidedCourses = guidedCourseRecords.map((course) => {
     const nextStart = finderData.nextStartByCourseId[course.id];
     /*
-      Same photograph this course carries on /courses and on its own page.
-      Previously indexed by position here too, which is why Intensive German
-      wore a different photograph on each of the three surfaces.
+      Course identity photos are shared with the index and detail page.
+      The homepage group-course row has its own walking photo, explicitly
+      accepted in the photo review on 2026-10-31.
     */
-    const photo = getCoursePhoto(course.slug, locale);
+    const photo = course.slug === 'german-for-groups'
+      ? pageConfig.photos.courseD
+      : getCoursePhoto(course.slug, locale);
 
     return {
       id: `course-${course.slug}`,
@@ -247,6 +249,7 @@ export default async function HomePage() {
       media: {
         src: photo.src,
         alt: photo.alt,
+        ...(course.slug === 'german-for-groups' ? { aspectRatio: '16 / 10' } : {}),
       },
     };
   });

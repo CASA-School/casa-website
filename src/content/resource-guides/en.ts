@@ -37,8 +37,9 @@ export const studyInGermanyGuideEn: ResourceGuideData = {
     summary: 'Help with choosing what to study, applying and your first steps in Germany.',
     lead: 'Would you like to study in Germany? This guide helps you plan, from choosing what to study and taking a language course to arriving here.',
     photo: {
-      src: '/media/casa/study-learners-attentive.webp',
-      alt: 'Two learners listening attentively',
+      src: '/media/casa/selected-attentive-learners.webp',
+      alt: 'Three learners wearing glasses listening attentively in class',
+      aspectRatio: '3 / 2',
     },
     ctas: [{ label: 'See our courses', href: '/courses' }],
   },
@@ -345,10 +346,10 @@ export const whyGermanyGuideEn: ResourceGuideData = {
     summary: 'What Germany can offer you in your studies and in everyday life, and where German helps.',
     lead: 'What could studying and living in Germany mean for you? This guide helps you find out.',
     photo: {
-      src: '/media/casa/group-course-walking-bremen.jpg',
+      src: '/media/casa/selected-bremen-walk.webp',
       alt: 'CASA learners walking through Bremen together',
-      // The group spans the whole width: shown as its full 3:2 frame, no head cut.
-      aspectRatio: '3 / 2',
+      // A comfortable-height frame; the registry focus keeps the group together.
+      aspectRatio: '16 / 10',
     },
     ctas: [{ label: 'See our courses', href: '/courses' }],
   },

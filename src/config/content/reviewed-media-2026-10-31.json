@@ -1,0 +1,526 @@
+{
+  "version": 1,
+  "reviewed_on": "2026-10-31",
+  "baseline_commit": "1ddb425a0eb8a4b737322973e80cfb1d75e1a27e",
+  "notes": [
+    "Approved delivery bytes supersede historical warm-grade builder recipes.",
+    "People and teaching content remain original; only approved light/colour and bounded background corrections are used.",
+    "Finished supplied selections receive no additional colour filter. Delivery encoding is lossy.",
+    "Originals, masks and lossless editing layers remain in the local photo review archive; never regenerate these exports with a historical recipe."
+  ],
+  "deliveries": [
+    {
+      "file": "course-intensive-class.webp",
+      "sha256": "dfd1927853d0a21ed5cf2dab95d253c56c246119a6c5fa1735cad6f38e136c7f",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "file": "course-intensive-hero.webp",
+      "sha256": "e2d3fad8f4867606372c4f6837d046715caab26ed0bd4468a61d91647f203b91",
+      "width": 2230,
+      "height": 929
+    },
+    {
+      "file": "course-intensive-story.webp",
+      "sha256": "62e57ec53387263f47439234aeb61195f6ed3e9f70dca7713728984f2fc570bb",
+      "width": 1400,
+      "height": 933
+    },
+    {
+      "file": "team-lesson-wide.webp",
+      "sha256": "de78e836b22e65271a461f5c34844768e9dd45f98fc3bbf0d668fe45b2e4ad60",
+      "width": 2560,
+      "height": 1680
+    },
+    {
+      "file": "course-evening-table.webp",
+      "sha256": "53dcf3c3ff3e17262c8750f511e742d6efe4f9ab5b069f823809940f01d5dff2",
+      "width": 1960,
+      "height": 1470
+    },
+    {
+      "file": "course-evening-hero.webp",
+      "sha256": "ec5ec51680e9f993f41e5147188e6f200583e0ea9d87d113445656c478f5bc7e",
+      "width": 1960,
+      "height": 817
+    },
+    {
+      "file": "course-special-smartboard.webp",
+      "sha256": "f339757f2e2fec6088b2af6fbefa9568278082a5d58e265298fc85ff556072b1",
+      "width": 2070,
+      "height": 1552
+    },
+    {
+      "file": "course-special-hero.webp",
+      "sha256": "ec9de0b3b7536308fb45d75255ed78cba54c53a6f52388ef2a0f5a30d98ffb7b",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "course-bildungszeit-class.webp",
+      "sha256": "f156b3156ae3112be768d91df5c14e175e5b1a52e91d20f5462d9b20502d2ec2",
+      "width": 2227,
+      "height": 1670
+    },
+    {
+      "file": "course-bildungszeit-hero.webp",
+      "sha256": "6ecb703678445a86587f4de252c94252d4bf469592d51774078a2caa06ce16d0",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "home-class-welcome.webp",
+      "sha256": "6b7b76313b4a436a7647df7a345e55aaf6de1e7e7bbcd5d88e5913eebac05e7d",
+      "width": 1620,
+      "height": 1080
+    },
+    {
+      "file": "classroom-map-vocabulary.jpg",
+      "sha256": "608c00b1ddc91e8b4ec745605adb5f48390118910dcf12fdb5d5828189260336",
+      "width": 2400,
+      "height": 1600
+    },
+    {
+      "file": "hero-classroom-lesson.webp",
+      "sha256": "9fe92bbd66931101863e71fdabc2c593ac446d323cab2476ba2bb8a081890167",
+      "width": 2110,
+      "height": 1688
+    },
+    {
+      "file": "exam-preparation-writing.jpg",
+      "sha256": "a5bc3e2ac6440dbf416634447e38a7a7f542b7ac03fa03b287688a4204a799c7",
+      "width": 1340,
+      "height": 1005
+    },
+    {
+      "file": "exam-b2-hero.webp",
+      "sha256": "1e188ba924f1c0e981f1c77d89aab0134c67c985aa990108ae6481ab280d986d",
+      "width": 1370,
+      "height": 571
+    },
+    {
+      "file": "exam-b2-class.webp",
+      "sha256": "9ec831f9a2a7baa9ce5b07d7a02fe830a4b811ba47e5a398a0b9d92cb107171e",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "course-company-focus.webp",
+      "sha256": "9ec831f9a2a7baa9ce5b07d7a02fe830a4b811ba47e5a398a0b9d92cb107171e",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "exam-c1-speaking.webp",
+      "sha256": "3129512ce795c3b2aa8c7739cd7ffb56ab3194618ebf0e94c6046fe464b3f53c",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "exam-story-writing.webp",
+      "sha256": "8eb05638608722f6ca6ebb04061af66c19f170d91d20b6dc9d2e3f1af697f3e1",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "exam-c1-study.webp",
+      "sha256": "62057f32d1ce9769bb34834e1402a3d4e7fc74421c531c31e6b58c7d943bedbc",
+      "width": 2276,
+      "height": 1707
+    },
+    {
+      "file": "exam-c1-study-hero.webp",
+      "sha256": "07871b00357a6670f3cbe7cbc8e4a9ed8b8f2e37fa34c7fa4c50bb8d7aafc462",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "individual-tutoring.jpg",
+      "sha256": "7db29bbaba9330ad097a599d3272c20e0dab38689ff02d9dfe77cdfe56ca3719",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "community-shared-meal.webp",
+      "sha256": "a0c0d06676de6f47705de0240a722b1c41a7497d05f17e6c3893b813cb1ae935",
+      "width": 2560,
+      "height": 1685
+    },
+    {
+      "file": "study-learners-attentive.webp",
+      "sha256": "b705d94659a38eedf4dd21b1bc10aeba253fbb1d86a953fdb0a28a8d3f117032",
+      "width": 2560,
+      "height": 2056
+    },
+    {
+      "file": "home-community-breakfast.webp",
+      "sha256": "b31a48d983ee44ebf56456b8ad81f62f70ca0f22a7778d9fae961c5a6abb045d",
+      "width": 1680,
+      "height": 2240
+    },
+    {
+      "file": "course-company-colleagues.webp",
+      "sha256": "ae86aac7a736f5d54a5bf9b0e629f9953fc1651050ba3fbcec4618e8b7a793cd",
+      "width": 2247,
+      "height": 1685
+    },
+    {
+      "file": "course-company-colleagues-hero.webp",
+      "sha256": "86a4f15d0bbf9b991b5b79d22ec2b5f7779d2aa71d43cc339fbb38c8d8821c81",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "course-company-writing.webp",
+      "sha256": "c956712cf4dc550af4186ae7988055d60953606b888130e7125f38488a2dbfd3",
+      "width": 1260,
+      "height": 840
+    },
+    {
+      "file": "course-medical-dialogue.webp",
+      "sha256": "766e5dec99e5a7122c2690392d5bf165e421778cf86dded2db01207f1d769d26",
+      "width": 2276,
+      "height": 1707
+    },
+    {
+      "file": "course-medical-dialogue-hero.webp",
+      "sha256": "71a4a6848201b47ba60b7b83dd34c44b571f6fd30e38c3ecd92da9c700e409a1",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "course-bildungszeit-learner.webp",
+      "sha256": "58e9a2d1797824945b6c38b78d0ed341b38fb509420e2b3280e1341b22397e6a",
+      "width": 2560,
+      "height": 1707
+    },
+    {
+      "file": "casa-wg-room.webp",
+      "sha256": "4b86e60eac5d97ce9c8fdab877ab497068f8516254a24756d29fa2dcd76c264c",
+      "width": 2276,
+      "height": 1707
+    },
+    {
+      "file": "student-room-alternative-1.jpg",
+      "sha256": "e88a5e898cda33cfe5de6ccc919206c917a59b3173d904605b3c88675de50394",
+      "width": 2276,
+      "height": 1707
+    },
+    {
+      "file": "casa-wg-room-hero.webp",
+      "sha256": "f8e9b2d4accf4ba94e506b67d02b01cfa1aa9e16ecad86f80a2d773d4dc1df95",
+      "width": 2560,
+      "height": 1067
+    },
+    {
+      "file": "student-room-balcony.jpg",
+      "sha256": "e175b5678d9e1fd0ba434400fb202e3c78089296d5ceabcd3903ff35cc75092a",
+      "width": 2276,
+      "height": 1707
+    },
+    {
+      "file": "shared-flat-kitchen-table.jpg",
+      "sha256": "9b6365ebf76d427ac6ab0a44dcd7e8c57a9ac2fdd4f57f6ea40cde4d9a9c2704",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "file": "learning-ball-exercise.webp",
+      "sha256": "85d336dc10e668f9234a751a5c19055ee21e58873788b14d7724b92a7f963af7",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0071.JPG",
+      "source_sha256": "da59a1a6528882ee336226ae9adb778221c8f48ad887b771349fc709b1ca93d2",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-group-discussion.webp",
+      "sha256": "f738fadb1fc29dece09cc2a2191f4572d3b980311430c4529592b8a914709f42",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0103.JPG",
+      "source_sha256": "748d8af0573c2dbc5409828f7e29028fb33c998dfbdfde03443b49671c064e94",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-group-discussion-wide.webp",
+      "sha256": "b260d8222d95f84e0923886b8b64ecdf3ed1d3d7f7f57538114458abc174a4bb",
+      "width": 2400,
+      "height": 1000,
+      "supplied_source": "IMG_0103.JPG",
+      "source_sha256": "748d8af0573c2dbc5409828f7e29028fb33c998dfbdfde03443b49671c064e94",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-learner-smile.webp",
+      "sha256": "276d6aaa9fbc66066495ea5242bbf9ba26e0d3afb2a804848df89acd92f6526f",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0113.JPG",
+      "source_sha256": "9e77ddb0a65d30fc1b0f5d037e3500857d496bfc1896861e474ce71d5f29936f",
+      "placement_status": "available; placement pending"
+    },
+    {
+      "file": "learning-writing-detail.webp",
+      "sha256": "5be61a25545a0fdc03c24dc196617692b112358b50eccc9bdbc01af5c0a92241",
+      "width": 1181,
+      "height": 787,
+      "supplied_source": "IMG_0156.JPG",
+      "source_sha256": "c6b38d8defa396075a65480b7c9f1e3d213bcf591ac540ce769d8276ec704101",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-speaking-prompt.webp",
+      "sha256": "9dd6fd8f697da51af8beb418b3f08f0d8dc0db9521de1e5141f01aafbf0c1c8d",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0235.JPG",
+      "source_sha256": "8c52acbb40734b0ce3f23afc717396be808721df5f08ec85e81178dd97e502ee",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-focused-pair.webp",
+      "sha256": "6c4c2dc7f58a307595886d3c23f5e82b4347232fbeaa88ee2fddcdfccfc15274",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0473.JPG",
+      "source_sha256": "33f8d861de74928edb746079396c55231322e78a0ba834a70dec00ae53405132",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-collaborative-writing.webp",
+      "sha256": "5c32e4875d5b26eb0cce61f42954cf51cf26e79116da57f039e77d393fcc7af7",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0506.JPG",
+      "source_sha256": "1b3e22213c9b132d122d251728e065110a01dd166249d257e403e8b8e8962432",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-dictionary-detail.webp",
+      "sha256": "eb29466babe90d2441ae6279b0592b3fb9399af1c1443f49b482f024910d208c",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_0524.JPG",
+      "source_sha256": "d5971cee2442189db28670d0a49a447bf041fa44fe443d2f7fefbbae83b0fe7e",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-friends-heart.webp",
+      "sha256": "9ea46d6656d669e29f9152b886217391db8c2f930fbc52355585304b2cca1ce8",
+      "width": 2400,
+      "height": 1600,
+      "supplied_source": "IMG_9233.JPG",
+      "source_sha256": "0c26c7b0f1685d0fd1d0d1a3155ad6934ec60e789da679da3497d7ea717ac13c",
+      "placement_status": "available; placement pending"
+    },
+    {
+      "file": "selected-learning-trio.webp",
+      "sha256": "7676194c4c61f2b89cca47c44f34b370ea9e6be464442d398757762aa60cf1a5",
+      "width": 1942,
+      "height": 809,
+      "supplied_source": "casa-student.png",
+      "source_sha256": "380b307f84c78f16e4ba0ff77d69cef365d96c27f2bddf93303d9abf100b3fc8",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "selected-learning-trio-card.webp",
+      "sha256": "825da14a4b63c529e5e40359a13a50e3e4266a678dece1b8f2148010cf2f6578",
+      "width": 1079,
+      "height": 809,
+      "supplied_source": "casa-student.png",
+      "source_sha256": "380b307f84c78f16e4ba0ff77d69cef365d96c27f2bddf93303d9abf100b3fc8",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "selected-pair-study.webp",
+      "sha256": "08bc9425236f49e80aee850d069aecf2ce2489deac066bc0ee1d069927e9ed57",
+      "width": 1942,
+      "height": 809,
+      "supplied_source": "casa-student-2.png",
+      "source_sha256": "7710c97169cf25be3ec31fc74d796fecf0524733d9dd8b5ca12e919885737b17",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "selected-bremen-walk.webp",
+      "sha256": "4a5d369627f7654cd2486111c793d1a958e55447998e6ceda00bc3f486a3748b",
+      "width": 1942,
+      "height": 809,
+      "supplied_source": "casa-student-3-groups.png",
+      "source_sha256": "5b234068f82b88308b4b29f4282721cd6aaedc02efc2d5abeb76173a7cb94d45",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "selected-city-phone-task.webp",
+      "sha256": "38652d36342f886af926471ee1cc33e3b6becc23c424256ba38cf73c13280802",
+      "width": 1536,
+      "height": 1024,
+      "supplied_source": "casa-group-image.png",
+      "source_sha256": "95203f33b17ca1dcb690c898c4dfbfb2cf9d4783b2ed2958f403a58bd3e713a5",
+      "placement_status": "available; placement pending"
+    },
+    {
+      "file": "selected-attentive-learners.webp",
+      "sha256": "c79efcabc1e0c613b9c5f4b4ec00ee1bd0685f8a39fb59e7112b27e8af565951",
+      "width": 2560,
+      "height": 1707,
+      "supplied_source": "casa-student-image.png",
+      "source_sha256": "c45ad8372b6f471dc9dbc7216fc2c482b08e8d4abe9496371f11c94bb4703036",
+      "placement_status": "assigned"
+    },
+    {
+      "file": "learning-speaking-prompt-wide.webp",
+      "sha256": "ae5b0925fb7078c81aeea90049cfde55094ba2c3fa0534ae0bb35b17a7811373",
+      "width": 2400,
+      "height": 1000,
+      "supplied_source": "IMG_0235.JPG",
+      "source_sha256": "8c52acbb40734b0ce3f23afc717396be808721df5f08ec85e81178dd97e502ee",
+      "placement_status": "assigned"
+    }
+  ],
+  "removed_files": [
+    "learners-writing-class.jpg",
+    "course-medical-writing.webp"
+  ],
+  "decisions": [
+    {
+      "item": 1,
+      "page": "/",
+      "section": "Personal story",
+      "decision": "keep-edited-original",
+      "file": "home-class-welcome.webp"
+    },
+    {
+      "item": 2,
+      "page": "/",
+      "section": "Life at CASA · people",
+      "decision": "keep-edited-original",
+      "file": "home-community-breakfast.webp"
+    },
+    {
+      "item": 3,
+      "page": "/",
+      "section": "Group-course row",
+      "decision": "accept-replacement",
+      "file": "selected-bremen-walk.webp"
+    },
+    {
+      "item": 4,
+      "page": "/ueber-uns/casa-leitbild",
+      "section": "Learning / mission section",
+      "decision": "accept-replacement",
+      "file": "learning-ball-exercise.webp"
+    },
+    {
+      "item": 5,
+      "page": "/sprachkurse/deutsch-intensiv",
+      "section": "Supporting story",
+      "decision": "accept-replacement",
+      "file": "selected-pair-study.webp"
+    },
+    {
+      "item": 6,
+      "page": "/sprachkurse/deutsch-fuer-gruppen",
+      "section": "Supporting story",
+      "decision": "keep-edited-original",
+      "file": "group-course-lunch-table.jpg"
+    },
+    {
+      "item": 7,
+      "page": "/sprachkurse/deutsch-fuer-mediziner",
+      "section": "Course lead / overview image",
+      "decision": "accept-replacement",
+      "file": "learning-speaking-prompt.webp"
+    },
+    {
+      "item": 8,
+      "page": "/sprachkurse/deutsch-fuer-mediziner",
+      "section": "Wide lead",
+      "decision": "accept-replacement",
+      "file": "learning-speaking-prompt-wide.webp"
+    },
+    {
+      "item": 9,
+      "page": "/sprachkurse/deutsch-fuer-mediziner",
+      "section": "Supporting story · rejected scene removed",
+      "decision": "accept-replacement",
+      "file": "course-medical-dialogue.webp"
+    },
+    {
+      "item": 10,
+      "page": "/sprachkurse/firmenunterricht",
+      "section": "Course lead / overview image",
+      "decision": "accept-replacement",
+      "file": "learning-group-discussion.webp"
+    },
+    {
+      "item": 11,
+      "page": "/sprachkurse/firmenunterricht",
+      "section": "Wide lead",
+      "decision": "accept-replacement",
+      "file": "learning-group-discussion-wide.webp"
+    },
+    {
+      "item": 12,
+      "page": "/sprachkurse/firmenunterricht",
+      "section": "Supporting story",
+      "decision": "accept-replacement",
+      "file": "learning-collaborative-writing.webp"
+    },
+    {
+      "item": 13,
+      "page": "/sprachkurse/firmenunterricht",
+      "section": "Beside the quotation",
+      "decision": "accept-replacement",
+      "file": "learning-writing-detail.webp"
+    },
+    {
+      "item": 14,
+      "page": "/pruefungszentrum",
+      "section": "Beside the quotation",
+      "decision": "accept-replacement",
+      "file": "learning-dictionary-detail.webp"
+    },
+    {
+      "item": 15,
+      "page": "/pruefungszentrum/telc-deutsch-c1-hochschule",
+      "section": "Phone / card version",
+      "decision": "accept-replacement",
+      "file": "selected-learning-trio-card.webp"
+    },
+    {
+      "item": 16,
+      "page": "/pruefungszentrum/telc-deutsch-c1-hochschule",
+      "section": "Wide lead",
+      "decision": "accept-replacement",
+      "file": "selected-learning-trio.webp"
+    },
+    {
+      "item": 17,
+      "page": "/pruefungszentrum/telc-deutsch-c1-hochschule",
+      "section": "Supporting story",
+      "decision": "accept-replacement",
+      "file": "learning-focused-pair.webp"
+    },
+    {
+      "item": 18,
+      "page": "/ratgeber/warum-deutschland",
+      "section": "Guide lead",
+      "decision": "accept-replacement",
+      "file": "selected-bremen-walk.webp"
+    },
+    {
+      "item": 19,
+      "page": "/ratgeber/studieren-in-deutschland",
+      "section": "Guide lead",
+      "decision": "accept-replacement",
+      "file": "selected-attentive-learners.webp"
+    }
+  ],
+  "pending_placements": [
+    "learning-learner-smile.webp",
+    "learning-friends-heart.webp",
+    "selected-city-phone-task.webp"
+  ]
+}
