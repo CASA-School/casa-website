@@ -21,7 +21,7 @@ SchoolMan (FileMaker Server 26, Mac mini 10.0.60.10, office LAN)
    │  90 Sync_<Table> layouts — base-table fields only, hidden from staff menus
    │  Data API, account WorkspaceSync (Full Access by Rahman's choice; the code only GETs and _finds)
    ▼
-sync service  scripts/schoolman-sync/sync.mjs      runs under launchd on Rahman's Mac (install-mac.sh)
+sync service  scripts/schoolman-sync/sync.mjs      a container on the office server (CT 103), since 2026-10-31
    │  every minute: what changed; every 5 min: the two dotted-change tables whole; every 30 min: tables
    │  without a change field; 02:15: every table whole + its record ids (deletions)
    │  only records whose modId moved are sent, 500 a request, HMAC-signed (SCHOOLMAN_SYNC_KEY)
@@ -77,8 +77,15 @@ bridge-mirror.mjs: the steps whose SchoolMan tables changed → mirror-export.mj
   once (the learners: about an hour) — the job allows two hours.
 - **The old bridge** (`infra/azure/bridge.sh`: read SchoolMan through FileMaker Pro on the office Mac with
   AppleScript, seal, upload, import in Azure) still works and is the way back. It is no longer run.
-- **Not yet:** the service on the office server (Proxmox CT 103, `10.0.60.11`) so the Mac can be off; writing
-  anything into SchoolMan (never without a dedicated account and Rahman's go, docs/FILEMAKER_BRIDGE.md §7).
+- **Where the service runs** (2026-10-31; Rahman: so his Mac can be off): the container `schoolman-sync` on the
+  office's Proxmox server, CT 103 (`claasbook-srv1`, `10.0.60.11`, beside the Klassenbuch), in
+  `/root/docker/schoolman-sync` — image `node:22-bookworm-slim`, user 1000, restarted by Docker, at most 768 MB
+  (it uses about 70). Not on the FileMaker Mac mini: that machine runs only FileMaker, and it is reached only
+  through Rahman's Screen Sharing. The Klassenbuch monitor on CT 103 watches the container
+  (`/etc/klassenbuch-monitor.json`): a stopped container, a restart or a line saying „failed" is mailed to
+  admin@, and the daily report at 07:00 has a line for it.
+- **Not yet:** writing anything into SchoolMan (never without a dedicated account and Rahman's go,
+  docs/FILEMAKER_BRIDGE.md §7).
 
 ## 2. What comes across
 
@@ -176,13 +183,15 @@ and [bridge-gaps.md](bridge-gaps.md) (updated per item: „across since 009x") s
 
 | Task | How |
 | --- | --- |
-| The service's log | `~/Library/Logs/casa-schoolman-sync.log` on Rahman's Mac (counts only) |
-| Restart the service (after a change to sync.mjs or sync-layouts.json) | `launchctl kickstart -k gui/$(id -u)/de.casa-bremen.schoolman-sync` |
-| Install / remove it | `scripts/schoolman-sync/install-mac.sh <FM_CERT_SHA256>` / `--off` (runs from the main checkout `~/Downloads/CASA`) |
-| Its secrets | Keychain items `casa-workspacesync` (WorkspaceSync's password, added by Rahman — never typed or printed by an agent) and `casa-schoolman-sync-key` (= the app secret `schoolman-sync-key` / env `SCHOOLMAN_SYNC_KEY`) |
+| Reach the server | `ssh -i ~/.ssh/casa_klassenbuch_ed25519 root@10.0.60.11` over the office VPN; SSH drops when several connections open in a row, so the scripts keep one open |
+| The service's log | `docker logs schoolman-sync` on CT 103 (counts only; 3 × 5 MB kept) |
+| Update it (after a change to sync.mjs or sync-layouts.json) | `scripts/schoolman-sync/server/deploy.sh` from a checkout of `main`: copies the files, recreates the container |
+| Stop it | `scripts/schoolman-sync/server/deploy.sh --off` |
+| The way back to the Mac | `deploy.sh --off`, copy `/root/docker/schoolman-sync/state/state.json` to `~/.casa-schoolman-sync/`, then `scripts/schoolman-sync/install-mac.sh <FM_CERT_SHA256>`. Never both at once |
+| Its secrets | Files in `/root/docker/schoolman-sync/secrets/` (user 1000, mode 400), put there by Rahman with `scripts/schoolman-sync/server/secrets.sh` straight from his Keychain items `casa-workspacesync` (WorkspaceSync's password) and `casa-schoolman-sync-key` (= the app secret `schoolman-sync-key` / env `SCHOOLMAN_SYNC_KEY`) — never typed or printed by an agent. Rotating: change the Keychain item, run secrets.sh, `docker restart schoolman-sync` |
 | The server certificate pin | `94:10:06:8A:19:88:25:B2:2B:06:50:64:B0:DC:D3:CB:BB:95:0F:C0:24:1B:68:3D:76:A0:0E:C1:8C:AF:66:DC` (the certificate names another machine, so it is pinned) |
-| Its state | `~/.casa-schoolman-sync/state.json`: per table the modIds sent, the newest change seen, a hash of the field list (a layout given more fields is sent whole once) |
-| Read everything again | `node scripts/schoolman-sync/sync.mjs --full` (2½ min locally, 6 min to Azure); one table: `--full --table Letter` |
+| Its state | `/root/docker/schoolman-sync/state/state.json` (on a Mac `~/.casa-schoolman-sync/state.json`): per table the modIds sent, the newest change seen, a hash of the field list (a layout given more fields is sent whole once) |
+| Read everything again | stop the container, then `docker compose run --rm sync --full` in `/root/docker/schoolman-sync` (2½ min locally, 6 min to Azure), start it again; one table: `--full --table Letter`. Never beside the running service: both write the same state |
 | The scheduled job | `infra/azure/schoolman-job.sh` creates it or points it at this checkout's image (builds it like db-job.sh); `--off` removes it. Its logs: Log Analytics, `ContainerAppConsoleLogs_CL | where ContainerJobName_s == 'caj-casa-website-schoolman'` |
 | A release whose migration ALTERs a table the bridge writes (people, letters, staff_notes, bookings …) | stop the running execution, `schoolman-job.sh --off`, `deploy.sh`, `schoolman-job.sh` — an ALTER waits for the bridge's long transaction and blocks every read of that table meanwhile |
 | A release that changes readers/importers only | `deploy.sh` is not needed for the job: `schoolman-job.sh` builds and points the job at the new image |
@@ -241,7 +250,7 @@ A new field of a table already synced:
 | --- | --- |
 | The layouts and their fields | `scripts/filemaker/sync-layouts.json`, [sync-layouts.md](sync-layouts.md) |
 | Layout tools (GUI, read-only except layout design) | `scripts/filemaker/layouts/` |
-| The service | `scripts/schoolman-sync/` (`sync.mjs`, `signature.mjs`, `install-mac.sh`) |
+| The service | `scripts/schoolman-sync/` (`sync.mjs`, `signature.mjs`; `server/` for the office server: `compose.yaml`, `run.sh`, `deploy.sh`, `secrets.sh`; `install-mac.sh` for a Mac) |
 | The endpoint and the copy | `src/app/api/schoolman/sync/route.ts`, `src/lib/schoolman/`, migration 0090 |
 | The bridge from the copy | `scripts/filemaker/bridge-mirror.mjs`, `mirror-export.mjs`, `bridge-run.mjs`, `fm_read.py` (`FM_MIRROR`) |
 | The steps | `scripts/filemaker/bridge-steps.mjs`, `read_*.py`, `import-*.mjs`, `sample.py`, `bridge-changes.mjs` |
@@ -250,7 +259,6 @@ A new field of a table already synced:
 
 ## 9. Still to do
 
-- Move the service to the office server (CT 103) so Rahman's Mac can be off.
 - Rahman's answers to §3's decisions, then their mappings.
 - Remove the one-run transition in `import-learners.mjs` (`vocabulariesBefore`) once a run has passed with it.
 - The e2e follow-ups (course list after the back-link change, offers on start days, the staff contract test).

@@ -185,7 +185,7 @@ Paste this to a new agent, with the unit's id:
 | Photo modernisation, local review | Codex | `~/.codex/worktrees/bettina-portrait/CASA`, branch `codex/photo-modernisation-local`; owns photo files under `public/media/casa/` until it lands |
 | Statistics: registration step counts (PR #214) privacy review | Codex | switched off (`REGISTRATION_METRICS`) |
 | Statistics navigation link | Codex | branch `codex/statistics-navigation`, release pending |
-| SchoolMan sync and bridge | Rahman's Mac service + the Azure job | `docs/schoolman/MIGRATION.md` |
+| SchoolMan sync and bridge | the service on the office server (CT 103) + the Azure job | `docs/schoolman/MIGRATION.md` |
 | CASA-Förderverein website | separate repository | `~/Code/local/casa-foerderverein` |
 | Klassenbuch | separate repository | `~/Code/local/casa-klassenbuch` |
 

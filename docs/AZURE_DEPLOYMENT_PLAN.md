@@ -232,7 +232,8 @@ Beside the app (docs/schoolman/MIGRATION.md):
 
 - **App secret `schoolman-sync-key`**, env `SCHOOLMAN_SYNC_KEY=secretref:schoolman-sync-key` on
   `ca-casa-website`: signs what the sync service sends to `/api/schoolman/sync`. The same key is the Keychain
-  item `casa-schoolman-sync-key` on the Mac that runs the service. Rotate both together.
+  item `casa-schoolman-sync-key` on Rahman's Mac and, copied from it, a file of the service on the office
+  server (`scripts/schoolman-sync/server/secrets.sh`). Rotate all three together.
 - **Job `caj-casa-website-schoolman`** in `rg-casa-website-prod` on `cae-casa-prod`: started by the website when
   the copy of SchoolMan changed, and by its schedule `7 * * * *` (hourly) as a fallback; 0.75 vCPU / 1.5 GiB (was
   every five minutes at 1 vCPU / 2 GiB until 2026-10-28, about €1 a day), replica timeout 7200 s, no retries,

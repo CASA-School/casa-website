@@ -647,8 +647,8 @@ sends only records whose `modId` moved since it last sent them, 500 per request,
 `SCHOOLMAN_SYNC_KEY` (HMAC over time and body; five minutes' grace). The password and the key come from the
 environment or, on a Mac, the Keychain (`casa-workspacesync`, `casa-schoolman-sync-key`); the server's
 certificate names another machine, so it is pinned by its fingerprint (`FM_CERT_SHA256`). The log holds
-counts, never a value. It runs on Rahman's Mac until the container on the office server (CT 103) exists;
-the Mac must be on, FileMaker Pro need not be open.
+counts, never a value. It runs as a container on the office server (CT 103, since 2026-10-31,
+`scripts/schoolman-sync/server/`); FileMaker Pro need not be open anywhere.
 
 **The copy** (`schoolman_records`, migration 0090). One row per SchoolMan record — the Data API's record id,
 its modification count and the layout's fields as JSON; `updated_at` moves only when the fields did.

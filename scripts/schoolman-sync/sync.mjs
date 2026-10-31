@@ -163,7 +163,7 @@ async function tick() {
     body,
     tls: false,
   }).catch((error) => ({ status: 0, json: { error: { message: error.message } } }));
-  if (r.status !== 200) log(`tick: HTTP ${r.status} ${r.json?.error?.code ?? r.json?.error?.message ?? ''}`);
+  if (r.status !== 200) log(`tick failed: HTTP ${r.status} ${r.json?.error?.code ?? r.json?.error?.message ?? ''}`);
 }
 
 // What was sent last time, per table and record: its modId. Only records whose modId moved are sent.
@@ -260,7 +260,8 @@ async function round(full) {
       for (const k of Object.keys(totals)) totals[k] += r[k];
       if (r.sent || r.removed) log(`${table}: ${r.read} read, ${r.sent} sent, ${r.changed} changed, ${r.removed} removed`);
     } catch (error) {
-      log(`${table}: ${error.message}`);
+      // „failed": the office server's monitor mails a line that says so (scripts/schoolman-sync/server).
+      log(`${table} failed: ${error.message}`);
     }
   }
   log(`${full ? 'complete' : 'changes'}: ${totals.read} read, ${totals.sent} sent, ${totals.changed} changed, ${totals.removed} removed in ${Math.round((Date.now() - started) / 1000)} s`);
