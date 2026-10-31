@@ -269,6 +269,12 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t(`hat die Verknüpfung mit der SchoolMan-Buchung ${String(entry.detail?.number ?? '')} gelöst`, `unlinked SchoolMan booking ${String(entry.detail?.number ?? '')}`);
     case 'registration_link_dismissed':
       return t('hat eine SchoolMan-Buchung als nicht dieselbe markiert', 'marked a SchoolMan booking as not the same');
+    case 'registration_person_confirmed':
+      return t(`hat die Person als ${String(entry.detail?.name ?? '')} erkannt`, `recognised the person as ${String(entry.detail?.name ?? '')}`);
+    case 'registration_person_new':
+      return t('hat die Person neu angelegt', 'added the person as new');
+    case 'registration_person_separated':
+      return t(`hat die Person von ${String(entry.detail?.name ?? '')} getrennt`, `separated the person from ${String(entry.detail?.name ?? '')}`);
     case 'cv_downloaded':
       return t(`hat den Lebenslauf zu ${dat} heruntergeladen`, `downloaded the CV on ${subject}`);
     case 'person_created':

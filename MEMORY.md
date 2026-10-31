@@ -2976,3 +2976,24 @@ as a second person, and the Anmeldung stays open though it is booked. Migration 
   before the registration are only asked.
 - docs/ADMIN_WORKSPACE.md §Website registrations and SchoolMan bookings.
 
+
+## 61. Who sent a registration, its places, and a wizard that asks only what fits (2026-10-31)
+
+Rahman, after seeing pass 60 and the wizard on a preparation course offering every level: the team's journey
+is find the person (by first and last name, in FileMaker), check the places, book; the SchoolMan comparison is
+temporary and belongs inside the person check; the wizard must offer only what fits the course.
+
+- **Person check** on every Anmeldung: `personCandidates()` (SQL narrows: address, phone, name parts, birthday)
+  + `judgeMatch()` (pure rule, `person-match-rules.ts`: typos, swapped names, double surnames, nicknames, day and
+  month exchanged, phone with or without country code; another birthday = another person, so siblings stay
+  *möglich*). The rail's „Person" card says *Schon bei CASA?* / *Neu bei CASA?*; „Vergleichen" opens a side panel
+  with a search and the fields side by side; „Das ist …" links the website's person into theirs, „Neue Person
+  anlegen" lists them; „Trennen" undoes. The SchoolMan card is gone: its bookings show under their person in the
+  panel, and the line says „In SchoolMan gebucht?".
+- **Places** on each open course line: a meter, „3 von 14 Plätzen frei", the waiting count.
+- **Wizard**: from a registration only its kind of course and, of a kind with several, the course asked for;
+  levels are the start's own (`levelsOf`), each with its free places, the asked one marked; a start of named
+  courses (preparation course, module) skips the level step.
+- Bug found on the way: `linkPerson` passed a parameter its flags query never read, so Postgres refused every
+  „Dieselbe Person" since 0007. Fixed.
+- docs/ADMIN_WORKSPACE.md §Who sent a registration.

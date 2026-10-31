@@ -4,29 +4,20 @@ import { notFound } from 'next/navigation';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { WaitlistForm } from '../../catalogue/waitlist-forms';
-import {
-  bookRegistrationAction,
-  dismissSchoolmanBookingAction,
-  editRegistrationAction,
-  linkSchoolmanBookingAction,
-  resolveRegistrationDeliveryAction,
-  setLineDeclinedAction,
-  unlinkSchoolmanBookingAction,
-} from '../actions';
+import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction, unlinkSchoolmanBookingAction } from '../actions';
 import { courseNameResolver } from '../course-names';
 import { formatDay, formatRange, parseOptionLabel, type ParsedOption } from '../option-label';
+import { RegistrationPersonCard } from './person-card';
 import { examLevel, levelWord, registrationChecks, registrationTitle, type RegistrationCheck } from '../summary';
 import { DateFormField } from '@/components/admin/date-picker';
 import { DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { LetterList } from '@/components/admin/letters/letter-list';
-import { PersonPanel } from '@/components/admin/person-panel';
 import { FactGrid, MetaItem, MetaLine, OwnerControl, StatusBar, SubmissionCard, Timeline } from '@/components/admin/record-parts';
 import { RowActions, type RowAction } from '@/components/admin/row-actions';
 import { Badge, BirthDate, Button, ButtonLink, Card, DetailList, Field, Input, RecordHeader, Select, Textarea } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
-import { shortDay } from '@/lib/admin/days';
 import { bookingOffer, stayVocabulary } from '@/lib/admin/booking-offer';
 import { levelFree, levelPlaces } from '@/lib/admin/booking-offer-types';
 import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
@@ -41,9 +32,11 @@ import { lettersForRegistration } from '@/lib/admin/letters/repo';
 import { mailHref } from '@/lib/admin/mail/href';
 import { listNotes } from '@/lib/admin/notes';
 import { learnerHistory } from '@/lib/admin/offers/course-catalogue';
-import { findDuplicateCandidates, getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
+import { getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
+import { describePeople, personCandidates } from '@/lib/admin/person-match';
 import { getRegistration, registrationTypeLabel, type LineOutcome, type RegistrationCourseLine, type RegistrationExamLine } from '@/lib/admin/registrations';
-import { schoolmanCandidates, type SchoolmanCandidate } from '@/lib/admin/registration-schoolman';
+import { registrationFacts } from '@/lib/admin/registration-person';
+import { schoolmanCandidates } from '@/lib/admin/registration-schoolman';
 import { inTheirLanguage } from '@/lib/admin/reply';
 import { listAssignableStaff } from '@/lib/admin/staff';
 import { startLevelPlaces } from '@/lib/admin/waitlist';
@@ -70,6 +63,8 @@ type Line = (RegistrationCourseLine | RegistrationExamLine) & {
   option: ParsedOption | null;
   /** A course's free places at its level in its start; null where there is no start or no level. */
   free: number | null;
+  /** That course's places, booked and waiting, for the meter. */
+  group: { places: number; booked: number; waiting: number; closed: boolean } | null;
 };
 
 const isOpen = (outcome: LineOutcome) => outcome.kind !== 'booked' && outcome.kind !== 'declined';
@@ -88,7 +83,7 @@ export default async function RegistrationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string; unlink?: string }>;
+  searchParams: Promise<{ error?: string; notice?: string; book?: string; queue?: string; decline?: string; unlink?: string; person?: string }>;
 }) {
   const [{ id }, query, user] = await Promise.all([params, searchParams, requireModule('registrations')]);
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
@@ -109,12 +104,14 @@ export default async function RegistrationPage({
   const lines: Line[] = [
     ...registration.courses.map((c) => {
       const places = c.courseInstanceId ? placesByStart.get(c.courseInstanceId) : undefined;
+      const level = places && c.declaredLevelCode ? levelPlaces({ levels: places }, c.declaredLevelCode) : null;
       return {
         ...c,
         name: courseName(c.courseTypeLabel, c.courseTypeId) ?? t('Kurs', 'Course'),
         detail: c.declaredLevelRaw?.trim() || c.declaredLevelCode,
         option: parseOptionLabel(c.courseInstanceLabel),
-        free: places && c.declaredLevelCode ? levelFree(levelPlaces({ levels: places }, c.declaredLevelCode), personId ?? undefined) : null,
+        free: level ? levelFree(level, personId ?? undefined) : null,
+        group: level ? { places: level.places, booked: level.booked + level.offered, waiting: level.queue.length, closed: Boolean(level.closed) } : null,
       };
     }),
     ...registration.exams.map((e) => ({
@@ -123,6 +120,7 @@ export default async function RegistrationPage({
       detail: registrationTypeLabel(e.registrationType, lang),
       option: parseOptionLabel(e.examSessionLabel),
       free: null,
+      group: null,
     })),
   ].sort((a, b) => (a.option?.start?.getTime() ?? Infinity) - (b.option?.start?.getTime() ?? Infinity));
 
@@ -152,20 +150,16 @@ export default async function RegistrationPage({
     canBook && (query.book || query.queue) ? bookingOffer() : null,
     canBook && registration.stay?.accommodationRequired && bookable.length ? stayVocabulary() : null,
     canBook && personId && bookable.length ? learnerHistory(personId).catch(() => null) : null,
-    // „In SchoolMan gebucht?" (0113): the SchoolMan bookings that may have been made from an open line.
+    // The SchoolMan bookings that may have been made from an open line (0113), while SchoolMan still books.
     open.length ? schoolmanCandidates(registration.id) : [],
   ]);
-  const [candidates, confirmed] = person
-    ? await Promise.all([
-        findDuplicateCandidates({
-          email: registration.contact.email,
-          lastName: registration.contact.lastName,
-          birthDate: toDateInputValue(registration.contact.birthDate) || null,
-          excludePersonId: person.id,
-        }),
-        latestConfirmedLevel(person.canonicalId),
-      ])
-    : [[], null];
+  // Who sent it (2026-10-31): the people at CASA it may be, found in the background, and the one it is once decided.
+  const facts = registrationFacts(registration.contact);
+  const [suggestions, linked, confirmed] = await Promise.all([
+    personId ? personCandidates(facts, { excludeId: personId, include: inSchoolman.map((c) => c.personId) }) : [],
+    person && person.canonicalId !== person.id ? describePeople([person.canonicalId], facts).then((found) => found[0] ?? null) : null,
+    person ? latestConfirmedLevel(person.canonicalId) : null,
+  ]);
 
   const { contact, stay } = registration;
   const deliveryFlags = flags.filter((flag) => !flag.resolvedAt && (flag.code === 'registration_staff_notice_unconfirmed' || flag.code === 'registration_receipt_unconfirmed'));
@@ -364,6 +358,12 @@ export default async function RegistrationPage({
                       </p>
                       <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[0.76rem] text-[var(--casa-muted)]">
                         {lineFacts(line, t)}
+                        {isOpen(line.outcome) && inSchoolman.some((c) => c.lineId === line.id) ? (
+                          // A booking in SchoolMan that may be this line's: compared in the person panel.
+                          <Link href={`${here}?person=1`} className="hover:opacity-80">
+                            <Badge tone="accent">{t('In SchoolMan gebucht?', 'Booked in SchoolMan?')}</Badge>
+                          </Link>
+                        ) : null}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
@@ -519,8 +519,6 @@ export default async function RegistrationPage({
             ) : null}
           </SubmissionCard>
 
-          {inSchoolman.length ? <InSchoolman candidates={inSchoolman} lines={lines} registrationId={registration.id} canEdit={canEdit} t={t} lang={lang} /> : null}
-
           {deliveryFlags.length ? (
             <Card title={t('E-Mail-Versand prüfen', 'Check email delivery')} icon={Icon.attention} tint="sun">
               <p className="mb-3 text-sm">{t('Der Versand wurde nicht bestätigt. Prüfe die Anmeldung und kontaktiere die Person bei Bedarf. Markiere den Hinweis erst nach der Prüfung als erledigt.', 'Delivery was not confirmed. Review the registration and contact the applicant if needed. Mark each item done after checking it.')}</p>
@@ -672,7 +670,33 @@ export default async function RegistrationPage({
         </div>
 
         <div className="space-y-4">
-          <PersonPanel person={person} candidates={candidates} flags={flags.filter((flag) => flag.code !== 'registration_staff_notice_unconfirmed' && flag.code !== 'registration_receipt_unconfirmed')} returnTo={here} canList={canAccess(user, 'people', 'edit')} />
+          <RegistrationPersonCard
+            registrationId={registration.id}
+            firstName={contact.firstName}
+            sent={{ name: fullName, birthDate: toDateInputValue(contact.birthDate) || null, email: contact.email, phone: contact.phone, nationality: contact.nationalityName ?? (contact.nationalityRaw || null) }}
+            person={person}
+            suggestions={suggestions}
+            linked={linked}
+            schoolman={inSchoolman.map((c) => {
+              const line = lines.find((l) => l.id === c.lineId);
+              const from = c.from ? new Date(`${c.from}T00:00:00Z`) : null;
+              return {
+                personId: c.personId,
+                bookingId: c.bookingId,
+                number: c.bookingNumber,
+                what: c.what,
+                when: from ? (c.lineKind === 'exam' ? formatDay(from, lang, true) : formatRange(from, c.to ? new Date(`${c.to}T00:00:00Z`) : null, lang)) : null,
+                line: line ? lineName(line) : t('eine Position', 'a line'),
+                lineId: c.lineId,
+                lineKind: c.lineKind,
+                exact: c.exact,
+                bookedAfter: c.bookedAfter,
+              };
+            })}
+            flags={flags.filter((flag) => flag.code !== 'registration_staff_notice_unconfirmed' && flag.code !== 'registration_receipt_unconfirmed')}
+            canEdit={canEdit}
+            openPanel={query.person === '1'}
+          />
           {/* Before there is a booking: the down payment or the placement test (docs/LETTERS.md); after it, one confirmation of every booking. */}
           <Card
             title={t('Briefe', 'Letters')}
@@ -745,11 +769,26 @@ function lineFacts(line: Line, t: T) {
       </>
     );
   }
-  if (line.free === null || !isOpen(line.outcome)) return line.option?.location ?? null;
-  return line.free === 0 ? (
-    <Badge tone="warning">{t('Niveau voll', 'Level full')}</Badge>
-  ) : (
-    <span>{line.free === 1 ? t('1 Platz frei', '1 place free') : t(`${line.free} Plätze frei`, `${line.free} places free`)}</span>
+  if (line.free === null || !line.group || !isOpen(line.outcome)) return line.option?.location ?? null;
+  const { places, booked, waiting, closed } = line.group;
+  // The level's course in that start, as the team checks it before booking: how full, and who waits.
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span aria-hidden="true" className="relative h-1.5 w-14 overflow-hidden rounded-full bg-[#e6ebf2]">
+        <span
+          className={cn('absolute inset-y-0 left-0 rounded-full', line.free === 0 ? 'bg-[#d99a00]' : line.free <= 2 ? 'bg-[#e0b24a]' : 'bg-[#2f9e5b]')}
+          style={{ width: `${Math.min(100, Math.round((booked / Math.max(places, 1)) * 100))}%` }}
+        />
+      </span>
+      {closed ? (
+        <Badge tone="warning">{t('Niveau geschlossen', 'Level closed')}</Badge>
+      ) : line.free === 0 ? (
+        <Badge tone="warning">{t('Niveau voll', 'Level full')}</Badge>
+      ) : (
+        <span className="tabular-nums">{t(`${line.free} von ${places} Plätzen frei`, `${line.free} of ${places} places free`)}</span>
+      )}
+      {waiting ? <span>{t(`· ${waiting} auf der Warteliste`, `· ${waiting} waiting`)}</span> : null}
+    </span>
   );
 }
 
@@ -839,96 +878,3 @@ function OriginalValues({ original, current, lang }: { original: Record<string, 
     </Card>
   );
 }
-
-/** Why a SchoolMan booking is offered as the line's: what agrees, and what does not. */
-function candidateReasons(c: SchoolmanCandidate, t: T): { text: string; tone: 'positive' | 'warning' | 'neutral' }[] {
-  return [
-    ...(c.samePerson ? [{ text: t('dieselbe Person', 'the same person'), tone: 'positive' as const }] : []),
-    ...(c.byEmail ? [{ text: t('gleiche E-Mail', 'same email'), tone: 'positive' as const }] : []),
-    ...(c.byName ? [{ text: t('gleicher Name', 'same name'), tone: 'positive' as const }] : []),
-    ...(c.byBirth ? [{ text: t('gleiches Geburtsdatum', 'same date of birth'), tone: 'positive' as const }] : []),
-    c.exact
-      ? { text: c.lineKind === 'exam' ? t('gleicher Prüfungstermin', 'same sitting') : t('gleicher Termin', 'same start'), tone: 'positive' as const }
-      : { text: c.lineKind === 'exam' ? t('anderer Prüfungstermin', 'another sitting') : t('anderer Termin', 'another start'), tone: 'warning' as const },
-    ...(c.bookedAfter ? [] : [{ text: t('vor der Anmeldung gebucht', 'booked before the registration'), tone: 'warning' as const }]),
-  ];
-}
-
-/**
- * „In SchoolMan gebucht?" (0113): the bookings a colleague made in SchoolMan that may be an open line's.
- * What the bridge was sure of is linked already; these it leaves to a colleague: „Verknüpfen" settles the
- * line and makes the two people one, „Nicht dieselbe" stops asking.
- */
-function InSchoolman({
-  candidates,
-  lines,
-  registrationId,
-  canEdit,
-  t,
-  lang,
-}: {
-  candidates: readonly SchoolmanCandidate[];
-  lines: readonly Line[];
-  registrationId: string;
-  canEdit: boolean;
-  t: T;
-  lang: WsLang;
-}) {
-  const day = (value: string | null) => (value ? new Date(`${value}T00:00:00Z`) : null);
-  return (
-    <Card title={t('In SchoolMan gebucht?', 'Booked in SchoolMan?')} icon={Icon.bookings} tint="blue">
-      <ul className="divide-y divide-ws-line-soft">
-        {candidates.map((c) => {
-          const line = lines.find((l) => l.id === c.lineId);
-          const from = day(c.from);
-          return (
-            <li key={`${c.lineId}-${c.bookingId}`} className="flex flex-wrap items-start gap-x-4 gap-y-3 py-3.5 first:pt-0 last:pb-0">
-              <div className="min-w-0 flex-1">
-                <p className="text-[0.92rem] font-semibold text-[var(--casa-ink)]">
-                  <Link href={`/admin/bookings/${c.bookingId}`} className="hover:underline">
-                    {c.bookingNumber}
-                  </Link>
-                  {c.what ? <span className="font-normal text-[#2b3546]"> · {c.what}</span> : null}
-                  {from ? <span className="font-normal text-[#2b3546]"> · {c.lineKind === 'exam' ? formatDay(from, lang, true) : formatRange(from, day(c.to), lang)}</span> : null}
-                </p>
-                <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
-                  {c.learnerName} · {t('in SchoolMan angelegt am', 'made in SchoolMan on')} {shortDay(c.bookedAt, lang)}
-                  {line ? ` · ${t('für', 'for')} ${lineName(line)}` : ''}
-                </p>
-                <p className="mt-2 flex flex-wrap gap-1.5">
-                  {candidateReasons(c, t).map((reason) => (
-                    <Badge key={reason.text} tone={reason.tone}>
-                      {reason.text}
-                    </Badge>
-                  ))}
-                </p>
-              </div>
-              {canEdit ? (
-                <div className="flex shrink-0 items-center gap-2">
-                  <form action={dismissSchoolmanBookingAction}>
-                    <input type="hidden" name="id" value={registrationId} />
-                    <input type="hidden" name="lineId" value={c.lineId} />
-                    <input type="hidden" name="bookingId" value={c.bookingId} />
-                    <Button type="submit" variant="ghost" size="sm">
-                      {t('Nicht dieselbe', 'Not the same')}
-                    </Button>
-                  </form>
-                  <form action={linkSchoolmanBookingAction}>
-                    <input type="hidden" name="id" value={registrationId} />
-                    <input type="hidden" name="lineId" value={c.lineId} />
-                    <input type="hidden" name="bookingId" value={c.bookingId} />
-                    <input type="hidden" name="kind" value={c.lineKind} />
-                    <Button type="submit" variant="secondary" size="sm">
-                      {t('Verknüpfen', 'Link')}
-                    </Button>
-                  </form>
-                </div>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
-    </Card>
-  );
-}
-
