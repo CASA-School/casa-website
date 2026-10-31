@@ -36,9 +36,11 @@ test('the intensive course books a whole level and a learning path from one choi
 
 test('the C1 Hochschule page books its preparation course: the form opens on it, under its exam, without a level', async ({ page }) => {
   await page.goto('/pruefungszentrum/telc-deutsch-c1-hochschule');
-  const book = page.getByRole('link', { name: 'Zum Vorbereitungskurs anmelden' });
-  test.skip(!(await book.count()), 'No C1 Hochschule preparation is open for registration right now.');
-  await book.click();
+  const dates = page.locator('section', { has: page.getByRole('heading', { name: 'Termine des Vorbereitungskurses' }) });
+  test.skip(!(await dates.count()), 'No C1 Hochschule preparation is open for registration right now.');
+  // Each course is said with the exam it leads to.
+  await expect(dates.locator('[aria-live="polite"]')).toContainText('Prüfung am');
+  await dates.getByRole('link', { name: 'Anmelden' }).click();
 
   await expect(page).toHaveURL(/\/anmeldung\/anmeldeformular\?courseId=/);
   await expect(page.locator('label', { has: page.locator('input[name="course-0-type"]:checked') })).toContainText('Prüfungsvorbereitung');

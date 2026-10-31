@@ -17,7 +17,9 @@ import { createPublicMetadata } from '@/lib/seo';
 import { getCasaContact } from '@/config/content/contacts';
 import { getExamFees } from '@/config/content/exam-fees';
 import { publishedPrices } from '@/lib/content/published-prices.server';
-import { preparationCoursesSentence } from '@/config/content/exam-preparation-courses';
+import { CourseTermTable, type CourseTermDate } from '@/components/courses/course-term-table';
+import { bremenDate } from '@/lib/appointments/schedule';
+import { scheduleLine } from '@/lib/registration/term-format';
 import { intl, pickTree, say } from '@/lib/cms/copy';
 
 type ExamDetailPageProps = {
@@ -163,17 +165,33 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
     : isC1
       ? say(locale, 'Die Prüfung ist immer an einem Freitag und dauert etwa von 8:30 bis 17 Uhr. Komm rechtzeitig und bring deine Unterlagen mit.', 'The exam is always on a Friday and runs from about 08:30 to 17:00. Arrive in good time and bring your documents with you.')
       : say(locale, 'Komm rechtzeitig und bring deine Unterlagen mit.', 'Arrive in good time and bring your documents with you.');
-  // The next preparation courses the registration form offers (SchoolMan's, through the bridge), as
-  // casa-bremen.de listed them on its C1 page. Built from the dates, so it is shown first and never
-  // offered for editing; the button opens the form on the first of them.
+  /*
+   * The preparation courses the registration form offers (SchoolMan's, through the bridge), in the
+   * course pages' date card (2026-10-31): a sentence of three date ranges in a bullet was hard to
+   * read. Each course is said with the exam day it leads to, the first sitting after it ends.
+   */
   const preparationTerms = isB2 || isC1 ? await getPreparationTerms(isC1 ? 'telc_c1_hochschule' : 'telc_b2', locale) : [];
-  const nextPreparationLine = [preparationCoursesSentence(preparationTerms.slice(0, 3), locale)].filter((line): line is string => Boolean(line));
-  const preparationCtas: Array<{ label: string; href: string; kind: 'primary' | 'secondary' }> = !(isB2 || isC1)
-    ? []
-    : preparationTerms.length > 0
-      ? [{ label: say(locale, 'Zum Vorbereitungskurs anmelden', 'Register for the preparation course'), href: `/registration/course?courseId=${encodeURIComponent(preparationTerms[0].id)}`, kind: 'primary' }]
-      : [{ label: say(locale, 'Nach dem nächsten Kurs fragen', 'Ask about the next course'), href: '/contact?topic=course-advice', kind: 'secondary' }];
-  const preparationCopy = isC1
+  const examAfter = (end: string) => detail.sessions.find((sitting) => bremenDate(new Date(sitting.starts_at)) > end);
+  const preparationDates: CourseTermDate[] = preparationTerms.map((term) => {
+    const exam = examAfter(term.endDate);
+    return {
+      id: term.id,
+      start: term.startDate,
+      end: term.endDate,
+      href: `/registration/course?courseId=${encodeURIComponent(term.id)}`,
+      joinable: false,
+      days: '',
+      levels: [],
+      note: exam ? say(locale, 'Prüfung am {date}', 'Exam on {date}', { date: formatDate(exam.starts_at, locale) }) : undefined,
+    };
+  });
+  const preparationSchedules = [...new Set(preparationTerms.map((term) => scheduleLine(term.schedule, locale)))];
+  // With none ahead the page says so where the dates would be, and offers to ask.
+  const preparationCtas: Array<{ label: string; href: string; kind: 'primary' | 'secondary' }> =
+    (isB2 || isC1) && preparationTerms.length === 0
+      ? [{ label: say(locale, 'Nach dem nächsten Kurs fragen', 'Ask about the next course'), href: '/contact?topic=course-advice', kind: 'secondary' }]
+      : [];
+  const preparation = isC1
     ? pickTree(locale, {
         de: {
           title: 'Der Vorbereitungskurs',
@@ -239,7 +257,6 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
             ],
           },
         });
-  const preparation = { ...preparationCopy, bullets: [...nextPreparationLine, ...preparationCopy.bullets] };
 
   // The url used to be the internal `/exams/b2`, not the page's address.
   const examSchema = examGraph({
@@ -340,6 +357,19 @@ export default async function ExamDetailPage({ params, searchParams }: ExamDetai
                 photo={examStoryPhoto}
                 ctas={preparationCtas}
               />
+
+              {preparationDates.length > 0 ? (
+                <CourseTermTable
+                  title={say(locale, 'Termine des Vorbereitungskurses', 'Preparation course dates')}
+                  dates={preparationDates}
+                  levels={[]}
+                  // The days and hours, said once where the courses share them.
+                  scheduleNote={preparationSchedules.length === 1 ? preparationSchedules[0] : ''}
+                  levelSpan={null}
+                  datesAreTerms
+                  locale={locale}
+                />
+              ) : null}
 
               <ProcessSteps
                 eyebrow={say(locale, 'Anmeldung', 'Registration')}

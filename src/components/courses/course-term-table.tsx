@@ -22,6 +22,8 @@ export type CourseTermDate = {
   days: string;
   /** The levels this start offers, as the level pills' values (lib/registration/levels `offeredLevels`). */
   levels: string[];
+  /** Said after the chosen term's dates: an exam preparation's exam day, „Prüfung am 5. Februar 2027". */
+  note?: string;
 };
 
 /** A level to choose: "B1", or a half "A1.1" with the level it belongs to, so halves sit in pairs. */
@@ -39,6 +41,7 @@ export type CourseTermLevel = { label: string; value: string; level: string };
  * Pills, not tiles or dropdowns; selected is the ink fill the site's primary buttons use.
  */
 export function CourseTermTable({
+  title,
   dates,
   levels,
   scheduleNote,
@@ -47,6 +50,8 @@ export function CourseTermTable({
   locale,
   note,
 }: {
+  /** „Kurstermine" unless the page names what the dates are of (an exam page: the preparation course's). */
+  title?: string;
   dates: CourseTermDate[];
   levels: CourseTermLevel[];
   /** How the course is timed, said once: „Vormittags (Mo–Fr, 09:00–12:30) oder nachmittags …". */
@@ -99,7 +104,7 @@ export function CourseTermTable({
 
   return (
     <section>
-      <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{say(locale, 'Kurstermine', 'Course dates')}</h2>
+      <h2 className="text-2xl font-bold leading-tight text-[var(--casa-ink)] sm:text-3xl">{title ?? say(locale, 'Kurstermine', 'Course dates')}</h2>
 
       <div className="mt-7 rounded-2xl bg-white p-5 shadow-[var(--shadow-card)] sm:p-8">
         {tabs.length > 1 ? (
@@ -202,6 +207,7 @@ export function CourseTermTable({
                 ? termRange(date.start, date.end, locale)
                 : say(locale, 'ab {date}', 'from {date}', { date: formatStart(date.start, locale) })}
             {levelSpan && levelLabel ? <span className="text-[var(--casa-muted)]"> · {levelSpan}</span> : null}
+            {date.note ? <span className="text-[var(--casa-muted)]"> · {date.note}</span> : null}
           </p>
           <Button asChild variant="prism" size="lg" className="shrink-0">
             <Link href={href}>
