@@ -147,9 +147,25 @@ export function BookingWizardClient({
   const presetWeeks = presetBz ? [] : joinableWeeks(preselected, today);
   const presetJoinGiven = presetWeeks.some((w) => w.monday === preselectedJoinFrom);
   const presetJoin = presetJoinGiven ? (preselectedJoinFrom ?? null) : defaultJoin(presetWeeks, today);
+  // A start of named courses (a preparation course, a module) teaches no level: nothing to ask about one.
+  const presetLevelless = Boolean(preselected && !presetBz && levelsOf(preselected, offer.levels).length === 0);
   const [step, setStep] = useState<Step>(
-    presetBz ? 'course' : preselected ? (presetWeeks.length && !presetJoinGiven ? 'course' : 'level') : presetExam ? 'sitting' : 'what'
+    presetBz
+      ? 'course'
+      : preselected
+        ? presetWeeks.length && !presetJoinGiven
+          ? 'course'
+          : presetLevelless
+            ? 'accommodation'
+            : 'level'
+        : presetExam
+          ? 'sitting'
+          : 'what'
   );
+  // From a registration or a course the kind of course is known: its starts alone, the others on request.
+  const [allTypes, setAllTypes] = useState(!preselected);
+  // And of that kind, the course asked for (telc C1 Hochschule, not B2): its starts, the rest on request.
+  const [allStarts, setAllStarts] = useState(!preselected);
   const [kind, setKind] = useState<'course' | 'exam'>(presetExam ? 'exam' : 'course');
   const [courseTypeId, setCourseTypeId] = useState<string | null>(
     preselected?.courseTypeId ?? null
@@ -171,7 +187,7 @@ export function BookingWizardClient({
   );
 
   const [joinFrom, setJoinFrom] = useState<string | null>(presetJoin);
-  const presetLevel = preselectedLevelCode ?? preselected?.levelCode ?? null;
+  const presetLevel = presetLevelless ? null : (preselectedLevelCode ?? preselected?.levelCode ?? null);
   const [levelCode, setLevelCode] = useState<string | null>(() => stepForJoin(presetLevel, presetBz ? null : preselected, presetJoin, offer.levels));
   // The step was moved to `.2` by the week chosen, not by a colleague: a week back in the first half moves it back.
   const [autoSecond, setAutoSecond] = useState(() => stepForJoin(presetLevel, presetBz ? null : preselected, presetJoin, offer.levels) !== presetLevel);
@@ -260,7 +276,10 @@ export function BookingWizardClient({
     }
   };
 
-  const visible = steps(t).filter((s) => (kind === 'exam' ? EXAM_STEPS : COURSE_STEPS).includes(s.key));
+  // The levels the chosen start teaches; none for a start of named courses, whose level step is skipped.
+  const choices = useMemo(() => levelsOf(cohort, offer.levels), [cohort, offer.levels]);
+  const asksLevel = isBz || !cohort || choices.length > 0;
+  const visible = steps(t).filter((s) => (kind === 'exam' ? EXAM_STEPS : COURSE_STEPS).includes(s.key) && (s.key !== 'level' || asksLevel));
   const index = visible.findIndex((s) => s.key === step);
   const canAdvance =
     (step === 'what' && (kind === 'course' || (kind === 'exam' && Boolean(examTypeId)))) ||
@@ -376,8 +395,8 @@ export function BookingWizardClient({
       {step === 'course' ? (
         <section className="space-y-3">
           <Question>{t('Welche Kursart?', 'Which kind of course?')}</Question>
-          <div className="flex flex-wrap gap-2">
-            {offer.courseTypes.map((type) => (
+          <div className="flex flex-wrap items-center gap-2">
+            {offer.courseTypes.filter((type) => allTypes || !courseTypeId || type.id === courseTypeId).map((type) => (
               <button
                 key={type.id}
                 type="button"
@@ -405,6 +424,15 @@ export function BookingWizardClient({
                 </span>
               </button>
             ))}
+            {!allTypes && courseTypeId && offer.courseTypes.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => setAllTypes(true)}
+                className="rounded-lg px-2 py-1.5 text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+              >
+                {t('Andere Kursart', 'Another kind')}
+              </button>
+            ) : null}
           </div>
 
           {isBz && bz ? (
@@ -442,7 +470,7 @@ export function BookingWizardClient({
             <div className="space-y-2 border-t border-ws-line-soft pt-4">
               <Question small>{t('Welcher Termin?', 'Which one?')}</Question>
               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                {(offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts ?? []).map((c) => (
+                {startsOf(offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts ?? [], allStarts ? null : preselected).map((c) => (
                   <Choice
                     key={c.id}
                     selected={cohort?.id === c.id}
@@ -454,7 +482,8 @@ export function BookingWizardClient({
                       setCohort(c);
                       setJoinFrom(monday);
                       setAutoSecond(moved !== base);
-                      if (moved) chooseLevel(moved, c);
+                      if (levelsOf(c, offer.levels).length === 0) setLevelCode(null);
+                      else if (moved) chooseLevel(moved, c);
                     }}
                     title={c.label}
                   >
@@ -462,6 +491,16 @@ export function BookingWizardClient({
                   </Choice>
                 ))}
               </div>
+              {!allStarts && preselected && startsOf(offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts ?? [], preselected).length <
+              (offer.courseTypes.find((type) => type.id === courseTypeId)?.cohorts.length ?? 0) ? (
+                <button
+                  type="button"
+                  onClick={() => setAllStarts(true)}
+                  className="text-[0.8rem] font-semibold text-[var(--casa-accent-text)] hover:text-[var(--casa-accent-text-hover)]"
+                >
+                  {t('Alle Termine dieser Kursart', 'Every start of this kind')}
+                </button>
+              ) : null}
               {cohort && weeksToJoin.length ? (
                 <div className="space-y-2 border-t border-ws-line-soft pt-4">
                   <Question small>{t('Einstieg ab', 'Joining from')}</Question>
@@ -539,33 +578,56 @@ export function BookingWizardClient({
       ) : step === 'level' ? (
         <section className="space-y-3">
           <Question>{t('Mit welchem Niveau beginnt die Person?', 'Which level are they starting at?')}</Question>
-          <div className="flex flex-wrap gap-1.5">
-            {offer.levels.map((l) => {
-              const places = cohort ? coursePlaces(cohort, l.code) : null;
-              const isFull = places ? levelFree(places, personId) === 0 : false;
+          {cohort ? <p className="-mt-1 text-[0.82rem] text-[var(--casa-muted)]">{cohort.label}</p> : null}
+          {/* The start's own levels, each with its free places; the one asked for is marked. */}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(5.25rem,1fr))] gap-1.5">
+            {choices.map((code) => {
+              const places = cohort ? coursePlaces(cohort, code) : null;
+              const left = places ? levelFree(places, personId) : null;
+              const isFull = left === 0;
+              const chosen = levelCode === code;
+              const asked = code === preselectedLevelCode;
               return (
                 <button
-                  key={l.code}
+                  key={code}
                   type="button"
+                  aria-pressed={chosen}
                   onClick={() => {
-                    chooseLevel(l.code);
+                    chooseLevel(code);
                     setAutoSecond(false);
                   }}
                   className={cn(
-                    'rounded-lg border px-2.5 py-1.5 text-sm font-semibold tabular-nums transition-colors',
-                    levelCode === l.code
+                    'relative flex flex-col items-start rounded-lg border px-2.5 py-1.5 text-left tabular-nums transition-colors',
+                    'outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/30',
+                    chosen
                       ? 'border-[var(--casa-ink-deep)] bg-[var(--casa-ink-deep)] text-white'
                       : isFull
                         ? 'border-[#efdca4] bg-[#fff8e6] text-[#7a4a00] hover:border-[#d9b65c]'
                         : 'border-ws-line bg-white hover:border-[var(--casa-blue)]/45'
                   )}
                 >
-                  {l.code}
-                  {isFull ? <span className="ml-1 text-[0.72rem] font-bold opacity-80">{places?.closed ? t('geschlossen', 'closed') : t('voll', 'full')}</span> : null}
+                  <span className="text-sm font-bold">{code}</span>
+                  <span className={cn('text-[0.7rem] font-semibold', chosen ? 'text-white/70' : isFull ? 'opacity-80' : 'text-[var(--casa-text-subtle)]')}>
+                    {left === null ? ' ' : isFull ? (places?.closed ? t('geschlossen', 'closed') : t('voll', 'full')) : t(`${left} frei`, `${left} free`)}
+                  </span>
+                  {asked ? (
+                    <span
+                      title={t('Angefragt', 'Asked for')}
+                      className={cn('absolute top-1.5 right-1.5 size-1.5 rounded-full', chosen ? 'bg-white' : 'bg-[var(--casa-blue)]')}
+                    />
+                  ) : null}
                 </button>
               );
             })}
           </div>
+          {preselectedLevelCode ? (
+            <p className="flex items-center gap-1.5 text-[0.76rem] text-[var(--casa-muted)]">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-[var(--casa-blue)]" />
+              {choices.includes(preselectedLevelCode)
+                ? t(`Angefragt: ${preselectedLevelCode}`, `Asked for: ${preselectedLevelCode}`)
+                : t(`Angefragt: ${preselectedLevelCode} – läuft in diesem Termin nicht`, `Asked for: ${preselectedLevelCode} – not taught in this start`)}
+            </p>
+          ) : null}
           {group ? (
             // The chosen level's places in this start, before the rest is asked.
             <p className={cn('text-[0.82rem]', full ? 'font-semibold text-[#9a5b00]' : 'text-[var(--casa-muted)]')}>
@@ -1103,6 +1165,30 @@ function bzClasses(run: BzWeek[], t: T, lang: WsLang): { half: 'first' | 'second
 }
 
 const bzShift = (t: T, shift: BzShift | null) => (shift === 'morning' ? t('Vormittag', 'Morning') : shift === 'afternoon' ? t('Nachmittag', 'Afternoon') : t('Intensivkurs', 'Intensive course'));
+
+/**
+ * The levels a start teaches, in teaching order (2026-10-31, Rahman: „only those courses should be
+ * displayed"): its own courses' and, for an intensive start, the second halves of the start running on
+ * its first day. One with no course set up yet: every level its kind teaches (the evening course no B1+).
+ * A start of named courses — a preparation course, a module — teaches none, and no level is asked.
+ */
+function levelsOf(c: CohortOffer | null, all: readonly { code: string }[]): string[] {
+  const codes = all.map((l) => l.code);
+  if (!c) return codes;
+  if (c.levelCode) return [c.levelCode];
+  const set = Object.entries(c.levels);
+  if (set.some(([, places]) => !places.until)) return codes.filter((code) => c.levels[code]);
+  if (c.format === 'intensive') return codes;
+  if (c.format === 'evening') return codes.filter((code) => !code.startsWith('B1+'));
+  return [];
+}
+
+/** A start's course, as its label names it first: „telc Deutsch C1 Hochschule – Prüfungsvorbereitung", „Intensivkurs". */
+const courseOf = (c: CohortOffer) => c.label.split(' · ')[0];
+
+/** The starts of a kind; with one asked for, those of the same course alone (a C1 preparation course, not the B2 one). */
+const startsOf = (cohorts: readonly CohortOffer[], asked: CohortOffer | null) =>
+  asked ? cohorts.filter((c) => c.courseTypeId !== asked.courseTypeId || courseOf(c) === courseOf(asked)) : [...cohorts];
 
 /** The same level at the other half: B1.1 → B1.2, when the levels have it. */
 const sibling = (code: string, half: '1' | '2', levels: readonly { code: string }[]) => {
