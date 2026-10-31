@@ -75,15 +75,15 @@ export function SidePanel({
             width === 'lg' ? 'sm:max-w-[560px]' : 'sm:max-w-[440px]'
           )}
         >
-          <header className="ws-head-band flex items-start gap-3 px-6 pt-5 pb-4 sm:rounded-t-3xl">
+          <header className="flex items-start gap-3 border-b border-ws-card-line bg-ws-card-head px-6 pt-5 pb-4 sm:rounded-t-3xl">
             {icon ? <IconChip icon={icon} tint={tint} size="md" /> : null}
             <div className="min-w-0 flex-1 pt-0.5">
-              <Primitive.Title className="text-[1.08rem] leading-snug font-extrabold tracking-[-0.01em] text-white">{title}</Primitive.Title>
+              <Primitive.Title className="text-[1.08rem] leading-snug font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</Primitive.Title>
               {subtitle ? <div className="mt-0.5 text-[0.84rem] text-[var(--casa-muted)]">{subtitle}</div> : null}
             </div>
             <Primitive.Close
               aria-label={t('Schließen', 'Close')}
-              className="-mt-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[var(--casa-muted)] transition-colors outline-none hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 [&_svg]:size-4"
+              className="-mt-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[var(--casa-muted)] transition-colors outline-none hover:bg-ws-sunk hover:text-[var(--casa-ink)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-4"
             >
               {Icon.close}
             </Primitive.Close>

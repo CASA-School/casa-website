@@ -476,18 +476,18 @@ function LevelCard({
         focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-card-line'
       )}
     >
-      <header className="ws-head-band flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ws-card-line bg-ws-card-head px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
           <span
             className={cn(
               'inline-flex h-9 min-w-12 items-center justify-center rounded-xl px-2.5 text-[0.95rem] font-extrabold tracking-[-0.01em] tabular-nums',
-              group.cancelled ? 'bg-white/15 text-[var(--casa-muted)] line-through' : 'bg-white text-[var(--fm-navy)]'
+              group.cancelled ? 'bg-ws-sunk text-[var(--casa-muted)] line-through' : 'bg-[var(--fm-navy)] text-white'
             )}
           >
             {joiner?.levelCode ?? group.levelCode ?? (group.title ? group.title.slice(0, 2).toUpperCase() : '—')}
           </span>
           <div className="min-w-0">
-            <h2 className="text-[0.95rem] leading-tight font-extrabold text-white">
+            <h2 className="text-[0.95rem] leading-tight font-extrabold text-[var(--casa-ink)]">
               {group.title && group.levelCode ? <span className="mr-1.5">{group.title} ·</span> : group.title ? <span className="mr-1.5">{group.title} ·</span> : null}
               {group.cancelled
                 ? t('Abgesagt', 'Cancelled')

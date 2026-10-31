@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 /**
  * A room and a visa, each its own section in its own colour (2026-10-31, Rahman: „unterkunft should have an
  * identifying color and even on its own section and visum as well so it is more prominent"): the stay's
- * blue and the visa's berry, the same in the head of the Anmeldung and on the list. Each says what was
+ * blue and the visa's violet, the same in the head of the Anmeldung and on the list. Each says what was
  * asked, and how far it has come — booked, placed; the letter for the embassy sent.
  */
 
@@ -20,11 +20,10 @@ const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.
 /**
  * The two colours, solid (2026-10-31, Rahman: the pale bands were „too similar to each other with the
  * blueish background"): a head in its colour with white type cannot be taken for the page, for a row, or
- * for the other section. The visa is berry, not violet: violet is Abend's (SESSION_COLOURS). Every other
- * section head is navy (`.ws-head-band`). The same two colours mark the head of the Anmeldung, the list and
- * the booking (badge tones `stay`, `visa`).
+ * for the other section. The same two colours mark the head of the Anmeldung and the list (badge tones
+ * `stay`, `visa`).
  */
-const COLOUR = { stay: '#0b78b4', visa: '#9b2c6f' } as const;
+const COLOUR = { stay: '#0b78b4', visa: '#7a3fc8' } as const;
 
 /** One section: a solid head in its colour, its title and where it stands; white rows under it. */
 function Section({ kind, icon, title, status, children }: { kind: keyof typeof COLOUR; icon: ReactNode; title: string; status: { text: string; state: 'open' | 'part' | 'done' }; children: ReactNode }) {
@@ -170,7 +169,7 @@ export function VisaCard({
               aria-hidden="true"
               className={cn(
                 'mt-px grid size-5 shrink-0 place-items-center rounded-full text-[0.66rem] font-extrabold [&_svg]:size-3',
-                step.done ? 'bg-[#9b2c6f] text-white' : 'bg-white text-[#9b2c6f] ring-[1.5px] ring-[#e3b5cf] ring-inset'
+                step.done ? 'bg-[#7a3fc8] text-white' : 'bg-white text-[#7a3fc8] ring-[1.5px] ring-[#c4a9ef] ring-inset'
               )}
             >
               {step.done ? Icon.check : i + 1}
@@ -186,7 +185,7 @@ export function VisaCard({
         <div className="flex justify-end border-t border-ws-line pt-3 pb-2">
           <Link
             href={action.href}
-            className="inline-flex h-9 items-center rounded-lg border border-[#e3b5cf] bg-white px-4 text-sm font-semibold text-[#9b2c6f] transition-colors hover:border-[#9b2c6f] hover:bg-[#fcf2f7]"
+            className="inline-flex h-9 items-center rounded-lg border border-[#c4a9ef] bg-white px-4 text-sm font-semibold text-[#7a3fc8] transition-colors hover:border-[#7a3fc8] hover:bg-[#f6f1fe]"
           >
             {action.label}
           </Link>
