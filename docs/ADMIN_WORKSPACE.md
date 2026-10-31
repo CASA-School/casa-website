@@ -2632,6 +2632,44 @@ forbidden *labels* rather than for the presence of a disclaimer for this reason.
 
 ---
 
+## Website registrations and SchoolMan bookings (2026-10-31, migration 0113)
+
+The parallel phase: a learner registers on the website, a colleague books them in SchoolMan as before, and
+the sync brings the booking in — under a second person (the bridge matches people only by their SchoolMan
+number; FILEMAKER_LESSONS: never by an address alone) and with the Anmeldung still open, though it is
+booked. Rahman, 2026-10-31: link them, so the inbox says what is really still open.
+
+**One rule, in the database.** `registration_schoolman_candidates(registration)` lists, for every open line
+of an Anmeldung of the last half year, the SchoolMan bookings (`filemaker_booking_id`, not cancelled, not
+linked to a line, made at most 45 days before the registration came in) of a person who has the line's
+e-mail address, its surname and date of birth, or its first name and surname (folded, `ws_fold`), and which
+fit: a course booking with a period in the start asked for, or the same type beginning within three days
+(*exact*), or the same type / within a week (*near*); an exam booking at the sitting asked for (*exact*) or at
+another sitting of that exam (*near*). A match is **sure** when it is exact, the booking was made after the
+registration came in (a day's grace), the person is the same — already linked, or the same address with the
+same birthday or full name — and it is the only sure booking for the line and the only sure line for the
+booking. A family writing from one address is never sure: siblings share the surname and the address, not
+the first name or the birthday.
+
+**The bridge links what is sure** at the end of every run, whichever steps ran
+(`link_registrations_to_schoolman()`, called by `linkRegistrations` in `scripts/filemaker/bridge-run.mjs`).
+`link_registration_line()` makes one link, for the bridge and for a colleague alike: the booking points at
+the line (`source_registration_id` / `source_exam_registration_id`, as a booking made in the workspace does),
+the line is settled (0097's trigger then settles the Anmeldung: „Erledigt" once every line is), the website's
+person is linked into SchoolMan's (`merged_into`, as „Verknüpfen" on a person; SchoolMan's keeps its number,
+bookings and name), its duplicate flags are answered, and the history says it („Workspace hat Intensivkurs B1
+mit der SchoolMan-Buchung B-2026-0582 verknüpft"). The bridge never writes these two booking columns, so a
+link survives every later run.
+
+**What is not sure is asked.** The Anmeldung shows „In SchoolMan gebucht?" under the submission: each booking
+with its number, course and dates, the learner, when it was made in SchoolMan, and why it is offered (gleiche
+E-Mail, gleicher Name, gleiches Geburtsdatum, gleicher / anderer Termin, vor der Anmeldung gebucht).
+„Verknüpfen" makes the link (`registrations` at `edit`; the server asks the rule again); „Nicht dieselbe"
+stops asking (`registration_link_dismissals`). The list of Anmeldungen marks such a row „In SchoolMan
+gebucht?". A linked line reads „In SchoolMan gebucht · B-…"; its „…" offers „Verknüpfung lösen", which opens
+the line again and records the booking as not the line's, so the next run does not link it back. The two
+people stay one; „Trennen" on the person parts them.
+
 ## Data flow from the public site
 
 `src/lib/admin/intake.ts` is the write path. Three rules:
