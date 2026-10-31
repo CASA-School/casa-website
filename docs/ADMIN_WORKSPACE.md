@@ -2710,10 +2710,11 @@ decides; the search is a read (`searchRegistrationPeopleAction`, `registrations`
 „3 von 14 Plätzen frei" or „Niveau voll", and how many wait. The week-by-week view stays on the course's own
 page (Kurse).
 
-**A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant — the stay
-the workspace's blue (`TINTS.blue`, badge `stay`), the visa violet (`TINTS.violet`, badge `visa`): pills in
-the Anmeldung's head that jump to their sections, a tag on the list, and a section of its own with its colour
-along the top (`needs.tsx`). *Unterkunft*: what was asked for, the stay's dates (the day before the first
+**A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant, solid —
+the stay blue `#0b78b4`, the visa violet `#7a3fc8` (badge tones `stay`, `visa`): pills in the Anmeldung's head
+that jump to their sections, a tag on the list, and a section of its own whose head is a band of its colour
+with white type, over white rows ruled in `--ws-line` (`needs.tsx`). Pale tints were tried first and
+rejected: next to each other and to the blue-grey canvas they read as one colour, and the head as a row. *Unterkunft*: what was asked for, the stay's dates (the day before the first
 course to the Saturday after the last, `stayFor`), allergies, and per booking made from it what was booked
 and where it was placed (`bookedStays`), or „Unterkunft zuteilen". *Visumshilfe*: the nationality and three
 steps — „Bitte um Anzahlung" sent, booked, „Bestätigung für die Botschaft" sent (`visaProgress`) — with the

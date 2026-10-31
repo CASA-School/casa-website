@@ -145,8 +145,6 @@ export const TINTS = {
   sun: 'bg-[#fff7cc] text-[#6b5600]',
   ink: 'bg-[#edf0f5] text-[#2b3546]',
   green: 'bg-[#e5f5eb] text-[#137a3c]',
-  /** A visa (2026-10-31): its own colour, so it stands out from the course and the stay. */
-  violet: 'bg-[#f1ebfd] text-[#5b2ea6]',
 } as const;
 
 export type Tint = keyof typeof TINTS;
@@ -459,10 +457,10 @@ const badgeTones = {
   warning: 'bg-[#fff4dc] text-[#8a5a00] ring-[#f1dfb0]',
   danger: 'bg-[#fdecec] text-[#a3241f] ring-[#f5cfcd]',
   quiet: 'bg-transparent text-[var(--casa-text-subtle)] ring-ws-line',
-  /** A room: the stay's blue, wherever accommodation is meant (TINTS.blue). */
-  stay: 'bg-[#e3f4fc] text-[#065f8c] ring-[#c4e6f6]',
-  /** A visa: its violet, wherever visa support is meant (TINTS.violet). */
-  visa: 'bg-[#f1ebfd] text-[#5b2ea6] ring-[#ddd0f6]',
+  /** A room, solid in the stay's blue: unmistakable on a white card and on the canvas (2026-10-31). */
+  stay: 'bg-[#0b78b4] text-white ring-[#0b78b4]',
+  /** A visa, solid in its violet. */
+  visa: 'bg-[#7a3fc8] text-white ring-[#7a3fc8]',
 } as const;
 
 export type BadgeTone = keyof typeof badgeTones;
