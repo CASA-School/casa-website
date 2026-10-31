@@ -962,7 +962,6 @@ h3 {
    * group headings: one surface for "the head of what follows".
    */
   --ws-card-line: #d3dae5;
-  /* Still the band of a card's foot, a list's group heading and a record's facts bar; a head is `.ws-head-band`. */
   --ws-card-head: #f3f6fa;
   --ws-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 8px -3px rgba(15, 23, 42, 0.08);
 
@@ -2741,42 +2740,6 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 :is(.casa-workspace-shell, .casa-ws-dialog) :is(h1, h2, h3) {
   font-family: var(--font-sans), system-ui, sans-serif;
   letter-spacing: normal;
-}
-
-/*
- * A section's head (2026-10-31, Rahman: „this is clean and clear distinction, do this for other headings
- * too … but carefully"). The pale band above (`--ws-card-head`, #f3f6fa) sat one breath from the
- * blue-grey canvas and from the white rows, so a head, its rows and the next section read as one wash.
- * A head is now a band of FileMaker's navy (`--fm-navy`, the colour the team knew SchoolMan by, and the
- * workspace's own neutral: its sidebar, its primary buttons) with white type — 10.4:1 — so it can be
- * taken for neither the page nor a row.
- *
- * Navy, not a hue, because the hues already mean something: the session colours (Vormittag green, Nachmittag
- * blue, Abend violet, SESSION_COLOURS), the offer's red course / blue stay / yellow programme (TINTS), a
- * stay's and a visa's own bands (registrations/[id]/needs.tsx). Those keep their places — a head's tinted
- * icon chip still says what the section is about — and no section head borrows one.
- *
- * Inside the band the light-surface tokens flip to their on-dark values, as on every dark surface
- * (`.casa-surface-dark`): a link, a quiet button, a muted line read light; a white control (a secondary
- * button, a badge) keeps its own ground and type. Portalled side panels carry no `.casa-workspace`, so the
- * values are literal.
- */
-.ws-head-band {
-  background-color: #1f3e6c;
-  color: #fff;
-  --casa-accent-text: var(--casa-accent-on-dark, #5cc8f5);
-  --casa-accent-text-hover: var(--casa-accent-on-dark-hover, #9bdefa);
-  --casa-text-subtle: #c3cfdf;
-  --casa-muted: #c3cfdf;
-}
-
-/* A primary action in a head („Zahlung erfassen") would be navy on navy: on the band it is white with navy type. */
-.ws-head-band .bg-\[var\(--casa-ink-deep\)\] {
-  background-color: #fff;
-  color: #1f3e6c;
-}
-.ws-head-band .bg-\[var\(--casa-ink-deep\)\]:hover {
-  background-color: #e3ebf6;
 }
 
 /*
