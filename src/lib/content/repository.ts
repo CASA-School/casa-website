@@ -28,6 +28,7 @@ import { secondHalfStart } from '@/lib/registration/halves';
 import { offeredLevels, soldByLevel } from '@/lib/registration/levels';
 import { parseSchedule, scheduleLine } from '@/lib/registration/term-format';
 import { sortByPublicCourseOrder } from '@/config/courses/course-order';
+import { PREPARATION_EXAM_NAMES, preparationExamOf } from '@/config/content/exam-preparation-courses';
 import {
   fallbackCourseInstances,
   fallbackCourseTypes,
@@ -61,6 +62,7 @@ import type {
   NewsViewItem,
   CareerPositionViewItem,
   PlacementNarrative,
+  PreparationExam,
   ProofMetric,
   SocialProofItem,
   TeamSpotlight,
@@ -137,15 +139,23 @@ const sparseCourseTopUpSlugs = [
 /**
  * Real products that are not presented as course cards.
  *
- * Exam preparation is sold through the two Prüfungszentrum pages (with its own
+ * Exam preparation is presented on the two Prüfungszentrum pages (with its own
  * fees: 260 EUR for telc B2, 520 EUR for telc C1 Hochschule), so a seventh
- * course card would duplicate it.
+ * course card would duplicate it. It is booked in the registration form
+ * (`registrationCourseSlugs`), each term under its exam.
  *
  * 'summer-intensive' and 'integration-german' used to be hidden here. Both are
  * now deleted outright, because CASA offers neither -- and the German FAQ says
  * so explicitly for Integrationskurse.
  */
 const hiddenPublicCourseSlugs = new Set(['exam-preparation']);
+
+/**
+ * Formats the registration form offers although they are no course card (2026-10-31). The
+ * workspace keeps exam preparation's type inactive (0042), so its own lists leave it out; the
+ * form offers the terms CASA puts on the website, each named for its exam.
+ */
+const registrationCourseSlugs = new Set(['exam-preparation']);
 
 const publicExamCodes = new Set([
   'telc_b2',
@@ -184,10 +194,18 @@ const publicCourseDisplayNames: Partial<Record<string, Record<ContentLocale, str
     en: 'Bildungszeit',
     de: 'Bildungszeit',
   },
+  'exam-preparation': {
+    en: 'Exam preparation',
+    de: 'Prüfungsvorbereitung',
+  },
 };
 
 function filterPublicCourseTypes(courses: CourseTypeRow[]) {
   return courses.filter((course) => !hiddenPublicCourseSlugs.has(course.slug));
+}
+
+function filterRegistrationCourseTypes(courses: CourseTypeRow[]) {
+  return courses.filter((course) => !hiddenPublicCourseSlugs.has(course.slug) || registrationCourseSlugs.has(course.slug));
 }
 
 /**
@@ -454,6 +472,8 @@ function buildCourseRegistrationOption(
     : null;
   const secondHalfOnly = soldByLevel(courseType.slug) && !isCourseTermBookable(instance, courseType.slug, today);
   const status = courseDeadlineStatus(secondHalfOnly && half ? half : lastCourseEntryDate(instance, courseType.slug), today);
+  // A preparation is for one exam, which is its level too: the form asks for none.
+  const exam = courseType.slug === 'exam-preparation' ? preparationExamOf(instance.title) : null;
 
   return {
     id: instance.id,
@@ -474,7 +494,8 @@ function buildCourseRegistrationOption(
     status: instance.status,
     levelMin: courseType.level_min,
     levelMax: courseType.level_max,
-    availableLevels: offeredLevels(courseType.slug, instance.levels, formatLevels, getAvailableLevels(courseType.level_min, courseType.level_max)),
+    availableLevels: exam ? [] : offeredLevels(courseType.slug, instance.levels, formatLevels, getAvailableLevels(courseType.level_min, courseType.level_max)),
+    ...(exam ? { exam, title: PREPARATION_EXAM_NAMES[exam] } : {}),
   };
 }
 
@@ -885,6 +906,8 @@ export async function getCourseRegistrationCatalog(
     const slugByTypeId = new Map(types.map((type) => [type.id, type.slug]));
     return rows.filter((row) => {
       const slug = slugByTypeId.get(row.course_type_id);
+      // A preparation the form cannot name an exam for (TestDaF) is not offered.
+      if (slug === 'exam-preparation' && !preparationExamOf(row.title)) return false;
       return slug !== undefined && (isCourseTermBookable(row, slug, today) || isSecondHalfBookable(row, slug, today));
     });
   };
@@ -910,12 +933,13 @@ export async function getCourseRegistrationCatalog(
             created_at,
             updated_at
           FROM course_types
-          WHERE is_active = true
+          WHERE is_active = true OR slug = ANY($1::text[])
           -- Deterministic only. The order a reader sees is the published one in
           -- config/courses/course-order.ts, applied in JS below so Neon-backed
           -- and fixture modes cannot disagree about it.
           ORDER BY slug
-        `
+        `,
+        [[...registrationCourseSlugs]]
       );
 
       if (courseRows.length > 0) {
@@ -936,6 +960,7 @@ export async function getCourseRegistrationCatalog(
               schedule,
               location,
               status,
+              title,
               created_at,
               updated_at
             FROM course_instances
@@ -984,9 +1009,9 @@ export async function getCourseRegistrationCatalog(
     courseTypes = sortByPublicCourseOrder(fallbackCourseTypes);
   }
 
-  courseTypes = filterPublicCourseTypes(courseTypes);
+  courseTypes = filterRegistrationCourseTypes(courseTypes);
   if (courseTypes.length === 0) {
-    courseTypes = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
+    courseTypes = filterRegistrationCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
   }
 
   // Same published order as the course index — the registration form's course
@@ -1009,7 +1034,7 @@ export async function getCourseRegistrationCatalog(
   instances = instances.filter((instance) => publicCourseTypeIds.has(instance.course_type_id));
 
   if (instances.length === 0) {
-    const fallbackPublicCourseTypes = filterPublicCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
+    const fallbackPublicCourseTypes = filterRegistrationCourseTypes(sortByPublicCourseOrder(fallbackCourseTypes));
     const fallbackPublicCourseTypeIds = new Set(fallbackPublicCourseTypes.map((courseType) => courseType.id));
     const fallbackPublicInstances = bookableTerms(fallbackCourseInstances, fallbackCourseTypes)
       .filter((item) => fallbackPublicCourseTypeIds.has(item.course_type_id))
@@ -1079,6 +1104,14 @@ export async function getCourseRegistrationCatalog(
     defaultCourseTypeId: resolvedCourseTypeId,
     defaultOptionId: resolvedOptionId,
   };
+}
+
+/** An exam's preparation terms the form offers, soonest first: what its page lists and links to. */
+export async function getPreparationTerms(exam: PreparationExam, locale: ContentLocale): Promise<CourseRegistrationOption[]> {
+  const catalog = await getCourseRegistrationCatalog(locale);
+  return Object.values(catalog.optionsByCourseTypeId)
+    .flat()
+    .filter((option) => option.exam === exam);
 }
 
 export async function getExamRegistrationCatalog(

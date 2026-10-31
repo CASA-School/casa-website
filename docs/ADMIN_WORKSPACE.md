@@ -1891,7 +1891,9 @@ dates, already from SchoolMan); a level SchoolMan has twice on one start, or
 with 28 places, is one course with two groups. An exam preparation, special
 module or company course becomes its own start — not on the website
 (`course_instances.on_website`, 0043; the website's lists and registration form
-read only starts that are) — with its course. The level comes from `LevelShort`
+read only starts that are) — with its course. A telc B2 or C1 Hochschule
+preparation ahead is the exception (2026-10-31): it goes on the website, where
+the exam pages list it and the registration form books it under its exam. The level comes from `LevelShort`
 and, for an evening term, `LevelShown`: `LevelStepReference` is a stale text
 copy (an evening B2 course reads `B2.1` or `A1.1` alike). Matched on SchoolMan's
 course number, then the start and level; what the workspace has wins. First

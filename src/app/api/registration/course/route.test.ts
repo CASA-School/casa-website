@@ -89,6 +89,37 @@ describe('course registration route', () => {
     expect(options).toEqual({ stored: false });
   });
 
+  it('books an exam preparation without a level, named for its exam as SchoolMan names the course', async () => {
+    const PREP_ID = '40000000-0000-4000-8000-000000000007';
+    const PREP_OPTION_ID = '20000000-0000-4000-8000-000000000007';
+    mocks.catalog.mockResolvedValue({
+      ...catalog,
+      courseTypes: [...catalog.courseTypes, { id: PREP_ID, slug: 'exam-preparation', name: 'Prüfungsvorbereitung' }],
+      optionsByCourseTypeId: {
+        ...catalog.optionsByCourseTypeId,
+        [PREP_ID]: [{
+          id: PREP_OPTION_ID, dateRangeLabel: '04. Jan. 2027 - 29. Jan. 2027', startDate: '2027-01-04', endDate: '2027-01-29',
+          scheduleLabel: 'Mo–Fr · 09:00–12:30', locationLabel: 'CASA Bremen', availableLevels: [],
+          exam: 'telc_c1_hochschule', title: 'telc Deutsch C1 Hochschule',
+        }],
+      },
+    });
+    mocks.store.mockResolvedValue(true);
+    mocks.notify.mockResolvedValue({ delivered: true, channel: 'email' });
+
+    const response = await POST(request({ ...valid, courses: [{ courseTypeId: PREP_ID, courseInstanceId: PREP_OPTION_ID, level: '' }] }));
+
+    expect(response.status).toBe(200);
+    expect(mocks.store.mock.calls[0][0].courses).toMatchObject([{
+      courseInstanceId: PREP_OPTION_ID,
+      courseTypeLabel: 'telc Deutsch C1 Hochschule – Prüfungsvorbereitung',
+      courseInstanceLabel: '04. Jan. 2027 - 29. Jan. 2027 | Mo–Fr · 09:00–12:30 | CASA Bremen',
+      levelRaw: '',
+      levelCode: null,
+    }]);
+    expect(mocks.notify.mock.calls[0][1]).toMatchObject({ courseTypeLabel: 'telc Deutsch C1 Hochschule – Prüfungsvorbereitung', currentLevel: '' });
+  });
+
   it('confirms an accepted registration to the sender, and says so', async () => {
     mocks.catalog.mockResolvedValue(catalog);
     mocks.store.mockResolvedValue(true);

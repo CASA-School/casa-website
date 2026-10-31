@@ -318,7 +318,8 @@ type, allergies (with their own consent), notes and terms. Missing:
   gebunden und kann nicht durch den Kunden/die Kundin gekündigt werden", plus the
   instruction to contact the German embassy.
 - **The "we cannot guarantee a CASA WG room" note** next to the accommodation choice.
-- "Deutsch Prüfungsvorbereitung" as a selectable course type.
+- ~~"Deutsch Prüfungsvorbereitung" as a selectable course type.~~ **Done 2026-10-31:**
+  „Prüfungsvorbereitung" is a course in the form, its terms under telc B2 and telc C1 Hochschule.
 
 ### `/anmeldung/anmeldung-zur-pruefung` → `/registration/exam`
 telc registration needs identity data our form does not collect:

@@ -207,7 +207,8 @@ export function coursePlan(input: {
   return {
     isPath: false,
     weeks: null,
-    rows: [{ key: option.id, level: level || null, start: option.startDate, end: option.endDate, schedule: option.schedule, scheduleLabel: option.scheduleLabel }],
+    // An exam preparation's exam stands where a level would.
+    rows: [{ key: option.id, level: level || option.title || null, start: option.startDate, end: option.endDate, schedule: option.schedule, scheduleLabel: option.scheduleLabel }],
   };
 }
 
@@ -287,7 +288,7 @@ export function termsForLevel(options: readonly CourseRegistrationOption[], leve
  * students"): every start in one list, its times said once, and CASA assigns the group.
  */
 function termGroups(options: readonly CourseRegistrationOption[], locale: ContentLocale, level: string, slug: string | undefined): DateTileGroup[] {
-  const groups = new Map<string, { schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
+  const groups = new Map<string, { title?: string; schedule: TermSchedule | null | undefined; label: string; tiles: DateTile[] }>();
   const half = isSecondHalf(level);
   const oneList = soldByLevel(slug);
 
@@ -308,9 +309,10 @@ function termGroups(options: readonly CourseRegistrationOption[], locale: Conten
     return tiles.length > 0 ? [{ key: 'all', meta, tiles }] : [];
   }
 
+  // An exam preparation's terms go under their exam, each with its schedule.
   for (const option of termsForLevel(options, level)) {
-    const key = option.schedule ? `${option.schedule.days}|${option.schedule.time}` : option.scheduleLabel;
-    const group = groups.get(key) ?? { schedule: option.schedule, label: option.scheduleLabel, tiles: [] };
+    const key = `${option.title ?? ''}|${option.schedule ? `${option.schedule.days}|${option.schedule.time}` : option.scheduleLabel}`;
+    const group = groups.get(key) ?? { title: option.title, schedule: option.schedule, label: option.scheduleLabel, tiles: [] };
     const note = half
       ? option.secondHalfStart ? undefined : locale === 'de' ? 'ab der 5. Kurswoche' : 'from the fifth week'
       : option.underway ? (locale === 'de' ? 'läuft bereits' : 'under way') : undefined;
@@ -323,7 +325,7 @@ function termGroups(options: readonly CourseRegistrationOption[], locale: Conten
     .sort(([, a], [, b]) => rank(a.schedule) - rank(b.schedule) || a.tiles[0].date.localeCompare(b.tiles[0].date))
     .map(([key, group]) => ({
       key,
-      title: group.schedule?.daytime ? daytimeLabel(group.schedule.daytime, locale) : undefined,
+      title: group.title ?? (group.schedule?.daytime ? daytimeLabel(group.schedule.daytime, locale) : undefined),
       meta: group.schedule ? scheduleLine(group.schedule, locale) : group.label,
       tiles: [...group.tiles].sort((a, b) => a.date.localeCompare(b.date)),
     }));

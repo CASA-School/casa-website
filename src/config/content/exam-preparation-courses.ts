@@ -1,18 +1,24 @@
 /**
- * The telc preparation courses, from FileMaker (`Course`, type
- * Prüfungsvorbereitung), read 2026-10-09.
+ * The telc preparation courses.
  *
- * Each four-week morning course ends just before a telc Deutsch C1 Hochschule
- * exam day, and casa-bremen.de listed the next ones on its C1 page; the move
- * had lost them. The B2 preparation runs on two evenings a week; its only
- * course in FileMaker began on 05.10.2026, so the B2 page lists none yet.
- * Add new courses here when CASA plans them in FileMaker.
+ * Booked online since 2026-10-31 (Rahman: „build it"): the registration form offers
+ * „Prüfungsvorbereitung" with its terms grouped by exam, and each exam page lists the
+ * next ones with a button into the form. The terms are SchoolMan's (`Course`, type
+ * Prüfungsvorbereitung), which the bridge brings across and puts on the website
+ * (scripts/filemaker/import-courses.mjs); nothing tells a term's exam but its title,
+ * so `preparationExamOf` reads it there, as `is_c1h_course` does in the database (0079).
+ *
+ * `PREPARATION_COURSES` are the fixtures a site without a database offers, as
+ * SchoolMan had them on 2026-10-09: each four-week morning course ends just before a
+ * telc Deutsch C1 Hochschule exam day, and the B2 preparation runs on two evenings
+ * a week.
  */
-import type { ContentLocale } from '@/lib/content/types';
-import { pick, say } from '@/lib/cms/copy';
+import type { ContentLocale, PreparationExam, TermSchedule } from '@/lib/content/types';
+import { say } from '@/lib/cms/copy';
+import { scheduleLine } from '@/lib/registration/term-format';
 
 type Schedule = 'mornings' | 'afternoons' | 'evenings';
-export type PreparationCourse = { exam: 'telc_b2' | 'telc_c1_hochschule'; from: string; to: string; schedule: Schedule };
+type PreparationCourse = { exam: PreparationExam; from: string; to: string; schedule: Schedule };
 
 const c1 = (from: string, to: string, schedule: Schedule = 'mornings'): PreparationCourse => ({ exam: 'telc_c1_hochschule', from, to, schedule });
 
@@ -32,39 +38,60 @@ export const PREPARATION_COURSES: PreparationCourse[] = [
   { exam: 'telc_b2', from: '2026-10-05', to: '2026-11-09', schedule: 'evenings' },
 ];
 
-const SCHEDULE: Record<Schedule, Record<ContentLocale, string>> = {
-  mornings: { de: 'Mo–Fr, 9–12:30 Uhr', en: 'Mon–Fri, 9:00–12:30' },
-  afternoons: { de: 'Mo–Do, 13–17:30 Uhr', en: 'Mon–Thu, 13:00–17:30' },
-  evenings: { de: 'Mo und Mi, 18:30–20 Uhr', en: 'Mon and Wed, 18:30–20:00' },
+/** The weeks as a stored start holds them. */
+export const PREPARATION_SCHEDULES: Record<Schedule, { days: string[]; time: string }> = {
+  mornings: { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '09:00-12:30' },
+  afternoons: { days: ['Mon', 'Tue', 'Wed', 'Thu'], time: '13:00-17:30' },
+  evenings: { days: ['Mon', 'Wed'], time: '18:30-20:00' },
 };
 
-/** The next courses that have not started by `today` (YYYY-MM-DD). */
-export function nextPreparationCourses(exam: PreparationCourse['exam'], today: string, count = 3) {
-  return PREPARATION_COURSES.filter((course) => course.exam === exam && course.from > today).slice(0, count);
+/** The exam's name, a proper name in both languages. */
+export const PREPARATION_EXAM_NAMES: Record<PreparationExam, string> = {
+  telc_b2: 'telc Deutsch B2',
+  telc_c1_hochschule: 'telc Deutsch C1 Hochschule',
+};
+
+/** SchoolMan's title for a preparation: „telc Deutsch C1 Hochschule – Prüfungsvorbereitung". */
+export const preparationTitle = (exam: PreparationExam) => `${PREPARATION_EXAM_NAMES[exam]} – Prüfungsvorbereitung`;
+
+/**
+ * The exam a preparation term is for, from its title: „telc Deutsch C1 Hochschule – Prüfungsvorbereitung",
+ * „C1H …", „B2 Vorbereitungskurs". Null for anything else (TestDaF), which the website does not offer.
+ */
+export function preparationExamOf(title: string | null | undefined): PreparationExam | null {
+  if (!title) return null;
+  if (/C1\s*(Hochschule|H\b)/i.test(title)) return 'telc_c1_hochschule';
+  if (/\bB2\b/.test(title)) return 'telc_b2';
+  return null;
 }
 
-function range(course: PreparationCourse, locale: ContentLocale) {
-  const [fy, fm, fd] = course.from.split('-');
-  const [ty, tm, td] = course.to.split('-');
+type PreparationTerm = { startDate: string; endDate: string; schedule?: TermSchedule | null };
+
+function range(term: PreparationTerm, locale: ContentLocale) {
+  const [fy, fm, fd] = term.startDate.split('-');
+  const [ty, tm, td] = term.endDate.split('-');
   if (locale === 'de') return `${fd}.${fm}.${fy === ty ? '' : fy}–${td}.${tm}.${ty}`;
   const day = (date: string, withYear: boolean) =>
     new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' })
       .format(new Date(`${date}T12:00:00Z`));
-  return `${day(course.from, fy !== ty)} – ${day(course.to, true)}`;
+  return `${day(term.startDate, fy !== ty)} – ${day(term.endDate, true)}`;
 }
 
+/** „Mo–Fr, 09:00–12:30 Uhr": the form's schedule line, as a sentence says it. */
+const when = (term: PreparationTerm, locale: ContentLocale) => scheduleLine(term.schedule, locale).replace(' · ', ', ');
+
 /**
- * „Die nächsten Vorbereitungskurse, jeweils Mo–Fr, 9–12:30 Uhr: 26.10.–20.11.2026,
- * 04.01.–29.01.2027 und 01.02.–26.02.2027." The schedule is said once when the
- * courses share it, after each date when they do not. Empty when none is planned.
+ * „Die nächsten Vorbereitungskurse, jeweils Mo–Fr, 09:00–12:30 Uhr: 04.01.–29.01.2027,
+ * 01.02.–26.02.2027 und 01.03.–02.04.2027." The schedule is said once when the
+ * terms share it, after each date when they do not. Null when none is planned.
  */
-export function preparationCoursesSentence(courses: PreparationCourse[], locale: ContentLocale) {
-  if (!courses.length) return null;
-  const shared = courses.every((course) => course.schedule === courses[0].schedule);
-  const items = courses.map((course) => (shared ? range(course, locale) : `${range(course, locale)} (${pick(locale, SCHEDULE[course.schedule])})`));
+export function preparationCoursesSentence(terms: PreparationTerm[], locale: ContentLocale) {
+  if (!terms.length) return null;
+  const shared = terms.every((term) => when(term, locale) === when(terms[0], locale));
+  const items = terms.map((term) => (shared ? range(term, locale) : `${range(term, locale)} (${when(term, locale)})`));
   const and = say(locale, ' und ', ' and ');
   const list = items.length > 1 ? `${items.slice(0, -1).join(', ')}${and}${items[items.length - 1]}` : items[0];
   const lead = say(locale, 'Die nächsten Vorbereitungskurse', 'The next preparation courses');
   const each = say(locale, 'jeweils', 'each');
-  return shared ? `${lead}, ${each} ${pick(locale, SCHEDULE[courses[0].schedule])}: ${list}.` : `${lead}: ${list}.`;
+  return shared ? `${lead}, ${each} ${when(terms[0], locale)}: ${list}.` : `${lead}: ${list}.`;
 }

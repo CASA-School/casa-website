@@ -25,9 +25,11 @@ import {
   getCourseRegistrationCatalog,
   getExamCatalog,
   getExamRegistrationCatalog,
+  getPreparationTerms,
 } from '../repository';
 
 const INTENSIVE = '10000000-0000-4000-8000-000000000001';
+const EXAM_PREPARATION = '10000000-0000-4000-8000-000000000007';
 const EVENING = '10000000-0000-4000-8000-000000000002';
 const BILDUNGSZEIT = '10000000-0000-4000-8000-000000000005';
 const TELC_B2 = '20000000-0000-4000-8000-000000000001';
@@ -146,6 +148,31 @@ describe('course registration catalog (fallback mode)', () => {
     expect(afternoon(de)?.scheduleLabel).toBe('Mo–Do · 13:00–17:30');
     expect(afternoon(en)?.scheduleLabel).toBe('Mon–Thu · 13:00–17:30');
     expect(afternoon(de)?.schedule).toEqual({ days: 'Mo–Do', time: '13:00–17:30', daytime: 'afternoon' });
+  });
+
+  it('offers exam preparation, each term under its exam and without a level (2026-10-31)', async () => {
+    const catalog = await getCourseRegistrationCatalog('de');
+    const type = catalog.courseTypes.find((candidate) => candidate.id === EXAM_PREPARATION);
+    const options = catalog.optionsByCourseTypeId[EXAM_PREPARATION];
+
+    expect(type?.name).toBe('Prüfungsvorbereitung');
+    // 28 Sep is still ahead on 23 Sep; a preparation is joined on its first day only.
+    expect(options.map((option) => [option.startDate, option.exam])).toEqual([
+      ['2026-09-28', 'telc_c1_hochschule'],
+      ['2026-10-05', 'telc_b2'],
+      ['2026-10-26', 'telc_c1_hochschule'],
+      ...['2027-01-04', '2027-02-01', '2027-03-01', '2027-04-05', '2027-05-03', '2027-05-31', '2027-08-02', '2027-08-30', '2027-09-27', '2027-10-25']
+        .map((date) => [date, 'telc_c1_hochschule']),
+    ]);
+    expect(options[1]).toMatchObject({ title: 'telc Deutsch B2', availableLevels: [], scheduleLabel: 'Mo, Mi · 18:30–20:00' });
+  });
+
+  it('gives an exam page its own preparation terms, the ones the form offers', async () => {
+    setClock('2026-10-31T10:00:00+01:00');
+    const [c1, b2] = await Promise.all([getPreparationTerms('telc_c1_hochschule', 'de'), getPreparationTerms('telc_b2', 'de')]);
+
+    expect(c1.slice(0, 3).map((term) => term.startDate)).toEqual(['2027-01-04', '2027-02-01', '2027-03-01']);
+    expect(b2).toEqual([]);
   });
 });
 
@@ -346,6 +373,39 @@ describe.each(ZONES)('database mode, server in %s: pg returns date columns as Da
       ['term-next', '2026-10-26', '2026-12-18', false],
     ]);
     expect(catalog.defaultOptionId).toBe('term-next');
+  });
+
+  it('reads the inactive preparation type and names each term\'s exam from its title, leaving out TestDaF', async () => {
+    const asked: unknown[][] = [];
+    db.current = {
+      query: async (sql: string, params: unknown[] = []) => {
+        if (sql.includes('FROM course_types')) {
+          asked.push(params);
+          return [{
+            id: 'course-prep', slug: 'exam-preparation', name: 'Exam Preparation', format: 'exam preparation', level_min: 'B1', level_max: 'C1',
+            lessons_per_week: 0, default_price: 0, pricing_mode: 'fixed', visa_eligible: false, currency: 'EUR', is_active: false,
+            created_at: new Date(), updated_at: new Date(),
+          }];
+        }
+        if (sql.includes('FROM course_instances')) {
+          const evening = { days: ['Tue'], time: '18:30-20:00' };
+          return [
+            { ...row, id: 'prep-c1', course_type_id: 'course-prep', start_date: new Date(2026, 9, 26), end_date: new Date(2026, 10, 20), schedule: null, location: null, title: 'telc Deutsch C1 Hochschule – Prüfungsvorbereitung' },
+            { ...row, id: 'prep-b2', course_type_id: 'course-prep', start_date: new Date(2026, 10, 3), end_date: new Date(2026, 11, 8), schedule: evening, location: null, title: 'B2 Vorbereitungskurs' },
+            { ...row, id: 'prep-testdaf', course_type_id: 'course-prep', start_date: new Date(2026, 10, 2), end_date: new Date(2026, 10, 27), schedule: null, location: null, title: 'TestDaF – Prüfungsvorbereitung' },
+          ];
+        }
+        return [];
+      },
+    };
+
+    const catalog = await getCourseRegistrationCatalog('de');
+
+    expect(asked[0]).toEqual([['exam-preparation']]);
+    expect(catalog.optionsByCourseTypeId['course-prep'].map((option) => [option.id, option.exam, option.title])).toEqual([
+      ['prep-c1', 'telc_c1_hochschule', 'telc Deutsch C1 Hochschule'],
+      ['prep-b2', 'telc_b2', 'telc Deutsch B2'],
+    ]);
   });
 });
 
