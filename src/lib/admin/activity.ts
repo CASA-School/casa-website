@@ -260,6 +260,15 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t(`hat „Bücher ausgegeben" zurückgenommen: ${String(entry.detail?.description ?? '')}`, `took back „books handed out": ${String(entry.detail?.description ?? '')}`);
     case 'letter_mailed':
       return t('hat einen Brief per E-Mail gesendet', 'sent a letter by e-mail');
+    case 'registration_linked_schoolman': {
+      const what = String(entry.detail?.label ?? t('eine Position', 'a line'));
+      const number = String(entry.detail?.number ?? '');
+      return t(`hat ${what} mit der SchoolMan-Buchung ${number} verknüpft`, `linked ${what} to SchoolMan booking ${number}`);
+    }
+    case 'registration_unlinked_schoolman':
+      return t(`hat die Verknüpfung mit der SchoolMan-Buchung ${String(entry.detail?.number ?? '')} gelöst`, `unlinked SchoolMan booking ${String(entry.detail?.number ?? '')}`);
+    case 'registration_link_dismissed':
+      return t('hat eine SchoolMan-Buchung als nicht dieselbe markiert', 'marked a SchoolMan booking as not the same');
     case 'cv_downloaded':
       return t(`hat den Lebenslauf zu ${dat} heruntergeladen`, `downloaded the CV on ${subject}`);
     case 'person_created':

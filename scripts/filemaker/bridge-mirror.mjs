@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { connect, requireConnectionString } from '../db/client.mjs';
-import { counts, importStep, printCounts } from './bridge-run.mjs';
+import { counts, importStep, linkRegistrations, printCounts } from './bridge-run.mjs';
 import { BRIDGE_STEPS } from './bridge-steps.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -147,6 +147,7 @@ async function round(full) {
     rmSync(work, { recursive: true, force: true });
   }
   if (skipped.length) console.log(`unchanged, not run: ${skipped.join(', ')}`);
+  if (ok) await linkRegistrations(lock);
   // SchoolMan as it was when the sync service last sent: what the workspace shows as „Stand".
   await lock.query(`INSERT INTO bridge_runs (source, read_at, ok, steps) VALUES ('schoolman-copy', $1, $2, $3::jsonb)`, [sent ?? new Date(), ok, JSON.stringify(done)]);
   if (done.length) printCounts(before, await counts());

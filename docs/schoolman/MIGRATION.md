@@ -37,6 +37,9 @@ schoolman_records (migration 0090)   one row per SchoolMan record: record id, mo
 bridge-mirror.mjs: the steps whose SchoolMan tables changed → mirror-export.mjs (only their tables, one file
                    each) → their read_*.py (FM_MIRROR) → their import-*.mjs → the workspace's tables
                                                                           (20 steps, bridge-steps.mjs)
+                   then, every run: website registrations linked to the SchoolMan bookings made from them
+                   (link_registrations_to_schoolman(), 0113; docs/ADMIN_WORKSPACE.md §Website registrations
+                   and SchoolMan bookings)
 ```
 
 - **Only what changed (2026-10-28, migration 0099; Rahman: the Azure costs had doubled).** Before, the job

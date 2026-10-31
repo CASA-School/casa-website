@@ -10,6 +10,7 @@ import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { isUuid } from '@/lib/admin/ids';
 import { bookRegistration } from '@/lib/admin/registration-booking';
+import { dismissSchoolmanBooking, linkToSchoolmanBooking, unlinkSchoolmanBooking } from '@/lib/admin/registration-schoolman';
 import { editRegistration, setLineDeclined, type RegistrationEdit } from '@/lib/admin/registrations';
 
 const SALUTATIONS = ['mr', 'ms', 'mx', 'neutral'] as const;
@@ -133,3 +134,53 @@ export async function bookRegistrationAction(formData: FormData): Promise<void> 
     .join(' ');
   redirect(`${back}?${result.skipped.length ? 'error' : 'notice'}=${encodeURIComponent(notice)}`);
 }
+
+/** The line and the SchoolMan booking a form names (0113). */
+function schoolmanLink(formData: FormData) {
+  const lineId = String(formData.get('lineId') ?? '');
+  const bookingId = String(formData.get('bookingId') ?? '');
+  if (!isUuid(lineId)) throw new Error('Invalid lineId');
+  return { lineId, bookingId: isUuid(bookingId) ? bookingId : null, kind: formData.get('kind') === 'exam' ? ('exam' as const) : ('course' as const) };
+}
+
+/**
+ * „Verknüpfen" on „In SchoolMan gebucht?" (0113): the booking a colleague made in SchoolMan is the line's.
+ * It settles the line and links the website's person into SchoolMan's, so it asks for `registrations` at
+ * `edit` (CLAUDE.md hard rule 7); the rule that offered the booking is checked again on the server.
+ */
+export async function linkSchoolmanBookingAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const back = `/admin/registrations/${id}`;
+  const { lineId, bookingId, kind } = schoolmanLink(formData);
+  if (!bookingId) throw new Error('Invalid bookingId');
+  const ok = await linkToSchoolmanBooking(id, kind, lineId, bookingId, actor);
+  revalidatePath('/admin/registrations', 'layout');
+  const { t } = await getI18n();
+  redirect(ok ? `${back}#line-${lineId}` : `${back}?error=${encodeURIComponent(t('Diese Buchung lässt sich nicht mehr verknüpfen.', 'This booking can no longer be linked.'))}`);
+}
+
+/** „Nicht dieselbe": that SchoolMan booking is not offered for the line again. */
+export async function dismissSchoolmanBookingAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const { lineId, bookingId } = schoolmanLink(formData);
+  if (!bookingId) throw new Error('Invalid bookingId');
+  await dismissSchoolmanBooking(id, lineId, bookingId, actor);
+  revalidatePath(`/admin/registrations/${id}`);
+  redirect(`/admin/registrations/${id}`);
+}
+
+/** „Verknüpfung lösen": a line linked to the wrong SchoolMan booking is open again; only after the confirmation. */
+export async function unlinkSchoolmanBookingAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const back = `/admin/registrations/${id}`;
+  const { lineId, kind } = schoolmanLink(formData);
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const ok = await unlinkSchoolmanBooking(id, kind, lineId, actor);
+  revalidatePath('/admin/registrations', 'layout');
+  const { t } = await getI18n();
+  redirect(ok ? `${back}#line-${lineId}` : `${back}?error=${encodeURIComponent(t('Diese Position ist mit keiner Buchung aus SchoolMan verknüpft.', 'This line is not linked to a SchoolMan booking.'))}`);
+}
+
