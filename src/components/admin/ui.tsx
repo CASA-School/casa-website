@@ -252,11 +252,11 @@ export function Card({
       )}
     >
       {title || actions ? (
-        <header className="flex min-h-[52px] flex-wrap items-center justify-between gap-3 rounded-t-3xl border-b border-ws-card-line bg-ws-card-head px-4 py-2.5">
+        <header className="ws-head-band flex min-h-[52px] flex-wrap items-center justify-between gap-3 rounded-t-3xl px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-2.5">
             {icon ? <IconChip icon={icon} tint={tint} /> : null}
             <div className="min-w-0">
-              {title ? <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2> : null}
+              {title ? <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em] text-white">{title}</h2> : null}
               {description ? (
                 <p className="mt-0.5 max-w-prose text-xs leading-relaxed text-[var(--casa-text-subtle)]">{description}</p>
               ) : null}
@@ -459,8 +459,8 @@ const badgeTones = {
   quiet: 'bg-transparent text-[var(--casa-text-subtle)] ring-ws-line',
   /** A room, solid in the stay's blue: unmistakable on a white card and on the canvas (2026-10-31). */
   stay: 'bg-[#0b78b4] text-white ring-[#0b78b4]',
-  /** A visa, solid in its violet. */
-  visa: 'bg-[#7a3fc8] text-white ring-[#7a3fc8]',
+  /** A visa, solid in its berry: not Abend's violet (SESSION_COLOURS). */
+  visa: 'bg-[#9b2c6f] text-white ring-[#9b2c6f]',
 } as const;
 
 export type BadgeTone = keyof typeof badgeTones;
