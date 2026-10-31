@@ -320,6 +320,88 @@ export const Icon = {
       <path d="M8 3.6c1.8-.8 3.7-.8 5.5 0v9.4c-1.8-.8-3.7-.8-5.5 0" />
     </svg>
   ),
+  /** A speech bubble with a line in it — the team telling us something (feedback, 0112). */
+  feedback: (
+    <svg {...box}>
+      <path d="M3.25 2.75h9.5a1.25 1.25 0 0 1 1.25 1.25v6a1.25 1.25 0 0 1-1.25 1.25H7.5L4.5 13.5v-2.25H3.25A1.25 1.25 0 0 1 2 10V4a1.25 1.25 0 0 1 1.25-1.25Z" />
+      <path d="M5 6h6M5 8.25h3.75" />
+    </svg>
+  ),
+  /** A camera — a screenshot taken of the screen. */
+  camera: (
+    <svg {...box}>
+      <path d="M2 5.5a1.25 1.25 0 0 1 1.25-1.25h1.6l1-1.5h4.3l1 1.5h1.6A1.25 1.25 0 0 1 14 5.5v6.25A1.25 1.25 0 0 1 12.75 13H3.25A1.25 1.25 0 0 1 2 11.75Z" />
+      <circle cx="8" cy="8.4" r="2.35" />
+    </svg>
+  ),
+  /** A framed picture — an image added from the computer. */
+  image: (
+    <svg {...box}>
+      <rect x="2" y="2.75" width="12" height="10.5" rx="1.4" />
+      <circle cx="5.75" cy="6.25" r="1.1" />
+      <path d="m2.5 12 3.75-3.5 2.5 2.25 2-1.75 2.75 2.5" />
+    </svg>
+  ),
+  /** A pen — draw by hand. */
+  pen: (
+    <svg {...box}>
+      <path d="m10.5 2.75 2.75 2.75L6 12.75l-3.5.75.75-3.5Z" />
+      <path d="m9.25 4 2.75 2.75" />
+    </svg>
+  ),
+  /** A rectangle — mark a place on a picture. */
+  frame: (
+    <svg {...box}>
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1" />
+    </svg>
+  ),
+  /** An arrow pointing up and right — point at something. */
+  arrow: (
+    <svg {...box}>
+      <path d="M3.5 12.5 12 4M6.5 4H12v5.5" />
+    </svg>
+  ),
+  /** A filled block — cover what others should not see. */
+  redact: (
+    <svg {...box}>
+      <rect x="2.5" y="5" width="11" height="6" rx="1" fill="currentColor" />
+    </svg>
+  ),
+  /** A turning arrow — take back the last step. */
+  undo: (
+    <svg {...box}>
+      <path d="M5.5 3.5 2.75 6.25 5.5 9" />
+      <path d="M2.75 6.25h6.5a3.75 3.75 0 0 1 0 7.5H7" />
+    </svg>
+  ),
+  /** A beetle — something does not work. */
+  bug: (
+    <svg {...box}>
+      <rect x="4.75" y="5" width="6.5" height="8.25" rx="3.25" />
+      <path d="M6 5.25a2 2 0 0 1 4 0M8 8v5.25M2.5 8.25h2.25M11.25 8.25h2.25M3 4.25l1.9 1.6M13 4.25l-1.9 1.6M3 12.5l1.9-1.4M13 12.5l-1.9-1.4" />
+    </svg>
+  ),
+  /** A puzzle piece — a piece the workspace still lacks. */
+  puzzle: (
+    <svg {...box}>
+      <path d="M3 4.5h2.4a1.6 1.6 0 1 1 3.2 0H11v2.4a1.6 1.6 0 1 1 0 3.2V13H8.6a1.6 1.6 0 1 0-3.2 0H3v-2.9a1.6 1.6 0 1 0 0-3.2Z" />
+    </svg>
+  ),
+  /** A light bulb — an idea. */
+  bulb: (
+    <svg {...box}>
+      <path d="M5.9 11.25c0-1.3-2.15-2.4-2.15-4.75a4.25 4.25 0 0 1 8.5 0c0 2.35-2.15 3.45-2.15 4.75Z" />
+      <path d="M6.25 13.5h3.5" />
+    </svg>
+  ),
+  /** A question mark in a circle — a question. */
+  question: (
+    <svg {...box}>
+      <circle cx="8" cy="8" r="5.75" />
+      <path d="M6.4 6.3a1.7 1.7 0 1 1 2.35 1.57c-.5.21-.75.6-.75 1.13v.25" />
+      <circle cx="8" cy="11.1" r="0.7" fill="currentColor" stroke="none" />
+    </svg>
+  ),
 } as const;
 
 export type IconName = keyof typeof Icon;

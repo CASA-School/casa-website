@@ -3016,3 +3016,21 @@ temporary and belongs inside the person check; the wizard must offer only what f
   `/admin/mail/groups` — live groups of learners (course, time of day, Mo+Mi / Di+Do, starting soon) and of the
   team (teachers, office, Angestellte, Honorarkräfte), sent in Bcc parts of 250. docs/ADMIN_WORKSPACE.md
   §Rundmail and a person's addresses.
+
+
+## 62. Feedback from every screen (2026-10-31)
+
+Rahman, planning the parallel phase (team on FileMaker and the workspace at once, the registration week ahead):
+the first thing to build is a way for the team's remarks to arrive with the screen they were made on —
+„very advanced and dynamic and best user experience", screenshots included, a mail to admin@.
+
+- „Feedback" in the top bar (phone: the band): kind (Funktioniert nicht / Fehlt hier / Idee / Frage), text,
+  up to five screenshots — this tab captured through the browser's screen sharing, pasted, dropped or chosen —
+  each drawn on (frame, arrow, pen, black out) before it goes; page, pages before, browser and page errors
+  travel with it. „Mein Feedback" with state and answer, a dot when an answer comes.
+- Migration 0112 (`staff_feedback`, `staff_feedback_files`, notes entity `feedback`); module `feedback`
+  (owner/admin by role); the inbox screen and record parts reused; route handlers for send, mine and the
+  pictures, each checking for itself; mail to admin@ after the response, screenshots inline under 4 MB.
+- 0111 is taken by the website session's exam-preparation branch; this is 0112.
+- docs/ADMIN_WORKSPACE.md §Feedback.
+

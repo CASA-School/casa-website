@@ -224,6 +224,9 @@ export type OverviewFacts = {
   cohortsUpcoming: number;
   nextExam: Date | null;
   applicationsOpen: number;
+  /** The team's feedback (0112): open, and how many are new. */
+  feedbackOpen: number;
+  feedbackNew: number;
   colleagues: number;
   changesToday: number;
   /** Website releases waiting for approval, and texts drafted but not released. */
@@ -241,12 +244,13 @@ export type OverviewFacts = {
 
 export async function getOverviewFacts(): Promise<OverviewFacts> {
   type Dates = 'nextExam' | 'pricesSince' | 'plannedTo';
-  type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen' | 'waitlistWaiting' | 'waitlistFree';
+  type Inbox = 'enquiriesOpen' | 'enquiriesNew' | 'registrationsOpen' | 'registrationsNew' | 'applicationsOpen' | 'feedbackOpen' | 'feedbackNew' | 'waitlistWaiting' | 'waitlistFree';
   // The inboxes are counted as their own screens count them (src/lib/admin/inbox.ts), so a card and its list never disagree.
-  const [enquiries, registrations, applications, waitlist] = await Promise.all([
+  const [enquiries, registrations, applications, feedback, waitlist] = await Promise.all([
     inboxCounts('enquiry'),
     inboxCounts('registration'),
     inboxCounts('career_application'),
+    inboxCounts('feedback'),
     waitlistCounts(),
   ]);
   const row = await queryFirst<Record<Exclude<keyof OverviewFacts, Dates | Inbox>, string> & Record<Dates, Date | null>>(
@@ -285,6 +289,8 @@ export async function getOverviewFacts(): Promise<OverviewFacts> {
     cohortsUpcoming: n(row?.cohortsUpcoming),
     nextExam: row?.nextExam ?? null,
     applicationsOpen: openCount(applications),
+    feedbackOpen: openCount(feedback),
+    feedbackNew: feedback.new,
     colleagues: n(row?.colleagues),
     changesToday: n(row?.changesToday),
     websitePending: n(row?.websitePending),
