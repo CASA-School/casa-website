@@ -1,0 +1,27 @@
+# The SchoolMan sync service on the office server (Proxmox CT 103, claasbook-srv1, 10.0.60.11), since
+# 2026-10-31: docs/schoolman/MIGRATION.md §5. Read-only by code. Its two secrets are files in ./secrets
+# (secrets.sh, run by Rahman), its bookmark is ./state/state.json; deploy.sh copies ./app and starts it.
+name: schoolman-sync
+services:
+  sync:
+    image: node:22-bookworm-slim
+    container_name: schoolman-sync
+    restart: unless-stopped
+    user: "1000:1000"
+    entrypoint: ["/bin/sh", "/app/scripts/schoolman-sync/server/run.sh"]
+    environment:
+      TZ: Europe/Berlin
+      # FileMaker Server's certificate (it does not name 10.0.60.10, so it is pinned, not checked).
+      FM_CERT_SHA256: "94:10:06:8A:19:88:25:B2:2B:06:50:64:B0:DC:D3:CB:BB:95:0F:C0:24:1B:68:3D:76:A0:0E:C1:8C:AF:66:DC"
+      SCHOOLMAN_SYNC_STATE: /state/state.json
+      NODE_OPTIONS: --max-old-space-size=512
+    volumes:
+      - ./app:/app:ro
+      - ./state:/state
+      - ./secrets:/run/schoolman-sync:ro
+    mem_limit: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "3"

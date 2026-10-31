@@ -2942,3 +2942,19 @@ Placement guidance and registration delivery follow-up were prepared in the `web
   (Ads, Business Profile, housekeeping, privacy, platform) with a paste-in brief; `docs/OPERATIONS.md`
   with the ops scripts now in `scripts/ops/` (health, Azure health, logs, read-only queries inside the
   app); `AGENTS.md` cleared of the portal-era helpers.
+
+## 58. The SchoolMan sync on the office server (2026-10-31)
+
+Rahman, before the first registration week with the team on both systems: the sync must not stop when his
+Mac sleeps. He suggested the FileMaker Mac mini; it went to Proxmox CT 103 instead (`claasbook-srv1`, beside
+the Klassenbuch): the Mac mini should run FileMaker alone, it is reached only through Screen Sharing under a
+departed colleague's account, and CT 103 already had Docker, a link to FileMaker and a monitor that mails.
+
+- `scripts/schoolman-sync/server/`: `compose.yaml` (node:22-bookworm-slim, user 1000, 768 MB cap, logs 3 × 5
+  MB), `run.sh` (secrets from files into the environment), `deploy.sh` (copy + recreate over one SSH
+  connection), `secrets.sh` (Rahman ran it: Keychain → server files, never shown).
+- Switched 10:41 CET: the Mac's launchd service removed (`install-mac.sh --off`, still the way back), its
+  bookmark (`state.json`, ids and modIds only) carried over, so nothing was read again; first round 18 s, 66 MB.
+- The Klassenbuch monitor watches it through `/etc/klassenbuch-monitor.json` (no change to its code): stopped,
+  restarted, or a line saying „failed" — so `sync.mjs` now writes „<table> failed: …" and „tick failed: …".
+- docs/schoolman/MIGRATION.md §1 and §5 have the runbook.

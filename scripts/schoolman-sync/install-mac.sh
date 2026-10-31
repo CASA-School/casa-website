@@ -1,7 +1,7 @@
 #!/bin/zsh
-# The SchoolMan sync service on this Mac, started at login and kept running by launchd (docs/FILEMAKER_BRIDGE.md §9)
-# — until it moves to the office server. The Mac must be on and in the office network (or the VPN); FileMaker
-# Pro need not be open. Secrets stay in the Keychain: `casa-workspacesync` (WorkspaceSync's password, added by
+# The SchoolMan sync service on this Mac, started at login and kept running by launchd (docs/FILEMAKER_BRIDGE.md §9).
+# Since 2026-10-31 it runs on the office server (scripts/schoolman-sync/server/); this is the way back, never
+# both. The Mac must be on and in the office network (or the VPN); FileMaker Pro need not be open. Secrets stay in the Keychain: `casa-workspacesync` (WorkspaceSync's password, added by
 # Rahman) and `casa-schoolman-sync-key` (the signing key, the same as the app's SCHOOLMAN_SYNC_KEY).
 #
 #   scripts/schoolman-sync/install-mac.sh <FM_CERT_SHA256>      install or update, and start

@@ -505,8 +505,8 @@ especially the reporting format in §7 (evidence → root cause → fix → file
   Team screen.
 - **SchoolMan comes across through the real-time sync (live 2026-10-27).** Read
   `docs/schoolman/MIGRATION.md` first. 90 `Sync_<Table>` layouts in SchoolMan (902 fields, hidden from the
-  staff's menus) are read over the Data API as `WorkspaceSync` by the sync service on Rahman's Mac
-  (`scripts/schoolman-sync`, launchd) into a copy in the workspace's database (`schoolman_records`,
+  staff's menus) are read over the Data API as `WorkspaceSync` by the sync service on the office server
+  (`scripts/schoolman-sync`, a container on Proxmox CT 103 since 2026-10-31) into a copy in the workspace's database (`schoolman_records`,
   `/api/schoolman/sync`, `SCHOOLMAN_SYNC_KEY`); the Azure job `caj-casa-website-schoolman` runs the bridge's
   steps from that copy — started by the endpoint when the copy changed, hourly as a fallback, and only the
   steps whose tables changed, all of them once a night (`infra/azure/schoolman-job.sh`, 0099). The service reads only — GET and
