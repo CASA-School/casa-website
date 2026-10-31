@@ -7,6 +7,7 @@ import { WaitlistForm } from '../../catalogue/waitlist-forms';
 import { bookRegistrationAction, editRegistrationAction, resolveRegistrationDeliveryAction, setLineDeclinedAction, unlinkSchoolmanBookingAction } from '../actions';
 import { courseNameResolver } from '../course-names';
 import { formatDay, formatRange, parseOptionLabel, type ParsedOption } from '../option-label';
+import { StayCard, VisaCard } from './needs';
 import { RegistrationPersonCard } from './person-card';
 import { examLevel, levelWord, registrationChecks, registrationTitle, type RegistrationCheck } from '../summary';
 import { DateFormField } from '@/components/admin/date-picker';
@@ -20,7 +21,7 @@ import { canAccess } from '@/lib/admin/access';
 import { activityFor } from '@/lib/admin/activity';
 import { bookingOffer, stayVocabulary } from '@/lib/admin/booking-offer';
 import { levelFree, levelPlaces } from '@/lib/admin/booking-offer-types';
-import { REGISTRATION_ACCOMMODATION, wishesWholeLevel } from '@/lib/admin/booking-levels';
+import { REGISTRATION_ACCOMMODATION, stayFor, wishesWholeLevel } from '@/lib/admin/booking-levels';
 import { BOOKING_STATUS_LABELS, PAYER_LABELS } from '@/lib/admin/bookings';
 import { isExamParts } from '@/lib/admin/exam-parts';
 import { FLAG_LABELS, listFlags } from '@/lib/admin/flags';
@@ -35,6 +36,7 @@ import { learnerHistory } from '@/lib/admin/offers/course-catalogue';
 import { getPersonSummary, latestConfirmedLevel } from '@/lib/admin/people';
 import { describePeople, personCandidates } from '@/lib/admin/person-match';
 import { getRegistration, registrationTypeLabel, type LineOutcome, type RegistrationCourseLine, type RegistrationExamLine } from '@/lib/admin/registrations';
+import { bookedStays, visaProgress } from '@/lib/admin/registration-needs';
 import { registrationFacts } from '@/lib/admin/registration-person';
 import { schoolmanCandidates } from '@/lib/admin/registration-schoolman';
 import { inTheirLanguage } from '@/lib/admin/reply';
@@ -155,10 +157,13 @@ export default async function RegistrationPage({
   ]);
   // Who sent it (2026-10-31): the people at CASA it may be, found in the background, and the one it is once decided.
   const facts = registrationFacts(registration.contact);
-  const [suggestions, linked, confirmed] = await Promise.all([
+  const [suggestions, linked, confirmed, stays, visa] = await Promise.all([
     personId ? personCandidates(facts, { excludeId: personId, include: inSchoolman.map((c) => c.personId) }) : [],
     person && person.canonicalId !== person.id ? describePeople([person.canonicalId], facts).then((found) => found[0] ?? null) : null,
     person ? latestConfirmedLevel(person.canonicalId) : null,
+    // A room and a visa, each how far it has come: booked and placed; the letter for the embassy sent.
+    registration.stay?.accommodationRequired ? bookedStays(booked) : [],
+    registration.stay?.visaRequired ? visaProgress(booked) : null,
   ]);
 
   const { contact, stay } = registration;
@@ -170,6 +175,8 @@ export default async function RegistrationPage({
   const dated = lines.filter((l) => l.kind === 'course' && l.option?.start);
   const stayFrom = dated[0]?.option?.start ?? null;
   const stayTo = dated.reduce<Date | null>((end, l) => (l.option?.end && (!end || l.option.end > end) ? l.option.end : end), null);
+  // The stay around the courses asked for: the day before the first, the Saturday after the last.
+  const stayDates = stayFor(toDateInputValue(stayFrom) || null, toDateInputValue(stayTo) || null);
 
   // The line whose wizard, queue or confirmation the address asks for.
   const bookingLine = canBook && offer ? lines.find((l) => l.id === query.book && isOpen(l.outcome)) : undefined;
@@ -215,6 +222,27 @@ export default async function RegistrationPage({
               </MetaItem>
               <MetaItem icon={Icon.globe}>{registration.locale === 'de' ? t('auf Deutsch', 'in German') : t('auf Englisch', 'in English')}</MetaItem>
             </MetaLine>
+            {stay?.accommodationRequired || stay?.visaRequired ? (
+              // What the stay asks besides the course, in its own colour, where the eye starts.
+              <span className="mt-2 flex flex-wrap gap-1.5">
+                {stay.accommodationRequired ? (
+                  <a href="#unterkunft" className="hover:opacity-80">
+                    <Badge tone="stay">
+                      <span aria-hidden="true" className="[&_svg]:size-3.5">{Icon.home}</span>
+                      {stay.accommodationType && ACCOMMODATION[stay.accommodationType] ? t(`Unterkunft · ${ACCOMMODATION[stay.accommodationType].de}`, `Accommodation · ${ACCOMMODATION[stay.accommodationType].en}`) : t('Unterkunft', 'Accommodation')}
+                    </Badge>
+                  </a>
+                ) : null}
+                {stay.visaRequired ? (
+                  <a href="#visum" className="hover:opacity-80">
+                    <Badge tone="visa">
+                      <span aria-hidden="true" className="[&_svg]:size-3.5">{Icon.globe}</span>
+                      {t('Visumshilfe', 'Visa support')}
+                    </Badge>
+                  </a>
+                ) : null}
+              </span>
+            ) : null}
           </>
         }
         actions={
@@ -477,25 +505,13 @@ export default async function RegistrationPage({
               ))}
             </ol>
 
-            {stay ? (
+            {stay && (!stay.accommodationRequired || !stay.visaRequired || confirmed || stay.allergies) ? (
               <div className="mt-4">
+                {/* What is needed has its own section below; here what is not, and the placement. */}
                 <FactGrid
                   facts={[
-                    {
-                      label: t('Unterkunft', 'Accommodation'),
-                      value: stay.accommodationRequired
-                        ? stay.accommodationType && ACCOMMODATION[stay.accommodationType]
-                          ? pick(lang, ACCOMMODATION[stay.accommodationType])
-                          : t('Nötig', 'Needed')
-                        : t('Nicht nötig', 'Not needed'),
-                      sub: stay.accommodationRequired && stayFrom ? formatRange(stayFrom, stayTo, lang) : undefined,
-                      tone: stay.accommodationRequired ? 'attention' : 'plain',
-                    },
-                    {
-                      label: t('Visumshilfe', 'Visa support'),
-                      value: stay.visaRequired ? t('Nötig', 'Needed') : t('Nicht nötig', 'Not needed'),
-                      tone: stay.visaRequired ? 'attention' : 'plain',
-                    },
+                    ...(stay.accommodationRequired ? [] : [{ label: t('Unterkunft', 'Accommodation'), value: t('Nicht nötig', 'Not needed'), tone: 'plain' as const }]),
+                    ...(stay.visaRequired ? [] : [{ label: t('Visumshilfe', 'Visa support'), value: t('Nicht nötig', 'Not needed'), tone: 'plain' as const }]),
                     ...(confirmed
                       ? [
                           {
@@ -506,7 +522,7 @@ export default async function RegistrationPage({
                           },
                         ]
                       : []),
-                    ...(stay.allergies ? [{ label: t('Allergien', 'Allergies'), value: stay.allergies, tone: 'attention' as const }] : []),
+                    ...(stay.allergies && !stay.accommodationRequired ? [{ label: t('Allergien', 'Allergies'), value: stay.allergies, tone: 'attention' as const }] : []),
                   ]}
                 />
               </div>
@@ -518,6 +534,41 @@ export default async function RegistrationPage({
               </figure>
             ) : null}
           </SubmissionCard>
+
+          {stay?.accommodationRequired || stay?.visaRequired ? (
+            <div className={cn('grid gap-4', stay.accommodationRequired && stay.visaRequired && 'xl:grid-cols-2')}>
+              {stay.accommodationRequired ? (
+                <div id="unterkunft" className="scroll-mt-24">
+                  <StayCard
+                    wish={stay.accommodationType && ACCOMMODATION[stay.accommodationType] ? ACCOMMODATION[stay.accommodationType] : null}
+                    from={stayDates?.from ?? null}
+                    to={stayDates?.to ?? null}
+                    allergies={stay.allergies}
+                    stays={stays}
+                    canPlace={canAccess(user, 'accommodation', 'edit')}
+                    t={t}
+                    lang={lang}
+                  />
+                </div>
+              ) : null}
+              {stay.visaRequired ? (
+                <div id="visum" className="scroll-mt-24">
+                  <VisaCard
+                    nationality={contact.nationalityName ?? (contact.nationalityRaw || null)}
+                    steps={visaSteps({ letters, booked: lines.filter((l) => l.outcome.kind === 'booked' && !l.outcome.cancelled), embassyLetterAt: visa?.embassyLetterAt ?? null, t, lang })}
+                    action={
+                      booked.length && visa?.bookingId && !visa.embassyLetterAt && canAccess(user, 'bookings', 'edit')
+                        ? { href: `/admin/bookings/${visa.bookingId}/letter?kind=visa`, label: t('Brief für die Botschaft schreiben', 'Write the embassy letter') }
+                        : !booked.length && canEdit && firstCourse && !letters.some((l) => l.kind === 'registration_deposit_request')
+                          ? { href: `/admin/registrations/course/${firstCourse.id}/letter`, label: t(`${LETTER_KIND_LABELS.registration_deposit_request.de} schreiben`, `Write the ${LETTER_KIND_LABELS.registration_deposit_request.en.toLowerCase()}`) }
+                          : null
+                    }
+                    t={t}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           {deliveryFlags.length ? (
             <Card title={t('E-Mail-Versand prüfen', 'Check email delivery')} icon={Icon.attention} tint="sun">
@@ -878,3 +929,43 @@ function OriginalValues({ original, current, lang }: { original: Record<string, 
     </Card>
   );
 }
+
+/**
+ * A visa case's way to the embassy (2026-10-31): the down payment asked for (a learner abroad pays the whole
+ * first course, docs/LETTERS.md), the booking, the letter for the embassy.
+ */
+function visaSteps({
+  letters,
+  booked,
+  embassyLetterAt,
+  t,
+  lang,
+}: {
+  letters: readonly { kind: string; sentAt: Date }[];
+  booked: readonly Line[];
+  embassyLetterAt: Date | null;
+  t: T;
+  lang: WsLang;
+}) {
+  const asked = letters.find((l) => l.kind === 'registration_deposit_request');
+  const sentOn = (at: Date) => t(`verschickt am ${shortDate(at, lang)}`, `sent on ${shortDate(at, lang)}`);
+  return [
+    {
+      label: pick(lang, LETTER_KIND_LABELS.registration_deposit_request),
+      done: Boolean(asked),
+      detail: asked ? sentOn(asked.sentAt) : t('noch nicht verschickt', 'not sent yet'),
+    },
+    {
+      label: t('Gebucht', 'Booked'),
+      done: booked.length > 0,
+      detail: booked.length ? booked.map((l) => (l.outcome.kind === 'booked' ? l.outcome.number : '')).join(', ') : t('noch nicht gebucht', 'not booked yet'),
+    },
+    {
+      label: pick(lang, LETTER_KIND_LABELS.visa_letter),
+      done: Boolean(embassyLetterAt),
+      detail: embassyLetterAt ? sentOn(embassyLetterAt) : t('noch nicht verschickt', 'not sent yet'),
+    },
+  ];
+}
+
+const shortDate = (at: Date, lang: WsLang) => new Date(at).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
