@@ -2711,7 +2711,8 @@ decides; the search is a read (`searchRegistrationPeopleAction`, `registrations`
 page (Kurse).
 
 **A room and a visa stand out** (Rahman, 2026-10-31). Each has its colour wherever it is meant — the stay
-blue, the visa violet (badge tones `stay`, `visa`, solid): pills in the Anmeldung's head that jump to their
+blue (badge tone `stay`, solid), the visa the soft orange of „Unter Beobachtung" (badge tone `visa`, Rahman:
+„more like orange … if it is required and if it is not, just nothing"): pills in the Anmeldung's head that jump to their
 sections and a tag on the list. Each is a section of its own (`needs.tsx`): the workspace's card with a
 tinted icon and its colour as a fine line along the top, rows ruled in `--ws-line`. Solid coloured heads were
 tried and turned back („like an elegant top border"), as were navy heads for every section. *Unterkunft*: what was asked for, the stay's dates (the day before the first
