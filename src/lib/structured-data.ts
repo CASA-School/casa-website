@@ -219,6 +219,8 @@ export function examGraph(input: {
     inLanguage: 'de',
     location: schoolPlace(),
     organizer: organizationRef(),
+    // Google's event report asks for a performer; for an exam that is the centre holding it.
+    performer: organizationRef(),
     image: toAbsoluteUrl('/brand/casa-logo.png'),
     offers: {
       '@type': 'Offer',
@@ -226,6 +228,8 @@ export function examGraph(input: {
       priceCurrency: input.currency,
       availability: 'https://schema.org/InStock',
       url: `${pageUrl('/registration/exam', input.locale)}?session=${session.id}`,
+      // Registration opens when the sitting is made: the bridge publishes new sittings as it creates them.
+      ...(session.created_at ? { validFrom: session.created_at } : {}),
       ...(session.registration_deadline ? { validThrough: session.registration_deadline } : {}),
     },
     about: { '@id': `${url}#credential` },
