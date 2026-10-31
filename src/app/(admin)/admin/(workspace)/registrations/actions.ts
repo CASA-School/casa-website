@@ -9,9 +9,11 @@ import { query } from '@/lib/admin/db';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { isUuid } from '@/lib/admin/ids';
+import { personCandidates, type PersonCandidate } from '@/lib/admin/person-match';
 import { bookRegistration } from '@/lib/admin/registration-booking';
+import { confirmRegistrationPerson, newRegistrationPerson, registrationFacts, separateRegistrationPerson } from '@/lib/admin/registration-person';
 import { dismissSchoolmanBooking, linkToSchoolmanBooking, unlinkSchoolmanBooking } from '@/lib/admin/registration-schoolman';
-import { editRegistration, setLineDeclined, type RegistrationEdit } from '@/lib/admin/registrations';
+import { editRegistration, getRegistration, setLineDeclined, type RegistrationEdit } from '@/lib/admin/registrations';
 
 const SALUTATIONS = ['mr', 'ms', 'mx', 'neutral'] as const;
 const STATUSES: readonly BookingStatus[] = ['reserved', 'confirmed'];
@@ -184,3 +186,45 @@ export async function unlinkSchoolmanBookingAction(formData: FormData): Promise<
   redirect(ok ? `${back}#line-${lineId}` : `${back}?error=${encodeURIComponent(t('Diese Position ist mit keiner Buchung aus SchoolMan verknüpft.', 'This line is not linked to a SchoolMan booking.'))}`);
 }
 
+
+/**
+ * The side panel's search (2026-10-31): a colleague's own words — a name, an address, a phone or
+ * customer number — judged against what the registration says. Reads only.
+ */
+export async function searchRegistrationPeopleAction(id: string, text: string): Promise<PersonCandidate[]> {
+  await requireModule('registrations');
+  if (!isUuid(id)) return [];
+  const registration = await getRegistration(id);
+  if (!registration) return [];
+  return personCandidates(registrationFacts(registration.contact), { excludeId: registration.personId, text: text.slice(0, 80), limit: 12 });
+}
+
+/** „Das ist …": the sender is this person at CASA. */
+export async function confirmRegistrationPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  const personId = String(formData.get('personId') ?? '');
+  if (!isUuid(personId)) throw new Error('Invalid personId');
+  const result = await confirmRegistrationPerson(id, personId, actor);
+  revalidatePath('/admin', 'layout');
+  const { lang } = await getI18n();
+  redirect(result.ok ? `/admin/registrations/${id}` : `/admin/registrations/${id}?error=${encodeURIComponent(pick(lang, result.reason))}`);
+}
+
+/** „Neue Person": nobody at CASA; the sender goes on the register. */
+export async function newRegistrationPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  await newRegistrationPerson(id, actor);
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/registrations/${id}`);
+}
+
+/** „Trennen": the sender is not who they were taken for. */
+export async function separateRegistrationPersonAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('registrations', 'edit');
+  const id = registrationId(formData);
+  await separateRegistrationPerson(id, actor);
+  revalidatePath('/admin', 'layout');
+  redirect(`/admin/registrations/${id}`);
+}

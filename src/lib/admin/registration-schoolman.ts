@@ -19,6 +19,8 @@ export type SchoolmanCandidate = {
   lineId: string;
   bookingId: string;
   bookingNumber: string;
+  /** The booking's learner, canonical: the person at CASA the panel compares. */
+  personId: string;
   learnerName: string;
   /** „Intensivkurs B1.1", „telc Deutsch B2". */
   what: string | null;
@@ -44,6 +46,7 @@ export async function schoolmanCandidates(registrationId: string): Promise<Schoo
     line_id: string;
     booking_id: string;
     number: string;
+    person_id: string;
     learner: string;
     what: string | null;
     from_day: string | null;
@@ -57,7 +60,7 @@ export async function schoolmanCandidates(registrationId: string): Promise<Schoo
     booked_after: boolean;
     sure: boolean;
   }>(
-    `SELECT c.line_kind, c.line_id, c.booking_id, b.number, concat_ws(' ', p.first_name, p.last_name) AS learner,
+    `SELECT c.line_kind, c.line_id, c.booking_id, b.number, p.id AS person_id, concat_ws(' ', p.first_name, p.last_name) AS learner,
             coalesce(
               (SELECT x.name FROM exam_sessions s JOIN exam_types x ON x.id = s.exam_type_id WHERE s.id = b.exam_session_id),
               concat_ws(' ', coalesce(nullif(btrim(t.name_de), ''), t.name),
@@ -79,6 +82,7 @@ export async function schoolmanCandidates(registrationId: string): Promise<Schoo
     lineId: r.line_id,
     bookingId: r.booking_id,
     bookingNumber: r.number,
+    personId: r.person_id,
     learnerName: r.learner,
     what: r.what,
     from: r.from_day,
