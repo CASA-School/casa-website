@@ -66,15 +66,15 @@ export default async function WorkspaceRootLayout({ children }: { children: Reac
     >
       <body className="casa-workspace bg-ws-canvas font-[family-name:var(--font-sans)] text-[var(--casa-ink)] antialiased">
         {/*
-          Before first paint: the sidebar's collapsed state, read from the same
-          key `SidebarToggle` writes. Without this a colleague who works
+          Before first paint: the sidebar's collapsed state and its width, read
+          from the keys `SidebarToggle` and `SidebarResizer` write. Without this a colleague who works
           collapsed watches the rail fold itself on every navigation. Wrapped
           in try/catch because a private window throws on localStorage access.
         */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var v=localStorage.getItem('casa-workspace-nav');if(v)document.documentElement.dataset.workspaceNav=v;var f=localStorage.getItem('casa-focus-nav');if(f)document.documentElement.dataset.focusNav=f}catch(e){}",
+              "try{var d=document.documentElement,v=localStorage.getItem('casa-workspace-nav');if(v)d.dataset.workspaceNav=v;var w=localStorage.getItem('casa-workspace-nav-width');if(w&&/^\\d{3}$/.test(w))d.style.setProperty('--ws-rail-w',w+'px');var f=localStorage.getItem('casa-focus-nav');if(f)d.dataset.focusNav=f}catch(e){}",
           }}
         />
         <WsLangProvider lang={lang}>{children}</WsLangProvider>

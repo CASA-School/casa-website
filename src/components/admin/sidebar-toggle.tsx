@@ -71,7 +71,7 @@ export function SidebarToggle({ focus = false }: { focus?: boolean }) {
       aria-label={collapsed ? t('Seitenleiste ausklappen', 'Expand the sidebar') : t('Seitenleiste einklappen', 'Collapse the sidebar')}
       title={collapsed ? t('Seitenleiste ausklappen', 'Expand the sidebar') : t('Seitenleiste einklappen', 'Collapse the sidebar')}
       className={cn(
-        'hidden size-8 shrink-0 items-center justify-center rounded-lg text-white/50',
+        'hidden size-8 shrink-0 items-center justify-center rounded-lg text-[var(--ws-rail-icon)]',
         'transition-colors hover:bg-white/[0.07] hover:text-white',
         'outline-none focus-visible:ring-2 focus-visible:ring-white/40 lg:flex'
       )}

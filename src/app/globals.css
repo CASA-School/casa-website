@@ -1006,9 +1006,19 @@ h3 {
   --fm-navy-hover: #183358;
 
   /* The sidebar: a deeper navy than FileMaker's, so the white pages read as the work area. */
-  --ws-rail: #12284a;
+  --ws-rail: #0f2445;
   /* Its top, a step lighter, so the frame has depth rather than a flat fill. */
-  --ws-rail-top: #183460;
+  --ws-rail-top: #14305a;
+  /*
+   * Its type, measured (2026-11-01, Rahman: „the font color on the background might be too pale"). Before:
+   * labels white at 68% (6.6:1), icons at 42% (3.5:1), group heads at 38% (3.1:1) — the last two under
+   * the 4.5:1 text needs. Now, on #0f2445: labels 13.4:1, sub-items 10.2:1, icons 7.8:1, group heads
+   * 7.2:1; the current page a white strip with navy type (15.5:1) and a blue icon (4.9:1).
+   */
+  --ws-rail-text: #e9eff8;
+  --ws-rail-sub: #c7d3e6;
+  --ws-rail-icon: #a9bad3;
+  --ws-rail-head: #9fb2cf;
 
   /* The workspace's primary action and its ink chips: FileMaker's navy, not black. */
   --casa-ink-deep: var(--fm-navy);
@@ -1047,6 +1057,16 @@ h3 {
 @media (min-width: 64rem) {
   :is(html[data-workspace-nav='collapsed'] .casa-workspace-shell:not(.casa-workspace-focus), html:not([data-focus-nav='expanded']) .casa-workspace-focus) .casa-workspace-rail {
     width: 4.25rem;
+  }
+
+  /* While its edge is dragged (sidebar-resizer.tsx) the rail follows the pointer, with no easing behind it. */
+  html[data-rail-resizing] .casa-workspace-rail {
+    transition: none;
+  }
+  html[data-rail-resizing],
+  html[data-rail-resizing] * {
+    cursor: col-resize !important;
+    user-select: none;
   }
 
   .casa-workspace-rail [data-nav-label] {

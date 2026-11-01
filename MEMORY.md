@@ -3007,3 +3007,6 @@ temporary and belongs inside the person check; the wizard must offer only what f
   heads with grey glyphs, a lighter canvas, one button system with a `tertiary` word-link, a record's bar with
   labelled status and owner, `accent` for the stay and the visa. docs/ADMIN_WORKSPACE.md §Design standards.
 - **Type** (2026-11-01): the workspace is Inter (Rahman, from a six-font mock-up), Kursplanung too; letters and mail are Arial. Corners are the workspace's own tokens (`rounded-ws-card` 14px).
+- **Sidebar** (2026-11-01): measured contrast (labels 13:1, icons 7.8:1, group heads 7.2:1; white strip for the
+  current page) and a draggable edge — 208–360px, folds under 150px (`sidebar-resizer.tsx`). Three icon/frame
+  mock-ups were turned down first: no 3D icons and no coloured icon tiles in the workspace.
