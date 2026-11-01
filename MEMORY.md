@@ -3038,8 +3038,8 @@ the first thing to build is a way for the team's remarks to arrive with the scre
 ## 63. Merged, and what Rahman asked next (2026-11-01)
 
 - PR #227 (passes 60, 61 and the design, Rundmail and address work recorded under 61) and PR #221 (pass 62)
-  are in `main` as rebase merges; #223 closed as part of #227. Not released: the next release applies
-  0112–0114 with the SchoolMan job paused (0112 changes `staff_notes`).
+  are in `main` as rebase merges; #223 closed as part of #227. Released the same evening as revision
+  `0000119` (main `67d730a3`): 0112–0114 applied with the SchoolMan job removed and recreated around it.
 - Rahman's next request, open (docs/ADMIN_WORKSPACE.md §Open items, „Record pages"): on a learner's
   Persönliche Daten, a field's value looks bigger than its name; heads, icons and buttons could learn from
   Ghulam Rasool's Dribbble work; four boxes should become one or two, „Datensatz" a standard element on every
