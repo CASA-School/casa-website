@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Manrope, Playfair_Display } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
 import '../globals.css';
 
@@ -17,10 +17,12 @@ import { getWsLang } from '@/lib/admin/i18n.server';
  *
  * TWO TYPEFACES, ONE OF THEM THE WORKSPACE'S OWN.
  *
- * Manrope carries the interface and every numeral (2026-09-16, the product
- * owner's choice after the course-planning board was designed in it): a
- * geometric sans with tabular figures, which a workspace of dated, counted
- * rows depends on completely. The public site stays on Plus Jakarta Sans in
+ * Inter carries the interface and every numeral (2026-11-01, Rahman chose it
+ * from a comparison of Manrope, Inter, Geist, IBM Plex Sans, Plus Jakarta Sans
+ * and Montserrat on a mock-up of an Anmeldung; Manrope before, since
+ * 2026-09-16): drawn for screens, clear at 12px, with tabular figures
+ * (`tabular-nums`) for the dated, counted rows. Letters and mail are Arial,
+ * whatever the interface uses. The public site stays on Plus Jakarta Sans in
  * its own root layout; the two products already differ in chrome and ground,
  * and the typeface is part of what tells staff which one they are in. Playfair
  * Display is kept for page and card titles only, at 16px and above, because it
@@ -34,10 +36,9 @@ import { getWsLang } from '@/lib/admin/i18n.server';
  * is not reachable at `casa-bremen.de/admin`.
  */
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['400', '500', '600', '700', '800'],
 });
 
 const playfairDisplay = Playfair_Display({
@@ -60,7 +61,7 @@ export default async function WorkspaceRootLayout({ children }: { children: Reac
   return (
     <html
       lang={lang}
-      className={`${manrope.variable} ${playfairDisplay.variable}`}
+      className={`${inter.variable} ${playfairDisplay.variable}`}
       suppressHydrationWarning
     >
       <body className="casa-workspace bg-ws-canvas font-[family-name:var(--font-sans)] text-[var(--casa-ink)] antialiased">
