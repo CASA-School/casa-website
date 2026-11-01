@@ -19,14 +19,16 @@ export async function Pagination({
   page,
   total,
   params,
+  pageSize = PAGE_SIZE,
 }: {
   basePath: string;
   page: number;
   total: number;
   /** The current search params, so the filter and query survive a page change. */
   params: Record<string, string | string[] | undefined>;
+  pageSize?: number;
 }) {
-  const pages = pageCount(total);
+  const pages = pageCount(total, pageSize);
   const { t } = await getI18n();
 
   if (pages <= 1) {
@@ -47,8 +49,8 @@ export async function Pagination({
     return query ? `${basePath}?${query}` : basePath;
   };
 
-  const first = (page - 1) * PAGE_SIZE + 1;
-  const last = Math.min(page * PAGE_SIZE, total);
+  const first = (page - 1) * pageSize + 1;
+  const last = Math.min(page * pageSize, total);
 
   return (
     <nav

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
+import { adjustBookingContext, BOOKING_CATEGORIES, validBookingMonth } from '@/lib/admin/booking-context';
+import { isSession } from '@/lib/admin/day-plan-labels';
+import { BookingOverview } from './booking-overview';
 import { berlinDay } from '@/lib/admin/days';
 import { bookingPeriod, readBookingTask, validBookingDay, BOOKING_SORT_KEYS, type BookingSort } from '@/lib/admin/booking-query';
 import { BookingToolbar } from './booking-toolbar';
@@ -19,6 +21,9 @@ import {
   PAYER_LABELS,
   type Payer,
   bookingCounts,
+  bookingCategoryCounts,
+  bookingContextFacets,
+  bookingDemand,
   bookingLight,
   bookingLightLabel,
   listBookings,
@@ -29,7 +34,7 @@ import { groupByMonth, monthHeading } from '@/lib/admin/days';
 import { requireModule } from '@/lib/admin/guard';
 import { addDays } from '@/lib/admin/offers/stay';
 import { todayInputValue, toDateInputValue } from '@/lib/dates';
-import { clampPage, firstParam, offsetFor, PAGE_SIZE } from '@/lib/admin/paging';
+import { clampPage, firstParam, offsetFor } from '@/lib/admin/paging';
 import { isUuid } from '@/lib/admin/ids';
 import { organisationName } from '@/lib/admin/organisations';
 import { pick, wsLocale, type Bilingual, type T, type WsLang } from '@/lib/admin/i18n';
@@ -40,30 +45,9 @@ import { owesMoney } from '@/lib/admin/open-money';
 import { mailHref } from '@/lib/admin/mail/href';
 
 /**
- * Bookings.
- *
- * A booking is created from a person or a registration, never from here — the
- * list is where you find one. Every row carries the team's colour from SchoolMan
- * (docs/schoolman/bookings.md) as a dot before the name, its word on hover: green
- * all good, yellow under observation, grey until paid in full, red cancelled —
- * the team reads the colours, not the words (Rahman, 2026-10-18), and yellow is
- * set from the dot on the learner's or the booking's page. The views are the
- * team's work lists: what is running (ending soon first), what is coming
- * (starting soon first), what is still owed (most first), the follow-ups due,
- * then the past and the cancelled. The tabs carry the counts; the line above
- * says only the sum owed.
- *
- * Money is two figures: the total charged, and the balance still open — the
- * one the team looks at first, in a calm amber while something is owed and a
- * quiet "Paid" once it is settled. Paid is total minus balance and needs no
- * column of its own.
- *
- * In months (Rahman, 2026-10-21: „add year and month … upcoming, ongoing and past, so the bookings with
- * money from the past could be quickly followed up with … an action button"): what is coming after the
- * next two weeks by the month it starts, the past with what is still owed first and then by the month
- * it ended, all and cancelled by the month they start. Each row ends in its actions — a payment, a
- * reminder, the confirmation, an e-mail, the learner — with „Erinnern" as a button where money is open
- * and the view is about money.
+ * Course-first booking worklists. Lifecycle choices live in the shared side panel; time, starting
+ * level and entry dates follow the actual schedule. The demand strip counts the entire result;
+ * the table keeps chronological booking dates, SchoolMan's lights and the existing money/actions.
  */
 
 const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
@@ -73,11 +57,19 @@ const VIEWS: { key: BookingFilter; label: Bilingual }[] = [
   { key: 'followup', label: { de: 'Wiedervorlage', en: 'Follow-up' } },
   { key: 'past', label: { de: 'Vergangen', en: 'Past' } },
   { key: 'cancelled', label: { de: 'Storniert', en: 'Cancelled' } },
-  { key: 'all', label: { de: 'Alle', en: 'All' } },
+  { key: 'reserved', label: { de: 'Reserviert', en: 'Reserved' } },
+  { key: 'all', label: { de: 'Alle Buchungen', en: 'All bookings' } },
 ];
 
 /** Two weeks: "soon" for a course that starts or ends — the team's NewStart and End lists. */
 const SOON_DAYS = 14;
+const BOOKINGS_PER_PAGE = 80;
+const CATEGORIES = [
+  { key: 'all', label: { de: 'Alle Buchungen', en: 'All bookings' } },
+  { key: 'intensive', label: { de: 'Intensiv', en: 'Intensive' } },
+  { key: 'evening', label: { de: 'Abend', en: 'Evening' } },
+  { key: 'exam', label: { de: 'Prüfungen', en: 'Exams' } },
+] as const;
 
 /** Still owed: a booking that is not cancelled with more charged than paid. */
 const owes = (b: BookingListItem) => b.status !== 'cancelled' && owesMoney(b.charged - b.paid);
@@ -135,16 +127,16 @@ export default async function BookingsPage({
 }) {
   const params = await searchParams;
   const user = await requireModule('bookings');
-  const [types, programmes, { t, lang }] = await Promise.all([bookingTypeChoices(), bookingProgrammeChoices(), getI18n()]);
+  const [types, programmes, facets, { t, lang }] = await Promise.all([bookingTypeChoices(), bookingProgrammeChoices(), bookingContextFacets(), getI18n()]);
   const today = berlinDay(new Date());
   const task = readBookingTask(firstParam(params.q) ?? '', types, today);
   if (task.recognized) {
     const canonical = Object.fromEntries(Object.entries(params).map(([key, value]) => [key, firstParam(value) ?? '']));
-    Object.assign(canonical, task.params, { q: task.search, page: '' });
-    redirect(`/admin/bookings?${new URLSearchParams(Object.entries(canonical).filter(([, value]) => Boolean(value)))}`);
+    const next = adjustBookingContext(canonical, { ...task.params, q: task.search }, facets);
+    redirect(`/admin/bookings?${new URLSearchParams(Object.entries(next).filter(([, value]) => Boolean(value)))}`);
   }
   const rawFilter = firstParam(params.filter);
-  const filter: BookingFilter = VIEWS.some(v => v.key === rawFilter) ? rawFilter as BookingFilter : 'current';
+  const filter: BookingFilter = VIEWS.some(v => v.key === rawFilter) ? rawFilter as BookingFilter : 'all';
   const search = (firstParam(params.q) ?? '').slice(0, 200);
   const page = clampPage(params.page);
   const rawPayer = firstParam(params.org);
@@ -154,6 +146,12 @@ export default async function BookingsPage({
   const payer = (['self', 'agency', 'company'] as const).find(p => p === firstParam(params.payer)) as Payer | undefined;
   const rawType = firstParam(params.type);
   const typeId = rawType === 'exam' || types.some(type => type.id === rawType) ? rawType : undefined;
+  const inferredCategory = typeId === 'exam' ? 'exam' : types.find(type => type.id === typeId)?.slug === 'intensive-german' ? 'intensive' : types.find(type => type.id === typeId)?.slug === 'evening-german' ? 'evening' : 'all';
+  const category = BOOKING_CATEGORIES.find(c => c === firstParam(params.category)) ?? inferredCategory;
+  const rawSession = firstParam(params.session);
+  const session = rawSession && isSession(rawSession) ? rawSession : undefined;
+  const month = validBookingMonth(firstParam(params.month));
+  const start = validBookingDay(firstParam(params.start));
   const programme = programmes.find(p => p.code === firstParam(params.programme))?.code;
   const rawLevel = (firstParam(params.level) ?? '').toUpperCase();
   const level = /^[ABC][12]\+?(?:\.[12])?$/.test(rawLevel) ? rawLevel : undefined;
@@ -161,10 +159,12 @@ export default async function BookingsPage({
   const bounds = period ? bookingPeriod(period, today) : { startFrom: validBookingDay(firstParam(params.from)), startTo: validBookingDay(firstParam(params.to)) };
   const sort = BOOKING_SORT_KEYS.find(key => key === firstParam(params.sort));
   const direction = firstParam(params.dir) === 'desc' ? 'desc' : 'asc';
-  const narrow = { payerId, year, payer, typeId, programme, level, ...bounds };
-  const [{ items, total }, counts, payerName, years] = await Promise.all([
-    listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page), sort, direction, ...narrow }),
-    bookingCounts(narrow),
+  const narrow = { payerId, year, payer, typeId, programme, category, session, level, month, start, ...bounds };
+  const [{ items, total, months: monthCounts }, counts, categoryCounts, demand, payerName, years] = await Promise.all([
+    listBookings({ filter, search, limit: BOOKINGS_PER_PAGE, offset: offsetFor(page, BOOKINGS_PER_PAGE), sort, direction, ...narrow }),
+    bookingCounts({ ...narrow, search }),
+    bookingCategoryCounts({ payerId, year, payer, programme, ...bounds, search, filter }),
+    category === 'all' ? Promise.resolve([]) : bookingDemand({ ...narrow, search, filter }),
     payerId ? organisationName(payerId) : Promise.resolve(null),
     bookingYearList(narrow),
   ]);
@@ -234,12 +234,12 @@ export default async function BookingsPage({
   const hideLg = 'hidden lg:table-cell';
   // A view's address keeps the filters; `without` drops one of them, for its label's ×.
   const values: Record<string, string> = Object.fromEntries(Object.entries({
-    filter: filter === 'current' ? undefined : filter, org: payerId, year: year?.toString(), payer, type: typeId, programme,
-    level, period, from: period ? undefined : bounds.startFrom, to: period ? undefined : bounds.startTo,
+    filter: filter === 'all' ? undefined : filter, org: payerId, year: year?.toString(), payer, type: typeId, programme,
+    category: category === 'all' ? undefined : category, session, level, month, start, period, from: period ? undefined : bounds.startFrom, to: period ? undefined : bounds.startTo,
     sort, dir: sort ? direction : undefined, q: search || undefined,
   }).filter((entry): entry is [string, string] => Boolean(entry[1])));
   const href = (key: BookingFilter, without?: string) => {
-    const next: Record<string, string> = { ...values, filter: key === 'current' ? '' : key };
+    const next: Record<string, string> = { ...values, filter: key === 'all' ? '' : key };
     if (without === 'dates') { delete next.from; delete next.to; }
     else if (without) delete next[without];
     return `/admin/bookings?${new URLSearchParams(Object.entries(next).filter(([, value]) => Boolean(value)))}`;
@@ -251,12 +251,12 @@ export default async function BookingsPage({
   >{label}<span aria-hidden="true" className="text-[0.7rem] opacity-65">{sort === key ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></Link>;
   const sortDirection = (key: BookingSort) => sort === key ? direction === 'asc' ? 'ascending' as const : 'descending' as const : undefined;
   const chips = [
+    filter !== 'all' ? { key: 'filter' as const, label: pick(lang, VIEWS.find(v => v.key === filter)!.label) } : null,
     payerId ? { key: 'org' as const, label: t(`Bezahlt von ${payerName ?? '…'}`, `Paid by ${payerName ?? '…'}`) } : null,
     year ? { key: 'year' as const, label: String(year) } : null,
     payer ? { key: 'payer' as const, label: pick(lang, PAYER_LABELS[payer]) } : null,
     typeName ? { key: 'type' as const, label: typeName } : null,
     programme ? { key: 'programme' as const, label: programmes.find((p) => p.code === programme)?.name ?? programme } : null,
-    level ? { key: 'level' as const, label: t(`Startniveau ${level}`, `Starting level ${level}`) } : null,
     period ? { key: 'period' as const, label: period === 'next14' ? t('Beginn: nächste 14 Tage', 'Starting in the next 14 days') : t('Beginn in diesem Monat', 'Starting this month') } : null,
     !period && (bounds.startFrom || bounds.startTo) ? { key: 'dates' as const, label: t(`Beginn: ${bounds.startFrom ?? '…'} – ${bounds.startTo ?? '…'}`, `Starts: ${bounds.startFrom ?? '…'} – ${bounds.startTo ?? '…'}`) } : null,
   ].filter(c => c !== null);
@@ -267,33 +267,31 @@ export default async function BookingsPage({
 
       <Card bleed className="casa-bookings-list">
         <ListBar
-          tabs={VIEWS.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: counts[v.key] }))}
-          active={filter}
+          tabs={CATEGORIES.map(v => {
+            const next = adjustBookingContext(values, { category: v.key === 'all' ? '' : v.key }, facets);
+            return { key: v.key, label: pick(lang, v.label), href: `/admin/bookings?${new URLSearchParams(Object.entries(next).filter(([, value]) => Boolean(value)))}`, count: categoryCounts[v.key] ?? 0 };
+          })}
+          active={category}
           search={{
             action: '/admin/bookings',
             value: search,
             placeholder: t('Name, Buchungsnummer (auch SchoolMan) oder Kurs', 'Name, booking number (SchoolMan too) or course'),
             keep: { ...values, q: undefined },
           }}
-
+          end={<BookingFilters
+            base={values} year={year} payer={payer} typeId={typeId} programme={programme}
+            years={years} types={types} programmes={programmes}
+            payers={(['self', 'agency', 'company'] as const).map(value => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
+            startFrom={bounds.startFrom} startTo={bounds.startTo}
+            canTotals={canAccess(user, 'prices', 'view')}
+            views={[...VIEWS].sort((a, b) => a.key === 'all' ? -1 : b.key === 'all' ? 1 : 0).map(v => ({ key: v.key, label: pick(lang, v.label), count: counts[v.key] }))}
+          />}
         />
-        <BookingToolbar values={values} types={types} levels={[...new Set(['A1', 'A2', 'B1', 'B2', 'C1', 'C2', ...CASA_LEVEL_SEQUENCE])]} colleague={user.id} more={<BookingFilters
-              base={values}
-              year={year}
-              payer={payer}
-              typeId={typeId}
-              programme={programme}
-              years={years}
-              types={types}
-              programmes={programmes}
-              payers={(['self', 'agency', 'company'] as const).map((value) => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
-              startFrom={bounds.startFrom}
-              startTo={bounds.startTo}
-              canTotals={canAccess(user, 'prices', 'view')}
-            />} />
+        <BookingToolbar values={values} facets={facets} today={today} summary={t(`${total} ${total === 1 ? 'Buchung' : 'Buchungen'}`, `${total} ${total === 1 ? 'booking' : 'bookings'}`)} />
+        {category !== 'all' ? <BookingOverview values={values} facets={facets} demand={demand} today={today} lang={lang} /> : null}
       {/* The filters in force, each with its ×: the list says what it is narrowed to, the panel changes it. */}
       {chips.length ? (
-        <p className="flex flex-wrap items-center gap-1.5 border-b border-ws-line-soft px-5 py-3">
+        <p className="flex flex-wrap items-center gap-1.5 border-b border-ws-line-soft px-5 py-2">
           {chips.map((chip) => (
             <span key={chip.key} className="inline-flex items-center gap-1.5 rounded-md bg-[#f3f6fa] py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
               {chip.label}
@@ -306,7 +304,7 @@ export default async function BookingsPage({
               </Link>
             </span>
           ))}
-          <Link href={`/admin/bookings?${new URLSearchParams({ ...(filter === 'current' ? {} : { filter }) })}`} className="ml-2 rounded-sm text-xs font-medium text-[var(--casa-muted)] hover:underline">{t('Zurücksetzen', 'Reset')}</Link>
+          <Link href={`/admin/bookings?${new URLSearchParams({ ...(category === 'all' ? {} : { category }), ...(search ? { q: search } : {}) })}`} className="ml-2 rounded-sm text-xs font-medium text-[var(--casa-muted)] hover:underline">{t('Zurücksetzen', 'Reset')}</Link>
         </p>
       ) : null}
 
@@ -315,7 +313,7 @@ export default async function BookingsPage({
             {search ? t(`Keine Buchung passt zu „${search}“.`, `No booking matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
-          <Table
+          <Table density="compact"
             head={[
               { label: sortHead('name', t('Teilnehmende', 'Student')), sort: sortDirection('name') },
               { label: sortHead('start', t('Zeitraum', 'Dates')), sort: sortDirection('start'), className: `w-[13.5rem] ${hide}` },
@@ -325,7 +323,7 @@ export default async function BookingsPage({
             ]}
           >
             {groups.map((group) => [
-              group.label ? <ListGroup key={group.key} label={group.label} count={group.rows.length} span={span} /> : null,
+              group.label ? <ListGroup key={group.key} label={group.label} count={filter === 'all' || filter === 'cancelled' ? monthCounts[group.key] : undefined} span={span} /> : null,
               ...group.rows.map((b) => {
                 const light = bookingLight(b);
                 const lightLabel = pick(lang, bookingLightLabel(b));
@@ -344,7 +342,7 @@ export default async function BookingsPage({
                   </>
                 ) : null;
                 return (
-                <TableRow key={b.id} interactive>
+                <TableRow key={b.id} interactive className={b.examSessionId ? 'booking-exam' : b.courseFormat === 'intensive' ? 'booking-intensive' : b.courseFormat === 'evening' ? 'booking-evening' : undefined}>
                   <Cell href={`/admin/bookings/${b.id}`} className="max-w-0">
                     {/* The team's colour before the name, as SchoolMan colours the record; its word on hover. */}
                     <span className="flex items-center gap-2.5">
@@ -373,7 +371,7 @@ export default async function BookingsPage({
         )}
       </Card>
 
-      <Pagination basePath="/admin/bookings" page={page} total={total} params={values} />
+      <Pagination basePath="/admin/bookings" page={page} total={total} params={values} pageSize={BOOKINGS_PER_PAGE} />
     </>
   );
 }

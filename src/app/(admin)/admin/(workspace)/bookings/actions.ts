@@ -2,6 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { BOOKING_CATEGORIES, validBookingMonth } from '@/lib/admin/booking-context';
+import { BOOKING_VIEW_KEYS, validBookingDay } from '@/lib/admin/booking-query';
+import { isSession } from '@/lib/admin/day-plan-labels';
 
 import {
   addCharge,
@@ -776,7 +779,7 @@ export async function saveLetterStandardAction(input: { kind: string; language: 
  * just written there but calculated only if requested"), from the bookings filter panel. The totals are
  * finance's and management's: whoever holds the price list (`prices`).
  */
-export async function bookingTotalsAction(input: { payer?: string; typeId?: string; programme?: string; payerId?: string }): Promise<BookingYear[]> {
+export async function bookingTotalsAction(input: { payer?: string; typeId?: string; programme?: string; payerId?: string; category?: string; session?: string; level?: string; month?: string; start?: string; startFrom?: string; startTo?: string; search?: string; filter?: string }): Promise<BookingYear[]> {
   const user = await requireModule('bookings');
   if (!canAccess(user, 'prices', 'view')) throw new Error('Not allowed');
   const payer = (['self', 'agency', 'company'] as const).find((p) => p === input.payer);
@@ -784,5 +787,11 @@ export async function bookingTotalsAction(input: { payer?: string; typeId?: stri
   const payerId = isUuid(input.payerId ?? '') ? input.payerId : undefined;
   // A programme's code (0093): letters and an underscore only, checked against the vocabulary by the query itself.
   const programme = /^[a-z_]{1,40}$/.test(input.programme ?? '') ? input.programme : undefined;
-  return bookingYears({ payer, typeId, payerId, programme });
+  const category = BOOKING_CATEGORIES.find(c => c === input.category);
+  const session = isSession(input.session ?? '') ? input.session as 'morning' | 'afternoon' | 'evening' : undefined;
+  const level = /^[ABC][12]\+?(?:\.[12])?$/.test(input.level ?? '') ? input.level : undefined;
+  const filter = BOOKING_VIEW_KEYS.find(f => f === input.filter);
+  return bookingYears({ payer, typeId, payerId, programme, category, session, level, filter,
+    month: validBookingMonth(input.month), start: validBookingDay(input.start),
+    startFrom: validBookingDay(input.startFrom), startTo: validBookingDay(input.startTo), search: input.search?.slice(0, 200) });
 }

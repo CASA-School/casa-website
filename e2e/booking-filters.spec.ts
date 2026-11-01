@@ -36,25 +36,23 @@ test.describe('workspace booking worklists', () => {
   test.beforeEach(async ({ context, baseURL }) => {
     await context.addCookies([{ name: 'casa_workspace_session', value: token, url: baseURL! }, { name: 'casa_ws_lang', value: 'en', url: baseURL! }]);
   });
-  test('filters, sorts and saves a reusable view without saving the learner search', async ({ page }) => {
+  test('filters and sorts with branded controls and no saved-view row', async ({ page }) => {
     await page.goto(`/admin/bookings?filter=all&q=${surname}&type=${type}`, { waitUntil: 'networkidle' });
     await expect(page.getByRole('row').filter({ hasText: `Ada ${surname}` })).toBeVisible();
     await expect(page.getByRole('row').filter({ hasText: `Zoe ${surname}` })).toBeVisible();
-    await page.getByRole('button', { name: 'Starting level: All', exact: true }).click();
+    await page.getByRole('button', { name: 'Starting level: All levels', exact: true }).click();
     await page.getByRole('menuitem', { name: 'B1', exact: true }).click();
     await expect(page).toHaveURL(/level=B1/);
     await expect(page.getByRole('row').filter({ hasText: `Ada ${surname}` })).toBeVisible();
     await expect(page.getByRole('row').filter({ hasText: `Zoe ${surname}` })).toHaveCount(0);
     await page.getByRole('link', { name: 'Sort by Balance' }).click();
     await expect(page.getByRole('columnheader', { name: 'Sort by Balance' })).toHaveAttribute('aria-sort', 'ascending');
-    await page.getByRole('button', { name: 'Save view', exact: true }).click();
-    await page.getByRole('textbox', { name: 'View name' }).fill('Evening B1');
-    await page.getByRole('button', { name: 'Save', exact: true }).click();
-    const stored = await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '[]'), `casa-workspace-booking-views:${owner}`);
-    expect(stored[0].params).toMatchObject({ type, level: 'B1', sort: 'balance' });
-    expect(stored[0].params).not.toHaveProperty('q');
-    await page.reload();
-    await expect(page.getByRole('combobox', { name: 'Saved views', exact: true }).locator('option').filter({ hasText: 'Evening B1' })).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Save view', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: 'Saved views', exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: /^Filters/ }).click();
+    const panel = page.getByRole('dialog', { name: 'Filter bookings' });
+    await expect(panel.getByRole('combobox', { name: 'Booking status' })).toHaveValue('all');
+    await expect(panel.getByRole('combobox', { name: 'Booking status' }).locator('option').filter({ hasText: 'Unpaid' })).toHaveText('Unpaid · 1');
   });
   test('task search opens a relevant list and preserves exact record search', async ({ page }) => {
     await page.goto('/admin/bookings', { waitUntil: 'networkidle' });
@@ -70,6 +68,17 @@ test.describe('workspace booking worklists', () => {
     const number = (await db.query(`SELECT number FROM bookings WHERE id = $1`, [bookings[0]])).rows[0].number;
     await page.goto(`/admin/bookings?filter=all&q=${number}`);
     await expect(page.getByRole('row').filter({ hasText: `Ada ${surname}` })).toBeVisible();
+  });
+  test('a new course task replaces incompatible context in the local list search', async ({ page }) => {
+    await page.goto(`/admin/bookings?category=intensive&session=morning&month=2027-01&level=A1&q=${surname}`, { waitUntil: 'networkidle' });
+    const search = page.locator('.ws-list-bar').getByRole('searchbox', { name: 'Search' });
+    await search.fill(`unpaid evening B1 ${surname}`);
+    await search.press('Enter');
+    await expect(page.getByRole('row').filter({ hasText: `Ada ${surname}` })).toBeVisible();
+    await expect(page.getByRole('row').filter({ hasText: `Zoe ${surname}` })).toHaveCount(0);
+    expect(new URL(page.url()).searchParams.get('category')).not.toBe('intensive');
+    expect(new URL(page.url()).searchParams.has('month')).toBe(false);
+    expect(new URL(page.url()).searchParams.has('session')).toBe(false);
   });
   test('course-start boundaries narrow the booked dates', async ({ page }) => {
     const dates = (await db.query(`SELECT (current_date + 8)::text AS after, (current_date + 6)::text AS before, current_date::text AS today, (current_date + 14)::text AS until`)).rows[0];

@@ -5,7 +5,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent
 import { DIALOG_OVERLAY, dialogPanel } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { useWsLang } from '@/components/admin/lang';
-import { Button, Card, IconChip } from '@/components/admin/ui';
+import { Button, Card, IconChip, Select } from '@/components/admin/ui';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -540,18 +540,18 @@ export function MailComposer({
             <h2 className="text-sm font-extrabold text-[var(--casa-ink)]">{t('So kommt sie an', 'As it arrives')}</h2>
             <div className="flex flex-wrap items-center gap-2">
               {each && people.length > 1 ? (
-                <select
+                <Select menuFit="content"
                   aria-label={t('Vorschau für', 'Preview for')}
                   value={previewed ? keyOf(previewed) : ''}
                   onChange={(e) => setPreviewKey(e.target.value)}
-                  className="h-8 max-w-[14rem] rounded-lg border border-ws-line bg-white px-2 text-[0.78rem] font-semibold text-[var(--casa-ink)]"
+                  className="max-w-[14rem] [&>button]:h-8 [&>button]:px-2 [&>button]:text-[0.78rem]"
                 >
                   {people.map((r) => (
                     <option key={keyOf(r)} value={keyOf(r)}>
                       {r.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               ) : null}
               <div role="radiogroup" aria-label={t('Breite', 'Width')} className="inline-flex gap-0.5 rounded-xl bg-ws-sunk p-0.5">
                 {(['desktop', 'phone'] as const).map((w) => (

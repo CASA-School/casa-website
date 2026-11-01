@@ -113,7 +113,7 @@ export default async function GroupsPage({ searchParams }: { searchParams: Promi
             {search ? t(`Nichts passt zu „${search}“.`, `Nothing matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
-          <Table
+          <Table density="compact"
             head={[
               t('Gruppe', 'Group'),
               { label: t('Land', 'Country'), className: `w-[10rem] ${hide}` },

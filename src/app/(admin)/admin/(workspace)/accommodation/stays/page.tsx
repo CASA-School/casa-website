@@ -98,7 +98,7 @@ export default async function StaysPage({ searchParams }: { searchParams: Promis
             {search ? t(`Nichts passt zu „${search}“.`, `Nothing matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
-          <Table
+          <Table density="compact"
             head={[
               t('Teilnehmende', 'Student'),
               { label: t('Aufenthalt', 'Stay'), className: 'w-[12rem]' },

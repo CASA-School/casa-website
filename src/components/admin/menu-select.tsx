@@ -99,7 +99,7 @@ function MenuList({
         ref={openAtChoice}
         className={cn(
           menuPanel,
-          fit === 'field' ? 'w-(--radix-dropdown-menu-trigger-width) min-w-0' : 'max-w-[22rem] min-w-(--radix-dropdown-menu-trigger-width)',
+          fit === 'field' ? 'w-(--radix-dropdown-menu-trigger-width) min-w-0' : 'max-w-[min(22rem,var(--radix-dropdown-menu-content-available-width))] min-w-(--radix-dropdown-menu-trigger-width)',
           'z-[1100] max-h-[min(60vh,440px,var(--radix-dropdown-menu-content-available-height))] overflow-x-hidden overflow-y-auto overscroll-contain border data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95'
         )}
       >
@@ -214,11 +214,12 @@ function labelOf(select: HTMLSelectElement): string {
 export function Select({
   className,
   bare = false,
+  menuFit,
   children,
   disabled,
   'aria-label': ariaLabel,
   ...props
-}: SelectHTMLAttributes<HTMLSelectElement> & { bare?: boolean }) {
+}: SelectHTMLAttributes<HTMLSelectElement> & { bare?: boolean; menuFit?: 'field' | 'content' }) {
   const native = useRef<HTMLSelectElement>(null);
   const field = useRef<HTMLButtonElement>(null);
   const [host, onOpenChange] = useHost(field);
@@ -313,7 +314,7 @@ export function Select({
             </>
           )}
         </DropdownMenuTrigger>
-        <MenuList options={options} value={shown.value} onPick={choose} host={host} fit={bare ? 'content' : 'field'} />
+        <MenuList options={options} value={shown.value} onPick={choose} host={host} fit={menuFit ?? (bare ? 'content' : 'field')} />
       </DropdownMenu>
     </span>
   );

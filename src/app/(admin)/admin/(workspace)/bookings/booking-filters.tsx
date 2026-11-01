@@ -9,7 +9,7 @@ import { useWsLang } from '@/components/admin/lang';
 import { Select } from '@/components/admin/menu-select';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button } from '@/components/admin/ui';
-import { cn } from '@/lib/utils';
+import type { BookingFilter } from '@/lib/admin/bookings';
 import { DateFormField } from '@/components/admin/date-picker';
 
 type Totals = { year: number; owing: number; owed: number }[];
@@ -36,6 +36,7 @@ export function BookingFilters({
   canTotals,
   startFrom,
   startTo,
+  views,
 }: {
   /** What the filters keep: the view, the organisation from its page, the search. */
   base: Record<string, string | undefined>;
@@ -51,15 +52,17 @@ export function BookingFilters({
   canTotals: boolean;
   startFrom?: string;
   startTo?: string;
+  views: readonly { key: BookingFilter; label: string; count: number }[];
 }) {
   const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   const [chosenPayer, setChosenPayer] = useState(payer ?? '');
+  const [chosenType, setChosenType] = useState(typeId ?? '');
   const [datesEdited, setDatesEdited] = useState(false);
   const [totals, setTotals] = useState<Totals | null>(null);
   const [failed, setFailed] = useState(false);
   const [counting, startCounting] = useTransition();
-  const active = [year, payer, programme, !base.period && (startFrom || startTo)].filter(Boolean).length;
+  const active = [base.filter && base.filter !== 'all', year, payer, typeId, programme, base.period || startFrom || startTo].filter(Boolean).length;
 
   const href = (extra: Record<string, string | undefined>) => {
     const query = new URLSearchParams(Object.entries({ ...base, ...extra }).filter((e): e is [string, string] => Boolean(e[1]))).toString();
@@ -69,7 +72,9 @@ export function BookingFilters({
     startCounting(async () => {
       try {
         setFailed(false);
-        setTotals(await bookingTotalsAction({ payer, typeId, programme, payerId: base.org }));
+        setTotals(await bookingTotalsAction({ payer, typeId, programme, payerId: base.org, category: base.category,
+          session: base.session, level: base.level, month: base.month, start: base.start,
+          startFrom, startTo, search: base.q, filter: base.filter }));
       } catch {
         setFailed(true);
       }
@@ -78,11 +83,11 @@ export function BookingFilters({
   return (
     <SidePanel
       open={open}
-      onOpenChange={next => { setOpen(next); if (next) { setChosenPayer(payer ?? ''); setDatesEdited(false); } }}
+      onOpenChange={next => { setOpen(next); if (next) { setChosenPayer(payer ?? ''); setChosenType(typeId ?? ''); setDatesEdited(false); setTotals(null); setFailed(false); } }}
       trigger={
         <span className="inline-flex items-center gap-1.5">
           {Icon.settings}
-          {t('Weitere Filter', 'More filters')}
+          {t('Filter', 'Filters')}
           {active ? <span className="ml-0.5 inline-grid min-w-[1.15rem] place-items-center rounded-full bg-[var(--fm-navy)] px-1 text-[0.68rem] font-bold text-white tabular-nums">{active}</span> : null}
         </span>
       }
@@ -92,7 +97,7 @@ export function BookingFilters({
       tint="blue"
       footer={
         <span className="flex w-full items-center justify-between gap-2">
-          <Link href={href({ year: undefined, payer: undefined, type: undefined, programme: undefined, from: undefined, to: undefined, period: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
+          <Link href={href({ filter: undefined, year: undefined, payer: undefined, type: undefined, programme: undefined, from: undefined, to: undefined, period: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
             {t('Zurücksetzen', 'Reset')}
           </Link>
           <Button type="submit" form="booking-filters" size="md">
@@ -102,7 +107,13 @@ export function BookingFilters({
       }
     >
       <form id="booking-filters" action="/admin/bookings" method="get" onSubmit={() => setOpen(false)} className="space-y-5 px-6 py-5">
-        {Object.entries(base).filter(([name]) => !['year', 'payer', 'type', 'programme', 'from', 'to', ...(datesEdited ? ['period'] : [])].includes(name)).map(([name, value]) => (value ? <input key={name} type="hidden" name={name} value={value} /> : null))}
+        {Object.entries(base).filter(([name]) => !['filter', 'year', 'payer', 'type', 'programme', 'from', 'to', ...(datesEdited ? ['period', 'month', 'start'] : []), ...(chosenType !== (typeId ?? '') ? ['category', 'session', 'level', 'month', 'start'] : [])].includes(name)).map(([name, value]) => (value ? <input key={name} type="hidden" name={name} value={value} /> : null))}
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold text-[var(--casa-muted)]">{t('Buchungsstatus', 'Booking status')}</span>
+          <Select name="filter" defaultValue={base.filter ?? 'all'}>
+            {views.map(view => <option key={view.key} value={view.key}>{view.label} · {view.count}</option>)}
+          </Select>
+        </label>
         <fieldset className="grid gap-3 sm:grid-cols-2">
           <legend className="mb-2 text-xs font-semibold text-[var(--casa-muted)]">{t('Kursbeginn', 'Course start')}</legend>
           <label className="block"><span className="mb-1 block text-xs text-[var(--casa-muted)]">{t('Von', 'From')}</span><DateFormField id="booking-start-from" name="from" defaultValue={startFrom} onChange={() => setDatesEdited(true)} /></label>
@@ -119,29 +130,16 @@ export function BookingFilters({
             ))}
           </Select>
         </label>
-        <fieldset>
-          <legend className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Wer zahlt', 'Who pays')}</legend>
-          <input type="hidden" name="payer" value={chosenPayer} />
-          <span className="flex flex-wrap gap-1.5">
-            {[{ value: '', label: t('Alle', 'All') }, ...payers].map((p) => (
-              <button
-                key={p.value || 'all'}
-                type="button"
-                aria-pressed={chosenPayer === p.value}
-                onClick={() => setChosenPayer(p.value)}
-                className={cn(
-                  'inline-flex h-8 items-center rounded-full px-3 text-[0.82rem] font-semibold ring-1 transition-colors ring-inset outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40',
-                  chosenPayer === p.value ? 'bg-[var(--fm-navy)] text-white ring-[var(--fm-navy)]' : 'bg-white text-[var(--casa-ink)] ring-ws-line hover:bg-ws-sunk'
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
-          </span>
-        </fieldset>
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold text-[var(--casa-muted)]">{t('Wer zahlt', 'Who pays')}</span>
+          <Select name="payer" value={chosenPayer} onChange={e => setChosenPayer(e.target.value)}>
+            <option value="">{t('Alle', 'All')}</option>
+            {payers.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+          </Select>
+        </label>
         <label className="block">
           <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Kursart', 'Course type')}</span>
-          <Select name="type" defaultValue={typeId ?? ''}>
+          <Select name="type" value={chosenType} onChange={e => setChosenType(e.target.value)}>
             <option value="">{t('Alle Kursarten', 'All course types')}</option>
             {types.map((type) => (
               <option key={type.id} value={type.id}>
@@ -169,11 +167,12 @@ export function BookingFilters({
       {canTotals ? (
         <section className="border-t border-ws-line-soft px-6 py-5">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-[0.84rem] font-bold text-[var(--casa-ink)]">{t('Offene Beträge', 'Amounts owed')}</h3>
+            <h3 className="text-[0.84rem] font-bold text-[var(--casa-ink)]">{t('Offene Beträge nach Jahr', 'Amounts owed by year')}</h3>
             <Button type="button" variant="secondary" size="sm" onClick={count} disabled={counting}>
               {counting ? t('Wird berechnet …', 'Working it out …') : totals ? t('Neu berechnen', 'Work out again') : t('Berechnen', 'Work out')}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-[var(--casa-muted)]">{t('Für die angewendeten Filter, über alle Jahre.', 'For the applied filters, across all years.')}</p>
           {failed ? <p className="mt-3 text-[0.82rem] text-[var(--casa-danger-text)]">{t('Das hat nicht geklappt.', 'That did not work.')}</p> : null}
           {totals ? (
             totals.some((y) => y.owing) ? (
@@ -183,7 +182,7 @@ export function BookingFilters({
                   .map((y) => (
                     <li key={y.year}>
                       <Link
-                        href={href({ year: String(y.year), payer, type: typeId, programme, filter: 'unclear' })}
+                        href={href({ year: String(y.year), payer, type: typeId, programme, filter: base.filter || 'unclear' })}
                         onClick={() => setOpen(false)}
                         className="flex items-baseline justify-between gap-3 px-3.5 py-2.5 text-[0.86rem] transition-colors hover:bg-[var(--ws-row-hover)]"
                       >

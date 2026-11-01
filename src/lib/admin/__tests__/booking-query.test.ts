@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bookingPeriod, readBookingTask, savedBookingParams, validBookingDay } from '../booking-query';
+import { bookingPeriod, readBookingTask, validBookingDay } from '../booking-query';
 const types = [{ id: 'evening-id', name: 'Abendkurs', slug: 'evening-german' }];
 const today = '2026-11-01';
 describe('booking task search', () => {
@@ -16,13 +16,10 @@ describe('booking task search', () => {
   it('does not invent a course type that is absent from the catalogue', () => {
     expect(readBookingTask('Abendkurs', [], today).recognized).toBe(false);
   });
-  it('uses relative dates that can be recalculated when a saved view is opened', () => {
+  it('uses relative dates that can be recalculated when a relative date filter is opened', () => {
     expect(readBookingTask('next 14 days', types, today).params).toEqual({ filter: 'upcoming', period: 'next14' });
     expect(bookingPeriod('next14', '2026-12-28')).toEqual({ startFrom: '2026-12-28', startTo: '2027-01-11' });
     expect(bookingPeriod('month', '2028-02-17')).toEqual({ startFrom: '2028-02-01', startTo: '2028-02-29' });
     expect(validBookingDay('2026-02-30')).toBeUndefined();
-  });
-  it('saves only filter choices, without names, destinations or arbitrary data', () => {
-    expect(savedBookingParams({ q: 'Pia Example', type: 'evening-id', level: 'B1', page: '7', href: 'https://example.com', filter: 'unclear', junk: 'x' })).toEqual({ type: 'evening-id', level: 'B1', filter: 'unclear' });
   });
 });
