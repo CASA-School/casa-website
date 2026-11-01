@@ -857,6 +857,27 @@ The global search is an anchored popover; conservative DE/EN task phrases offer 
 worklists while existing entity ranking, exact identifiers and recent records continue to work.
 
 
+**Installable Workspace (2026-11-02).** The staff app links `/admin/manifest.json`, separate from the
+public site's browser-mode `/manifest.webmanifest`. Its stable id and launch URL are `/admin`; scope `/`
+covers both the private host's short rewritten paths and the internal `/admin/...` links. The existing
+host boundary blocks staff manifest/version URLs on the public host. The single manifest identity is
+read by `src/config/workspace-app.ts` for layout metadata. Icons reuse the approved CASA sail/sun/wave
+artwork, including the opaque Apple icon and maskable Android icon; no new competing logo.
+
+The account menu offers **App installieren**. A supported browser's deferred installation event is
+consumed once, only on this explicit choice. Otherwise the shared SidePanel shows platform-specific
+manual steps (Safari Home Screen on iPhone/iPad, Safari Dock on Mac, Chrome/Edge or Android browser
+installation). Standalone windows hide the install entry. Dismissal adds no automatic reminder.
+
+This first version keeps business data online. It registers no service worker, creates no CacheStorage
+or IndexedDB records and queues no writes. A connection notice retains the current inputs in memory.
+`WorkspaceStatus` checks the immutable Next build identity on foreground/focus/reconnection and once a
+minute while visible. `/admin/app-version` requires an active staff session, returns the normal API
+envelope and `private, no-store`; failures leave current work alone, and a 401 stops polling. Production
+reads `.next/BUILD_ID`, shipped by standalone output; development has a stable `development` identity.
+A different build produces a non-modal notice. Reload is manual and confirmed with an explicit warning
+about unsaved inputs. Push subscriptions and offline editing are outside this first version.
+
 **The look is the offers module's (2026-10-13).** Rahman asked for the whole
 workspace to be restyled the way Offers was built (docs/OFFERS.md §Design):
 white framed cards on the canvas, headings in the sans at 800, an icon chip in

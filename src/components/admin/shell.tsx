@@ -12,6 +12,8 @@ import { SidebarResizer } from './sidebar-resizer';
 import { FeedbackButton } from './feedback/feedback-button';
 import { TopBar } from './top-bar';
 import { AccountMenu } from './top-bar-menus';
+import { WorkspaceStatus } from './workspace-status';
+import { workspaceVersion } from '@/lib/admin/app-version';
 import { canAccess } from '@/lib/admin/access';
 import type { StaffRole, StaffUser } from '@/lib/admin/auth';
 import { pick, type Bilingual, type WsLang } from '@/lib/admin/i18n';
@@ -60,7 +62,7 @@ export async function WorkspaceShell({
   children: ReactNode;
 }) {
   const focus = variant === 'focus';
-  const [{ t, lang }, site] = await Promise.all([getI18n(), publicSiteOrigin()]);
+  const [{ t, lang }, site, version] = await Promise.all([getI18n(), publicSiteOrigin(), workspaceVersion()]);
   const siteHref = `${site}/`;
   const roleText = roleLabel(user.role, lang);
   // Rooms, the type lists and the price list: defined once and left alone for a season.
@@ -77,6 +79,7 @@ export async function WorkspaceShell({
 
   return (
     <div className={cn('casa-workspace-shell flex min-h-dvh flex-col lg:flex-row', focus && 'casa-workspace-focus')}>
+      <WorkspaceStatus initialVersion={version} />
       {/* The pages of this visit, for the way back above a record; and „recently opened". */}
       <Suspense fallback={null}>
         <NavTrail colleague={user.id} pages={pages.map(({ href, label }) => ({ href, label }))} />

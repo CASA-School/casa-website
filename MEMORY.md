@@ -21,6 +21,15 @@ surfaces, mobile navigation/search and optional compact Table spacing apply acro
 No migration. Implementation and validation evidence: dashboard-brand worktree, ignored
 `output/contextual-bookings/`. This refinement is separate from the already completed revision120 release.
 
+Workspace PWA, 2026-11-02: the staff app has its own static /admin/manifest.json, standalone display,
+stable /admin identity and approved CASA icons. The account menu handles native installation or manual
+Apple/browser steps. Business data stays online: no service worker/private data cache/offline writes.
+Foreground build checks use authenticated, no-store /admin/app-version and Next BUILD_ID; a new version
+is announced without reloading, with confirmation before discarding inputs. See ADMIN_WORKSPACE design
+standards. Build/types/lint/Knip/CMS, 1122 unit tests, 101 affected E2E and 124 workspace routes pass;
+12 host/auth/build checks also pass against the actual standalone runtime. Local evidence under
+output/workspace-pwa; deployment is separate.
+
 The entries below are historical work notes, not a current launch checklist. Prefer README, the current handoff and runtime code when an older entry conflicts.
 
 Historical summary last updated: 2026-06-29

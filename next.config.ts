@@ -63,6 +63,13 @@ const nextConfig: NextConfig = {
     return [
       { source: '/:path*', headers: SECURITY_HEADERS },
       {
+        source: '/admin/manifest.json',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json' },
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
         source: '/:path*',
         missing: [{ type: 'host', value: INDEXABLE_HOSTS }],
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
