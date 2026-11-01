@@ -134,7 +134,7 @@ export default async function KursePage({ searchParams }: { searchParams: Promis
                 </form>
               ) : null}
               {canWrite ? (
-                <FormDialog trigger={t('Gruppe anlegen', 'Add group')} size="sm" title={`${t('Gruppe anlegen', 'Add group')} · ${shiftLabel}`} description={`${thisLabel} · ${phaseLabel(phase)} (.${phase})`} titleClassName={ui.dlgTitle}>
+                <FormDialog presentation="dialog" trigger={t('Gruppe anlegen', 'Add group')} size="sm" title={`${t('Gruppe anlegen', 'Add group')} · ${shiftLabel}`} description={`${thisLabel} · ${phaseLabel(phase)} (.${phase})`} titleClassName={ui.dlgTitle}>
                   <form action={addGroupAction} className={ui.module}>
                     {hidden({ month, shift, phase, returnTo })}
                     <div className={ui.sec}>

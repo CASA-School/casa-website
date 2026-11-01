@@ -812,6 +812,25 @@ pre-paint script writes an attribute the server render does not have.
 
 ## Design standards
 
+**Interface follow-up (2026-11-01, approved by Rahman).** The rail identifies the product as
+CASA Workspace (a compact C when folded). Participant details use two cards and one editor for
+personal fields, multiple contacts and both addresses. Its save checks the original snapshot and
+writes changes and audit events in one transaction; a stale draft remains open. Existing contact
+ranking, linked-record ownership, removal permissions and the separate bank-data module remain.
+
+Standard `FormDialog` forms now open in the shared `SidePanel`, with a fixed header, scrolling body,
+actions at the foot and native trigger focus restoration. Phone fields stack; reduced motion is
+respected. Use `presentation="dialog"` for broad worksheets or the focus-mode planning form;
+XL worksheets retain their centred default. Confirmation dialogs keep their focused layout.
+The accounts list's row editor uses the same side-panel frame. No new independent popup primitive.
+
+The bookings list exposes course, **starting level** and course-start filters, sortable columns and
+account-scoped browser-local named views. Saved views contain filters, not free-text learner searches;
+relative date presets are resolved when opened. Filter URLs retain pagination context. The global
+search is an anchored popover; conservative DE/EN task phrases offer guarded booking worklists while
+existing entity ranking, exact identifiers and recent records continue to work.
+
+
 **The look is the offers module's (2026-10-13).** Rahman asked for the whole
 workspace to be restyled the way Offers was built (docs/OFFERS.md §Design):
 white framed cards on the canvas, headings in the sans at 800, an icon chip in

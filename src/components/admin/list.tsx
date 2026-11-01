@@ -97,7 +97,7 @@ export function RecordName({ name, reference, about, flag }: { name: string; ref
         <span className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[0.9rem] font-semibold tracking-[-0.005em] text-[var(--casa-ink)]">{name}</span>
           {/* On a phone the name needs the width more than the reference does. */}
-          {reference ? <span className="hidden shrink-0 text-xs font-medium text-[var(--casa-text-subtle)] tabular-nums sm:inline">{reference}</span> : null}
+          {reference ? <span data-record-reference="" className="hidden shrink-0 text-xs font-medium text-[var(--casa-text-subtle)] tabular-nums sm:inline">{reference}</span> : null}
           {flag}
         </span>
         {about ? <span className="mt-0.5 block truncate text-[0.8rem] text-[var(--casa-muted)]">{about}</span> : null}

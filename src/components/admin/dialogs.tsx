@@ -4,6 +4,8 @@ import { createContext, useContext, useRef, useState, type ReactNode } from 'rea
 import { useFormStatus } from 'react-dom';
 
 import { Icon } from './icons';
+import { DIALOG_OVERLAY, SidePanel } from './side-panel';
+export { DIALOG_OVERLAY } from './side-panel';
 import { useWsLang } from './lang';
 import { Button, IconChip, type Tint } from './ui';
 import {
@@ -18,7 +20,8 @@ import { cn } from '@/lib/utils';
 /**
  * The workspace's two dialogs (docs/ADMIN_WORKSPACE.md §Dialogs).
  *
- * FORM DIALOG — a create or edit form in a popup, opened from a button. The
+ * FORM DIALOG — a create or edit form at the side, opened from a button. Wide
+ * worksheets can opt into the centred layout. The
  * form inside is an ordinary `<form action={serverAction}>`; the dialog only
  * frames it: a head (title, what it is about, an optional icon), the form,
  * and the form's own `DialogFooter` — Cancel and the one primary action,
@@ -38,7 +41,6 @@ import { cn } from '@/lib/utils';
 
 const WIDTHS = { sm: 'max-w-[440px]', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' } as const;
 export const dialogPanel = (width: keyof typeof WIDTHS) => cn('casa-ws-dialog overflow-visible rounded-ws-card sm:rounded-ws-card', WIDTHS[width]);
-export const DIALOG_OVERLAY = 'bg-[#0d1b33]/45';
 
 /** Inside a dialog: the footer brings Cancel and pins itself to the foot. */
 const InDialog = createContext(false);
@@ -71,8 +73,11 @@ export function FormDialog({
   width = 'md',
   defaultOpen = false,
   titleClassName,
+  presentation = width === 'xl' ? 'dialog' : 'side',
 }: {
   trigger: ReactNode;
+  /** Standard forms edit at the side; broad worksheets can keep the centred layout. */
+  presentation?: 'side' | 'dialog';
   title: string;
   description?: string;
   /** A subject icon beside the title, on its tint: what the record is about. */
@@ -90,6 +95,22 @@ export function FormDialog({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const { t } = useWsLang();
+  if (presentation === 'side') {
+    return <SidePanel
+      open={open}
+      onOpenChange={setOpen}
+      triggerAsChild
+      trigger={<Button type="button" variant={triggerVariant} size={size} aria-haspopup="dialog" data-dialog="form">{trigger}</Button>}
+      title={title}
+      subtitle={description}
+      icon={icon}
+      tint={tint}
+      width={width === 'sm' ? 'md' : 'lg'}
+      className={cn('casa-form-panel [&>header]:bg-white [&_label]:font-medium [&_.grid-cols-2]:grid-cols-1 sm:[&_.grid-cols-2]:grid-cols-2', width === 'lg' && 'sm:max-w-2xl', width === 'xl' && 'sm:max-w-4xl')}
+    >
+      <DialogBody>{children}</DialogBody>
+    </SidePanel>;
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button type="button" variant={triggerVariant} size={size} onClick={() => setOpen(true)} aria-haspopup="dialog" data-dialog="form">

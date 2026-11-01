@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import { ConfirmSubmit, DialogFooter, FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
@@ -46,6 +47,10 @@ export async function ContactCard({
   hidden,
   actions,
   mailTo,
+  title,
+  headerAction,
+  children,
+  className,
 }: {
   emails: PersonEmail[];
   phones: PersonPhone[];
@@ -57,6 +62,10 @@ export async function ContactCard({
   actions: Actions;
   /** The mail screen for one of the addresses. */
   mailTo: (address: string) => string;
+  title?: string;
+  headerAction?: ReactNode;
+  children?: ReactNode;
+  className?: string;
 }) {
   const { t, lang } = await getI18n();
 
@@ -143,7 +152,7 @@ export async function ContactCard({
   const head = 'text-xs font-bold text-[var(--casa-muted)]';
 
   return (
-    <Card title={t('Kontakt', 'Contact')} icon={Icon.mail} tint="blue">
+    <Card title={title ?? t('Kontakt', 'Contact')} icon={Icon.mail} tint="blue" actions={headerAction} className={className}>
       <div className="space-y-4">
         <section aria-label={t('E-Mail', 'Email')}>
           <h3 className={head}>{t('E-Mail', 'Email')}</h3>
@@ -216,6 +225,7 @@ export async function ContactCard({
             </FormDialog>
           ) : null}
         </section>
+        {children}
       </div>
     </Card>
   );

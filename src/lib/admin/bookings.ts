@@ -1,4 +1,6 @@
 import type { PoolClient } from 'pg';
+import type { BookingSort, BookingTypeChoice } from './booking-query';
+import { parseQuery, searchTokens } from './search-query';
 
 import { logActivity } from './activity';
 import { resolveCourse } from './courses';
@@ -482,9 +484,11 @@ export async function listBookings({
   search,
   limit = 40,
   offset = 0,
+  sort, direction = 'asc',
   ...narrow
 }: {
   filter?: BookingFilter;
+  sort?: BookingSort; direction?: 'asc' | 'desc';
   search?: string;
   limit?: number;
   offset?: number;
@@ -492,17 +496,29 @@ export async function listBookings({
   const params: unknown[] = [];
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})${narrowed(narrow, params)}`;
   if (search) {
-    params.push(`%${search}%`);
-    const n = `$${params.length}`;
-    where += ` AND (concat_ws(' ', p.first_name, p.last_name) ILIKE ${n} OR concat_ws(' ', p.last_name, p.first_name) ILIKE ${n} OR t.name ILIKE ${n} OR t.name_de ILIKE ${n} OR et.name ILIKE ${n} OR b.number ILIKE ${n} OR b.filemaker_booking_id = trim(both '%' from ${n}))`;
+    const parsed = parseQuery(search);
+    if (parsed.booking.exact || parsed.booking.prefix || parsed.number) {
+      params.push(parsed.booking.exact ?? parsed.number ?? '');
+      params.push(parsed.booking.prefix ? `${parsed.booking.prefix}%` : '');
+      where += ` AND (lower(b.number) = $${params.length - 1} OR lower(b.number) LIKE $${params.length} OR b.filemaker_booking_id = $${params.length - 1})`;
+    } else {
+      const tokens = searchTokens(search);
+      if (tokens.length) {
+        params.push(tokens);
+        where += ` AND NOT EXISTS (SELECT 1 FROM unnest($${params.length}::text[]) word
+          WHERE strpos(ws_fold(concat_ws(' ', p.first_name, p.last_name, t.name, t.name_de, et.name, b.number, person_email(p.id))), word) = 0)`;
+      }
+    }
   }
+  const sortColumn = sort === 'name' ? 'person_name' : sort === 'balance' ? `${CHARGED} - ${PAID}` : 'start_date';
+  const order = sort ? `${sortColumn} ${direction === 'desc' ? 'DESC' : 'ASC'} NULLS LAST` : ORDER[filter];
   const total = await queryFirst<{ n: string }>(
     `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
        LEFT JOIN exam_sessions es ON es.id = b.exam_session_id LEFT JOIN exam_types et ON et.id = es.exam_type_id ${where}`,
     params
   );
   const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY ${ORDER[filter]}, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    `${LIST} ${where} ORDER BY ${order}, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset]
   );
   return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
@@ -512,11 +528,20 @@ export async function listBookings({
  * What the bookings list is narrowed to (2026-10-21, the filter panel): the organisation that pays (from
  * its page), the year (`BOOKING_YEAR`), who pays, and the course type — `exam` for the exam bookings.
  */
-export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string; programme?: string };
+export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string; programme?: string; level?: string; startFrom?: string; startTo?: string };
 
 /** The narrowing as SQL on `b`, its values pushed onto `params`. */
-function narrowed({ payerId, year, payer, typeId, programme }: BookingNarrow, params: unknown[]): string {
+function narrowed({ payerId, year, payer, typeId, programme, level, startFrom, startTo }: BookingNarrow, params: unknown[]): string {
   let sql = '';
+  if (level) {
+    params.push(level);
+    const at = `$${params.length}`;
+    sql += ` AND EXISTS (SELECT 1 FROM booking_periods bp LEFT JOIN courses lc ON lc.id = bp.course_id
+      WHERE bp.booking_id = b.id AND (coalesce(bp.level_code, lc.level_code, bp.level_band) = ${at}
+        OR (strpos(${at}, '.') = 0 AND coalesce(bp.level_code, lc.level_code, bp.level_band) LIKE ${at} || '.%')))`;
+  }
+  if (startFrom) { params.push(startFrom); sql += ` AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) >= $${params.length}::date`; }
+  if (startTo) { params.push(startTo); sql += ` AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) <= $${params.length}::date`; }
   if (programme) {
     params.push(programme);
     sql += ` AND b.programme_code = $${params.length}`;
@@ -568,9 +593,9 @@ export async function bookingYearList(narrow: BookingNarrow = {}): Promise<numbe
 }
 
 /** The course types a booking can have, for the filter: the workspace's names, in their order. */
-export async function bookingTypeChoices(): Promise<{ id: string; name: string }[]> {
-  return query<{ id: string; name: string }>(
-    `SELECT id, coalesce(nullif(trim(name_de), ''), name) AS name FROM course_types
+export async function bookingTypeChoices(): Promise<BookingTypeChoice[]> {
+  return query<BookingTypeChoice>(
+    `SELECT id, slug, coalesce(nullif(trim(name_de), ''), name) AS name FROM course_types
       WHERE id IN (SELECT DISTINCT course_type_id FROM bookings WHERE course_type_id IS NOT NULL AND deleted_at IS NULL)
       ORDER BY position NULLS LAST, name`
   );

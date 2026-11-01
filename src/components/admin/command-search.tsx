@@ -1,16 +1,15 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Popover } from 'radix-ui';
 import { pick, type Bilingual } from '@/lib/admin/i18n';
 import type { SearchGroup, SearchHit, SearchKind } from '@/lib/admin/search';
 import { foldSearch, matchesShortcut, searchTokens } from '@/lib/admin/search-query';
 import { cn } from '@/lib/utils';
 
 import type { Shortcut } from './command-shortcuts';
-import { DIALOG_OVERLAY } from './dialogs';
 import { Icon } from './icons';
 import { useWsLang } from './lang';
 import { readRecent } from './nav-trail';
@@ -32,6 +31,8 @@ const KINDS: Record<SearchKind, { label: Bilingual; icon: ReactNode }> = {
   letter: { label: { de: 'Briefe', en: 'Letters' }, icon: Icon.mail },
 };
 
+type WorkList = { href: string; label: string };
+type Answer = { groups: SearchGroup[]; views?: WorkList[] };
 type Row = { key: string; href: string; title: string; detail?: string; icon: ReactNode };
 type Section = { id: string; label: string; rows: Row[] };
 
@@ -113,11 +114,12 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
-  const [result, setResult] = useState<{ term: string; groups: SearchGroup[]; failed?: boolean }>({ term: '', groups: [] });
+  const [result, setResult] = useState<Answer & { term: string; failed?: boolean }>({ term: '', groups: [] });
   const [loading, setLoading] = useState(false);
   const [recent, setRecent] = useState<SearchHit[]>([]);
   const [active, setActive] = useState(0);
-  const cache = useRef(new Map<string, SearchGroup[]>());
+  const cache = useRef(new Map<string, Answer>());
+  const searchId = useId();
   const list = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const { t, lang } = useWsLang();
@@ -125,6 +127,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (!trigger.current?.offsetParent) return;
+      if (!open && e.target instanceof Element && e.target.closest('[role="dialog"]')) return;
       const typing = e.target instanceof HTMLElement && (e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName));
       if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing)) {
         e.preventDefault();
@@ -133,7 +136,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, []);
+  }, [open]);
 
   // Opened: the records opened last, read again — only those this colleague may still open come back.
   useEffect(() => {
@@ -152,18 +155,18 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
     if (term.length < 2) return;
     const cached = cache.current.get(term);
     if (cached) {
-      setResult({ term, groups: cached });
+      setResult({ term, ...cached });
       setActive(0);
       return;
     }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
       setLoading(true);
-      ask<{ groups: SearchGroup[] }>({ q: term }, controller.signal)
+      ask<Answer>({ q: term }, controller.signal)
         .then((data) => {
-          cache.current.set(term, data.groups);
+          cache.current.set(term, data);
           if (cache.current.size > 40) cache.current.delete(cache.current.keys().next().value!);
-          setResult({ term, groups: data.groups });
+          setResult({ term, ...data });
           setActive(0);
         })
         .catch(() => {
@@ -189,6 +192,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
         { id: 'new', label: t('Neu', 'New'), rows: creates.map((s) => shortcutRow('new', s)) },
       ].filter((s) => s.rows.length);
     }
+    const views: Section = { id: 'views', label: t('Passende Arbeitslisten', 'Matching worklists'), rows: (result.views ?? []).map(v => ({ key: v.href, href: v.href, title: v.label, icon: Icon.bookings })) };
     const records = result.groups.map((g) => ({ id: g.kind, label: pick(lang, KINDS[g.kind].label), rows: g.hits.map(hitRow) }));
     const pageRows = pages.filter((p) => matchesShortcut(tokens, p.label, p.keywords)).slice(0, 4);
     const createRows = creates.filter((c) => matchesShortcut(tokens, c.label, c.keywords)).slice(0, 4);
@@ -198,8 +202,8 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
     ];
     // „Neu …" asked for, or a page named in full („Buchungen"): the shortcut first, then the records.
     const named = ['neu', 'new'].includes(tokens[0] ?? '') || pageRows.some((p) => foldSearch(p.label) === tokens.join(' '));
-    return (named ? [...shortcuts, ...records] : [...records, ...shortcuts]).filter((s) => s.rows.length);
-  }, [short, recent, pathname, creates, result.groups, pages, tokens, lang, t]);
+    return [views, ...(named ? [...shortcuts, ...records] : [...records, ...shortcuts])].filter((s) => s.rows.length);
+  }, [short, recent, pathname, creates, result.groups, result.views, pages, tokens, lang, t]);
 
   const rows = sections.flatMap((s) => s.rows);
   const current = Math.min(active, Math.max(rows.length - 1, 0));
@@ -254,20 +258,21 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
   };
 
   return (
-    <>
+    <Popover.Root open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
+      <Popover.Trigger asChild>
       {variant === 'bar' ? (
         <button
           ref={trigger}
           type="button"
           onClick={() => setOpen(true)}
           title={t('Suchen', 'Search')}
-          className="group flex h-9 w-full max-w-[22rem] items-center gap-2.5 rounded-full bg-white/70 pr-1.5 pl-3.5 text-left text-[0.84rem] text-[var(--casa-text-subtle)] ring-1 ring-ws-line ring-inset transition-[background-color,box-shadow] outline-none hover:bg-white hover:shadow-[0_1px_2px_rgba(16,24,40,0.06)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
+          className="group flex h-9 w-full max-w-[25rem] items-center gap-2.5 rounded-lg bg-white/70 pr-1.5 pl-3.5 text-left text-[0.84rem] text-[var(--casa-text-subtle)] ring-1 ring-ws-line ring-inset transition-[background-color,box-shadow] outline-none hover:bg-white hover:shadow-[0_1px_2px_rgba(16,24,40,0.06)] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
         >
           <span aria-hidden="true" className="shrink-0 text-[var(--casa-muted)] [&_svg]:h-4 [&_svg]:w-4">
             {Icon.search}
           </span>
-          <span className="flex-1 truncate">{t('Suchen …', 'Search …')}</span>
-          <kbd className="rounded-full bg-ws-sunk px-2 py-0.5 font-sans text-[0.66rem] font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset">
+          <span className="flex-1 truncate">{t('Name, Nummer oder Aufgabe …', 'Name, number or task …')}</span>
+          <kbd className="rounded-md bg-ws-sunk px-2 py-0.5 font-sans text-[0.66rem] font-semibold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset">
             ⌘K
           </kbd>
         </button>
@@ -283,18 +288,15 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
           {Icon.search}
         </button>
       )}
-
-      <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
-        <DialogContent
-          // Pinned near the top, on a phone too: the list grows downwards and the keyboard stays clear of it.
-          className="casa-ws-dialog mt-3 max-w-xl gap-0 self-start overflow-hidden rounded-ws-card p-0 sm:mt-[8vh]"
-          overlayClassName={DIALOG_OVERLAY}
-          showCloseButton={false}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align={variant === 'bar' ? 'start' : 'end'}
+          sideOffset={8}
+          collisionPadding={12}
+          aria-label={t('Im Arbeitsbereich suchen', 'Search the workspace')}
+          className="casa-ws-dialog z-[1000] w-[min(36rem,calc(100vw-24px))] overflow-hidden rounded-xl border border-ws-line bg-white shadow-[0_12px_44px_rgba(16,24,40,0.16)] outline-none"
         >
-          <DialogTitle className="sr-only">{t('Im Arbeitsbereich suchen', 'Search the workspace')}</DialogTitle>
-          <DialogDescription className="sr-only">
-            {t('Ein Name, eine Nummer, eine E-Mail-Adresse, ein Kurs wie „B1.1 Oktober"', 'A name, a number, an email address, a course like “B1.1 October”')}
-          </DialogDescription>
           <div className="flex items-center gap-3 border-b border-ws-line px-4">
             <span aria-hidden="true" className="text-[var(--casa-text-subtle)]">
               {Icon.search}
@@ -317,8 +319,8 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
               }}
               placeholder={t('Name, Nummer, E-Mail, Kurs …', 'Name, number, email, course …')}
               aria-label={t('Im Arbeitsbereich suchen', 'Search the workspace')}
-              aria-controls="casa-search-results"
-              aria-activedescendant={rows[current] ? `casa-search-${current}` : undefined}
+              aria-controls={`${searchId}-results`}
+              aria-activedescendant={rows[current] ? `${searchId}-${current}` : undefined}
               autoComplete="off"
               spellCheck={false}
               className="h-14 flex-1 bg-transparent text-[0.95rem] text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-text-subtle)]"
@@ -328,7 +330,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
             ) : null}
           </div>
 
-          <div ref={list} id="casa-search-results" className="max-h-[min(60vh,32rem)] overflow-y-auto py-2" role="listbox" aria-label={t('Ergebnisse', 'Results')}>
+          <div ref={list} id={`${searchId}-results`} className="max-h-[min(55dvh,30rem)] overflow-y-auto py-2" role="listbox" aria-label={t('Ergebnisse', 'Results')}>
             {sections.length === 0 ? (
               <p className="px-5 py-6 text-sm text-[var(--casa-text-subtle)]">
                 {short
@@ -349,7 +351,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
                     return (
                       <a
                         key={row.key}
-                        id={`casa-search-${index}`}
+                        id={`${searchId}-${index}`}
                         href={row.href}
                         role="option"
                         aria-selected={on}
@@ -385,8 +387,8 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
             <span>{t('⌘ Enter in neuem Tab', '⌘ Enter in a new tab')}</span>
             <span className="ml-auto">{t('Esc zum Schließen', 'Esc to close')}</span>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }

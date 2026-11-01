@@ -115,10 +115,11 @@ export class WorkspaceDatabaseError extends Error {
 
 export async function query<T extends QueryResultRow>(
   sql: string,
-  params: readonly unknown[] = []
+  params: readonly unknown[] = [],
+  client?: PoolClient
 ): Promise<T[]> {
   try {
-    const result = await getPool().query<T>(sql, params as unknown[]);
+    const result = await (client ?? getPool()).query<T>(sql, params as unknown[]);
     return result.rows;
   } catch (error) {
     throw new WorkspaceDatabaseError(redact(error));
@@ -127,9 +128,10 @@ export async function query<T extends QueryResultRow>(
 
 export async function queryFirst<T extends QueryResultRow>(
   sql: string,
-  params: readonly unknown[] = []
+  params: readonly unknown[] = [],
+  client?: PoolClient
 ): Promise<T | undefined> {
-  const [row] = await query<T>(sql, params);
+  const [row] = await query<T>(sql, params, client);
   return row;
 }
 

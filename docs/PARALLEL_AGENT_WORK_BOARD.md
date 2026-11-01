@@ -60,6 +60,7 @@ Paste this to a new agent, with the unit's id:
 | H5 | Search Console and Bing after the switch | Google/Bing | ready (check first) |
 | H6 | Database maintenance window | Azure | offered, waiting for Rahman |
 | H7 | Next release | Azure | photography release authorized by Rahman, 2026-10-31 |
+| UI | Workspace interface follow-up | code | ✅ approved implementation; push, merge and release authorized by Rahman, 2026-11-01 |
 | P1 | Privacy: specialist review pack | docs | ready |
 | P2 | Scheduled deletion (retention) | code, both products | needs a privacy owner |
 | X1 | Site and workspace as two apps | Azure + code | later, Rahman will come back to it |

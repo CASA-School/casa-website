@@ -7,6 +7,10 @@ import { isExamParts } from '@/lib/admin/exam-parts';
 import { issueLearnerLetter } from '@/lib/admin/letters/booking-issue';
 import { readChoices } from '@/lib/admin/letters/choices';
 import { requireModule } from '@/lib/admin/guard';
+import { countryCodeFromName } from '@/lib/admin/normalize';
+import { canAccess } from '@/lib/admin/access';
+import { PersonDetailsInput, type PersonDetailsResult } from '@/lib/admin/person-details-input';
+import { savePersonDetails } from '@/lib/admin/person-details';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { readBankAccount, readEmail, readPerson, readPhone } from './person-input';
@@ -200,6 +204,37 @@ export async function updatePersonAction(formData: FormData): Promise<void> {
   await updatePerson(id, input, actor);
   revalidatePath('/admin/people', 'layout');
   redirect(`/admin/people/${id}`);
+}
+
+/** The approved unified editor: no redirects on failure, so its draft stays open. */
+export async function savePersonDetailsAction(payload: unknown): Promise<PersonDetailsResult> {
+  const actor = await requireModule('people', 'edit');
+  const { t } = await getI18n();
+  const parsed = PersonDetailsInput.safeParse(payload);
+  if (!parsed.success) return { ok: false, error: t('Bitte prüfe die Angaben und ergänze unvollständige Kontakte.', 'Please check the details and complete any unfinished contacts.') };
+  const values = parsed.data;
+  if ([values.person.birthCountry, values.addresses.local.country, values.addresses.home.country].some(value => value && !countryCodeFromName(value))) {
+    return { ok: false, error: t('Bitte wähle ein Land aus der Vorschlagsliste.', 'Please choose a country from the suggestions.') };
+  }
+  const form = new FormData();
+  form.set('personId', values.personId);
+  const id = await learnerId(form);
+  if ((values.emails.some(e => e.id && e.remove) || values.phones.some(p => p.id && p.remove)) && !canAccess(actor, 'people', 'full')) {
+    return { ok: false, error: t('Du darfst Kontaktdaten ändern, aber nicht entfernen.', 'You may edit contact details, but cannot remove them.') };
+  }
+  for (const [key, value] of Object.entries(values.person)) form.set(key, value);
+  form.set('withFacts', '1');
+  const input = readPerson(form, t);
+  if (typeof input === 'string') return { ok: false, error: input };
+  try {
+    const result = await savePersonDetails({ ...values, personId: id }, input, actor);
+    if (result === 'changed') return { ok: false, error: t('Der Datensatz wurde inzwischen geändert. Deine Eingaben bleiben erhalten. Schließe den Editor und lade die Seite neu, bevor du sie überträgst.', 'This record has changed since you opened it. Your draft is preserved. Close the editor and reload the page before applying it.') };
+    if (result === 'invalid') return { ok: false, error: t('Ein Kontakt wurde inzwischen geändert. Bitte lade den Datensatz neu.', 'A contact has changed. Please reload the record.') };
+  } catch {
+    return { ok: false, error: t('Speichern war nicht möglich. Es wurden keine Änderungen übernommen. Bitte versuche es erneut.', 'Unable to save. No changes were applied. Please try again.') };
+  }
+  revalidatePath('/admin/people', 'layout');
+  return { ok: true };
 }
 
 /** Only after the confirmation dialog: the hidden `confirmed` field must be set. */

@@ -1,4 +1,9 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { CASA_LEVEL_SEQUENCE } from '@/config/calculator/pricing';
+import { berlinDay } from '@/lib/admin/days';
+import { bookingPeriod, readBookingTask, validBookingDay, BOOKING_SORT_KEYS, type BookingSort } from '@/lib/admin/booking-query';
+import { BookingToolbar } from './booking-toolbar';
 import { BookingLightDot } from '@/components/admin/booking-light';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Icon } from '@/components/admin/icons';
@@ -129,34 +134,39 @@ export default async function BookingsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
+  const user = await requireModule('bookings');
+  const [types, programmes, { t, lang }] = await Promise.all([bookingTypeChoices(), bookingProgrammeChoices(), getI18n()]);
+  const today = berlinDay(new Date());
+  const task = readBookingTask(firstParam(params.q) ?? '', types, today);
+  if (task.recognized) {
+    const canonical = Object.fromEntries(Object.entries(params).map(([key, value]) => [key, firstParam(value) ?? '']));
+    Object.assign(canonical, task.params, { q: task.search, page: '' });
+    redirect(`/admin/bookings?${new URLSearchParams(Object.entries(canonical).filter(([, value]) => Boolean(value)))}`);
+  }
   const rawFilter = firstParam(params.filter);
-  const filter: BookingFilter = VIEWS.some((v) => v.key === rawFilter) ? (rawFilter as BookingFilter) : 'current';
-  const search = firstParam(params.q);
+  const filter: BookingFilter = VIEWS.some(v => v.key === rawFilter) ? rawFilter as BookingFilter : 'current';
+  const search = (firstParam(params.q) ?? '').slice(0, 200);
   const page = clampPage(params.page);
-  // From an organisation's page: only the bookings it pays (2026-10-20).
   const rawPayer = firstParam(params.org);
   const payerId = rawPayer && isUuid(rawPayer) ? rawPayer : undefined;
-  // The filters at the side (2026-10-21): the year (of a booking's first day), who pays, the course type.
   const rawYear = firstParam(params.year);
   const year = rawYear && /^\d{4}$/.test(rawYear) ? Number(rawYear) : undefined;
-  const rawPayerKind = firstParam(params.payer);
-  const payer = (['self', 'agency', 'company'] as const).find((p) => p === rawPayerKind) as Payer | undefined;
+  const payer = (['self', 'agency', 'company'] as const).find(p => p === firstParam(params.payer)) as Payer | undefined;
   const rawType = firstParam(params.type);
-  const typeId = rawType === 'exam' || (rawType && isUuid(rawType)) ? rawType : undefined;
-  // The university's programme (0093): which of its programmes it invoices.
-  const programmes = await bookingProgrammeChoices();
-  const rawProgramme = firstParam(params.programme);
-  const programme = programmes.find((p) => p.code === rawProgramme)?.code;
-  const narrow = { payerId, year, payer, typeId, programme };
-
-  const [{ items, total }, counts, payerName, { t, lang }, user, years, types] = await Promise.all([
-    listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page), ...narrow }),
+  const typeId = rawType === 'exam' || types.some(type => type.id === rawType) ? rawType : undefined;
+  const programme = programmes.find(p => p.code === firstParam(params.programme))?.code;
+  const rawLevel = (firstParam(params.level) ?? '').toUpperCase();
+  const level = /^[ABC][12]\+?(?:\.[12])?$/.test(rawLevel) ? rawLevel : undefined;
+  const period = ['month', 'next14'].includes(firstParam(params.period) ?? '') ? firstParam(params.period) : undefined;
+  const bounds = period ? bookingPeriod(period, today) : { startFrom: validBookingDay(firstParam(params.from)), startTo: validBookingDay(firstParam(params.to)) };
+  const sort = BOOKING_SORT_KEYS.find(key => key === firstParam(params.sort));
+  const direction = firstParam(params.dir) === 'desc' ? 'desc' : 'asc';
+  const narrow = { payerId, year, payer, typeId, programme, level, ...bounds };
+  const [{ items, total }, counts, payerName, years] = await Promise.all([
+    listBookings({ filter, search, limit: PAGE_SIZE, offset: offsetFor(page), sort, direction, ...narrow }),
     bookingCounts(narrow),
     payerId ? organisationName(payerId) : Promise.resolve(null),
-    getI18n(),
-    requireModule('bookings'),
     bookingYearList(narrow),
-    bookingTypeChoices(),
   ]);
   const canEdit = canAccess(user, 'bookings', 'edit');
   const typeName = typeId === 'exam' ? t('Prüfungen', 'Exams') : types.find((ty) => ty.id === typeId)?.name;
@@ -175,7 +185,7 @@ export default async function BookingsPage({
   ];
   // Who needs a room is „Aufenthalte" (/admin/accommodation/stays), where a stay is also placed.
   const groups = (
-    filter === 'current'
+    sort ? [{ key: 'sorted', label: '', rows: items }] : filter === 'current'
       ? [
           { key: 'ending', label: t('Enden bald', 'Ending soon'), rows: items.filter(endsSoon) },
           { key: 'running', label: t('Laufen weiter', 'Running on'), rows: items.filter((b) => !endsSoon(b)) },
@@ -223,38 +233,69 @@ export default async function BookingsPage({
   // The total gives way first on a narrower screen: the balance is the figure the team acts on.
   const hideLg = 'hidden lg:table-cell';
   // A view's address keeps the filters; `without` drops one of them, for its label's ×.
-  const query = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org' | 'programme') =>
-    new URLSearchParams(
-      Object.entries({
-        filter: key === 'current' ? undefined : key,
-        org: without === 'org' ? undefined : payerId,
-        year: without === 'year' || !year ? undefined : String(year),
-        payer: without === 'payer' ? undefined : payer,
-        type: without === 'type' ? undefined : typeId,
-        programme: without === 'programme' ? undefined : programme,
-      }).filter((e): e is [string, string] => Boolean(e[1]))
-    ).toString();
-  const href = (key: BookingFilter, without?: 'year' | 'payer' | 'type' | 'org' | 'programme') => {
-    const q = query(key, without);
-    return `/admin/bookings${q ? `?${q}` : ''}`;
+  const values: Record<string, string> = Object.fromEntries(Object.entries({
+    filter: filter === 'current' ? undefined : filter, org: payerId, year: year?.toString(), payer, type: typeId, programme,
+    level, period, from: period ? undefined : bounds.startFrom, to: period ? undefined : bounds.startTo,
+    sort, dir: sort ? direction : undefined, q: search || undefined,
+  }).filter((entry): entry is [string, string] => Boolean(entry[1])));
+  const href = (key: BookingFilter, without?: string) => {
+    const next: Record<string, string> = { ...values, filter: key === 'current' ? '' : key };
+    if (without === 'dates') { delete next.from; delete next.to; }
+    else if (without) delete next[without];
+    return `/admin/bookings?${new URLSearchParams(Object.entries(next).filter(([, value]) => Boolean(value)))}`;
   };
+  const sortHead = (key: BookingSort, label: string) => <Link
+    href={`/admin/bookings?${new URLSearchParams({ ...values, sort: key, dir: sort === key && direction === 'asc' ? 'desc' : 'asc' })}`}
+    className="inline-flex items-center gap-1.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
+    aria-label={t(`Nach ${label} sortieren`, `Sort by ${label}`)}
+  >{label}<span aria-hidden="true" className="text-[0.7rem] opacity-65">{sort === key ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></Link>;
+  const sortDirection = (key: BookingSort) => sort === key ? direction === 'asc' ? 'ascending' as const : 'descending' as const : undefined;
   const chips = [
     payerId ? { key: 'org' as const, label: t(`Bezahlt von ${payerName ?? '…'}`, `Paid by ${payerName ?? '…'}`) } : null,
     year ? { key: 'year' as const, label: String(year) } : null,
     payer ? { key: 'payer' as const, label: pick(lang, PAYER_LABELS[payer]) } : null,
     typeName ? { key: 'type' as const, label: typeName } : null,
     programme ? { key: 'programme' as const, label: programmes.find((p) => p.code === programme)?.name ?? programme } : null,
-  ].filter((c): c is { key: 'org' | 'year' | 'payer' | 'type' | 'programme'; label: string } => c !== null);
+    level ? { key: 'level' as const, label: t(`Startniveau ${level}`, `Starting level ${level}`) } : null,
+    period ? { key: 'period' as const, label: period === 'next14' ? t('Beginn: nächste 14 Tage', 'Starting in the next 14 days') : t('Beginn in diesem Monat', 'Starting this month') } : null,
+    !period && (bounds.startFrom || bounds.startTo) ? { key: 'dates' as const, label: t(`Beginn: ${bounds.startFrom ?? '…'} – ${bounds.startTo ?? '…'}`, `Starts: ${bounds.startFrom ?? '…'} – ${bounds.startTo ?? '…'}`) } : null,
+  ].filter(c => c !== null);
 
   return (
     <>
       <PageHeader title={t('Buchungen', 'Bookings')} />
 
+      <Card bleed className="casa-bookings-list">
+        <ListBar
+          tabs={VIEWS.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: counts[v.key] }))}
+          active={filter}
+          search={{
+            action: '/admin/bookings',
+            value: search,
+            placeholder: t('Name, Buchungsnummer (auch SchoolMan) oder Kurs', 'Name, booking number (SchoolMan too) or course'),
+            keep: { ...values, q: undefined },
+          }}
+
+        />
+        <BookingToolbar values={values} types={types} levels={[...new Set(['A1', 'A2', 'B1', 'B2', 'C1', 'C2', ...CASA_LEVEL_SEQUENCE])]} colleague={user.id} more={<BookingFilters
+              base={values}
+              year={year}
+              payer={payer}
+              typeId={typeId}
+              programme={programme}
+              years={years}
+              types={types}
+              programmes={programmes}
+              payers={(['self', 'agency', 'company'] as const).map((value) => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
+              startFrom={bounds.startFrom}
+              startTo={bounds.startTo}
+              canTotals={canAccess(user, 'prices', 'view')}
+            />} />
       {/* The filters in force, each with its ×: the list says what it is narrowed to, the panel changes it. */}
       {chips.length ? (
-        <p className="-mt-3 mb-5 flex flex-wrap items-center gap-1.5">
+        <p className="flex flex-wrap items-center gap-1.5 border-b border-ws-line-soft px-5 py-3">
           {chips.map((chip) => (
-            <span key={chip.key} className="inline-flex items-center gap-1.5 rounded-full bg-white py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
+            <span key={chip.key} className="inline-flex items-center gap-1.5 rounded-md bg-[#f3f6fa] py-1 pr-1.5 pl-3 text-[0.8rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line">
               {chip.label}
               <Link
                 href={href(filter, chip.key)}
@@ -265,34 +306,10 @@ export default async function BookingsPage({
               </Link>
             </span>
           ))}
+          <Link href={`/admin/bookings?${new URLSearchParams({ ...(filter === 'current' ? {} : { filter }) })}`} className="ml-2 rounded-sm text-xs font-medium text-[var(--casa-muted)] hover:underline">{t('Zurücksetzen', 'Reset')}</Link>
         </p>
       ) : null}
 
-      <Card bleed>
-        <ListBar
-          tabs={VIEWS.map((v) => ({ key: v.key, label: pick(lang, v.label), href: href(v.key), count: counts[v.key] }))}
-          active={filter}
-          search={{
-            action: '/admin/bookings',
-            value: search,
-            placeholder: t('Name, Buchungsnummer (auch SchoolMan) oder Kurs', 'Name, booking number (SchoolMan too) or course'),
-            keep: { filter: filter === 'current' ? undefined : filter, org: payerId, year: year ? String(year) : undefined, payer, type: typeId, programme },
-          }}
-          end={
-            <BookingFilters
-              base={{ filter: filter === 'current' ? undefined : filter, org: payerId, q: search || undefined }}
-              year={year}
-              payer={payer}
-              typeId={typeId}
-              programme={programme}
-              years={years}
-              types={types}
-              programmes={programmes}
-              payers={(['self', 'agency', 'company'] as const).map((value) => ({ value, label: pick(lang, PAYER_LABELS[value]) }))}
-              canTotals={canAccess(user, 'prices', 'view')}
-            />
-          }
-        />
         {items.length === 0 ? (
           <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Hier gibt es keine Buchungen', 'No bookings here')}>
             {search ? t(`Keine Buchung passt zu „${search}“.`, `No booking matches “${search}”.`) : null}
@@ -300,11 +317,11 @@ export default async function BookingsPage({
         ) : (
           <Table
             head={[
-              t('Buchung', 'Booking'),
-              { label: t('Zeitraum', 'Dates'), className: `w-[13.5rem] ${hide}` },
+              { label: sortHead('name', t('Teilnehmende', 'Student')), sort: sortDirection('name') },
+              { label: sortHead('start', t('Zeitraum', 'Dates')), sort: sortDirection('start'), className: `w-[13.5rem] ${hide}` },
               { label: t('Gesamt', 'Total'), align: 'right' as const, className: `w-[8rem] ${hideLg}` },
-              { label: t('Offen', 'Balance'), align: 'right' as const, className: 'w-[8.5rem]' },
-              { label: '', className: remindHere && canEdit ? 'w-[8rem]' : 'w-[3.5rem]' },
+              { label: sortHead('balance', t('Offen', 'Balance')), sort: sortDirection('balance'), align: 'right' as const, className: 'w-[5.5rem] lg:w-[8.5rem]' },
+              { label: '', className: remindHere && canEdit ? 'w-9 lg:w-[8rem]' : 'w-9 sm:w-[3.5rem]' },
             ]}
           >
             {groups.map((group) => [
@@ -334,18 +351,19 @@ export default async function BookingsPage({
                       <span className="relative z-20 inline-flex">
                         <BookingLightDot light={light} label={lightLabel} size="md" />
                       </span>
-                      <RecordName name={b.personName} reference={b.number} about={about || undefined} />
+                      <span className="min-w-0 sm:hidden"><span className="block text-[0.84rem] leading-snug font-semibold wrap-break-word">{b.personName}</span>{about ? <span className="mt-1 block truncate text-xs text-[var(--casa-muted)]">{about}</span> : null}</span>
+                      <span className="hidden min-w-0 sm:block"><RecordName name={b.personName} reference={b.number} about={about || undefined} /></span>
                     </span>
                   </Cell>
                   <Cell className={`text-[0.84rem] whitespace-nowrap text-[#2b3546] tabular-nums ${hide}`}>{when(b, lang)}</Cell>
                   <Cell align="right" className={`whitespace-nowrap text-[#2b3546] tabular-nums ${hideLg}`}>
                     {b.charged !== 0 ? money(b.charged, b.currency) : null}
                   </Cell>
-                  <Cell align="right" className="whitespace-nowrap tabular-nums">
+                  <Cell align="right" className="text-xs whitespace-nowrap tabular-nums sm:text-sm">
                     <Balance b={b} t={t} lang={lang} />
                   </Cell>
                   <Cell align="right">
-                    <RowActions label={t(`Aktionen: ${b.personName}, ${b.number}`, `Actions: ${b.personName}, ${b.number}`)} {...actionsOf(b)} />
+                    <RowActions compact="lg" label={t(`Aktionen: ${b.personName}, ${b.number}`, `Actions: ${b.personName}, ${b.number}`)} {...actionsOf(b)} />
                   </Cell>
                 </TableRow>
                 );
@@ -355,7 +373,7 @@ export default async function BookingsPage({
         )}
       </Card>
 
-      <Pagination basePath="/admin/bookings" page={page} total={total} params={params} />
+      <Pagination basePath="/admin/bookings" page={page} total={total} params={values} />
     </>
   );
 }
