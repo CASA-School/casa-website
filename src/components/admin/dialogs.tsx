@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils';
  */
 
 const WIDTHS = { sm: 'max-w-[440px]', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' } as const;
-export const dialogPanel = (width: keyof typeof WIDTHS) => cn('casa-ws-dialog overflow-visible rounded-3xl sm:rounded-3xl', WIDTHS[width]);
+export const dialogPanel = (width: keyof typeof WIDTHS) => cn('casa-ws-dialog overflow-visible rounded-ws-card sm:rounded-ws-card', WIDTHS[width]);
 export const DIALOG_OVERLAY = 'bg-[#0d1b33]/45';
 
 /** Inside a dialog: the footer brings Cancel and pins itself to the foot. */
@@ -129,7 +129,7 @@ export function DialogFooter({ children, start, cancel = true }: { children: Rea
       className={cn(
         'ws-dialog-foot flex flex-wrap items-center gap-2',
         inDialog
-          ? 'sticky bottom-0 z-10 -mx-6 -mb-6 mt-6 rounded-b-3xl border-t border-ws-line bg-white/95 px-6 py-3.5 backdrop-blur-sm'
+          ? 'sticky bottom-0 z-10 -mx-6 -mb-6 mt-6 rounded-b-ws-card border-t border-ws-line bg-white/95 px-6 py-3.5 backdrop-blur-sm'
           : 'mt-4'
       )}
     >
@@ -204,7 +204,7 @@ export function ConfirmSubmit({
               <DialogDescription className="mt-1.5 text-[0.86rem] leading-relaxed text-[var(--casa-muted)]">{description}</DialogDescription>
             </div>
           </div>
-          <div className="mt-6 flex justify-end gap-2 rounded-b-3xl border-t border-ws-line bg-ws-sunk/50 px-6 py-3.5">
+          <div className="mt-6 flex justify-end gap-2 rounded-b-ws-card border-t border-ws-line bg-ws-sunk/50 px-6 py-3.5">
             <DialogClose asChild>
               <Button type="button" variant="ghost" size="md">
                 {t('Abbrechen', 'Cancel')}

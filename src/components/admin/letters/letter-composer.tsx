@@ -415,7 +415,7 @@ export function LetterComposer({
 
         <aside className="space-y-4" aria-label={t('Der Brief', 'The letter')}>
           {kindGroups && all.length > 1 ? (
-            <nav aria-label={t('Briefe', 'Letters')} className="hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card xl:block">
+            <nav aria-label={t('Briefe', 'Letters')} className="hidden rounded-ws-card border border-ws-card-line bg-white shadow-ws-card xl:block">
               <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Briefe', 'Letters')}</h2>
               {next ? (
                 // What is due now, when it is not the letter open.
@@ -447,7 +447,7 @@ export function LetterComposer({
               </div>
             </nav>
           ) : null}
-          <section className="rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+          <section className="rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
             <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Einstellungen', 'Settings')}</h2>
             <Choice label={t('Sprache', 'Language')}>
               <Seg
@@ -548,7 +548,7 @@ export function LetterComposer({
           </section>
 
           {sent.length ? (
-            <section className="rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+            <section className="rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
               <h2 className="border-b border-ws-line px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)]">{t('Verlauf', 'History')}</h2>
               <ul className="p-1.5">
                 {sent.map((s) => (

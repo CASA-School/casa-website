@@ -208,6 +208,15 @@
   --radius-2xl: var(--radius);              /* 6px */
   --radius-3xl: calc(var(--radius) + 2px);  /* 8px — canonical: feature */
   --radius-4xl: calc(var(--radius) + 2px);  /* 8px */
+  /*
+   * The workspace's own corners (design A, 2026-11-01). The site's scale above is compressed — a
+   * `rounded-2xl` card is 6px — and the workspace's frames read as boxes at that size; Rahman chose
+   * the mock-up's softer frames. `rounded-ws-card` a card, a record's head, a dialog; `rounded-ws-inner`
+   * a framed row or a menu inside one; `rounded-ws-field` a button, a field, a dropdown.
+   */
+  --radius-ws-card: 14px;
+  --radius-ws-inner: 11px;
+  --radius-ws-field: 9px;
 }
 
 :root {

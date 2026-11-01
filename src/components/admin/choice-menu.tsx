@@ -16,7 +16,7 @@ import { Icon } from './icons';
 
 /** A menu's panel: white, a fine edge, a soft lift. Shared with the top bar's menus. */
 export const menuPanel =
-  'casa-ws-menu min-w-56 rounded-xl border-ws-line bg-white p-1.5 text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.05),0_16px_36px_-12px_rgba(16,24,40,0.22)]';
+  'casa-ws-menu min-w-56 rounded-ws-inner border-ws-line bg-white p-1.5 text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.05),0_16px_36px_-12px_rgba(16,24,40,0.22)]';
 
 /** A menu's item: CASA's warm cream under the pointer, as list rows are. */
 export const menuItem =

@@ -116,7 +116,7 @@ export default async function PricesPage({ searchParams }: { searchParams: Promi
         <EmptyState title={t('Noch keine Preisliste', 'No price list yet')} />
       ) : (
         <>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-3xl border border-ws-card-line bg-white px-5 shadow-ws-card">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-ws-card border border-ws-card-line bg-white px-5 shadow-ws-card">
             <div className="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-1">
               {lists.length > 1 ? (
                 <nav aria-label={t('Preislisten', 'Price lists')} className="-mb-px flex max-w-full gap-5 overflow-x-auto [scrollbar-width:none]">

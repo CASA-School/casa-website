@@ -87,7 +87,7 @@ export function Popover({
           <div
             style={{ width }}
             onSubmitCapture={() => setTimeout(() => setOpen(false), 0)}
-            className="casa-ws-dialog max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]"
+            className="casa-ws-dialog max-w-[calc(100vw-2rem)] overflow-hidden rounded-ws-inner bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]"
           >
             <p className="border-b border-ws-line-soft px-3.5 py-2.5 text-xs font-bold text-[var(--casa-muted)]">{label}</p>
             <div className="max-h-[min(60vh,420px)] overflow-y-auto p-1.5">{children}</div>
@@ -101,7 +101,7 @@ export function Popover({
           style={{ width }}
           onSubmitCapture={() => setTimeout(() => setOpen(false), 0)}
           className={cn(
-            'absolute left-0 z-40 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]',
+            'absolute left-0 z-40 max-w-[calc(100vw-2rem)] overflow-hidden rounded-ws-inner bg-white text-sm shadow-[0_24px_56px_-22px_rgba(15,23,42,0.42),0_0_0_1px_rgba(15,23,42,0.08)]',
             up ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'
           )}
         >

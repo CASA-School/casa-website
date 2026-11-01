@@ -366,7 +366,7 @@ const AGE_LABELS: Record<AgeGroup, { de: string; en: string }> = {
 
 function Figure({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-ws-card-line bg-white px-5 py-4 shadow-ws-card">
+    <div className="rounded-ws-card border border-ws-card-line bg-white px-5 py-4 shadow-ws-card">
       <p className="text-xs font-medium text-[var(--casa-text-subtle)]">{label}</p>
       <p className="mt-1 text-2xl font-extrabold tracking-[-0.02em] text-[var(--casa-ink)] tabular-nums">{value}</p>
     </div>
