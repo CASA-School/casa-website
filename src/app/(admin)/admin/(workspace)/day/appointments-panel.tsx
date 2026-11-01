@@ -250,7 +250,7 @@ function AppointmentRow({
         {/* Moving a request is its „Ändern", so a request shows it without a hover. */}
         {canEdit ? (
           <span className={cn('transition-opacity focus-within:opacity-100', !requested && 'lg:opacity-0 lg:group-hover:opacity-100')}>
-            <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="ghost" size="sm" width="lg" icon={Icon.clock} tint="green" title={fullName(a)}>
+            <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="tertiary" size="sm" width="lg" icon={Icon.clock} tint="green" title={fullName(a)}>
               <AppointmentForm appointment={a} day={a.date} back={back} colleagues={colleagues} me={me} canDelete={canDelete} />
             </FormDialog>
           </span>

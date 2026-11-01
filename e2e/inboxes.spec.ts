@@ -90,7 +90,7 @@ test.describe('inboxes', () => {
 
   for (const queue of [
     // A line's old address leads to its Anmeldung.
-    { name: 'Kira Prüfkurs', list: '/admin/registrations', mark: 'Unterkunft nötig', record: () => `/admin/registrations/course/${ids.course}` },
+    { name: 'Kira Prüfkurs', list: '/admin/registrations', mark: 'Unterkunft', record: () => `/admin/registrations/course/${ids.course}` },
     { name: 'Emil Prüfexam', list: '/admin/registrations', mark: 'Nur mündlicher Teil', record: () => `/admin/registrations/${anmeldung.exam}` },
     { name: 'Ava Prüfbewerbung', list: '/admin/applications', mark: 'Lehrkraft für Deutsch als Fremdsprache', record: () => `/admin/applications/${ids.application}` },
   ]) {

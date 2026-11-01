@@ -244,7 +244,7 @@ export default async function OrganisationPage({
               tint="green"
               actions={
                 canEdit ? (
-                  <FormDialog icon={Icon.person} tint="green" trigger={t('Kontakt hinzufügen', 'Add contact')} title={t('Neuer Kontakt', 'New contact')} triggerVariant="ghost" size="sm" width="lg">
+                  <FormDialog icon={Icon.person} tint="green" trigger={t('Kontakt hinzufügen', 'Add contact')} title={t('Neuer Kontakt', 'New contact')} triggerVariant="tertiary" size="sm" width="lg">
                     <ContactForm organisationId={id} />
                   </FormDialog>
                 ) : undefined
@@ -280,7 +280,7 @@ export default async function OrganisationPage({
                       </span>
                       {canEdit ? (
                         <span className="flex items-center gap-1">
-                          <FormDialog icon={Icon.person} tint="green" trigger={t('Ändern', 'Change')} title={c.name} triggerVariant="ghost" size="sm" width="lg">
+                          <FormDialog icon={Icon.person} tint="green" trigger={t('Ändern', 'Change')} title={c.name} triggerVariant="tertiary" size="sm" width="lg">
                             <ContactForm organisationId={id} contact={c} />
                           </FormDialog>
                           {canDelete ? (
@@ -309,7 +309,7 @@ export default async function OrganisationPage({
                 tint="green"
                 actions={
                   canEdit ? (
-                    <FormDialog icon={Icon.money} tint="green" trigger={t('Provision eintragen', 'Add commission')} title={t('Provision', 'Commission')} triggerVariant="ghost" size="sm">
+                    <FormDialog icon={Icon.money} tint="green" trigger={t('Provision eintragen', 'Add commission')} title={t('Provision', 'Commission')} triggerVariant="tertiary" size="sm">
                       <CommissionForm organisationId={id} chargeTypes={chargeTypes} />
                     </FormDialog>
                   ) : undefined
@@ -325,7 +325,7 @@ export default async function OrganisationPage({
                         </span>
                         {canEdit ? (
                           <span className="flex items-center gap-1">
-                            <FormDialog icon={Icon.money} tint="green" trigger={t('Ändern', 'Change')} title={t('Provision', 'Commission')} triggerVariant="ghost" size="sm">
+                            <FormDialog icon={Icon.money} tint="green" trigger={t('Ändern', 'Change')} title={t('Provision', 'Commission')} triggerVariant="tertiary" size="sm">
                               <CommissionForm organisationId={id} chargeTypes={chargeTypes} term={term} />
                             </FormDialog>
                             {canDelete ? (
@@ -569,7 +569,7 @@ export default async function OrganisationPage({
             tint="green"
             actions={
               editsBank ? (
-                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="tertiary" size="sm">
                   <BankAccountForm holder={organisation.name} action={addOrganisationBankAccountAction} hidden={{ organisationId: id }} />
                 </FormDialog>
               ) : undefined
@@ -586,7 +586,7 @@ export default async function OrganisationPage({
                     </span>
                     <span className="flex items-center gap-1">
                       {editsBank ? (
-                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="tertiary" size="sm">
                           <BankAccountForm holder={organisation.name} account={b} action={updateOrganisationBankAccountAction} hidden={{ organisationId: id }} />
                         </FormDialog>
                       ) : null}

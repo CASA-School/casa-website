@@ -148,7 +148,7 @@ export default async function StaffMemberPage({
   ];
 
   const rolesDialog = canEdit ? (
-    <FormDialog icon={Icon.team} tint="ink" trigger={t('Aufgaben', 'Roles')} title={t(`Aufgaben von ${member.name}`, `${member.name}'s roles`)} triggerVariant="ghost" size="sm" width="lg">
+    <FormDialog icon={Icon.team} tint="ink" trigger={t('Aufgaben', 'Roles')} title={t(`Aufgaben von ${member.name}`, `${member.name}'s roles`)} triggerVariant="tertiary" size="sm" width="lg">
       <RolesForm staffId={id} roles={roles} checked={member.roles} />
     </FormDialog>
   ) : null;
@@ -305,7 +305,7 @@ export default async function StaffMemberPage({
               tint="ink"
               actions={
                 canEdit && managesAccounts ? (
-                  <FormDialog icon={Icon.lock} tint="ink" trigger={member.account ? t('Ändern', 'Change') : t('Verbinden', 'Link')} title={t('Konto im Arbeitsbereich', 'Workspace account')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.lock} tint="ink" trigger={member.account ? t('Ändern', 'Change') : t('Verbinden', 'Link')} title={t('Konto im Arbeitsbereich', 'Workspace account')} triggerVariant="tertiary" size="sm">
                     <AccountForm staffId={id} current={member.account?.id ?? null} accounts={member.account ? [{ id: member.account.id, name: member.account.name, email: member.account.email }, ...accounts] : accounts} />
                   </FormDialog>
                 ) : undefined
@@ -342,7 +342,7 @@ export default async function StaffMemberPage({
                 tint="ink"
                 actions={
                   canEdit ? (
-                    <FormDialog icon={Icon.calendar} tint="sun" trigger={t('Eintragen', 'Add')} title={t('Abwesenheit eintragen', 'Add time away')} triggerVariant="ghost" size="sm">
+                    <FormDialog icon={Icon.calendar} tint="sun" trigger={t('Eintragen', 'Add')} title={t('Abwesenheit eintragen', 'Add time away')} triggerVariant="tertiary" size="sm">
                       <AbsenceForm staffId={id} />
                     </FormDialog>
                   ) : undefined
@@ -382,7 +382,7 @@ export default async function StaffMemberPage({
               tint="blue"
               actions={
                 canEdit ? (
-                  <FormDialog icon={Icon.kursplanung} tint="sun" trigger={t('Ändern', 'Change')} title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')} triggerVariant="ghost" size="sm" width="lg">
+                  <FormDialog icon={Icon.kursplanung} tint="sun" trigger={t('Ändern', 'Change')} title={t('Regeln für die Kursplanung', 'Rules for Kursplanung')} triggerVariant="tertiary" size="sm" width="lg">
                     <TeachingForm member={member} />
                   </FormDialog>
                 ) : undefined
@@ -449,7 +449,7 @@ export default async function StaffMemberPage({
               tint="green"
               actions={
                 canEdit && examTypes.length ? (
-                  <FormDialog icon={Icon.award} tint="ink" trigger={t('Eintragen', 'Add')} title={t('Lizenz eintragen', 'Add a licence')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.award} tint="ink" trigger={t('Eintragen', 'Add')} title={t('Lizenz eintragen', 'Add a licence')} triggerVariant="tertiary" size="sm">
                     <LicenceForm staffId={id} exams={examTypes} />
                   </FormDialog>
                 ) : undefined
@@ -474,7 +474,7 @@ export default async function StaffMemberPage({
                       {l.note ? <span className="block text-[0.8rem] text-[var(--casa-muted)]">{l.note}</span> : null}
                       {canEdit ? (
                         <span className="mt-1 flex items-center gap-1">
-                          <FormDialog icon={Icon.award} tint="ink" trigger={t('Ändern', 'Change')} title={t('Lizenz', 'Licence')} triggerVariant="ghost" size="sm">
+                          <FormDialog icon={Icon.award} tint="ink" trigger={t('Ändern', 'Change')} title={t('Lizenz', 'Licence')} triggerVariant="tertiary" size="sm">
                             <LicenceForm staffId={id} exams={examTypes} licence={l} />
                           </FormDialog>
                           {canDelete ? (
@@ -548,7 +548,7 @@ export default async function StaffMemberPage({
             tint="ink"
             actions={
               canEdit ? (
-                <FormDialog icon={Icon.person} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={member.name} triggerVariant="ghost" size="sm" width="lg">
+                <FormDialog icon={Icon.person} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={member.name} triggerVariant="tertiary" size="sm" width="lg">
                   <PersonForm person={person} countries={countries} action={updateStaffPersonAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -579,7 +579,7 @@ export default async function StaffMemberPage({
             tint="ink"
             actions={
               canEdit ? (
-                <FormDialog icon={Icon.globe} tint="ink" trigger={home ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')} title={t('Adresse', 'Address')} triggerVariant="ghost" size="sm">
+                <FormDialog icon={Icon.globe} tint="ink" trigger={home ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')} title={t('Adresse', 'Address')} triggerVariant="tertiary" size="sm">
                   <AddressForm personId={person.id} kind="home" address={home} countries={countries} action={saveStaffAddressAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -628,7 +628,7 @@ export default async function StaffMemberPage({
               tint="blue"
               actions={
                 editsPrivate ? (
-                  <FormDialog icon={Icon.statement} tint="ink" trigger={t('Vertrag hinzufügen', 'Add contract')} title={t('Neuer Vertrag', 'New contract')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.statement} tint="ink" trigger={t('Vertrag hinzufügen', 'Add contract')} title={t('Neuer Vertrag', 'New contract')} triggerVariant="tertiary" size="sm">
                     <ContractForm staffId={id} />
                   </FormDialog>
                 ) : undefined
@@ -656,7 +656,7 @@ export default async function StaffMemberPage({
                       </span>
                       <span className="flex items-center gap-1">
                         {editsPrivate ? (
-                          <FormDialog icon={Icon.statement} tint="ink" trigger={t('Ändern', 'Change')} title={t('Vertrag', 'Contract')} triggerVariant="ghost" size="sm">
+                          <FormDialog icon={Icon.statement} tint="ink" trigger={t('Ändern', 'Change')} title={t('Vertrag', 'Contract')} triggerVariant="tertiary" size="sm">
                             <ContractForm staffId={id} contract={c} />
                           </FormDialog>
                         ) : null}
@@ -684,7 +684,7 @@ export default async function StaffMemberPage({
                 tint="ink"
                 actions={
                   editsPrivate && hr ? (
-                    <FormDialog icon={Icon.lock} tint="ink" trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="ghost" size="sm">
+                    <FormDialog icon={Icon.lock} tint="ink" trigger={t('Ändern', 'Change')} title={t('Steuer und Versicherung', 'Tax and insurance')} triggerVariant="tertiary" size="sm">
                       <HrNumbersForm staffId={id} numbers={hr} />
                     </FormDialog>
                   ) : undefined
@@ -737,7 +737,7 @@ export default async function StaffMemberPage({
             tint="green"
             actions={
               editsPrivate ? (
-                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                <FormDialog icon={Icon.money} tint="ink" trigger={t('Konto hinzufügen', 'Add account')} title={t('Bankverbindung', 'Bank details')} triggerVariant="tertiary" size="sm">
                   <BankAccountForm personId={person.id} holder={member.name} action={addStaffBankAccountAction} hidden={hidden} />
                 </FormDialog>
               ) : undefined
@@ -754,7 +754,7 @@ export default async function StaffMemberPage({
                     </span>
                     <span className="flex items-center gap-1">
                       {editsPrivate ? (
-                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="ghost" size="sm">
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung', 'Bank details')} triggerVariant="tertiary" size="sm">
                           <BankAccountForm personId={person.id} holder={member.name} account={b} action={updateStaffBankAccountAction} hidden={hidden} />
                         </FormDialog>
                       ) : null}

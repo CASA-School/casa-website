@@ -13,7 +13,7 @@ import { ChoiceMenu } from './choice-menu';
 import { Icon } from './icons';
 import { Avatar } from './list';
 import { TimelineEntries, type TimelineFacet, type TimelineRow } from './timeline-entries';
-import { ButtonLink, Card } from './ui';
+import { Button, ButtonLink, Card } from './ui';
 
 /**
  * The parts of a queue record's page that do the work on it (2026-10-14, the
@@ -22,13 +22,13 @@ import { ButtonLink, Card } from './ui';
  */
 
 /** Each state's colours: its dot, and its pill when it is the current one or named in the history. */
-const TONE: Record<WorkStatus, { pill: string; dot: string }> = {
-  new: { pill: 'bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]', dot: 'bg-[#2f6fd1]' },
-  in_progress: { pill: 'bg-[#e6ecf6] text-[var(--fm-navy)] ring-[#bccae0]', dot: 'bg-[var(--fm-navy)]' },
-  waiting: { pill: 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]', dot: 'bg-[#d99a00]' },
-  done: { pill: 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]', dot: 'bg-[#1f9d55]' },
-  declined: { pill: 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]', dot: 'bg-[#8792a3]' },
-  spam: { pill: 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]', dot: 'bg-[#8792a3]' },
+const TONE: Record<WorkStatus, { pill: string; dot: string; halo: string }> = {
+  new: { pill: 'bg-[#e8f1fd] text-[#174a8f] ring-[#b9d0f1]', dot: 'bg-[#2f6fd1]', halo: 'ring-[#2f6fd1]/15' },
+  in_progress: { pill: 'bg-[#e6ecf6] text-[var(--fm-navy)] ring-[#bccae0]', dot: 'bg-[var(--fm-navy)]', halo: 'ring-[#1d3a6b]/15' },
+  waiting: { pill: 'bg-[#fff2d6] text-[#6e4700] ring-[#ebd298]', dot: 'bg-[#d99a00]', halo: 'ring-[#d99a00]/20' },
+  done: { pill: 'bg-[#e6f5ec] text-[#14653a] ring-[#b7dfc6]', dot: 'bg-[#1f9d55]', halo: 'ring-[#1f9d55]/15' },
+  declined: { pill: 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]', dot: 'bg-[#8792a3]', halo: 'ring-[#8792a3]/15' },
+  spam: { pill: 'bg-[#f1f3f6] text-[#3c4657] ring-[#d5dbe4]', dot: 'bg-[#8792a3]', halo: 'ring-[#8792a3]/15' },
 };
 
 /** The working states, in the order work moves through them. */
@@ -61,15 +61,19 @@ export async function StatusBar({
   status: WorkStatus;
   canEdit: boolean;
 }) {
-  const { lang } = await getI18n();
+  const { t, lang } = await getI18n();
   const rare = !STEPS.includes(status);
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-      {/* A row of four on a wide screen; two by two on a phone, where a wrapped pill track reads as broken. */}
+    <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto">
+      <span className="text-xs font-semibold text-[var(--casa-muted)]">{t('Status', 'Status')}</span>
+      {/*
+       * Design A (2026-11-01): a recessed track, the current state lifted out of it in white with its
+       * coloured dot. A row on a wide screen; two by two on a phone, where a wrapped track reads as broken.
+       */}
       <form
         action={updateStatusAction}
-        className="grid w-full grid-cols-2 gap-1 rounded-2xl bg-white p-1 shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-[#d3dbe6] ring-inset sm:flex sm:w-auto sm:items-center sm:rounded-full"
+        className="grid w-full grid-cols-2 gap-0.5 rounded-[10px] bg-[#eef2f7] p-[3px] ring-1 ring-ws-line ring-inset sm:flex sm:w-auto sm:items-center"
       >
         <input type="hidden" name="entity" value={entity} />
         <input type="hidden" name="id" value={id} />
@@ -84,13 +88,13 @@ export async function StatusBar({
               disabled={!canEdit || current}
               aria-pressed={current}
               className={cn(
-                'inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-2 text-[0.78rem] font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 sm:justify-start sm:gap-2 sm:px-3.5 sm:text-[0.8rem]',
+                'inline-flex h-7 items-center justify-center gap-1.5 rounded-[7px] px-2 text-[0.78rem] font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 sm:justify-start sm:gap-2 sm:px-3 sm:text-[0.8rem]',
                 current
-                  ? cn('shadow-[0_1px_2px_rgba(16,24,40,0.08)] ring-1 ring-inset', TONE[step].pill)
-                  : 'text-[#334155] enabled:hover:bg-[#eef2f7] enabled:hover:text-[var(--casa-ink)] disabled:cursor-default'
+                  ? 'bg-white text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.06)] disabled:cursor-default'
+                  : 'text-[var(--casa-muted)] enabled:hover:bg-white/70 enabled:hover:text-[var(--casa-ink)] disabled:cursor-default'
               )}
             >
-              <span aria-hidden="true" className={cn('size-2 rounded-full', current ? TONE[step].dot : 'bg-[#a9b4c4]')} />
+              <span aria-hidden="true" className={cn('size-[7px] rounded-full', current ? cn(TONE[step].dot, 'ring-[3px]', TONE[step].halo) : 'bg-[#a9b4c4]')} />
               {pick(lang, STATUS_LABELS[step])}
             </button>
           );
@@ -126,19 +130,24 @@ export async function OwnerControl({
       ) : (
         <span aria-hidden="true" className="size-6 shrink-0 rounded-full border border-dashed border-[#a9b4c4]" />
       )}
-      <span className="text-[0.82rem]">
-        <span className="text-[var(--casa-muted)]">{t('Zuständig:', 'Owner:')} </span>
-        <span className={cn('font-semibold', owner ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
-          {owner ? (owner.id === me.id ? t('du', 'you') : owner.name) : t('niemand', 'nobody')}
-        </span>
+      <span className={cn('text-[0.82rem] font-semibold', owner ? 'text-[var(--casa-ink)]' : 'text-[var(--casa-muted)]')}>
+        {owner ? (owner.id === me.id ? t('du', 'you') : owner.name) : t('Niemand', 'Nobody')}
       </span>
     </>
   );
+  const label = <span className="text-xs font-semibold text-[var(--casa-muted)]">{t('Zuständig', 'Owner')}</span>;
 
-  if (!canEdit) return <span className="flex items-center gap-2 px-1.5">{current}</span>;
+  if (!canEdit)
+    return (
+      <span className="flex items-center gap-3">
+        {label}
+        <span className="flex items-center gap-2">{current}</span>
+      </span>
+    );
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2">
+      {label}
       <ChoiceMenu
         action={assignAction}
         fields={{ entity, id }}
@@ -159,7 +168,7 @@ export async function OwnerControl({
             icon: <Avatar name={member.name} staff size="sm" />,
           })),
         ]}
-        triggerClassName="flex items-center gap-2 rounded-full py-1 pr-2.5 pl-1 transition-colors outline-none hover:bg-white focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#d3dbe6] data-[state=open]:ring-inset"
+        triggerClassName="flex items-center gap-2 rounded-lg py-1 pr-2 pl-1 transition-colors outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 data-[state=open]:bg-ws-sunk"
         trigger={
           <>
             {current}
@@ -173,14 +182,9 @@ export async function OwnerControl({
         <form action={assignAction}>
           <input type="hidden" name="entity" value={entity} />
           <input type="hidden" name="id" value={id} />
-          <button
-            type="submit"
-            name="staffUserId"
-            value={me.id}
-            className="inline-flex h-8 items-center rounded-full bg-white px-3 text-[0.78rem] font-semibold text-[var(--fm-navy)] shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-[#d3dbe6] ring-inset transition-colors outline-none hover:bg-[#eef2f7] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
-          >
+          <Button type="submit" name="staffUserId" value={me.id} variant="secondary" size="sm">
             {t('Übernehmen', 'Take it')}
-          </button>
+          </Button>
         </form>
       ) : null}
     </div>
@@ -491,12 +495,9 @@ export async function Timeline({
           className="block min-h-[4.25rem] w-full resize-y rounded-2xl border-0 bg-transparent px-3.5 pt-3 pb-1 text-[0.86rem] leading-relaxed text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-muted)]"
         />
         <div className="flex justify-end px-2 pb-2">
-          <button
-            type="submit"
-            className="inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[0.78rem] font-semibold text-[var(--fm-navy)] ring-1 ring-[#bccae0] ring-inset transition-colors outline-none hover:bg-[#eef2f7] focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40"
-          >
+          <Button type="submit" variant="secondary" size="sm">
             {t('Notiz hinzufügen', 'Add note')}
-          </button>
+          </Button>
         </div>
       </form>
       ) : null}
@@ -589,25 +590,29 @@ export function MetaLine({ children }: { children: ReactNode }) {
   return <span className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.84rem] text-[var(--casa-muted)]">{children}</span>;
 }
 
-/** The facts that decide the next step, in a grid of small framed cells: the dates, the level, a room. */
+/**
+ * The facts beside what was sent — the dates, the level, a room not needed — as one quiet line of label
+ * and value under a soft rule (design A, 2026-11-01), not a grid of boxes inside the card.
+ */
 export function FactGrid({
   facts,
 }: {
   facts: readonly { label: string; value: ReactNode; sub?: ReactNode; tone?: 'plain' | 'attention' | 'good' }[];
 }) {
   return (
-    <dl className="grid gap-2 sm:grid-cols-2">
+    <dl className="flex flex-wrap gap-x-8 gap-y-2 border-t border-ws-line-soft pt-3.5">
       {facts.map((fact) => (
-        <div
-          key={fact.label}
-          className={cn(
-            'rounded-xl px-3.5 py-2.5 ring-1 ring-inset',
-            fact.tone === 'attention' ? 'bg-[#fff8e6] ring-[#efdca4]' : fact.tone === 'good' ? 'bg-[#f0f9f3] ring-[#c8e6d3]' : 'bg-[#f7f9fc] ring-ws-line'
-          )}
-        >
-          <dt className="text-[0.74rem] font-semibold text-[var(--casa-muted)]">{fact.label}</dt>
-          <dd className="mt-0.5 text-[0.92rem] font-bold text-[var(--casa-ink)]">{fact.value ?? '—'}</dd>
-          {fact.sub ? <dd className="mt-0.5 text-[0.76rem] text-[var(--casa-muted)]">{fact.sub}</dd> : null}
+        <div key={fact.label} className="flex min-w-0 items-baseline gap-2">
+          <dt className="shrink-0 text-xs font-semibold text-[var(--casa-muted)]">{fact.label}</dt>
+          <dd
+            className={cn(
+              'text-[0.86rem] font-semibold',
+              fact.tone === 'attention' ? 'text-[#8a5a00]' : fact.tone === 'good' ? 'text-[#14653a]' : 'text-[#2b3546]'
+            )}
+          >
+            {fact.value ?? '—'}
+            {fact.sub ? <span className="font-normal text-[var(--casa-muted)]"> · {fact.sub}</span> : null}
+          </dd>
         </div>
       ))}
     </dl>
@@ -627,6 +632,7 @@ export async function SubmissionCard({
   at,
   via,
   title,
+  count,
   children,
   reply,
   extra,
@@ -637,6 +643,8 @@ export async function SubmissionCard({
   /** How it came, when that says something: „über das Anmeldeformular". */
   via?: string | null;
   title: string;
+  /** How many things were sent, beside the title: the lines of an Anmeldung. */
+  count?: number;
   children: ReactNode;
   reply: { href: string; locale: string; primary?: boolean };
   /** Beside „Antworten": the CV, say. */
@@ -645,32 +653,27 @@ export async function SubmissionCard({
   const { t, lang } = await getI18n();
   const german = reply.locale === 'de';
   return (
-    <article className="overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ws-card-line bg-ws-card-head px-6 py-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Avatar name={name || email} />
-          <div className="min-w-0 text-[0.84rem]">
-            <p className="truncate">
-              <span className="font-semibold text-[var(--casa-ink)]">{name}</span> <span className="text-[var(--casa-muted)]">&lt;{email}&gt;</span>
-            </p>
-            <p className="mt-0.5 text-[0.78rem] text-[var(--casa-muted)]">
-              {t('an CASA Bremen', 'to CASA Bremen')}
-              {via ? ` · ${via}` : ''}
-            </p>
-          </div>
+    <article className="overflow-hidden rounded-2xl border border-ws-card-line bg-white shadow-ws-card">
+      {/* Design A (2026-11-01): who sent it is the record's own head; this card's head is what was sent, and when. */}
+      <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-ws-line-soft px-5 py-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span aria-hidden="true" className="shrink-0 text-[#8792a4] [&_svg]:size-[17px]">
+            {Icon.mail}
+          </span>
+          <h2 className="truncate text-[0.92rem] font-bold tracking-[-0.005em] text-[var(--casa-ink)]">{title}</h2>
+          {count ? (
+            <span className="rounded-full bg-ws-card-head px-2 py-px text-xs font-bold text-[var(--casa-muted)] ring-1 ring-ws-line ring-inset">{count}</span>
+          ) : null}
         </div>
-        <time dateTime={at.toISOString()} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
+        <time dateTime={at.toISOString()} title={[name, email].filter(Boolean).join(' · ')} className="text-[0.78rem] text-[var(--casa-muted)] tabular-nums">
           <span className="font-semibold text-[var(--casa-ink)]">
             {shortDay(at, lang)}, {berlinTime(at, lang)}
           </span>{' '}
-          · {relativeDays(at, lang)}
+          · {via ?? relativeDays(at, lang)}
         </time>
       </header>
-      <div className="px-6 pt-5 pb-6">
-        <h2 className="text-[1.05rem] font-bold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2>
-        <div className="mt-3">{children}</div>
-      </div>
-      <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line bg-ws-card-head px-6 py-3.5">
+      <div className="px-5 pt-4 pb-5">{children}</div>
+      <footer className="flex flex-wrap items-center gap-3 border-t border-ws-line-soft px-5 py-3">
         <ButtonLink href={reply.href} variant={reply.primary === false ? 'secondary' : 'primary'}>
           <span aria-hidden="true" className="[&_svg]:size-4">
             {Icon.mail}

@@ -105,7 +105,7 @@ test.describe('enquiries', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${NAME.first} ${NAME.last}`);
 
     await page.getByRole('button', { name: 'Übernehmen' }).click();
-    await expect(page.getByText('Zuständig: du')).toBeVisible();
+    await expect(page.locator('header').getByText('du', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0);
 
     // Three states (2026-10-21): Offen, In Arbeit, Erledigt.
@@ -116,7 +116,7 @@ test.describe('enquiries', () => {
 
     await page.getByRole('button', { name: 'Wer sich darum kümmert' }).click();
     await page.getByRole('menuitem', { name: 'Niemand' }).click();
-    await expect(page.getByText('Zuständig: niemand')).toBeVisible();
+    await expect(page.locator('header').getByText('Niemand', { exact: true })).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Neue Notiz' }).fill('Angerufen, Platzanfrage an den Kurs weitergegeben.');
     await page.getByRole('button', { name: 'Notiz hinzufügen' }).click();

@@ -188,7 +188,7 @@ export function CleaningTab({
             </ul>
             {canEdit ? (
               <footer className="mt-3 flex items-center gap-2 border-t border-ws-line-soft pt-3">
-                <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="ghost" size="sm" icon={Icon.calendar} tint="blue" title={pick(lang, duty.name)}>
+                <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="tertiary" size="sm" icon={Icon.calendar} tint="blue" title={pick(lang, duty.name)}>
                   <DutyForm placeId={placeId} duty={duty} t={t} />
                 </FormDialog>
                 {canDelete ? (

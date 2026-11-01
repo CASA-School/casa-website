@@ -196,7 +196,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
                 tint="green"
                 actions={
                   canEdit ? (
-                    <FormDialog icon={Icon.person} tint="green" trigger={t('Hinzufügen', 'Add')} title={t('Wer wohnt hier?', 'Who lives here?')} triggerVariant="ghost" size="sm" width="lg">
+                    <FormDialog icon={Icon.person} tint="green" trigger={t('Hinzufügen', 'Add')} title={t('Wer wohnt hier?', 'Who lives here?')} triggerVariant="tertiary" size="sm" width="lg">
                       <MemberForm placeId={id} />
                     </FormDialog>
                   ) : undefined
@@ -212,7 +212,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
                         </span>
                         {canEdit ? (
                           <span className="flex items-center gap-1">
-                            <FormDialog icon={Icon.person} tint="green" trigger={t('Ändern', 'Change')} title={m.name} triggerVariant="ghost" size="sm" width="lg">
+                            <FormDialog icon={Icon.person} tint="green" trigger={t('Ändern', 'Change')} title={m.name} triggerVariant="tertiary" size="sm" width="lg">
                               <MemberForm placeId={id} member={m} />
                             </FormDialog>
                             {canDelete ? (
@@ -252,7 +252,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
           tint="blue"
           actions={
             canEdit ? (
-              <FormDialog icon={Icon.home} tint="blue" trigger={t('Zimmer hinzufügen', 'Add room')} title={t('Neues Zimmer', 'New room')} triggerVariant="ghost" size="sm" width="lg">
+              <FormDialog icon={Icon.home} tint="blue" trigger={t('Zimmer hinzufügen', 'Add room')} title={t('Neues Zimmer', 'New room')} triggerVariant="tertiary" size="sm" width="lg">
                 <RoomForm placeId={id} types={types} />
               </FormDialog>
             ) : undefined
@@ -286,7 +286,7 @@ export default async function PlacePage({ params, searchParams }: { params: Prom
                     </span>
                     {canEdit ? (
                       <span className="flex items-center gap-1">
-                        <FormDialog icon={Icon.home} tint="blue" trigger={t('Ändern', 'Change')} title={label} triggerVariant="ghost" size="sm" width="lg">
+                        <FormDialog icon={Icon.home} tint="blue" trigger={t('Ändern', 'Change')} title={label} triggerVariant="tertiary" size="sm" width="lg">
                           <RoomForm placeId={id} room={r} types={types} />
                         </FormDialog>
                         {canDelete ? (
