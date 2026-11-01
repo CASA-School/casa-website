@@ -45,7 +45,7 @@ the rules the planners kept in their heads.
    dashboards, no explanatory paragraphs.
 4. **Real people, real problems.** No fabricated absences or conflicts about real teachers. The demo gap
    is a real one (a teacher released from duty).
-5. **Its own look, not the workspace's density — the prototype's, 1:1.** Manrope for everything
+5. **Its own look, not the workspace's density — the prototype's, 1:1.** The workspace's sans for everything (Manrope until 2026-11-01, then Inter at Rahman's request with the rest of the workspace)
    including headings (the workspace's Playfair titles, eyebrow and bordered tabs inside the module were
    rejected on 2026-09-16): a 19px title row with the month dropdown, soft pill tabs and the undo / copy
    buttons; `.sel` dropdowns; pill toggles in the dialog; small uppercase labels on tables and sections —
