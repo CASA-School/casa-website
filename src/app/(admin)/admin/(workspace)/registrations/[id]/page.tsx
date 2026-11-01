@@ -178,9 +178,15 @@ export default async function RegistrationPage({
   // The stay around the courses asked for: the day before the first, the Saturday after the last.
   const stayDates = stayFor(toDateInputValue(stayFrom) || null, toDateInputValue(stayTo) || null);
 
+  // Person first (2026-11-01, Rahman): nothing is booked or queued until the sender is decided — someone
+  // already at CASA, or put on the register as new — so every booking lands on the one person's page.
+  const personDecided = Boolean(person && (person.listed || person.canonicalId !== person.id));
+  const bookNow = canBook && personDecided;
+  const decideFirst = `${here}?person=1`;
+
   // The line whose wizard, queue or confirmation the address asks for.
-  const bookingLine = canBook && offer ? lines.find((l) => l.id === query.book && isOpen(l.outcome)) : undefined;
-  const queueLine = canBook && offer ? lines.find((l): l is Line & RegistrationCourseLine => l.id === query.queue && l.kind === 'course' && Boolean(l.courseInstanceId)) : undefined;
+  const bookingLine = bookNow && offer ? lines.find((l) => l.id === query.book && isOpen(l.outcome)) : undefined;
+  const queueLine = bookNow && offer ? lines.find((l): l is Line & RegistrationCourseLine => l.id === query.queue && l.kind === 'course' && Boolean(l.courseInstanceId)) : undefined;
   const queueLevels = queueLine ? (offer?.levels.map((l) => l.code) ?? []) : [];
 
   // The values a colleague may correct, as they stand: compared with what was sent (`original`).
@@ -246,7 +252,7 @@ export default async function RegistrationPage({
           </>
         }
         actions={
-          canBook && bookable.length ? (
+          bookNow && bookable.length ? (
             <FormDialog
               icon={Icon.bookings}
               tint="red"
@@ -344,6 +350,11 @@ export default async function RegistrationPage({
                 </DialogFooter>
               </form>
             </FormDialog>
+          ) : canBook && bookable.length ? (
+            <ButtonLink href={decideFirst} variant="primary">
+              <span aria-hidden="true" className="[&_svg]:size-4">{Icon.person}</span>
+              {t('Person klären', 'Confirm the person')}
+            </ButtonLink>
           ) : null
         }
         bar={
@@ -396,7 +407,14 @@ export default async function RegistrationPage({
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <Outcome outcome={line.outcome} t={t} />
-                      {canBook && isOpen(line.outcome) ? (
+                      {canBook && isOpen(line.outcome) && !personDecided ? (
+                        <span title={t('Erst die Person klären', 'Confirm the person first')}>
+                          <ButtonLink href={decideFirst} size="sm" className="text-[var(--casa-text-subtle)]">
+                            <span aria-hidden="true" className="[&_svg]:size-3.5">{Icon.lock}</span>
+                            {t('Buchen', 'Book')}
+                          </ButtonLink>
+                        </span>
+                      ) : canBook && isOpen(line.outcome) ? (
                         bookingLine?.id === line.id && offer && personId ? (
                           <FormDialog defaultOpen icon={Icon.bookings} tint="red" trigger={t('Buchen', 'Book')} title={t(`${fullName} buchen`, `Book ${fullName}`)} size="sm" width="lg">
                             {line.kind === 'course' ? (
@@ -446,7 +464,7 @@ export default async function RegistrationPage({
                           </Button>
                         </form>
                       ) : null}
-                      <RowActions label={t('Weitere Aktionen', 'More actions')} actions={lineActions(line, { here, canBook, canEdit, t })} />
+                      <RowActions label={t('Weitere Aktionen', 'More actions')} actions={lineActions(line, { here, canBook: bookNow, canEdit, t })} />
                     </div>
                   </div>
                   {queueLine?.id === line.id && personId ? (
