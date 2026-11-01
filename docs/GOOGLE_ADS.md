@@ -1,9 +1,9 @@
 # Google Ads: the Ad Grants account
 
 CASA's free Google search ads: what the grant is, its rules, how sign-ups are measured, and the
-campaigns. Checked 2026-10-30. The same plan as a 13-page PDF for Rahman:
-`~/Downloads/CASA-site/output/ad-grants/CASA-Ad-Grants-Plan.pdf` (not in git). Eligibility and the
-website requirements are in docs/GOOGLE_AD_GRANTS_COMPLIANCE.md.
+campaigns. Checked 2026-10-30; made the brief for any agent on 2026-10-31. The same plan as a
+13-page PDF for Rahman: `~/Downloads/CASA-site/output/ad-grants/CASA-Ad-Grants-Plan.pdf` (not in
+git). Eligibility and the website requirements are in docs/GOOGLE_AD_GRANTS_COMPLIANCE.md.
 
 ## State
 
@@ -12,10 +12,55 @@ website requirements are in docs/GOOGLE_AD_GRANTS_COMPLIANCE.md.
   administrator, accepted the payments profile 9486-6175-4118 (administrator and primary contact)
   and the Google Ireland advertising terms the same day. Billing says „Wir stellen das nicht in
   Rechnung".
-- **Nothing runs yet:** no campaign, no conversion action, no tracking.
+- **Live since 2026-10-31:** „Deutsch am Abend – Bremen" (id 24423184939, §First campaign) and
+  „Deutsch intensiv – Bremen" (id 24412445946, §Second campaign), 50 USD a day each. Call reporting is off (Rahman, 2026-10-31), so Google
+  counts no conversions until A1; no tracking on the site. Google created one inactive website
+  conversion action („Lead-Formulare senden") during the build; it has no tag and does nothing.
+- The account picker also lists a second, empty „Google Ads-Konto" 715-735-9700 („wird
+  eingerichtet"), not CASA's grant account. Never build in it.
 - **Decisions pending with Rahman** (below). Nothing in the account changes without his go.
 - Ad Grants never asks for card details. If Google Ads asks for one, it is the wrong account:
   check the number at the top right.
+
+## Working on the account (Claude, Codex, Gemini or a person)
+
+This file is the whole brief. An agent that cannot read the repository gets it attached or pasted,
+with this prompt:
+
+> You are helping CASA Bremen („CASA - Internationale Sprachschule gemeinnützige GmbH", a
+> non-profit language school) with its Google Ad Grants account 343-341-7137. The attached
+> GOOGLE_ADS.md is your brief: read all of it before you act. Do only the task Rahman gives you,
+> inside the limits in „Working on the account". Before you change anything, compare the live
+> account with „State" and tell Rahman where they differ. When you finish, give Rahman a dated list
+> of what you changed, for the „Account log", and anything in this file that turned out to be wrong.
+
+Agents with the repository read CLAUDE.md, `docs/PARALLEL_AGENT_WORK_BOARD.md` (units A1–A5) and
+`docs/OPERATIONS.md` §Accounts first.
+
+**Limits**
+
+- **The agent prepares, Rahman approves.** Campaigns, ad groups, keywords, ads and assets are built
+  **paused**. Only Rahman, or an agent he tells to for that step, enables a campaign, publishes a
+  text or changes a running budget.
+- **Never:** accept terms or invitations; enter or change payment details; link or unlink accounts
+  (Analytics, Search Console, Merchant Center, YouTube…); add or remove users or change access;
+  change the account's name, currency or time zone; sign in, sign out or enter a password for
+  Rahman; answer the program survey for CASA.
+- **Google's suggestions are not approvals.** Auto-apply recommendations stay off. AI Max for
+  Search, final URL expansion, automatically created assets and broad match stay off until Rahman
+  says otherwise: they write texts and pick landing pages nobody approved, and loose matching spends
+  the click rate the grant depends on. The optimisation score is not a goal.
+- **Texts:** German says „du"; British English; no prices or dates that go stale; nothing from
+  §Visa wording; every claim must already be on casa-bremen.de. Approved figures: 30,000+
+  learners, 150+ countries, ages 7–80+, 45,000+ course bookings, 40+ staff and teachers, in Bremen
+  since 1983.
+- **The website is not part of the account work.** Landing pages, the consent box and tracking are
+  code in the repository (units A1, A3). Never a Google tag, a tag manager or a script added to the
+  site from outside it; the privacy policy promises none (§Measuring sign-ups).
+- **Where:** ads.google.com, customer 343-341-7137 (check the number at the top right before every
+  change), administrator r.shafiee@casa-bremen.de. On Rahman's Mac it is open in Chrome „Browser 1".
+- **Afterwards:** a dated line per change in „Account log" (what, who, paused or live), and „State"
+  corrected. An agent without the repository hands those lines to Rahman.
 
 ## The grant
 
@@ -123,8 +168,10 @@ none of these, FAQ); online, app, kostenlos lernen, duolingo, pdf, übungen; job
 werden, ausbildung; goethe.
 
 Sitelinks: Kurstermine, Einstufungstest, Anmeldung, Gemeinnützige Arbeit (EN: Course dates,
-Visa and FAQ, Accommodation, Our non-profit work). Callouts: Gemeinnützig seit 1983, Über 150
-Herkunftsländer, Mitten in Bremen (EN: Non-profit since 1983, From 150+ countries).
+Visa and FAQ, Accommodation, Our non-profit work). Callouts: Gemeinnützige Schule, Seit 1983,
+Über 150 Herkunftsländer, Mitten in Bremen (EN: Non-profit school, Since 1983, From 150+
+countries). 1983 is the school's founding year, not the start of its non-profit status: never
+join the two („gemeinnützig seit 1983", „non-profit since 1983").
 
 Draft texts (checked against 30/90/25 characters; du in German; no prices or dates that go stale;
 Rahman approves before anything is published):
@@ -149,6 +196,254 @@ Bidding: Maximize clicks for the first weeks, Maximize conversions once conversi
 budgets per campaign that together stay under 329 USD. An account-level final URL suffix
 `utm_source=google&utm_medium=cpc&utm_campaign={campaignid}` (or a readable name per campaign) so
 ad visits appear in Statistik.
+
+### Build details
+
+- **Type and networks:** Search campaigns; Google Search only, Search partners and Display off.
+- **Locations:** as in the table, with the location option „Presence: people in or regularly in
+  your included locations", not „interest", so a search for „deutschkurs bremen" made in Delhi
+  does not see the Bremen ads.
+- **Match types (recommendation, part of decision 4):** phrase and exact to start; broad only once
+  conversions arrive and the click rate is safely above 5 %. No single-word keywords except
+  „CASA". The negatives above as one shared list at account level.
+- **Ads:** one responsive search ad per ad group to start, with the drafted lines plus more in the
+  same voice to reach 8–15 headlines and 4 descriptions; final URL from the table below.
+- **Statistik and the suffix:** `/admin/statistics` labels a visit whose link carries `gclid`,
+  `gbraid` or `wbraid` as „Google Ads", otherwise `utm_source · utm_campaign`
+  (`campaignOf` in `src/lib/site-views.ts`). Since the click ID wins, the suffix does not yet split
+  ad visits by campaign; preferring `utm_campaign` when both are present fixes it (with A1, or a
+  small PR of its own).
+
+Final URLs (all answered 200 on 2026-10-31):
+
+| Ad group | German | English |
+| --- | --- | --- |
+| Intensive | https://casa-bremen.de/sprachkurse/deutsch-intensiv | https://casa-bremen.de/en/courses/intensive-german |
+| Evening | https://casa-bremen.de/sprachkurse/deutsch-am-abend | https://casa-bremen.de/en/courses/evening-course |
+| Placement test | https://casa-bremen.de/anmeldung/einstufungstest | https://casa-bremen.de/en/placement-test |
+| telc B2 | https://casa-bremen.de/pruefungszentrum/telc-deutsch-b2 | https://casa-bremen.de/en/exams/b2 |
+| telc C1 Hochschule | https://casa-bremen.de/pruefungszentrum/telc-deutsch-c1-hochschule | https://casa-bremen.de/en/exams/c1 |
+| Bildungszeit | https://casa-bremen.de/sprachkurse/bildungszeit-deutsch | https://casa-bremen.de/en/courses/bildungszeit |
+| Nursing · Medicine | https://casa-bremen.de/sprachkurse/deutsch-fuer-mediziner | https://casa-bremen.de/en/courses/german-for-medical |
+| Language café · Tandem | https://casa-bremen.de/ratgeber/sprachtandem | https://casa-bremen.de/en/resources/language-tandem |
+| Mission | https://casa-bremen.de/ueber-uns/gemeinnuetzigkeit | https://casa-bremen.de/en/about/nonprofit |
+
+Sitelinks: Kurstermine → `/sprachkurse` (ASSUMPTION: the course overview; no page holds the dates
+alone), Einstufungstest → `/anmeldung/einstufungstest`, Anmeldung → `/anmeldung/anmeldeformular`,
+Gemeinnützige Arbeit → `/ueber-uns/gemeinnuetzigkeit`. English: Course dates → `/en/courses`, Visa
+and FAQ → `/en/faq`, Accommodation → `/en/accommodation`, Our non-profit work →
+`/en/about/nonprofit`. A German path never gets an English ad, and the other way round.
+
+## First campaign: Deutsch am Abend (decided 2026-10-31)
+
+Rahman, 2026-10-31: the evening course numbers are falling, so the first campaign is the evening
+course alone, in Bremen, for people who work during the day and have their evenings free. It
+replaces the Evening ad group of „Deutschkurse Bremen"; when that campaign follows, a keyword lives
+in one campaign only. Texts checked against Google's limits on 2026-10-31. **Built paused on
+2026-10-31** exactly as below, with the differences listed under „As built".
+
+**The course (casa-bremen.de/sprachkurse/deutsch-am-abend, 2026-10-31):** twice a week, 18:30–20:00,
+Monday + Wednesday or Tuesday + Thursday; 4 lessons a week; A1 to C1, half a level per trimester
+of about 3½ months; small international groups; from 378 € a trimester plus the book. The next
+trimester starts **4 January 2027**, the only start for beginners (A1.1); with some German, people
+join a running course when places are free. So until Christmas the campaign's job is filling
+January. Over Christmas the office works shorter hours, not closed (Rahman, 2026-10-31).
+
+**Settings**
+
+| Setting | Value |
+| --- | --- |
+| Name | Deutsch am Abend – Bremen |
+| Type, networks | Search; Google Search only |
+| Locations | 25 km around Am Dobben 14 (Bremen, Delmenhorst, Achim, Lilienthal, Stuhr, Weyhe, Oyten); „Presence" only. Bremerhaven is too far for two evenings a week |
+| Bidding | Maximize clicks until conversions arrive, then Maximize conversions |
+| Budget | 50 USD a day (Google spends what the searches allow; the evening searches will not reach it) |
+| Ad schedule | All day, every day: people look during lunch and after work |
+| Final URL suffix | `utm_source=google&utm_medium=cpc&utm_campaign=abendkurs` |
+
+Because the ads reach only people in the Bremen area, keywords without „bremen" (such as
+„deutschkurs abends") still reach only Bremen searchers. That is where most of the reach is:
+„abendkurs deutsch bremen" itself has fewer than 10 searches a month. Expect tens of clicks a
+month, not hundreds (ASSUMPTION until it runs; Keyword Planner gives ranges only).
+
+**Ad groups and keywords** (phrase match „…", exact match […])
+
+| Ad group | Keywords | Final URL |
+| --- | --- | --- |
+| Abends und neben dem Beruf | „abendkurs deutsch", [abendkurs deutsch bremen], „deutschkurs abends", „deutschkurs am abend", „deutsch lernen abends", „deutschkurs nach der arbeit", „deutschkurs nach feierabend", „deutschkurs berufsbegleitend", „deutschkurs neben dem beruf", „deutsch lernen neben dem job", „deutschkurs teilzeit" | /sprachkurse/deutsch-am-abend |
+| Deutschkurs Bremen | „deutschkurs bremen", [deutschkurs bremen], „deutsch lernen bremen", „deutschkurs a1 bremen", „deutschkurs a2 bremen", „deutschkurs b1 bremen", „deutschkurs b2 bremen", „deutschkurs c1 bremen", „sprachschule bremen deutsch" | /sprachkurse/deutsch-am-abend |
+| German evening classes (EN) | „german evening classes", „german evening course", „evening german course", „german course after work", „part time german course", „german course bremen", „german classes bremen", „learn german bremen", „german lessons bremen" | /en/courses/evening-course |
+
+Two German groups with the same ads on purpose: they show how many people look for an evening
+course and how many look for any course and still choose the evening.
+
+**Negatives** (one shared list for the campaign): integrationskurs, berufssprachkurs,
+bildungsgutschein, jobcenter, vhs, volkshochschule, goethe, intensiv, intensivkurs, kinder,
+schüler, kostenlos, gratis, online, app, duolingo, pdf, übungen, arbeitsblatt, telc, dtz,
+einbürgerungstest, prüfung, stellenangebote, gehalt, lehrer werden, englisch, spanisch,
+französisch; free, online, app, jobs, teacher, translator. Not „job": it would block
+„deutsch lernen neben dem job".
+
+**Ads** (one responsive search ad per group; path `casa-bremen.de/abendkurs/deutsch`, English
+`/evening-classes/german`)
+
+German headlines (≤ 30): Abendkurs Deutsch in Bremen · Deutschkurs am Abend · Deutsch lernen nach
+der Arbeit · Deutsch nach Feierabend · Neben dem Beruf Deutsch lernen · Zweimal pro Woche abends ·
+Abends von 18:30 bis 20:00 · Mo + Mi oder Di + Do · Alle Niveaus von A1 bis C1 · Kleine
+internationale Gruppen · Kostenloser Einstufungstest · Gemeinnützige Sprachschule · Seit 1983 in
+Bremen · Deutschkurs in Bremen · Jetzt online anmelden
+
+German descriptions (≤ 90):
+- Lerne Deutsch am Abend bei CASA, der gemeinnützigen Sprachschule mitten in Bremen.
+- Zweimal pro Woche, 18:30–20:00 Uhr, montags und mittwochs oder dienstags und donnerstags.
+- Mit Vorkenntnissen steigst du in einen laufenden Kurs ein, wenn noch Plätze frei sind.
+- Kleine internationale Gruppen von A1 bis C1. Mach zuerst den kostenlosen Einstufungstest.
+
+English headlines: German evening classes Bremen · Learn German after work · German course in
+Bremen · Two evenings a week · Evenings, 18:30 to 20:00 · Mon + Wed or Tue + Thu · All levels from
+A1 to C1 · Small international groups · Free placement test · Non-profit language school · In
+Bremen since 1983 · Learners from 150+ countries · Register online
+
+English descriptions:
+- Learn German in the evening at CASA, a non-profit language school in the heart of Bremen.
+- Twice a week, 18:30–20:00, on Mondays and Wednesdays or on Tuesdays and Thursdays.
+- If you already speak some German, join a running course whenever places are free.
+- Small international groups from A1 to C1. Take the free placement test first.
+
+**Assets** (German ones on the German groups, English on the English group)
+
+| Sitelink | Lines | URL |
+| --- | --- | --- |
+| Einstufungstest | Kostenlos online · Oder vor Ort mit Termin | /anmeldung/einstufungstest |
+| Zur Anmeldung | In drei Schritten anmelden · Ein Trimester wählen | /anmeldung/anmeldeformular |
+| Gemeinnützige Arbeit | Keine Gewinnausschüttung · Einnahmen fließen in die Bildung | /ueber-uns/gemeinnuetzigkeit |
+| Beratung anfragen | Niveau, Termine, Gebühren · Per Formular oder Telefon | /kontakt |
+| Placement test | Free and online · Or in person by appointment | /en/placement-test |
+| Register | Three steps to your course · Choose a trimester | /en/registration/course |
+| Our non-profit work | No profits paid out · Income stays in education | /en/about/nonprofit |
+| Ask us | Level, dates, fees · By form or phone | /en/contact |
+
+Callouts: Gemeinnützige Schule · Seit 1983 · Kleine Gruppen · Einstufungstest kostenlos ·
+Kostenfreies Sprachcafé · Mitten in Bremen; English: Non-profit school · Since 1983 · Small groups ·
+Free placement test · Free language café. Seasonal, with the asset's end date set to 3 January
+2027: „Neuer Kurs ab 4. Januar" / „New course from 4 January".
+
+Call asset: +49 421 460 414 30, shown only in office hours (Mon–Thu 08:30–18:30, Fri 08:30–12:30),
+also over Christmas. Its call conversion keeps Google's default length: it is there for the grant's
+one conversion a month, not to count every call (Rahman, 2026-10-31).
+
+**Measuring it.** The people this campaign is for register in the evening, when the office is
+closed, so calls alone will undercount it: the forms are what count, which means unit A1 (the
+consent box and the Data Manager list). Two ways to start:
+- **Calls first (recommended, because January is close):** build now, switch on with the call
+  conversion once decision 3 is yes and the privacy policy has its paragraph on call forwarding;
+  A1 follows in parallel and adds the forms.
+- **Wait for A1:** both measures from day one, but the campaign starts later and has less time
+  before 4 January.
+
+Without A1, a registration from the campaign still shows in the workspace and in Statistik („Google
+Ads" as the visit's campaign), just not in Google Ads.
+
+**How we know it worked:** evening registrations for the 4 January 2027 start compared with the
+January 2026 and August 2026 starts (workspace); ad visits and their landing pages in Statistik;
+conversions and the click rate in Google Ads. Look at the search terms report weekly for the first
+month and add negatives.
+
+**As built (2026-10-31)**
+
+- Campaign id 24423184939, paused, start date 31 Oct 2026, no end date, 50 USD a day, Maximize
+  clicks with no CPC cap. Google's estimate at that budget: about 125 clicks a week at 2.80 USD.
+- The campaign wizard demands a goal: „Lead-Formulare senden" (form submissions) is set; it is only
+  a label until A1 delivers conversions. EU political ads: answered „no".
+- AI Max, text customisation, final URL expansion, automatically created assets, broad match and
+  dynamic search ads: all off, checked on the campaign's own settings page (the wizard's summary
+  page showed some of them wrongly).
+- Languages German and English. Ad groups: „Abends und neben dem Beruf" (11 keywords), „Deutschkurs
+  Bremen" (9; same ad as the first group), „German evening classes (EN)" (9). 27 phrase, 2 exact.
+- 33 negatives on the campaign (broad negatives), not yet a shared list.
+- Assets at ad group level: the 4 German sitelinks and 6 callouts on both German groups, the 4
+  English sitelinks and 5 callouts on the English group, the seasonal callout in each language with
+  end date 3 Jan 2027. The call asset (0421 460 414 30) is on the campaign, Mon–Thu 08:30–18:30
+  and Fri 08:30–12:30. Call reporting was switched off afterwards (Rahman, 2026-10-31), so the ad
+  shows CASA's own number and no call is counted. „Small groups" is marked „eingeschränkt" for a
+  religion policy, which looks like a false flag.
+- Google's tag setup page after publishing was skipped: no tag on the site.
+
+**Before it goes live:** Rahman switches the campaign on. With call reporting off, the grant's one
+conversion a month has to come from A1 (the form list); without it Google can pause the account
+after warnings. Each step goes into „Account log".
+
+**How we judge it (Rahman, 2026-10-31):** evening registrations for January 2027 against the
+evening registrations of 2026. Google's conversion counts are for the grant rules, not the verdict.
+
+## Second campaign: Deutsch intensiv (built paused 2026-10-31)
+
+Rahman, 2026-10-31: one more campaign, for the intensive courses, on their own page. Built paused
+the same day as below; Rahman published it in the wizard (start date 1 Dec), Claude paused it at
+once and set the start date to 31 Oct.
+
+**The course (casa-bremen.de/sprachkurse/deutsch-intensiv, 2026-10-31):** 20 lessons of 45 minutes
+a week; a complete level in 8 weeks, A1 to C1 in a year; mornings Mon–Fri 09:00–12:30 or
+afternoons Mon–Thu 13:00–17:30; international groups of 10 to 16; starts through the year; free
+placement test. So no „Kleine Gruppen" callout here.
+
+**Settings:** id 24412445946, „Deutsch intensiv – Bremen", Search only, 25 km around Am Dobben 14
+with „Presence", German and English, Maximize clicks, 50 USD a day (Google's estimate: about 112
+clicks a week at 3.13 USD), suffix `utm_source=google&utm_medium=cpc&utm_campaign=intensivkurs`,
+AI Max, text customisation, URL expansion, automatically created assets and broad match off (checked
+on the settings page).
+
+**Ad groups** (phrase „…", exact […])
+
+| Ad group | Keywords | Final URL |
+| --- | --- | --- |
+| Intensivkurs Deutsch | „intensivkurs deutsch", [intensivkurs deutsch bremen], „deutsch intensivkurs", „deutsch intensivkurs bremen", „deutschkurs intensiv", „deutsch intensiv lernen", „intensiver deutschkurs", „deutschkurs vollzeit", „deutschkurs vormittags", „deutschkurs täglich", „deutsch schnell lernen" | /sprachkurse/deutsch-intensiv |
+| Intensive German (EN) | „intensive german course", „german intensive course", „intensive german course bremen", „german intensive course bremen", „intensive german classes", „full time german course", „learn german fast", „german course mornings", „daily german classes" | /en/courses/intensive-german |
+
+General searches („deutschkurs bremen", „german course bremen") stay in the evening campaign; a
+keyword lives in one campaign only.
+
+**Negatives (41, on the campaign):** the evening campaign's list without „intensiv"/„intensivkurs",
+plus abends, abend, abendkurs, feierabend, berufsbegleitend, teilzeit, wochenende, evening, part
+time, weekend, so the two campaigns do not compete.
+
+**Ads** (path `/intensivkurs/deutsch`, English `/intensive/german`)
+
+German headlines: Intensivkurs Deutsch in Bremen · Deutsch intensiv lernen · 20 Einheiten pro Woche ·
+Ein Niveau in 8 Wochen · In einem Jahr von A1 bis C1 · Vormittags oder nachmittags · Vormittags 9:00
+bis 12:30 · Nachmittags 13:00 bis 17:30 · Internationale Gruppen · Kostenloser Einstufungstest ·
+Gemeinnützige Sprachschule · Seit 1983 in Bremen · Deutschkurs in Bremen · Für Studium und Beruf ·
+Jetzt online anmelden
+
+German descriptions:
+- Lerne Deutsch intensiv bei CASA, der gemeinnützigen Sprachschule mitten in Bremen.
+- 20 Unterrichtseinheiten pro Woche: ein komplettes Niveau in 8 Wochen, von A1 bis C1.
+- Vormittags Mo–Fr 9:00–12:30 Uhr oder nachmittags Mo–Do 13:00–17:30 Uhr.
+- Lernende aus über 150 Ländern. Mach zuerst den kostenlosen Einstufungstest.
+
+English headlines: Intensive German in Bremen · Learn German intensively · 20 lessons a week · One
+level in 8 weeks · From A1 to C1 in a year · Mornings or afternoons · International groups · Free
+placement test · Non-profit language school · In Bremen since 1983 · Learners from 150+ countries ·
+For study and work · Register online
+
+English descriptions:
+- Learn German intensively at CASA, a non-profit language school in the heart of Bremen.
+- 20 lessons a week: a complete level in 8 weeks, from A1 to C1.
+- Mornings Mon–Fri 09:00–12:30 or afternoons Mon–Thu 13:00–17:30.
+- Learners from over 150 countries. Take the free placement test first.
+
+**Assets:** German group: sitelinks Einstufungstest, Online anmelden (Kurs und Starttermin wählen ·
+Wir bestätigen deinen Platz → /anmeldung/anmeldeformular), Gemeinnützige Arbeit, Beratung anfragen;
+callouts Gemeinnützige Schule, Seit 1983, Ein Niveau in 8 Wochen, Einstufungstest kostenlos,
+Kostenfreies Sprachcafé, Mitten in Bremen. English group: Placement test, Register online (Choose
+your course and start · We confirm your place → /en/registration/course), Our non-profit work, Ask
+us; callouts Non-profit school, Since 1983, One level in 8 weeks, Free placement test, Free language
+café. The evening campaign's call asset (office hours) is reused on the campaign.
+
+**As with the evening campaign:** Google pre-filled the new English ad group with its own AI keywords
+(broad) and AI ad text, including „Dein Browser ist zu alt …" from the page; all of it was replaced.
+**How we judge it:** intensive registrations from Bremen in the months it runs against the same
+months of 2026 (workspace).
 
 ## Learners abroad
 
@@ -192,7 +487,7 @@ prepared machine translations (docs/TRANSLATIONS.md), not public; Portuguese is 
 1. Measurement: way A (consent box + Data Manager list) with calls as backstop.
 2. Who checks the consent wording and the privacy paragraph.
 3. Call forwarding on the ads (a Google number that rings at CASA).
-4. Ad texts and keywords above.
+4. Ad texts and keywords: first the evening campaign (§First campaign), then the rest.
 5. The English page „Learn German in Bremen" and the first countries.
 6. Opening Turkish and Spanish on the site (after Phase A).
 
@@ -202,6 +497,36 @@ Account click rate ≥ 5 %; at least one conversion; Quality Score 1–2 keyword
 report (new negatives, new keywords); the survey answered; Statistik and the workspace show the
 leads; course pages still match the ads. Google publishes no average spend; agencies' figures are
 not reliable.
+
+## Account log
+
+Newest last. One line per change in the account: date, who, what, paused or live.
+
+- 2026-06: Google for Nonprofits approved CASA gGmbH (Goodstack). Ad Grants activation refused as
+  too commercial (the old TYPO3 site).
+- 2026-10-29: activation requested again from the new casa-bremen.de (Rahman).
+- 2026-10-30: approved. Rahman, with Claude at his request: invitation accepted (r.shafiee@,
+  administrator), payments profile 9486-6175-4118 and Google Ireland terms accepted. No campaigns,
+  conversion actions or settings changed.
+- 2026-10-31: this file made the brief for any agent (Claude). The live account was not re-checked.
+- 2026-10-31: account settings checked, none changed (auto-tagging on, auto-apply off, call
+  reporting on). Campaign „Deutsch am Abend – Bremen" (24423184939) built by Claude at Rahman's
+  request; Rahman confirmed his identity and published it with start date 1 Dec 2026; Claude paused
+  it at once, added ad groups 2 and 3, 33 negatives, 12 sitelinks, 20 callouts and the call asset,
+  then set the start date to 31 Oct 2026. **Paused.**
+- 2026-10-31: call reporting switched off at account level (Claude, at Rahman's request). Campaign
+  „Deutsch intensiv – Bremen" (24412445946) built by Claude; Rahman published it with start date
+  1 Dec 2026; Claude paused it at once, added the English ad group, 41 negatives, 8 sitelinks, 11
+  callouts and the existing call asset, then set the start date to 31 Oct 2026. **Paused.**
+- 2026-10-31: both campaigns switched on by Claude at Rahman's request. **Live**, status „Aktiv
+  (eingeschränkt) · Nicht genug relevante Keywords" (Google wants more, looser keywords; kept tight
+  on purpose for the click rate) and „Gebotsstrategie lernt"; ads in Google's review.
+- 2026-11-01: checked, nothing changed. All five ads approved („Aktiv"); 42 of 49 keywords active,
+  7 „Nicht aktiv · Geringes Suchvolumen" (Google switches them on by itself once people search
+  them); 0 impressions on the first day. „Nicht genug relevante Keywords" stays: it is Google's
+  advice to add looser keywords, not an error. Without conversions the campaigns bid on Maximize
+  clicks under the grant's 2 USD cap, while Google's own estimate was 2.80–3.13 USD a click, so
+  impressions stay thin until A1 lets them move to Maximize conversions.
 
 ## Sources
 

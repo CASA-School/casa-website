@@ -11,6 +11,7 @@ without Rahman's go for that text; Google reviews most edits before they show.
 
 | Part | State |
 | --- | --- |
+| Categories | „Sprachschule" (primary), „Gemeinnützige Organisation", „Bildungstestservice", and since 2026-10-31 „Deutsch-Sprachschule" (German language school, the category the schools in English AI answers carry; docs/SEO_AND_GEO.md §AI answers). Added by Claude at Rahman's go; Google says a review takes up to 10 minutes, but it still read „Ausstehend" on 2026-11-01 |
 | Website | `https://casa-bremen.de/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (Statistik: „google · gbp") |
 | Booking button | The registration form: `/anmeldung/anmeldeformular?utm_source=google&utm_campaign=gbp-buchung` |
 | Products | Six, no prices (they would go stale), each linking to its page with `utm_campaign=gbp-produkte`. „Deutschkurse": Intensivkurs Deutsch (A1–C1), Abendkurs Deutsch (A1–C1), Bildungszeit: Deutsch- und Englischkurse, Deutsch für Pflege und Medizin (B2–C1). „Prüfungen": telc Deutsch B2, telc Deutsch C1 Hochschule. Images: `output/gbp-products/` (1200×900, from cleared site photos) |

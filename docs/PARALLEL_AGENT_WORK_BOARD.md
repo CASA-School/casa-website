@@ -78,9 +78,9 @@ Paste this to a new agent, with the unit's id:
 **Needs Rahman:** decision 1 (way A), decision 2 (who checks the text), decision 3 (call forwarding); the secret for the endpoint is set on the Container App only with his go; release only with his go.
 
 ### A2 · Ad Grants: account setup and Bremen campaigns
-**Status:** ready to prepare. Nothing is published without Rahman's approval of the texts.
-**Read first:** `docs/GOOGLE_ADS.md` (rules, campaigns, drafts, negatives); `docs/VOICE_AND_TONE.md`; `docs/OPERATIONS.md` §Accounts.
-**Goal:** in account 343-341-7137 (Chrome „Browser 1"): auto-tagging on, the final URL suffix, survey notifications on, the five Bremen campaigns built **paused** with ad groups, keywords, negatives, sitelinks and callouts as drafted; conversion actions created once A1 is live.
+**Status:** in progress. „Deutsch am Abend" and „Deutsch intensiv" are live since 2026-10-31 (GOOGLE_ADS.md §State); the other Bremen campaigns and the conversion actions (after A1) are left. Nothing is published without Rahman's approval of the texts.
+**Read first:** `docs/GOOGLE_ADS.md` (§Working on the account first, then rules, campaigns, drafts, negatives; an agent without the repository, such as Gemini, gets that file and its paste-in prompt); `docs/VOICE_AND_TONE.md`; `docs/OPERATIONS.md` §Accounts.
+**Goal:** in account 343-341-7137 (Chrome „Browser 1"): auto-tagging on, the final URL suffix, survey notifications on, first the evening campaign „Deutsch am Abend" (GOOGLE_ADS.md §First campaign, Rahman 2026-10-31), then the other Bremen campaigns, all built **paused** with ad groups, keywords, negatives, sitelinks and callouts as drafted; conversion actions created once A1 is live.
 **Owns:** the Google Ads account only.
 **Done when:** Rahman has approved the texts and switched the campaigns on (or told you to); the campaigns satisfy every rule in `docs/GOOGLE_ADS.md` §The rules; the doc's „State" section is updated.
 **Needs Rahman:** decision 4 (texts and keywords); go before any campaign is enabled. Never accept terms, link accounts or enter payment details.
