@@ -123,7 +123,9 @@ ratings and an instruction would read as manipulation).
    the page an English question can be answered from.
 
 **Check it monthly:** the three questions above, plus the same in ChatGPT and Perplexity, from a
-Bremen location; note CASA's place and what the answer says about it.
+Bremen location; note CASA's place and what the answer says about it. Then Bing Webmaster Tools →
+AI Performance (citations and the questions behind them) and Search Console → Performance (the
+non-brand queries: „sprachschule bremen", „deutschkurs bremen", „german courses bremen").
 
 ## At go-live (with the domain)
 
@@ -134,7 +136,11 @@ Bremen location; note CASA's place and what the answer says about it.
    Done 2026-10-29 (domain property `sc-domain:casa-bremen.de`, owner r.shafiee@, TXT
    `google-site-verification=…` in the Plesk zone; sitemap submitted the same evening).
 3. **Bing Webmaster Tools:** import the property from Search Console. IndexNow runs from the
-   next release on.
+   next release on. Done 2026-11-01: Rahman signed in as r.shafiee@ and allowed Bing read-only
+   access to Search Console; casa-bremen.de was imported, the sitemap submitted the same day. Bing
+   already held the new site through IndexNow (55 pages on `site:casa-bremen.de`). Its **AI
+   Performance** report (beta) counts how often Copilot and its partners cite CASA's pages and for
+   which questions: the one measured view of AI answers we have (§AI answers).
 4. **Google Business Profile:** make sure the website field says `https://casa-bremen.de/` and
    that name, address and phone match the site exactly. Done 2026-10-29/30 with a tagged link,
    products and a booking link: `docs/GOOGLE_BUSINESS_PROFILE.md`.
