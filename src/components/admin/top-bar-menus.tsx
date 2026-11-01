@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRef, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { menuItem, menuPanel } from './choice-menu';
 import { Icon } from './icons';
 import { useWsLang } from './lang';
+import { useWorkspaceInstall } from './workspace-install';
 
 const panel = menuPanel;
 const item = menuItem;
@@ -88,21 +89,25 @@ export function AccountMenu({
 }) {
   const { t } = useWsLang();
   const signOut = useRef<HTMLFormElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const app = useWorkspaceInstall();
+  const [open, setOpen] = useState(false);
   const first = name.trim().split(/\s+/)[0] ?? name;
 
   return (
     <>
       <form ref={signOut} action={signOutAction} hidden />
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
         {tone === 'rail' ? (
           <DropdownMenuTrigger
+            ref={trigger}
             aria-label={t('Dein Konto', 'Your account')}
             className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
             <Initials name={name} tone="rail" />
           </DropdownMenuTrigger>
         ) : (
-          <DropdownMenuTrigger className={cn(control, 'gap-2 pr-2.5 pl-1')} aria-label={t('Dein Konto', 'Your account')}>
+          <DropdownMenuTrigger ref={trigger} className={cn(control, 'gap-2 pr-2.5 pl-1')} aria-label={t('Dein Konto', 'Your account')}>
             <Initials name={name} />
             <span className="max-w-[9rem] truncate">{first}</span>
             <span aria-hidden="true" className="text-[var(--casa-text-subtle)] [&_svg]:size-3.5">
@@ -131,6 +136,14 @@ export function AccountMenu({
               {t('Zur Website', 'The website')}
             </a>
           </DropdownMenuItem>
+          {app && !app.installed ? <DropdownMenuItem className={item} disabled={app.installing} onSelect={event => {
+            event.preventDefault();
+            setOpen(false);
+            void app.install(trigger.current);
+          }}>
+            {Icon.download}
+            {t('App installieren', 'Install app')}
+          </DropdownMenuItem> : null}
           <DropdownMenuSeparator className="mx-1 my-1.5 bg-ws-line-soft" />
           <DropdownMenuItem className={item} onSelect={() => signOut.current?.requestSubmit()}>
             {Icon.signOut}

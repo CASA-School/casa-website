@@ -61,6 +61,7 @@ Paste this to a new agent, with the unit's id:
 | H6 | Database maintenance window | Azure | offered, waiting for Rahman |
 | H7 | Next release | Azure | photography release authorized by Rahman, 2026-10-31 |
 | UI | Workspace interface follow-up | code | ✅ contextual booking/list refinement implemented and verified 2026-11-02 (`codex/contextual-booking-lists`); production release separate from the completed revision120 release |
+| UI-PWA | Installable CASA Workspace | code | ✅ implemented and verified 2026-11-02 (`codex/workspace-pwa`); 1122 unit / 101 E2E / 124 routes pass; production release separate |
 | P1 | Privacy: specialist review pack | docs | ready |
 | P2 | Scheduled deletion (retention) | code, both products | needs a privacy owner |
 | X1 | Site and workspace as two apps | Azure + code | later, Rahman will come back to it |

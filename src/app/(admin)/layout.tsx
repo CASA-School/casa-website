@@ -1,10 +1,12 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 
 import '../globals.css';
 
 import { WsLangProvider } from '@/components/admin/lang';
 import { getWsLang } from '@/lib/admin/i18n.server';
+import { workspaceApp } from '@/config/workspace-app';
+import { WorkspaceInstallProvider } from '@/components/admin/workspace-install';
 
 /**
  * Root layout for the STAFF WORKSPACE.
@@ -49,11 +51,17 @@ const playfairDisplay = Playfair_Display({
 
 export const metadata: Metadata = {
   title: 'Workspace · CASA Bremen',
+  applicationName: workspaceApp.name,
+  manifest: workspaceApp.manifest,
+  appleWebApp: { capable: true, title: workspaceApp.name, statusBarStyle: 'default' },
+  icons: { icon: '/icon.png', apple: '/apple-icon.png' },
   // Belt and braces with the middleware. Robots metadata is not access control
   // (CLAUDE.md, known open items), but there is no reason to also invite a
   // crawler that ignores the 404.
   robots: { index: false, follow: false, nocache: true },
 };
+
+export const viewport: Viewport = { themeColor: workspaceApp.themeColor, colorScheme: 'light' };
 
 export default async function WorkspaceRootLayout({ children }: { children: React.ReactNode }) {
   // German unless this colleague chose English (docs/ADMIN_I18N.md); every client component reads it from here.
@@ -77,7 +85,7 @@ export default async function WorkspaceRootLayout({ children }: { children: Reac
               "try{var d=document.documentElement,v=localStorage.getItem('casa-workspace-nav');if(v)d.dataset.workspaceNav=v;var w=localStorage.getItem('casa-workspace-nav-width');if(w&&/^\\d{3}$/.test(w))d.style.setProperty('--ws-rail-w',w+'px');var f=localStorage.getItem('casa-focus-nav');if(f)d.dataset.focusNav=f}catch(e){}",
           }}
         />
-        <WsLangProvider lang={lang}>{children}</WsLangProvider>
+        <WsLangProvider lang={lang}><WorkspaceInstallProvider>{children}</WorkspaceInstallProvider></WsLangProvider>
       </body>
     </html>
   );
