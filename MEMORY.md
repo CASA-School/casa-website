@@ -3006,3 +3006,5 @@ temporary and belongs inside the person check; the wizard must offer only what f
 - **Design A** (2026-11-01, Rahman chose it from two mock-ups and asked for it across the workspace): white card
   heads with grey glyphs, a lighter canvas, one button system with a `tertiary` word-link, a record's bar with
   labelled status and owner, `accent` for the stay and the visa. docs/ADMIN_WORKSPACE.md §Design standards.
+- **Type** (2026-11-01): the workspace is Inter (Rahman, from a six-font mock-up); Kursplanung keeps Manrope in its
+  own layout; letters and mail are Arial. Corners are the workspace's own tokens (`rounded-ws-card` 14px).
