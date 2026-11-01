@@ -832,7 +832,7 @@ the workspace. What changed, all in the shared parts:
 - **Surfaces** (`globals.css`): a lighter canvas (`--ws-canvas` #edf1f6), a finer card edge
   (`--ws-card-line` #dce3ec) and a deeper, softer shadow. The band (`--ws-card-head`, now #f7f9fc) is kept
   only for a list's group heads, a card's footer and a side panel's head.
-- **Cards** (`Card`, `ui.tsx`): 16px corners, a white head with a soft rule, the title at 700 beside a
+- **Cards** (`Card`, `ui.tsx`): 14px corners (`rounded-ws-card`), a white head with a soft rule, the title at 700 beside a
   grey glyph. `tint` is no longer drawn; `accent` (blue, orange) marks a section with its own colour — a
   line along its top and its glyph tinted — the stay and the visa so far.
 - **Buttons**: one shape (8px corners), two heights, bold labels; primary dark, secondary white with an
@@ -861,10 +861,28 @@ the workspace. What changed, all in the shared parts:
 
 The mock-up is kept outside the repository (`output/mockups/anmeldung-redesign.html`, gitignored).
 
+**Directions turned down.** Each was built or drawn and Rahman said no; do not propose them again.
+
+- **Navy section heads** (2026-10-31): every card head a navy band with white type — „reverse this, i don't
+  like this color change". Reverted the same day (`542b240d`).
+- **3D icons, coloured icon tiles, duotone glyphs in the workspace** (2026-11-01, three sidebar mock-ups).
+  The public site's Fluent 3D icons stay on the site; the workspace keeps plain line glyphs.
+- **The „Dribbble" direction** (2026-11-01, from Ghulam Rasool's shots on dribbble.com, which Rahman named
+  as inspiration for heads, icons and buttons): fully rounded pill buttons, round icon buttons, a navy pill
+  for the active tab, icons in outlined squares, label-left/value-right rows, missing fields as a row of
+  dashed „+ Geburtsort" chips, and a clock button for the record's history. „no this is bad, not good at
+  all", no reason given. The request behind it is still open (§Open items, „Record pages").
+
+How a mock-up is made: one real screen with real data, served by the dev server from `public/_mockup/`
+(deleted before any commit; a copy in `output/mockups/`, gitignored), the current screen beside the proposal
+so he can switch between them.
+
 The rules, each of which came from a real defect on a real screen.
 
 1. **A section is one framed block; the canvas between sections separates
-   them, and its head is a band (changed 2026-10-27).** A card's header was
+   them, and its head is a band (changed 2026-10-27).** *Since design A (2026-11-01) the head is white
+   again with a soft rule and a firmer card edge; the band is kept for a list's group heads, a card's
+   footer and a side panel's head. The history below explains why the edge and shadow are what they are.* A card's header was
    once `--ws-sunk`, within 1.01:1 of the page canvas — so the gap above a card
    and the header of the next card resolved to the same grey and two stacked
    sections merged into one strip. It then became white with a rule, which
@@ -2752,6 +2770,21 @@ never out of date.
   (`about_key`). Rights: `people` for learners, `staff` for the team, at `edit` to send.
 - These are mails about courses and the school, not advertising: a newsletter needs the learners' consent.
 
+**Where it lives, for whoever changes it.** SQL: `db/migrations/0114_contact_rule_and_group_mail.sql`
+(`email_tier`, `person_records`, `person_emails`, `person_email`, `person_phones`, `person_phone`). Reads and
+writes of a person's contacts: `src/lib/admin/contacts.ts` (server) and `contact-labels.ts` (the kinds, safe in
+the browser); the card is `people/contact-card.tsx`, its actions in `people/actions.ts` and `staff/actions.ts`.
+Groups: `src/lib/admin/mail/audience-keys.ts` (the key grammar, the names, who matches — no database, unit
+tested in `__tests__/audience-keys.test.ts`), `mail/audiences.ts` (the SQL), the page
+`mail/groups/page.tsx` with `learner-groups.tsx` (its `PRESETS` are the ready-made groups). A new kind of group
+is a new token in `audience-keys.ts` plus its column in `learnerFacts()`; a new ready-made group is one entry
+in `PRESETS` or `TEAM`. Sending is `sendWorkspaceMail` in `mail/draft.ts` (`GROUP_BATCH`, `GROUP_MAX`).
+Browser test: `e2e/group-mail.spec.ts`.
+
+**Not done.** The public website's forms still ask for one e-mail and one phone; each registration adds its
+address to the person (it does not replace the old one), and the rule picks among them. A second field on
+the forms belongs to the website.
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,
@@ -3326,11 +3359,12 @@ CI does not have — CI does not run e2e at all.
 | --- | --- |
 | **FileMaker bridge** | Designed, not built — `docs/FILEMAKER_BRIDGE.md`. FileMaker already models our pipeline as `Contact → PreBooking → Booking`; the bridge lands registrations as Contact+PreBooking pairs and never writes Bookings. Blocked on eight decisions listed there, the first being whether a write is wanted at all |
 | **Retention policy** | Nothing is deleted on a schedule. Enquiries, registrations, placement attempts and CVs are all personal data and a period needs a named owner at CASA |
-| **Outbound email** | No sending. Every reply is a `mailto:` |
+| **Record pages** (Rahman, 2026-11-01, on a learner's Persönliche Daten) | Three points, open: (1) a field's value looks bigger than its name — `DetailList` sets the label at 12px grey and the value at 14px; he wants it elegant; (2) heads, icons and buttons could take inspiration from Ghulam Rasool's Dribbble work — the first attempt was turned down (§Design standards, Directions turned down); (3) the tab has four boxes (Person, Kontakt, Adressen, Datensatz) — he wants one or two clean ones, „Datensatz" (created when, by whom) as a standard, elegant element on every record rather than a box, and a clean, standard edit popup that lets the team change a learner's details quickly. Mock-up first |
+| **Outbound email** | Sent since 2026-10-23 through `MailComposer` and Microsoft Graph (§Mail from the workspace); every other mail opens the same screen |
 | **Catalogue editing** | Read-only. `docs/COURSE_FACTS_SOURCE_OF_TRUTH.md` is the authority on those numbers, and an edit form here would let the workspace contradict the published facts |
-| **Self-service password reset** | Needs outbound email |
+| **Self-service password reset** | Not planned: each colleague changes their own on Your account, an owner or admin resets a forgotten one on Team |
 | **Owner-set passwords** | Give them in person or by phone, not by email |
-| **`admin.casa-bremen.de`** | DNS record not created yet. Until it is, use `CASA_ALLOW_ADMIN_ON_PUBLIC_HOST=true` or reach it on the public host in development |
+| **`admin.casa-bremen.de`** | Live since 2026-10-11 (CLAUDE.md, Known open items) |
 | **Placement fee and deposit on a booking** (2026-10-17) | The offers module adds the placement fee (50 €) and the deposit (580 €) on a learner's first stay; a booking does not. Rahman to decide |
 | **Rent per type, room or meals** (2026-10-17) | The price list has one generic rent (SchoolMan prices every type alike); the Prices screen cannot enter one per type yet |
 | **Closed levels on the website** (decided 2026-10-21) | The website keeps offering every level of a start, also a closed one, so no learner is lost. A registration for a full or closed course is answered by a colleague: „Auf die Warteliste", or „Späteren Kurs anbieten" (letter `registration_later_course`, the next start of the course) |

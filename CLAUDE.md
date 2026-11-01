@@ -280,7 +280,20 @@ between sections separates them — a card header is white with a rule, never a
 grey band the same value as the page. A field title is a label (12px sentence
 case), not an uppercase eyebrow — in `DetailList` and table column
 heads. One primary button per screen. Never show a raw uuid as a field, and
-never give plumbing a badge in the rail.
+never give plumbing a badge in the rail. The look is **design A** (2026-11-01): white
+card heads with a grey glyph, one button system (8px corners, a `tertiary` word-link
+for small ways on), Inter for the interface, Arial for letters and mail. Rahman judges
+design by seeing it: **any workspace-wide visual change starts as a mock-up of one real
+screen** (in `public/_mockup/`, deleted before commit). Directions he turned down —
+navy section heads, 3D or coloured icon tiles, pill buttons with outlined icon squares —
+are listed in `docs/ADMIN_WORKSPACE.md` §Design standards; do not bring them back.
+
+**A person's address is one rule (0114, 2026-11-01).** Show or mail a person through
+`person_email(p.id)` / `person_emails()` (and `person_phone` / `person_phones`): their own
+address before an agency's or a shared one, then the chosen one, private before work,
+newest — across linked records. Never write the old `ORDER BY is_primary DESC,
+created_at` sub-query. Group mail is „Rundmail" (`/admin/mail/groups`), live groups,
+never a stored list. `docs/ADMIN_WORKSPACE.md` §Rundmail and a person's addresses.
 
 **Setup is not navigation.** Rooms, the type lists and the price list are
 defined once and left for a season; they live under Settings, not the main
@@ -493,6 +506,13 @@ especially the reporting format in §7 (evidence → root cause → fix → file
 
 ## Known open items
 
+- **In `main`, not yet released (2026-11-01).** PR #227 (registrations: the person check,
+  the SchoolMan link, person first; design A; Inter; the sidebar; Settings → Technik;
+  Rundmail and the address rule) and PR #221 (Feedback). The next release applies
+  migrations 0112, 0113 and 0114; 0112 changes `staff_notes`, so pause the SchoolMan job
+  around it (`docs/schoolman/MIGRATION.md` §5). Rahman's open request on record pages
+  (field labels, the Persönliche Daten tab, a standard „Datensatz" button) is in
+  `docs/ADMIN_WORKSPACE.md` §Open items.
 - **`admin.casa-bremen.de` is live (2026-10-11).** CNAME and `asuid.admin` TXT in
   the Lands Concepts Plesk zone, bound to `ca-casa-website` with a managed
   certificate; `src/proxy.ts` serves the workspace there, and `/admin` stays 404 on
