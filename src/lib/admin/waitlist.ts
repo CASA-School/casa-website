@@ -362,7 +362,7 @@ type EntryRow = {
 /** Entries with their position among the open ones of the same start and level. */
 const ENTRIES = `
   SELECT w.id, w.course_id, canonical_person_id(w.person_id) AS person_id, p.first_name, p.last_name,
-         (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+         person_email(p.id) AS email,
          w.course_instance_id, t.name AS course_type_name, coalesce(t.name_de, t.name) AS course_type_name_de, i.start_date, i.session, i.schedule,
          w.level_code, w.status,
          CASE WHEN w.status IN ('waiting', 'offered')

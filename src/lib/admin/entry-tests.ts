@@ -173,7 +173,7 @@ export async function dayEntryTests(day: string): Promise<DayEntryTest[]> {
       `SELECT d.id AS day_id, c.id AS course_id, d.group_index, c.level_code,
               coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number,
               coalesce(r.nickname, r.name, hr.nickname, hr.name) AS room_name, coalesce(nullif(trim(tm.short_name), ''), ${NAME('tp')}) AS teacher_name,
-              (SELECT e.address FROM emails e WHERE e.person_id = tp.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS teacher_email,
+              person_email(tp.id) AS teacher_email,
               to_char(t.starts_at, 'HH24:MI') AS starts_at, coalesce(c.session, i.session) AS session
          FROM course_days d
          JOIN course_day_times t ON t.id = d.id

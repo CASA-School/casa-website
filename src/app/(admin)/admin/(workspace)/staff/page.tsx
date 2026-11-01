@@ -2,7 +2,7 @@ import { NewStaffForm } from './staff-forms';
 import { FormDialog } from '@/components/admin/dialogs';
 import { Icon } from '@/components/admin/icons';
 import { ListBar, ListEmpty, RecordName } from '@/components/admin/list';
-import { Badge, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { canAccess } from '@/lib/admin/access';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
@@ -32,9 +32,15 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
         title={t('Mitarbeitende', 'Staff')}
         actions={
           canAccess(user, 'staff', 'edit') ? (
-            <FormDialog icon={Icon.person} tint="ink" trigger={t('Neu', 'New')} title={t('Neue Person im Team', 'A new colleague')} triggerVariant="primary" width="lg">
-              <NewStaffForm roles={roles} />
-            </FormDialog>
+            <>
+              <ButtonLink href="/admin/mail/groups" variant="secondary">
+                {Icon.mail}
+                {t('Rundmail', 'Group mail')}
+              </ButtonLink>
+              <FormDialog icon={Icon.person} tint="ink" trigger={t('Neu', 'New')} title={t('Neue Person im Team', 'A new colleague')} triggerVariant="primary" width="lg">
+                <NewStaffForm roles={roles} />
+              </FormDialog>
+            </>
           ) : null
         }
       />

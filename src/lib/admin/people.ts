@@ -443,7 +443,7 @@ export async function listPeople({
   >(
     `${SELECT.replace(
       'FROM people p',
-      `, (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email,
+      `, person_email(p.id) AS primary_email,
          nb.course_name, nb.course_start, nb.course_end, nb.course_session,
          -- The level a teacher confirmed last, else the one of the course they sit in (or start next).
          coalesce((SELECT coalesce(rv.confirmed_level_code, rv.confirmed_level) FROM placement_reviews rv
@@ -1087,7 +1087,7 @@ export async function listDeletedPeople({ search, limit = 40, offset = 0 }: { se
   const total = await queryFirst<{ n: string }>(`SELECT count(*) AS n FROM people p ${where}`, params);
   const rows = await query<{ id: string; first_name: string; last_name: string | null; primary_email: string | null; deleted_at: Date; deleted_by_name: string | null }>(
     `SELECT p.id, p.first_name, p.last_name, p.deleted_at, u.name AS deleted_by_name,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS primary_email
+            person_email(p.id) AS primary_email
        FROM people p LEFT JOIN staff_users u ON u.id = p.deleted_by
       ${where}
       ORDER BY p.deleted_at DESC, p.id

@@ -1,6 +1,8 @@
 import { todayInputValue } from '@/lib/dates';
 import type { T } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
+import { isEmailKind, isPhoneKind } from '@/lib/admin/contact-labels';
+import type { EmailInput, PhoneInput } from '@/lib/admin/contacts';
 import { normalizeIban, type BankAccountInput, type PersonInput } from '@/lib/admin/people';
 
 /**
@@ -78,4 +80,28 @@ export async function readBankAccount(formData: FormData): Promise<BankAccountIn
     holderAddress: field(formData, 'holderAddress', 400),
     bankAddress: field(formData, 'bankAddress', 400),
   };
+}
+
+/** An address on the contact card: new (with the address) or one of theirs labelled again. */
+export function readEmail(formData: FormData, t: T): (EmailInput & { id: string | null }) | string {
+  const id = String(formData.get('emailId') ?? '');
+  const address = String(formData.get('address') ?? '').trim().slice(0, 200);
+  if (!id && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) return t('Diese E-Mail-Adresse sieht nicht richtig aus.', 'That email address does not look right.');
+  const kind = String(formData.get('kind') ?? 'personal');
+  return {
+    id: /^[0-9a-f-]{36}$/i.test(id) ? id : null,
+    address,
+    kind: isEmailKind(kind) ? kind : 'personal',
+    note: field(formData, 'note', 120),
+    primary: formData.get('primary') === '1',
+  };
+}
+
+/** A number on the contact card: new (with the number) or one of theirs labelled again. */
+export function readPhone(formData: FormData, t: T): (PhoneInput & { id: string | null }) | string {
+  const id = String(formData.get('phoneId') ?? '');
+  const number = String(formData.get('number') ?? '').trim().slice(0, 60);
+  if (!id && number.replace(/[^\d]/g, '').length < 5) return t('Diese Telefonnummer sieht nicht richtig aus.', 'That phone number does not look right.');
+  const kind = String(formData.get('kind') ?? 'mobile');
+  return { id: /^[0-9a-f-]{36}$/i.test(id) ? id : null, number, kind: isPhoneKind(kind) ? kind : 'mobile', primary: formData.get('primary') === '1' };
 }

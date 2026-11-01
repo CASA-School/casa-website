@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { readBankAccount, readPerson } from '../people/person-input';
+import { readBankAccount, readEmail, readPerson, readPhone } from '../people/person-input';
+import { removeContact, saveEmail, savePhone } from '@/lib/admin/contacts';
 import { canAccess } from '@/lib/admin/access';
 import { saveStaffDesk } from '@/lib/admin/day-plan';
 import { DESKS, type Desk } from '@/lib/admin/day-plan-labels';
@@ -242,6 +243,42 @@ export async function updateStaffPersonAction(formData: FormData): Promise<void>
   const input = readPerson(formData, t);
   if (typeof input === 'string') fail(back, input);
   await updatePerson(await personOf(staffId), input, actor);
+  done(back);
+}
+
+/** A colleague's address on their contact card, new or labelled again. */
+export async function saveStaffEmailAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('staff', 'edit');
+  const staffId = id(formData, 'staffId');
+  const back = page(staffId, 'details');
+  const { t, lang } = await getI18n();
+  const input = readEmail(formData, t);
+  if (typeof input === 'string') fail(back, input);
+  const result = await saveEmail(await personOf(staffId), input.id, input, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
+}
+
+/** A colleague's number on their contact card, new or labelled again. */
+export async function saveStaffPhoneAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('staff', 'edit');
+  const staffId = id(formData, 'staffId');
+  const back = page(staffId, 'details');
+  const { t, lang } = await getI18n();
+  const input = readPhone(formData, t);
+  if (typeof input === 'string') fail(back, input);
+  const result = await savePhone(await personOf(staffId), input.id, input, actor);
+  if (!result.ok) fail(back, pick(lang, result.reason));
+  done(back);
+}
+
+/** A colleague's address or number removed, after the confirmation: `full`, as every removal. */
+export async function removeStaffContactAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('staff', 'full');
+  const staffId = id(formData, 'staffId');
+  const back = page(staffId, 'details');
+  if (formData.get('confirmed') !== '1') done(back);
+  await removeContact(await personOf(staffId), formData.get('channel') === 'phone' ? 'phone' : 'email', id(formData, 'contactId'), actor);
   done(back);
 }
 

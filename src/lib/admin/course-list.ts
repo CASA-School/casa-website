@@ -321,7 +321,7 @@ export async function findLearnersForCourse(courseId: string, text: string): Pro
   const like = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   const rows = await query<{ id: string; first_name: string; last_name: string | null; email: string | null; bookings: number; booked: boolean }>(
     `SELECT p.id, p.first_name, p.last_name,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            person_email(p.id) AS email,
             (SELECT count(*) FROM bookings b WHERE b.person_id = ANY(person_family(p.id)) AND b.deleted_at IS NULL)::int AS bookings,
             EXISTS (SELECT 1 FROM bookings b JOIN booking_periods bp ON bp.booking_id = b.id
                      WHERE b.person_id = ANY(person_family(p.id)) AND bp.course_id = $2

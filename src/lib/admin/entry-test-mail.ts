@@ -125,7 +125,7 @@ export async function teacherMailDraft(day: string, actor: StaffUser): Promise<T
   const others = classes.length
     ? await query<{ course_id: string; group_index: number; name: string | null; email: string | null }>(
         `SELECT DISTINCT d.course_id, d.group_index, coalesce(nullif(trim(sm.short_name), ''), concat_ws(' ', p.first_name, p.last_name)) AS name,
-                (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+                person_email(p.id) AS email
            FROM course_days d JOIN staff_members sm ON sm.id = d.teacher_id JOIN people p ON p.id = sm.person_id
           WHERE NOT d.cancelled AND d.on_date BETWEEN $1::date AND $1::date + 6
             AND (d.course_id, d.group_index) IN (SELECT * FROM unnest($2::uuid[], $3::int[]))

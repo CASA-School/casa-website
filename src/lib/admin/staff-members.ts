@@ -65,7 +65,7 @@ const LIST = `
            WHERE r.staff_member_id = s.id) AS roles,
          ${CURRENT_CONTRACT('s')} AS contract_kind,
          s.is_active,
-         (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+         person_email(p.id) AS email,
          s.staff_user_id IS NOT NULL AS has_account
     FROM staff_members s
     JOIN people p ON p.id = s.person_id`;

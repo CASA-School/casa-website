@@ -91,7 +91,7 @@ export async function flatOccupancy(from: string, to: string, lang: WsLang): Pro
               concat_ws(' ', p.first_name, p.last_name) AS name,
               to_char(s.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(s.ends_on, 'YYYY-MM-DD') AS ends_on,
               coalesce(nullif(trim(ct.name_de), ''), ct.name) AS course,
-              (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+              person_email(p.id) AS email,
               (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone,
               coalesce(s.departure_confirmed, false) AS departure_confirmed,
               (SELECT nullif(sum(c.amount), 0) FROM booking_charges c WHERE c.booking_id = b.id AND c.kind = 'deposit') AS deposit

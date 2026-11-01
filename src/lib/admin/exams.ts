@@ -167,7 +167,7 @@ export async function findCandidates(sittingId: string, text: string): Promise<C
   const like = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   const rows = await query<{ id: string; first_name: string; last_name: string | null; email: string | null; bookings: number; booked: boolean }>(
     `SELECT p.id, p.first_name, p.last_name,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            person_email(p.id) AS email,
             (SELECT count(*) FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.deleted_at IS NULL)::int AS bookings,
             EXISTS (SELECT 1 FROM bookings b WHERE canonical_person_id(b.person_id) = p.id AND b.exam_session_id = $2
                        AND b.deleted_at IS NULL AND b.status <> 'cancelled') AS booked
@@ -240,7 +240,7 @@ export async function sittingCandidates(sittingId: string): Promise<SittingCandi
     letters: { id: string; kind: string; sent_at: string }[];
   }>(
     `SELECT b.id, b.number, canonical_person_id(b.person_id) AS person_id, p.first_name, p.last_name, b.exam_parts,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            person_email(p.id) AS email,
             (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone,
             coalesce((SELECT json_agg(json_build_object('id', l.id, 'kind', l.kind, 'sent_at', l.sent_at) ORDER BY l.sent_at DESC)
                         FROM letters l
@@ -312,7 +312,7 @@ export async function telcList(sittingId: string): Promise<TelcRow[]> {
   }>(
     `SELECT b.id, p.id AS person_id, p.last_name, p.first_name, p.salutation::text AS salutation, to_char(p.birth_date, 'DD.MM.YYYY') AS birth_date,
             nullif(trim(p.birth_place), '') AS birth_place, c.name_de AS birth_country, nullif(trim(p.mother_tongue), '') AS mother_tongue,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            person_email(p.id) AS email,
             b.exam_parts
        FROM bookings b
        JOIN people p ON p.id = canonical_person_id(b.person_id)
@@ -375,7 +375,7 @@ export type ExamWaitlistEntry = {
 
 const EXAM_ENTRIES = `
   SELECT w.id, canonical_person_id(w.person_id) AS person_id, p.first_name, p.last_name,
-         (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+         person_email(p.id) AS email,
          w.exam_session_id, et.name AS exam_name, s.starts_at, w.exam_parts, w.status,
          CASE WHEN w.status IN ('waiting', 'offered')
               THEN row_number() OVER (PARTITION BY w.exam_session_id, (w.status IN ('waiting', 'offered')) ORDER BY w.rank, w.joined_at)

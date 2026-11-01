@@ -105,7 +105,7 @@ export async function sittingExaminers(sittingId: string): Promise<SittingExamin
   const rows = await query<{ staff_member_id: string; name: string; short_name: string; part: ExamParts; licensed: boolean; email: string | null; phone: string | null }>(
     `SELECT x.staff_member_id, concat_ws(' ', p.first_name, p.last_name) AS name, m.short_name, x.part,
             EXISTS (SELECT 1 FROM staff_licences l WHERE l.staff_member_id = x.staff_member_id AND l.exam_type_id = s.exam_type_id AND ${VALID_ON(SITTING_DAY)}) AS licensed,
-            coalesce((SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1), u.email) AS email,
+            coalesce(person_email(p.id), u.email) AS email,
             (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone
        FROM exam_session_examiners x
        JOIN exam_sessions s ON s.id = x.exam_session_id

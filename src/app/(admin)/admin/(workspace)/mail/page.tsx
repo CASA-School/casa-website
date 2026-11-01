@@ -7,7 +7,7 @@ import { requireStaff } from '@/lib/admin/guard';
 import { pick, type Bilingual } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
 import { mailDraft } from '@/lib/admin/mail/draft';
-import type { MailAbout } from '@/lib/admin/mail/href';
+import { isGroupMail, type MailAbout } from '@/lib/admin/mail/href';
 import { graphSender } from '@/lib/notifications/graph-mail.server';
 
 const REPLIES = new Set<MailAbout>(['enquiry', 'registration', 'course_registration', 'exam_registration', 'application']);
@@ -37,7 +37,7 @@ export default async function MailPage({
   searchParams: Promise<{ to?: string; subject?: string; address?: string; back?: string; error?: string; sent?: string }>;
 }) {
   const [params, user, { t, lang }] = await Promise.all([searchParams, requireStaff(), getI18n()]);
-  const draft = await mailDraft(params.to ?? '', { subject: params.subject, address: params.address }, user);
+  const draft = await mailDraft(params.to ?? '', { subject: params.subject, address: params.address, lang }, user);
   if (!draft) notFound();
   // Back to where it came from: a page of the workspace only.
   const back = params.back && /^\/admin\/[\w\-/?=&.,%:]*$/.test(params.back) && !params.back.includes('//') ? params.back : draft.href;
@@ -57,13 +57,21 @@ export default async function MailPage({
                 ? t('E-Mail an alle Teilnehmenden', 'E-mail to every candidate')
                 : draft.about === 'exam_examiners'
                   ? t('E-Mail an die Prüfenden', 'E-mail to the examiners')
-                  : t(`E-Mail an ${draft.title}`, `E-mail to ${draft.title}`)
+                  : isGroupMail(draft.about)
+                    ? t('Rundmail', 'Group mail')
+                    : t(`E-Mail an ${draft.title}`, `E-mail to ${draft.title}`)
         }
         description={
           <>
             <Link href={draft.href} className="font-semibold text-[var(--casa-accent-text)] hover:underline">
               {draft.about === 'contact' ? draft.detail : ABOUT[draft.about] ? pick(lang, ABOUT[draft.about]!) : draft.title}
             </Link>
+            {isGroupMail(draft.about) ? (
+              <span>
+                {' · '}
+                {t(`${draft.recipients.filter((r) => r.chosen).length} Empfänger`, `${draft.recipients.filter((r) => r.chosen).length} recipients`)}
+              </span>
+            ) : null}
             {draft.detail && draft.about !== 'contact' ? <span> · {draft.detail}</span> : null}
           </>
         }

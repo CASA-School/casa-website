@@ -3,7 +3,9 @@ import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { unlinkPersonAction } from '../../actions';
-import { deletePersonAction, removeBankAccountAction } from '../actions';
+import { deletePersonAction, removeBankAccountAction, removeContactAction, saveEmailAction, savePhoneAction } from '../actions';
+import { ContactCard } from '../contact-card';
+import { personContacts } from '@/lib/admin/contacts';
 import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
 import { BankAddresses } from '../bank-addresses';
 import { BookingWizard } from '../../bookings/booking-wizard';
@@ -188,7 +190,7 @@ export default async function PersonPage({
   const seesBank = canAccess(user, 'private_data');
   const editsBank = canAccess(user, 'private_data', 'edit');
   const removesBank = canAccess(user, 'private_data', 'full');
-  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters, examWaits, tests] = await Promise.all([
+  const [timeline, confirmed, flags, activity, notes, fileMakerLinks, countries, bookings, offer, offers, courseName, stage, bankAccounts, waits, allLetters, examWaits, tests, contacts] = await Promise.all([
     personTimeline(person.id, lang),
     latestConfirmedLevel(person.id),
     listFlags('person', person.id),
@@ -206,14 +208,15 @@ export default async function PersonPage({
     seesBookings || seesOffers ? lettersForPerson(person.id) : Promise.resolve([]),
     seesBookings ? personExamEntries(person.id) : Promise.resolve([]),
     personTests(person.id),
+    personContacts(person.id),
   ]);
   // The letters this colleague may open: an offer's with `offers`, a registration's with
   // `registrations`, the others with `bookings`.
   const seesRegistrations = canAccess(user, 'registrations');
   const letters = allLetters.filter((l) => (l.kind === 'offer' ? seesOffers : l.kind.startsWith('registration_') ? seesRegistrations : seesBookings));
 
-  const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
-  const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
+  const email = contacts.emails.find((e) => e.inUse);
+  const phone = contacts.phones.find((p) => p.inUse);
   const openFlags = flags.filter((f) => !f.resolvedAt);
   const came = origin(t, person.createdBy, pick(lang, person.createdByLabel));
   const since = person.createdAt.toLocaleDateString(wsLocale(lang), { month: 'long', year: 'numeric' });
@@ -627,43 +630,15 @@ export default async function PersonPage({
                 ]}
               />
             </Card>
-            <Card title={t('Kontakt', 'Contact')} icon={Icon.mail} tint="blue">
-              <DetailList
-                items={[
-                  {
-                    label: t('E-Mail', 'Email'),
-                    wide: true,
-                    value: person.emails.length ? (
-                      <ul className="space-y-0.5">
-                        {person.emails.map((e) => (
-                          <li key={e.address} className="truncate">
-                            <Link href={mailHref('person', person.id, { address: e.address })} className="font-medium hover:underline">
-                              {e.address}
-                            </Link>
-                            {e.note ? <span className="text-[var(--casa-muted)]"> · {e.note}</span> : null}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null,
-                  },
-                  {
-                    label: t('Telefon', 'Phone'),
-                    wide: true,
-                    value: person.phones.length ? (
-                      <ul className="space-y-0.5">
-                        {person.phones.map((p) => (
-                          <li key={p.number}>
-                            <a href={`tel:${p.number}`} className="font-medium hover:underline">
-                              {p.number}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null,
-                  },
-                ]}
-              />
-            </Card>
+            <ContactCard
+              emails={contacts.emails}
+              phones={contacts.phones}
+              canEdit={canEdit}
+              canRemove={canAccess(user, 'people', 'full')}
+              hidden={{ personId: person.id }}
+              actions={{ saveEmail: saveEmailAction, savePhone: savePhoneAction, remove: removeContactAction }}
+              mailTo={(address) => mailHref('person', person.id, { address })}
+            />
           </div>
 
           <div className="space-y-4">

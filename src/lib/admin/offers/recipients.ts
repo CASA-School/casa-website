@@ -98,7 +98,7 @@ export async function findRecipients(q: string, filter: RecipientFilter, lang: W
     (filter === 'all' && term.length >= 2) || filter === 'person'
       ? query<PersonRow>(
           `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
-                  (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email,
+                  person_email(p.id) AS email,
                   (SELECT number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at DESC LIMIT 1) AS phone,
                   (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings,
                   ${studiedBeforeSql('p.id')} AS studied, ${stayedBeforeSql('p.id')} AS stayed
@@ -307,7 +307,7 @@ export async function matchRecipients({ name, email }: { name: string; email: st
 async function personById(id: string, lang: WsLang): Promise<PersonHit | null> {
   const p = await queryFirst<PersonRow>(
     `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
-            (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email,
+            person_email(p.id) AS email,
             (SELECT number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at DESC LIMIT 1) AS phone,
             (SELECT count(*) FROM bookings b WHERE b.person_id = p.id AND b.deleted_at IS NULL) AS bookings,
             ${studiedBeforeSql('p.id')} AS studied, ${stayedBeforeSql('p.id')} AS stayed
@@ -529,7 +529,7 @@ export async function resolveRecipient(client: PoolClient, r: NewOfferInput['rec
 
   const { rows } = await client.query<{ id: string; salutation: string | null; first_name: string; last_name: string | null; nationality_code: string | null; email: string | null }>(
     `SELECT p.id, p.salutation::text AS salutation, p.first_name, p.last_name, p.nationality_code,
-            (SELECT address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at DESC LIMIT 1) AS email
+            person_email(p.id) AS email
        FROM people p WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
     [personId]
   );

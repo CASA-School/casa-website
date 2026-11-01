@@ -3010,3 +3010,9 @@ temporary and belongs inside the person check; the wizard must offer only what f
 - **Sidebar** (2026-11-01): measured contrast (labels 13:1, icons 7.8:1, group heads 7.2:1; white strip for the
   current page) and a draggable edge — 208–360px, folds under 150px (`sidebar-resizer.tsx`). Three icon/frame
   mock-ups were turned down first: no 3D icons and no coloured icon tiles in the workspace.
+- **Rundmail + a person's addresses** (2026-11-01, Rahman): one rule for the address a person is written to
+  (0114 `person_emails` / `person_email`: own before an agency's, chosen, private, newest — across linked
+  records), used by every list and mail; a contact card with several labelled addresses and numbers; and
+  `/admin/mail/groups` — live groups of learners (course, time of day, Mo+Mi / Di+Do, starting soon) and of the
+  team (teachers, office, Angestellte, Honorarkräfte), sent in Bcc parts of 250. docs/ADMIN_WORKSPACE.md
+  §Rundmail and a person's addresses.

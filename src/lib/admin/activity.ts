@@ -283,6 +283,12 @@ export function describeActivity(entry: ActivityEntry, lang: WsLang): string {
       return t('hat eine Person bearbeitet', 'edited a person');
     case 'person_address_updated':
       return t('hat eine Adresse geändert', 'changed an address');
+    case 'contact_added':
+      return entry.detail?.channel === 'phone' ? t('hat eine Telefonnummer hinzugefügt', 'added a phone number') : t('hat eine E-Mail-Adresse hinzugefügt', 'added an email address');
+    case 'contact_changed':
+      return entry.detail?.channel === 'phone' ? t('hat eine Telefonnummer geändert', 'changed a phone number') : t('hat eine E-Mail-Adresse geändert', 'changed an email address');
+    case 'contact_removed':
+      return entry.detail?.channel === 'phone' ? t('hat eine Telefonnummer entfernt', 'removed a phone number') : t('hat eine E-Mail-Adresse entfernt', 'removed an email address');
     case 'person_private_updated':
       return t('hat Steuer- und Versicherungsnummern geändert', 'changed tax and insurance numbers');
     case 'bank_account_added':

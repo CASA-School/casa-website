@@ -222,6 +222,9 @@ const routes = [
   '/admin/team',
   '/admin/settings',
   '/admin/settings/system',
+  '/admin/mail/groups',
+  '/admin/mail?to=learners:evening.tue-thu',
+  '/admin/mail?to=team:teaching.employed',
   '/admin/settings/setup',
   '/admin/settings/prices',
 ].filter(Boolean);

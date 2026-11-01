@@ -92,7 +92,8 @@ async function createPerson(
   if (email) {
     params.push(email);
     conditions.push(
-      `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $${params.length})`
+      // An agency's address, or one several people share, is no sign of the same person (0114).
+      `EXISTS (SELECT 1 FROM emails e WHERE canonical_person_id(e.person_id) = p.id AND e.normalized = $${params.length} AND e.kind <> 'agency' AND email_tier(e.normalized) = 0)`
     );
   }
   if (input.lastName?.trim() && birthDate) {

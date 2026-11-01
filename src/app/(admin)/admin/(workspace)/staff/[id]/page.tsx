@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 
 import { RecordFoot } from '../../bookings/record-foot';
 import { AddressForm, BankAccountForm, PersonForm } from '../../people/person-form';
+import { ContactCard } from '../../people/contact-card';
+import { personContacts } from '@/lib/admin/contacts';
 import { BankAddresses } from '../../people/bank-addresses';
 import {
   addStaffBankAccountAction,
@@ -10,7 +12,10 @@ import {
   removeContractAction,
   removeLicenceAction,
   removeStaffBankAccountAction,
+  removeStaffContactAction,
   saveStaffAddressAction,
+  saveStaffEmailAction,
+  saveStaffPhoneAction,
   setStaffActiveAction,
   takeBackAbsenceAction,
   updateStaffBankAccountAction,
@@ -100,7 +105,7 @@ export default async function StaffMemberPage({
   const teaches = member.roles.includes('teaching');
   const examines = member.roles.includes('examiner') || member.roles.includes('supervision');
 
-  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk, time, trainings, targetWeek] = await Promise.all([
+  const [roles, person, teaching, absences, licences, sittings, examTypes, contracts, hr, bank, countries, accounts, keys, desk, time, trainings, targetWeek, contacts] = await Promise.all([
     staffRoles(),
     getPerson(member.personId),
     upcomingTeaching(id, weeks * 7),
@@ -120,12 +125,13 @@ export default async function StaffMemberPage({
     staffTrainings(id),
     // The target week of the contract period (0092), with the contract: `staff_private`.
     seesPrivate ? staffTargetWeek(id) : Promise.resolve(null),
+    personContacts(member.personId),
   ]);
   if (!person) notFound();
   const roleName = new Map(roles.map((r) => [r.code, pick(lang, r.name)]));
   const current = contracts.find((c) => c.current) ?? null;
-  const email = person.emails.find((e) => e.isPrimary) ?? person.emails[0];
-  const phone = person.phones.find((p) => p.isPrimary) ?? person.phones[0];
+  const email = contacts.emails.find((e) => e.inUse);
+  const phone = contacts.phones.find((p) => p.inUse);
   const home = person.addresses.find((a) => a.kind === 'home');
   const hidden = { staffId: id };
   const day = (iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) => new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), opts);
@@ -560,19 +566,18 @@ export default async function StaffMemberPage({
                 { label: t('Geburtsort', 'Place of birth'), value: person.facts.birthPlace },
                 { label: t('Nationalität', 'Nationality'), value: person.nationalityName ?? person.nationalityRaw },
                 { label: t('Muttersprache', 'Mother tongue'), value: person.facts.motherTongue },
-                {
-                  label: t('E-Mail', 'Email'),
-                  value: email ? (
-                    <>
-                      {email.address}
-                      {email.note ? <span className="text-[var(--casa-muted)]"> · {email.note}</span> : null}
-                    </>
-                  ) : null,
-                },
-                { label: t('Telefon', 'Phone'), value: phone?.number ?? null },
               ]}
             />
           </Card>
+          <ContactCard
+            emails={contacts.emails}
+            phones={contacts.phones}
+            canEdit={canEdit}
+            canRemove={canDelete}
+            hidden={hidden}
+            actions={{ saveEmail: saveStaffEmailAction, savePhone: saveStaffPhoneAction, remove: removeStaffContactAction }}
+            mailTo={(address) => mailHref('staff', member.id, { address })}
+          />
           <Card
             title={t('Adresse', 'Address')}
             icon={Icon.rooms}
