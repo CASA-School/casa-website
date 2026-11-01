@@ -17,7 +17,12 @@
   position: relative;
   background: #fff;
   color: #1f2430;
-  font-family: var(--font-sans), system-ui, sans-serif;
+  /*
+   * Arial, as CASA's mail (Rahman, 2026-11-01: „for letters and emails … stick to arial"), not the
+   * workspace's face. The server prints PDFs on Linux, which has no Arial: Liberation Sans has its
+   * exact metrics, so a letter breaks its lines the same on screen and in the PDF.
+   */
+  font-family: Arial, 'Liberation Sans', 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 1.6cqw;
   line-height: 1.4;
   padding: 6.2cqw 9.5cqw 0 11.9cqw;
@@ -74,7 +79,7 @@
 }
 
 .subject {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 1.82cqw;
   line-height: 1.35;
