@@ -11,19 +11,17 @@ vi.mock('@/lib/admin/site-stats', () => ({
   leads: async () => [{ kind: 'course', count: 3 }, { kind: 'exam', count: 2 }],
   registrants: async () => ({ ages: [], nationalities: [] }),
   registrationMetrics: async () => [],
-  registrationDeliveryReview: async () => ({ registration_receipt_unconfirmed: 1 }),
 }));
 import StatisticsPage from './page';
 
 describe('statistics', () => {
-  it('shows recorded registrations and delivery flags while disabled tracking is not a zero funnel', async () => {
+  it('shows recorded registrations while disabled tracking is not a zero funnel', async () => {
     vi.stubEnv('REGISTRATION_METRICS', '');
     try {
       const markup = renderToStaticMarkup(await StatisticsPage({ searchParams: Promise.resolve({}) }));
       expect(markup).toContain('Course registrations');
       expect(markup).toContain('Exam registrations');
       expect(markup).toContain('Step measurement is not enabled');
-      expect(markup).toContain('Applicant acknowledgement');
       expect(markup).toContain('Displayed website language');
       expect(markup).not.toContain('Visits ending in an enquiry');
     } finally { vi.unstubAllEnvs(); }

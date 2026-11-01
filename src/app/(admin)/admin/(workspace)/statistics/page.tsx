@@ -10,7 +10,6 @@ import {
   campaigns,
   displayedLanguages,
   registrationMetrics,
-  registrationDeliveryReview,
   languages,
   leads,
   registrants,
@@ -39,7 +38,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
   const { t, lang } = await getI18n();
   const range: StatRange = STAT_RANGES.find((days) => String(days) === requested) ?? 30;
 
-  const [totals, days, pages, origins, spoken, tagged, received, registered, places, displayed, metrics, delivery] = await Promise.all([
+  const [totals, days, pages, origins, spoken, tagged, received, registered, places, displayed, metrics] = await Promise.all([
     siteTotals(range),
     viewsByDay(range),
     topPages(range),
@@ -51,7 +50,6 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
     visitorCountries(range),
     displayedLanguages(range),
     registrationMetrics(range),
-    registrationDeliveryReview(),
   ]);
   const number = (value: number) => new Intl.NumberFormat(wsLocale(lang)).format(value);
   const fromSearch = origins.filter((o) => o.kind === 'search').reduce((total, o) => total + o.visits, 0);
@@ -151,11 +149,6 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
           </Card>;
         })}
       </div>
-      <Card title={t('E-Mail-Zustellung prüfen', 'Email delivery needs review')} icon={Icon.enquiries} tint="blue" className="mb-4">
-        <p className="text-sm">{t('Offene Prüfhinweise insgesamt (unabhängig vom Zeitraum):', 'Open review flags in total (not limited to the selected period):')} {t('Bestätigung an Anmeldende', 'Applicant acknowledgement')}: <strong>{number(delivery.registration_receipt_unconfirmed ?? 0)}</strong> · {t('Benachrichtigung an CASA', 'CASA notification')}: <strong>{number(delivery.registration_staff_notice_unconfirmed ?? 0)}</strong></p>
-        <p className="mt-1 text-sm text-[var(--casa-text-subtle)]">{t('Ein Hinweis bedeutet unbestätigt, nicht zwingend fehlgeschlagen. Annahme durch den Anbieter bestätigt nicht den Posteingang.', 'A flag means unconfirmed, not necessarily failed. Provider acceptance does not guarantee inbox delivery.')}</p>
-      </Card>
-
       <Card title={t('Besuche pro Tag', 'Visits per day')} icon={Icon.overview} tint="blue" className="mb-4">
         <DayBars days={days} lang={lang} />
       </Card>

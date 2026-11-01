@@ -3000,3 +3000,6 @@ temporary and belongs inside the person check; the wizard must offer only what f
 - **Person first** (2026-11-01, Rahman): booking and the waiting list stay locked on an Anmeldung until the
   sender is decided (`senderUndecided()`, checked in the page and in every action that books or queues from a
   line); the head says „Person klären", a line's „Buchen" has a padlock and opens the panel.
+- **Technical logs off the working screens** (2026-11-01, Rahman): the „E-Mail-Versand prüfen" card, the list's
+  badge and Statistik's delivery card are gone; mails not confirmed as sent are a log on Settings → Technik
+  (`/admin/settings/system`), with the mail mode, SchoolMan, the integrations and the placement engine.

@@ -2960,6 +2960,15 @@ season, so they are nested items under Settings at the bottom of the sidebar:
 **Prices** (`/admin/settings/prices`), **Lists** (`/admin/settings/setup`) and
 **Rooms**. Lists needs `settings`, which everyone has.
 
+**Technik** (`/admin/settings/system`, 2026-11-01, Rahman: „keep these type of interfaces under technical
+logs but well-organized; our main interfaces like booking … should focus on the real functionality, data
+and work"). The deployment's technical state and logs, off the working screens: the website's mails not
+confirmed as sent (`unconfirmedMails()`, `mail-delivery.ts` — the team's notice and the sender's
+acknowledgement of each registration, with „Geprüft" for a colleague with `registrations` at `edit`), how
+mail goes out, the SchoolMan transfer, the integrations and the placement engine. The registration page,
+the registrations list and Statistik no longer show the delivery warnings. Settings itself is the way into
+Prices, Lists, Rooms and Technik, with your own account beside it.
+
 **Prices** is its own module, `prices` (2026-10-13), because the price list is
 finance's and management's: owners and administrators hold it by role, staff
 do not, and a colleague in finance is given it on the Team screen — `edit`
