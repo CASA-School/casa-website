@@ -509,7 +509,7 @@ export function MailComposer({
           </form>
 
           {history.length ? (
-            <details className="group rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+            <details className="group rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
               <summary className="flex cursor-pointer list-none items-center gap-2.5 px-4 py-3 text-sm font-extrabold text-[var(--casa-ink)] [&::-webkit-details-marker]:hidden">
                 <IconChip icon={Icon.check} tint="green" />
                 {t(`Schon gesendet (${history.length})`, `Sent before (${history.length})`)}

@@ -122,7 +122,7 @@ export async function InboxScreen({
         {counts.new + counts.inProgress + counts.waiting === 0 ? <span>{t('Alles erledigt', 'All done')}</span> : null}
       </p>
 
-      <div className="mb-6 overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+      <div className="mb-6 overflow-hidden rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
         <ListBar
           tabs={[
             { key: 'week', label: t('Letzte 7 Tage', 'Last 7 days'), href: basePath, count: counts.week },
@@ -260,7 +260,7 @@ export function DaySections<I extends { id: string; at: Date }>({
   if (today && days[0]?.day !== today) days.unshift({ day: today, rows: [] });
   if (!days.length) {
     return (
-      <div className="rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+      <div className="rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
         <ListEmpty title={emptyTitle ?? t('Nichts hier', 'Nothing here')} />
       </div>
     );
@@ -280,7 +280,7 @@ export function DaySections<I extends { id: string; at: Date }>({
               {rows.length ? <span className="ml-auto text-xs font-semibold text-[var(--casa-muted)] tabular-nums">{summary(rows)}</span> : null}
             </header>
             {rows.length ? (
-              <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+              <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
                 {rows.map((item) => row(item))}
               </ul>
             ) : (
@@ -389,7 +389,7 @@ function History({
 }) {
   if (!items.length) {
     return (
-      <div className="rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+      <div className="rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
         <ListEmpty title={t('Hier ist nichts', 'Nothing here')} />
       </div>
     );
@@ -404,7 +404,7 @@ function History({
             </h2>
             <span className="text-xs font-semibold text-[var(--casa-muted)] tabular-nums">{counted(lang, rows.length, one, many)}</span>
           </header>
-          <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-3xl border border-ws-card-line bg-white shadow-ws-card">
+          <ul className="divide-y divide-ws-line-soft overflow-hidden rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
             {rows.map((item) => {
               const open = isOpen(item.status);
               return (

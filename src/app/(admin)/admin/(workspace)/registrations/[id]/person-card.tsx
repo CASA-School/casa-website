@@ -90,7 +90,7 @@ export async function RegistrationPersonCard({
       ) : isNew && person ? (
         <>
           <State tone="good">{t('Neu bei CASA', 'New at CASA')}</State>
-          <Link href={`/admin/people/${person.canonicalId}`} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 ring-1 ring-ws-line-soft ring-inset hover:bg-ws-sunk">
+          <Link href={`/admin/people/${person.canonicalId}`} className="group flex items-center gap-3 rounded-ws-inner px-3 py-2.5 ring-1 ring-ws-line-soft ring-inset hover:bg-ws-sunk">
             <Avatar name={person.displayName} />
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{person.displayName}</span>
             <span aria-hidden="true" className="text-[var(--casa-text-subtle)] [&_svg]:size-4">{Icon.chevronRight}</span>
@@ -193,7 +193,7 @@ function PersonRow({ person: c, t, lang, reasons = false }: { person: PersonCand
     .join(' · ');
   const agree = c.judgement.reasons.filter((r) => r === 'email' || r === 'phone' || r === 'birth' || r === 'name' || r === 'name_swapped' || r === 'name_close');
   return (
-    <Link href={`/admin/people/${c.id}`} className="group flex items-start gap-3 rounded-xl px-3 py-2.5 ring-1 ring-ws-line-soft ring-inset transition-colors hover:bg-ws-sunk">
+    <Link href={`/admin/people/${c.id}`} className="group flex items-start gap-3 rounded-ws-inner px-3 py-2.5 ring-1 ring-ws-line-soft ring-inset transition-colors hover:bg-ws-sunk">
       <Avatar name={c.name} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold text-[var(--casa-ink)]">{c.name}</span>

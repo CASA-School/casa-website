@@ -287,7 +287,7 @@ export function CommandSearch({ variant = 'bar', pages, creates }: { variant?: '
       <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
         <DialogContent
           // Pinned near the top, on a phone too: the list grows downwards and the keyboard stays clear of it.
-          className="casa-ws-dialog mt-3 max-w-xl gap-0 self-start overflow-hidden rounded-3xl p-0 sm:mt-[8vh]"
+          className="casa-ws-dialog mt-3 max-w-xl gap-0 self-start overflow-hidden rounded-ws-card p-0 sm:mt-[8vh]"
           overlayClassName={DIALOG_OVERLAY}
           showCloseButton={false}
         >

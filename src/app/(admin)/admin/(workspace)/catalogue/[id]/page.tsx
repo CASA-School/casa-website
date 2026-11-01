@@ -472,7 +472,7 @@ function LevelCard({
     <section
       id={`level-${key}`}
       className={cn(
-        'scroll-mt-24 overflow-hidden rounded-3xl border bg-white shadow-ws-card',
+        'scroll-mt-24 overflow-hidden rounded-ws-card border bg-white shadow-ws-card',
         focused ? 'border-[var(--fm-navy)]/40 ring-2 ring-[var(--fm-navy)]/10' : 'border-ws-card-line'
       )}
     >

@@ -482,7 +482,7 @@ export async function Timeline({
       {canWrite ? (
       <form
         action={addNoteAction}
-        className="rounded-2xl bg-white ring-1 ring-[#d3dbe6] ring-inset transition-shadow focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35"
+        className="rounded-ws-inner bg-white ring-1 ring-ws-line-firm ring-inset transition-shadow focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35"
       >
         <input type="hidden" name="entity" value={entity} />
         <input type="hidden" name="entityId" value={id} />
@@ -492,7 +492,7 @@ export async function Timeline({
           required
           placeholder={t('Was habt ihr vereinbart, und wie geht es weiter?', 'What did you agree, and what happens next?')}
           aria-label={t('Neue Notiz', 'New note')}
-          className="block min-h-[4.25rem] w-full resize-y rounded-2xl border-0 bg-transparent px-3.5 pt-3 pb-1 text-[0.86rem] leading-relaxed text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-muted)]"
+          className="block min-h-[4.25rem] w-full resize-y rounded-ws-inner border-0 bg-transparent px-3.5 pt-3 pb-1 text-[0.86rem] leading-relaxed text-[var(--casa-ink)] outline-none placeholder:text-[var(--casa-muted)]"
         />
         <div className="flex justify-end px-2 pb-2">
           <Button type="submit" variant="secondary" size="sm">
@@ -653,7 +653,7 @@ export async function SubmissionCard({
   const { t, lang } = await getI18n();
   const german = reply.locale === 'de';
   return (
-    <article className="overflow-hidden rounded-2xl border border-ws-card-line bg-white shadow-ws-card">
+    <article className="overflow-hidden rounded-ws-card border border-ws-card-line bg-white shadow-ws-card">
       {/* Design A (2026-11-01): who sent it is the record's own head; this card's head is what was sent, and when. */}
       <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-ws-line-soft px-5 py-2.5">
         <div className="flex min-w-0 items-center gap-2.5">

@@ -53,7 +53,7 @@ const focusRing =
   'outline-none focus-visible:border-[var(--casa-blue)] focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/25';
 
 const controlBase =
-  'w-full rounded-lg border border-ws-line bg-white px-3 py-2 text-sm font-medium text-[var(--casa-ink)] transition-colors placeholder:font-normal placeholder:text-[var(--casa-text-subtle)] hover:border-ws-line-firm disabled:cursor-not-allowed disabled:opacity-55';
+  'w-full rounded-ws-field border border-ws-line bg-white px-3 py-2 text-sm font-medium text-[var(--casa-ink)] transition-colors placeholder:font-normal placeholder:text-[var(--casa-text-subtle)] hover:border-ws-line-firm disabled:cursor-not-allowed disabled:opacity-55';
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(controlBase, focusRing, 'h-10', className)} {...props} />;
@@ -129,7 +129,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-ws-field font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
         buttonVariants[variant],
         buttonSizes[size],
         focusRing,
@@ -197,7 +197,7 @@ export function ButtonLink({
   children: ReactNode;
 }) {
   const classes = cn(
-    'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-bold transition-colors',
+    'inline-flex shrink-0 items-center justify-center gap-2 rounded-ws-field font-bold transition-colors',
     buttonVariants[variant],
     buttonSizes[size],
     focusRing,
@@ -256,7 +256,7 @@ export function Card({
   return (
     <section
       className={cn(
-        'rounded-2xl',
+        'rounded-ws-card',
         cardFrame,
         overflow === 'hidden' ? 'overflow-hidden' : '',
         accent ? cn('relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px]', ACCENT_LINE[accent]) : '',
@@ -264,7 +264,7 @@ export function Card({
       )}
     >
       {title || actions ? (
-        <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-3 rounded-t-2xl border-b border-ws-line-soft bg-white px-5 py-2.5">
+        <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-3 rounded-t-ws-card border-b border-ws-line-soft bg-white px-5 py-2.5">
           <div className="flex min-w-0 items-center gap-2.5">
             {icon ? (
               accent ? (
@@ -289,7 +289,7 @@ export function Card({
       <div className={bleed ? '' : 'px-5 py-4'}>{children}</div>
 
       {footer ? (
-        <footer className="rounded-b-2xl border-t border-ws-line-soft bg-ws-card-head px-5 py-2.5">{footer}</footer>
+        <footer className="rounded-b-ws-card border-t border-ws-line-soft bg-ws-card-head px-5 py-2.5">{footer}</footer>
       ) : null}
     </section>
   );
@@ -414,7 +414,7 @@ export function RecordHeader({
     <header className="mb-5">
       {named ? <TrailLabel label={named} /> : null}
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
-      <section className={cn('overflow-hidden rounded-2xl', cardFrame)}>
+      <section className={cn('overflow-hidden rounded-ws-card', cardFrame)}>
         {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}
         <div className="flex flex-wrap items-start gap-4 px-6 pt-6 pb-5">
           {avatar ? <Avatar name={avatar} size="lg" /> : null}

@@ -50,7 +50,7 @@ export type MenuOption = {
 };
 
 const fieldClass =
-  'flex h-10 w-full items-center gap-2 rounded-lg border border-ws-line bg-white px-3 text-left text-sm font-medium text-[var(--casa-ink)] transition-colors outline-none hover:border-ws-line-firm focus-visible:border-[var(--casa-blue)] focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/25 disabled:cursor-not-allowed disabled:opacity-55 data-[state=open]:border-ws-line-firm aria-invalid:border-[#d14343] [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-[var(--casa-muted)]';
+  'flex h-10 w-full items-center gap-2 rounded-ws-field border border-ws-line bg-white px-3 text-left text-sm font-medium text-[var(--casa-ink)] transition-colors outline-none hover:border-ws-line-firm focus-visible:border-[var(--casa-blue)] focus-visible:ring-[3px] focus-visible:ring-[var(--casa-blue)]/25 disabled:cursor-not-allowed disabled:opacity-55 data-[state=open]:border-ws-line-firm aria-invalid:border-[#d14343] [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-[var(--casa-muted)]';
 
 /** Where the menu is drawn: the dialog, side panel or calendar the field sits in, or the page. */
 const hostOf = (field: HTMLElement | null) => field?.closest<HTMLElement>('[data-menu-host], [data-slot="dialog-content"]') ?? null;
