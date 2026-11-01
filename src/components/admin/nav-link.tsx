@@ -61,20 +61,20 @@ export function NavLink({
         title={title}
         aria-current={here ? 'page' : undefined}
         className={cn(
-          'group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[0.85rem] whitespace-nowrap transition-colors duration-150 lg:overflow-hidden',
-          'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+          'group relative flex h-[34px] items-center gap-2.5 rounded-ws-field px-2.5 text-[0.86rem] whitespace-nowrap transition-[background-color,color,box-shadow] duration-200 ease-out lg:overflow-hidden',
+          'outline-none focus-visible:ring-2 focus-visible:ring-white/50',
           here
-            ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
+            ? 'bg-white font-semibold text-[var(--ws-rail)] shadow-[0_1px_2px_rgba(0,0,0,0.25),0_6px_16px_-8px_rgba(0,0,0,0.55)]'
             : branchOpen
-              ? 'font-semibold text-white hover:bg-white/[0.06]'
-              : 'font-medium text-white/68 hover:bg-white/[0.06] hover:text-white'
+              ? 'font-semibold text-white hover:bg-white/[0.08]'
+              : 'font-medium text-[var(--ws-rail-text)] hover:bg-white/[0.08] hover:text-white'
         )}
       >
         <span
           aria-hidden="true"
           className={cn(
-            'shrink-0 transition-colors duration-150 [&_svg]:size-[17px]',
-            here ? 'text-[#8fd6ff]' : branchOpen ? 'text-white/85' : 'text-white/42 group-hover:text-white/80'
+            'shrink-0 transition-colors duration-200 [&_svg]:size-[17px]',
+            here ? 'text-[#1f6fd6]' : branchOpen ? 'text-white' : 'text-[var(--ws-rail-icon)] group-hover:text-white'
           )}
         >
           {icon}
@@ -87,7 +87,8 @@ export function NavLink({
             aria-hidden="true"
             data-nav-label
             className={cn(
-              'hidden text-white/40 transition duration-150 lg:inline',
+              'hidden transition duration-200 lg:inline',
+              here ? 'text-[var(--ws-rail)]/60' : 'text-[var(--ws-rail-icon)]',
               branchOpen ? 'rotate-90 opacity-70' : 'opacity-0 group-hover:opacity-100'
             )}
           >
@@ -109,7 +110,7 @@ export function NavLink({
       {items && items.length > 0 && branchOpen ? (
         <ul
           data-nav-children
-          className="mt-0.5 mb-1.5 ml-[1.2rem] hidden space-y-0.5 border-l border-white/[0.1] pl-2.5 lg:block"
+          className="mt-1 mb-1.5 ml-[1.2rem] hidden space-y-0.5 border-l border-white/[0.14] pl-2.5 lg:block"
         >
           {items.map((item) => {
             const current = isCurrent(pathname, item.href);
@@ -119,11 +120,11 @@ export function NavLink({
                   href={item.href}
                   aria-current={current ? 'page' : undefined}
                   className={cn(
-                    'flex h-7 items-center gap-2 rounded-lg px-2.5 text-[0.82rem] transition-colors duration-150',
-                    'outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+                    'flex h-[30px] items-center gap-2 rounded-ws-field px-2.5 text-[0.83rem] transition-colors duration-200',
+                    'outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                     current
-                      ? 'bg-white/[0.1] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
-                      : 'font-medium text-white/55 hover:bg-white/[0.05] hover:text-white'
+                      ? 'bg-white/[0.14] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+                      : 'font-medium text-[var(--ws-rail-sub)] hover:bg-white/[0.08] hover:text-white'
                   )}
                 >
                   <span data-nav-label className="min-w-0 flex-1">
@@ -205,7 +206,7 @@ export function NavGroup({
         aria-expanded={open}
         aria-controls={`nav-group-${id}`}
         data-nav-group-label
-        className="group/label mt-5 mb-1 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.72rem] font-semibold tracking-[0.02em] text-white/38 transition-colors hover:text-white/70 lg:flex"
+        className="group/label mt-5 mb-1.5 hidden w-full items-center justify-between rounded-md px-2.5 py-0.5 text-[0.74rem] font-semibold tracking-[0.01em] text-[var(--ws-rail-head)] transition-colors hover:text-white lg:flex"
       >
         {label}
         <svg

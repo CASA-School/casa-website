@@ -8,6 +8,7 @@ import { LangSwitch } from './lang-switch';
 import { Icon } from './icons';
 import { NavGroup, NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
+import { SidebarResizer } from './sidebar-resizer';
 import { TopBar } from './top-bar';
 import { AccountMenu } from './top-bar-menus';
 import { canAccess } from '@/lib/admin/access';
@@ -79,7 +80,8 @@ export async function WorkspaceShell({
       <Suspense fallback={null}>
         <NavTrail colleague={user.id} pages={pages.map(({ href, label }) => ({ href, label }))} />
       </Suspense>
-      <aside className="casa-workspace-rail w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_45%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[15.5rem] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
+      <aside className="casa-workspace-rail relative w-full shrink-0 self-start bg-[linear-gradient(180deg,var(--ws-rail-top)_0%,var(--ws-rail)_55%)] text-white lg:sticky lg:top-0 lg:h-dvh lg:w-[var(--ws-rail-w,15.5rem)] lg:shadow-[inset_-1px_0_0_rgba(255,255,255,0.06)] lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none">
+        {focus ? null : <SidebarResizer />}
         <div className="flex h-full flex-col overflow-x-hidden">
           <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
             {/* The name in type, nothing else (Rahman, 2026-10-14): set in the workspace's display serif, as the logo's lettering is. */}

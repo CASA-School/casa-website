@@ -848,6 +848,12 @@ the workspace. What changed, all in the shared parts:
   Plus Jakarta Sans and Montserrat on the same mock-up, Kursplanung included (Rahman: „use inter for
   kursplanung too"); Playfair stays for the CASA wordmark and printed list heads. Letters
   and mail are Arial (Liberation Sans in the server's PDFs, same metrics).
+- **The sidebar** (2026-11-01, Rahman: „flexible … bigger or even smaller until it collapses", „the font
+  color on the background might be too pale"): its type measured on the navy (`--ws-rail-text` 13.4:1,
+  `--ws-rail-sub` 10.2:1, `--ws-rail-icon` 7.8:1, `--ws-rail-head` 7.2:1; before, icons and group heads were
+  under 4.5:1); the current page a white strip with navy type. Its right edge drags (`sidebar-resizer.tsx`):
+  208–360px, folded to icons under 150px and unfolded by dragging out; double click or Enter folds; the
+  width is `--ws-rail-w`, kept per browser and set before first paint.
 - **Corners**: the workspace's own tokens, `rounded-ws-card` 14px, `rounded-ws-inner` 11px,
   `rounded-ws-field` 9px; the site's compressed scale (`rounded-2xl` = 6px) is left to the site.
 - Unchanged on purpose: the colours that mean something — the sessions' green, blue and purple, the
