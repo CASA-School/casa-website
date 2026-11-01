@@ -824,6 +824,31 @@ panel (`popover.tsx`: status and owner in the record rail), and every date is
 typed or picked in the workspace's own field (`date-picker.tsx`), never the
 browser's. The sidebar is white, like the toolbars of the editor and Offers.
 
+**Design A (2026-11-01)** supersedes the head band and the icon chips. Rahman, on an Anmeldung: „the
+boxes, the buttons, even the offen, in arbeit, erledigt and the headings and the heading rows … also
+zuständig and übernehmen"; he chose A of two mock-ups („it looks much better") and asked for it across
+the workspace. What changed, all in the shared parts:
+
+- **Surfaces** (`globals.css`): a lighter canvas (`--ws-canvas` #edf1f6), a finer card edge
+  (`--ws-card-line` #dce3ec) and a deeper, softer shadow. The band (`--ws-card-head`, now #f7f9fc) is kept
+  only for a list's group heads, a card's footer and a side panel's head.
+- **Cards** (`Card`, `ui.tsx`): 16px corners, a white head with a soft rule, the title at 700 beside a
+  grey glyph. `tint` is no longer drawn; `accent` (blue, orange) marks a section with its own colour — a
+  line along its top and its glyph tinted — the stay and the visa so far.
+- **Buttons**: one shape (8px corners), two heights, bold labels; primary dark, secondary white with an
+  edge, and `tertiary`, a word in the link colour, for the small ways on in a card's head („Ändern",
+  „Bearbeiten", „Hinzufügen" — every `FormDialog` trigger that was `ghost`). No pill-shaped buttons.
+- **A record's head** (`RecordHeader`): its facts and its bar on white under a soft rule. In a queue
+  record's bar, „Status" and „Zuständig" are labels; the status is a recessed track with the current
+  state lifted out in white with its coloured dot; „Übernehmen" is a secondary button.
+- **What was sent** (`SubmissionCard`): who sent it is the record's own head, so the card's head is what
+  was sent and when; an Anmeldung calls it „Angefragt" with its count, its lines are rows without a frame
+  of their own, and `FactGrid` is one quiet line of label and value.
+- Unchanged on purpose: the colours that mean something — the sessions' green, blue and purple, the
+  booking lights, the stay's blue and the visa's orange — and the offer page's own meaning colours.
+
+The mock-up is kept outside the repository (`output/mockups/anmeldung-redesign.html`, gitignored).
+
 The rules, each of which came from a real defect on a real screen.
 
 1. **A section is one framed block; the canvas between sections separates

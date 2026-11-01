@@ -362,7 +362,7 @@ export default async function BookingPage({
     <span className="flex items-center gap-2">
       {period.levelCode ? <span className="font-semibold">{period.levelCode}</span> : <span className="text-[var(--casa-text-subtle)]">—</span>}
       {canEdit && booking.status !== 'cancelled' ? (
-        <FormDialog icon={Icon.bookings} tint="red" trigger={period.levelCode ? t('Ändern', 'Change') : t('Festlegen', 'Set')} title={t('Niveau', 'Level')} size="sm" triggerVariant="ghost">
+        <FormDialog icon={Icon.bookings} tint="red" trigger={period.levelCode ? t('Ändern', 'Change') : t('Festlegen', 'Set')} title={t('Niveau', 'Level')} size="sm" triggerVariant="tertiary">
           <PeriodLevelForm bookingId={booking.id} periodId={period.id} levelCode={period.levelCode} levels={levels} />
         </FormDialog>
       ) : null}
@@ -1278,7 +1278,7 @@ export default async function BookingPage({
               tint="sun"
               actions={
                 canEdit ? (
-                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Setzen', 'Set')} title={t('Wiedervorlage', 'Follow-up')} triggerVariant="ghost" size="sm">
+                  <FormDialog icon={Icon.clock} tint="sun" trigger={t('Setzen', 'Set')} title={t('Wiedervorlage', 'Follow-up')} triggerVariant="tertiary" size="sm">
                     <form action={addFollowUpAction} className="space-y-3">
                       <input type="hidden" name="bookingId" value={booking.id} />
                       <Field label={t('Am', 'On')} htmlFor="follow-up-day">

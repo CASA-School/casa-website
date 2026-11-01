@@ -21,7 +21,7 @@ import type { PersonCandidate } from '@/lib/admin/person-match';
 
 const TRIGGER = 'inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40';
 const TRIGGER_MAIN = `${TRIGGER} bg-[var(--casa-ink-deep)] text-white shadow-[0_1px_2px_rgba(15,23,42,0.18)] hover:bg-[var(--casa-ink-deep-hover)]`;
-const TRIGGER_QUIET = `${TRIGGER} h-8 px-3 text-xs text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]`;
+const TRIGGER_QUIET = `${TRIGGER} h-8 px-2.5 text-xs text-[var(--casa-accent-text)] hover:bg-[#eef5fc] hover:text-[var(--casa-accent-text-hover)]`;
 
 /**
  * „Person" at the top of an Anmeldung's rail (2026-10-31): who sent it, the first question — someone

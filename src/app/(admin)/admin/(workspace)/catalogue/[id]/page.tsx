@@ -534,7 +534,7 @@ function LevelCard({
           {plans ? (
             <>
             {form ? (
-              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t(`Kurs ${group.label}`, `Course ${group.label}`)} size="sm" triggerVariant="ghost">
+              <FormDialog trigger={t('Bearbeiten', 'Edit')} title={t(`Kurs ${group.label}`, `Course ${group.label}`)} size="sm" triggerVariant="tertiary">
                 <CourseForm course={form} rooms={rooms} returnTo={levelBack} />
               </FormDialog>
             ) : null}
@@ -782,14 +782,14 @@ function QueueRow({
           >
             {t('Brief', 'Letter')}
           </Link>
-          <FormDialog trigger={t('Verschieben', 'Move')} title={t(`${entry.personName} verschieben`, `Move ${entry.personName}`)} size="sm" triggerVariant="ghost">
+          <FormDialog trigger={t('Verschieben', 'Move')} title={t(`${entry.personName} verschieben`, `Move ${entry.personName}`)} size="sm" triggerVariant="tertiary">
             <MoveForm entry={entry} queueLength={queueLength} starts={startOptions} levels={levels} returnTo={back} />
           </FormDialog>
           <FormDialog
             trigger={offered ? t('Abgesagt', 'Declined') : t('Von der Liste', 'Off the list')}
             title={offered ? t(`${entry.personName} hat abgesagt`, `${entry.personName} declined`) : t(`${entry.personName} von der Warteliste nehmen`, `Take ${entry.personName} off the list`)}
             size="sm"
-            triggerVariant="ghost"
+            triggerVariant="tertiary"
           >
             <CloseForm entry={entry} returnTo={back} />
           </FormDialog>

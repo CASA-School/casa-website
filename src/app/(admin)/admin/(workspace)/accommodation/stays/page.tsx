@@ -138,7 +138,7 @@ export default async function StaysPage({ searchParams }: { searchParams: Promis
                       tint="blue"
                       trigger={s.placeId ? t('Ändern', 'Change') : t('Unterkunft', 'Place')}
                       title={t(`Wo wohnt ${s.personName}?`, `Where does ${s.personName} stay?`)}
-                      triggerVariant="ghost"
+                      triggerVariant="tertiary"
                       size="sm"
                       width="lg"
                     >

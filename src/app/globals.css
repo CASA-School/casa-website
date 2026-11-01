@@ -939,7 +939,7 @@ h3 {
    * sunk 0.90 → canvas 0.84 in relative luminance, about 1.08:1 per step,
    * and `--casa-text-subtle` still clears AA on the canvas at 4.7:1.
    */
-  --ws-canvas: #e8edf4;
+  --ws-canvas: #edf1f6;
 
   /*
    * A section on the canvas, and its head (2026-10-27, Rahman: „a bit of a
@@ -960,10 +960,15 @@ h3 {
    * For comparison, the Tagesplan's cream column head is 1.12:1 under white.
    * The same band carries a record's facts bar, a side panel's head and a list's
    * group headings: one surface for "the head of what follows".
+   *
+   * Design A (2026-11-01, Rahman chose it from a mock-up of the Anmeldung: „it looks much better"): a
+   * card is white to its head — the head told by its title, its glyph and a soft rule, not by a band —
+   * on a lighter canvas, framed by a fine edge and a deeper, softer shadow. The band stays, paler, for
+   * the surfaces that still use it: a list's group heads, a card's footer, a side panel's head.
    */
-  --ws-card-line: #d3dae5;
-  --ws-card-head: #f3f6fa;
-  --ws-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 8px -3px rgba(15, 23, 42, 0.08);
+  --ws-card-line: #dce3ec;
+  --ws-card-head: #f7f9fc;
+  --ws-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px -8px rgba(15, 23, 42, 0.1);
 
   /* Lists: the head is a band of CASA's warm cream (the site's `--casa-warm-soft`
      family, quieter), and every other row a breath of it, so a long list reads

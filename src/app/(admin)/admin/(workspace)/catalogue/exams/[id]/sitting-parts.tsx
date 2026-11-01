@@ -164,7 +164,7 @@ export function CandidateRow({
 
 function CollectedDialog({ candidate: c, sittingId, t }: { candidate: SittingCandidate; sittingId: string; t: T }) {
   return (
-    <FormDialog icon={Icon.award} tint="ink" trigger={t('Abgeholt', 'Collected')} title={t(`Ergebnis von ${c.personName} abgeholt`, `${c.personName}'s result collected`)} size="sm" triggerVariant="ghost">
+    <FormDialog icon={Icon.award} tint="ink" trigger={t('Abgeholt', 'Collected')} title={t(`Ergebnis von ${c.personName} abgeholt`, `${c.personName}'s result collected`)} size="sm" triggerVariant="tertiary">
       <form action={markCollectedAction} className="space-y-3">
         <input type="hidden" name="sittingId" value={sittingId} />
         <input type="hidden" name="bookingId" value={c.bookingId} />
@@ -471,7 +471,7 @@ export function QueueRow({
                     {t('Brief', 'Letter')}
                   </ButtonLink>
                   {queueLength > 1 ? (
-                    <FormDialog trigger={t('Verschieben', 'Move')} title={t(`${entry.personName} verschieben`, `Move ${entry.personName}`)} size="sm" triggerVariant="ghost">
+                    <FormDialog trigger={t('Verschieben', 'Move')} title={t(`${entry.personName} verschieben`, `Move ${entry.personName}`)} size="sm" triggerVariant="tertiary">
                       <MoveForm entry={{ id: entry.id, position: entry.position, courseInstanceId: null, levelCode: null }} queueLength={queueLength} starts={[]} levels={[]} returnTo={back} />
                     </FormDialog>
                   ) : null}
@@ -479,7 +479,7 @@ export function QueueRow({
                     trigger={offered ? t('Abgesagt', 'Declined') : t('Von der Liste', 'Off the list')}
                     title={offered ? t(`${entry.personName} hat abgesagt`, `${entry.personName} declined`) : t(`${entry.personName} von der Warteliste nehmen`, `Take ${entry.personName} off the list`)}
                     size="sm"
-                    triggerVariant="ghost"
+                    triggerVariant="tertiary"
                   >
                     <CloseForm entry={entry} returnTo={back} />
                   </FormDialog>

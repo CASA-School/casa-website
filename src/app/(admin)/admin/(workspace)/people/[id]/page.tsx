@@ -682,7 +682,7 @@ export default async function PersonPage({
                         <FormDialog icon={Icon.globe} tint="ink"
                           trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
                           title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
-                          triggerVariant="ghost"
+                          triggerVariant="tertiary"
                           size="sm"
                         >
                           <AddressForm personId={person.id} kind={kind} address={address} countries={countries} />
@@ -858,7 +858,7 @@ export default async function PersonPage({
                     </span>
                     <span className="flex items-center gap-1">
                       {editsBank ? (
-                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung ändern', 'Change the bank account')} triggerVariant="ghost" size="sm">
+                        <FormDialog icon={Icon.money} tint="ink" trigger={t('Ändern', 'Change')} title={t('Bankverbindung ändern', 'Change the bank account')} triggerVariant="tertiary" size="sm">
                           <BankAccountForm personId={person.id} holder={person.displayName} account={account} />
                         </FormDialog>
                       ) : null}

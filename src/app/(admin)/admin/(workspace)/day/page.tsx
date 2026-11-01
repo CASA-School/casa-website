@@ -500,7 +500,7 @@ function TaskRow({
       <span className="flex shrink-0 items-center gap-1">
         {canEdit ? (
           <span className="transition-opacity focus-within:opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
-            <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="ghost" size="sm" icon={Icon.check} tint="ink" title={t('Aufgabe', 'Task')}>
+            <FormDialog trigger={t('Ändern', 'Edit')} triggerVariant="tertiary" size="sm" icon={Icon.check} tint="ink" title={t('Aufgabe', 'Task')}>
               <EditTaskForm task={task} day={day} colleagues={colleagues} canDelete={canDelete} />
             </FormDialog>
           </span>

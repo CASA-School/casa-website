@@ -79,7 +79,7 @@ export function FormDialog({
   icon?: ReactNode;
   tint?: Tint;
   children: ReactNode;
-  triggerVariant?: 'primary' | 'secondary' | 'ghost';
+  triggerVariant?: 'primary' | 'secondary' | 'ghost' | 'tertiary';
   size?: 'sm' | 'md';
   /** `lg` for a multi-step form or two columns, `xl` for a grid (a week's plan); the default suits a handful of fields. */
   width?: 'sm' | 'md' | 'lg' | 'xl';

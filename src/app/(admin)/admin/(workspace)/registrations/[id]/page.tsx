@@ -380,15 +380,16 @@ export default async function RegistrationPage({
             name={fullName}
             email={contact.email}
             at={registration.submittedAt}
-            via={t('über das Anmeldeformular', 'from the registration form')}
-            title={title}
+            via={t('Anmeldeformular', 'registration form')}
+            title={t('Angefragt', 'Requested')}
+            count={lines.length}
             reply={{ href: reply, locale: registration.locale, primary: !canBook }}
           >
-            <ol className="divide-y divide-ws-line-soft rounded-2xl ring-1 ring-ws-line ring-inset">
+            <ol className="-mx-5 -mt-1 divide-y divide-ws-line-soft">
               {lines.map((line) => (
-                <li key={line.id} id={`line-${line.id}`} className="scroll-mt-24 px-4 py-3">
+                <li key={line.id} id={`line-${line.id}`} className="scroll-mt-24 px-5 py-3.5">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:flex-nowrap">
-                    <p className="w-full shrink-0 text-[0.8rem] text-[var(--casa-muted)] tabular-nums sm:w-40">{lineWhen(line, t, lang)}</p>
+                    <p className="w-full shrink-0 text-[0.82rem] font-semibold text-[var(--casa-ink)] tabular-nums sm:w-40">{lineWhen(line, t, lang)}</p>
                     <div className="min-w-0 flex-1">
                       <p className={cn('text-[0.92rem] font-semibold text-[var(--casa-ink)]', line.outcome.kind === 'declined' && 'text-[var(--casa-muted)] line-through')}>
                         {line.name}
@@ -621,7 +622,7 @@ export default async function RegistrationPage({
                   icon={Icon.person}
                   tint="ink"
                   size="sm"
-                  triggerVariant="ghost"
+                  triggerVariant="tertiary"
                 >
                   <form action={editRegistrationAction} className="space-y-3">
                     <input type="hidden" name="id" value={registration.id} />

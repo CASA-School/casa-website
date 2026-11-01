@@ -102,8 +102,10 @@ const buttonVariants = {
   primary:
     'bg-[var(--casa-ink-deep)] text-white hover:bg-[var(--casa-ink-deep-hover)] shadow-[0_1px_2px_rgba(15,23,42,0.18)]',
   secondary:
-    'border border-ws-line-firm bg-white text-[var(--casa-ink)] hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]',
+    'border border-ws-line-firm bg-white text-[var(--casa-ink)] shadow-[0_1px_1px_rgba(15,23,42,0.04)] hover:border-[var(--casa-blue)]/45 hover:text-[var(--casa-accent-text)]',
   ghost: 'text-[var(--casa-text-subtle)] hover:bg-ws-sunk hover:text-[var(--casa-ink)]',
+  /** A small way on, as a word in the link colour: „Bearbeiten", „Brief schreiben" (design A, 2026-11-01). */
+  tertiary: 'text-[var(--casa-accent-text)] hover:bg-[#eef5fc] hover:text-[var(--casa-accent-text-hover)]',
   danger:
     'border border-ws-line-firm bg-white text-[var(--casa-danger-text)] hover:border-[var(--casa-danger-text)]/50 hover:bg-[var(--casa-danger-text)]/6',
   /** The last step of a destructive action, in its confirmation. */
@@ -127,7 +129,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
         buttonVariants[variant],
         buttonSizes[size],
         focusRing,
@@ -170,6 +172,9 @@ export function IconChip({ icon, tint = 'ink', size = 'sm' }: { icon: ReactNode;
 /** A section's frame on the canvas: the firmer edge and the soft two-layer shadow (globals.css). */
 const cardFrame = 'border border-ws-card-line bg-white shadow-ws-card';
 
+/** The line along the top of a section with its own colour (2026-10-31): the stay's blue, the visa's orange. */
+const ACCENT_LINE = { blue: 'before:bg-[#3a9fd0]', orange: 'before:bg-[#d99a00]' } as const;
+
 /**
  * A link dressed as a button: a page to go to, an address to write to, a file
  * to download. A path inside the workspace is a `Link`; a `mailto:`, or a
@@ -192,7 +197,7 @@ export function ButtonLink({
   children: ReactNode;
 }) {
   const classes = cn(
-    'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-semibold transition-colors',
+    'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-bold transition-colors',
     buttonVariants[variant],
     buttonSizes[size],
     focusRing,
@@ -210,11 +215,12 @@ export function ButtonLink({
 }
 
 /**
- * A card: one white block on the canvas, 8px, framed by `--ws-card-line` and a
- * soft shadow. Its head is a band (`--ws-card-head`) with a rule under it: the
- * title in the sans at 800, an icon chip when the card has a subject, and the
- * card's actions on the right — so a title reads as the head of what follows,
- * not as its first row (2026-10-27).
+ * A card: one white block on the canvas, framed by `--ws-card-line` and a soft
+ * shadow. Its head is white (design A, 2026-11-01): the title in the sans at
+ * 700 beside a grey glyph, the card's actions on the right, a soft rule under
+ * it. `accent` gives a section that has its own colour — the stay's blue, the
+ * visa's orange — a fine line along its top and its glyph on a tinted square;
+ * `tint` is no longer drawn in the head.
  *
  * `overflow="visible"` for a card whose controls open a panel over what
  * follows (the record rail); every other card clips, so a table's rows keep
@@ -226,7 +232,7 @@ export function Card({
   actions,
   footer,
   icon,
-  tint = 'ink',
+  accent,
   bleed = false,
   overflow = 'hidden',
   className,
@@ -237,7 +243,10 @@ export function Card({
   actions?: ReactNode;
   footer?: ReactNode;
   icon?: ReactNode;
+  /** The head's colour before design A; kept on the call sites, not drawn. */
   tint?: Tint;
+  /** A section with its own colour: a line along its top, its glyph tinted. */
+  accent?: keyof typeof ACCENT_LINE;
   /** True when the body is a table or list that should touch the card's edges. */
   bleed?: boolean;
   overflow?: 'hidden' | 'visible';
@@ -247,18 +256,27 @@ export function Card({
   return (
     <section
       className={cn(
-        'rounded-3xl',
+        'rounded-2xl',
         cardFrame,
         overflow === 'hidden' ? 'overflow-hidden' : '',
+        accent ? cn('relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px]', ACCENT_LINE[accent]) : '',
         className
       )}
     >
       {title || actions ? (
-        <header className="flex min-h-[52px] flex-wrap items-center justify-between gap-3 rounded-t-3xl border-b border-ws-card-line bg-ws-card-head px-4 py-2.5">
+        <header className="flex min-h-[50px] flex-wrap items-center justify-between gap-3 rounded-t-2xl border-b border-ws-line-soft bg-white px-5 py-2.5">
           <div className="flex min-w-0 items-center gap-2.5">
-            {icon ? <IconChip icon={icon} tint={tint} /> : null}
+            {icon ? (
+              accent ? (
+                <IconChip icon={icon} tint={accent} />
+              ) : (
+                <span aria-hidden="true" className="shrink-0 text-[#8792a4] [&_svg]:size-[17px]">
+                  {icon}
+                </span>
+              )
+            ) : null}
             <div className="min-w-0">
-              {title ? <h2 className="text-[0.95rem] leading-tight font-extrabold tracking-[-0.01em] text-[var(--casa-ink)]">{title}</h2> : null}
+              {title ? <h2 className="text-[0.92rem] leading-tight font-bold tracking-[-0.005em] text-[var(--casa-ink)]">{title}</h2> : null}
               {description ? (
                 <p className="mt-0.5 max-w-prose text-xs leading-relaxed text-[var(--casa-text-subtle)]">{description}</p>
               ) : null}
@@ -268,10 +286,10 @@ export function Card({
         </header>
       ) : null}
 
-      <div className={bleed ? '' : 'px-4 py-4'}>{children}</div>
+      <div className={bleed ? '' : 'px-5 py-4'}>{children}</div>
 
       {footer ? (
-        <footer className="rounded-b-3xl border-t border-ws-line bg-ws-card-head px-4 py-2.5">{footer}</footer>
+        <footer className="rounded-b-2xl border-t border-ws-line-soft bg-ws-card-head px-5 py-2.5">{footer}</footer>
       ) : null}
     </section>
   );
@@ -396,14 +414,14 @@ export function RecordHeader({
     <header className="mb-5">
       {named ? <TrailLabel label={named} /> : null}
       {backHref ? <BackLink href={backHref} label={backLabel} /> : null}
-      <section className={cn('overflow-hidden rounded-3xl', cardFrame)}>
+      <section className={cn('overflow-hidden rounded-2xl', cardFrame)}>
         {/* Clean white: the record's name carries the head, not a tinted wash behind it. */}
         <div className="flex flex-wrap items-start gap-4 px-6 pt-6 pb-5">
           {avatar ? <Avatar name={avatar} size="lg" /> : null}
           {/* Room for the name before the actions: on a phone they wrap under it, never over it. */}
           <div className="min-w-[min(100%,12rem)] flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">{title}</h1>
+              <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-[-0.025em] text-[var(--casa-ink)]">{title}</h1>
               {status}
             </div>
             {subtitle ? <div className="mt-1.5 text-sm text-[var(--casa-text-subtle)]">{subtitle}</div> : null}
@@ -411,7 +429,7 @@ export function RecordHeader({
           {actions ? <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
         {facts.length ? (
-          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-card-line bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
+          <dl className={cn('grid grid-cols-2 gap-px border-t border-ws-line-soft bg-ws-line-soft', FACT_COLUMNS[Math.min(facts.length, 6)])}>
             {facts.map((fact) => {
               const body = (
                 <>
@@ -430,11 +448,11 @@ export function RecordHeader({
                 </>
               );
               return fact.href ? (
-                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-ws-card-head px-5 py-3.5 transition-colors hover:bg-ws-sunk">
+                <Link key={fact.label} href={fact.href} className="block min-w-0 bg-white px-5 py-3.5 transition-colors hover:bg-ws-card-head">
                   {body}
                 </Link>
               ) : (
-                <div key={fact.label} className="min-w-0 bg-ws-card-head px-5 py-3.5">
+                <div key={fact.label} className="min-w-0 bg-white px-5 py-3.5">
                   {body}
                 </div>
               );
@@ -442,7 +460,7 @@ export function RecordHeader({
           </dl>
         ) : null}
         {bar ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ws-card-line bg-ws-card-head px-6 py-3.5">{bar}</div>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-ws-line-soft bg-white px-6 py-3.5">{bar}</div>
         ) : null}
         {tabs ? <div className="border-t border-ws-line bg-white px-3">{tabs}</div> : null}
       </section>

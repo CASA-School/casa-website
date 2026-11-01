@@ -18,15 +18,6 @@ const day = (iso: string, lang: WsLang) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString(wsLocale(lang), { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
 const weeksBetween = (from: string, to: string) => Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / (7 * 86_400_000)));
 
-/**
- * Each section is the workspace's own card with its colour as a fine line along the top (Rahman,
- * 2026-10-31, after solid heads: „to the one before that like an elegant top border").
- */
-const EDGE = {
-  stay: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#3a9fd0]',
-  visa: 'relative before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-[3px] before:bg-[#d99a00]',
-} as const;
-
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-baseline gap-4 py-2.5">
@@ -64,8 +55,7 @@ export function StayCard({
     <Card
       title={t('Unterkunft', 'Accommodation')}
       icon={Icon.home}
-      tint="blue"
-      className={EDGE.stay}
+      accent="blue"
       actions={
         placed ? (
           <Badge tone="positive">{t('Zugeteilt', 'Placed')}</Badge>
@@ -136,8 +126,7 @@ export function VisaCard({
     <Card
       title={t('Visumshilfe', 'Visa support')}
       icon={Icon.globe}
-      tint="orange"
-      className={EDGE.visa}
+      accent="orange"
       actions={
         done === steps.length ? (
           <Badge tone="positive">{t('Brief für die Botschaft verschickt', 'Embassy letter sent')}</Badge>

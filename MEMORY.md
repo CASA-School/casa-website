@@ -3003,3 +3003,6 @@ temporary and belongs inside the person check; the wizard must offer only what f
 - **Technical logs off the working screens** (2026-11-01, Rahman): the „E-Mail-Versand prüfen" card, the list's
   badge and Statistik's delivery card are gone; mails not confirmed as sent are a log on Settings → Technik
   (`/admin/settings/system`), with the mail mode, SchoolMan, the integrations and the placement engine.
+- **Design A** (2026-11-01, Rahman chose it from two mock-ups and asked for it across the workspace): white card
+  heads with grey glyphs, a lighter canvas, one button system with a `tertiary` word-link, a record's bar with
+  labelled status and owner, `accent` for the stay and the visa. docs/ADMIN_WORKSPACE.md §Design standards.
