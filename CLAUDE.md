@@ -506,11 +506,11 @@ especially the reporting format in §7 (evidence → root cause → fix → file
 
 ## Known open items
 
-- **In `main`, not yet released (2026-11-01).** PR #227 (registrations: the person check,
-  the SchoolMan link, person first; design A; Inter; the sidebar; Settings → Technik;
-  Rundmail and the address rule) and PR #221 (Feedback). The next release applies
-  migrations 0112, 0113 and 0114; 0112 changes `staff_notes`, so pause the SchoolMan job
-  around it (`docs/schoolman/MIGRATION.md` §5). Rahman's open request on record pages
+- **Released 2026-11-01 as revision `0000119`** (main `67d730a3`, rollback `0000118`): PR #227
+  (registrations: the person check, the SchoolMan link, person first; design A; Inter; the
+  sidebar; Settings → Technik; Rundmail and the address rule) and PR #221 (Feedback), with
+  migrations 0112–0114 applied on Azure; the SchoolMan job was removed and recreated around
+  it (`docs/schoolman/MIGRATION.md` §5). Rahman's open request on record pages
   (field labels, the Persönliche Daten tab, a standard „Datensatz" button) is in
   `docs/ADMIN_WORKSPACE.md` §Open items.
 - **`admin.casa-bremen.de` is live (2026-10-11).** CNAME and `asuid.admin` TXT in
