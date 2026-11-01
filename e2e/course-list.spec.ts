@@ -115,11 +115,18 @@ test.describe('Course list', () => {
     await expect(stat('Lehrkräfte')).toContainText(teachers[2].short);
     await expect(stat('Lehrkräfte')).not.toContainText(teachers[0].short);
     await expect(stat('Teilnehmende')).toContainText('6 / 14');
-    // The level's other number, and back to the view it came from.
+    // The level's other number; the way back names the number it came from, and from there the view.
     await page.getByRole('link', { name: /^99901/ }).click();
     await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}$`));
     await expect(stat('Lehrkräfte')).toContainText(`${teachers[0].short} · ${teachers[1].short}`);
-    await expect(page.locator('header').getByRole('link', { name: 'Kurse' })).toHaveAttribute('href', '/admin/catalogue?view=evening');
+    const back = page.locator('header').getByRole('link', { name: /B1\.1 · 99902$/ });
+    await expect(back).toHaveAttribute('href', `/admin/catalogue/courses/${courseId}/2`);
+    await back.click();
+    await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}/2$`));
+    await expect(page.locator('header').getByRole('link', { name: 'Kurse', exact: true })).toHaveAttribute('href', '/admin/catalogue?view=evening');
+    // Opened fresh there is no way it came, and the way back is the course list in the course's own view.
+    await page.goto(`/admin/catalogue/courses/${courseId}`);
+    await expect(page.locator('header').getByRole('link', { name: 'Kurse', exact: true })).toHaveAttribute('href', '/admin/catalogue?view=evening');
   });
 
   test('a course begun with nobody in it and no lesson day sits apart, as not held', async ({ page }) => {
