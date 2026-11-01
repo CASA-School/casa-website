@@ -2,7 +2,7 @@
 
 The open work on the CASA website after go-live, cut into units that separate agents can take
 on in parallel. Each unit says what to read, what it owns, when it is done and where it needs
-Rahman. Last updated: 2026-10-30.
+Rahman. Last updated: 2026-11-01.
 
 The August board (design system, typography, content units, all done) is archived in
 `docs/archive/PARALLEL_AGENT_WORK_BOARD_2026-08.md`.
@@ -146,6 +146,7 @@ Paste this to a new agent, with the unit's id:
 
 ### H7 · Next release
 **Status:** Rahman authorized the reviewed photography release on 2026-10-31. Its baseline is revision 0000114 (`35b926ed`); the approved selections, retained originals, delivery hashes and framing rules are in `docs/MEDIA_LIBRARY.md`. Merge after green CI, then deploy through the runbook. Later releases still require Rahman's go; ask Azure for the live revision rather than relying on this historical baseline.
+**Also in `main` since 2026-11-01:** the workspace's PR #227 and PR #221 bring migrations 0112–0114. 0112 changes `staff_notes`, which the SchoolMan bridge writes: pause `caj-casa-website-schoolman` around the release (`docs/schoolman/MIGRATION.md` §5).
 **Read first:** `docs/OPERATIONS.md` §Releasing.
 
 ---
@@ -181,7 +182,7 @@ Paste this to a new agent, with the unit's id:
 
 | Work | Who | Where |
 | --- | --- | --- |
-| The staff workspace (`/admin`) and its open items | the admin thread | `~/Downloads/CASA-admin`, branch `admin`; `docs/ADMIN_WORKSPACE.md` §Open items. PR #169 (an e2e fix, CI green) is theirs |
+| The staff workspace (`/admin`) and its open items | the admin thread | Its work of 2026-10-31/11-01 is in `main` (PR #227, PR #221), not released. New workspace work branches from `casa/main` in its own worktree; `docs/ADMIN_WORKSPACE.md` §Open items is the list (the „Record pages" request first). PR #169 (an e2e fix) is theirs |
 | Photo modernisation, local review | Codex | `~/.codex/worktrees/bettina-portrait/CASA`, branch `codex/photo-modernisation-local`; owns photo files under `public/media/casa/` until it lands |
 | Statistics: registration step counts (PR #214) privacy review | Codex | switched off (`REGISTRATION_METRICS`) |
 | Statistics navigation link | Codex | branch `codex/statistics-navigation`, release pending |

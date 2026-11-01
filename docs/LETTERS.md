@@ -65,6 +65,10 @@ lacked a field the sheet had started to read, and opening one crashed the letter
 - `print.tsx` — `PrintCopy` renders the letter a second time on `<body>` as `[data-letter-print]`;
   `globals.css` hides everything else on paper and sets `@page letter` (A4, the first page's margins
   inside the sheet). `printLetter(name)` names the PDF.
+- **Type** (2026-11-01, Rahman: „for letters and emails … stick to arial"): the sheet is Arial, as CASA's
+  mail, not the workspace's Inter (`letter-sheet.module.css`). The server prints PDFs on Linux, which has no
+  Arial: Liberation Sans (`fonts-liberation`, which the Dockerfile's `playwright install --with-deps chromium`
+  brings) has the same metrics, so a line breaks where it does on screen.
 
 ## Choosing the letter (2026-10-17)
 

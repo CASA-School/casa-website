@@ -3034,3 +3034,17 @@ the first thing to build is a way for the team's remarks to arrive with the scre
 - 0111 is taken by the website session's exam-preparation branch; this is 0112.
 - docs/ADMIN_WORKSPACE.md §Feedback.
 
+
+## 63. Merged, and what Rahman asked next (2026-11-01)
+
+- PR #227 (passes 60, 61 and the design, Rundmail and address work recorded under 61) and PR #221 (pass 62)
+  are in `main` as rebase merges; #223 closed as part of #227. Not released: the next release applies
+  0112–0114 with the SchoolMan job paused (0112 changes `staff_notes`).
+- Rahman's next request, open (docs/ADMIN_WORKSPACE.md §Open items, „Record pages"): on a learner's
+  Persönliche Daten, a field's value looks bigger than its name; heads, icons and buttons could learn from
+  Ghulam Rasool's Dribbble work; four boxes should become one or two, „Datensatz" a standard element on every
+  record, and the edit popup clean and quick.
+- A first mock-up of it (pill buttons, round icon buttons, a navy pill tab, outlined icon squares, label-left
+  rows, dashed „+ …" chips for missing fields, a clock button for the record's history) was turned down —
+  „no this is bad, not good at all". docs/ADMIN_WORKSPACE.md §Design standards lists it with the other
+  directions turned down. The next attempt starts from a mock-up again and asks what he disliked.
