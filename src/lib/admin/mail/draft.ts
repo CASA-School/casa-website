@@ -10,7 +10,9 @@ import { query, queryFirst } from '../db';
 import type { Bilingual } from '../i18n';
 import { coverClosing } from '../letters/cover-mail';
 import { signatureFor } from '../mail-signature';
-import { MAIL_MODULES, isMailAbout, type MailAbout } from './href';
+import { learnerAudienceName, parseLearnerKey, parseTeamKey, teamAudienceName } from './audience-keys';
+import { learnerMembers, teamMembers, type AudienceMember } from './audiences';
+import { MAIL_MODULES, isGroupMail, isMailAbout, type MailAbout } from './href';
 import { plainMailHtml } from '@/lib/mail/shell';
 import { graphSender, sendGraphMail } from '@/lib/notifications/graph-mail.server';
 
@@ -51,6 +53,8 @@ export type MailDraft = {
 
 type Record_ = {
   title: string;
+  /** The title in English, where it is words of the workspace's own (a group's name). */
+  titleEn?: string;
   detail: string | null;
   href: string;
   recipients: MailRecipient[];
@@ -69,6 +73,9 @@ type Record_ = {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SENT_AT = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' });
 const Email = z.email();
+/** A „Rundmail": at most this many at once, Bcc in parts of this many a message. */
+const GROUP_MAX = 2000;
+const GROUP_BATCH = 250;
 
 const g = (de: string, en: string): Bilingual => ({ de, en });
 const lang = (value: string | null | undefined): Language => (value === 'en' ? 'en' : 'de');
@@ -86,8 +93,9 @@ function unique(list: MailRecipient[]): MailRecipient[] {
   });
 }
 
+/** Every address of a person, the one the rule of 0114 chooses first: their own before an agency's. */
 async function personEmails(personId: string) {
-  return query<{ address: string; is_primary: boolean }>(`SELECT address, is_primary FROM emails WHERE person_id = $1 ORDER BY is_primary DESC, created_at`, [personId]);
+  return query<{ address: string; is_primary: boolean }>(`SELECT address, rank = 1 AS is_primary FROM person_emails($1) ORDER BY rank`, [personId]);
 }
 
 /** One reader of a mail: a person with one or more addresses, the main one ticked. */
@@ -296,6 +304,34 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
         entity: null,
       };
     }
+    case 'learners':
+    case 'team': {
+      // A „Rundmail" (2026-11-01): everyone in the group as it is today, in Bcc. A learner whose only address
+      // is an agency's is listed apart and not ticked: information about the school is for the learner.
+      const learners = about === 'learners' ? parseLearnerKey(id) : null;
+      const team = about === 'team' ? parseTeamKey(id) : null;
+      if (!learners && !team) return null;
+      const members: AudienceMember[] = learners ? await learnerMembers(learners) : await teamMembers(team!);
+      const own = learners ? g('Teilnehmende', 'Students') : g('Team', 'Team');
+      const name = learners ? learnerAudienceName(learners) : teamAudienceName(team!);
+      return {
+        title: name.de,
+        titleEn: name.en,
+        detail: null,
+        href: '/admin/mail/groups',
+        recipients: unique([
+          ...members.filter((m) => m.email && !m.viaAgency).map((m) => ({ email: m.email!, name: m.name, group: own, chosen: true })),
+          ...members.filter((m) => m.email && m.viaAgency).map((m) => ({ email: m.email!, name: m.name, group: g('Nur über Agentur', 'Through an agency only'), chosen: false })),
+        ]),
+        missing: members.filter((m) => !m.email).map((m) => m.name),
+        bcc: true,
+        language: 'de',
+        greet: null,
+        greetAll: true,
+        subject: '',
+        entity: null,
+      };
+    }
     case 'exam_sitting':
     case 'exam_examiners': {
       // An exam sitting (2026-10-27): to everyone booked into it (Bcc), or to whoever examines it.
@@ -311,7 +347,7 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
       if (about === 'exam_sitting') {
         const people = await query<{ name: string; email: string | null }>(
           `SELECT concat_ws(' ', p.first_name, p.last_name) AS name,
-                  (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+                  person_email(p.id) AS email
              FROM bookings b JOIN people p ON p.id = canonical_person_id(b.person_id)
             WHERE b.exam_session_id = $1 AND b.deleted_at IS NULL AND b.status <> 'cancelled'
             ORDER BY p.last_name, p.first_name`,
@@ -333,7 +369,7 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
       }
       const examiners = await query<{ name: string; first_name: string | null; email: string | null; account_email: string | null }>(
         `SELECT concat_ws(' ', p.first_name, p.last_name) AS name, p.first_name,
-                (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+                person_email(p.id) AS email,
                 u.email AS account_email
            FROM exam_session_examiners x JOIN staff_members m ON m.id = x.staff_member_id JOIN people p ON p.id = m.person_id
            LEFT JOIN staff_users u ON u.id = m.staff_user_id
@@ -376,7 +412,10 @@ async function resolve(about: MailAbout, id: string): Promise<Record_ | null> {
 
 function parse(to: string): { about: MailAbout; id: string } | null {
   const [about, id] = to.split(':');
-  return about && id && isMailAbout(about) && UUID.test(id) ? { about, id } : null;
+  if (!about || !id || !isMailAbout(about)) return null;
+  if (about === 'learners') return parseLearnerKey(id) ? { about, id } : null;
+  if (about === 'team') return parseTeamKey(id) ? { about, id } : null;
+  return UUID.test(id) ? { about, id } : null;
 }
 
 /** The first right the colleague has for a mail of this kind, at `edit` if any. */
@@ -391,7 +430,7 @@ function rightFor(about: MailAbout, actor: StaffUser): { module: WorkspaceModule
 const greeting = (language: Language, name: string | null, all?: boolean) =>
   language === 'en' ? `Hello${name ? ` ${name}` : ''},` : `Hallo${name ? ` ${name}` : all ? ' zusammen' : ''},`;
 
-export async function mailDraft(to: string, options: { subject?: string; address?: string }, actor: StaffUser): Promise<MailDraft | null> {
+export async function mailDraft(to: string, options: { subject?: string; address?: string; lang?: Language }, actor: StaffUser): Promise<MailDraft | null> {
   const target = parse(to);
   if (!target) return null;
   const right = rightFor(target.about, actor);
@@ -402,7 +441,7 @@ export async function mailDraft(to: string, options: { subject?: string; address
     signatureFor(actor.email),
     query<{ id: string; subject: string; recipients: string[]; sent_at: Date; by: string | null }>(
       `SELECT m.id, m.subject, m.recipients, m.sent_at, u.name AS by FROM workspace_mails m LEFT JOIN staff_users u ON u.id = m.sent_by
-        WHERE m.about_kind = $1 AND m.about_id = $2 ORDER BY m.sent_at DESC LIMIT 30`,
+        WHERE m.about_kind = $1 AND ${isGroupMail(target.about) ? 'm.about_key' : 'm.about_id::text'} = $2 ORDER BY m.sent_at DESC LIMIT 30`,
       [target.about, target.id]
     ),
   ]);
@@ -418,7 +457,7 @@ export async function mailDraft(to: string, options: { subject?: string; address
     id: target.id,
     module: right.module,
     canSend: right.canSend,
-    title: record.title,
+    title: options.lang === 'en' && record.titleEn ? record.titleEn : record.title,
     detail: record.detail,
     href: record.href,
     recipients,
@@ -430,7 +469,11 @@ export async function mailDraft(to: string, options: { subject?: string; address
     signature: signature ? { owner: signature.owner, html: signature.html } : null,
     closing: coverClosing(record.language, first(actor.name) ?? ''),
     replyTo: actor.email,
-    history: sent.map((m) => ({ id: m.id, title: m.subject, detail: [SENT_AT.format(m.sent_at), m.by, m.recipients.join(', ')].filter(Boolean).join(' · ') })),
+    history: sent.map((m) => ({
+      id: m.id,
+      title: m.subject,
+      detail: [SENT_AT.format(m.sent_at), m.by, isGroupMail(target.about) ? (options.lang === 'en' ? `${m.recipients.length} recipients` : `${m.recipients.length} Empfänger`) : m.recipients.join(', ')].filter(Boolean).join(' · '),
+    })),
   };
 }
 
@@ -452,7 +495,8 @@ export async function sendWorkspaceMail(
   if (!emails.length) return refuse('Bitte wähle mindestens eine Empfängerin oder einen Empfänger.', 'Please choose at least one recipient.');
   const wrong = emails.find((e) => !Email.safeParse(e).success);
   if (wrong) return refuse(`„${wrong}" ist keine E-Mail-Adresse.`, `“${wrong}” is not an e-mail address.`);
-  if (emails.length > (record.bcc ? 80 : 10)) return refuse('Das sind zu viele Empfänger.', 'Those are too many recipients.');
+  const group = isGroupMail(target.about);
+  if (emails.length > (group ? GROUP_MAX : record.bcc ? 80 : 10)) return refuse('Das sind zu viele Empfänger.', 'Those are too many recipients.');
   const subject = input.subject.trim();
   const text = input.text.trim();
   if (!subject || !text || subject.length > 200 || text.length > 10_000) return refuse('Bitte gib Betreff und Text an.', 'Please give a subject and a text.');
@@ -466,25 +510,39 @@ export async function sendWorkspaceMail(
     signature: signature?.mailHtml ?? null,
     closing: signature ? null : coverClosing(record.language, first(actor.name) ?? ''),
   });
-  try {
-    await sendGraphMail(from, {
-      // A class: everyone in Bcc, the workspace's own mailbox in „An", so no one sees the others.
-      to: record.bcc && emails.length > 1 ? from : emails,
-      bcc: record.bcc && emails.length > 1 ? emails : undefined,
-      subject,
-      html,
-      logo: false,
-      replyTo: actor.email ? [{ emailAddress: { address: actor.email, name: actor.name } }] : undefined,
-      attachments: signature?.attachments,
-    });
-  } catch (error) {
-    console.error('[workspace-mail] not sent', error);
-    return refuse('Die E-Mail ließ sich nicht senden. Bitte versuch es noch einmal.', 'The e-mail could not be sent. Please try again.');
+  // A class: everyone in Bcc, the workspace's own mailbox in „An", so no one sees the others. A group goes
+  // in parts of `GROUP_BATCH`, under Exchange's limit of recipients a message.
+  const bcc = record.bcc && emails.length > 1;
+  const batches = bcc ? Array.from({ length: Math.ceil(emails.length / GROUP_BATCH) }, (_, i) => emails.slice(i * GROUP_BATCH, (i + 1) * GROUP_BATCH)) : [emails];
+  const reached: string[] = [];
+  const keep = (list: string[]) =>
+    query(
+      `INSERT INTO workspace_mails (about_kind, about_id, about_key, recipients, bcc, subject, body, signature, sent_by) VALUES ($1, $2, $3, $4::text[], $5, $6, $7, $8, $9)`,
+      [target.about, group ? null : target.id, group ? target.id : null, list, bcc, subject, text, Boolean(signature), actor.id]
+    );
+  for (const batch of batches) {
+    try {
+      await sendGraphMail(from, {
+        to: bcc ? from : batch,
+        bcc: bcc ? batch : undefined,
+        subject,
+        html,
+        logo: false,
+        replyTo: actor.email ? [{ emailAddress: { address: actor.email, name: actor.name } }] : undefined,
+        attachments: signature?.attachments,
+      });
+      reached.push(...batch);
+    } catch (error) {
+      console.error('[workspace-mail] not sent', error);
+      if (!reached.length) return refuse('Die E-Mail ließ sich nicht senden. Bitte versuch es noch einmal.', 'The e-mail could not be sent. Please try again.');
+      await keep(reached);
+      return refuse(
+        `Die E-Mail ging an ${reached.length} von ${emails.length} Empfängern, dann brach der Versand ab. Unter „Gesendet" steht, wer sie bekommen hat.`,
+        `The e-mail reached ${reached.length} of ${emails.length} recipients, then sending stopped. “Sent” shows who received it.`
+      );
+    }
   }
-  await query(
-    `INSERT INTO workspace_mails (about_kind, about_id, recipients, bcc, subject, body, signature, sent_by) VALUES ($1, $2, $3::text[], $4, $5, $6, $7, $8)`,
-    [target.about, target.id, emails, record.bcc && emails.length > 1, subject, text, Boolean(signature), actor.id]
-  );
+  await keep(reached);
   if (record.entity) {
     await logActivity({ actor, entity: record.entity, entityId: record.entityId ?? target.id, action: 'mail_sent', detail: { subject, recipients: emails.length } });
   }

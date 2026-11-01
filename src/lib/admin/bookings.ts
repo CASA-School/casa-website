@@ -302,7 +302,7 @@ export type TeacherAnswer = 'yes' | 'no' | 'unsure';
 
 const LIST = `
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
-         (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS person_email,
+         person_email(p.id) AS person_email,
          coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,

@@ -274,7 +274,7 @@ export async function dayLessons(day: string): Promise<DayLesson[]> {
   const learners = courseIds.length
     ? await query<{ course_id: string; group_index: number | null; person_id: string; name: string; email: string | null }>(
         `SELECT bp.course_id, bp.group_index, p.id AS person_id, concat_ws(' ', p.first_name, p.last_name) AS name,
-                (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+                person_email(p.id) AS email
            FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
           WHERE bp.course_id = ANY($1::uuid[]) AND bp.start_date <= $2::date AND bp.end_date >= $2::date
             AND b.deleted_at IS NULL AND p.deleted_at IS NULL AND b.status IN ('reserved', 'confirmed')
@@ -918,7 +918,7 @@ export async function classContacts(courseDayId: string): Promise<ClassContacts 
             coalesce(c.level_code, c.title, coalesce(ty.name_de, ty.name)) AS label, coalesce(ty.name_de, ty.name) AS type_name,
             coalesce(c.filemaker_group_ids[d.group_index], c.filemaker_course_id) AS number, coalesce(r.nickname, r.name) AS room_name,
             ${TEACHER('tm', 'tp')} AS teacher_name,
-            (SELECT e.address FROM emails e WHERE e.person_id = tp.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS teacher_email
+            person_email(tp.id) AS teacher_email
        FROM course_days d
        JOIN course_day_times t ON t.id = d.id
        JOIN courses c ON c.id = d.course_id JOIN course_instances i ON i.id = c.course_instance_id JOIN course_types ty ON ty.id = i.course_type_id
@@ -930,7 +930,7 @@ export async function classContacts(courseDayId: string): Promise<ClassContacts 
   if (!head) return null;
   const learners = await query<{ name: string; email: string | null }>(
     `SELECT concat_ws(', ', p.last_name, p.first_name) AS name,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email
+            person_email(p.id) AS email
        FROM booking_periods bp JOIN bookings b ON b.id = bp.booking_id JOIN people p ON p.id = b.person_id
       WHERE bp.course_id = $1 AND (bp.group_index IS NULL OR bp.group_index = $2)
         AND bp.start_date <= $3::date AND bp.end_date >= $3::date

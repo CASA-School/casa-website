@@ -43,7 +43,7 @@ type PersonRow = {
 async function letterPerson(personId: string): Promise<LetterPerson | null> {
   const person = await queryFirst<PersonRow>(
     `SELECT p.id, p.first_name, p.last_name, p.salutation::text AS salutation,
-            (SELECT e.address FROM emails e WHERE e.person_id = p.id ORDER BY e.is_primary DESC, e.created_at LIMIT 1) AS email,
+            person_email(p.id) AS email,
             to_char(p.birth_date, 'YYYY-MM-DD') AS birth_date, c.name_de AS nationality_de, c.name_en AS nationality_en, p.passport_number,
             (SELECT ph.number FROM phones ph WHERE ph.person_id = p.id ORDER BY ph.is_primary DESC, ph.created_at LIMIT 1) AS phone,
             p.mother_tongue, p.birth_place

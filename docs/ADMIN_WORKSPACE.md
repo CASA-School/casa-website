@@ -2654,6 +2654,55 @@ the record's timeline („hat eine E-Mail gesendet: …"). A sent offer has „P
 „Angenommen", back to its letter's mail screen. The only `mailto:` left is the mail screen's own „Im
 Mailprogramm öffnen".
 
+## Rundmail and a person's addresses (2026-11-01)
+
+Rahman: „if i want to send all active students an email … all active intensive course students … evening
+courses … the ones doing courses monday-wednesday or tuesday-thursday … all active teachers or only the
+Angestellte", „a highly intelligent and smart system that gets updated", and „participants having two email
+and some participants coming through agency — in such informative emails their personal email should be
+considered as primary email … what if a participant has more than one email or phone".
+
+**Which address, decided once (0114).** A person keeps every address and number they gave — each registration
+adds its own, SchoolMan's come across — over all their linked records. `person_emails(person)` lists them in
+the order of one rule and `person_email(person)` is the first; every list, letter and mail of the workspace
+asks it (the old `ORDER BY is_primary DESC, created_at` sub-query is gone, as is its blindness to linked
+records):
+
+1. their own address before a shared one — an organisation's address (its own or a contact's) or one marked
+   „Agentur" comes last; one that three people or more have (an agency nobody has entered yet) before that;
+2. the one a colleague chose (`is_primary`);
+3. a private address before a work one;
+4. the newest: the one they gave us last.
+
+Nothing is reclassified in the data: entering an agency later changes the answer by itself. `person_phones()`
+does the same for numbers, an emergency contact never first. An agency's address, or one several people
+share, is also no sign of the same person: the person check and intake's duplicate flag leave it out.
+
+**The contact card** (`people/contact-card.tsx`, on a learner's page and a colleague's staff page): every
+address and number, labelled (Privat / Arbeit / Agentur, the organisation it belongs to, „auch bei 7 weiteren
+Personen", a note), the one in use marked „Hauptadresse" / „Hauptnummer". With `edit`: add one, label it,
+make it the main one; removing one is `full`, as every removal — with `edit` an old one is simply not the main
+one. The person form no longer carries e-mail and phone when editing (a new person still gives one of each).
+
+**Rundmail** (`/admin/mail/groups`; „Neu" → Rundmail, the search, and a button on Teilnehmende and
+Mitarbeitende). A group is a question, not a list: `learners:<key>` / `team:<key>` (`mail/audience-keys.ts`),
+read from the bookings and the staff register when the page opens and again when the mail is sent, so it is
+never out of date.
+
+- **Learners**: in a course today — a reserved or confirmed booking with a period running, the register's „Im
+  Kurs" — or starting within 14 days, or both; by course (intensive, Bildungszeit counted there; evening;
+  special; the rest), time of day (`courseSessionSql`), and weekdays: Mo + Mi or Di + Do, whichever the
+  course mostly meets on (`course_days`), else the start's planned days. Ready-made groups with today's
+  count, and „Eigene Auswahl" — any combination, counted as it is chosen.
+- **Team**: active colleagues; teachers (the `teaching` role) or the office; by the contract that runs today
+  (Angestellt / Honorar). Work mail goes to the work mailbox: the account's address, else a CASA address of
+  theirs, else the rule's.
+- **The mail screen** as for any mail: Bcc, „Hallo zusammen,", the people with no address named, a learner
+  reachable only through an agency listed apart under „Nur über Agentur" and not ticked. Sent in parts of 250
+  (Exchange's limit is 500 a message), at most 2,000; kept in `workspace_mails` by the group's key
+  (`about_key`). Rights: `people` for learners, `staff` for the team, at `edit` to send.
+- These are mails about courses and the school, not advertising: a newsletter needs the learners' consent.
+
 ## Copy on screens — labels, not explanations
 
 **In two languages (2026-10-14).** Every label is written in German and English,

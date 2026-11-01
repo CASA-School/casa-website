@@ -58,9 +58,11 @@ export async function personCandidates(
 
   const hits = await query<{ id: string }>(
     `WITH contact AS (
+       -- An agency's address, or one several people share, says nothing about who someone is (0114).
        SELECT canonical_person_id(e.person_id) AS id FROM emails e
-        WHERE e.normalized = ANY($1::text[]) OR split_part(e.normalized, '@', 1) = ANY($2::text[])
-                OR ($9::text IS NOT NULL AND strpos(e.normalized, lower($9)) > 0)
+        WHERE (e.normalized = ANY($1::text[]) OR split_part(e.normalized, '@', 1) = ANY($2::text[])
+                OR ($9::text IS NOT NULL AND strpos(e.normalized, lower($9)) > 0))
+          AND ($9::text IS NOT NULL OR (e.kind <> 'agency' AND email_tier(e.normalized) = 0))
        UNION
        SELECT canonical_person_id(x.person_id) FROM phones x
         WHERE right(regexp_replace(x.normalized, '\\D', '', 'g'), 9) = ANY($3::text[])
@@ -126,7 +128,7 @@ export async function describePeople(ids: readonly string[], sent: MatchFacts): 
   }>(
     `SELECT p.id, p.first_name, p.last_name, p.second_last_name, p.nickname, to_char(p.birth_date, 'YYYY-MM-DD') AS birth_date,
             p.nationality_code, coalesce(c.name_de, c.name_en) AS nationality, p.customer_number, p.listed, p.created_by,
-            (SELECT array_agg(DISTINCT e.normalized) FROM emails e WHERE e.person_id = ANY(person_family(p.id))) AS emails,
+            (SELECT array_agg(DISTINCT e.normalized) FROM emails e WHERE e.person_id = ANY(person_family(p.id)) AND e.kind <> 'agency' AND email_tier(e.normalized) = 0) AS emails,
             (SELECT array_agg(DISTINCT x.number) FROM phones x WHERE x.person_id = ANY(person_family(p.id))) AS phones,
             coalesce(bk.n, 0)::int AS bookings, to_char(bk.since, 'YYYY-MM-DD') AS since,
             cur.type_name, cur.level_code, to_char(cur.start_date, 'YYYY-MM-DD') AS start_date, to_char(cur.end_date, 'YYYY-MM-DD') AS end_date

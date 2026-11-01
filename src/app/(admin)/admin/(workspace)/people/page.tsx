@@ -6,7 +6,7 @@ import { Icon } from '@/components/admin/icons';
 import { dayRange, euros, ListBar, ListEmpty, ListGroup, RecordName } from '@/components/admin/list';
 import { Pagination } from '@/components/admin/pagination';
 import { RowActions, type RowAction } from '@/components/admin/row-actions';
-import { Badge, Button, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
+import { Badge, Button, ButtonLink, Card, Cell, PageHeader, Table, TableRow } from '@/components/admin/ui';
 import { FLAG_LABELS, openFlagsByCode, type FlagCode } from '@/lib/admin/flags';
 import { capitalise, num, pick, relativeDays, wsLocale, type Bilingual, type WsLang } from '@/lib/admin/i18n';
 import { toDateInputValue } from '@/lib/dates';
@@ -172,6 +172,11 @@ export default async function PeoplePage({
         title={t('Teilnehmende', 'Students')}
         actions={
           canEdit ? (
+            <>
+            <ButtonLink href="/admin/mail/groups" variant="secondary">
+              {Icon.mail}
+              {t('Rundmail', 'Group mail')}
+            </ButtonLink>
             <FormDialog icon={Icon.person} tint="ink"
               trigger={t('Person hinzufügen', 'Add person')}
               title={params.then === 'book' ? t('Neue Buchung: wer?', 'New booking: who?') : t('Neue Person', 'Add a person')}
@@ -184,6 +189,7 @@ export default async function PeoplePage({
                 <PersonForm countries={countries} />
               )}
             </FormDialog>
+            </>
           ) : null
         }
       />

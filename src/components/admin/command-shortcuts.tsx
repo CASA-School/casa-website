@@ -35,6 +35,10 @@ export function createItems(user: StaffUser, t: T): Shortcut[] {
     ...(canAccess(user, 'accommodation', 'edit')
       ? [{ href: '/admin/accommodation?new=1', label: t('Unterkunft', 'Place to stay'), icon: Icon.home, keywords: 'neu new unterkunft accommodation gastfamilie host family wg flat' }]
       : []),
+    // A mail to a group: everyone in a course, the evening classes on Tuesday and Thursday, the teachers (2026-11-01).
+    ...(canAccess(user, 'people', 'edit') || canAccess(user, 'staff', 'edit')
+      ? [{ href: '/admin/mail/groups', label: t('Rundmail', 'Group mail'), icon: Icon.mail, keywords: 'neu new rundmail group mail e-mail email alle all newsletter verteiler' }]
+      : []),
   ];
 }
 
@@ -49,6 +53,7 @@ export function pageShortcuts(user: StaffUser, t: T): Shortcut[] {
     ...page('registrations', '/admin/registrations', 'Anmeldungen', 'Registrations', Icon.registrations, 'kursanmeldungen prüfungsanmeldungen course exam registrations posteingang inbox telc'),
     ...(canAccess(user, 'placement') && placementTestSwitchedOn() ? page('placement', '/admin/placement', 'Einstufungstests', 'Placement tests', Icon.placement) : []),
     ...page('people', '/admin/people', 'Teilnehmende', 'Students', Icon.people, 'lernende learners kartei personen people'),
+    ...(canAccess(user, 'people') || canAccess(user, 'staff') ? [{ href: '/admin/mail/groups', label: t('Rundmail', 'Group mail'), icon: Icon.mail, keywords: 'Rundmail Group mail e-mail email alle all verteiler abendkurs intensivkurs lehrkräfte teachers' }] : []),
     ...page('bookings', '/admin/bookings', 'Buchungen', 'Bookings', Icon.bookings),
     ...page('offers', '/admin/offers', 'Angebote', 'Offers', Icon.offers),
     ...page('groups', '/admin/groups', 'Gruppen', 'Groups', Icon.group, 'gruppenbesuche visits'),

@@ -9,7 +9,8 @@ import { readChoices } from '@/lib/admin/letters/choices';
 import { requireModule } from '@/lib/admin/guard';
 import { pick } from '@/lib/admin/i18n';
 import { getI18n } from '@/lib/admin/i18n.server';
-import { readBankAccount, readPerson } from './person-input';
+import { readBankAccount, readEmail, readPerson, readPhone } from './person-input';
+import { removeContact, saveEmail, savePhone } from '@/lib/admin/contacts';
 import { staffIdForPerson } from '@/lib/admin/staff-members';
 import {
   addBankAccount,
@@ -52,6 +53,48 @@ async function learnerId(formData: FormData): Promise<string> {
     );
   }
   return id;
+}
+
+/** An address on the contact card, new or labelled again; the one ticked becomes the main one. */
+export async function saveEmailAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('people', 'edit');
+  const id = await learnerId(formData);
+  const back = `/admin/people/${id}?tab=details`;
+  const { t, lang } = await getI18n();
+  const input = readEmail(formData, t);
+  if (typeof input === 'string') redirect(`${back}&error=${encodeURIComponent(input)}`);
+  const result = await saveEmail(id, input.id, input, actor);
+  if (!result.ok) redirect(`${back}&error=${encodeURIComponent(pick(lang, result.reason))}`);
+  revalidatePath('/admin/people', 'layout');
+  redirect(back);
+}
+
+/** A number on the contact card, new or labelled again. */
+export async function savePhoneAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('people', 'edit');
+  const id = await learnerId(formData);
+  const back = `/admin/people/${id}?tab=details`;
+  const { t, lang } = await getI18n();
+  const input = readPhone(formData, t);
+  if (typeof input === 'string') redirect(`${back}&error=${encodeURIComponent(input)}`);
+  const result = await savePhone(id, input.id, input, actor);
+  if (!result.ok) redirect(`${back}&error=${encodeURIComponent(pick(lang, result.reason))}`);
+  revalidatePath('/admin/people', 'layout');
+  redirect(back);
+}
+
+/** An address or a number removed, after the confirmation: `full`, as every removal. */
+export async function removeContactAction(formData: FormData): Promise<void> {
+  const actor = await requireModule('people', 'full');
+  const id = await learnerId(formData);
+  const back = `/admin/people/${id}?tab=details`;
+  if (formData.get('confirmed') !== '1') redirect(back);
+  const channel = formData.get('channel') === 'phone' ? 'phone' : 'email';
+  const contactId = String(formData.get('contactId') ?? '');
+  if (!UUID.test(contactId)) throw new Error('Invalid contactId');
+  await removeContact(id, channel, contactId, actor);
+  revalidatePath('/admin/people', 'layout');
+  redirect(back);
 }
 
 /** A home or a Bremen address; emptied, it is removed. */

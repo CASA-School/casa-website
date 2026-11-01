@@ -12,7 +12,8 @@ import { DialogFooter } from '@/components/admin/dialogs';
  *
  * Progressive disclosure: a new person needs a name and a way to reach them;
  * salutation, date of birth, nationality and phone appear once a first name
- * and an email are in (`OptionalSection`). When editing, everything is shown —
+ * and an email are in (`OptionalSection`). When editing, everything is shown
+ * but the addresses and numbers, which are on the contact card (`ContactCard`) —
  * the person opened Edit to go deeper — with the rest of what SchoolMan knows
  * about a learner below it (second surname, nickname, place and country of
  * birth, mother tongue, occupation, passport; some of it telc asks for).
@@ -41,10 +42,6 @@ export async function PersonForm({
     ['neutral', t('Keine Anrede', 'No salutation')],
   ] as const;
   const editing = Boolean(person);
-  const primaryEmail =
-    person?.emails.find((e) => e.isPrimary)?.address ?? person?.emails[0]?.address ?? '';
-  const primaryPhone =
-    person?.phones.find((p) => p.isPrimary)?.number ?? person?.phones[0]?.number ?? '';
   const nationality = person?.nationalityName ?? person?.nationalityRaw ?? '';
 
   const more = (
@@ -80,15 +77,11 @@ export async function PersonForm({
           ))}
         </datalist>
       </Field>
-      <Field label={t('Telefon', 'Phone')} htmlFor="person-phone">
-        <Input
-          id="person-phone"
-          name="phone"
-          type="tel"
-          defaultValue={primaryPhone}
-          maxLength={60}
-        />
-      </Field>
+      {editing ? null : (
+        <Field label={t('Telefon', 'Phone')} htmlFor="person-phone">
+          <Input id="person-phone" name="phone" type="tel" maxLength={60} />
+        </Field>
+      )}
     </div>
   );
 
@@ -116,15 +109,12 @@ export async function PersonForm({
           />
         </Field>
       </div>
-      <Field label={t('E-Mail', 'Email')} htmlFor="person-email">
-        <Input
-          id="person-email"
-          name="email"
-          type="email"
-          maxLength={200}
-          defaultValue={primaryEmail}
-        />
-      </Field>
+      {/* Editing, addresses and numbers are on the contact card: several, labelled, one the main one. */}
+      {editing ? null : (
+        <Field label={t('E-Mail', 'Email')} htmlFor="person-email">
+          <Input id="person-email" name="email" type="email" maxLength={200} />
+        </Field>
+      )}
 
       <OptionalSection
         requires={['firstName', 'email']}
