@@ -2733,7 +2733,7 @@ html[lang^="en"] .casa-example-label [lang="en"] { display: inline; }
 /*
  * Focus mode — the course-planning module (docs/KURSPLANUNG.md).
  *
- * The board keeps the typography it was approved with: Manrope for headings
+ * The board keeps the typography it was approved with — the workspace's sans (Inter since 2026-11-01) for headings
  * too. The workspace's display face belongs to the queues; a board and its two
  * lists are controls, not prose. Scoped to the focus shell, so nothing else in
  * the workspace and nothing on the public site changes. The dialog is portalled

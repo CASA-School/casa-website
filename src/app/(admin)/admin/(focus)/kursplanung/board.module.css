@@ -2,7 +2,7 @@
  * The board's look. Level tints on columns and placed pieces; yellow only for a
  * substitute; red only for a conflict. Local tokens, so the board reads the same
  * on any ground (the --pz-* tokens sit on .casa-workspace in globals.css); the
- * typeface is Manrope, set by its layout (the rest of the workspace is Inter since 2026-11-01).
+ * typeface is the workspace's (Inter since 2026-11-01, Manrope before) by inheritance.
  */
 .root {
   color: var(--pz-ink);

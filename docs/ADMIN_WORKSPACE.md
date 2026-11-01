@@ -845,8 +845,8 @@ the workspace. What changed, all in the shared parts:
   was sent and when; an Anmeldung calls it „Angefragt" with its count, its lines are rows without a frame
   of their own, and `FactGrid` is one quiet line of label and value.
 - **Type** (2026-11-01): Inter for the whole interface, chosen from Manrope, Inter, Geist, IBM Plex Sans,
-  Plus Jakarta Sans and Montserrat on the same mock-up. Kursplanung keeps Manrope (docs/KURSPLANUNG.md
-  rule 5), loaded by its own layout; Playfair stays for the CASA wordmark and printed list heads. Letters
+  Plus Jakarta Sans and Montserrat on the same mock-up, Kursplanung included (Rahman: „use inter for
+  kursplanung too"); Playfair stays for the CASA wordmark and printed list heads. Letters
   and mail are Arial (Liberation Sans in the server's PDFs, same metrics).
 - **Corners**: the workspace's own tokens, `rounded-ws-card` 14px, `rounded-ws-inner` 11px,
   `rounded-ws-field` 9px; the site's compressed scale (`rounded-2xl` = 6px) is left to the site.
