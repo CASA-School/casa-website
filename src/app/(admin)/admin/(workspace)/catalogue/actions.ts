@@ -27,6 +27,7 @@ import {
   takeBackOffer,
   type CloseReason,
 } from '@/lib/admin/waitlist';
+import { senderUndecided } from '@/lib/admin/registration-person';
 
 /**
  * The waiting list's mutations (docs/ADMIN_WORKSPACE.md §Waiting list). Putting someone in a queue,
@@ -144,6 +145,10 @@ export async function addToWaitlistAction(formData: FormData): Promise<void> {
   const back = backTo(formData, `/admin/catalogue/${courseInstanceId}`);
   const levelCode = await level(formData, back);
   const registrationId = String(formData.get('registrationId') ?? '');
+  // Nothing is queued from a registration whose person is still undecided (2026-11-01).
+  if (UUID.test(registrationId) && (await senderUndecided({ courseLine: registrationId }))) {
+    fail(back, (await getI18n()).t('Erst die Person klären: schon bei CASA oder neu.', 'Confirm the person first: already at CASA, or new.'));
+  }
   const result = await addToWaitlist(
     {
       personId,

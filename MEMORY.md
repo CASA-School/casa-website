@@ -2997,3 +2997,6 @@ temporary and belongs inside the person check; the wizard must offer only what f
 - Bug found on the way: `linkPerson` passed a parameter its flags query never read, so Postgres refused every
   „Dieselbe Person" since 0007. Fixed.
 - docs/ADMIN_WORKSPACE.md §Who sent a registration.
+- **Person first** (2026-11-01, Rahman): booking and the waiting list stay locked on an Anmeldung until the
+  sender is decided (`senderUndecided()`, checked in the page and in every action that books or queues from a
+  line); the head says „Person klären", a line's „Buchen" has a padlock and opens the panel.

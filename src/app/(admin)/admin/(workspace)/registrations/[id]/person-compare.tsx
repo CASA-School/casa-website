@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { Icon } from '@/components/admin/icons';
@@ -87,6 +88,27 @@ export function PersonCompare({
   const [today] = useState(() => new Date().toISOString().slice(0, 10));
   const asked = useRef(0);
   const term = text.trim();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(Boolean(defaultOpen));
+  const named = Boolean(defaultOpen);
+  const decided = `${linked?.id ?? ''}:${isNew}`;
+  const [seen, setSeen] = useState({ named, decided });
+
+  // A decision closes the panel — its work is done; a link that names it (`?person=1`: „Person klären", a
+  // locked „Buchen") opens it, also on a page already open.
+  if (seen.named !== named || seen.decided !== decided) {
+    setSeen({ named, decided });
+    setOpen(seen.decided === decided ? named : false);
+  }
+  const onOpenChange = (next: boolean) => {
+    setOpen(next);
+    // Closed, the address forgets it, so the same link opens it again.
+    if (next || !defaultOpen) return;
+    const params = new URLSearchParams(window.location.search);
+    params.delete('person');
+    router.replace(params.size ? `${pathname}?${params}` : pathname, { scroll: false });
+  };
 
   useEffect(() => {
     if (term.length < 2) return;
@@ -110,7 +132,8 @@ export function PersonCompare({
     <SidePanel
       trigger={trigger}
       triggerClassName={triggerClassName}
-      defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       width="lg"
       icon={Icon.person}
       tint="green"
