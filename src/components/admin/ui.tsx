@@ -543,13 +543,15 @@ export function EmptyState({
 export function Table({
   head,
   children,
+  density = 'standard',
 }: {
   head: readonly (ReactNode | { label: ReactNode; align?: 'left' | 'right'; className?: string; sort?: 'ascending' | 'descending' })[];
   children: ReactNode;
+  density?: 'standard' | 'compact';
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="ws-table w-full min-w-full border-collapse text-sm">
+      <table data-density={density} className="ws-table w-full min-w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-[var(--ws-head-line)] bg-[var(--ws-head)]">
             {head.map((column, index) => {
@@ -600,13 +602,15 @@ export function Table({
 export function TableRow({
   interactive = false,
   children,
+  className,
 }: {
   /** Set when a cell in this row carries an `href`. */
   interactive?: boolean;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <tr data-interactive={interactive || undefined} className={cn('group transition-colors', interactive ? 'relative' : undefined)}>
+    <tr data-interactive={interactive || undefined} className={cn('group transition-colors', interactive ? 'relative' : undefined, className)}>
       {children}
     </tr>
   );

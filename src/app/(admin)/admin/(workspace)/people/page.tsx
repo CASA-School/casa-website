@@ -231,7 +231,7 @@ export default async function PeoplePage({
             <ListEmpty title={search ? t('Nichts gefunden', 'Nothing found') : t('Niemand gelöscht', 'Nobody deleted')} />
           ) : (
             // Deleted people have no page to open; each row says when and by whom, and brings them back.
-            <Table
+            <Table density="compact"
               head={[
                 t('Teilnehmende', 'Student'),
                 { label: t('Gelöscht', 'Deleted'), className: 'w-[14rem]' },
@@ -264,7 +264,7 @@ export default async function PeoplePage({
             {search ? t(`Niemand passt zu „${search}“.`, `Nobody matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
-          <Table
+          <Table density="compact"
             head={[
               t('Teilnehmende', 'Student'),
               { label: t('Niveau', 'Level'), className: `w-[6.5rem] ${hide}` },

@@ -8,6 +8,15 @@ import { cn } from '@/lib/utils';
 import { Icon } from './icons';
 import { useWsLang } from './lang';
 
+/** Shared compact filter row; the branded field supplies its visible choice. */
+export function ListFilters({ children, pending = false }: { children: ReactNode; pending?: boolean }) {
+  return <div aria-busy={pending} className="ws-list-filters flex flex-wrap items-center gap-2 border-b border-ws-line-soft px-3 py-2 sm:px-5">{children}</div>;
+}
+
+export function ListFilterField({ label, children }: { label: string; children: ReactNode }) {
+  return <label className="ws-list-filter block min-w-0 flex-1 basis-[calc(50%-0.25rem)] sm:max-w-56 sm:basis-auto sm:flex-none"><span className="sr-only">{label}</span>{children}</label>;
+}
+
 export type ListTab = { key: string; label: string; href: string; count?: number };
 
 type ListSearchProps = {
@@ -36,9 +45,9 @@ export function ListBar({
 }) {
   const { t } = useWsLang();
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-ws-line px-5">
+    <div className="ws-list-bar flex min-w-0 items-center justify-between gap-3 border-b border-ws-line px-3 sm:px-5">
       {tabs?.length ? (
-        <nav aria-label={t('Ansichten', 'Views')} className="-mb-px flex max-w-full gap-5 overflow-x-auto [scrollbar-width:none]">
+        <nav aria-label={t('Ansichten', 'Views')} className="-mb-px flex min-w-0 flex-1 gap-4 overflow-x-auto [scrollbar-width:none] sm:gap-5">
           {tabs.map((tab) => {
             const on = tab.key === active;
             return (
@@ -55,7 +64,7 @@ export function ListBar({
                 )}
               >
                 {tab.label}
-                {tab.count ? (
+                {tab.count !== undefined ? (
                   <span className={cn('text-xs font-semibold tabular-nums', on ? 'text-[var(--casa-muted)]' : 'text-[var(--casa-text-subtle)]')}>
                     {tab.count}
                   </span>
@@ -65,12 +74,12 @@ export function ListBar({
           })}
         </nav>
       ) : summary ? (
-        <p className="py-3.5 text-[0.84rem] font-semibold text-[var(--casa-muted)]">{summary}</p>
+        <p className="min-w-0 flex-1 py-3 text-[0.84rem] font-semibold text-[var(--casa-muted)]">{summary}</p>
       ) : (
         <span />
       )}
       {search || end ? (
-        <span className="flex items-center gap-3">
+        <span className="flex shrink-0 items-center gap-2">
           {end}
           {search ? <ListSearch {...search} /> : null}
         </span>
@@ -101,13 +110,14 @@ function ListSearch({ action, value, placeholder, keep }: ListSearchProps) {
     <form
       action={action}
       role="search"
+      data-search-open={open}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) fold();
       }}
       className={cn(
-        'relative my-2 flex h-9 items-center rounded-full transition-[width,background-color,box-shadow] duration-200 ease-out motion-reduce:transition-none',
+        'relative my-1.5 flex h-9 items-center rounded-lg transition-[width,background-color,box-shadow] duration-200 ease-out motion-reduce:transition-none',
         open
-          ? 'w-full bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-ws-line ring-inset focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35 sm:w-64'
+          ? 'w-[min(15rem,42vw)] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-ws-line ring-inset focus-within:ring-2 focus-within:ring-[var(--casa-blue)]/35 sm:w-56'
           : 'w-9'
       )}
     >

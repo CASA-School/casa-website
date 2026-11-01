@@ -89,7 +89,7 @@ export default async function OrganisationsPage({ searchParams }: { searchParams
             {search ? t(`Nichts passt zu „${search}“.`, `Nothing matches “${search}”.`) : null}
           </ListEmpty>
         ) : (
-          <Table
+          <Table density="compact"
             head={[
               t('Organisation', 'Organisation'),
               { label: t('Land', 'Country'), className: `w-[11rem] ${hide}` },

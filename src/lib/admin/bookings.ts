@@ -1,5 +1,6 @@
 import type { PoolClient } from 'pg';
 import type { BookingSort, BookingTypeChoice } from './booking-query';
+import type { BookingContext, BookingDemand, BookingFacet } from './booking-context';
 import { parseQuery, searchTokens } from './search-query';
 
 import { logActivity } from './activity';
@@ -13,7 +14,6 @@ import { closeOnBooking, logClosedByBooking, type WaitlistEntryCore } from './wa
 import { bookedLevelLabel, PAYMENT_SUBJECTS } from './booking-levels';
 import { pick, type Bilingual, type WsLang } from './i18n';
 import { isUuid } from './ids';
-import { courseSessionSql } from './course-session';
 import { isSession, sessionAt, type Session } from './day-plan-labels';
 import { owesMoney, owesSql } from './open-money';
 
@@ -167,6 +167,7 @@ export type BookingListItem = {
   /** Their address, for „E-Mail an …" from the list. */
   personEmail: string | null;
   courseTypeName: string | null;
+  courseFormat: string | null;
   /** The part of the day of its course running now or next, for its colour in a list (2026-10-21). */
   session: Session | null;
   /** When the last payment reminder went out, SchoolMan's among them: what a follow-up needs to know. */
@@ -302,10 +303,21 @@ export type BookingDetail = BookingListItem & {
 
 export type TeacherAnswer = 'yes' | 'no' | 'unsure';
 
-const LIST = `
+// Resolve lesson-based sessions once per statement. Correlating the lesson view per historical
+// booking scans it thousands of times; the shared set preserves the same first-lesson rule.
+const BOOKING_CONTEXT_CTE = `WITH booking_lesson_times AS MATERIALIZED (
+  SELECT course_id, group_index, on_date, starts_at FROM course_day_times WHERE starts_at IS NOT NULL
+), booking_session_times AS MATERIALIZED (
+  SELECT DISTINCT ON (course_id, group_index) course_id, group_index,
+    CASE WHEN starts_at < '12:00' THEN 'morning' WHEN starts_at < '17:00' THEN 'afternoon' ELSE 'evening' END AS session
+  FROM (SELECT * FROM booking_lesson_times UNION ALL SELECT course_id, NULL::smallint, on_date, starts_at FROM booking_lesson_times) times
+  ORDER BY course_id, group_index, on_date, starts_at
+)`;
+
+const LIST = `${BOOKING_CONTEXT_CTE}
   SELECT b.id, b.number, b.person_id, trim(p.first_name || ' ' || coalesce(p.last_name, '')) AS person_name,
          person_email(p.id) AS person_email,
-         coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, b.status::text AS status, b.currency, b.created_at,
+         coalesce(nullif(trim(t.name_de), ''), t.name, et.name) AS course_type_name, t.format AS course_format, b.status::text AS status, b.currency, b.created_at,
          b.observation_reason, b.observation_note, b.exam_session_id, b.exam_parts,
          b.accommodation_type_code, b.accommodation_room_type_code, b.accommodation_catering_code, b.accommodation_from, b.accommodation_to,
          (SELECT s.place FROM booking_stays s WHERE s.booking_id = b.id AND NOT s.cancelled AND s.place IS NOT NULL
@@ -314,7 +326,10 @@ const LIST = `
          (SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) AS end_date,
          coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0) AS charged,
          coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0) AS paid,
-         (SELECT ${courseSessionSql('bp.course_id', 'bp.course_instance_id', 'b.course_type_id')} FROM booking_periods bp
+         (SELECT coalesce(st.session, bc.session, bi.session, bp.day_time_code, CASE WHEN t.format = 'evening' THEN 'evening' END)
+           FROM booking_periods bp LEFT JOIN courses bc ON bc.id = bp.course_id
+           LEFT JOIN course_instances bi ON bi.id = coalesce(bc.course_instance_id, bp.course_instance_id)
+           LEFT JOIN booking_session_times st ON st.course_id = bc.id AND st.group_index IS NOT DISTINCT FROM bp.group_index
            WHERE bp.booking_id = b.id ORDER BY (bp.end_date < current_date), bp.start_date LIMIT 1) AS session,
          (SELECT max(l.sent_at) FROM letters l WHERE l.booking_id = b.id AND l.kind = 'payment_reminder') AS reminded_at,
          b.filemaker_booking_id,
@@ -333,6 +348,7 @@ type ListRow = {
   person_name: string;
   person_email: string | null;
   course_type_name: string | null;
+  course_format: string | null;
   session: string | null;
   reminded_at: Date | null;
   filemaker_booking_id: string | null;
@@ -363,6 +379,7 @@ const toItem = (r: ListRow): BookingListItem => ({
   personName: r.person_name,
   personEmail: r.person_email,
   courseTypeName: r.course_type_name,
+  courseFormat: r.course_format,
   session: isSession(r.session) ? r.session : null,
   remindedAt: r.reminded_at,
   schoolmanNumber: r.filemaker_booking_id,
@@ -447,7 +464,7 @@ export async function bookingStays(bookingId: string): Promise<BookingStay[]> {
   }));
 }
 
-export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'followup' | 'past' | 'cancelled' | 'all';
+export type BookingFilter = 'current' | 'upcoming' | 'unclear' | 'followup' | 'past' | 'cancelled' | 'reserved' | 'all';
 
 const CHARGED = `coalesce((SELECT sum(amount) FROM booking_charges c WHERE c.booking_id = b.id), 0)`;
 const PAID = `coalesce((SELECT sum(amount) FROM payments pm WHERE pm.booking_id = b.id AND pm.voided_at IS NULL), 0)`;
@@ -464,6 +481,7 @@ const FILTERS: Record<BookingFilter, string> = {
   upcoming: `b.status IN ('reserved','confirmed') AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) > current_date`,
   past: `b.status = 'completed' OR ((SELECT max(end_date) FROM booking_days bd WHERE bd.booking_id = b.id) < current_date AND b.status <> 'cancelled')`,
   cancelled: `b.status = 'cancelled'`,
+  reserved: `b.status = 'reserved'`,
   all: 'true',
 };
 
@@ -476,6 +494,7 @@ const ORDER: Record<BookingFilter, string> = {
   upcoming: 'start_date ASC NULLS LAST',
   past: `(b.status <> 'cancelled' AND ${owesSql(`${CHARGED} - ${PAID}`)}) DESC, end_date DESC NULLS LAST`,
   cancelled: 'start_date DESC NULLS LAST',
+  reserved: 'start_date ASC NULLS LAST',
   all: 'start_date DESC NULLS LAST',
 };
 
@@ -492,8 +511,30 @@ export async function listBookings({
   search?: string;
   limit?: number;
   offset?: number;
-} & BookingNarrow): Promise<{ items: BookingListItem[]; total: number }> {
+} & BookingNarrow): Promise<{ items: BookingListItem[]; total: number; months: Record<string, number> }> {
   const params: unknown[] = [];
+  const where = bookingWhere({ filter, search, ...narrow }, params);
+  const sortColumn = sort === 'name' ? 'person_name' : sort === 'balance' ? `${CHARGED} - ${PAID}` : 'start_date';
+  const order = sort ? `${sortColumn} ${direction === 'desc' ? 'DESC' : 'ASC'} NULLS LAST` : ORDER[filter];
+  const totals = await query<{ month: string | null; overall: number; n: string }>(
+    `${BOOKING_CONTEXT_CTE} SELECT month, grouping(month) AS overall, count(*) AS n FROM (
+      SELECT to_char((SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id), 'YYYY-MM') AS month
+      ${BOOKING_FROM} ${where}
+    ) matches GROUP BY GROUPING SETS ((month), ())`,
+    params
+  );
+  const rows = await query<ListRow>(
+    `${LIST} ${where} ORDER BY ${order}, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, limit, offset]
+  );
+  return { items: rows.map(row => toItem(narrow.session ? { ...row, session: narrow.session } : row)), total: Number(totals.find(r => r.overall)?.n ?? 0),
+    months: Object.fromEntries(totals.filter(r => !r.overall).map(r => [r.month ?? 'undated', Number(r.n)])) };
+}
+
+const BOOKING_FROM = `FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
+  LEFT JOIN exam_sessions es ON es.id = b.exam_session_id LEFT JOIN exam_types et ON et.id = es.exam_type_id`;
+
+function bookingWhere({ filter = 'all', search, ...narrow }: BookingNarrow & { filter?: BookingFilter; search?: string }, params: unknown[]) {
   let where = `WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[filter]})${narrowed(narrow, params)}`;
   if (search) {
     const parsed = parseQuery(search);
@@ -505,43 +546,70 @@ export async function listBookings({
       const tokens = searchTokens(search);
       if (tokens.length) {
         params.push(tokens);
-        where += ` AND NOT EXISTS (SELECT 1 FROM unnest($${params.length}::text[]) word
-          WHERE strpos(ws_fold(concat_ws(' ', p.first_name, p.last_name, t.name, t.name_de, et.name, b.number, person_email(p.id))), word) = 0)`;
+        const words = `$${params.length}::text[]`;
+        // Most searches are names or course words. Resolve the ranked contact only for people whose
+        // family has a potentially matching address; the uncorrelated set is hashed once, preserving
+        // the primary-contact rule without running person_emails for every historical booking.
+        where += ` AND NOT EXISTS (SELECT 1 FROM unnest(${words}) word WHERE CASE
+          WHEN strpos(ws_fold(concat_ws(' ', p.first_name, p.last_name, t.name, t.name_de, et.name, b.number)), word) > 0 THEN false
+          WHEN canonical_person_id(p.id) IN (SELECT canonical_person_id(se.person_id) FROM emails se
+            WHERE EXISTS (SELECT 1 FROM unnest(${words}) email_word WHERE strpos(ws_fold(se.address), email_word) > 0))
+            THEN strpos(ws_fold(coalesce(person_email(p.id), '')), word) = 0
+          ELSE true END)`;
       }
     }
   }
-  const sortColumn = sort === 'name' ? 'person_name' : sort === 'balance' ? `${CHARGED} - ${PAID}` : 'start_date';
-  const order = sort ? `${sortColumn} ${direction === 'desc' ? 'DESC' : 'ASC'} NULLS LAST` : ORDER[filter];
-  const total = await queryFirst<{ n: string }>(
-    `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id LEFT JOIN course_types t ON t.id = b.course_type_id
-       LEFT JOIN exam_sessions es ON es.id = b.exam_session_id LEFT JOIN exam_types et ON et.id = es.exam_type_id ${where}`,
-    params
-  );
-  const rows = await query<ListRow>(
-    `${LIST} ${where} ORDER BY ${order}, b.created_at DESC, b.id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-    [...params, limit, offset]
-  );
-  return { items: rows.map(toItem), total: Number(total?.n ?? 0) };
+  return where;
 }
 
 /**
  * What the bookings list is narrowed to (2026-10-21, the filter panel): the organisation that pays (from
  * its page), the year (`BOOKING_YEAR`), who pays, and the course type — `exam` for the exam bookings.
  */
-export type BookingNarrow = { payerId?: string; year?: number; payer?: Payer; typeId?: string; programme?: string; level?: string; startFrom?: string; startTo?: string };
+export type BookingNarrow = BookingContext & { payerId?: string; year?: number; payer?: Payer; typeId?: string; programme?: string; startFrom?: string; startTo?: string };
 
-/** The narrowing as SQL on `b`, its values pushed onto `params`. */
-function narrowed({ payerId, year, payer, typeId, programme, level, startFrom, startTo }: BookingNarrow, params: unknown[]): string {
-  let sql = '';
+// One context per booked period (or exam), so a morning A1 period cannot satisfy an evening B1 filter.
+// A late joiner belongs to their own entry month, even when their course started in an earlier month.
+const BOOKING_CONTEXT = `
+  SELECT CASE coalesce(ct.format, bt.format) WHEN 'intensive' THEN 'intensive' WHEN 'evening' THEN 'evening' ELSE 'other' END AS category,
+    b.course_type_id AS type_id, coalesce(st.session, bc.session, bi.session, bp.day_time_code, CASE WHEN bt.format = 'evening' THEN 'evening' END) AS session,
+    coalesce(bp.level_code, bc.level_code, bp.level_band) AS level,
+    bp.start_date AS start
+  FROM (SELECT 1) seed
+    LEFT JOIN booking_periods bp ON bp.booking_id = b.id
+    LEFT JOIN courses bc ON bc.id = bp.course_id
+    LEFT JOIN course_instances bi ON bi.id = coalesce(bc.course_instance_id, bp.course_instance_id)
+    LEFT JOIN course_types ct ON ct.id = bi.course_type_id
+    LEFT JOIN course_types bt ON bt.id = b.course_type_id
+    LEFT JOIN booking_session_times st ON st.course_id = bc.id AND st.group_index IS NOT DISTINCT FROM bp.group_index
+  WHERE b.exam_session_id IS NULL
+  UNION ALL
+  SELECT 'exam', NULL::uuid, NULL::text, et.level, (es.starts_at AT TIME ZONE 'Europe/Berlin')::date
+  FROM exam_sessions es JOIN exam_types et ON et.id = es.exam_type_id WHERE es.id = b.exam_session_id
+`;
+
+function contextWhere({ category, session, level, month, start, startFrom, startTo }: BookingContext & { startFrom?: string; startTo?: string }, params: unknown[], alias = 'ctx'): string {
+  const clauses: string[] = [];
+  const eq = (column: string, value: string) => { params.push(value); clauses.push(`${alias}.${column} = $${params.length}`); };
+  if (category && category !== 'all') eq('category', category);
+  if (session) eq('session', session);
   if (level) {
     params.push(level);
     const at = `$${params.length}`;
-    sql += ` AND EXISTS (SELECT 1 FROM booking_periods bp LEFT JOIN courses lc ON lc.id = bp.course_id
-      WHERE bp.booking_id = b.id AND (coalesce(bp.level_code, lc.level_code, bp.level_band) = ${at}
-        OR (strpos(${at}, '.') = 0 AND coalesce(bp.level_code, lc.level_code, bp.level_band) LIKE ${at} || '.%')))`;
+    clauses.push(`(${alias}.level = ${at} OR (strpos(${at}, '.') = 0 AND ${alias}.level LIKE ${at} || '.%'))`);
   }
-  if (startFrom) { params.push(startFrom); sql += ` AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) >= $${params.length}::date`; }
-  if (startTo) { params.push(startTo); sql += ` AND (SELECT min(start_date) FROM booking_days bd WHERE bd.booking_id = b.id) <= $${params.length}::date`; }
+  if (month) { params.push(month); clauses.push(`to_char(${alias}.start, 'YYYY-MM') = $${params.length}`); }
+  if (start) { params.push(start); clauses.push(`${alias}.start = $${params.length}::date`); }
+  if (startFrom) { params.push(startFrom); clauses.push(`${alias}.start >= $${params.length}::date`); }
+  if (startTo) { params.push(startTo); clauses.push(`${alias}.start <= $${params.length}::date`); }
+  return clauses.join(' AND ') || 'true';
+}
+
+/** The narrowing as SQL on `b`, its values pushed onto `params`. */
+function narrowed({ payerId, year, payer, typeId, programme, ...context }: BookingNarrow, params: unknown[]): string {
+  let sql = '';
+  const contextual = contextWhere(context, params);
+  if (contextual !== 'true') sql += ` AND EXISTS (SELECT 1 FROM (${BOOKING_CONTEXT}) ctx WHERE ${contextual})`;
   if (programme) {
     params.push(programme);
     sql += ` AND b.programme_code = $${params.length}`;
@@ -566,18 +634,54 @@ function narrowed({ payerId, year, payer, typeId, programme, level, startFrom, s
   return sql;
 }
 
-export async function bookingCounts(narrow: BookingNarrow = {}): Promise<Record<BookingFilter, number>> {
-  const out = {} as Record<BookingFilter, number>;
+export async function bookingCounts(narrow: BookingNarrow & { search?: string } = {}): Promise<Record<BookingFilter, number>> {
   const params: unknown[] = [];
-  const sql = narrowed(narrow, params);
-  for (const key of Object.keys(FILTERS) as BookingFilter[]) {
-    const row = await queryFirst<{ n: string }>(
-      `SELECT count(*) AS n FROM bookings b JOIN people p ON p.id = b.person_id WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL AND (${FILTERS[key]})${sql}`,
-      params
-    );
-    out[key] = Number(row?.n ?? 0);
-  }
-  return out;
+  const where = bookingWhere(narrow, params);
+  const keys = Object.keys(FILTERS) as BookingFilter[];
+  const row = await queryFirst<Record<BookingFilter, string>>(`${BOOKING_CONTEXT_CTE} SELECT ${keys.map(key => `count(*) FILTER (WHERE ${FILTERS[key]}) AS "${key}"`).join(', ')} ${BOOKING_FROM} ${where}`, params);
+  return Object.fromEntries(keys.map(key => [key, Number(row?.[key] ?? 0)])) as Record<BookingFilter, number>;
+}
+
+/** Choices come from actual scheduled courses/exams and booked periods, never an invented cross-product. */
+export async function bookingContextFacets(): Promise<BookingFacet[]> {
+  return query<BookingFacet>(`${BOOKING_CONTEXT_CTE} SELECT DISTINCT ctx.category, ctx.type_id AS "typeId", ctx.session, ctx.level, ctx.start::text
+    ${BOOKING_FROM} CROSS JOIN LATERAL (${BOOKING_CONTEXT}) ctx WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL
+    UNION
+    SELECT CASE ft.format WHEN 'intensive' THEN 'intensive' WHEN 'evening' THEN 'evening' ELSE 'other' END,
+      ft.id, coalesce(st.session, fc.session, fi.session, CASE WHEN ft.format = 'evening' THEN 'evening' END), coalesce(fc.level_code, fi.level_code), fi.start_date::text
+    FROM course_instances fi JOIN course_types ft ON ft.id = fi.course_type_id LEFT JOIN courses fc ON fc.course_instance_id = fi.id AND fc.status <> 'cancelled'
+    LEFT JOIN booking_session_times st ON st.course_id = fc.id
+    WHERE fi.status <> 'cancelled' AND ft.is_active
+    UNION
+    SELECT 'exam', NULL::uuid, NULL::text, et.level, (es.starts_at AT TIME ZONE 'Europe/Berlin')::date::text
+    FROM exam_sessions es JOIN exam_types et ON et.id = es.exam_type_id WHERE es.status <> 'cancelled' AND et.is_active`);
+}
+
+export async function bookingCategoryCounts(narrow: BookingNarrow & { search?: string; filter?: BookingFilter } = {}) {
+  const params: unknown[] = [];
+  const rows = await query<{ category: string | null; n: string }>(`${BOOKING_CONTEXT_CTE} SELECT ctx.category, count(DISTINCT b.id) AS n
+    ${BOOKING_FROM} CROSS JOIN LATERAL (${BOOKING_CONTEXT}) ctx ${bookingWhere(narrow, params)}
+    GROUP BY GROUPING SETS ((ctx.category), ())`, params);
+  return Object.fromEntries(rows.map(row => [row.category ?? 'all', Number(row.n)]));
+}
+
+/** Whole-result counts: unique learners (including linked records), bookings, and the reserved subset.
+ * Cancelled places never inflate demand. A learner may attend more than one month/session, so totals
+ * are calculated with DISTINCT at each scope, never by adding the per-course counts.
+ */
+export async function bookingDemand(narrow: BookingNarrow & { search?: string; filter?: BookingFilter } = {}): Promise<BookingDemand[]> {
+  const params: unknown[] = [];
+  const where = bookingWhere(narrow, params);
+  const context = contextWhere(narrow, params);
+  const rows = await query<Omit<BookingDemand, 'bookings' | 'students' | 'reserved'> & { bookings: string; students: string; reserved: string }>(`${BOOKING_CONTEXT_CTE}
+    SELECT CASE WHEN grouping(to_char(ctx.start, 'YYYY-MM')) = 1 THEN 'total' WHEN grouping(ctx.category) = 1 THEN 'month' ELSE 'session' END AS scope,
+      to_char(ctx.start, 'YYYY-MM') AS month, ctx.category, ctx.session,
+      count(DISTINCT b.id) AS bookings, count(DISTINCT canonical_person_id(b.person_id)) AS students,
+      count(DISTINCT canonical_person_id(b.person_id)) FILTER (WHERE b.status = 'reserved') AS reserved
+    ${BOOKING_FROM} CROSS JOIN LATERAL (${BOOKING_CONTEXT}) ctx ${where} AND b.status <> 'cancelled' AND ${context}
+    GROUP BY GROUPING SETS ((to_char(ctx.start, 'YYYY-MM'), ctx.category, ctx.session), (to_char(ctx.start, 'YYYY-MM')), ())
+    ORDER BY month NULLS LAST, scope`, params);
+  return rows.map(row => ({ ...row, bookings: Number(row.bookings), students: Number(row.students), reserved: Number(row.reserved) }));
 }
 
 /** The years bookings are in, newest first, for the filter's choice — no money. */
@@ -585,7 +689,7 @@ export async function bookingYearList(narrow: BookingNarrow = {}): Promise<numbe
   const params: unknown[] = [];
   const sql = narrowed({ ...narrow, year: undefined }, params);
   const rows = await query<{ year: number }>(
-    `SELECT DISTINCT ${BOOKING_YEAR} AS year FROM bookings b JOIN people p ON p.id = b.person_id
+    `${BOOKING_CONTEXT_CTE} SELECT DISTINCT ${BOOKING_YEAR} AS year FROM bookings b JOIN people p ON p.id = b.person_id
       WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL${sql} ORDER BY 1 DESC`,
     params
   );
@@ -615,15 +719,14 @@ export type BookingYear = { year: number; bookings: number; owing: number; owed:
  * What is still owed, year by year, newest first (2026-10-21: „calculated only if requested" — the filter
  * panel's „Berechnen", for finance and management). Under the rest of the narrowing, not its year.
  */
-export async function bookingYears(narrow: BookingNarrow = {}): Promise<BookingYear[]> {
+export async function bookingYears(narrow: BookingNarrow & { search?: string; filter?: BookingFilter } = {}): Promise<BookingYear[]> {
   const params: unknown[] = [];
-  const sql = narrowed({ ...narrow, year: undefined }, params);
+  const sql = bookingWhere({ ...narrow, year: undefined }, params);
   const rows = await query<{ year: number; bookings: string; owing: string; owed: string | null }>(
-    `SELECT year, count(*) AS bookings, count(*) FILTER (WHERE owes) AS owing, sum(balance) FILTER (WHERE owes) AS owed FROM (
+    `${BOOKING_CONTEXT_CTE} SELECT year, count(*) AS bookings, count(*) FILTER (WHERE owes) AS owing, sum(balance) FILTER (WHERE owes) AS owed FROM (
        SELECT ${BOOKING_YEAR} AS year, ${CHARGED} - ${PAID} AS balance,
               b.status <> 'cancelled' AND ${owesSql(`${CHARGED} - ${PAID}`)} AS owes
-         FROM bookings b JOIN people p ON p.id = b.person_id
-        WHERE b.deleted_at IS NULL AND p.deleted_at IS NULL${sql}
+         ${BOOKING_FROM} ${sql}
      ) y WHERE year IS NOT NULL GROUP BY year ORDER BY year DESC`,
     params
   );

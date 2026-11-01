@@ -824,11 +824,37 @@ respected. Use `presentation="dialog"` for broad worksheets or the focus-mode pl
 XL worksheets retain their centred default. Confirmation dialogs keep their focused layout.
 The accounts list's row editor uses the same side-panel frame. No new independent popup primitive.
 
-The bookings list exposes course, **starting level** and course-start filters, sortable columns and
-account-scoped browser-local named views. Saved views contain filters, not free-text learner searches;
-relative date presets are resolved when opened. Filter URLs retain pagination context. The global
-search is an anchored popover; conservative DE/EN task phrases offer guarded booking worklists while
-existing entity ranking, exact identifiers and recent records continue to work.
+The bookings list starts with **All bookings / Intensive / Evening / Exams**. Lifecycle, payment,
+follow-up and reserved-place worklists live in the filter side panel. Named browser-local views have
+been removed (Rahman, 2026-11-01). Quick controls use the shared branded `Select` with `menuFit="content"`
+so a compact trigger does not truncate the menu's options. Category switches clear dependent time,
+starting-level, month and exact-start choices; other changes keep only compatible descendants.
+
+Choices come from scheduled courses/exams and actual booked periods, including legacy unlinked periods.
+A time, starting level and entry date must match the **same period**. Lesson times for a known booked
+group take precedence over the course/start defaults. Whole-level choices include their starting steps;
+they do not mean all levels a learner will eventually study. Periods are counted by their own entry date, so January joiners in an older course remain in January;
+legacy periods retain their recorded time of day even without a linked course. The side panel's custom
+date bounds apply to the same period's entry date, alongside its session and starting level. Existing filter URLs and conservative DE/EN task search remain valid.
+
+The demand strip counts the whole matching result, including later pages: distinct canonical learners,
+distinct bookings and the reserved learner subset, excluding cancellations. Monthly and overall totals
+are counted independently, so multi-period bookings and linked people do not inflate them; session
+figures can overlap when a learner attends several sessions. Scheduled starts remain available with
+zero demand. Table month headings count all matching bookings by their first booked day, cancellations
+included when the selected worklist includes them. Bookings show 80 rows per page, chronological by
+default, with quiet type edges for intensive, evening and exams.
+
+Shared list rules: `ListBar` keeps navigation and utilities compact, including zero counts; an expanded
+phone search gets a utility line so navigation stays usable. `ListFilters` / `ListFilterField` host compact
+branded controls. `Table density="compact"` owns record-list spacing in one global rule (bookings,
+people, organisations, groups and stays). List heads, alternating rows and portalled dropdowns share
+the workspace's neutral surface tokens. Catalogue courses already use compact rows and now inherit
+the same palette. Finance's requested year totals respect the applied course/context/search/worklist
+filters, across years, behind the existing price-list permission.
+
+The global search is an anchored popover; conservative DE/EN task phrases offer guarded booking
+worklists while existing entity ranking, exact identifiers and recent records continue to work.
 
 
 **The look is the offers module's (2026-10-13).** Rahman asked for the whole

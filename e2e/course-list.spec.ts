@@ -119,7 +119,10 @@ test.describe('Course list', () => {
     await page.getByRole('link', { name: /^99901/ }).click();
     await expect(page).toHaveURL(new RegExp(`/admin/catalogue/courses/${courseId}$`));
     await expect(stat('Lehrkräfte')).toContainText(`${teachers[0].short} · ${teachers[1].short}`);
-    await expect(page.locator('header').getByRole('link', { name: 'Kurse' })).toHaveAttribute('href', '/admin/catalogue?view=evening');
+    // The approved navigation trail returns to the group just visited; a fresh load uses the module list.
+    await expect(page.locator('header').getByRole('link', { name: /99902$/ })).toHaveAttribute('href', `/admin/catalogue/courses/${courseId}/2`);
+    await page.reload();
+    await expect(page.locator('header').getByRole('link', { name: 'Kurse', exact: true })).toHaveAttribute('href', '/admin/catalogue?view=evening');
   });
 
   test('a course begun with nobody in it and no lesson day sits apart, as not held', async ({ page }) => {

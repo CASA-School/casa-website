@@ -103,20 +103,26 @@ test.describe('group mail and addresses', () => {
 
   test('several addresses on the person, one the main one', async ({ page }) => {
     await page.goto(`/admin/people/${people[0]}?tab=details`);
-    const contact = page.getByRole('heading', { name: 'Kontakt' }).locator('xpath=ancestor::section[1]');
+    const contact = page.getByRole('heading', { name: 'Kontakt & Adressen', exact: true }).locator('xpath=ancestor::section[1]');
     const ownRow = contact.locator('li', { hasText: own });
     await expect(ownRow).toContainText('Hauptadresse');
     await expect(contact.locator('li', { hasText: agency })).toContainText(`Agentur E2E ${stamp}`);
 
-    await contact.getByRole('button', { name: 'E-Mail hinzufügen' }).click();
-    await page.getByLabel('E-Mail-Adresse').fill(`ada-neu-${stamp}@privat-e2e.example`);
-    await page.getByRole('dialog').getByText('Hauptadresse').click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Hinzufügen' }).click();
+    await contact.getByRole('button', { name: 'Bearbeiten', exact: true }).click();
+    const editor = page.getByRole('dialog');
+    await editor.getByRole('button', { name: 'E-Mail hinzufügen' }).click();
+    await editor.getByLabel('E-Mail-Adresse', { exact: true }).last().fill(`ada-neu-${stamp}@privat-e2e.example`);
+    await editor.getByRole('radio', { name: 'Bevorzugte Adresse' }).last().check();
+    await editor.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expect(editor).not.toBeVisible();
     await expect(contact.locator('li', { hasText: `ada-neu-${stamp}` })).toContainText('Hauptadresse');
     await expect(ownRow).not.toContainText('Hauptadresse');
 
-    await contact.locator('li', { hasText: `ada-neu-${stamp}` }).getByRole('button', { name: 'Entfernen' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Entfernen' }).click();
+    await contact.getByRole('button', { name: 'Bearbeiten', exact: true }).click();
+    const email = editor.locator('[data-editor-section="contact"] > div').filter({ has: page.locator(`input[value="ada-neu-${stamp}@privat-e2e.example"]`) });
+    await email.getByRole('button', { name: 'Entfernen', exact: true }).click();
+    await editor.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expect(editor).not.toBeVisible();
     await expect(contact.locator('li', { hasText: `ada-neu-${stamp}` })).toHaveCount(0);
     await expect(ownRow).toContainText('Hauptadresse');
   });

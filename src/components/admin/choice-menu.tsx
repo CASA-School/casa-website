@@ -18,7 +18,7 @@ import { Icon } from './icons';
 export const menuPanel =
   'casa-ws-menu min-w-56 rounded-ws-inner border-ws-line bg-white p-1.5 text-[var(--casa-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.05),0_16px_36px_-12px_rgba(16,24,40,0.22)]';
 
-/** A menu's item: CASA's warm cream under the pointer, as list rows are. */
+/** A menu's item: the workspace's quiet list-row surface under the pointer. */
 export const menuItem =
   'cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[0.84rem] font-medium text-[var(--casa-ink)] focus:bg-[var(--ws-row-hover)] focus:text-[var(--casa-ink)] [&_svg]:size-4 [&_svg]:text-[var(--casa-muted)]';
 

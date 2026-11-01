@@ -979,14 +979,12 @@ h3 {
   --ws-card-head: #f7f9fc;
   --ws-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px -8px rgba(15, 23, 42, 0.1);
 
-  /* Lists: the head is a band of CASA's warm cream (the site's `--casa-warm-soft`
-     family, quieter), and every other row a breath of it, so a long list reads
-     row by row without ruled lines and sits warm against the navy frame. */
-  --ws-head: #f8f1e3;
-  --ws-head-line: #ebdfc7;
-  --ws-head-text: #5c4a1f;
-  --ws-row-alt: #fcf9f2;
-  --ws-row-hover: #f6eedc;
+  /* Shared list and dropdown surfaces follow the workspace's neutral card palette. */
+  --ws-head: var(--ws-card-head);
+  --ws-head-line: var(--ws-line);
+  --ws-head-text: var(--casa-muted);
+  --ws-row-alt: #fbfcfe;
+  --ws-row-hover: #f2f5fa;
 
   /* The sidebar. `--casa-ink-deep` is the site's inverted band; the workspace
      wants one step deeper so the white content area reads as the lit surface
@@ -1163,13 +1161,6 @@ h3 {
 .casa-form-panel > div > div,
 .casa-form-panel form { flex: 1; }
 .casa-form-panel .ws-dialog-foot { margin-top: auto; }
-.casa-bookings-list {
-  --ws-head: var(--ws-card-head);
-  --ws-head-line: var(--ws-line);
-  --ws-head-text: var(--casa-muted);
-  --ws-row-alt: white;
-  --ws-row-hover: #f8fafd;
-}
 @media (width < 1280px) {
   .casa-bookings-list [data-record-reference] { display: none; }
 }
@@ -1202,6 +1193,21 @@ h3 {
 .casa-workspace .ws-table > tbody > tr[data-interactive]:hover {
   background-color: var(--ws-row-hover);
 }
+/* Dense record lists opt in through Table, rather than copying cell overrides per module. */
+.casa-workspace .ws-table[data-density="compact"] > thead > tr > th { padding-block: 0.625rem; }
+.casa-workspace .ws-table[data-density="compact"] > tbody > tr:not([data-group]) > td { padding-block: 0.625rem; }
+.ws-list-filter [data-menu-select] { min-width: 0; }
+.ws-list-filter [data-menu-select] > button { height: 2rem; padding-inline: 0.625rem; font-size: 0.78rem; }
+@media (width < 640px) {
+  /* An expanded search gets its own utility line; course navigation stays usable on narrow phones. */
+  .ws-list-bar:has([data-search-open="true"]) { flex-wrap: wrap; gap: 0; }
+  .ws-list-bar:has([data-search-open="true"]) > nav { flex-basis: 100%; }
+  .ws-list-bar:has([data-search-open="true"]) > span { width: 100%; justify-content: space-between; }
+  .ws-list-bar [data-search-open="true"] { width: min(14rem, 60vw); }
+}
+.casa-bookings-list .booking-intensive > td:first-child { box-shadow: inset 2px 0 #9cb9cb; }
+.casa-bookings-list .booking-evening > td:first-child { box-shadow: inset 2px 0 #b5a6cb; }
+.casa-bookings-list .booking-exam > td:first-child { box-shadow: inset 2px 0 #d7bc81; }
 /* A row with its actions („…", `RowActions`) needs no arrow at its end: the menu says there is more
    (Rahman, 2026-10-21). Unlayered, so it outranks the arrow's `sm:block`. */
 .casa-workspace .ws-table > tbody > tr:has([data-row-actions]) .ws-row-arrow {

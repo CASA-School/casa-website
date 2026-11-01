@@ -12,6 +12,15 @@ No database migration. See `docs/ADMIN_WORKSPACE.md` §Design standards. Push, m
 explicitly authorized after local review; release evidence is retained in the dashboard-brand worktree's
 ignored `output/mockups/workspace-pilot/` folder.
 
+Booking-list refinement, 2026-11-01: Rahman removed saved views in favour of course-category navigation,
+contextual branded time/starting-level/month/start controls and a side filter panel for worklists.
+Demand counts distinct canonical learners/bookings across the whole result and separates reservations,
+excluding cancelled places; table month counts include every matching page. Known booked-group lesson
+times take precedence over course defaults. Unlinked historical periods remain searchable. Shared list
+surfaces, mobile navigation/search and optional compact Table spacing apply across related record lists.
+No migration. Implementation and validation evidence: dashboard-brand worktree, ignored
+`output/contextual-bookings/`. This refinement is separate from the already completed revision120 release.
+
 The entries below are historical work notes, not a current launch checklist. Prefer README, the current handoff and runtime code when an older entry conflicts.
 
 Historical summary last updated: 2026-06-29

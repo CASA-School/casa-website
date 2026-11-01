@@ -2,7 +2,7 @@ import { addDays } from './offers/stay';
 import { isIsoDay } from './booking-levels';
 import { foldSearch, isIdentifier, parseQuery } from './search-query';
 
-export const BOOKING_VIEW_KEYS = ['current', 'upcoming', 'unclear', 'followup', 'past', 'cancelled', 'all'] as const;
+export const BOOKING_VIEW_KEYS = ['current', 'upcoming', 'unclear', 'followup', 'past', 'cancelled', 'reserved', 'all'] as const;
 export const BOOKING_SORT_KEYS = ['name', 'start', 'balance'] as const;
 export type BookingSort = typeof BOOKING_SORT_KEYS[number];
 export type BookingTypeChoice = { id: string; name: string; slug?: string };
@@ -48,12 +48,6 @@ export function bookingPeriod(period: string, today: string): { startFrom?: stri
     return { startFrom: first, startTo: end };
   }
   return {};
-}
-
-const SAVABLE = new Set(['filter', 'type', 'level', 'period', 'year', 'payer', 'programme', 'org', 'from', 'to', 'sort', 'dir']);
-/** Named views contain filter parameters only, never a free-text search or arbitrary destination. */
-export function savedBookingParams(values: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(Object.entries(values).filter(([key, value]) => SAVABLE.has(key) && typeof value === 'string' && value.length <= 120));
 }
 
 export const validBookingDay = (value: string | undefined): string | undefined => value && isIsoDay(value) ? value : undefined;

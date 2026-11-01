@@ -14,9 +14,9 @@ export function clampPage(raw: string | string[] | undefined): number {
   return Number.isFinite(value) && value >= 1 ? Math.min(Math.floor(value), 10_000) : 1;
 }
 
-export const offsetFor = (page: number) => (page - 1) * PAGE_SIZE;
+export const offsetFor = (page: number, pageSize = PAGE_SIZE) => (page - 1) * pageSize;
 
-export const pageCount = (total: number) => Math.max(1, Math.ceil(total / PAGE_SIZE));
+export const pageCount = (total: number, pageSize = PAGE_SIZE) => Math.max(1, Math.ceil(total / pageSize));
 
 /** First value of a search param, trimmed, or undefined when empty. */
 export function firstParam(raw: string | string[] | undefined): string | undefined {
