@@ -4,7 +4,7 @@ import pg from 'pg';
 
 // This scenario creates synthetic records; it must never run against CASA's database.
 const disposable = process.env.CASA_E2E_DISPOSABLE_DB === '1' && /^postgres(?:ql)?:\/\/(?:[^@/]+@)?(?:127\.0\.0\.1|localhost):/.test(process.env.DATABASE_URL ?? '');
-test('staff can review and clear a failed registration notice', async ({ page, context }) => {
+test('a mail not confirmed as sent is followed up on Settings → Technik', async ({ page, context }) => {
   test.skip(!disposable, 'requires an explicitly marked disposable local database');
   const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
   await db.connect();
@@ -17,13 +17,15 @@ test('staff can review and clear a failed registration notice', async ({ page, c
     VALUES ($1, 'Intensivkurs', 'ms', 'Test', 'Delivery', 'delivery@example.invalid', '123456', 'Germany', '1990-01-01', 'de', $2) RETURNING id, registration_id`, [randomUUID(), person])).rows[0];
   await db.query(`INSERT INTO record_flags (entity, entity_id, code) VALUES ('course_registration', $1, 'registration_staff_notice_unconfirmed'), ('course_registration', $1, 'registration_receipt_unconfirmed')`, [line.id]);
   await context.addCookies([{ name: 'casa_workspace_session', value: token, domain: '127.0.0.1', path: '/' }]);
+  // A technical log on Settings → Technik (2026-11-01), never on the registration itself.
   await page.goto(`/admin/registrations/${line.registration_id}`);
-  await expect(page.getByText('Team-Benachrichtigung prüfen und Anmeldung bearbeiten')).toBeVisible();
-  await expect(page.getByText('Eingangsbestätigung prüfen und bei Bedarf Kontakt aufnehmen')).toBeVisible();
-  const item = page.locator('li').filter({ hasText: 'Team-Benachrichtigung prüfen und Anmeldung bearbeiten' });
-  await item.getByRole('button', { name: 'Geprüft' }).click();
-  await expect(page.getByText('Team-Benachrichtigung prüfen und Anmeldung bearbeiten')).toHaveCount(0);
-  await expect(page.getByText('Eingangsbestätigung prüfen und bei Bedarf Kontakt aufnehmen')).toBeVisible();
+  await expect(page.getByText('Eingangsbestätigung')).toHaveCount(0);
+  await page.goto('/admin/settings/system');
+  const rows = page.locator('li').filter({ hasText: 'Test Delivery' });
+  await expect(rows).toHaveCount(2);
+  await rows.filter({ hasText: 'Benachrichtigung ans Team' }).getByRole('button', { name: 'Geprüft' }).click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText('Eingangsbestätigung');
   const flags = await db.query(`SELECT code, resolved_by FROM record_flags WHERE entity_id = $1 AND resolved_at IS NOT NULL`, [line.id]);
   expect(flags.rows).toEqual([{ code: 'registration_staff_notice_unconfirmed', resolved_by: owner }]);
   await db.end();

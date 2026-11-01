@@ -220,11 +220,3 @@ export async function registrationMetrics(days: StatRange) {
   return rows.map((row) => ({ ...row, count: Number(row.n) }));
 }
 
-/** Current unresolved flags: provider acceptance is not proof of inbox delivery. */
-export async function registrationDeliveryReview() {
-  const rows = await query<{ code: string; n: string }>(
-    `SELECT code, count(*) AS n FROM record_flags
-      WHERE resolved_at IS NULL AND code IN ('registration_receipt_unconfirmed', 'registration_staff_notice_unconfirmed')
-      GROUP BY code`);
-  return Object.fromEntries(rows.map((row) => [row.code, Number(row.n)]));
-}

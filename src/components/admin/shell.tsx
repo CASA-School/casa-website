@@ -67,6 +67,7 @@ export async function WorkspaceShell({
     ...(canAccess(user, 'prices') ? [{ href: '/admin/settings/prices', label: t('Preise', 'Prices') }] : []),
     { href: '/admin/settings/setup', label: t('Listen', 'Lists') },
     ...(canAccess(user, 'rooms') ? [{ href: '/admin/settings/rooms', label: t('Räume', 'Rooms') }] : []),
+    { href: '/admin/settings/system', label: t('Technik', 'Technical') },
   ];
   const placementReview = canAccess(user, 'placement') && placementTestSwitchedOn();
   // What the search palette offers besides records: the pages this colleague may open, „Neu".

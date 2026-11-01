@@ -69,7 +69,6 @@ export default async function RegistrationsPage({ searchParams }: { searchParams
       badges: (
         <>
           {inSchoolman.has(item.id) ? <Badge tone="positive">{t('In SchoolMan gebucht?', 'Booked in SchoolMan?')}</Badge> : null}
-          {item.deliveryNeedsReview ? <Badge tone="neutral">{t('E-Mail-Versand prüfen', 'Check email delivery')}</Badge> : null}
           {item.accommodationRequired ? <Badge tone="stay">{t('Unterkunft', 'Accommodation')}</Badge> : null}
           {item.visaRequired ? <Badge tone="visa">{t('Visum', 'Visa')}</Badge> : null}
           {onlyExam?.detail && onlyExam.detail !== 'full' ? <Badge tone="neutral">{registrationTypeLabel(onlyExam.detail, lang)}</Badge> : null}
