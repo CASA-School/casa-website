@@ -2724,6 +2724,14 @@ next letter one click away. What is not needed stays a quiet fact in the submiss
 „Alle buchen" stays visible during the parallel phase (Rahman, 2026-10-31): he watches for double bookings
 himself, and the team needs it open to test and to write the manuals.
 
+**Person first (Rahman, 2026-11-01: „make Neue Person anlegen required before booking").** Nothing is booked
+or queued from an Anmeldung until its sender is decided — „Das ist …" (someone at CASA) or „Neue Person
+anlegen" — so every booking lands on the one person's page. Until then the head's action is „Person klären",
+each line's „Buchen" carries a padlock and opens the person panel (`?person=1`), and the waiting list is not
+offered. The server holds the same rule: `senderUndecided()` (`registration-person.ts`) is asked by „Alle
+buchen", the wizard's booking and waiting list, and the course page's waiting list whenever a registration
+line comes with the form. A decision closes the panel.
+
 **The wizard asks only what fits the course** (`booking-wizard-client.tsx`, `levelsOf`). From a registration
 the kind of course is known: its starts alone, and of a kind with several courses the one asked for (telc C1
 Hochschule, not B2), with „Andere Kursart" and „Alle Termine dieser Kursart" one click away. The level step

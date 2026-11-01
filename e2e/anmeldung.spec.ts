@@ -107,6 +107,13 @@ test.describe('an Anmeldung of several lines', () => {
     await expect(page.locator('li[id^="line-"]')).toHaveCount(3);
     await expect(page.locator('main')).toContainText('C1 hat noch keinen Termin.');
 
+    // Person first (2026-11-01): nothing is booked until the sender is decided — here someone new.
+    await expect(page.getByRole('button', { name: '1 Position buchen' })).toHaveCount(0);
+    await expect(page.locator(`#line-${lines.a1}`).getByRole('link', { name: 'Buchen' })).toHaveAttribute('href', /\?person=1$/);
+    await page.getByRole('link', { name: 'Person klären' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Neue Person anlegen' }).click();
+    await expect(page.getByText('Neu bei CASA', { exact: true })).toBeVisible();
+
     // Only A1 has a start: the quick way books it alone, one booking pointing at its line.
     await page.getByRole('button', { name: '1 Position buchen' }).click();
     const dialog = page.getByRole('dialog');

@@ -11,7 +11,7 @@ import { getI18n } from '@/lib/admin/i18n.server';
 import { isUuid } from '@/lib/admin/ids';
 import { personCandidates, type PersonCandidate } from '@/lib/admin/person-match';
 import { bookRegistration } from '@/lib/admin/registration-booking';
-import { confirmRegistrationPerson, newRegistrationPerson, registrationFacts, separateRegistrationPerson } from '@/lib/admin/registration-person';
+import { confirmRegistrationPerson, newRegistrationPerson, registrationFacts, senderUndecided, separateRegistrationPerson } from '@/lib/admin/registration-person';
 import { dismissSchoolmanBooking, linkToSchoolmanBooking, unlinkSchoolmanBooking } from '@/lib/admin/registration-schoolman';
 import { editRegistration, getRegistration, setLineDeclined, type RegistrationEdit } from '@/lib/admin/registrations';
 
@@ -104,6 +104,7 @@ export async function bookRegistrationAction(formData: FormData): Promise<void> 
   const back = `/admin/registrations/${id}`;
   const { t, lang } = await getI18n();
   const lineIds = formData.getAll('lineIds').map(String).filter(isUuid);
+  if (await senderUndecided({ registration: id })) redirect(`${back}?error=${encodeURIComponent(t('Erst die Person klären: schon bei CASA oder neu.', 'Confirm the person first: already at CASA, or new.'))}`);
   if (!lineIds.length) redirect(`${back}?error=${encodeURIComponent(t('Wähle mindestens eine Position.', 'Choose at least one line.'))}`);
   const status = String(formData.get('status') ?? 'reserved');
   const payer = String(formData.get('payer') ?? 'self');

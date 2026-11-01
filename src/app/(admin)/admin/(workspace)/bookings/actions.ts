@@ -39,6 +39,7 @@ import { setBooksHandedOut } from '@/lib/admin/books';
 import { addDays, BZ_WEEKS, bzSegments } from '@/lib/admin/bildungszeit-rules';
 import { accommodationCharge, bookedPeriod, expectedCharges, priceSelection, stayVocabulary, type BookingSelection } from '@/lib/admin/booking-offer';
 import { addToWaitlist } from '@/lib/admin/waitlist';
+import { senderUndecided } from '@/lib/admin/registration-person';
 import type { StaffUser } from '@/lib/admin/auth';
 import { isExamParts, ratedParts } from '@/lib/admin/exam-parts';
 import { addToExamWaitlist, getSitting } from '@/lib/admin/exams';
@@ -106,6 +107,12 @@ function fail(path: string, message: string): never {
   redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
 }
 const confirmed = (formData: FormData) => formData.get('confirmed') === '1';
+
+/** Nothing is booked or queued from a registration whose person is still undecided (2026-11-01). */
+async function requireSenderDecided(formData: FormData, back: string): Promise<void> {
+  const undecided = await senderUndecided({ courseLine: optionalId(formData, 'sourceRegistrationId'), examLine: optionalId(formData, 'sourceExamRegistrationId') });
+  if (undecided) fail(back, (await getI18n()).t('Erst die Person klären: schon bei CASA oder neu.', 'Confirm the person first: already at CASA, or new.'));
+}
 
 /** A stay's arrival and departure from a form: dates or nothing, departure not before arrival. */
 function readStayDates(formData: FormData, back: string, t: T): { from: string | null; to: string | null } {
@@ -420,6 +427,7 @@ export async function createBookingFromWizardAction(formData: FormData): Promise
   const personId = id(formData, 'personId');
   const raw = String(formData.get('returnTo') ?? '');
   const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
+  await requireSenderDecided(formData, safeBack);
 
   const kind = String(formData.get('kind') ?? 'course') === 'exam' ? 'exam' : 'course';
   if (kind === 'exam') return createExamBooking(formData, actor, personId, safeBack);
@@ -679,6 +687,7 @@ export async function waitlistFromWizardAction(formData: FormData): Promise<void
   const personId = id(formData, 'personId');
   const raw = String(formData.get('returnTo') ?? '');
   const safeBack = /^\/admin(\/[A-Za-z0-9\-_/]*)?$/.test(raw) ? raw : `/admin/people/${personId}`;
+  await requireSenderDecided(formData, safeBack);
   const { t, lang } = await getI18n();
   // A full sitting: the candidate queues for it, with the parts they want (0036).
   if (String(formData.get('kind') ?? '') === 'exam') {

@@ -44,6 +44,26 @@ async function senderOf(registrationId: string): Promise<Sender | undefined> {
   );
 }
 
+/**
+ * Whether the sender of a registration is still undecided — neither put on the register nor joined to
+ * someone at CASA (2026-11-01, Rahman: „make Neue Person anlegen required before booking"). Nothing is
+ * booked or queued from a registration until it is, so every booking lands on the one person. Found by
+ * the registration, or by one of its course or exam lines.
+ */
+export async function senderUndecided(by: { registration?: string | null; courseLine?: string | null; examLine?: string | null }): Promise<boolean> {
+  if (!by.registration && !by.courseLine && !by.examLine) return false;
+  const row = await queryFirst<{ open: boolean }>(
+    `SELECT NOT (p.listed OR p.merged_into IS NOT NULL) AS open
+       FROM registrations g JOIN people p ON p.id = g.person_id
+      WHERE g.id = $1::uuid
+         OR g.id = (SELECT registration_id FROM course_registrations WHERE id = $2::uuid)
+         OR g.id = (SELECT registration_id FROM exam_registrations WHERE id = $3::uuid)
+      LIMIT 1`,
+    [by.registration ?? null, by.courseLine ?? null, by.examLine ?? null]
+  );
+  return row?.open ?? false;
+}
+
 /** „Das ist …": the sender is this person at CASA. A sender joined to someone else before is moved. */
 export async function confirmRegistrationPerson(registrationId: string, personId: string, actor: StaffUser): Promise<{ ok: true } | { ok: false; reason: Bilingual }> {
   const sender = await senderOf(registrationId);
