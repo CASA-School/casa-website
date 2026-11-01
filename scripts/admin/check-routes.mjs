@@ -221,6 +221,7 @@ const routes = [
   '/admin/statistics',
   '/admin/team',
   '/admin/settings',
+  '/admin/settings/system',
   '/admin/settings/setup',
   '/admin/settings/prices',
 ].filter(Boolean);
