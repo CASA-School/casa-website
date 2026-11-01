@@ -10,6 +10,7 @@ import { Select } from '@/components/admin/menu-select';
 import { SidePanel } from '@/components/admin/side-panel';
 import { Button } from '@/components/admin/ui';
 import { cn } from '@/lib/utils';
+import { DateFormField } from '@/components/admin/date-picker';
 
 type Totals = { year: number; owing: number; owed: number }[];
 
@@ -33,6 +34,8 @@ export function BookingFilters({
   programmes,
   payers,
   canTotals,
+  startFrom,
+  startTo,
 }: {
   /** What the filters keep: the view, the organisation from its page, the search. */
   base: Record<string, string | undefined>;
@@ -46,14 +49,17 @@ export function BookingFilters({
   programmes: readonly { code: string; name: string }[];
   payers: readonly { value: string; label: string }[];
   canTotals: boolean;
+  startFrom?: string;
+  startTo?: string;
 }) {
   const { t } = useWsLang();
   const [open, setOpen] = useState(false);
   const [chosenPayer, setChosenPayer] = useState(payer ?? '');
+  const [datesEdited, setDatesEdited] = useState(false);
   const [totals, setTotals] = useState<Totals | null>(null);
   const [failed, setFailed] = useState(false);
   const [counting, startCounting] = useTransition();
-  const active = [year, payer, typeId, programme].filter(Boolean).length;
+  const active = [year, payer, programme, !base.period && (startFrom || startTo)].filter(Boolean).length;
 
   const href = (extra: Record<string, string | undefined>) => {
     const query = new URLSearchParams(Object.entries({ ...base, ...extra }).filter((e): e is [string, string] => Boolean(e[1]))).toString();
@@ -72,21 +78,21 @@ export function BookingFilters({
   return (
     <SidePanel
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={next => { setOpen(next); if (next) { setChosenPayer(payer ?? ''); setDatesEdited(false); } }}
       trigger={
         <span className="inline-flex items-center gap-1.5">
           {Icon.settings}
-          {t('Filter', 'Filters')}
+          {t('Weitere Filter', 'More filters')}
           {active ? <span className="ml-0.5 inline-grid min-w-[1.15rem] place-items-center rounded-full bg-[var(--fm-navy)] px-1 text-[0.68rem] font-bold text-white tabular-nums">{active}</span> : null}
         </span>
       }
-      triggerClassName="inline-flex h-8 items-center rounded-lg px-2.5 text-[0.82rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line transition-colors ring-inset outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]"
+      triggerClassName="inline-flex h-9 items-center rounded-lg px-2 text-[0.75rem] whitespace-nowrap sm:px-2.5 sm:text-[0.82rem] font-semibold text-[var(--casa-ink)] ring-1 ring-ws-line transition-colors ring-inset outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]"
       title={t('Buchungen filtern', 'Filter bookings')}
       icon={Icon.bookings}
       tint="blue"
       footer={
         <span className="flex w-full items-center justify-between gap-2">
-          <Link href={href({ year: undefined, payer: undefined, type: undefined, programme: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
+          <Link href={href({ year: undefined, payer: undefined, type: undefined, programme: undefined, from: undefined, to: undefined, period: undefined })} className="text-[0.84rem] font-semibold text-[var(--casa-muted)] hover:text-[var(--casa-ink)]">
             {t('Zurücksetzen', 'Reset')}
           </Link>
           <Button type="submit" form="booking-filters" size="md">
@@ -96,7 +102,12 @@ export function BookingFilters({
       }
     >
       <form id="booking-filters" action="/admin/bookings" method="get" onSubmit={() => setOpen(false)} className="space-y-5 px-6 py-5">
-        {Object.entries(base).map(([name, value]) => (value ? <input key={name} type="hidden" name={name} value={value} /> : null))}
+        {Object.entries(base).filter(([name]) => !['year', 'payer', 'type', 'programme', 'from', 'to', ...(datesEdited ? ['period'] : [])].includes(name)).map(([name, value]) => (value ? <input key={name} type="hidden" name={name} value={value} /> : null))}
+        <fieldset className="grid gap-3 sm:grid-cols-2">
+          <legend className="mb-2 text-xs font-semibold text-[var(--casa-muted)]">{t('Kursbeginn', 'Course start')}</legend>
+          <label className="block"><span className="mb-1 block text-xs text-[var(--casa-muted)]">{t('Von', 'From')}</span><DateFormField id="booking-start-from" name="from" defaultValue={startFrom} onChange={() => setDatesEdited(true)} /></label>
+          <label className="block"><span className="mb-1 block text-xs text-[var(--casa-muted)]">{t('Bis', 'Until')}</span><DateFormField id="booking-start-to" name="to" defaultValue={startTo} onChange={() => setDatesEdited(true)} /></label>
+        </fieldset>
         <label className="block">
           <span className="mb-1 block text-[0.75rem] font-semibold text-[var(--casa-muted)]">{t('Jahr', 'Year')}</span>
           <Select name="year" defaultValue={year ? String(year) : ''}>

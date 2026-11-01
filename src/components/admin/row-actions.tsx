@@ -35,7 +35,7 @@ export function RowActions({
   primary?: RowAction | null;
   actions: readonly RowAction[];
   /** On a phone the step goes into „…" (first), so the row keeps its width for the name (Prüfungen, 2026-10-27). */
-  compact?: boolean;
+  compact?: boolean | 'lg';
 }) {
   if (!primary && !actions.length) return null;
   const menu: (RowAction & { phoneOnly: boolean })[] = [
@@ -49,7 +49,7 @@ export function RowActions({
           action={primary}
           className={cn(
             'inline-flex h-7 items-center gap-1.5 rounded-lg bg-white px-2.5 text-[0.78rem] font-semibold whitespace-nowrap text-[var(--casa-ink)] ring-1 ring-ws-line transition-colors ring-inset outline-none hover:bg-ws-sunk focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40 [&_svg]:size-3.5 [&_svg]:text-[var(--casa-muted)]',
-            compact && 'max-sm:hidden'
+            compact && (compact === 'lg' ? 'max-lg:hidden' : 'max-sm:hidden')
           )}
         >
           {primary.icon}
@@ -71,7 +71,7 @@ export function RowActions({
           <DropdownMenuContent align="end" sideOffset={6} className={cn(menuPanel, 'min-w-[14rem]')}>
             {menu.map((action) => [
               action.divide ? <DropdownMenuSeparator key={`${action.href}-line`} className="mx-1 my-1 bg-ws-line-soft" /> : null,
-              <DropdownMenuItem key={`${action.href}${action.phoneOnly ? '-phone' : ''}`} asChild className={cn(menuItem, action.phoneOnly && 'sm:hidden')}>
+              <DropdownMenuItem key={`${action.href}${action.phoneOnly ? '-phone' : ''}`} asChild className={cn(menuItem, action.phoneOnly && (compact === 'lg' ? 'lg:hidden' : 'sm:hidden'))}>
                 <Link href={action.href}>
                   {action.icon}
                   {action.label}

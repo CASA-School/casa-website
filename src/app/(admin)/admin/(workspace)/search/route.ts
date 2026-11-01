@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 import { canAccess } from '@/lib/admin/access';
+import { berlinDay } from '@/lib/admin/days';
+import { bookingTypeChoices } from '@/lib/admin/bookings';
+import { readBookingTask } from '@/lib/admin/booking-query';
 import { getStaffUser } from '@/lib/admin/auth';
 import { isWorkspaceDatabaseConfigured } from '@/lib/admin/db';
 import { getI18n } from '@/lib/admin/i18n.server';
@@ -57,5 +60,23 @@ export async function POST(request: Request): Promise<Response> {
     return apiSuccess({ hits: await recentRecords(refs, holds, t, lang) });
   }
 
-  return apiSuccess({ groups: await searchWorkspace(parsed.data.q.slice(0, 80), holds, t, lang) });
+  const q = parsed.data.q.slice(0, 80);
+  const views: { href: string; label: string }[] = [];
+  if (holds('bookings')) {
+    const types = await bookingTypeChoices();
+    const task = readBookingTask(q, types, berlinDay(new Date()));
+    if (task.recognized) {
+      const params = new URLSearchParams({ filter: 'all', ...task.params, ...(task.search ? { q: task.search } : {}) });
+      const labels = [
+        task.params.filter === 'unclear' ? t('Zahlung offen', 'Unpaid') : task.params.filter === 'followup' ? t('Wiedervorlage', 'Follow-up') : '',
+        task.params.type === 'exam' ? t('Prüfungen', 'Exams') : types.find(type => type.id === task.params.type)?.name,
+        task.params.level,
+        task.params.period === 'next14' ? t('Nächste 14 Tage', 'Next 14 days') : task.params.period === 'month' ? t('Dieser Monat', 'This month') : '',
+        task.params.from ? `${task.params.from} – ${task.params.to}` : '',
+        task.search,
+      ].filter(Boolean);
+      views.push({ href: `/admin/bookings?${params}`, label: `${t('Buchungen', 'Bookings')}: ${labels.join(' · ')}` });
+    }
+  }
+  return apiSuccess({ groups: await searchWorkspace(q, holds, t, lang), views });
 }

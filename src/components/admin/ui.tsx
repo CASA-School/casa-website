@@ -544,7 +544,7 @@ export function Table({
   head,
   children,
 }: {
-  head: readonly (ReactNode | { label: ReactNode; align?: 'left' | 'right'; className?: string })[];
+  head: readonly (ReactNode | { label: ReactNode; align?: 'left' | 'right'; className?: string; sort?: 'ascending' | 'descending' })[];
   children: ReactNode;
 }) {
   return (
@@ -561,6 +561,7 @@ export function Table({
                 <th
                   key={index}
                   scope="col"
+                  aria-sort={isSpec ? column.sort : undefined}
                   className={cn(
                     'px-4 py-3 text-xs font-semibold whitespace-nowrap text-[var(--ws-head-text)] first:pl-5 last:pr-5',
                     align === 'right' ? 'text-right' : 'text-left',

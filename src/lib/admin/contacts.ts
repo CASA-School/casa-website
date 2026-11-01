@@ -1,11 +1,12 @@
 import 'server-only';
 
 import { z } from 'zod';
+import type { PoolClient } from 'pg';
 
 import { logActivity } from './activity';
 import type { StaffUser } from './auth';
 import { isEmailKind, isPhoneKind, type EmailKind, type PhoneKind } from './contact-labels';
-import { query, queryFirst, withTransaction } from './db';
+import { query, withTransaction } from './db';
 import type { Bilingual } from './i18n';
 import { normalizeEmail, normalizePhone } from './normalize';
 
@@ -39,7 +40,7 @@ type Result = { ok: true } | { ok: false; reason: Bilingual };
 const refuse = (de: string, en: string): Result => ({ ok: false, reason: { de, en } });
 const Email = z.email();
 
-export async function personContacts(personId: string): Promise<{ emails: PersonEmail[]; phones: PersonPhone[] }> {
+export async function personContacts(personId: string, client?: PoolClient): Promise<{ emails: PersonEmail[]; phones: PersonPhone[] }> {
   const [emails, phones] = await Promise.all([
     query<{ id: string; address: string; kind: string; is_primary: boolean; note: string | null; tier: number; rank: number; organisation: string | null; shared: number }>(
       `SELECT pe.id, pe.address, pe.kind, pe.is_primary, pe.note, pe.tier, pe.rank,
@@ -47,9 +48,9 @@ export async function personContacts(personId: string): Promise<{ emails: Person
                        (SELECT o.name FROM organisation_contacts c JOIN organisations o ON o.id = c.organisation_id WHERE lower(c.email) = pe.normalized LIMIT 1)) AS organisation,
               (SELECT count(DISTINCT canonical_person_id(e.person_id)) FROM emails e WHERE e.normalized = pe.normalized)::int AS shared
          FROM person_emails($1) pe ORDER BY pe.rank`,
-      [personId]
+      [personId], client
     ),
-    query<{ id: string; number: string; kind: string; is_primary: boolean; rank: number }>(`SELECT id, number, kind, is_primary, rank FROM person_phones($1) ORDER BY rank`, [personId]),
+    query<{ id: string; number: string; kind: string; is_primary: boolean; rank: number }>(`SELECT id, number, kind, is_primary, rank FROM person_phones($1) ORDER BY rank`, [personId], client),
   ]);
   return {
     emails: emails.map((e) => ({
@@ -71,11 +72,11 @@ export type EmailInput = { address: string; kind: EmailKind; note: string | null
 export type PhoneInput = { number: string; kind: PhoneKind; primary: boolean };
 
 /** An address added, or — already one of theirs — labelled again. */
-export async function saveEmail(personId: string, emailId: string | null, input: EmailInput, actor: StaffUser): Promise<Result> {
+export async function saveEmail(personId: string, emailId: string | null, input: EmailInput, actor: StaffUser, client?: PoolClient): Promise<Result> {
   const address = input.address.trim();
   if (!emailId && !Email.safeParse(address).success) return refuse('Diese E-Mail-Adresse sieht nicht richtig aus.', 'That email address does not look right.');
-  const done = await withTransaction(async (client) => {
-    const owner = await client.query<{ root: string }>(`SELECT canonical_person_id($1) AS root FROM people WHERE id = $1 AND deleted_at IS NULL`, [personId]);
+  const work = async (client: PoolClient) => {
+    const owner = await client.query<{ root: string }>(`SELECT canonical_person_id($1) AS root FROM people WHERE id = $1 AND deleted_at IS NULL FOR UPDATE`, [personId]);
     const root = owner.rows[0]?.root;
     if (!root) return null;
     let id = emailId;
@@ -102,21 +103,22 @@ export async function saveEmail(personId: string, emailId: string | null, input:
       await client.query(`UPDATE emails SET is_primary = false WHERE id = $1`, [id]);
     }
     return root;
-  });
+  };
+  const done = client ? await work(client) : await withTransaction(work);
   if (!done) return refuse('Diese Adresse gibt es nicht mehr.', 'That address no longer exists.');
-  await logActivity({ actor, entity: 'person', entityId: done, action: emailId ? 'contact_changed' : 'contact_added', detail: { channel: 'email' } });
+  await logActivity({ actor, entity: 'person', entityId: done, action: emailId ? 'contact_changed' : 'contact_added', detail: { channel: 'email' } }, client);
   return { ok: true };
 }
 
 /** A number added, or — already one of theirs — labelled again. */
-export async function savePhone(personId: string, phoneId: string | null, input: PhoneInput, actor: StaffUser): Promise<Result> {
+export async function savePhone(personId: string, phoneId: string | null, input: PhoneInput, actor: StaffUser, client?: PoolClient): Promise<Result> {
   const number = input.number.trim();
   const normalized = normalizePhone(number);
   if (!phoneId && normalized.replace('+', '').length < 5) return refuse('Diese Telefonnummer sieht nicht richtig aus.', 'That phone number does not look right.');
   // An emergency contact is someone else's number: never the one used.
   const primary = input.primary && input.kind !== 'emergency';
-  const done = await withTransaction(async (client) => {
-    const owner = await client.query<{ root: string }>(`SELECT canonical_person_id($1) AS root FROM people WHERE id = $1 AND deleted_at IS NULL`, [personId]);
+  const work = async (client: PoolClient) => {
+    const owner = await client.query<{ root: string }>(`SELECT canonical_person_id($1) AS root FROM people WHERE id = $1 AND deleted_at IS NULL FOR UPDATE`, [personId]);
     const root = owner.rows[0]?.root;
     if (!root) return null;
     let id = phoneId;
@@ -142,24 +144,31 @@ export async function savePhone(personId: string, phoneId: string | null, input:
       await client.query(`UPDATE phones SET is_primary = false WHERE id = $1`, [id]);
     }
     return root;
-  });
+  };
+  const done = client ? await work(client) : await withTransaction(work);
   if (!done) return refuse('Diese Nummer gibt es nicht mehr.', 'That number no longer exists.');
-  await logActivity({ actor, entity: 'person', entityId: done, action: phoneId ? 'contact_changed' : 'contact_added', detail: { channel: 'phone' } });
+  await logActivity({ actor, entity: 'person', entityId: done, action: phoneId ? 'contact_changed' : 'contact_added', detail: { channel: 'phone' } }, client);
   return { ok: true };
 }
 
 /** An address or number removed from the person — from every record of theirs that has it. */
-export async function removeContact(personId: string, channel: 'email' | 'phone', id: string, actor: StaffUser): Promise<boolean> {
-  const root = (await queryFirst<{ root: string }>(`SELECT canonical_person_id($1) AS root`, [personId]))?.root;
-  if (!root) return false;
-  const table = channel === 'email' ? 'emails' : 'phones';
-  const removed = await query(
-    `DELETE FROM ${table} WHERE person_id = ANY (person_records($2))
-        AND normalized = (SELECT normalized FROM ${table} WHERE id = $1 AND person_id = ANY (person_records($2)))
-     RETURNING id`,
-    [id, root]
-  );
-  if (!removed.length) return false;
-  await logActivity({ actor, entity: 'person', entityId: root, action: 'contact_removed', detail: { channel } });
-  return true;
+export async function removeContact(personId: string, channel: 'email' | 'phone', id: string, actor: StaffUser, client?: PoolClient): Promise<boolean> {
+  const work = async (connection: PoolClient) => {
+    const owner = await connection.query<{ root: string }>(
+      `SELECT canonical_person_id($1) AS root FROM people WHERE id = $1 AND deleted_at IS NULL FOR UPDATE`, [personId]
+    );
+    const root = owner.rows[0]?.root;
+    if (!root) return false;
+    const table = channel === 'email' ? 'emails' : 'phones';
+    const removed = await connection.query(
+      `DELETE FROM ${table} WHERE person_id = ANY (person_records($2))
+          AND normalized = (SELECT normalized FROM ${table} WHERE id = $1 AND person_id = ANY (person_records($2)))
+       RETURNING id`,
+      [id, root]
+    );
+    if (!removed.rowCount) return false;
+    await logActivity({ actor, entity: 'person', entityId: root, action: 'contact_removed', detail: { channel } }, connection);
+    return true;
+  };
+  return client ? work(client) : withTransaction(work);
 }

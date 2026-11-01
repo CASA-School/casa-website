@@ -352,7 +352,7 @@ function PriceCard({
       bleed
       actions={
         canEdit ? (
-          <FormDialog icon={Icon.money} tint="green" trigger={t('Bearbeiten', 'Edit')} size="sm" title={title} width={rows.length > 8 ? 'lg' : 'md'}>
+          <FormDialog presentation="dialog" icon={Icon.money} tint="green" trigger={t('Bearbeiten', 'Edit')} size="sm" title={title} width={rows.length > 8 ? 'lg' : 'md'}>
             <form action={savePricesAction} className="space-y-4">
               <input type="hidden" name="list" value={list.validFrom} />
               <div className={cn('grid max-h-[60vh] gap-3 overflow-y-auto pr-1', rows.length > 8 ? 'sm:grid-cols-2' : '')}>

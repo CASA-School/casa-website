@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { query, queryFirst, withTransaction } from './db';
 import type { StaffUser } from './auth';
 import { logActivity } from './activity';
@@ -150,11 +151,11 @@ export async function getPersonSummary(id: string): Promise<PersonSummary | null
 }
 
 /** The canonical person for an id, with channels and anything linked into it. */
-export async function getPerson(id: string): Promise<PersonDetail | null> {
+export async function getPerson(id: string, client?: PoolClient): Promise<PersonDetail | null> {
   if (!isUuid(id)) return null;
   const row = await queryFirst<Row>(
     `${SELECT} WHERE p.id = canonical_person_id($1) AND p.deleted_at IS NULL`,
-    [id]
+    [id], client
   );
   if (!row) return null;
 
@@ -176,31 +177,31 @@ export async function getPerson(id: string): Promise<PersonDetail | null> {
       `SELECT p.second_last_name, p.nickname, p.birth_year, p.birth_place, p.birth_country_code,
               coalesce(c.name_de, c.name_en) AS birth_country_name, p.mother_tongue, p.occupation, p.passport_number, p.customer_number
          FROM people p LEFT JOIN countries c ON c.code = p.birth_country_code WHERE p.id = $1`,
-      [row.id]
+      [row.id], client
     ),
     query<{ kind: AddressKind; street: string | null; postcode: string | null; city: string | null; country_code: string | null; country_name: string | null }>(
       `SELECT a.kind, a.street, a.postcode, a.city, a.country_code, coalesce(c.name_de, c.name_en) AS country_name
          FROM addresses a LEFT JOIN countries c ON c.code = a.country_code
         WHERE a.person_id = $1 ORDER BY a.kind = 'local' DESC`,
-      [row.id]
+      [row.id], client
     ),
     query<{ address: string; is_primary: boolean; note: string | null }>(
       `SELECT DISTINCT ON (e.normalized) e.address, e.is_primary, e.note
          FROM emails e
         WHERE e.person_id = ANY(person_family($1))
         ORDER BY e.normalized, e.is_primary DESC, e.created_at`,
-      [row.id]
+      [row.id], client
     ),
     query<{ number: string; is_primary: boolean }>(
       `SELECT DISTINCT ON (ph.normalized) ph.number, ph.is_primary
          FROM phones ph
         WHERE ph.person_id = ANY(person_family($1))
         ORDER BY ph.normalized, ph.is_primary DESC, ph.created_at`,
-      [row.id]
+      [row.id], client
     ),
     query<Row>(
       `${SELECT} WHERE p.id <> $1 AND p.id = ANY(person_family($1)) ORDER BY p.created_at`,
-      [row.id]
+      [row.id], client
     ),
   ]);
 
@@ -848,9 +849,10 @@ export async function createPersonByStaff(input: PersonInput, actor: StaffUser):
 export async function updatePerson(
   id: string,
   input: PersonInput,
-  actor: StaffUser
+  actor: StaffUser,
+  client?: PoolClient
 ): Promise<void> {
-  await withTransaction(async (client) => {
+  const work = async (client: PoolClient) => {
     await client.query(
       `UPDATE people
           SET salutation = $2::salutation, first_name = $3, last_name = $4, birth_date = $5::date,
@@ -894,24 +896,31 @@ export async function updatePerson(
         [id, input.phone.trim(), normalized]
       );
     }
-  });
-  await logActivity({ actor, entity: 'person', entityId: id, action: 'person_updated' });
+  };
+  if (client) await work(client);
+  else await withTransaction(work);
+  await logActivity({ actor, entity: 'person', entityId: id, action: 'person_updated' }, client);
 }
 
 /** A person's home or local address; an empty one is removed. */
-export async function saveAddress(personId: string, kind: AddressKind, input: AddressInput, actor: StaffUser): Promise<void> {
-  const empty = !input.street && !input.postcode && !input.city && !input.country;
-  if (empty) {
-    await query(`DELETE FROM addresses WHERE person_id = $1 AND kind = $2`, [personId, kind]);
-  } else {
-    await query(
-      `INSERT INTO addresses (person_id, kind, street, postcode, city, country_code) VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (person_id, kind) DO UPDATE
-         SET street = EXCLUDED.street, postcode = EXCLUDED.postcode, city = EXCLUDED.city, country_code = EXCLUDED.country_code`,
-      [personId, kind, input.street, input.postcode, input.city, countryCodeFromName(input.country)]
-    );
-  }
-  await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_address_updated', detail: { kind } });
+export async function saveAddress(personId: string, kind: AddressKind, input: AddressInput, actor: StaffUser, client?: PoolClient): Promise<void> {
+  const work = async (connection: PoolClient) => {
+    await connection.query(`SELECT id FROM people WHERE id = $1 AND deleted_at IS NULL FOR UPDATE`, [personId]);
+    const empty = !input.street && !input.postcode && !input.city && !input.country;
+    if (empty) {
+      await connection.query(`DELETE FROM addresses WHERE person_id = $1 AND kind = $2`, [personId, kind]);
+    } else {
+      await connection.query(
+        `INSERT INTO addresses (person_id, kind, street, postcode, city, country_code) VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (person_id, kind) DO UPDATE
+           SET street = EXCLUDED.street, postcode = EXCLUDED.postcode, city = EXCLUDED.city, country_code = EXCLUDED.country_code`,
+        [personId, kind, input.street, input.postcode, input.city, countryCodeFromName(input.country)]
+      );
+    }
+    await logActivity({ actor, entity: 'person', entityId: personId, action: 'person_address_updated', detail: { kind } }, connection);
+  };
+  if (client) await work(client);
+  else await withTransaction(work);
 }
 
 // ------------------------------------------------------------ bank details

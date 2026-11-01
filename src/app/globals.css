@@ -1111,11 +1111,15 @@ h3 {
     width: 0;
   }
 
-  /* Folded, the name "CASA" sets smaller so it fits the icon column. */
+  /* Folded, the product wordmark gives way to its compact monogram. */
   :is(html[data-workspace-nav='collapsed'] .casa-workspace-shell:not(.casa-workspace-focus), html:not([data-focus-nav='expanded']) .casa-workspace-focus) .casa-workspace-rail [data-rail-brand] {
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
     padding: 0;
+  }
+  :is(html[data-workspace-nav='collapsed'] .casa-workspace-shell:not(.casa-workspace-focus), html:not([data-focus-nav='expanded']) .casa-workspace-focus) .casa-workspace-rail [data-rail-wordmark] {
+    display: none;
+  }
+  :is(html[data-workspace-nav='collapsed'] .casa-workspace-shell:not(.casa-workspace-focus), html:not([data-focus-nav='expanded']) .casa-workspace-focus) .casa-workspace-rail [data-rail-monogram] {
+    display: inline-flex;
   }
 
   /* Collapsed, the head keeps only the toggle. */
@@ -1139,6 +1143,42 @@ h3 {
     padding-top: 0.5rem;
     border-top: 1px solid rgb(255 255 255 / 0.1);
   }
+}
+
+/* Approved participant pilot: a quieter pair of cards and one editing surface. */
+.casa-person-details h2 { font-weight: 600; }
+.casa-person-details .person-facts dl { row-gap: 0; }
+.casa-person-details .person-facts dl > div { border-bottom: 1px solid var(--ws-line-soft); padding: 1rem 0; }
+.casa-person-details .person-facts dl > div:nth-last-child(-n + 2) { border-bottom: 0; }
+.casa-person-details .person-facts dt { font-weight: 400; }
+.casa-person-details .person-facts dd { font-size: 0.84rem; font-weight: 450; }
+.casa-person-details .person-contacts a { font-weight: 500; }
+.casa-person-editor > header, .casa-person-editor > footer { background: white; }
+.casa-person-editor h3 > svg { width: 1rem; height: 1rem; color: var(--casa-muted); }
+.casa-person-editor label { font-weight: 500; }
+/* Standard workspace forms share the side panel's scroll area and pinned actions. */
+.casa-form-panel > div,
+.casa-form-panel > div > div,
+.casa-form-panel form { display: flex; flex-direction: column; }
+.casa-form-panel > div > div,
+.casa-form-panel form { flex: 1; }
+.casa-form-panel .ws-dialog-foot { margin-top: auto; }
+.casa-bookings-list {
+  --ws-head: var(--ws-card-head);
+  --ws-head-line: var(--ws-line);
+  --ws-head-text: var(--casa-muted);
+  --ws-row-alt: white;
+  --ws-row-hover: #f8fafd;
+}
+@media (width < 1280px) {
+  .casa-bookings-list [data-record-reference] { display: none; }
+}
+@media (width < 640px) {
+  .casa-bookings-list .ws-table :is(th, td) { padding-inline: 0.5rem; }
+  .casa-bookings-list .ws-table :is(th, td):first-child { padding-left: 0.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .casa-person-editor { animation: none !important; }
 }
 
 /* A dark workspace panel (the sign-in page's) flips the accent and subtle text

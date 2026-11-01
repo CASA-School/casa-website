@@ -28,8 +28,8 @@ import { cn } from '@/lib/utils';
  * "Workspace" under it: "do you think professional saas dashboards sidebar
  * looks like this"). Deep navy — FileMaker's structural colour, which the team
  * knows, on the surface every modern product darkens — so the white pages read
- * as the lit work area and the frame recedes. From the top: the name "CASA" in
- * type, the navigation in its groups, Settings at the foot. What a colleague
+ * as the lit work area and the frame recedes. From the top: the compact
+ * "CASA Workspace" wordmark, the navigation in its groups, Settings at the foot. What a colleague
  * reaches for from any page — search (⌘K), "Neu", the language, who is signed
  * in — sits in a slim glass top bar over the page (`TopBar`, 2026-10-14), so
  * the sidebar is navigation and nothing else.
@@ -85,14 +85,25 @@ export async function WorkspaceShell({
         {focus ? null : <SidebarResizer />}
         <div className="flex h-full flex-col overflow-x-hidden">
           <div data-rail-head className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
-            {/* The name in type, nothing else (Rahman, 2026-10-14): set in the workspace's display serif, as the logo's lettering is. */}
+            {/* Product identity (Rahman, 2026-11-01): a compact wordmark, a C when folded. */}
             <Link
               href="/admin"
-              aria-label={t('CASA, Übersicht', 'CASA, Overview')}
+              aria-label={t('CASA Workspace, Übersicht', 'CASA Workspace, Overview')}
+              title="CASA Workspace"
               data-rail-brand
-              className="rounded-md px-1 font-[family-name:var(--font-display)] text-[1.4rem] leading-none font-semibold tracking-[0.06em] text-white outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="inline-flex shrink-0 items-center rounded-md px-1 py-1 text-white outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
-              CASA
+              <span data-rail-wordmark className="inline-flex items-baseline gap-2 whitespace-nowrap">
+                <span className="hidden text-[0.625rem] leading-none font-semibold tracking-[0.16em] text-[var(--ws-rail-head)] min-[360px]:inline">CASA</span>
+                <span className="text-[1rem] leading-none font-semibold tracking-[-0.025em]">Workspace</span>
+              </span>
+              <span
+                data-rail-monogram
+                aria-hidden="true"
+                className="hidden size-8 items-center justify-center font-[family-name:var(--font-display)] text-[1.625rem] leading-none font-semibold"
+              >
+                C
+              </span>
             </Link>
             <span className="flex items-center gap-1 lg:hidden">
               <LangSwitch />

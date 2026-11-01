@@ -6,7 +6,9 @@ import { unlinkPersonAction } from '../../actions';
 import { deletePersonAction, removeBankAccountAction, removeContactAction, saveEmailAction, savePhoneAction } from '../actions';
 import { ContactCard } from '../contact-card';
 import { personContacts } from '@/lib/admin/contacts';
-import { AddressForm, BankAccountForm, PersonForm } from '../person-form';
+import { BankAccountForm } from '../person-form';
+import { PersonEditor, PersonEditButton } from '../person-editor';
+import { personDetailsValues } from '@/lib/admin/person-details';
 import { BankAddresses } from '../bank-addresses';
 import { BookingWizard } from '../../bookings/booking-wizard';
 import { createBookingFromWizardAction, waitlistFromWizardAction } from '../../bookings/actions';
@@ -344,13 +346,6 @@ export default async function PersonPage({
   const overviewOpen = openCases.filter((c) => c.key !== `booking-${spotlight?.id}`);
   const recent = pastCases.slice(0, 3);
 
-  const personDialog = (variant: 'secondary' | 'ghost') =>
-    canEdit ? (
-      <FormDialog icon={Icon.person} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={person.displayName} width="lg" triggerVariant={variant} size={variant === 'ghost' ? 'sm' : undefined}>
-        <PersonForm person={person} countries={countries} />
-      </FormDialog>
-    ) : null;
-
   const tabs: RecordTab[] = [
     { id: 'overview', label: t('Übersicht', 'Overview'), icon: Icon.overview },
     { id: 'cases', label: t('Anfragen & Buchungen', 'Enquiries & bookings'), icon: Icon.registrations, count: cases.length },
@@ -377,6 +372,7 @@ export default async function PersonPage({
     .join(' · ');
 
   return (
+    <PersonEditor initial={personDetailsValues(person, contacts)} countries={countries} enabled={canEdit} canRemove={canDelete}>
     <RecordTabs tabs={tabs} initial={tab}>
       <RecordHeader
         backHref="/admin/people"
@@ -426,13 +422,13 @@ export default async function PersonPage({
         }
         actions={
           <>
-            {personDialog('secondary')}
+            <PersonEditButton variant="primary" />
             {canOffer ? <MakeOffer from={{ personId: person.id }} existing={offers} /> : null}
             {canBook && offer ? (
               <FormDialog icon={Icon.bookings} tint="red"
                 trigger={t('Neue Buchung', 'New booking')}
                 title={t(`${person.displayName} buchen`, `Book ${person.displayName}`)}
-                triggerVariant="primary"
+                triggerVariant="secondary"
                 width="lg"
                 defaultOpen={book === '1'}
               >
@@ -598,9 +594,8 @@ export default async function PersonPage({
 
       {/* Who they are, how to reach them, where they live, where the record came from. */}
       <RecordTabPanel id="details">
-        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-          <div className="space-y-4">
-            <Card title={t('Person', 'Person')} icon={Icon.person} tint="ink" actions={personDialog('ghost')}>
+        <div className="casa-person-details grid items-start gap-5 md:grid-cols-2">
+          <Card title={t('Persönliche Angaben', 'Personal details')} icon={Icon.person} tint="ink" className="person-facts">
               <DetailList
                 items={[
                   ...(person.salutation && SALUTATIONS[person.salutation] ? [{ label: t('Anrede', 'Salutation'), value: pick(lang, SALUTATIONS[person.salutation]) }] : []),
@@ -630,70 +625,34 @@ export default async function PersonPage({
                 ]}
               />
             </Card>
-            <ContactCard
-              emails={contacts.emails}
-              phones={contacts.phones}
-              canEdit={canEdit}
-              canRemove={canAccess(user, 'people', 'full')}
-              hidden={{ personId: person.id }}
-              actions={{ saveEmail: saveEmailAction, savePhone: savePhoneAction, remove: removeContactAction }}
-              mailTo={(address) => mailHref('person', person.id, { address })}
-            />
-          </div>
-
-          <div className="space-y-4">
-            {/* Where they live: at home, and in Bremen while here. Letters go to the Bremen one first. */}
-            <Card title={t('Adressen', 'Addresses')} icon={Icon.rooms} tint="ink">
-              <ul className="-my-1.5 divide-y divide-ws-line-soft">
-                {(['local', 'home'] as const).map((kind: AddressKind) => {
-                  const address = person.addresses.find((a) => a.kind === kind);
-                  return (
-                    <li key={kind} className="flex items-start justify-between gap-3 py-2.5">
-                      <span className="min-w-0 text-sm">
-                        <span className="block text-xs font-medium text-[var(--casa-muted)]">{kind === 'local' ? t('In Bremen', 'In Bremen') : t('Zuhause', 'At home')}</span>
-                        {address ? <AddressLines address={address} /> : <span className="block text-[var(--casa-text-subtle)]">—</span>}
-                      </span>
-                      {canEdit ? (
-                        <FormDialog icon={Icon.globe} tint="ink"
-                          trigger={address ? t('Ändern', 'Change') : t('Hinzufügen', 'Add')}
-                          title={kind === 'local' ? t('Adresse in Bremen', 'Address in Bremen') : t('Adresse zuhause', 'Home address')}
-                          triggerVariant="tertiary"
-                          size="sm"
-                        >
-                          <AddressForm personId={person.id} kind={kind} address={address} countries={countries} />
-                        </FormDialog>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            </Card>
-
-            <Card title={t('Datensatz', 'Record')} icon={Icon.note} tint="ink">
-              <DetailList
-                items={[
-                  { label: t('Angelegt', 'Created'), value: <DateText value={person.createdAt} /> },
-                  { label: t('Herkunft', 'Source'), value: came },
-                  ...(fileMakerLinks.length
-                    ? [
-                        {
-                          label: 'FileMaker',
-                          wide: true,
-                          value: (
-                            <ul className="space-y-0.5 text-sm">
-                              {fileMakerLinks.map((link) => (
-                                <li key={link.id}>
-                                  {link.sourceLayout}{' '}
-                                  <span className="font-mono text-xs text-[var(--casa-muted)]">{link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          ),
-                        },
-                      ]
-                    : []),
-                ]}
-              />
+          <ContactCard
+            title={t('Kontakt & Adressen', 'Contact & addresses')}
+            headerAction={<PersonEditButton section="contact" variant="tertiary" />}
+            className="person-contacts"
+            emails={contacts.emails} phones={contacts.phones}
+            canEdit={false} canRemove={false}
+            hidden={{ personId: person.id }}
+            actions={{ saveEmail: saveEmailAction, savePhone: savePhoneAction, remove: removeContactAction }}
+            mailTo={(address) => mailHref('person', person.id, { address })}
+          >
+            <div className="grid grid-cols-2 gap-5 border-t border-ws-line-soft pt-4">
+              {(['local', 'home'] as const).map((kind: AddressKind) => {
+                const address = person.addresses.find(a => a.kind === kind);
+                return <div key={kind} className="min-w-0 text-[0.84rem]">
+                  <p className="mb-2 text-xs text-[var(--casa-muted)]">{kind === 'local' ? t('In Bremen', 'In Bremen') : t('Zuhause', 'At home')}</p>
+                  {address ? <AddressLines address={address} /> : <span className="text-[var(--casa-text-subtle)]">—</span>}
+                </div>;
+              })}
+            </div>
+          </ContactCard>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--casa-muted)]">
+          {Icon.clock}<span>{t('Angelegt', 'Created')} <DateText value={person.createdAt} /></span>{came !== t('Angelegt', 'Created') ? <><span aria-hidden="true">·</span><span>{came}</span></> : null}
+        </div>
+        {fileMakerLinks.length || person.linkedDuplicates.length ? <details className="mt-3 text-xs text-[var(--casa-muted)]">
+          <summary className="w-fit cursor-pointer rounded-md py-1 font-medium outline-none focus-visible:ring-2 focus-visible:ring-[var(--casa-blue)]/40">{t('Datensatz und verknüpfte Einträge', 'Record and linked entries')}</summary>
+          <div className="mt-2 border-t border-ws-line pt-3">
+            {fileMakerLinks.length ? <ul className="space-y-1">{fileMakerLinks.map(link => <li key={link.id}>FileMaker · {link.sourceLayout} <span className="font-mono">{link.sourcePrimaryKey ?? `#${link.sourceRecordId}`}</span></li>)}</ul> : null}
               {person.linkedDuplicates.length > 0 ? (
                 <div className="mt-4 border-t border-ws-line-soft pt-3">
                   <span className="text-xs font-medium text-[var(--casa-muted)]">{t('Verknüpfte Datensätze', 'Linked records')}</span>
@@ -706,21 +665,20 @@ export default async function PersonPage({
                             {t('Angelegt', 'Created')} <DateText value={dup.createdAt} /> · {dup.createdBy}
                           </span>
                         </span>
-                        <form action={unlinkPersonAction}>
+                        {canDelete ? <form action={unlinkPersonAction}>
                           <input type="hidden" name="personId" value={dup.id} />
                           <input type="hidden" name="returnTo" value={`/admin/people/${person.id}`} />
                           <Button type="submit" variant="ghost" size="sm">
                             {t('Trennen', 'Unlink')}
                           </Button>
-                        </form>
+                        </form> : null}
                       </li>
                     ))}
                   </ul>
                 </div>
               ) : null}
-            </Card>
           </div>
-        </div>
+        </details> : null}
       </RecordTabPanel>
 
       {/* Every letter sent to them — offers, confirmations, receipts, waiting-list letters — as it went out. */}
@@ -880,6 +838,7 @@ export default async function PersonPage({
         </RecordFoot>
       ) : null}
     </RecordTabs>
+    </PersonEditor>
   );
 }
 

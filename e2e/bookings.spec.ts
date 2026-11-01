@@ -73,6 +73,59 @@ test.describe('booking colours', () => {
     ]);
   });
 
+  test('booking editing opens at the side, keeps its actions visible on a phone, and saves', async ({ page }) => {
+    await page.goto(`/admin/bookings/${bookingId}`, { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Bearbeiten', exact: true }).click();
+    const editor = page.getByRole('dialog', { name: 'Buchung bearbeiten', exact: true });
+    await expect(editor).toBeVisible();
+    const desktop = await editor.boundingBox();
+    expect(desktop!.x).toBeGreaterThan(page.viewportSize()!.width / 2);
+    expect(desktop!.width).toBeLessThanOrEqual(560);
+    const desktopSave = await editor.getByRole('button', { name: 'Speichern', exact: true }).boundingBox();
+    expect(desktopSave!.y + desktopSave!.height).toBeGreaterThan(page.viewportSize()!.height - 40);
+    await page.screenshot({ path: 'output/mockups/workspace-pilot/booking-sidebar-desktop.png', animations: 'disabled' });
+    await editor.getByLabel('Notizen', { exact: true }).fill('Discard this draft');
+    await editor.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+    await expect(editor).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Bearbeiten', exact: true })).toBeFocused();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole('button', { name: 'Bearbeiten', exact: true }).click();
+    await expect(editor.getByLabel('Notizen', { exact: true })).toHaveValue('');
+    expect(await editor.evaluate(element => element.scrollWidth <= innerWidth)).toBe(true);
+    const save = editor.getByRole('button', { name: 'Speichern', exact: true });
+    const footer = await save.boundingBox();
+    expect(footer!.y + footer!.height).toBeLessThanOrEqual(844);
+    expect(footer!.y + footer!.height).toBeGreaterThan(804);
+    await page.screenshot({ path: 'output/mockups/workspace-pilot/booking-sidebar-mobile.png', animations: 'disabled' });
+    await editor.getByLabel('Notizen', { exact: true }).fill('Sidebar save verified');
+    await editor.getByRole('checkbox', { name: 'Visum nötig', exact: true }).check();
+    await save.click();
+    await expect(editor).not.toBeVisible();
+    await expect.poll(async () => (await client.query(`SELECT notes, visa_required FROM bookings WHERE id = $1`, [bookingId])).rows[0]).toEqual({ notes: 'Sidebar save verified', visa_required: true });
+    await expect.poll(async () => Number((await client.query(`SELECT count(*) AS n FROM staff_activity WHERE entity_id = $1 AND action = 'booking_updated'`, [bookingId])).rows[0].n)).toBeGreaterThan(0);
+  });
+
+  test('the account-row editor uses the side panel and restores row focus', async ({ page }) => {
+    await page.goto('/admin/team', { waitUntil: 'networkidle' });
+    const ownRow = page.getByRole('row').filter({ hasText: '(du)' });
+    const trigger = ownRow.getByRole('button', { name: /öffnen$/ });
+    await trigger.click();
+    const editor = page.getByRole('dialog');
+    await expect(editor).toBeVisible();
+    await expect.poll(async () => { const box = await editor.boundingBox(); return Math.round(box!.x + box!.width); }).toBe(page.viewportSize()!.width - 8);
+    await editor.getByRole('tab', { name: 'Angaben', exact: true }).click();
+    await expect(editor.getByRole('textbox', { name: 'Name', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(editor).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await trigger.click();
+    expect(await editor.evaluate(element => element.scrollWidth <= innerWidth)).toBe(true);
+    expect(await editor.evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    await editor.getByRole('button', { name: 'Schließen', exact: true }).click();
+  });
+
   test('the books: red until handed out at the desk, green after, and back', async ({ page }) => {
     const { rows } = await client.query<{ id: string }>(
       `INSERT INTO booking_charges (booking_id, kind, description, amount) VALUES ($1, 'books', 'Bücher · Netzwerk neu A2.1', 26.99) RETURNING id`,

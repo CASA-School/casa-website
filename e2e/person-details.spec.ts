@@ -77,25 +77,53 @@ test.describe('person details', () => {
     await page.goto(`/admin/people/${personId}`);
 
     await page.getByRole('button', { name: 'Bearbeiten', exact: true }).first().click();
-    await page.getByLabel('Muttersprache').fill('Spanisch');
-    await page.getByLabel('Geburtsort').fill('Valparaíso');
-    await page.getByLabel('Passnummer').fill('P1234567');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    const editor = page.getByRole('dialog');
+    await editor.getByLabel('Muttersprache').fill('Spanisch');
+    await editor.getByText('Weitere persönliche Angaben', { exact: true }).click();
+    await editor.getByLabel('Geburtsort').fill('Valparaíso');
+    await editor.getByLabel('Passnummer').fill('P1234567');
+    await editor.getByRole('button', { name: 'Adressen', exact: true }).click();
+    await editor.getByLabel('Straße und Hausnummer').first().fill('Am Dobben 14');
+    await editor.getByLabel('PLZ', { exact: true }).first().fill('28203');
+    await editor.getByLabel('Ort', { exact: true }).first().fill('Bremen');
+    await editor.getByLabel('Land', { exact: true }).first().fill('Deutschland');
+    await editor.getByRole('button', { name: 'Kontakt', exact: true }).click();
+    await editor.getByRole('button', { name: 'E-Mail hinzufügen' }).click();
+    await editor.getByLabel('E-Mail-Adresse', { exact: true }).fill('tia@example.invalid');
+    await editor.getByRole('radio', { name: 'Bevorzugte Adresse' }).check();
+    await editor.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expect(editor).not.toBeVisible();
     await page.getByRole('tab', { name: 'Persönliche Daten' }).click();
-    const details = page.getByRole('heading', { name: 'Person', exact: true }).locator('xpath=ancestor::section[1]');
+    const details = page.getByRole('heading', { name: 'Persönliche Angaben', exact: true }).locator('xpath=ancestor::section[1]');
     await expect(details).toContainText('Spanisch');
     await expect(details).toContainText('Valparaíso');
     await expect(details).toContainText('P1234567');
+    const contacts = page.getByRole('heading', { name: 'Kontakt & Adressen' }).locator('xpath=ancestor::section[1]');
+    await expect(contacts).toContainText('tia@example.invalid');
+    await expect(contacts).toContainText('Am Dobben 14');
+    await expect(contacts).toContainText('28203 Bremen');
+    const saved = (await client.query(`SELECT birth_place, mother_tongue FROM people WHERE id = $1`, [personId])).rows[0];
+    expect(saved).toEqual({ birth_place: 'Valparaíso', mother_tongue: 'Spanisch' });
 
-    const addresses = page.getByRole('heading', { name: 'Adressen' }).locator('xpath=ancestor::section[1]');
-    await addresses.getByRole('button', { name: 'Hinzufügen' }).first().click();
-    await page.getByLabel('Straße und Hausnummer').fill('Am Dobben 14');
-    await page.getByLabel('PLZ').fill('28203');
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await expect(page.getByRole('tab', { selected: true })).toHaveText('Persönliche Daten');
-    await expect(addresses).toContainText('Am Dobben 14');
-    await expect(addresses).toContainText('28203 Bremen');
+  });
 
+  test('a dirty editor stays open, and a stale draft cannot overwrite a colleague', async ({ page, context, baseURL }) => {
+    await signIn(context, baseURL!, ownerToken);
+    await page.goto(`/admin/people/${personId}?tab=details`);
+    await page.getByRole('button', { name: 'Bearbeiten', exact: true }).first().click();
+    const editor = page.getByRole('dialog');
+    await editor.getByLabel('Vorname', { exact: true }).fill('Draft name');
+    await page.keyboard.press('Escape');
+    await expect(editor.getByText('Änderungen noch nicht gespeichert.')).toBeVisible();
+    await editor.getByRole('button', { name: 'Weiter bearbeiten' }).click();
+    await client.query(`UPDATE people SET last_name = 'Kollegenstand' WHERE id = $1`, [personId]);
+    await editor.getByRole('button', { name: 'Speichern', exact: true }).click();
+    await expect(editor.getByRole('alert')).toContainText('inzwischen geändert');
+    await expect(editor.getByLabel('Vorname', { exact: true })).toHaveValue('Draft name');
+    expect((await client.query(`SELECT first_name FROM people WHERE id = $1`, [personId])).rows[0].first_name).toBe('Tia');
+    await editor.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+    await editor.getByRole('button', { name: 'Verwerfen' }).click();
+    await client.query(`UPDATE people SET last_name = 'Telcfall' WHERE id = $1`, [personId]);
   });
 
   test('a colleague adds a bank account and corrects it', async ({ page, context, baseURL }) => {
@@ -113,6 +141,17 @@ test.describe('person details', () => {
     await expect(accounts).toContainText('Sparkasse Bremen');
     // Removing an account is for owners and administrators.
     await expect(accounts.getByRole('button', { name: 'Entfernen' })).toHaveCount(0);
+  });
+
+  test('view access hides editing and withheld booking access yields no task shortcuts', async ({ page, context, baseURL }) => {
+    await client.query(`INSERT INTO staff_module_access (staff_user_id, module, level) VALUES ($1, 'people', 'view'), ($1, 'bookings', 'none')`, [staffId]);
+    await signIn(context, baseURL!, staffToken);
+    await page.goto(`/admin/people/${personId}?tab=details`);
+    await expect(page.getByRole('button', { name: 'Bearbeiten', exact: true })).toHaveCount(0);
+    const response = await page.request.post('/admin/search', { data: { q: 'unpaid evening B1' } });
+    expect(response.ok()).toBe(true);
+    expect((await response.json()).data.views).toEqual([]);
+    await client.query(`DELETE FROM staff_module_access WHERE staff_user_id = $1 AND module IN ('people', 'bookings')`, [staffId]);
   });
 
   test('a colleague whose right was withdrawn has no bank tab', async ({ page, context, baseURL }) => {

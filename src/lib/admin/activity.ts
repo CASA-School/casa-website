@@ -1,4 +1,5 @@
 import { query } from './db';
+import type { PoolClient } from 'pg';
 import { ENTRY_TESTS, isEntryTestId } from '@/lib/entry-test/tests';
 import type { StaffUser } from './auth';
 import { dayRange, pick, translator, wsLocale, type WsLang } from './i18n';
@@ -34,12 +35,12 @@ export async function logActivity({
   entityId: string | null;
   action: string;
   detail?: Record<string, unknown>;
-}): Promise<void> {
-  await query(
-    `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [actor.id, actor.name, entity, entityId, action, detail ? JSON.stringify(detail) : null]
-  );
+}, client?: PoolClient): Promise<void> {
+  const sql = `INSERT INTO staff_activity (staff_user_id, staff_name, entity, entity_id, action, detail)
+     VALUES ($1, $2, $3, $4, $5, $6)`;
+  const values = [actor.id, actor.name, entity, entityId, action, detail ? JSON.stringify(detail) : null];
+  if (client) await client.query(sql, values);
+  else await query(sql, values);
 }
 
 /**

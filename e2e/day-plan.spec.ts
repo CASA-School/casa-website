@@ -114,6 +114,20 @@ test.describe('Tagesplan', () => {
     await expect(page.getByRole('listitem').filter({ hasText: `Rückruf Agentur — Tagesplantest ${stamp}` })).toBeVisible();
   });
 
+  test('a form opened from a day panel returns to that panel on Escape', async ({ page }) => {
+    await page.goto('/admin/day', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /^Abwesend/ }).click();
+    const parent = page.getByRole('dialog', { name: 'Abwesend', exact: true });
+    const trigger = parent.getByRole('button', { name: 'Abwesenheit eintragen', exact: true });
+    await trigger.click();
+    const editor = page.getByRole('dialog', { name: 'Abwesenheit eintragen', exact: true });
+    await expect(editor).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(editor).not.toBeVisible();
+    await expect(parent).toBeVisible();
+    await expect(trigger).toBeFocused();
+  });
+
   test('the tiles open side panels: reception shows the usual shift; reported ill, the colleague is away', async ({ page }) => {
     // Absences are kept for weekdays only, as on a colleague's page.
     test.skip(new Date(`${today}T12:00:00Z`).getUTCDay() % 6 === 0, 'today is a weekend');

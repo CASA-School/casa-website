@@ -5,10 +5,11 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { DIALOG_OVERLAY } from './dialogs';
 import { Icon } from './icons';
 import { useWsLang } from './lang';
 import { IconChip, type Tint } from './ui';
+
+export const DIALOG_OVERLAY = 'bg-[#0d1b33]/45';
 
 /**
  * A panel that slides in from the right (2026-10-19, Rahman: "side popups … when clicked it opens a
@@ -22,10 +23,12 @@ import { IconChip, type Tint } from './ui';
 export function SidePanel({
   trigger,
   triggerClassName,
+  triggerAsChild = false,
   triggerLabel,
   open,
   defaultOpen,
   onOpenChange,
+  onCloseAutoFocus,
   title,
   subtitle,
   icon,
@@ -33,15 +36,19 @@ export function SidePanel({
   footer,
   width = 'md',
   children,
+  className,
 }: {
   trigger?: ReactNode;
   triggerClassName?: string;
+  /** Reuse an existing button as the trigger, including its focus/return target. */
+  triggerAsChild?: boolean;
   /** The trigger's accessible name, when its content does not say it plainly. */
   triggerLabel?: string;
   open?: boolean;
   /** Open on arrival, as from a link that names the panel (`/admin/day?termine=1`). */
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
   title: ReactNode;
   subtitle?: ReactNode;
   icon?: ReactNode;
@@ -49,30 +56,33 @@ export function SidePanel({
   footer?: ReactNode;
   width?: 'md' | 'lg';
   children: ReactNode;
+  className?: string;
 }) {
   const { t } = useWsLang();
   return (
     <Primitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       {trigger ? (
-        <Primitive.Trigger aria-label={triggerLabel} className={triggerClassName}>
+        <Primitive.Trigger asChild={triggerAsChild} aria-label={triggerLabel} className={triggerClassName}>
           {trigger}
         </Primitive.Trigger>
       ) : null}
       <Primitive.Portal>
         <Primitive.Overlay
           className={cn(
-            'fixed inset-0 z-[1000] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
+            'fixed inset-0 z-[1000] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 motion-reduce:animate-none!',
             DIALOG_OVERLAY
           )}
         />
         <Primitive.Content
           data-slot="dialog-content"
           aria-describedby={undefined}
+          onCloseAutoFocus={onCloseAutoFocus}
           className={cn(
             // `casa-ws-dialog`: the workspace's type (globals.css), the panel being portalled out of the shell.
             'casa-ws-dialog fixed inset-y-0 right-0 z-[1000] flex w-full flex-col bg-white shadow-[-24px_0_60px_-28px_rgba(15,23,42,0.45)] outline-none sm:inset-y-2 sm:right-2 sm:rounded-ws-card',
-            'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=open]:duration-300',
-            width === 'lg' ? 'sm:max-w-[560px]' : 'sm:max-w-[440px]'
+            'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=open]:duration-300 motion-reduce:animate-none!',
+            width === 'lg' ? 'sm:max-w-[560px]' : 'sm:max-w-[440px]',
+            className
           )}
         >
           <header className="flex items-start gap-3 border-b border-ws-card-line bg-ws-card-head px-6 pt-5 pb-4 sm:rounded-t-ws-card">

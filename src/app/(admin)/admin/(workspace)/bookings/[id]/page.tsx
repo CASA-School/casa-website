@@ -785,7 +785,7 @@ export default async function BookingPage({
               </FormDialog>
             ) : null}
             {canEdit ? (
-              <FormDialog icon={Icon.bookings} tint="ink" trigger={t('Bearbeiten', 'Edit')} title={t('Buchung bearbeiten', 'Edit the booking')}>
+              <FormDialog trigger={<>{Icon.pen}{t('Bearbeiten', 'Edit')}</>} title={t('Buchung bearbeiten', 'Edit the booking')} description={`${booking.personName} · ${booking.number}`}>
                 <EditBookingForm booking={booking} courseTypes={courseTypes} stays={stays} />
               </FormDialog>
             ) : null}
